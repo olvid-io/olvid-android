@@ -684,9 +684,13 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         fetchManager.deleteOwnedIdentity(session, ownedIdentity, excludedProtocolInstanceUid != null);
 
         for (UserInterfaceDialog userInterfaceDialog : UserInterfaceDialog.getAll(wrapSession(session))) {
-            ObvDialog obvDialog = userInterfaceDialog.getObvDialog();
-            if (Arrays.equals(obvDialog.getBytesOwnedIdentity(), ownedIdentity.getBytes())) {
-                userInterfaceDialog.delete();
+            try {
+                ObvDialog obvDialog = userInterfaceDialog.getObvDialog();
+                if (Arrays.equals(obvDialog.getBytesOwnedIdentity(), ownedIdentity.getBytes())) {
+                    userInterfaceDialog.delete();
+                }
+            } catch (Exception e) {
+                Logger.x(e);
             }
         }
     }

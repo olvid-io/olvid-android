@@ -352,9 +352,11 @@ public class AppSingleton {
 
         new Handler(Looper.getMainLooper()).post(() -> currentIdentityLiveData.observeForever(currentIdentityObserverForNameCache));
 
+        // Always re-create all channels in case a user has reset all app preferences as this deletes all notification channels
+        AndroidNotificationManager.createChannels(lastBuildExecuted);
+
         if (lastBuildExecuted != BuildConfig.VERSION_CODE || lastAndroidSdkVersionExecuted != Build.VERSION.SDK_INT) {
             App.runThread(() -> {
-                AndroidNotificationManager.createChannels(lastBuildExecuted);
                 runBuildUpgrade(lastBuildExecuted, lastAndroidSdkVersionExecuted);
             });
         }

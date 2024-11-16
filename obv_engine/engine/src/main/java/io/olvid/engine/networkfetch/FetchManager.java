@@ -546,7 +546,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         for (InboxAttachment inboxAttachment: inboxMessage.getAttachments()) {
             inboxAttachment.markForDeletion();
         }
-        fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid);
+        session.addSessionCommitListener(() -> fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid));
     }
 
     // This method marks a message for deletion and queues the operation to delete it from server
@@ -559,7 +559,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         }
         inboxMessage.markForDeletion();
         if (inboxMessage.canBeDeleted()) {
-            fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid);
+            session.addSessionCommitListener(() -> fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid));
         }
     }
 

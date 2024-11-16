@@ -200,7 +200,6 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 break;
             }
             case EngineNotifications.UI_DIALOG: {
-                AtomicLong discussionId = new AtomicLong();
                 UUID dialogUuid = (UUID) userInfo.get(EngineNotifications.UI_DIALOG_UUID_KEY);
                 ObvDialog dialog = (ObvDialog) userInfo.get(EngineNotifications.UI_DIALOG_DIALOG_KEY);
                 Long creationTimestamp = (Long) userInfo.get(EngineNotifications.UI_DIALOG_CREATION_TIMESTAMP_KEY);
@@ -210,130 +209,19 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
 
                 Invitation existingInvitation = db.invitationDao().getByDialogUuid(dialogUuid);
 
-                if (dialog.getCategory().getObvGroupV2() != null) {
-                    // groupV2
-                    String groupName;
-                    try {
-                        JsonGroupDetails trustedGroupDetails = AppSingleton.getJsonObjectMapper().readValue(dialog.getCategory().getObvGroupV2().detailsAndPhotos.serializedGroupDetails, JsonGroupDetails.class);
-                        groupName = trustedGroupDetails.getName();
-                    } catch (Exception ex) {
-                        groupName = null;
-                    }
-                    if (groupName == null) {
-                        groupName = InvitationListViewModelKt.getReadableMembers(dialog.getCategory().getObvGroupV2());
-                    }
-
-                    Discussion discussion = db.discussionDao().getByGroupIdentifierWithAnyStatus(dialog.getBytesOwnedIdentity(), dialog.getCategory().getObvGroupV2().groupIdentifier.getBytes());
-
-                    if (discussion != null) {
-                        discussionId.set(discussion.id);
-                    } else {
-                        discussionId.set(db.discussionDao().insert(new Discussion(
-                                groupName != null ? groupName : "",
-                                dialog.getBytesOwnedIdentity(),
-                                Discussion.TYPE_GROUP_V2,
-                                dialog.getCategory().getObvGroupV2().groupIdentifier.getBytes(),
-                                UUID.randomUUID(),
-                                0,
-                                System.currentTimeMillis(),
-                                null,
-                                false,
-                                false,
-                                0,
-                                true,
-                                -1,
-                                Discussion.STATUS_PRE_DISCUSSION
-                        )));
-                    }
-                } else if (dialog.getCategory().getPendingGroupMemberIdentities() != null && dialog.getCategory().getBytesGroupOwnerAndUid() != null) {
-                    // groupV1
-                    String name = "";
-                    try {
-                        name = AppSingleton.getJsonObjectMapper().readValue(
-                                dialog.getCategory().getSerializedGroupDetails(),
-                                JsonGroupDetails.class).getName();
-                    } catch (Exception ex) {
-                        // empty
-                    }
-                    Discussion discussion = db.discussionDao().getByGroupOwnerAndUidWithAnyStatus(dialog.getBytesOwnedIdentity(), dialog.getCategory().getBytesGroupOwnerAndUid());
-                    if (discussion != null) {
-                        discussionId.set(discussion.id);
-                    } else {
-                        discussionId.set(db.discussionDao().insert(new Discussion(
-                                name,
-                                dialog.getBytesOwnedIdentity(),
-                                Discussion.TYPE_GROUP,
-                                dialog.getCategory().getBytesGroupOwnerAndUid(),
-                                UUID.randomUUID(),
-                                0,
-                                System.currentTimeMillis(),
-                                null,
-                                false,
-                                false,
-                                0,
-                                true,
-                                -1,
-                                Discussion.STATUS_PRE_DISCUSSION
-                        )));
-                    }
-                } else if (dialog.getCategory().getBytesContactIdentity() != null) {
-                    // contact
-                    String displayName;
-                    try {
-                        displayName = AppSingleton.getJsonObjectMapper().readValue(
-                                dialog.getCategory().getContactDisplayNameOrSerializedDetails(),
-                                JsonIdentityDetails.class).formatDisplayName(
-                                JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName());
-                    } catch (Exception ex) {
-                        displayName = dialog.getCategory().getContactDisplayNameOrSerializedDetails();
-                    }
-                    if (displayName == null) {
-                        displayName = AppSingleton.getContactCustomDisplayName(dialog.getCategory().getBytesContactIdentity());
-                    }
-
-                    Discussion discussion = null;
-                    if (dialog.getCategory().getId() == ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY) {
-                        Contact mediator = db.contactDao().get(dialog.getBytesOwnedIdentity(), dialog.getCategory()
-                                .getBytesMediatorOrGroupOwnerIdentity());
-                        if (mediator != null) {
-                            discussion = db.discussionDao().getByContactWithAnyStatus(dialog.getBytesOwnedIdentity(), mediator.bytesContactIdentity);
-                        }
-                    } else {
-                        discussion = db.discussionDao().getByContactWithAnyStatus(dialog.getBytesOwnedIdentity(), dialog.getCategory().getBytesContactIdentity());
-                    }
-
-                    if (discussion != null) {
-                        discussionId.set(discussion.id);
-                    } else {
-                        discussionId.set(db.discussionDao().insert(new Discussion(
-                                displayName,
-                                dialog.getBytesOwnedIdentity(),
-                                Discussion.TYPE_CONTACT,
-                                dialog.getCategory().getBytesContactIdentity(),
-                                UUID.randomUUID(),
-                                0,
-                                System.currentTimeMillis(),
-                                null,
-                                false,
-                                false,
-                                0,
-                                true,
-                                -1,
-                                Discussion.STATUS_PRE_DISCUSSION
-                        )));
-                    }
-                }
-
                 switch (dialog.getCategory().getId()) {
                     case ObvDialog.Category.INVITE_SENT_DIALOG_CATEGORY:
                     case ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY:
                     case ObvDialog.Category.INVITE_ACCEPTED_DIALOG_CATEGORY:
                     case ObvDialog.Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY:
                     case ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY: {
-                        Invitation invitation = new Invitation(dialog, creationTimestamp, discussionId.get());
+                        long discussionId = getDiscussionIdForInvitation(dialog);
+                        if (discussionId == -1) {
+                            break;
+                        }
+                        Invitation invitation = new Invitation(dialog, creationTimestamp, discussionId);
                         db.invitationDao().insert(invitation);
-                        db.discussionDao().updateLastMessageTimestamp(discussionId.get(), InvitationListViewModelKt.getTimestamp(invitation));
+                        db.discussionDao().updateLastMessageTimestamp(discussionId, InvitationListViewModelKt.getTimestamp(invitation));
                         break;
                     }
                     case ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY:
@@ -341,9 +229,13 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                     case ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
                     case ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY:
                     case ObvDialog.Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY: {
-                        Invitation invitation = new Invitation(dialog, creationTimestamp, discussionId.get());
+                        long discussionId = getDiscussionIdForInvitation(dialog);
+                        if (discussionId == -1) {
+                            break;
+                        }
+                        Invitation invitation = new Invitation(dialog, creationTimestamp, discussionId);
                         db.invitationDao().insert(invitation);
-                        db.discussionDao().updateLastMessageTimestamp(discussionId.get(), InvitationListViewModelKt.getTimestamp(invitation));
+                        db.discussionDao().updateLastMessageTimestamp(discussionId, InvitationListViewModelKt.getTimestamp(invitation));
                         // only notify if the invitation is different from the previous notification
                         if ((existingInvitation == null) || (existingInvitation.associatedDialog.getCategory().getId() != invitation.associatedDialog.getCategory().getId())) {
                             AndroidNotificationManager.displayInvitationNotification(invitation);
@@ -372,9 +264,13 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                             }
                         }
                         // fallback case, or if an exception occurred during auto-accept
-                        Invitation invitation = new Invitation(dialog, creationTimestamp, discussionId.get());
+                        long discussionId = getDiscussionIdForInvitation(dialog);
+                        if (discussionId == -1) {
+                            break;
+                        }
+                        Invitation invitation = new Invitation(dialog, creationTimestamp, discussionId);
                         db.invitationDao().insert(invitation);
-                        db.discussionDao().updateLastMessageTimestamp(discussionId.get(), InvitationListViewModelKt.getTimestamp(invitation));
+                        db.discussionDao().updateLastMessageTimestamp(discussionId, InvitationListViewModelKt.getTimestamp(invitation));
                         // only notify if the invitation is different from the previous notification
                         if ((existingInvitation == null) || (existingInvitation.associatedDialog.getCategory().getId() != invitation.associatedDialog.getCategory().getId())) {
                             AndroidNotificationManager.displayInvitationNotification(invitation);
@@ -677,6 +573,124 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
         }
     }
 
+
+    private long getDiscussionIdForInvitation(ObvDialog dialog) {
+        if (dialog.getCategory().getObvGroupV2() != null) {
+            // groupV2
+            String groupName;
+            try {
+                JsonGroupDetails trustedGroupDetails = AppSingleton.getJsonObjectMapper().readValue(dialog.getCategory().getObvGroupV2().detailsAndPhotos.serializedGroupDetails, JsonGroupDetails.class);
+                groupName = trustedGroupDetails.getName();
+            } catch (Exception ex) {
+                groupName = null;
+            }
+            if (groupName == null) {
+                groupName = InvitationListViewModelKt.getReadableMembers(dialog.getCategory().getObvGroupV2());
+            }
+
+            Discussion discussion = db.discussionDao().getByGroupIdentifierWithAnyStatus(dialog.getBytesOwnedIdentity(), dialog.getCategory().getObvGroupV2().groupIdentifier.getBytes());
+
+            if (discussion != null) {
+                return discussion.id;
+            } else {
+                return db.discussionDao().insert(new Discussion(
+                        groupName != null ? groupName : "",
+                        dialog.getBytesOwnedIdentity(),
+                        Discussion.TYPE_GROUP_V2,
+                        dialog.getCategory().getObvGroupV2().groupIdentifier.getBytes(),
+                        UUID.randomUUID(),
+                        0,
+                        System.currentTimeMillis(),
+                        null,
+                        false,
+                        false,
+                        0,
+                        true,
+                        -1,
+                        Discussion.STATUS_PRE_DISCUSSION
+                ));
+            }
+        } else if (dialog.getCategory().getPendingGroupMemberIdentities() != null && dialog.getCategory().getBytesGroupOwnerAndUid() != null) {
+            // groupV1
+            String name = "";
+            try {
+                name = AppSingleton.getJsonObjectMapper().readValue(
+                        dialog.getCategory().getSerializedGroupDetails(),
+                        JsonGroupDetails.class).getName();
+            } catch (Exception ex) {
+                // empty
+            }
+            Discussion discussion = db.discussionDao().getByGroupOwnerAndUidWithAnyStatus(dialog.getBytesOwnedIdentity(), dialog.getCategory().getBytesGroupOwnerAndUid());
+            if (discussion != null) {
+                return discussion.id;
+            } else {
+                return db.discussionDao().insert(new Discussion(
+                        name,
+                        dialog.getBytesOwnedIdentity(),
+                        Discussion.TYPE_GROUP,
+                        dialog.getCategory().getBytesGroupOwnerAndUid(),
+                        UUID.randomUUID(),
+                        0,
+                        System.currentTimeMillis(),
+                        null,
+                        false,
+                        false,
+                        0,
+                        true,
+                        -1,
+                        Discussion.STATUS_PRE_DISCUSSION
+                ));
+            }
+        } else if (dialog.getCategory().getBytesContactIdentity() != null) {
+            // contact
+            String displayName;
+            try {
+                displayName = AppSingleton.getJsonObjectMapper().readValue(
+                        dialog.getCategory().getContactDisplayNameOrSerializedDetails(),
+                        JsonIdentityDetails.class).formatDisplayName(
+                        JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
+                        SettingsActivity.getUppercaseLastName());
+            } catch (Exception ex) {
+                displayName = dialog.getCategory().getContactDisplayNameOrSerializedDetails();
+            }
+            if (displayName == null) {
+                displayName = AppSingleton.getContactCustomDisplayName(dialog.getCategory().getBytesContactIdentity());
+            }
+
+            Discussion discussion = null;
+            if (dialog.getCategory().getId() == ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY) {
+                Contact mediator = db.contactDao().get(dialog.getBytesOwnedIdentity(), dialog.getCategory()
+                        .getBytesMediatorOrGroupOwnerIdentity());
+                if (mediator != null) {
+                    discussion = db.discussionDao().getByContactWithAnyStatus(dialog.getBytesOwnedIdentity(), mediator.bytesContactIdentity);
+                }
+            } else {
+                discussion = db.discussionDao().getByContactWithAnyStatus(dialog.getBytesOwnedIdentity(), dialog.getCategory().getBytesContactIdentity());
+            }
+
+            if (discussion != null) {
+                return discussion.id;
+            } else {
+                return db.discussionDao().insert(new Discussion(
+                        displayName,
+                        dialog.getBytesOwnedIdentity(),
+                        Discussion.TYPE_CONTACT,
+                        dialog.getCategory().getBytesContactIdentity(),
+                        UUID.randomUUID(),
+                        0,
+                        System.currentTimeMillis(),
+                        null,
+                        false,
+                        false,
+                        0,
+                        true,
+                        -1,
+                        Discussion.STATUS_PRE_DISCUSSION
+                ));
+            }
+        }
+        return -1;
+    }
 
     @Override
     public void setEngineNotificationListenerRegistrationNumber(long registrationNumber) {

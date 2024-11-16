@@ -1,3 +1,8 @@
+# Build 256 (3.3.1)
+2024-11-16
+
+- Fix an issue with notification channels not found after a device-wide "reset app preferences" 
+
 # Build 255 (3.3)
 2024-11-14
 
