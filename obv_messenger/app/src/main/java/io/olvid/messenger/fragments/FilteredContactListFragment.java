@@ -252,7 +252,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
     }
 
 
-    class FilteredContactListAdapter extends LoadAwareAdapter<FilteredContactListAdapter.ContactViewHolder> implements Observer<List<FilteredContactListViewModel.SelectableContact>> {
+    protected class FilteredContactListAdapter extends LoadAwareAdapter<FilteredContactListAdapter.ContactViewHolder> implements Observer<List<FilteredContactListViewModel.SelectableContact>> {
         private List<FilteredContactListViewModel.SelectableContact> filteredContacts = null;
         private final LayoutInflater inflater;
         private final SearchHighlightSpan[] highlightedSpans;
@@ -567,6 +567,9 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
                 int position = this.getLayoutPosition();
                 if (selectable) {
                     filteredContactListViewModel.selectContact(filteredContacts.get(position).contact);
+                    if (contactFilterEditText != null) {
+                        contactFilterEditText.selectAll();
+                    }
                 } else {
                     if (FilteredContactListFragment.this.onClickDelegate != null) {
                         FilteredContactListFragment.this.onClickDelegate.contactClicked(view, filteredContacts.get(position).contact);

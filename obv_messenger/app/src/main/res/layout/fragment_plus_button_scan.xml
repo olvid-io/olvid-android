@@ -7,14 +7,15 @@
     tools:context=".plus_button.ScanFragment">
 
 
-    <View
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="0dp"
-        android:layout_height="@dimen/tab_bar_size"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/tab_bar_size"
         android:background="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
     <ImageView
         android:id="@+id/back_button"
@@ -41,6 +42,7 @@
         app:layout_constraintStart_toEndOf="@+id/back_button"
         app:layout_constraintTop_toTopOf="@+id/top_bar"
         tools:ignore="SpUsage" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout
         android:id="@+id/scanner_fragment_placeholder"

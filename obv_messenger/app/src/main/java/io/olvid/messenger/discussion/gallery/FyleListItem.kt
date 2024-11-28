@@ -169,7 +169,6 @@ private fun FyleListItemPreview() {
                         "txt/plain",
                         0,
                         1024,
-                        0f,
                         byteArrayOf(),
                         0,
                         null
@@ -194,7 +193,6 @@ private fun FyleListItemPreview() {
                         "application/pdf",
                         FyleMessageJoinWithStatus.STATUS_DOWNLOADING,
                         1024,
-                        0.5f,
                         byteArrayOf(),
                         0,
                         null

@@ -59,8 +59,8 @@ public class ShareSelectedMessageTask implements Runnable {
 
             Intent intent = new Intent();
             String mimeType = null;
-            boolean multiple = ((message.contentBody != null && message.contentBody.length() > 0) && (message.totalAttachmentCount > 0)) || (message.totalAttachmentCount > 1);
-            if (message.contentBody != null && message.contentBody.length() > 0) {
+            boolean multiple = ((message.contentBody != null && !message.contentBody.isEmpty()) && (message.totalAttachmentCount > 0)) || (message.totalAttachmentCount > 1);
+            if (message.contentBody != null && !message.contentBody.isEmpty()) {
                 intent.putExtra(Intent.EXTRA_TEXT, message.contentBody);
                 mimeType = "text/plain";
             }

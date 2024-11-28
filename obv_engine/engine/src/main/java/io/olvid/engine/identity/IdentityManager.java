@@ -545,7 +545,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
 
         if (keycloakState != null) {
-            KeycloakServer keycloakServer = KeycloakServer.create(wrapSession(session), keycloakState.keycloakServer, ownedIdentity.getOwnedIdentity(), keycloakState.jwks.toJson(), keycloakState.signatureKey == null ? null : keycloakState.signatureKey.toJson(), keycloakState.clientId, keycloakState.clientSecret);
+            KeycloakServer keycloakServer = KeycloakServer.create(wrapSession(session), keycloakState.keycloakServer, ownedIdentity.getOwnedIdentity(), keycloakState.jwks.toJson(), keycloakState.signatureKey == null ? null : keycloakState.signatureKey.toJson(), keycloakState.clientId, keycloakState.clientSecret, keycloakState.transferRestricted);
             if (keycloakServer == null) {
                 return null;
             }
@@ -890,7 +890,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public JsonKeycloakUserDetails verifyKeycloakSignature(Session session, Identity ownedIdentity, String signature) {
+    public JsonKeycloakUserDetails verifyKeycloakIdentitySignature(Session session, Identity ownedIdentity, String signature) {
         try {
             OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
             if (ownedIdentityObject == null || !ownedIdentityObject.isKeycloakManaged()) {
@@ -952,6 +952,37 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         return null;
     }
 
+
+    @Override
+    public String verifyKeycloakSignature(Session session, Identity ownedIdentity, String signature) {
+        try {
+            OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
+            if (ownedIdentityObject == null || !ownedIdentityObject.isKeycloakManaged()) {
+                return null;
+            }
+            KeycloakServer keycloakServer = ownedIdentityObject.getKeycloakServer();
+
+            final JwksVerificationKeyResolver jwksResolver;
+            JsonWebKey signatureKey = keycloakServer.getSignatureKey();
+            if (signatureKey != null) {
+                jwksResolver = new JwksVerificationKeyResolver(Collections.singletonList(signatureKey));
+            } else {
+                JsonWebKeySet jwks = keycloakServer.getJwks();
+                jwksResolver = new JwksVerificationKeyResolver(jwks.getJsonWebKeys());
+            }
+            JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+                    .setExpectedAudience(false)
+                    .setVerificationKeyResolver(jwksResolver)
+                    .build();
+
+            JwtContext context = jwtConsumer.process(signature);
+            if (context.getJwtClaims() != null) {
+                // signature is valid
+                return context.getJwtClaims().getRawJson();
+            }
+        } catch (Exception ignored) { }
+        return null;
+    }
 
     @Override
     public String getOwnedIdentityKeycloakServerUrl(Session session, Identity ownedIdentity) throws SQLException {
@@ -1026,7 +1057,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
         session.addSessionCommitListener(backupNeededSessionCommitListener);
 
-        KeycloakServer keycloakServer = KeycloakServer.create(wrapSession(session), keycloakState.keycloakServer, ownedIdentity, keycloakState.jwks.toJson(), keycloakState.signatureKey == null ? null : keycloakState.signatureKey.toJson(), keycloakState.clientId, keycloakState.clientSecret);
+        KeycloakServer keycloakServer = KeycloakServer.create(wrapSession(session), keycloakState.keycloakServer, ownedIdentity, keycloakState.jwks.toJson(), keycloakState.signatureKey == null ? null : keycloakState.signatureKey.toJson(), keycloakState.clientId, keycloakState.clientSecret, keycloakState.transferRestricted);
         if (keycloakServer == null) {
             Logger.e("Unable to create new KeycloakServer db entry");
             throw new Exception();
@@ -1092,6 +1123,16 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         return null;
     }
 
+    @Override
+    public void updateKeycloakTransferRestrictedIfNeeded(Session session, Identity ownedIdentity, String serverUrl, boolean transferRestricted) throws SQLException {
+        KeycloakServer keycloakServer = KeycloakServer.get(wrapSession(session), serverUrl, ownedIdentity);
+
+        if (keycloakServer != null) {
+            if (transferRestricted ^ keycloakServer.isTransferRestricted()) {
+                keycloakServer.setTransferRestricted(transferRestricted);
+            }
+        }
+    }
 
     @Override
     public boolean updateKeycloakPushTopicsIfNeeded(Session session, Identity ownedIdentity, String serverUrl, List<String> pushTopics) throws SQLException {
@@ -1720,7 +1761,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             if (publishedDetails != null) {
                 JsonIdentityDetails identityDetails = publishedDetails.getJsonIdentityDetails();
                 if (identityDetails != null && identityDetails.getSignedUserDetails() != null) {
-                    JsonKeycloakUserDetails jsonKeycloakUserDetails = verifyKeycloakSignature(session, ownedIdentity, identityDetails.getSignedUserDetails());
+                    JsonKeycloakUserDetails jsonKeycloakUserDetails = verifyKeycloakIdentitySignature(session, ownedIdentity, identityDetails.getSignedUserDetails());
 
                     if (jsonKeycloakUserDetails != null) {
                         // the contact has some valid signed details

@@ -36,8 +36,8 @@ public class MessageToSend {
     private final boolean isApplicationMessage;
     private final boolean isVoipMessage;
 
-    public MessageToSend(Identity ownedIdentity, UID uid, String server, EncryptedBytes encryptedContent, Header[] headers) {
-        this(ownedIdentity, uid, server, encryptedContent, null, headers, new Attachment[0], false, false);
+    public MessageToSend(Identity ownedIdentity, UID uid, String server, EncryptedBytes encryptedContent, Header[] headers, boolean hasUserContent) {
+        this(ownedIdentity, uid, server, encryptedContent, null, headers, new Attachment[0], hasUserContent, false);
     }
 
     public MessageToSend(Identity ownedIdentity, UID uid, String server, EncryptedBytes encryptedContent, EncryptedBytes encryptedExtendedContent, Header[] headers, Attachment[] attachments, boolean isApplicationMessage, boolean isVoipMessage) {

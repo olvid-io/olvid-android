@@ -19,6 +19,7 @@
 package io.olvid.messenger.settings
 
 import android.os.Bundle
+import android.view.View
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceFragmentCompat
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
@@ -37,5 +38,9 @@ class AppIconSettingsPreferenceFragment : PreferenceFragmentCompat() {
                 AppIconSettingScreen(isCurrentIcon = { it == App.currentIcon })
             }
         }
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.setBackgroundColor(resources.getColor(R.color.dialogBackground))
     }
 }

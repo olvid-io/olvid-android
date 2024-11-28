@@ -35,8 +35,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -75,8 +78,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
-import io.olvid.messenger.R.color
-import io.olvid.messenger.R.drawable
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.BUTTON
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.BUTTON_OUTLINED
@@ -97,7 +98,9 @@ fun OnboardingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = colorResource(id = color.almostWhite))
+            .background(color = colorResource(id = R.color.almostWhite))
+            .systemBarsPadding()
+            .imePadding()
     ) {
         Column(
             modifier = Modifier
@@ -183,7 +186,7 @@ fun OnboardingScreen(
                                 elevation = null,
                                 onClick = action.onClick,
                                 enabled = action.enabled,
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = colorResource(id = color.blueOrWhite),)
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = colorResource(id = R.color.blueOrWhite),)
                             ) {
                                 action.icon?.let {
                                     Icon(
@@ -207,13 +210,14 @@ fun OnboardingScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .statusBarsPadding()
                 .align(Alignment.TopCenter)
         ) {
             onBack?.let {
                 IconButton(onClick = onBack) {
                     Icon(
-                        painter = painterResource(id = drawable.ic_arrow_back),
-                        tint = colorResource(id = color.almostBlack),
+                        painter = painterResource(id = R.drawable.ic_arrow_back),
+                        tint = colorResource(id = R.color.almostBlack),
                         contentDescription = "back"
                     )
                 }
@@ -221,8 +225,8 @@ fun OnboardingScreen(
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = onClose) {
                 Icon(
-                    painter = painterResource(id = drawable.ic_close),
-                    tint = colorResource(id = color.almostBlack),
+                    painter = painterResource(id = R.drawable.ic_close),
+                    tint = colorResource(id = R.color.almostBlack),
                     contentDescription = "close"
                 )
             }
@@ -251,7 +255,7 @@ private fun OnboardingHeader(title: String, subtitle: String) {
             text = title,
             style = TextStyle(
                 fontSize = 24.sp,
-                color = colorResource(id = color.almostBlack),
+                color = colorResource(id = R.color.almostBlack),
                 textAlign = TextAlign.Center
             )
         )
@@ -310,8 +314,8 @@ private fun OlvidLogo() {
                 shape = RoundedCornerShape(16.dp),
                 brush = Brush.verticalGradient(
                     listOf(
-                        colorResource(id = color.olvid_gradient_light),
-                        colorResource(id = color.olvid_gradient_dark)
+                        colorResource(id = R.color.olvid_gradient_light),
+                        colorResource(id = R.color.olvid_gradient_dark)
                     )
                 )
             )
@@ -320,7 +324,7 @@ private fun OlvidLogo() {
             modifier = Modifier
                 .align(Alignment.Center)
                 .size(56.dp),
-            painter = painterResource(id = drawable.icon_olvid_no_padding),
+            painter = painterResource(id = R.drawable.icon_olvid_no_padding),
             contentDescription = "Olvid"
         )
     }
@@ -350,21 +354,21 @@ private fun OnboardingButton(
         ) {
             Text(
                 text = text,
-                color = colorResource(id = color.almostBlack),
+                color = colorResource(id = R.color.almostBlack),
                 style = OlvidTypography.body1,
             )
             description?.let {
                 Text(
                     modifier = Modifier.padding(top = 4.dp),
                     text = description,
-                    color = colorResource(id = color.greyTint),
+                    color = colorResource(id = R.color.greyTint),
                     style = OlvidTypography.subtitle1,
                 )
             }
         }
         Icon(
-            painter = painterResource(id = drawable.ic_chevron_right),
-            tint = colorResource(id = color.almostBlack),
+            painter = painterResource(id = R.drawable.ic_chevron_right),
+            tint = colorResource(id = R.color.almostBlack),
             contentDescription = ""
         )
     }

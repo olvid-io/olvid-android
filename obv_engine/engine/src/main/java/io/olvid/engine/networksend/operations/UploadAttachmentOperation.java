@@ -155,7 +155,7 @@ public class UploadAttachmentOperation extends PriorityOperation {
                                 authEnc.encrypt(outboxAttachment.getKey(), Encoded.encodeChunk(chunkNumber, buffer, bufferFullness), prng));
                         serverMethod.setSslSocketFactory(sslSocketFactory);
 
-                        serverMethod.setProgressListener(100, new ServerMethodForS3.ServerMethodForS3ProgressListener() {
+                        serverMethod.setProgressListener(150, new ServerMethodForS3.ServerMethodForS3ProgressListener() {
                             final HashMap<String, Object> userInfo;
                             final long totalLength;
                             final long chunkLength;

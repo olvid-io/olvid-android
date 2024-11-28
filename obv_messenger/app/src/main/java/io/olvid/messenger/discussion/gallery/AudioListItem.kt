@@ -415,7 +415,6 @@ fun AudioListItemPreview() {
                         "audio/",
                         FyleMessageJoinWithStatus.STATUS_COMPLETE,
                         1024,
-                        0f,
                         byteArrayOf(),
                         0,
                         null
@@ -424,7 +423,7 @@ fun AudioListItemPreview() {
                 activity = null,
                 audioAttachmentServiceBinding = null,
                 discussionId = 0,
-                onLongClick = { /*TODO*/ })
+                onLongClick = { })
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -442,7 +441,6 @@ fun AudioListItemPreview() {
                         "audio/mp3",
                         FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE,
                         1024*1024,
-                        0.5f,
                         byteArrayOf(),
                         0,
                         null,
@@ -454,7 +452,7 @@ fun AudioListItemPreview() {
                 activity = null,
                 audioAttachmentServiceBinding = null,
                 discussionId = 0,
-                onLongClick = { /*TODO*/ })
+                onLongClick = { })
         }
     }
 }

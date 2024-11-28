@@ -79,7 +79,6 @@ public class FyleMessageJoinWithStatus {
     public static final String MIME_TYPE = "file_type";
     public static final String STATUS = "status";
     public static final String SIZE = "size";
-    public static final String PROGRESS = "progress";
     public static final String ENGINE_MESSAGE_IDENTIFIER = "engine_message_identifier";
     public static final String ENGINE_NUMBER = "engine_number";
     public static final String IMAGE_RESOLUTION = "image_resolution"; // null = not computed yet, "" = not a preview-able image, "750x1203" = image resolution, "a750x1203" = animated image, "v360x240" = video resolution
@@ -121,9 +120,11 @@ public class FyleMessageJoinWithStatus {
     public boolean textExtracted;
 
     @ColumnInfo(name = TEXT_CONTENT)
+    @Nullable
     public String textContent;
 
     @ColumnInfo(name = MIME_TYPE)
+    @Nullable
     public String mimeType;
 
     @ColumnInfo(name = STATUS)
@@ -132,13 +133,12 @@ public class FyleMessageJoinWithStatus {
     @ColumnInfo(name = SIZE)
     public long size;
 
-    @ColumnInfo(name = PROGRESS)
-    public float progress;
-
     @ColumnInfo(name = ENGINE_MESSAGE_IDENTIFIER)
+    @Nullable
     public byte[] engineMessageIdentifier;
 
     @ColumnInfo(name = ENGINE_NUMBER)
+    @Nullable
     public Integer engineNumber;
 
     @ColumnInfo(name = IMAGE_RESOLUTION)
@@ -156,7 +156,7 @@ public class FyleMessageJoinWithStatus {
     public int receptionStatus;
 
     // default constructor required by Room (do not use internally)
-    public FyleMessageJoinWithStatus(long fyleId, long messageId, @NonNull byte[] bytesOwnedIdentity, @NonNull String filePath, @NonNull String fileName, boolean textExtracted, String textContent, String mimeType, int status, long size, float progress, byte[] engineMessageIdentifier, Integer engineNumber, @Nullable String imageResolution, @Nullable byte[] miniPreview, boolean wasOpened, int receptionStatus) {
+    public FyleMessageJoinWithStatus(long fyleId, long messageId, @NonNull byte[] bytesOwnedIdentity, @NonNull String filePath, @NonNull String fileName, boolean textExtracted, @Nullable String textContent, @Nullable String mimeType, int status, long size, @Nullable byte[] engineMessageIdentifier, @Nullable Integer engineNumber, @Nullable String imageResolution, @Nullable byte[] miniPreview, boolean wasOpened, int receptionStatus) {
         this.fyleId = fyleId;
         this.messageId = messageId;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
@@ -167,7 +167,6 @@ public class FyleMessageJoinWithStatus {
         this.mimeType = mimeType;
         this.status = status;
         this.size = size;
-        this.progress = progress;
         this.engineMessageIdentifier = engineMessageIdentifier;
         this.engineNumber = engineNumber;
         this.imageResolution = imageResolution;
@@ -177,7 +176,7 @@ public class FyleMessageJoinWithStatus {
     }
 
     @Ignore
-    public FyleMessageJoinWithStatus(long fyleId, long messageId, @NonNull byte[] bytesOwnedIdentity, @NonNull String filePath, @NonNull String fileName, String mimeType, int status, long size, float progress, byte[] engineMessageIdentifier, Integer engineNumber, @Nullable String imageResolution) {
+    public FyleMessageJoinWithStatus(long fyleId, long messageId, @NonNull byte[] bytesOwnedIdentity, @NonNull String filePath, @NonNull String fileName, @Nullable String mimeType, int status, long size, @Nullable byte[] engineMessageIdentifier, @Nullable Integer engineNumber, @Nullable String imageResolution) {
         this.fyleId = fyleId;
         this.messageId = messageId;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
@@ -186,7 +185,6 @@ public class FyleMessageJoinWithStatus {
         this.mimeType = mimeType;
         this.status = status;
         this.size = size;
-        this.progress = progress;
         this.engineMessageIdentifier = engineMessageIdentifier;
         this.engineNumber = engineNumber;
         this.imageResolution = imageResolution;
@@ -207,7 +205,6 @@ public class FyleMessageJoinWithStatus {
                 mimeType,
                 STATUS_DRAFT,
                 size,
-                0,
                 null,
                 null,
                 imageResolution,
@@ -228,7 +225,6 @@ public class FyleMessageJoinWithStatus {
                 mimeType,
                 STATUS_COPYING,
                 size,
-                0,
                 null,
                 null,
                 imageResolution,
@@ -259,10 +255,6 @@ public class FyleMessageJoinWithStatus {
         }
     }
 
-    public void setProgress(float progress) {
-        this.progress = progress;
-    }
-
     public boolean refreshOutboundStatus(byte[] bytesOwnedIdentity) {
         // outbound status only makes sense for outbound messages, which have an engine number
         if (engineNumber == null) {
@@ -270,7 +262,7 @@ public class FyleMessageJoinWithStatus {
         }
 
         List<MessageRecipientInfo> messageRecipientInfos = AppDatabase.getInstance().messageRecipientInfoDao().getAllByMessageId(messageId);
-        if (messageRecipientInfos.size() == 0) {
+        if (messageRecipientInfos.isEmpty()) {
             return false;
         }
         // when computing the message status, do not take the recipient info of my other owned devices into account, unless this is the only recipient info (discussion with myself)
@@ -335,9 +327,8 @@ public class FyleMessageJoinWithStatus {
                 if (message != null
                         && (message.messageType == Message.TYPE_INBOUND_MESSAGE || message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE)) {
 
-                    // do not modify the fyleMessageJoin otherwise the MessageAttachment diffutil does not detect the change in db...
                     wasOpened = true;
-                    AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(this);
+                    AppDatabase.getInstance().fyleMessageJoinWithStatusDao().updateWasOpened(messageId, fyleId);
 
                     // send notification to the sender if needed
                     DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(message.discussionId);
@@ -383,6 +374,6 @@ public class FyleMessageJoinWithStatus {
         if (this == o) return true;
         if (!(o instanceof FyleMessageJoinWithStatus)) return false;
         FyleMessageJoinWithStatus that = (FyleMessageJoinWithStatus) o;
-        return fyleId == that.fyleId && messageId == that.messageId && textExtracted == that.textExtracted && status == that.status && size == that.size && Float.compare(progress, that.progress) == 0 && wasOpened == that.wasOpened && receptionStatus == that.receptionStatus && Objects.deepEquals(bytesOwnedIdentity, that.bytesOwnedIdentity) && Objects.equals(filePath, that.filePath) && Objects.equals(fileName, that.fileName) && Objects.equals(textContent, that.textContent) && Objects.equals(mimeType, that.mimeType) && Objects.deepEquals(engineMessageIdentifier, that.engineMessageIdentifier) && Objects.equals(engineNumber, that.engineNumber) && Objects.equals(imageResolution, that.imageResolution) && Objects.deepEquals(miniPreview, that.miniPreview);
+        return fyleId == that.fyleId && messageId == that.messageId && textExtracted == that.textExtracted && status == that.status && size == that.size && wasOpened == that.wasOpened && receptionStatus == that.receptionStatus && Objects.deepEquals(bytesOwnedIdentity, that.bytesOwnedIdentity) && Objects.equals(filePath, that.filePath) && Objects.equals(fileName, that.fileName) && Objects.equals(textContent, that.textContent) && Objects.equals(mimeType, that.mimeType) && Objects.deepEquals(engineMessageIdentifier, that.engineMessageIdentifier) && Objects.equals(engineNumber, that.engineNumber) && Objects.equals(imageResolution, that.imageResolution) && Objects.deepEquals(miniPreview, that.miniPreview);
     }
 }

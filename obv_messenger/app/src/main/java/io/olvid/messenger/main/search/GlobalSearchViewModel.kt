@@ -70,8 +70,8 @@ class GlobalSearchViewModel : ViewModel() {
     var groupsFound by mutableStateOf<List<SearchableDiscussion>?>(null)
     var otherDiscussionsFound by mutableStateOf<List<SearchableDiscussion>?>(null)
     var messagesFound by mutableStateOf<Flow<PagingData<DiscussionAndMessage>>?>(null)
-    var bookmarksFound by mutableStateOf<List<DiscussionAndMessage>?>(null)
     var fylesFound by mutableStateOf<Flow<PagingData<FyleAndOrigin>>?>(null)
+    var linksFound by mutableStateOf<Flow<PagingData<FyleAndOrigin>>?>(null)
 
     val searching by derivedStateOf { searchJob != null }
 
@@ -89,6 +89,7 @@ class GlobalSearchViewModel : ViewModel() {
             supervisorScope {
                 searchMessages(bytesOwnedIdentity, tokenizedQuery)
                 searchFyles(bytesOwnedIdentity, tokenizedQuery)
+                searchLinks(bytesOwnedIdentity, tokenizedQuery)
                 val deferredSearches = listOf(
                     async(Dispatchers.IO) {
                         searchContacts(bytesOwnedIdentity)
@@ -110,10 +111,11 @@ class GlobalSearchViewModel : ViewModel() {
         searchJob = null
 
         messagesFound = null
-        bookmarksFound = null
         contactsFound = null
         groupsFound = null
         otherDiscussionsFound = null
+        fylesFound = null
+        linksFound = null
     }
 
     @Composable
@@ -197,6 +199,12 @@ class GlobalSearchViewModel : ViewModel() {
     private fun searchFyles(bytesOwnedIdentity: ByteArray, tokenizedQuery: String) {
         fylesFound = pager(ATTACHMENT_SEARCH_LIMIT) { offset ->
             AppDatabase.getInstance().globalSearchDao().attachmentsGlobalSearch(bytesOwnedIdentity, tokenizedQuery, ATTACHMENT_SEARCH_LIMIT, offset)
+        }.flow.cachedIn(viewModelScope)
+    }
+
+    private fun searchLinks(bytesOwnedIdentity: ByteArray, tokenizedQuery: String) {
+        linksFound = pager(ATTACHMENT_SEARCH_LIMIT) { offset ->
+            AppDatabase.getInstance().globalSearchDao().linksGlobalSearch(bytesOwnedIdentity, tokenizedQuery, ATTACHMENT_SEARCH_LIMIT, offset)
         }.flow.cachedIn(viewModelScope)
     }
 

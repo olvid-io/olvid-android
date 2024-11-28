@@ -172,6 +172,17 @@ public class ObvDialog {
         }
     }
 
+    public void setTransferAuthenticationProof(String signature, String serializedAuthState) throws Exception {
+        if (this.category.id == Category.TRANSFER_DIALOG_CATEGORY && this.category.obvTransferStep.getStep() == ObvTransferStep.Step.TARGET_REQUESTS_KEYCLOAK_AUTHENTICATION_PROOF)  {
+            encodedResponse = Encoded.of(new Encoded[]{
+                    Encoded.of(signature),
+                    Encoded.of(serializedAuthState),
+            });
+        } else {
+            throw new Exception();
+        }
+    }
+
     // endregion
 
 

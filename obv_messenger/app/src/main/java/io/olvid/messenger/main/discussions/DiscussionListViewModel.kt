@@ -113,8 +113,9 @@ class DiscussionListViewModel : ViewModel() {
     fun syncPinnedDiscussions() {
         viewModelScope.launch(Dispatchers.IO) {
             val db = AppDatabase.getInstance()
-            val oldPinnedDiscussions =
-                db.discussionDao().getAllPinned(AppSingleton.getBytesCurrentIdentity())
+            val oldPinnedDiscussions = AppSingleton.getBytesCurrentIdentity()?.let { bytesOwnedIdentity ->
+                db.discussionDao().getAllPinned(bytesOwnedIdentity)
+            } ?: emptyList()
             val pinnedDiscussionsMap =
                 HashMap(oldPinnedDiscussions.associateBy { discussion -> discussion.id })
             val pinnedDiscussions =
@@ -459,7 +460,7 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
 
                 else -> {
                     if (discussionType == Discussion.TYPE_GROUP || discussionType == Discussion.TYPE_GROUP_V2) {
-                        (if (SettingsActivity.getAllowContactFirstName())
+                        (if (SettingsActivity.allowContactFirstName)
                             AppSingleton.getContactFirstName(message.senderIdentifier)
                         else
                             AppSingleton.getContactCustomDisplayName(message.senderIdentifier)

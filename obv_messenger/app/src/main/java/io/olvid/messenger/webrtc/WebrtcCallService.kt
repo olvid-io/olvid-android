@@ -1115,7 +1115,7 @@ class WebrtcCallService : Service() {
 
         // check if my current owned identity has call permission, if not, check if another non-hidden identity has it
         var bytesOwnedIdentityWithCallPermission = bytesOwnedIdentity
-        val currentOwnedIdentity = AppDatabase.getInstance().ownedIdentityDao()[bytesOwnedIdentity]
+        val currentOwnedIdentity = bytesOwnedIdentity?.let { AppDatabase.getInstance().ownedIdentityDao()[it] }
         if (currentOwnedIdentity == null || !currentOwnedIdentity.getApiKeyPermissions().contains(
                 CALL
             )
@@ -1543,14 +1543,22 @@ class WebrtcCallService : Service() {
 
     private fun getDiscussion(bytesOwnedIdentity: ByteArray?, bytesContactIdentity: ByteArray?,bytesGroupOwnerAndUidOrIdentifier: ByteArray?) : Discussion? {
         return if (bytesGroupOwnerAndUidOrIdentifier == null) {
-            AppDatabase.getInstance().discussionDao()
-                .getByContact(bytesOwnedIdentity, bytesContactIdentity)
+            if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
+                AppDatabase.getInstance().discussionDao()
+                    .getByContact(bytesOwnedIdentity, bytesContactIdentity)
+            } else {
+                null
+            }
         } else {
-            AppDatabase.getInstance().discussionDao()
-                .getByGroupOwnerAndUidOrIdentifier(
-                    bytesOwnedIdentity,
-                    bytesGroupOwnerAndUidOrIdentifier
-                )
+            if (bytesOwnedIdentity != null) {
+                AppDatabase.getInstance().discussionDao()
+                    .getByGroupOwnerAndUidOrIdentifier(
+                        bytesOwnedIdentity,
+                        bytesGroupOwnerAndUidOrIdentifier
+                    )
+            } else {
+                null
+            }
         }
     }
     private fun getDiscussionCustomization(discussion: Discussion?): DiscussionCustomization? {
@@ -2474,7 +2482,7 @@ class WebrtcCallService : Service() {
             val useCamera2 = Camera2Enumerator.isSupported(this)
             val cameraEnumerator = if (useCamera2) Camera2Enumerator(this) else Camera1Enumerator()
 
-            val targetResolution = SettingsActivity.getVideoSendResolution()
+            val targetResolution = SettingsActivity.videoSendResolution
 
             // For now, we keep the first front and the first back camera
             val cameras = cameraEnumerator.deviceNames.toList()
@@ -2637,11 +2645,10 @@ class WebrtcCallService : Service() {
             if (callType == CallLogItem.TYPE_OUTGOING) {
                 if (bytesGroupOwnerAndUidOrIdentifier != null) {
                     // group discussion
-                    val discussion = AppDatabase.getInstance().discussionDao()
-                        .getByGroupOwnerAndUidOrIdentifier(
-                            bytesOwnedIdentity,
-                            bytesGroupOwnerAndUidOrIdentifier
-                        )
+                    val discussion = bytesGroupOwnerAndUidOrIdentifier?.let {
+                        AppDatabase.getInstance().discussionDao()
+                            .getByGroupOwnerAndUidOrIdentifier(bytesOwnedIdentity, it)
+                    }
                     if (discussion != null) {
                         val callMessage = Message.createPhoneCallMessage(
                             AppDatabase.getInstance(),
@@ -2687,11 +2694,11 @@ class WebrtcCallService : Service() {
                 for (callParticipant in callParticipants) {
                     if (callParticipant.role == CALLER) {
                         var discussion: Discussion? = null
-                        if (bytesGroupOwnerAndUidOrIdentifier != null) {
+                        bytesGroupOwnerAndUidOrIdentifier?.let {
                             discussion = AppDatabase.getInstance().discussionDao()
                                 .getByGroupOwnerAndUidOrIdentifier(
                                     bytesOwnedIdentity,
-                                    bytesGroupOwnerAndUidOrIdentifier
+                                    it
                                 )
                         }
                         if (discussion == null) {
@@ -2700,19 +2707,19 @@ class WebrtcCallService : Service() {
                                 callParticipant.bytesContactIdentity
                             )
                         }
-                        if (discussion != null) {
+                        discussion?.let {
                             val callMessage = Message.createPhoneCallMessage(
                                 AppDatabase.getInstance(),
-                                discussion.id,
+                                it.id,
                                 callParticipant.bytesContactIdentity,
                                 this
                             )
                             AppDatabase.getInstance().messageDao().insert(callMessage)
-                            if (discussion.updateLastMessageTimestamp(callMessage.timestamp)) {
+                            if (it.updateLastMessageTimestamp(callMessage.timestamp)) {
                                 AppDatabase.getInstance().discussionDao()
                                     .updateLastMessageTimestamp(
-                                        discussion.id,
-                                        discussion.lastMessageTimestamp
+                                        it.id,
+                                        it.lastMessageTimestamp
                                     )
                             }
                         }
@@ -2797,8 +2804,12 @@ class WebrtcCallService : Service() {
         if (callParticipants.size > 1 && bytesGroupOwnerAndUidOrIdentifier != null) {
             when (discussionType) {
                 Discussion.TYPE_GROUP -> {
-                    val group = AppDatabase.getInstance()
-                        .groupDao()[bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier]
+                    val group = bytesOwnedIdentity?.let { ownId ->
+                        bytesGroupOwnerAndUidOrIdentifier?.let { groupId ->
+                            AppDatabase.getInstance()
+                                .groupDao()[ownId, groupId]
+                        }
+                    }
                     group?.getCustomPhotoUrl()?.let {
                         initialView.setPhotoUrl(
                             bytesGroupOwnerAndUidOrIdentifier,
@@ -2813,8 +2824,12 @@ class WebrtcCallService : Service() {
                 }
 
                 Discussion.TYPE_GROUP_V2 -> {
-                    val group = AppDatabase.getInstance()
-                        .group2Dao()[bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier]
+                    val group = bytesOwnedIdentity?.let { ownId ->
+                        bytesGroupOwnerAndUidOrIdentifier?.let { groupId ->
+                            AppDatabase.getInstance()
+                                .group2Dao()[ownId, groupId]
+                        }
+                    }
                     group?.getCustomPhotoUrl()?.let {
                         initialView.setPhotoUrl(
                             bytesGroupOwnerAndUidOrIdentifier,
@@ -3416,44 +3431,52 @@ class WebrtcCallService : Service() {
         var startCallMessage: JsonStartCallMessage? = null
         when (discussionType) {
             Discussion.TYPE_GROUP -> {
-                if (AppDatabase.getInstance().contactGroupJoinDao().isGroupMember(
-                        bytesOwnedIdentity,
-                        callParticipant.bytesContactIdentity,
-                        bytesGroupOwnerAndUidOrIdentifier
-                    )
-                ) {
-                    startCallMessage = JsonStartCallMessage(
-                        sessionDescriptionType,
-                        gzip(sessionDescription),
-                        turnUserName,
-                        turnPassword,
-                        turnServers,
-                        callParticipants.size,
-                        bytesGroupOwnerAndUidOrIdentifier,
-                        false,
-                        callParticipant.gatheringPolicy
-                    )
+                bytesOwnedIdentity?.let { ownId ->
+                    bytesGroupOwnerAndUidOrIdentifier?.let { gouid ->
+                        if (AppDatabase.getInstance().contactGroupJoinDao().isGroupMember(
+                                ownId,
+                                callParticipant.bytesContactIdentity,
+                                gouid
+                            )
+                        ) {
+                            startCallMessage = JsonStartCallMessage(
+                                sessionDescriptionType,
+                                gzip(sessionDescription),
+                                turnUserName,
+                                turnPassword,
+                                turnServers,
+                                callParticipants.size,
+                                gouid,
+                                false,
+                                callParticipant.gatheringPolicy
+                            )
+                        }
+                    }
                 }
             }
 
             Discussion.TYPE_GROUP_V2 -> {
-                if (AppDatabase.getInstance().group2MemberDao().isGroupMember(
-                        bytesOwnedIdentity,
-                        bytesGroupOwnerAndUidOrIdentifier,
-                        callParticipant.bytesContactIdentity
-                    )
-                ) {
-                    startCallMessage = JsonStartCallMessage(
-                        sessionDescriptionType,
-                        gzip(sessionDescription),
-                        turnUserName,
-                        turnPassword,
-                        turnServers,
-                        callParticipants.size,
-                        bytesGroupOwnerAndUidOrIdentifier,
-                        true,
-                        callParticipant.gatheringPolicy
-                    )
+                bytesOwnedIdentity?.let { ownId ->
+                    bytesGroupOwnerAndUidOrIdentifier?.let { groupId ->
+                        if (AppDatabase.getInstance().group2MemberDao().isGroupMember(
+                                ownId,
+                                groupId,
+                                callParticipant.bytesContactIdentity
+                            )
+                        ) {
+                            startCallMessage = JsonStartCallMessage(
+                                sessionDescriptionType,
+                                gzip(sessionDescription),
+                                turnUserName,
+                                turnPassword,
+                                turnServers,
+                                callParticipants.size,
+                                groupId,
+                                true,
+                                callParticipant.gatheringPolicy
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -3557,15 +3580,17 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         val answerCallMessage =
             JsonAnswerCallMessage(sessionDescriptionType, gzip(sessionDescription))
         postMessage(listOf(callParticipant), answerCallMessage)
-        if (AppDatabase.getInstance().ownedDeviceDao()
-                .doesOwnedIdentityHaveAnotherDeviceWithChannel(bytesOwnedIdentity)
-        ) {
-            postMessage(
-                JsonAnsweredOrRejectedOnOtherDeviceMessage(true),
-                bytesOwnedIdentity,
-                listOf(bytesOwnedIdentity),
-                callIdentifier
-            )
+        bytesOwnedIdentity?.let { ownId ->
+            if (AppDatabase.getInstance().ownedDeviceDao()
+                    .doesOwnedIdentityHaveAnotherDeviceWithChannel(ownId)
+            ) {
+                postMessage(
+                    JsonAnsweredOrRejectedOnOtherDeviceMessage(true),
+                    ownId,
+                    listOf(ownId),
+                    callIdentifier
+                )
+            }
         }
     }
 

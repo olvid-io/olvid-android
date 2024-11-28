@@ -48,10 +48,14 @@ import java.util.Objects;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
+import io.olvid.messenger.FyleProgressSingleton;
+import io.olvid.messenger.ProgressStatus;
+import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.tasks.UpdateMessageImageResolutionsTask;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 public class PreviewUtils {
 
@@ -109,7 +113,7 @@ public class PreviewUtils {
 
     public static boolean canGetPreview(Fyle fyle, FyleMessageJoinWithStatus fyleMessageJoinWithStatus) {
         String mimeType = fyleMessageJoinWithStatus.getNonNullMimeType();
-        boolean notEmpty = fyleMessageJoinWithStatus.progress != 0 || (fyleMessageJoinWithStatus.status != FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE && fyleMessageJoinWithStatus.status != FyleMessageJoinWithStatus.STATUS_DOWNLOADING);
+        boolean notEmpty = (fyleMessageJoinWithStatus.status != FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE && fyleMessageJoinWithStatus.status != FyleMessageJoinWithStatus.STATUS_DOWNLOADING) || (FyleProgressSingleton.INSTANCE.getProgress(fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.messageId).getValue() != ProgressStatus.Unknown.INSTANCE);
 
         if (mimeType.startsWith("image/")) {
             if (notEmpty) {
@@ -441,6 +445,31 @@ public class PreviewUtils {
             PreviewUtilsWithDrawables.purgeCache();
         }
         thumbnailCache.evictAll();
+    }
+
+    public static int getDrawableResourceForMimeType(@NonNull String mimeType) {
+        if (mimeType.startsWith("audio/")) {
+            return R.drawable.mime_type_icon_audio;
+        } else if (mimeType.startsWith("image/")) {
+            return R.drawable.mime_type_icon_image;
+        } else if (mimeType.startsWith("video/")) {
+            return R.drawable.mime_type_icon_video;
+        } else if (mimeType.startsWith("text/")) {
+            return R.drawable.mime_type_icon_text;
+        } else {
+            switch (mimeType) {
+                case OpenGraph.MIME_TYPE:
+                    return R.drawable.mime_type_icon_link;
+                case "application/zip":
+                case "application/gzip":
+                case "application/x-bzip":
+                case "application/x-bzip2":
+                case "application/x-7z-compressed":
+                    return R.drawable.mime_type_icon_zip;
+                default:
+                    return R.drawable.mime_type_icon_file;
+            }
+        }
     }
 
     private static class SizeAndBitmap {

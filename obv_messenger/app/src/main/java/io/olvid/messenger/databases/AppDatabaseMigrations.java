@@ -41,6 +41,15 @@ import io.olvid.messenger.customClasses.StringUtils;
 
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[]{
+            new Migration(70, 71) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 70 TO 71");
+
+                    database.execSQL("ALTER TABLE `fyle_message_join_with_status` DROP COLUMN `progress`");
+                }
+            },
+
             new Migration(69, 70) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {

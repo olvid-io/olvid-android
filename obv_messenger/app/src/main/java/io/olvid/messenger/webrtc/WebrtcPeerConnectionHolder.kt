@@ -226,8 +226,8 @@ class WebrtcPeerConnectionHolder(
         }
 
         private fun getIceServer(username: String?, password: String?): IceServer {
-            val servers: List<String> = if (SettingsActivity.getScaledTurn() != null) {
-                when (SettingsActivity.getScaledTurn()) {
+            val servers: List<String> = if (SettingsActivity.scaledTurn != null) {
+                when (SettingsActivity.scaledTurn) {
                     "par" -> TURN_SCALED_SERVERS_EU
                     "nyc" -> TURN_SCALED_SERVERS_US
                     "sng" -> TURN_SCALED_SERVERS_AP

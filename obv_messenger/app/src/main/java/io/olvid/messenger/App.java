@@ -551,13 +551,13 @@ public class App extends Application implements DefaultLifecycleObserver {
         try {
             Intent geoIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("geo:%s,%s?q=%s,%s&z=17", latitude, longitude, latitude, longitude)));
             geoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            if (getContext().getPackageManager().queryIntentActivities(geoIntent, PackageManager.MATCH_DEFAULT_ONLY).size() > 0) {
+            if (!getContext().getPackageManager().queryIntentActivities(geoIntent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
                 openLocationIntent(activity, geoIntent, onOpenCallback);
                 return;
             } else {
                 Intent fallbackIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(fallbackUri));
                 fallbackIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                if (getContext().getPackageManager().queryIntentActivities(fallbackIntent, PackageManager.MATCH_DEFAULT_ONLY).size() > 0) {
+                if (!getContext().getPackageManager().queryIntentActivities(fallbackIntent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
                     openLocationIntent(activity, fallbackIntent, onOpenCallback);
                     return;
                 }

@@ -214,6 +214,7 @@ fun ContactListScreen(
                                                                         )
                                                                     }
                                                                 }
+                                                                onClick(it)
                                                             }
                                                         } else {
                                                             onClick
@@ -481,8 +482,8 @@ private fun Contact(
                         )
                     val name =
                         identityDetails.formatFirstAndLastName(
-                            SettingsActivity.getContactDisplayNameFormat(),
-                            SettingsActivity.getUppercaseLastName()
+                            SettingsActivity.contactDisplayNameFormat,
+                            SettingsActivity.uppercaseLastName
                         )
                     AppSingleton.getContactPhotoUrl(keycloakUserDetails.identity)?.let {
                         initialView.setPhotoUrl(keycloakUserDetails.identity, it)

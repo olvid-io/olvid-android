@@ -59,8 +59,8 @@ public class Invitation {
     public static final String DISCUSSION_ID = "discussion_id";
 
     @PrimaryKey
-    @NonNull
     @ColumnInfo(name = DIALOG_UUID)
+    @NonNull
     public UUID dialogUuid;
 
     @ColumnInfo(name = BYTES_OWNED_IDENTITY)

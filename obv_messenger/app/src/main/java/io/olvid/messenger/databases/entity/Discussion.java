@@ -93,6 +93,7 @@ public class Discussion {
     public long id;
 
     @ColumnInfo(name = TITLE)
+    @Nullable
     public String title;
 
     @ColumnInfo(name = BYTES_OWNED_IDENTITY)
@@ -141,7 +142,7 @@ public class Discussion {
     public int status;
 
     // default constructor required by Room
-    public Discussion(String title, @NonNull byte[] bytesOwnedIdentity, int discussionType, @NonNull byte[] bytesDiscussionIdentifier, @NonNull UUID senderThreadIdentifier, long lastOutboundMessageSequenceNumber, long lastMessageTimestamp, @Nullable String photoUrl, boolean keycloakManaged, boolean unread, int pinned, boolean active, @Nullable Integer trustLevel, int status) {
+    public Discussion(@Nullable String title, @NonNull byte[] bytesOwnedIdentity, int discussionType, @NonNull byte[] bytesDiscussionIdentifier, @NonNull UUID senderThreadIdentifier, long lastOutboundMessageSequenceNumber, long lastMessageTimestamp, @Nullable String photoUrl, boolean keycloakManaged, boolean unread, int pinned, boolean active, @Nullable Integer trustLevel, int status) {
         this.title = title;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.discussionType = discussionType;

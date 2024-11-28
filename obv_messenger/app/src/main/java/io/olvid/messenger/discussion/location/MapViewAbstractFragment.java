@@ -30,7 +30,7 @@ import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 
-import com.mapbox.geojson.constants.GeoJsonConstants;
+import org.maplibre.geojson.constants.GeoJsonConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;

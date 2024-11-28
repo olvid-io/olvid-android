@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.engine.engine.types.EngineNotificationListener;
@@ -292,6 +293,10 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
             case EngineNotifications.UI_DIALOG_DELETED: {
                 App.runThread(() -> {
                     UUID dialogUuid = (UUID) userInfo.get(EngineNotifications.UI_DIALOG_DELETED_UUID_KEY);
+                    if (dialogUuid == null) {
+                        return;
+                    }
+
                     Invitation existingInvitation = db.invitationDao().getByDialogUuid(dialogUuid);
                     if (existingInvitation != null) {
                         db.invitationDao().delete(existingInvitation);
@@ -394,6 +399,9 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.OWNED_IDENTITY_DETAILS_CHANGED_BYTES_OWNED_IDENTITY_KEY);
                 JsonIdentityDetails identityDetails = (JsonIdentityDetails) userInfo.get(EngineNotifications.OWNED_IDENTITY_DETAILS_CHANGED_IDENTITY_DETAILS_KEY);
                 String photoUrl = (String) userInfo.get(EngineNotifications.OWNED_IDENTITY_DETAILS_CHANGED_PHOTO_URL_KEY);
+                if (bytesOwnedIdentity == null) {
+                    break;
+                }
 
                 OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(bytesOwnedIdentity);
                 if (ownedIdentity != null && identityDetails != null) {
@@ -415,6 +423,9 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
             case EngineNotifications.OWNED_IDENTITY_LATEST_DETAILS_UPDATED: {
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.OWNED_IDENTITY_LATEST_DETAILS_UPDATED_BYTES_OWNED_IDENTITY_KEY);
                 Boolean hasUnpublished = (Boolean) userInfo.get(EngineNotifications.OWNED_IDENTITY_LATEST_DETAILS_UPDATED_HAS_UNPUBLISHED_KEY);
+                if (bytesOwnedIdentity == null) {
+                    break;
+                }
 
                 OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(bytesOwnedIdentity);
                 if (ownedIdentity != null && hasUnpublished != null) {
@@ -431,6 +442,9 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
             case EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED: {
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED_BYTES_OWNED_IDENTITY_KEY);
                 Boolean active = (Boolean) userInfo.get(EngineNotifications.OWNED_IDENTITY_ACTIVE_STATUS_CHANGED_ACTIVE_KEY);
+                if (bytesOwnedIdentity == null) {
+                    break;
+                }
 
                 OwnedIdentity ownedIdentity = db.ownedIdentityDao().get(bytesOwnedIdentity);
                 if (ownedIdentity != null && active != null) {
@@ -512,6 +526,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                 keycloakState.jwks,
                                 keycloakState.signatureKey,
                                 keycloakState.serializedAuthState,
+                                keycloakState.transferRestricted,
                                 keycloakState.ownApiKey,
                                 keycloakState.latestRevocationListTimestamp,
                                 keycloakState.latestGroupUpdateTimestamp,

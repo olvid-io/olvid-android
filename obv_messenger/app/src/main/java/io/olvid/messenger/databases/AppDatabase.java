@@ -93,40 +93,40 @@ import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
 
 @Database(
         entities = {
+                ActionShortcutConfiguration.class,
+                CallLogItem.class,
+                CallLogItemContactJoin.class,
                 Contact.class,
-                Group.class,
                 ContactGroupJoin.class,
-                PendingGroupMember.class,
                 Discussion.class,
                 DiscussionCustomization.class,
                 Fyle.class,
                 FyleMessageJoinWithStatus.class,
                 FyleMessageJoinWithStatusFTS.class,
+                Group.class,
+                Group2.class,
+                Group2Member.class,
+                Group2PendingMember.class,
                 Invitation.class,
-                Message.class,
-                MessageFTS.class,
-                MessageExpiration.class,
-                MessageMetadata.class,
-                MessageRecipientInfo.class,
-                OwnedIdentity.class,
-                OwnedDevice.class,
-                CallLogItem.class,
-                CallLogItemContactJoin.class,
-                Reaction.class,
-                RemoteDeleteAndEditRequest.class,
                 KnownCertificate.class,
                 LatestDiscussionSenderSequenceNumber.class,
+                Message.class,
+                MessageExpiration.class,
+                MessageFTS.class,
+                MessageMetadata.class,
+                MessageRecipientInfo.class,
+                OwnedDevice.class,
+                OwnedIdentity.class,
+                PendingGroupMember.class,
+                Reaction.class,
                 ReactionRequest.class,
-                ActionShortcutConfiguration.class,
-                Group2.class,
-                Group2PendingMember.class,
-                Group2Member.class,
+                RemoteDeleteAndEditRequest.class,
         },
         version = AppDatabase.DB_SCHEMA_VERSION
 )
 @TypeConverters({ObvTypeConverters.class})
 public abstract class AppDatabase extends RoomDatabase {
-    public static final int DB_SCHEMA_VERSION = 70;
+    public static final int DB_SCHEMA_VERSION = 71;
     public static final int DB_FTS_GLOBAL_SEARCH_VERSION = 1;
     public static final String DB_FILE_NAME = "app_database";
     public static final String TMP_ENCRYPTED_DB_FILE_NAME = "encrypted_app_database";

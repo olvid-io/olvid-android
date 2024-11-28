@@ -53,7 +53,6 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 
 @UnstableApi public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryImageViewHolder> implements Observer<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> {
     static final int STATUS_CHANGE_MASK = 1;
-    static final int PROGRESS_CHANGE_MASK = 2;
 
     static final int VIEW_TYPE_IMAGE = 1;
     static final int VIEW_TYPE_VIDEO = 2;
@@ -75,8 +74,8 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
     }
 
     public void cleanup() {
-        Logger.e("Closing media player");
         if (mediaPlayer != null) {
+            Logger.d("Closing media player");
             mediaPlayer.release();
         }
     }
@@ -273,10 +272,6 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
                 int changesMask = 0;
                 if (oldItem.fyleMessageJoinWithStatus.status != newItem.fyleMessageJoinWithStatus.status) {
                     changesMask |= STATUS_CHANGE_MASK;
-                }
-
-                if (oldItem.fyleMessageJoinWithStatus.progress != newItem.fyleMessageJoinWithStatus.progress) {
-                    changesMask |= PROGRESS_CHANGE_MASK;
                 }
 
                 payloadCache[newItemPosition] = changesMask;

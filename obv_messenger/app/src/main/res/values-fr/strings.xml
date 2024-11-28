@@ -98,6 +98,7 @@
     <string name="explanation_no_group_match_filter">Aucun groupe trouvé</string>
     <string name="explanation_no_message_found">Aucun message trouvé</string>
     <string name="explanation_no_attachment_found">Auncune pièce jointe trouvée</string>
+    <string name="explanation_no_link_found">Auncun lien trouvé</string>
     <string name="format_identity_details_custom_field">%1$s : %2$s</string>
     <string name="hint_company">Société (facultatif)</string>
     <string name="hint_compose_your_message">Écrire un message</string>
@@ -876,7 +877,7 @@
     <string name="text_option_identity_provider">IdP\u00a0: %1$s</string>
     <string name="explanation_choose_display_name_keycloak">Le nom ci-dessous a été récupéré depuis le fournisseur d\'identités de votre société et ne peut être modifié. Vous pouvez tout de même choisir une photo de profil. Ces informations ne seront jamais envoyées aux serveurs d\'Olvid.</string>
     <string name="dialog_title_keycloak_authentication_required_token_expired">Authentification nécessaire</string>
-    <string name="dialog_message_keycloak_authentication_required_token_expired">Votre ID Olvid est gérée par le fournisseur d\'identités de votre société. Vous devez vous ré-authentifier auprès de ce fournisseur d\'identité pour continuer.</string>
+    <string name="dialog_message_keycloak_authentication_required_token_expired">Votre ID Olvid est gérée par le fournisseur d\'identités de votre société. Vous devez vous ré-authentifier auprès de ce fournisseur d\'identités pour continuer.</string>
     <string name="dialog_title_keycloak_identity_replacement">Remplacer l\'ID Olvid précédent</string>
     <string name="dialog_message_keycloak_identity_replacement">Un autre ID Olvid est associé à votre compte sur le fournisseur d\'identités de votre société. Si vous avez généré un nouvel ID, vous devez remplacer le précédent.</string>
     <string name="button_label_revoke">Remplacer l\'ID précédent</string>
@@ -895,15 +896,17 @@
     <string name="explanation_keycloak_update_change_server">Olvid est déjà configuré pour utiliser un fournisseur d\'identités DIFFÉRENT. Si votre société a effectivement changé de fournisseur d\'identités, vous pouvez continuer et vous authentifier auprès de ce nouveau fournisseur. En cas de doute, vous pouvez annuler.\nVeuillez contacter votre administrateur pour plus de détails.</string>
     <string name="explanation_keycloak_update_same_server">Olvid est déjà configuré pour utiliser le fournisseur d\'identités de votre société.\nVeuillez contacter votre administrateur pour plus de détails.</string>
     <string name="explanation_keycloak_unable_to_contact_server">Échec de connexion au fournisseur d\'identités de votre société. Veuillez vérifier l\'état de votre connexion internet ou contacter votre administrateur pour plus de détails.</string>
-    <string name="explanation_keycloak_update_bad_server">Impossible de configurer le fournisseur d\'identité de votre société avec votre ID Olvid actuel. Votre ID a été généré sur un serveur Olvid différent.\nVeuillez contacter votre administrateur pour plus de détails.</string>
-    <string name="explanation_keycloak_olvid_version_outdated">Impossible de configurer le fournisseur d\'identité de votre société. Votre version d\'Olvid est dépassée et n\'est pas compatible avec le fournisseur d\'identité de votre société.\nVeuillez mettre à jour Olvid et réessayer, ou contacter votre administrateur pour plus de détails.</string>
+    <string name="explanation_keycloak_update_bad_server">Impossible de configurer le fournisseur d\'identités de votre société avec votre ID Olvid actuel. Votre ID a été généré sur un serveur Olvid différent.\nVeuillez contacter votre administrateur pour plus de détails.</string>
+    <string name="explanation_keycloak_olvid_version_outdated">Impossible de configurer le fournisseur d\'identités de votre société. Votre version d\'Olvid est dépassée et n\'est pas compatible avec le fournisseur d\'identités de votre société.\nVeuillez mettre à jour Olvid et réessayer, ou contacter votre administrateur pour plus de détails.</string>
     <string name="explanation_keycloak_bind">Le nom ci-dessous a été récupéré depuis le fournisseur d\'identités de votre société.\nUne fois votre ID Olvid géré par ce fournisseur, c\'est comme cela que vos contacts vous verront dans Olvid.</string>
     <string name="button_label_manage_keycloak">Passer à un ID géré</string>
     <string name="toast_message_keycloak_bind_successful">Passage à un ID géré réussi</string>
     <string name="toast_message_unable_to_keycloak_bind">Échec de passage à un ID géré</string>
     <string name="menu_action_unbind_from_keycloak">Retirer le fournisseur d\'identités</string>
     <string name="dialog_title_unbind_from_keycloak">Retirer le fournisseur d\'identités</string>
+    <string name="dialog_title_unbind_from_keycloak_restricted">Impossible de retirer le fournisseur d\'identités</string>
     <string name="dialog_message_unbind_from_keycloak">Votre ID Olvid est actuellement géré par le fournisseur d\'identités de votre société. Vous êtes sur le point de passer à un ID Olvid normal, non-géré.\n\nSi vous continuez, vous ne pourrez plus ajouter automatiquement d\'autres employés à vos contacts. Veuillez contacter votre administrateur pour plus de détails.\n\nSouhaitez-vous continuer\u00a0?</string>
+    <string name="dialog_message_unbind_from_keycloak_restricted">Votre ID Olvid est actuellement géré par le fournisseur d\'identités de votre société qui restreint les trasnferts. Il ne peut pas être retiré à votre initiative.\n\n Veuillez contacter votre administrateur pour plus de détails.</string>
     <string name="text_explanation_warning_identity_creation_keycloak_revocation_needed">Votre fournisseur d\'identités indique qu\'un ID Olvid est déjà associé à l\'utilisateur sous lequel vous vous êtes connecté. Si vous continuez, cet ID Olvid sera révoqué et votre nouvel ID sera associé à l\'utilisateur.\nVeuillez contacter votre administrateur pour plus de détails.</string>
     <string name="text_explanation_warning_identity_creation_keycloak_revocation_impossible">Votre fournisseur d\'identités indique qu\'un ID Olvid est déjà associé à l\'utilisateur sous lequel vous vous êtes connecté. Vous ne pouvez pas poursuivre la création de votre ID Olvid.\n\nVeuillez contacter votre administrateur pour plus de détails.</string>
     <string name="text_explanation_warning_binding_keycloak_revocation_impossible">Votre fournisseur d\'identités indique qu\'un ID Olvid est déjà associé à l\'utilisateur sous lequel vous vous êtes connecté. Vous ne pouvez pas poursuivre la configuration.\n\nVeuillez contacter votre administrateur pour plus de détails.</string>
@@ -1873,6 +1876,7 @@
     <string name="global_search_result_contacts">Contacts</string>
     <string name="global_search_result_messages">Messages</string>
     <string name="global_search_result_attachments">Pièces jointes</string>
+    <string name="global_search_result_links">Liens</string>
     <string name="button_label_send_read_receipts">Notifier mes contacts</string>
     <string name="button_label_do_not_send">Ne pas les notifier</string>
     <string name="button_label_ask_later">Me redemander plus tard</string>
@@ -1923,6 +1927,25 @@
     <string name="button_label_clock_settings">Paramètres d\'horloge</string>
     <string name="activity_title_get_in_contact">Entrer en contact</string>
     <string name="button_label_discuss_with">Discuter avec %1$s</string>
+    <string name="onboarding_transfer_restricted_title">Transfert de profil réglementé</string>
+    <string name="explanation_transfer_restriction_title_1">Important</string>
+    <string name="explanation_transfer_restriction_text_1">Votre société impose de vous authentifier auprès de votre fournisseur d\'identitiés sur votre nouvel appareil avant d\'accéder à votre profil.</string>
+    <string name="explanation_transfer_restriction_title_2">Pourquoi ?</string>
+    <string name="explanation_transfer_restriction_text_2">Cela garantit que seuls des appareils autorisés peuvent accéder à votre profil.</string>
+    <string name="explanation_transfer_restriction_authentication_needed">Votre société impose une authentification supplémentaire : vous devez vous authentifier auprès de votre fournisseur d\'identités directement sur ce nouvel appareil.\n\n**Si votre nouvel appareil ne vous demande pas de vous authentifier, veuillez vérifier qu’il a bien la dernière version d’Olvid.**</string>
+    <string name="onboarding_authentication_required_title">Authentification requise</string>
+    <string name="onboarding_transfer_keycloak_error_message_unreachable">Impossible de contacter le fournisseur d\'idenitité de votre société</string>
+    <string name="onboarding_transfer_keycloak_error_message_authentication_failed">Échec d\'authentification</string>
+    <string name="onboarding_transfer_keycloak_error_message_authentication_proof_error">Échec de récupération de la preuve d\'authentification</string>
+    <string name="onboarding_transfer_authentication_successful_title">Authentification réussie</string>
+    <string name="onboarding_transfer_authentication_successful">Import du profil en cours</string>
+    <string name="onboarding_transfer_keycloak_authentication_required">Veuillez vous authentifier auprès du fournisseur d\'identités de votre société pour poursuivre.</string>
+    <string name="dialog_title_rebind_keycloak_restricted">Impossible de modifier le fournisseur d\'identités</string>
+    <string name="dialog_message_rebind_keycloak_restricted">Votre ID Olvid est actuellement géré par le fournisseur d\'identités de votre société qui restreint les trasnferts. Il ne peut pas être modifié à votre initiative.\n\n Veuillez contacter votre administrateur pour plus de détails.</string>
+    <string name="troubleshooting_storage_db_sync_title">Cohérence des bases de données</string>
+    <string name="troubleshooting_storage_db_sync_description">Après un « crash » de l\'application, les bases de données internes peuvent être incohérentes. Lancez cette vérification pour vous assurer que tout est en ordre 😁</string>
+    <string name="button_label_check_now">Vérifier maintenant</string>
+
 
 
 

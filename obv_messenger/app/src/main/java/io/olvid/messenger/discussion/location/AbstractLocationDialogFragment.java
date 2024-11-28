@@ -28,16 +28,24 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
 import androidx.core.location.LocationManagerCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 
@@ -105,6 +113,21 @@ public abstract class AbstractLocationDialogFragment extends DialogFragment {
         enableLocationActivityResultLauncher = registerForActivityResult(locationActivationStartActivityForResult, result -> checkPermissionsAndUpdateDialog());
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ConstraintLayout constraintLayout = view.findViewById(R.id.root_constraint_layout);
+        if (constraintLayout != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(constraintLayout, (v, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
+                ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                marginLayoutParams.topMargin = insets.top;
+                marginLayoutParams.bottomMargin = insets.bottom;
+                v.setLayoutParams(marginLayoutParams);
+                return WindowInsetsCompat.CONSUMED;
+            });
+        }
+    }
 
     // LOCATION PERMISSION GRANTING ZONE
     public static boolean isLocationPermissionGranted(FragmentActivity activity) {

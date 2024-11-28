@@ -171,7 +171,7 @@ public class NotificationActionService extends IntentService {
                             final AppDatabase db = AppDatabase.getInstance();
                             final Discussion discussion = db.discussionDao().getById(discussionId);
                             if (discussion != null) {
-                                if (response.length() > 0) {
+                                if (!response.isEmpty()) {
                                     DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
                                     final JsonExpiration jsonExpiration;
                                     if (discussionCustomization != null) {
@@ -234,7 +234,7 @@ public class NotificationActionService extends IntentService {
                             final Discussion discussion = db.discussionDao().getById(discussionId);
                             if (discussion != null) {
                                 AndroidNotificationManager.displayMissedCallNotification(discussion, response);
-                                if (response.length() > 0) {
+                                if (!response.isEmpty()) {
                                     DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussionId);
                                     final JsonExpiration jsonExpiration;
                                     if (discussionCustomization != null) {

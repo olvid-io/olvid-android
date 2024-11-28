@@ -101,7 +101,7 @@ public class UpdateGroupV2PhotoFromEngineTask implements Runnable {
                     if (detailsAndPhotos.photoUrl == null) {
                         // always auto-trust the new photo if there was no previous photo
                         return true;
-                    } else if (detailsAndPhotos.photoUrl.length() != 0) {
+                    } else if (!detailsAndPhotos.photoUrl.isEmpty()) {
                         // there was a photo, and we download it
                         if (Objects.equals(detailsAndPhotos.photoUrl, detailsAndPhotos.publishedPhotoUrl)) {
                             // same photo --> trust
@@ -160,16 +160,16 @@ public class UpdateGroupV2PhotoFromEngineTask implements Runnable {
 
                 // photo was removed, notify if old photo was downloaded
                 if (detailsAndPhotos.publishedPhotoUrl == null) {
-                    return detailsAndPhotos.photoUrl.length() > 0;
+                    return !detailsAndPhotos.photoUrl.isEmpty();
                 }
 
                 // new photo not downloaded yet, do not notify (too early to decide)
-                if (detailsAndPhotos.publishedPhotoUrl.length() == 0) {
+                if (detailsAndPhotos.publishedPhotoUrl.isEmpty()) {
                     return false;
                 }
 
                 // new photo was downloaded, but not the old one --> notify
-                if (detailsAndPhotos.photoUrl.length() == 0) {
+                if (detailsAndPhotos.photoUrl.isEmpty()) {
                     return true;
                 }
 

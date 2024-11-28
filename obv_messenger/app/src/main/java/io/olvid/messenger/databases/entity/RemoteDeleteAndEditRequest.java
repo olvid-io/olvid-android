@@ -120,7 +120,7 @@ public class RemoteDeleteAndEditRequest {
     public String getSanitizedSerializedMentions() {
         if (mentions != null) {
             try {
-                List<JsonUserMention> jsonUserMentions = AppSingleton.getJsonObjectMapper().readValue(mentions, new TypeReference<List<JsonUserMention>>() {
+                List<JsonUserMention> jsonUserMentions = AppSingleton.getJsonObjectMapper().readValue(mentions, new TypeReference<>() {
                 });
                 List<JsonUserMention> sanitizedMentions = new ArrayList<>();
                 for (JsonUserMention mention : jsonUserMentions) {

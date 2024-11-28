@@ -160,10 +160,10 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                         }
                     }
                     ObvSyncAtom.TYPE_SETTING_DEFAULT_SEND_READ_RECEIPTS -> {
-                        SettingsActivity.setDefaultSendReadReceipt(obvSyncAtom.booleanValue)
+                        SettingsActivity.defaultSendReadReceipt = obvSyncAtom.booleanValue
                     }
                     ObvSyncAtom.TYPE_SETTING_AUTO_JOIN_GROUPS -> {
-                        SettingsActivity.setAutoJoinGroups(SettingsActivity.getAutoJoinGroupsFromString(obvSyncAtom.stringValue))
+                        SettingsActivity.autoJoinGroups = SettingsActivity.getAutoJoinGroupsFromString(obvSyncAtom.stringValue)
                     }
                     ObvSyncAtom.TYPE_BOOKMARKED_MESSAGE_CHANGE -> {
                         obvSyncAtom.messageIdentifier.discussionIdentifier?.let { discussionIdentifier ->

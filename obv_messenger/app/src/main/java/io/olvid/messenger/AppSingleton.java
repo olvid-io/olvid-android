@@ -98,6 +98,7 @@ public class AppSingleton {
     private static final String LAST_BUILD_EXECUTED_PREFERENCE_KEY = "last_build";
     private static final String LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY = "last_android_sdk_version";
     private static final String LAST_FTS_GLOBAL_SEARCH_VERSION_PREFERENCE_KEY = "last_fts_global_search_version";
+    private static final String LAST_ENGINE_SYNC_PREFERENCE_KEY = "last_engine_sync";
 
 
     public static final String FYLE_DIRECTORY = "fyles";
@@ -189,6 +190,15 @@ public class AppSingleton {
             List<Integer> icons = SettingsActivity.getComposeMessageIconPreferredOrder();
             if (icons != null && !icons.contains(ComposeMessageFragment.ICON_SEND_LOCATION)) {
                 icons.add(0, ComposeMessageFragment.ICON_SEND_LOCATION);
+                SettingsActivity.setComposeMessageIconPreferredOrder(icons);
+            }
+        }
+
+        if (lastBuildExecuted != 0 && lastBuildExecuted < 257) {
+            // if the user has customized attach icon order, add the send location icon so they see it
+            List<Integer> icons = SettingsActivity.getComposeMessageIconPreferredOrder();
+            if (icons != null && !icons.contains(ComposeMessageFragment.ICON_INTRODUCE)) {
+                icons.add(icons.size(), ComposeMessageFragment.ICON_INTRODUCE);
                 SettingsActivity.setComposeMessageIconPreferredOrder(icons);
             }
         }
@@ -383,6 +393,7 @@ public class AppSingleton {
                                     keycloakState.jwks,
                                     keycloakState.signatureKey,
                                     keycloakState.serializedAuthState,
+                                    keycloakState.transferRestricted,
                                     keycloakState.ownApiKey,
                                     keycloakState.latestRevocationListTimestamp,
                                     keycloakState.latestGroupUpdateTimestamp,
@@ -584,6 +595,7 @@ public class AppSingleton {
                                             keycloakState.jwks,
                                             keycloakState.signatureKey,
                                             keycloakState.serializedAuthState,
+                                            keycloakState.transferRestricted,
                                             keycloakState.ownApiKey,
                                             keycloakState.latestRevocationListTimestamp,
                                             keycloakState.latestGroupUpdateTimestamp,
@@ -622,18 +634,19 @@ public class AppSingleton {
                                  @Nullable final JsonWebKeySet jwks,
                                  @Nullable final JsonWebKey signatureKey,
                                  @Nullable final String serializedKeycloakState,
+                                 final boolean keycloakTransferRestricted,
                                  @Nullable final GenerateIdentitySuccessCallback successCallback,
                                  @Nullable final Runnable failureCallback) {
         App.runThread(() -> {
             ObvKeycloakState keycloakState = null;
             if (keycloakServer != null && serializedKeycloakState != null && jwks != null && clientId != null && signatureKey != null) {
-                keycloakState = new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, null,0, 0);
+                keycloakState = new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, keycloakTransferRestricted, null,0, 0);
             }
             ObvIdentity obvOwnedIdentity = engine.generateOwnedIdentity(server, identityDetails, keycloakState, DEFAULT_DEVICE_DISPLAY_NAME);
 
             if (obvOwnedIdentity != null) {
                 if (keycloakState != null) {
-                    KeycloakManager.getInstance().registerKeycloakManagedIdentity(obvOwnedIdentity, keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, null, 0, 0, true);
+                    KeycloakManager.getInstance().registerKeycloakManagedIdentity(obvOwnedIdentity, keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, keycloakTransferRestricted, null, 0, 0, true);
                 }
 
                 OwnedIdentity ownedIdentity;
@@ -644,6 +657,7 @@ public class AppSingleton {
                     ownedIdentity.unlockSalt = unlockSalt;
                     db.ownedIdentityDao().insert(ownedIdentity);
                 } catch (Exception e) {
+                    Logger.x(e);
                     // unable to create ownedIdentity on app side, try delete on engine side
                     try {
                         engine.deleteOwnedIdentity(obvOwnedIdentity.getBytesIdentity());
@@ -775,6 +789,7 @@ public class AppSingleton {
                                                 keycloakState.jwks,
                                                 keycloakState.signatureKey,
                                                 keycloakState.serializedAuthState,
+                                                keycloakState.transferRestricted,
                                                 null,
                                                 0,
                                                 0,
@@ -926,6 +941,16 @@ public class AppSingleton {
         editor.apply();
     }
 
+    public static void saveLastEngineSynchronisationTime(long timestamp) {
+        SharedPreferences.Editor editor = instance.sharedPreferences.edit();
+        editor.putLong(LAST_ENGINE_SYNC_PREFERENCE_KEY, timestamp);
+        editor.apply();
+    }
+
+    public static long getLastEngineSynchronisationTime() {
+        return instance.sharedPreferences.getLong(LAST_ENGINE_SYNC_PREFERENCE_KEY, -1);
+    }
+
     public static AppSingleton getInstance() {
         return instance;
     }
@@ -944,15 +969,11 @@ public class AppSingleton {
 
     // endregion
 
-    // region Contact names and info caches for main thread access
+    // region Contact names and info caches (for main thread access)
 
     @NonNull private final MutableLiveData<HashMap<BytesKey, Pair<String, String>>> contactNamesCache; // the first element of the pair is the full display name, the second the first name (or custom name for both, if set)
     @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactHuesCache;
     @NonNull private final MutableLiveData<HashMap<BytesKey, String>> contactPhotoUrlsCache;
-//    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactKeycloakManagedCache;
-//    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactInactiveCache;
-//    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactOneToOneCache;
-//    @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactTrustLevelCache;
     @NonNull private final MutableLiveData<HashMap<BytesKey, ContactCacheInfo>> contactInfoCache;
 
 

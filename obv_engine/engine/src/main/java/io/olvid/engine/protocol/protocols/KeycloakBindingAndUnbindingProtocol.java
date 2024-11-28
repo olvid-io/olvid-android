@@ -217,7 +217,7 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
             this.keycloakServer = receivedMessage.getInputs()[1].decodeString();
             this.clientId = receivedMessage.getInputs()[2].decodeString();
             String clientSecret = receivedMessage.getInputs()[3].decodeString();
-            this.clientSecret = clientSecret.length() == 0 ? null : clientSecret;
+            this.clientSecret = clientSecret.isEmpty() ? null : clientSecret;
             this.jwks = receivedMessage.getInputs()[4].decodeString();
             this.signatureKey = receivedMessage.getInputs()[5].decodeString();
         }
@@ -285,6 +285,7 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
         boolean propagationNeeded;
 
 
+        @SuppressWarnings("unused")
         public OwnedIdentityKeycloakBindingStep(InitialProtocolState startState, OwnedIdentityKeycloakBindingMessage receivedMessage, KeycloakBindingAndUnbindingProtocol protocol) throws Exception {
             super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
@@ -293,6 +294,7 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
             this.propagationNeeded = true;
         }
 
+        @SuppressWarnings("unused")
         public OwnedIdentityKeycloakBindingStep(InitialProtocolState startState, PropagateKeycloakBindingMessage receivedMessage, KeycloakBindingAndUnbindingProtocol protocol) throws Exception {
             super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
@@ -304,6 +306,7 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
                     new JsonWebKeySet(receivedMessage.jwks),
                     JsonWebKey.Factory.newJwk(receivedMessage.signatureKey),
                     null,
+                    false,
                     null,
                     0,
                     0
@@ -370,12 +373,14 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
         InitialProtocolState startState;
         boolean propagationNeeded;
 
+        @SuppressWarnings("unused")
         public OwnedIdentityKeycloakUnbindingStep(InitialProtocolState startState, OwnedIdentityKeycloakUnbindingMessage receivedMessage, KeycloakBindingAndUnbindingProtocol protocol) throws Exception {
             super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
             this.startState = startState;
             this.propagationNeeded = true;
         }
 
+        @SuppressWarnings("unused")
         public OwnedIdentityKeycloakUnbindingStep(InitialProtocolState startState, PropagateKeycloakUnbindingMessage receivedMessage, KeycloakBindingAndUnbindingProtocol protocol) throws Exception {
             super(ReceptionChannelInfo.createAnyObliviousChannelOrPreKeyWithOwnedDeviceInfo(), receivedMessage, protocol);
             this.startState = startState;
@@ -406,9 +411,7 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         IDENTITY_DETAILS_PUBLICATION_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new IdentityDetailsPublicationProtocol.InitialMessage(coreProtocolMessage, version).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }

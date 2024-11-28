@@ -6,33 +6,31 @@ plugins {
     id 'com.google.gms.google-services'
     id 'kotlin-android'
     id 'org.jetbrains.kotlin.plugin.compose' version "$kotlin_version"
+    id 'com.google.devtools.ksp' version "2.0.21-1.0.26"
 }
 
 import org.gradle.internal.os.OperatingSystem
 OperatingSystem os = OperatingSystem.current()
 
+ksp {
+    arg("room.schemaLocation","$projectDir/schemas".toString())
+    arg("room.incremental", "true")
+    arg("room.generateKotlin", "false")
+}
+
 android {
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         manifestPlaceholders
         applicationId "io.olvid.messenger"
         minSdkVersion 21
-        targetSdk 34
-        versionCode 256
-        versionName "3.3.1"
+        targetSdk 35
+        versionCode 257
+        versionName "3.4"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr']
-
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments = [
-                        "room.schemaLocation": "$projectDir/schemas".toString(),
-                        "room.incremental": "true"
-                ]
-            }
-        }
         manifestPlaceholders.appAuthRedirectScheme = "olvid.openid"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -131,12 +129,13 @@ androidComponents {
 }
 
 dependencies {
-    def roomVersion = '2.6.1'
+    final def room_version = '2.6.1'
 
     testImplementation "junit:junit:4.13.2"
-    annotationProcessor "androidx.room:room-compiler:$roomVersion"
 
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.2'
+    ksp "androidx.room:room-compiler:$room_version"
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.3'
 
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
     implementation project(path: ':libwebrtc')
@@ -146,7 +145,7 @@ dependencies {
 
     implementation 'com.google.android.material:material:1.12.0'
 
-    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.core:core-ktx:1.15.0'
 
     def composeBom = platform 'androidx.compose:compose-bom:2024.09.03'
     implementation composeBom
@@ -155,7 +154,7 @@ dependencies {
     implementation 'androidx.compose.animation:animation-graphics'
     implementation 'androidx.compose.runtime:runtime-livedata'
     implementation 'androidx.compose.ui:ui-tooling-preview'
-    final def lifecycle_version = '2.8.6'
+    final def lifecycle_version = '2.8.7'
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version"
@@ -180,41 +179,43 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.emoji2:emoji2:1.5.0'
     implementation 'androidx.emoji2:emoji2-bundled:1.5.0'
-    implementation 'androidx.activity:activity-ktx:1.9.2'
+    implementation 'androidx.activity:activity-ktx:1.9.3'
     implementation 'androidx.biometric:biometric:1.1.0'
-    implementation 'androidx.camera:camera-camera2:1.3.4'
-    implementation 'androidx.camera:camera-lifecycle:1.3.4'
-    implementation 'androidx.camera:camera-view:1.3.4'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    final def camera_version = '1.4.0'
+    implementation "androidx.camera:camera-camera2:$camera_version"
+    implementation "androidx.camera:camera-lifecycle:$camera_version"
+    implementation "androidx.camera:camera-view:$camera_version"
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.exifinterface:exifinterface:1.3.7'
-    implementation 'androidx.fragment:fragment-ktx:1.8.4'
+    implementation 'androidx.fragment:fragment-ktx:1.8.5'
+    implementation 'androidx.fragment:fragment-compose:1.8.5'
     implementation 'androidx.media3:media3-exoplayer:1.4.1'
     implementation 'androidx.media3:media3-ui:1.4.1'
     implementation 'androidx.media:media:1.7.0'
-    final def navigation_version = '2.8.2'
+    final def navigation_version = '2.8.4'
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-compose:$navigation_version"
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
-    implementation "androidx.room:room-runtime:$roomVersion"
-    implementation "androidx.room:room-ktx:$roomVersion"
-    implementation 'net.zetetic:sqlcipher-android:4.5.6@aar'
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    implementation 'net.zetetic:sqlcipher-android:4.6.1@aar'
     implementation 'androidx.sharetarget:sharetarget:1.2.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'androidx.work:work-runtime:2.9.1'
+    implementation 'androidx.work:work-runtime:2.10.0'
     implementation 'androidx.datastore:datastore-preferences:1.1.1'
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha06'
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
     implementation 'org.jsoup:jsoup:1.18.1'
 
-    def paging_version = "3.3.2"
+    def paging_version = "3.3.4"
     implementation "androidx.paging:paging-common:$paging_version"
     implementation "androidx.paging:paging-runtime-ktx:$paging_version"
     implementation "androidx.paging:paging-compose:$paging_version"
-    implementation "androidx.room:room-paging:$roomVersion"
+    implementation "androidx.room:room-paging:$room_version"
 
     // webclient
     implementation 'com.google.protobuf:protobuf-lite:3.0.1'
@@ -223,9 +224,9 @@ dependencies {
     implementation 'net.openid:appauth:0.11.1'
     implementation 'org.bitbucket.b_c:jose4j:0.9.6'
 
-    // map libre integration --> do not upgrade to version 11 and annotation 3.0 as openGL requirements changed and may not be supported on all devices
-    implementation 'org.maplibre.gl:android-sdk:10.3.0'
-    implementation 'org.maplibre.gl:android-plugin-annotation-v9:2.0.2'
+    // map libre integration
+    implementation 'org.maplibre.gl:android-sdk:11.6.1'
+    implementation 'org.maplibre.gl:android-plugin-annotation-v9:3.0.2'
 
     final def commonmark_version = "0.23.0"
     implementation "org.commonmark:commonmark:$commonmark_version"
@@ -239,7 +240,7 @@ dependencies {
     fullImplementation 'com.android.billingclient:billing:7.1.1'
 
     // Firebase
-    fullImplementation('com.google.firebase:firebase-messaging:24.0.2') {
+    fullImplementation('com.google.firebase:firebase-messaging:24.1.0') {
         exclude group: 'com.google.firebase', module: 'firebase-core'
         exclude group: 'com.google.firebase', module: 'firebase-analytics'
         exclude group: 'com.google.firebase', module: 'firebase-measurement-connector'

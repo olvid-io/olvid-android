@@ -18,6 +18,7 @@
  */
 package io.olvid.messenger.group
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.text.InputType
 import android.util.Pair
@@ -35,7 +36,14 @@ import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.switchMap
@@ -90,9 +98,9 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
             ephemeralViewModel.setDiscussionId(null, true)
 
             // ephemeral settings
-            ephemeralViewModel.setReadOnce(SettingsActivity.getDefaultDiscussionReadOnce())
-            ephemeralViewModel.setVisibility(SettingsActivity.getDefaultDiscussionVisibilityDuration())
-            ephemeralViewModel.setExistence(SettingsActivity.getDefaultDiscussionExistenceDuration())
+            ephemeralViewModel.setReadOnce(SettingsActivity.defaultDiscussionReadOnce)
+            ephemeralViewModel.setVisibility(SettingsActivity.defaultDiscussionVisibilityDuration)
+            ephemeralViewModel.setExistence(SettingsActivity.defaultDiscussionExistenceDuration)
 
             // only look at intent when first creating the activity
             val intent = intent
@@ -163,6 +171,8 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                 }
             }
         }
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
         setContentView(R.layout.activity_group_creation)
         onBackPressed {
             val position = viewPager.currentItem
@@ -178,6 +188,17 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(false)
+            elevation = 0f
+        }
+        findViewById<CoordinatorLayout>(R.id.root_coordinator)?.let {
+            ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                toolbar.updatePadding(top = insets.top)
+                view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    updateMargins(bottom = insets.bottom)
+                }
+                WindowInsetsCompat.CONSUMED
+            }
         }
         groupCreationViewModel.subtitleLiveData.observe(this) { tabAndSelectedContactCount: Pair<Int?, Int?>? ->
             if (subtitleTextView == null || tabAndSelectedContactCount == null || tabAndSelectedContactCount.first == null || tabAndSelectedContactCount.second == null) {
@@ -296,31 +317,32 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if (viewPager.currentItem == CONTACTS_SELECTION_TAB) {
             menuInflater.inflate(R.menu.menu_group_creation_contact_selection, menu)
-            val searchView = menu.findItem(R.id.action_search).actionView as SearchView?
+            val searchItem = menu.findItem(R.id.action_search)
+            val searchView = searchItem.actionView as? EditText
             if (searchView != null) {
-                searchView.queryHint = getString(R.string.hint_search_contact_name)
+                val expandListener = object : MenuItem.OnActionExpandListener {
+                    override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                        searchView.requestFocus()
+                        return true
+                    }
+
+                    override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                        searchView.text = null
+                        return true
+                    }
+                }
+                searchItem.setOnActionExpandListener(expandListener)
+
+                searchView.layoutParams = ViewGroup.LayoutParams(-1, -1)
+                searchView.background = null
+                searchView.hint = getString(R.string.hint_search_contact_name)
                 if (SettingsActivity.useKeyboardIncognitoMode()) {
                     searchView.imeOptions =
                         searchView.imeOptions or EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
                 }
                 searchView.inputType =
                     InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or InputType.TYPE_TEXT_VARIATION_FILTER
-                searchView.setOnQueryTextListener(object : OnQueryTextListener {
-                    val editText: EditText = AppCompatEditText(searchView.context)
-
-                    init {
-                        contactsSelectionFragment!!.setContactFilterEditText(editText)
-                    }
-
-                    override fun onQueryTextSubmit(query: String): Boolean {
-                        return true
-                    }
-
-                    override fun onQueryTextChange(newText: String): Boolean {
-                        editText.setText(newText)
-                        return true
-                    }
-                })
+                contactsSelectionFragment!!.setContactFilterEditText(searchView)
             }
         }
         return true

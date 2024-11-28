@@ -1,3 +1,12 @@
+# Build 257 (3.4)
+2024-11-28
+
+- Olvid now targets Android 15 (API 35)
+- Improved global search to also match link title/description
+- Allow contact introduction directly from the discussion screen
+- [optimization] attachment download/upload progresses are no longer written to database
+- several small bug fixes
+
 # Build 256 (3.3.1)
 2024-11-16
 

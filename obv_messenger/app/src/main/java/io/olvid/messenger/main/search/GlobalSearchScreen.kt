@@ -45,7 +45,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.ScrollableTabRow
-import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
@@ -71,7 +70,6 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import io.olvid.engine.Logger
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
@@ -88,7 +86,6 @@ import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.gallery.FyleListItem
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
-import io.olvid.messenger.discussion.linkpreview.OpenGraph
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.contacts.CustomTab
@@ -98,10 +95,12 @@ import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel.SearchableDiscussion
 import kotlinx.coroutines.launch
 
-fun LazyPagingItems<*>?.isLoading() = (this?.loadState?.refresh == LoadState.Loading) || (this?.loadState?.append == LoadState.Loading)
+fun LazyPagingItems<*>?.isLoading() =
+    (this?.loadState?.refresh == LoadState.Loading) || (this?.loadState?.append == LoadState.Loading)
 
 @Composable
 fun GlobalSearchScreen(
+    modifier: Modifier = Modifier,
     globalSearchViewModel: GlobalSearchViewModel,
     linkPreviewViewModel: LinkPreviewViewModel,
     bookmarks: List<DiscussionAndMessage>? = null
@@ -112,6 +111,7 @@ fun GlobalSearchScreen(
 
     val messages = globalSearchViewModel.messagesFound?.collectAsLazyPagingItems()
     val attachments = globalSearchViewModel.fylesFound?.collectAsLazyPagingItems()
+    val links = globalSearchViewModel.linksFound?.collectAsLazyPagingItems()
     val pages = listOf(
         // first -> label, second -> hasResults
         R.string.global_search_result_contacts to {
@@ -123,12 +123,13 @@ fun GlobalSearchScreen(
         },
         R.string.global_search_result_messages to { (messages?.itemCount ?: 0) > 0 },
         R.string.global_search_result_attachments to { (attachments?.itemCount ?: 0) > 0 },
+        R.string.global_search_result_links to { (links?.itemCount ?: 0) > 0 },
     )
 
     val pagerState = rememberPagerState { pages.size }
-    var loading = globalSearchViewModel.searching || messages.isLoading() || attachments.isLoading()
+    val loading = globalSearchViewModel.searching || messages.isLoading() || attachments.isLoading() || links.isLoading()
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = modifier) {
         if (bookmarks != null) {
             Box(
                 modifier = Modifier
@@ -186,6 +187,8 @@ fun GlobalSearchScreen(
                         pagerState.requestScrollToPage(2)
                     } else if ((attachments?.itemCount ?: 0) > 0) {
                         pagerState.requestScrollToPage(3)
+                    } else if ((links?.itemCount ?: 0) > 0) {
+                        pagerState.requestScrollToPage(4)
                     }
                 }
             }
@@ -371,50 +374,35 @@ fun GlobalSearchScreen(
                                                         fontWeight = FontWeight.Medium
                                                     )
                                                 }
-                                                when (fyle.fyleAndStatus.fyleMessageJoinWithStatus.nonNullMimeType) {
-                                                    OpenGraph.MIME_TYPE -> {
-                                                        LinkListItem(
-                                                            fyleAndStatus = fyle.fyleAndStatus,
-                                                            onClick = {
-                                                                fyle.message.goto(context)
-                                                            },
-                                                            linkPreviewViewModel = linkPreviewViewModel,
-                                                            globalSearchViewModel = globalSearchViewModel
-                                                        )
-                                                    }
-
-                                                    else -> {
-                                                        FyleListItem(fyleAndStatus = fyle.fyleAndStatus,
-                                                            fileName = globalSearchViewModel.highlight(
-                                                                content = fyle.fyleAndStatus.fyleMessageJoinWithStatus.fileName
-                                                            ),
-                                                            extraHorizontalPadding = 4.dp,
-                                                            onClick = { fyle.message.goto(context) },
-                                                            onLongClick = {
-                                                                if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(
-                                                                        PreviewUtils.getNonNullMimeType(
-                                                                            fyle.fyleAndStatus.fyleMessageJoinWithStatus.mimeType,
-                                                                            fyle.fyleAndStatus.fyleMessageJoinWithStatus.fileName
-                                                                        )
-                                                                    ) && SettingsActivity.useInternalImageViewer()
-                                                                ) {
-                                                                    App.openMessageGalleryActivity(
-                                                                        context,
-                                                                        fyle.fyleAndStatus.fyleMessageJoinWithStatus.messageId,
-                                                                        fyle.fyleAndStatus.fyleMessageJoinWithStatus.fyleId
-                                                                    )
-                                                                } else {
-                                                                    App.openFyleInExternalViewer(
-                                                                        context,
-                                                                        fyle.fyleAndStatus,
-                                                                    ) {
-                                                                        fyle.fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened()
-                                                                    }
-                                                                }
+                                                FyleListItem(fyleAndStatus = fyle.fyleAndStatus,
+                                                    fileName = globalSearchViewModel.highlight(
+                                                        content = fyle.fyleAndStatus.fyleMessageJoinWithStatus.fileName
+                                                    ),
+                                                    extraHorizontalPadding = 4.dp,
+                                                    onClick = { fyle.message.goto(context) },
+                                                    onLongClick = {
+                                                        if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(
+                                                                PreviewUtils.getNonNullMimeType(
+                                                                    fyle.fyleAndStatus.fyleMessageJoinWithStatus.mimeType,
+                                                                    fyle.fyleAndStatus.fyleMessageJoinWithStatus.fileName
+                                                                )
+                                                            ) && SettingsActivity.useInternalImageViewer()
+                                                        ) {
+                                                            App.openMessageGalleryActivity(
+                                                                context,
+                                                                fyle.fyleAndStatus.fyleMessageJoinWithStatus.messageId,
+                                                                fyle.fyleAndStatus.fyleMessageJoinWithStatus.fyleId
+                                                            )
+                                                        } else {
+                                                            App.openFyleInExternalViewer(
+                                                                context,
+                                                                fyle.fyleAndStatus,
+                                                            ) {
+                                                                fyle.fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened()
                                                             }
-                                                        )
+                                                        }
                                                     }
-                                                }
+                                                )
                                             }
                                         }
                                     }
@@ -422,6 +410,71 @@ fun GlobalSearchScreen(
                             } ?: run {
                                 if (!loading) {
                                     NoResultsFound(3)
+                                }
+                            }
+                        }
+
+
+                        4 -> {
+                            links?.takeIf { it.itemCount > 0 }?.let {
+                                LazyColumn(
+                                    state = lazyListState,
+                                    contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
+                                ) {
+                                    items(
+                                        count = links.itemCount,
+                                        key = links.itemKey { "${it.fyleAndStatus.fyleMessageJoinWithStatus.messageId}-${it.fyleAndStatus.fyleMessageJoinWithStatus.fyleId}" }
+                                    ) { index ->
+                                        links[index]?.let { fyle ->
+                                            Column(modifier = Modifier.padding(bottom = 4.dp)) {
+                                                Row(
+                                                    modifier = Modifier.padding(horizontal = 12.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    InitialView(
+                                                        modifier = Modifier
+                                                            .padding(end = 8.dp)
+                                                            .requiredSize(20.dp),
+                                                        initialViewSetup = { view ->
+                                                            view.setFromCache(fyle.message.senderIdentifier)
+                                                        },
+                                                    )
+                                                    Text(
+                                                        modifier = Modifier.weight(1f),
+                                                        text = AppSingleton.getContactCustomDisplayName(
+                                                            fyle.message.senderIdentifier
+                                                        )
+                                                            ?: stringResource(id = R.string.text_deleted_contact),
+                                                        style = OlvidTypography.body2,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                        fontWeight = FontWeight.Medium
+                                                    )
+                                                    Spacer(Modifier.width(8.dp))
+                                                    Text(
+                                                        text = StringUtils.getNiceDateString(
+                                                            context,
+                                                            fyle.message.timestamp
+                                                        ).toString(),
+                                                        style = OlvidTypography.body2,
+                                                        fontWeight = FontWeight.Medium
+                                                    )
+                                                }
+                                                LinkListItem(
+                                                    fyleAndStatus = fyle.fyleAndStatus,
+                                                    onClick = {
+                                                        fyle.message.goto(context)
+                                                    },
+                                                    linkPreviewViewModel = linkPreviewViewModel,
+                                                    globalSearchViewModel = globalSearchViewModel
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            } ?: run {
+                                if (!loading) {
+                                    NoResultsFound(4)
                                 }
                             }
                         }
@@ -441,7 +494,7 @@ private fun NoResultsFound(tabIndex: Int = -1) {
     ) {
         MainScreenEmptyList(
             icon = when (tabIndex) {
-                0,1  -> R.drawable.ic_contacts_filter
+                0, 1 -> R.drawable.ic_contacts_filter
                 else -> R.drawable.ic_search_anything
             },
             title = when (tabIndex) {
@@ -449,6 +502,7 @@ private fun NoResultsFound(tabIndex: Int = -1) {
                 1 -> R.string.explanation_no_group_match_filter
                 2 -> R.string.explanation_no_message_found
                 3 -> R.string.explanation_no_attachment_found
+                4 -> R.string.explanation_no_link_found
                 else -> R.string.explanation_empty_global_search
             }
         )
@@ -585,8 +639,8 @@ private fun SearchResult(
                         AnnotatedString(
                             contact.customDisplayName ?: contact.getIdentityDetails()
                                 ?.formatFirstAndLastName(
-                                    SettingsActivity.getContactDisplayNameFormat(),
-                                    SettingsActivity.getUppercaseLastName()
+                                    SettingsActivity.contactDisplayNameFormat,
+                                    SettingsActivity.uppercaseLastName
                                 ) ?: contact.getCustomDisplayName()
                         )
                     }?.let { globalSearchViewModel.highlight(it) }
@@ -608,12 +662,12 @@ private fun SearchResult(
                             AnnotatedString(
                                 identityDetails.formatDisplayName(
                                     JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                    SettingsActivity.getUppercaseLastName()
+                                    SettingsActivity.uppercaseLastName
                                 )
                             )
                         else
                             identityDetails.formatPositionAndCompany(
-                                SettingsActivity.getContactDisplayNameFormat()
+                                SettingsActivity.contactDisplayNameFormat
                             )?.let { AnnotatedString(it) }
                     }
                 }

@@ -69,7 +69,8 @@ public abstract class ConcreteProtocolMessage {
                 coreProtocolMessage.getProtocolInstanceUid(),
                 getProtocolMessageId(),
                 getInputs(),
-                coreProtocolMessage.isPartOfFullRatchetProtocolOfTheSendSeed());
+                coreProtocolMessage.isPartOfFullRatchetProtocolOfTheSendSeed(),
+                coreProtocolMessage.hasUserContent());
     }
 
     public ChannelProtocolMessageToSend generateChannelProtocolMessageToSend() {

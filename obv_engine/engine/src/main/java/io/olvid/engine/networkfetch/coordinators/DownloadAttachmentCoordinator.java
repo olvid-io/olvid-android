@@ -108,8 +108,15 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
             InboxAttachment[] attachmentsToResume = InboxAttachment.getAllAttachmentsToResume(fetchManagerSession);
             for (InboxAttachment inboxAttachment: attachmentsToResume) {
                 queueNewDownloadAttachmentOperation(inboxAttachment.getOwnedIdentity(), inboxAttachment.getMessageUid(), inboxAttachment.getAttachmentNumber(), inboxAttachment.getPriorityCategory(), inboxAttachment.getPriority());
+                // post an initial progress value so the app directly has a progress to show, even if download does not progress
+                fetchManagerSession.inboxAttachmentListener.attachmentDownloadProgressed(inboxAttachment.getOwnedIdentity(), inboxAttachment.getMessageUid(), inboxAttachment.getAttachmentNumber(), inboxAttachment.getProgress());
             }
-            fetchManagerSession.session.commit();
+
+            InboxAttachment[] attachmentsNotToResume = InboxAttachment.getAllPartialAttachmentsNotToResume(fetchManagerSession);
+            for (InboxAttachment inboxAttachment: attachmentsNotToResume) {
+                // also post a progress value for attachments that won't be downloaded
+                fetchManagerSession.inboxAttachmentListener.attachmentDownloadProgressed(inboxAttachment.getOwnedIdentity(), inboxAttachment.getMessageUid(), inboxAttachment.getAttachmentNumber(), inboxAttachment.getProgress());
+            }
         } catch (Exception e) {
             Logger.x(e);
         }

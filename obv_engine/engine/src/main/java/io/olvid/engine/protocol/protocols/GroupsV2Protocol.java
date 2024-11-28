@@ -2036,8 +2036,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                 SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(groupMembersAndPermission.identity, getOwnedIdentity()),
                                 getProtocolId(),
-                                invitationProtocolInstanceUid,
-                                false);
+                                invitationProtocolInstanceUid);
                         ChannelMessageToSend messageToSend = new InvitationOrMembersUpdateMessage(coreProtocolMessage, startState.groupIdentifier, startState.groupVersion, keysToSend, contactDeviceUidsWithChannel).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } else {
@@ -2070,8 +2069,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                 SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity(), getOwnedIdentity()),
                                 getProtocolId(),
-                                invitationProtocolInstanceUid,
-                                false);
+                                invitationProtocolInstanceUid);
                         // we send the full set of owned devices, not only "other" own device uid, so that receiving devices know if all devices were notified
                         ChannelMessageToSend messageToSend = new InvitationOrMembersUpdateMessage(coreProtocolMessage, startState.groupIdentifier, startState.groupVersion, keysToSend, allOwnedDeviceUids).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
@@ -2677,9 +2675,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                             SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                             DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID,
-                                            new UID(getPrng()),
-                                            false
-                                    );
+                                            new UID(getPrng()));
                                     ChannelMessageToSend messageToSend = new DownloadGroupV2PhotoProtocol.InitialMessage(coreProtocolMessage, startState.groupIdentifier, serverBlob.serverPhotoInfo).generateChannelProtocolMessageToSend();
                                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                                 }
@@ -2727,9 +2723,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                                 SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                                 DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID,
-                                                new UID(getPrng()),
-                                                false
-                                        );
+                                                new UID(getPrng()));
                                         ChannelMessageToSend messageToSend = new DownloadGroupV2PhotoProtocol.InitialMessage(coreProtocolMessage, startState.groupIdentifier, serverBlob.serverPhotoInfo).generateChannelProtocolMessageToSend();
                                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                                     }
@@ -3193,9 +3187,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                 SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                 DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID,
-                                new UID(getPrng()),
-                                false
-                        );
+                                new UID(getPrng()));
                         ChannelMessageToSend messageToSend = new DownloadGroupV2PhotoProtocol.InitialMessage(coreProtocolMessage, groupIdentifier, ((InvitationReceivedState) startState).serverBlob.serverPhotoInfo).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     }
@@ -4777,7 +4769,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             for (GroupV2.IdentifierVersionAndKeys identifierVersionAndKeys : receivedMessage.groupInfos) {
                 UID protocolInstanceUid = identifierVersionAndKeys.groupIdentifier.computeProtocolInstanceUid();
 
-                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()), GROUPS_V2_PROTOCOL_ID, protocolInstanceUid, false);
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()), GROUPS_V2_PROTOCOL_ID, protocolInstanceUid);
                 ChannelMessageToSend messageToSend = new BlobKeysAfterChannelCreationMessage(coreProtocolMessage, receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), identifierVersionAndKeys.groupIdentifier, identifierVersionAndKeys.groupVersion, identifierVersionAndKeys.blobKeys).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -4838,9 +4830,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                 SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                 DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID,
-                                new UID(getPrng()),
-                                false
-                        );
+                                new UID(getPrng()));
                         ChannelMessageToSend messageToSend = new DownloadGroupV2PhotoProtocol.InitialMessage(coreProtocolMessage, receivedMessage.groupIdentifier, serverPhotoInfo).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (Exception e) {
@@ -4889,9 +4879,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                 SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                 DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID,
-                                new UID(getPrng()),
-                                false
-                        );
+                                new UID(getPrng()));
                         ChannelMessageToSend messageToSend = new DownloadGroupV2PhotoProtocol.InitialMessage(coreProtocolMessage, receivedMessage.groupIdentifier, serverPhotoInfo).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (Exception e) {

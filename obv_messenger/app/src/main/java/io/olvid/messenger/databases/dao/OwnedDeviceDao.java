@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -32,68 +34,68 @@ import io.olvid.messenger.databases.entity.OwnedDevice;
 @Dao
 public interface OwnedDeviceDao {
     @Insert
-    void insert(OwnedDevice ownedDevice);
+    void insert(@NonNull OwnedDevice ownedDevice);
 
     @Delete
-    void delete(OwnedDevice ownedDevice);
+    void delete(@NonNull OwnedDevice ownedDevice);
 
     @Query("UPDATE " + OwnedDevice.TABLE_NAME +
             " SET " + OwnedDevice.DISPLAY_NAME + " = :displayName " +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
-    void updateDisplayName(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, String displayName);
+    void updateDisplayName(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesDeviceUid, @Nullable String displayName);
 
     @Query("UPDATE " + OwnedDevice.TABLE_NAME +
             " SET " + OwnedDevice.CHANNEL_CONFIRMED + " = :channelConfirmed " +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
-    void updateChannelConfirmed(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, boolean channelConfirmed);
+    void updateChannelConfirmed(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesDeviceUid, boolean channelConfirmed);
 
     @Query("UPDATE " + OwnedDevice.TABLE_NAME +
             " SET " + OwnedDevice.HAS_PRE_KEY + " = :hasPreKey " +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
-    void updateHasPreKey(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, boolean hasPreKey);
+    void updateHasPreKey(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesDeviceUid, boolean hasPreKey);
 
    @Query("UPDATE " + OwnedDevice.TABLE_NAME +
             " SET " + OwnedDevice.TRUSTED + " = :trusted " +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
            " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
-    void updateTrusted(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, boolean trusted);
+    void updateTrusted(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesDeviceUid, boolean trusted);
 
     @Query("UPDATE " + OwnedDevice.TABLE_NAME +
             " SET " + OwnedDevice.CURRENT_DEVICE + " = :currentDevice " +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
-    void updateCurrentDevice(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, boolean currentDevice);
+    void updateCurrentDevice(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesDeviceUid, boolean currentDevice);
 
     @Query("UPDATE " + OwnedDevice.TABLE_NAME +
             " SET " + OwnedDevice.LAST_REGISTRATION_TIMESTAMP + " = :lastRegistrationTimestamp, " +
             OwnedDevice.EXPIRATION_TIMESTAMP + " = :expirationTimestamp " +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
-    void updateTimestamps(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid, Long lastRegistrationTimestamp, Long expirationTimestamp);
+    void updateTimestamps(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesDeviceUid, @Nullable Long lastRegistrationTimestamp, @Nullable Long expirationTimestamp);
 
 
     @Query("SELECT * FROM " + OwnedDevice.TABLE_NAME +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.BYTES_DEVICE_UID + " = :bytesDeviceUid ")
-    OwnedDevice get(byte[] bytesOwnedIdentity, byte[] bytesDeviceUid);
+    @Nullable OwnedDevice get(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesDeviceUid);
 
     @Query("SELECT * FROM " + OwnedDevice.TABLE_NAME +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " ORDER BY " + OwnedDevice.CURRENT_DEVICE + " DESC, " + OwnedDevice.DISPLAY_NAME + " ASC, " + OwnedDevice.BYTES_DEVICE_UID + " ASC ")
-    LiveData<List<OwnedDevice>> getAllSorted(byte[] bytesOwnedIdentity);
+    LiveData<List<OwnedDevice>> getAllSorted(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT * FROM " + OwnedDevice.TABLE_NAME +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
-    List<OwnedDevice> getAllSync(byte[] bytesOwnedIdentity);
+    List<OwnedDevice> getAllSync(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT EXISTS (SELECT 1 FROM " + OwnedDevice.TABLE_NAME +
             " WHERE " + OwnedDevice.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + OwnedDevice.CURRENT_DEVICE + " = 0 " +
             " AND (" + OwnedDevice.CHANNEL_CONFIRMED + " = 1 " +
             " OR " + OwnedDevice.HAS_PRE_KEY + " = 1))")
-    boolean doesOwnedIdentityHaveAnotherDeviceWithChannel(byte[] bytesOwnedIdentity);
+    boolean doesOwnedIdentityHaveAnotherDeviceWithChannel(@NonNull byte[] bytesOwnedIdentity);
 
 }

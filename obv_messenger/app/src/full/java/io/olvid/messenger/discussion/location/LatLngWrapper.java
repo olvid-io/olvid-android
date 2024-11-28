@@ -41,7 +41,7 @@ public class LatLngWrapper {
     }
 
     // maplibre version
-    public LatLngWrapper(com.mapbox.mapboxsdk.geometry.LatLng latLng) {
+    public LatLngWrapper(org.maplibre.android.geometry.LatLng latLng) {
         latitude = latLng.getLatitude();
         longitude = latLng.getLongitude();
     }
@@ -81,8 +81,8 @@ public class LatLngWrapper {
         return location;
     }
 
-    public com.mapbox.mapboxsdk.geometry.LatLng toMapLibre() {
-        return new com.mapbox.mapboxsdk.geometry.LatLng(latitude, longitude);
+    public org.maplibre.android.geometry.LatLng toMapLibre() {
+        return new org.maplibre.android.geometry.LatLng(latitude, longitude);
     }
 
     public com.google.android.gms.maps.model.LatLng toGoogleMaps() {

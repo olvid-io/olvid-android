@@ -20,7 +20,10 @@
 package io.olvid.messenger.settings;
 
 import android.os.Bundle;
+import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.PreferenceFragmentCompat;
 
 import io.olvid.messenger.R;
@@ -30,5 +33,10 @@ public class CameraPreferenceFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.fragment_preferences_camera, rootKey);
+    }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.setBackgroundColor(getResources().getColor(R.color.dialogBackground));
     }
 }

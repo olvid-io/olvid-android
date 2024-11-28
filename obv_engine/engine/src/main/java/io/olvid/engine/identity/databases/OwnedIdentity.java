@@ -175,7 +175,7 @@ public class OwnedIdentity implements ObvDatabase {
                     jwks = null;
                     signatureKey = null;
                 }
-                return new ObvKeycloakState(keycloakServer.getServerUrl(), keycloakServer.getClientId(), keycloakServer.getClientSecret(), jwks, signatureKey, keycloakServer.getSerializedAuthState(), keycloakServer.getOwnApiKey(), keycloakServer.getLatestRevocationListTimestamp(), keycloakServer.getLatestGroupUpdateTimestamp());
+                return new ObvKeycloakState(keycloakServer.getServerUrl(), keycloakServer.getClientId(), keycloakServer.getClientSecret(), jwks, signatureKey, keycloakServer.getSerializedAuthState(), keycloakServer.isTransferRestricted(), keycloakServer.getOwnApiKey(), keycloakServer.getLatestRevocationListTimestamp(), keycloakServer.getLatestGroupUpdateTimestamp());
 
             }
         }

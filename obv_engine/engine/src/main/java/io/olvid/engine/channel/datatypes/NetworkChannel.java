@@ -164,7 +164,7 @@ public abstract class NetworkChannel extends Channel {
 
 
                 EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, paddedPlaintext, prng);
-                messageToSend = new MessageToSend(message.getSendChannelInfo().getFromIdentity(), messageUid, server, encryptedContent, headers);
+                messageToSend = new MessageToSend(message.getSendChannelInfo().getFromIdentity(), messageUid, server, encryptedContent, headers, channelProtocolMessageToSend.hasUserContent());
                 break;
             }
             default:

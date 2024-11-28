@@ -24,7 +24,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
+import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentActivity;
@@ -230,5 +232,10 @@ public class DiscussionRetentionPolicyPreferenceFragment extends PreferenceFragm
         if (discussionSettingsViewModel != null) {
             discussionSettingsViewModel.removeSettingsChangedListener(this);
         }
+    }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.setBackgroundColor(getResources().getColor(R.color.dialogBackground));
     }
 }

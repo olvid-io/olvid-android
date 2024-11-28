@@ -58,7 +58,7 @@ public class PostOsmLocationMessageInDiscussionTask implements Runnable {
     @Override
     public void run() {
         final Discussion discussion = db.discussionDao().getById(discussionId);
-        if (!discussion.isNormal()) {
+        if (discussion == null || !discussion.isNormal()) {
             Logger.w("A message was posted in a discussion where you cannot post!!!");
             return;
         }

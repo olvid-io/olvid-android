@@ -213,6 +213,7 @@ public class Fyle {
             this.sha256 = sha256;
         }
 
+        /** @noinspection unused*/
         public JsonMetadata() {
         }
 

@@ -281,11 +281,7 @@ public class AndroidNotificationManager {
         }
 
         long[] pattern = SettingsActivity.getMessageVibrationPattern();
-        if (pattern == null) {
-            messageChannel.enableVibration(false);
-        } else {
-            messageChannel.setVibrationPattern(pattern);
-        }
+        messageChannel.setVibrationPattern(pattern);
 
         messageChannel.setSound(SettingsActivity.getMessageRingtone(), new AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)

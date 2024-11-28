@@ -20,7 +20,6 @@
 package io.olvid.messenger.customClasses;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -39,6 +38,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
@@ -50,23 +51,27 @@ import java.util.List;
 import java.util.Map;
 
 import io.olvid.messenger.App;
+import io.olvid.messenger.FyleProgressSingleton;
+import io.olvid.messenger.ProgressStatus;
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
+import io.olvid.messenger.discussion.message.Attachment;
+import io.olvid.messenger.discussion.message.Visibility;
 import io.olvid.messenger.services.MediaPlayerService;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachmentAdapter.AttachmentViewHolder> implements Observer<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> {
     protected List<FyleMessageJoinWithStatusDao.FyleAndStatus> attachmentFyles;
     private final LayoutInflater inflater;
-    private final Activity activity;
+    private final FragmentActivity activity;
     @NonNull private final AudioAttachmentServiceBinding audioAttachmentServiceBinding;
     private final int previewPixelSize;
-    private MessageAttachmentAdapter.AttachmentLongClickListener attachmentLongClickListener;
+    private AttachmentLongClickListener attachmentLongClickListener;
     private long discussionId;
 
-    public DraftAttachmentAdapter(Activity activity, @NonNull AudioAttachmentServiceBinding audioAttachmentServiceBinding) {
+    public DraftAttachmentAdapter(FragmentActivity activity, @NonNull AudioAttachmentServiceBinding audioAttachmentServiceBinding) {
         this.activity = activity;
         this.previewPixelSize = activity.getResources().getDimensionPixelSize(R.dimen.attachment_small_preview_size);
         this.audioAttachmentServiceBinding = audioAttachmentServiceBinding;
@@ -106,6 +111,10 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
         super.onViewRecycled(holder);
         holder.fyleAndStatus = null;
         holder.attachmentImageView.setImageDrawable(null);
+        if (holder.progressLiveData != null) {
+            holder.progressLiveData.removeObserver(holder.progressListener);
+            holder.progressLiveData = null;
+        }
     }
 
     @Override
@@ -166,16 +175,15 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
                     audioAttachmentServiceBinding.loadAudioAttachment(fyleAndStatus, holder);
                 }
             } else {
-                holder.attachmentImageView.setImageResource(MessageAttachmentAdapter.getDrawableResourceForMimeType(mimeType));
+                holder.attachmentImageView.setImageResource(PreviewUtils.getDrawableResourceForMimeType(mimeType));
             }
         }
         switch (fyleAndStatus.fyleMessageJoinWithStatus.status) {
             case FyleMessageJoinWithStatus.STATUS_COPYING:
                 holder.attachmentProgress.setVisibility(View.VISIBLE);
-                holder.attachmentProgress.setProgress((int) (fyleAndStatus.fyleMessageJoinWithStatus.progress * 100));
                 holder.attachmentProgressLabel.setVisibility(View.VISIBLE);
                 holder.attachmentProgressLabel.setText(R.string.label_copy);
-                if (fyleAndStatus.fyleMessageJoinWithStatus.progress < .01f) {
+                if (holder.progressLiveData == null) {
                     final AnimatedVectorDrawableCompat zeroProgressSpinner = AnimatedVectorDrawableCompat.create(activity, R.drawable.file_progress_zero_spinner);
                     if (zeroProgressSpinner != null) {
                         zeroProgressSpinner.start();
@@ -184,9 +192,11 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
                     } else {
                         holder.attachmentStatusIconImageView.setVisibility(View.GONE);
                     }
-                } else {
-                    holder.attachmentStatusIconImageView.setVisibility(View.GONE);
+
+                    holder.progressLiveData = FyleProgressSingleton.INSTANCE.getProgress(fyleAndStatus.fyleMessageJoinWithStatus.fyleId, fyleAndStatus.fyleMessageJoinWithStatus.messageId);
+                    holder.progressLiveData.observe(activity, holder.progressListener);
                 }
+
                 holder.attachmentDeleteImageView.setVisibility(View.VISIBLE);
                 break;
             case FyleMessageJoinWithStatus.STATUS_DRAFT:
@@ -242,12 +252,16 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
         }
         FyleMessageJoinWithStatusDao.FyleAndStatus longClickedFyleAndStatus = attachmentFyles.get(position);
         if (attachmentLongClickListener != null) {
-            attachmentLongClickListener.attachmentLongClicked(longClickedFyleAndStatus, view, MessageAttachmentAdapter.Visibility.VISIBLE, false, attachmentFyles.size() > 1);
+            attachmentLongClickListener.attachmentLongClicked(longClickedFyleAndStatus, view, Visibility.VISIBLE, false, attachmentFyles.size() > 1);
         }
     }
 
-    public void setAttachmentLongClickListener(MessageAttachmentAdapter.AttachmentLongClickListener attachmentLongClickListener) {
+    public void setAttachmentLongClickListener(AttachmentLongClickListener attachmentLongClickListener) {
         this.attachmentLongClickListener = attachmentLongClickListener;
+    }
+
+    public interface AttachmentLongClickListener {
+        void attachmentLongClicked(FyleMessageJoinWithStatusDao.FyleAndStatus longClickedFyleAndStatus, View clickedView, Visibility visibility, boolean readOnce, boolean multipleAttachments);
     }
 
 
@@ -256,6 +270,8 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
         final ImageView attachmentStatusIconImageView;
         final ImageView attachmentDeleteImageView;
         final ProgressBar attachmentProgress;
+        final Observer<ProgressStatus> progressListener;
+        LiveData<ProgressStatus> progressLiveData;
         final TextView attachmentProgressLabel;
         final TextView attachmentFileName;
         final TextView attachmentMimeType;
@@ -270,6 +286,22 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
             attachmentStatusIconImageView = itemView.findViewById(R.id.attachment_status_icon_image_view);
             attachmentDeleteImageView = itemView.findViewById(R.id.attachment_delete_icon_image_view);
             attachmentProgress = itemView.findViewById(R.id.attachment_progress);
+            progressListener = progressStatus -> {
+                if (progressStatus instanceof ProgressStatus.InProgress) {
+                    float progress = ((ProgressStatus.InProgress) progressStatus).getProgress();
+                    if (progress > 0.01f) {
+                        attachmentProgress.setProgress((int) (progress * 100));
+                        if (attachmentDeleteImageView.getVisibility() != View.GONE) {
+                            attachmentStatusIconImageView.setVisibility(View.GONE);
+                        }
+                    }
+                } else if (progressStatus == ProgressStatus.Unknown.INSTANCE) {
+                    attachmentProgress.setProgress(0);
+                }else if (progressStatus == ProgressStatus.Finished.INSTANCE) {
+                    attachmentProgress.setProgress(100);
+                }
+            };
+            progressLiveData = null;
             attachmentProgressLabel = itemView.findViewById(R.id.attachment_progress_label);
             attachmentFileName = itemView.findViewById(R.id.attachment_file_name);
             attachmentMimeType = itemView.findViewById(R.id.attachment_mime_type);
@@ -401,7 +433,7 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
                 return;
             }
             if (bitmap == null) {
-                new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageResource(MessageAttachmentAdapter.getDrawableResourceForMimeType(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType())));
+                new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageResource(PreviewUtils.getDrawableResourceForMimeType(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType())));
             } else {
                 new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageBitmap(bitmap));
             }

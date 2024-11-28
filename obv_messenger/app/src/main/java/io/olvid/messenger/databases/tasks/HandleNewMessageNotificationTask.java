@@ -40,6 +40,7 @@ import io.olvid.engine.engine.types.ObvAttachment;
 import io.olvid.engine.engine.types.ObvMessage;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.FyleProgressSingleton;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
@@ -265,12 +266,14 @@ public class HandleNewMessageNotificationTask implements Runnable {
             boolean messageShouldBeRemoteDeleted = false;
             if (remoteDeleteAndEditRequest != null && remoteDeleteAndEditRequest.requestType == RemoteDeleteAndEditRequest.TYPE_DELETE) {
                 // check whether the remote delete request comes from another owned device or the message sender or an authorized group member
-                if (remoteDeleteAndEditRequest.remoteDeleter == messageSender.bytesOwnedIdentity) {
+                if (Arrays.equals(remoteDeleteAndEditRequest.remoteDeleter, messageSender.bytesOwnedIdentity)) {
                     messageShouldBeRemoteDeleted = true;
                 } else if (discussion.discussionType == Discussion.TYPE_GROUP_V2){
-                    Group2Member group2Member = db.group2MemberDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier, remoteDeleteAndEditRequest.remoteDeleter);
-                    if (group2Member != null) {
-                        messageShouldBeRemoteDeleted = group2Member.permissionRemoteDeleteAnything || (group2Member.permissionEditOrRemoteDeleteOwnMessages && Arrays.equals(remoteDeleteAndEditRequest.remoteDeleter, messageSender.getSenderIdentity()));
+                    if (remoteDeleteAndEditRequest.remoteDeleter != null) {
+                        Group2Member group2Member = db.group2MemberDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier, remoteDeleteAndEditRequest.remoteDeleter);
+                        if (group2Member != null) {
+                            messageShouldBeRemoteDeleted = group2Member.permissionRemoteDeleteAnything || (group2Member.permissionEditOrRemoteDeleteOwnMessages && Arrays.equals(remoteDeleteAndEditRequest.remoteDeleter, messageSender.getSenderIdentity()));
+                        }
                     }
                 }
             }
@@ -572,7 +575,6 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                             attachmentMetadata.getType(),
                                             FyleMessageJoinWithStatus.STATUS_COMPLETE,
                                             attachment.getExpectedLength(),
-                                            1,
                                             attachment.getMessageIdentifier(),
                                             attachment.getNumber(),
                                             imageResolution
@@ -596,11 +598,14 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                             attachmentMetadata.getType(),
                                             attachment.isDownloadRequested() ? FyleMessageJoinWithStatus.STATUS_DOWNLOADING : FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE,
                                             attachment.getExpectedLength(),
-                                            (float) attachment.getReceivedLength() / attachment.getExpectedLength(),
                                             attachment.getMessageIdentifier(),
                                             attachment.getNumber(),
                                             imageResolution
                                     );
+                                    if (attachment.getReceivedLength() > 0) {
+                                        FyleProgressSingleton.INSTANCE.updateProgress(fyle.id, message.id, (float) attachment.getReceivedLength() / attachment.getExpectedLength(), null);
+                                    }
+
                                     if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
                                         fyleMessageJoinWithStatus.wasOpened = true;
                                     }
@@ -623,11 +628,14 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                         attachmentMetadata.getType(),
                                         attachment.isDownloadRequested() ? FyleMessageJoinWithStatus.STATUS_DOWNLOADING : FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE,
                                         attachment.getExpectedLength(),
-                                        (float) attachment.getReceivedLength() / attachment.getExpectedLength(),
                                         attachment.getMessageIdentifier(),
                                         attachment.getNumber(),
                                         imageResolution
                                 );
+                                if (attachment.getReceivedLength() > 0) {
+                                    FyleProgressSingleton.INSTANCE.updateProgress(fyle.id, message.id, (float) attachment.getReceivedLength() / attachment.getExpectedLength(), null);
+                                }
+
                                 if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
                                     fyleMessageJoinWithStatus.wasOpened = true;
                                 }
@@ -665,9 +673,11 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     if (Objects.equals(message.linkPreviewFyleId, fyleMessageJoinWithStatus.fyleId) // always download link previews
                             || ((downloadSize == -1 || fyleMessageJoinWithStatus.size < downloadSize)
                             && (AvailableSpaceHelper.getAvailableSpace() == null || AvailableSpaceHelper.getAvailableSpace() > fyleMessageJoinWithStatus.size))) {
-                        AppSingleton.getEngine().downloadSmallAttachment(obvMessage.getBytesToIdentity(), fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
-                        fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADING;
-                        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
+                        if (fyleMessageJoinWithStatus.engineNumber != null) {
+                            AppSingleton.getEngine().downloadSmallAttachment(obvMessage.getBytesToIdentity(), fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
+                            fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADING;
+                            AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
+                        }
                     }
                 }
             }
@@ -762,7 +772,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
         switch (discussion.discussionType) {
             case Discussion.TYPE_GROUP: {
                 Group group = db.groupDao().get(messageSender.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
-                if (!Arrays.equals(group.bytesGroupOwnerIdentity, messageSender.getSenderIdentity())
+                if (group == null || !Arrays.equals(group.bytesGroupOwnerIdentity, messageSender.getSenderIdentity())
                         && (group.bytesGroupOwnerIdentity != null || !Arrays.equals(messageSender.getSenderIdentity(), messageSender.bytesOwnedIdentity))) {
                     Logger.e("Received a group shared settings update by someone else than the group owner");
                     return;
@@ -874,7 +884,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
         AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussion.id);
         // reload the discussion
         discussion = db.discussionDao().getById(discussion.id);
-        if (messagesToDelete > 0) {
+        if (discussion != null && messagesToDelete > 0) {
             Message message = Message.createDiscussionRemotelyDeletedMessage(db, discussion.id, messageSender.getSenderIdentity(), serverTimestamp);
             db.messageDao().insert(message);
             if (discussion.updateLastMessageTimestamp(serverTimestamp)) {
@@ -1203,7 +1213,12 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 System.arraycopy(bytesGroupUid, 0, bytesGroupOwnerAndUid, bytesGroupOwner.length, bytesGroupUid.length);
                 return db.discussionDao().getByGroupOwnerAndUidWithAnyStatus(messageSender.bytesOwnedIdentity, bytesGroupOwnerAndUid);
             } else if (oneToOneMessageIdentifier != null) {
-                return db.discussionDao().getByContactWithAnyStatus(messageSender.bytesOwnedIdentity, oneToOneMessageIdentifier.getBytesContactIdentity(messageSender.bytesOwnedIdentity));
+                byte[] bytesContactIdentity = oneToOneMessageIdentifier.getBytesContactIdentity(messageSender.bytesOwnedIdentity);
+                if (bytesContactIdentity != null) {
+                    return db.discussionDao().getByContactWithAnyStatus(messageSender.bytesOwnedIdentity, bytesContactIdentity);
+                } else {
+                    return null;
+                }
             } else {
                 return null;
             }
@@ -1353,7 +1368,8 @@ public class HandleNewMessageNotificationTask implements Runnable {
         } else if (oneToOneMessageIdentifier != null) {
             final boolean hold;
             if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
-                hold = db.discussionDao().getByContactWithAnyStatus(messageSender.bytesOwnedIdentity, oneToOneMessageIdentifier.getBytesContactIdentity(messageSender.bytesOwnedIdentity)) == null;
+                byte[] bytesContactIdentity = oneToOneMessageIdentifier.getBytesContactIdentity(messageSender.bytesOwnedIdentity);
+                hold = bytesContactIdentity != null && db.discussionDao().getByContactWithAnyStatus(messageSender.bytesOwnedIdentity, bytesContactIdentity) == null;
             } else {
                 Contact contact = db.contactDao().get(messageSender.bytesOwnedIdentity, oneToOneMessageIdentifier.getBytesContactIdentity(messageSender.bytesOwnedIdentity));
                 hold = contact != null && !contact.oneToOne;

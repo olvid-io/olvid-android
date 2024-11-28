@@ -28,8 +28,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.mapbox.mapboxsdk.maps.AttributionDialogManager;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
+import org.maplibre.android.maps.AttributionDialogManager;
+import org.maplibre.android.maps.MapLibreMap;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
@@ -54,8 +54,8 @@ public class MapLibreCustomAttributionDialogManager extends AttributionDialogMan
             "https://olvid.io/"
     };
 
-    public MapLibreCustomAttributionDialogManager(@NonNull Context context, @NonNull MapboxMap mapboxMap) {
-        super(context, mapboxMap);
+    public MapLibreCustomAttributionDialogManager(@NonNull Context context, @NonNull MapLibreMap mapLibreMap) {
+        super(context, mapLibreMap);
         this.context = context;
     }
 

@@ -99,7 +99,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -132,10 +131,11 @@ import io.olvid.messenger.databases.entity.MessageMetadata
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.discussion.DiscussionSearch
 import io.olvid.messenger.discussion.DiscussionViewModel
 import io.olvid.messenger.discussion.linkpreview.LinkPreview
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
+import io.olvid.messenger.discussion.search.DiscussionSearch
+import io.olvid.messenger.discussion.search.DiscussionSearchViewModel
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.contacts.PublishedDetails
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity
@@ -382,7 +382,11 @@ fun Message(
                                         .widthIn(max = maxWidth)
                                         .align(Alignment.End)
 
-                                    Message.TYPE_INBOUND_MESSAGE, Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> Modifier
+                                    Message.TYPE_INBOUND_MESSAGE -> Modifier
+                                        .widthIn(max = maxWidth)
+
+                                    Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> Modifier
+                                        .fillMaxWidth()
                                         .widthIn(max = maxWidth)
 
                                     else -> Modifier
@@ -466,12 +470,17 @@ fun Message(
                         )
 
                         // LinkPreview
-                        LinkPreview(
-                            message = message,
-                            discussionViewModel = discussionViewModel,
-                            linkPreviewViewModel = linkPreviewViewModel,
-                            onLongClick = onLongClick
-                        )
+                        if (!message.isLocationMessage) {
+                            LinkPreview(
+                                message = message,
+                                discussionViewModel = discussionViewModel,
+                                linkPreviewViewModel = linkPreviewViewModel,
+                                highlighter = discussionSearch?.viewModel?.let {
+                                    it::highlight
+                                },
+                                onLongClick = onLongClick
+                            )
+                        }
 
                         // Attachments
                         if (message.hasAttachments() && message.isLocationMessage.not()) {
@@ -483,6 +492,7 @@ fun Message(
                                     openOnClick = openOnClick,
                                     onAttachmentLongClick = onAttachmentLongClick,
                                     openViewerCallback = openViewerCallback,
+                                    discussionSearchViewModel = discussionSearch?.viewModel
                                 )
                             }
                         }
@@ -879,7 +889,10 @@ fun MessageBody(
             discussionId = discussionViewModel?.discussionId,
             scale = scale,
             onClick = onClick,
-            onLongClick = onLongClick
+            onLongClick = onLongClick,
+            highlighter = discussionSearch?.viewModel?.let {
+                it::highlight
+            },
         )
     } else {
         when (message.messageType) {
@@ -948,7 +961,7 @@ fun MessageBody(
                     if (readOnce == discussionCustomization.settingReadOnce && expiration.getVisibilityDuration() == discussionCustomization.settingVisibilityDuration && expiration.getExistenceDuration() == discussionCustomization.settingExistenceDuration) {
                         // settings are the default, verify if auto-open
                         val autoOpen =
-                            if (discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages != null) discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages == true else SettingsActivity.getDefaultAutoOpenLimitedVisibilityInboundMessages()
+                            if (discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages != null) discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages == true else SettingsActivity.defaultAutoOpenLimitedVisibilityInboundMessages
                         if (autoOpen) {
                             App.runThread {
                                 discussionViewModel.discussion.value?.bytesOwnedIdentity?.let {
@@ -964,6 +977,7 @@ fun MessageBody(
 
                 if (message.isWithoutText.not()) {
                     EphemeralVisibilityExplanation(
+                        modifier = Modifier.fillMaxWidth(),
                         duration = expiration.visibilityDuration,
                         readOnce = readOnce,
                     ) {
@@ -1097,13 +1111,11 @@ fun MessageBody(
                                                 val userIdentifier =
                                                     ObvBase64.decode(annotation.item)
                                                 if (bytesOwnedIdentity.contentEquals(userIdentifier)) {
-                                                    startActivity(
-                                                        context,
+                                                    context.startActivity(
                                                         Intent(
                                                             context,
                                                             OwnedIdentityDetailsActivity::class.java
-                                                        ),
-                                                        null
+                                                        )
                                                     )
                                                 } else {
                                                     // check that there is indeed a contact
@@ -1212,7 +1224,7 @@ fun getAnnotatedStringContent(
     message: Message,
     linkPreviewUrl: String? = null,
     bytesOwnedIdentity: ByteArray? = null,
-    discussionSearchViewModel: DiscussionSearch.SearchViewModel?,
+    discussionSearchViewModel: DiscussionSearchViewModel?,
 ): AnnotatedString {
     return buildAnnotatedString {
         var stringContent = message.getStringContent(context)

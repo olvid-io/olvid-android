@@ -866,9 +866,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                             SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             CHANNEL_CREATION_WITH_OWNED_DEVICE_PROTOCOL_ID,
-                            childProtocolInstanceUid,
-                            false
-                    );
+                            childProtocolInstanceUid);
                     ChannelMessageToSend messageToSend = new ChannelCreationWithOwnedDeviceProtocol.InitialMessage(coreProtocolMessage, receivedMessage.remoteDeviceUid).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -945,8 +943,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
                 UID protocolInstanceUid = new UID(getPrng());
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ConcreteProtocol.OWNED_DEVICE_DISCOVERY_PROTOCOL_ID,
-                        protocolInstanceUid,
-                        false);
+                        protocolInstanceUid);
                 ChannelMessageToSend message = new OwnedDeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, getPrng());
             } catch (Exception e) {
@@ -959,9 +956,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         CHANNEL_CREATION_WITH_OWNED_DEVICE_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new ChannelCreationWithOwnedDeviceProtocol.InitialMessage(coreProtocolMessage, startState.remoteDeviceUid).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -1016,8 +1011,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
                 UID protocolInstanceUid = new UID(getPrng());
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ConcreteProtocol.OWNED_DEVICE_DISCOVERY_PROTOCOL_ID,
-                        protocolInstanceUid,
-                        false);
+                        protocolInstanceUid);
                 ChannelMessageToSend message = new OwnedDeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, getPrng());
             } catch (Exception e) {
@@ -1030,9 +1024,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         CHANNEL_CREATION_WITH_OWNED_DEVICE_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new ChannelCreationWithOwnedDeviceProtocol.InitialMessage(coreProtocolMessage, startState.remoteDeviceUid).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -1098,9 +1090,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
                             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                     SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                     DOWNLOAD_IDENTITY_PHOTO_CHILD_PROTOCOL_ID,
-                                    new UID(getPrng()),
-                                    false
-                            );
+                                    new UID(getPrng()));
                             ChannelMessageToSend messageToSend = new DownloadIdentityPhotoChildProtocol.InitialMessage(coreProtocolMessage, getOwnedIdentity(), receivedMessage.remoteSerializedIdentityWithVersionAndPhoto).generateChannelProtocolMessageToSend();
                             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         }
@@ -1126,9 +1116,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new DeviceCapabilitiesDiscoveryProtocol.InitialSingleOwnedDeviceMessage(coreProtocolMessage, startState.remoteDeviceUid, false).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -1206,9 +1194,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
                             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                     SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                     DOWNLOAD_IDENTITY_PHOTO_CHILD_PROTOCOL_ID,
-                                    new UID(getPrng()),
-                                    false
-                            );
+                                    new UID(getPrng()));
                             ChannelMessageToSend messageToSend = new DownloadIdentityPhotoChildProtocol.InitialMessage(coreProtocolMessage, getOwnedIdentity(), receivedMessage.remoteSerializedIdentityWithVersionAndPhoto).generateChannelProtocolMessageToSend();
                             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         }
@@ -1234,9 +1220,7 @@ public class ChannelCreationWithOwnedDeviceProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new DeviceCapabilitiesDiscoveryProtocol.InitialSingleOwnedDeviceMessage(coreProtocolMessage, startState.remoteDeviceUid, false).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }

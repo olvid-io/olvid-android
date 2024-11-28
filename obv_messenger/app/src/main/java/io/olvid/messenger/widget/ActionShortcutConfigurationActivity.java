@@ -61,6 +61,10 @@ import androidx.constraintlayout.helper.widget.Flow;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
@@ -129,6 +133,21 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
 
         setContentView(R.layout.activity_widget_action_shortcut_configuration);
 
+        Window window = getWindow();
+        if (window != null) {
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+            WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightNavigationBars(false);
+        }
+        ConstraintLayout root = findViewById(R.id.root_constraint_layout);
+        if (root != null) {
+
+            ViewCompat.setOnApplyWindowInsetsListener(root, (view, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
+                root.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                return WindowInsetsCompat.CONSUMED;
+            });
+        }
+
         viewModel = new ViewModelProvider(this).get(ActionShortcutConfigurationViewModel.class);
 
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -160,7 +179,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
             }
             viewModel.setBytesOwnedIdentity(bytesOwnedIdentity);
         });
-        Transformations.switchMap(viewModel.getOwnedIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? null : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
+        Transformations.switchMap(viewModel.getOwnedIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? new byte[0] : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
 
         viewModel.getOwnedIdentityLiveData().observe(this, this::bindOwnedIdentity);
 
@@ -399,7 +418,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         discussionInitialView.setDiscussion(discussionAndContactNames.discussion);
 
         discussionTitleTextView.setVisibility(View.VISIBLE);
-        if (discussionAndContactNames.discussion.title.isEmpty()) {
+        if (discussionAndContactNames.discussion.title == null || discussionAndContactNames.discussion.title.isEmpty()) {
             SpannableString spannableString = new SpannableString(getString(R.string.text_unnamed_discussion));
             spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             discussionTitleTextView.setText(spannableString);
@@ -688,7 +707,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
         App.runThread(() -> {
             Long discussionId = viewModel.getActionDiscussionIdLiveData().getValue();
             String message = viewModel.getActionMessage();
-            if (discussionId == null || message == null || message.trim().length() == 0) {
+            if (discussionId == null || message == null || message.trim().isEmpty()) {
                 return;
             }
 

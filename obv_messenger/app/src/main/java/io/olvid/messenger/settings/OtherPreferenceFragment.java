@@ -26,10 +26,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.DropDownPreference;
@@ -285,5 +288,10 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
             e.printStackTrace();
             App.toast(R.string.toast_message_error_exporting_db, Toast.LENGTH_SHORT);
         }
+    }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.setBackgroundColor(getResources().getColor(R.color.dialogBackground));
     }
 }

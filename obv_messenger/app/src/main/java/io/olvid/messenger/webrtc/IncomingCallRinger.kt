@@ -83,8 +83,8 @@ class IncomingCallRinger(private val context: Context) {
         val vibrationPattern: LongArray
         val useFlash: Boolean
         if (call.discussionCustomization == null || !call.discussionCustomization.prefUseCustomCallNotification) {
-            ringtone = SettingsActivity.getCallRingtone()
-            vibrationPattern = SettingsActivity.getCallVibrationPattern()
+            ringtone = SettingsActivity.callRingtone
+            vibrationPattern = SettingsActivity.callVibrationPattern
             useFlash = SettingsActivity.useFlashOnIncomingCall()
         } else {
             ringtone =

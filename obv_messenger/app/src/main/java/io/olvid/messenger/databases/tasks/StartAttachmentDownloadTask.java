@@ -32,9 +32,14 @@ public class StartAttachmentDownloadTask implements Runnable {
 
     @Override
     public void run() {
+        if (fyleMessageJoinWithStatus.engineNumber == null) {
+            return;
+        }
         AppSingleton.getEngine().downloadLargeAttachment(fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
         FyleMessageJoinWithStatus reloadedFyleMessageJoinWithStatus = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().get(fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.messageId);
-        reloadedFyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADING;
-        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(reloadedFyleMessageJoinWithStatus);
+        if (reloadedFyleMessageJoinWithStatus != null) {
+            reloadedFyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADING;
+            AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(reloadedFyleMessageJoinWithStatus);
+        }
     }
 }

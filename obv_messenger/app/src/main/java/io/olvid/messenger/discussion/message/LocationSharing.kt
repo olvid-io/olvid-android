@@ -71,6 +71,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -100,7 +101,7 @@ fun LocationSharing(
     var menuMessageOpened by remember { mutableStateOf(false) }
     var menuOpened by remember { mutableStateOf(false) }
     fun locationGoToMessageOrShowPopup() {
-        when (SettingsActivity.getLocationIntegration()) {
+        when (SettingsActivity.locationIntegration) {
             SettingsActivity.LocationIntegrationEnum.OSM, SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM, SettingsActivity.LocationIntegrationEnum.MAPS -> {
                 onOpenMap()
             }
@@ -234,7 +235,7 @@ fun LocationSharing(
                             SettingsActivity.LocationIntegrationEnum.OSM,
                             SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM,
                             SettingsActivity.LocationIntegrationEnum.MAPS
-                        ).contains(SettingsActivity.getLocationIntegration())
+                        ).contains(SettingsActivity.locationIntegration)
                     ) {
                         DropdownMenuItem(text = {
                             Text(
@@ -272,8 +273,9 @@ fun LocationMessage(
     discussionId: Long?,
     scale: Float,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
-) {
+    onLongClick: () -> Unit,
+    highlighter: ((Context, AnnotatedString) -> AnnotatedString)? = null,
+    ) {
     val context = LocalContext.current
     val jsonMessage = message.jsonMessage
 
@@ -362,7 +364,8 @@ fun LocationMessage(
             )
         },
         onClick = onClick,
-        onLongClick = onLongClick
+        onLongClick = onLongClick,
+        highlighter = highlighter,
     )
 }
 
@@ -380,7 +383,8 @@ private fun LocationMessageContent(
     onStopSharingLocation: () -> Unit,
     onCopyCoordinates: () -> Unit,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onLongClick: () -> Unit,
+    highlighter: ((Context, AnnotatedString) -> AnnotatedString)?,
 ) {
     if (message.hasAttachments()) {
         BoxWithConstraints {
@@ -388,7 +392,9 @@ private fun LocationMessageContent(
                 audioAttachmentServiceBinding = null,
                 onAttachmentLongClick = { _ -> onLongClick() },
                 maxWidth = maxWidth,
-                onLocationClicked = onClick)
+                onLocationClicked = onClick,
+                discussionSearchViewModel = null
+            )
         }
     } else {
         Column(
@@ -538,10 +544,10 @@ private fun LocationMessageContent(
             textAlign = TextAlign.Center
         )
     }
-    if (address.isNullOrEmpty().not()) {
+    address?.takeIf { it.isNotEmpty() }?.let {
         Text(
             modifier = Modifier,
-            text = address!!,
+            text = highlighter?.invoke(LocalContext.current, AnnotatedString(address)) ?: AnnotatedString(address),
             color = if (message.isInbound) colorResource(id = R.color.inboundMessageBody) else colorResource(
                 id = R.color.primary700
             ),
@@ -575,7 +581,8 @@ fun LocationMessageContentPreview() {
                 onClick = {},
                 onLongClick = {},
                 onStopSharingLocation = {},
-                onCopyCoordinates = {}
+                onCopyCoordinates = {},
+                highlighter = null
             )
         }
     }

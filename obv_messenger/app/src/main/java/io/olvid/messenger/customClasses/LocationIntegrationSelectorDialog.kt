@@ -46,7 +46,7 @@ class LocationIntegrationSelectorDialog(
         val providerLabels = context.resources.getStringArray(R.array.location_integration)
 
         var initiallySelected = -1
-        val integrationString = SettingsActivity.getLocationIntegration().string
+        val integrationString = SettingsActivity.locationIntegration.string
         for (i in providers.indices) {
             if (integrationString == providers[i]) {
                 initiallySelected = i
@@ -136,7 +136,7 @@ class LocationIntegrationSelectorDialog(
         textInputLayout.setHint(R.string.hint_custom_osm_url)
 
         val editText = dialogView.findViewById<TextInputEditText>(R.id.dialog_edittext)
-        editText.setText(SettingsActivity.getLocationCustomOsmServerUrl())
+        editText.setText(SettingsActivity.locationCustomOsmServerUrl)
         editText.inputType = InputType.TYPE_TEXT_VARIATION_URI
 
         val builder = SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)

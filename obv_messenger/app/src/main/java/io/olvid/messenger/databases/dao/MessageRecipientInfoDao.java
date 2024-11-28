@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -50,13 +52,13 @@ public interface MessageRecipientInfoDao {
             " mri." + MessageRecipientInfo.UNREAD_ATTACHMENT_NUMBERS + " AS mri_" + MessageRecipientInfo.UNREAD_ATTACHMENT_NUMBERS;
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insert(MessageRecipientInfo... messageRecipientInfos);
+    void insert(@NonNull MessageRecipientInfo... messageRecipientInfos);
 
     @Delete
-    void delete(MessageRecipientInfo... messageRecipientInfos);
+    void delete(@NonNull MessageRecipientInfo... messageRecipientInfos);
 
     @Update(onConflict = OnConflictStrategy.IGNORE)
-    void update(MessageRecipientInfo... messageRecipientInfos);
+    void update(@NonNull MessageRecipientInfo... messageRecipientInfos);
 
     @Query("SELECT mri.* FROM " + MessageRecipientInfo.TABLE_NAME + " AS mri " +
             " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
@@ -65,7 +67,7 @@ public interface MessageRecipientInfoDao {
             " ON mess." + Message.DISCUSSION_ID + " = disc.id " +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND mri." + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + " = :engineIdentifier")
-    List<MessageRecipientInfo> getAllByEngineMessageIdentifier(byte[] bytesOwnedIdentity, byte[] engineIdentifier);
+    List<MessageRecipientInfo> getAllByEngineMessageIdentifier(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] engineIdentifier);
 
     @Query("SELECT * FROM " + MessageRecipientInfo.TABLE_NAME + " WHERE " + MessageRecipientInfo.MESSAGE_ID + " = :messageId")
     List<MessageRecipientInfo> getAllByMessageId(long messageId);
@@ -86,7 +88,7 @@ public interface MessageRecipientInfoDao {
     @Query("SELECT MIN(" + MessageRecipientInfo.TIMESTAMP_SENT + ") FROM " + MessageRecipientInfo.TABLE_NAME +
             " WHERE " + MessageRecipientInfo.MESSAGE_ID + " = :messageId " +
             " AND " + MessageRecipientInfo.TIMESTAMP_SENT + " IS NOT NULL")
-    Long getOriginalServerTimestampForMessage(long messageId);
+    @Nullable Long getOriginalServerTimestampForMessage(long messageId);
 
     @Query("SELECT " + PREFIX_MESSAGE_RECIPIENT_INFO_COLUMNS + ", " +
             " message.* FROM " + MessageRecipientInfo.TABLE_NAME + " AS mri " +
@@ -95,11 +97,11 @@ public interface MessageRecipientInfoDao {
             " WHERE mri." + MessageRecipientInfo.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND message." + Message.SENDER_IDENTIFIER + " = :bytesOwnedIdentity " +
             " AND mri." + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + " IS NULL")
-    List<MessageRecipientInfoAndMessage> getAllUnsentForContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    List<MessageRecipientInfoAndMessage> getAllUnsentForContact(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT DISTINCT " + MessageRecipientInfo.RETURN_RECEIPT_KEY + " FROM " + MessageRecipientInfo.TABLE_NAME +
             " WHERE " + MessageRecipientInfo.RETURN_RECEIPT_NONCE + " = :nonce")
-    List<byte[]> getReturnReceiptKeysForNonce(byte[] nonce);
+    List<byte[]> getReturnReceiptKeysForNonce(@NonNull byte[] nonce);
 
     @Query("SELECT mri.* FROM " + MessageRecipientInfo.TABLE_NAME + " AS mri " +
             " INNER JOIN " + Message.TABLE_NAME + " AS message " +
@@ -109,7 +111,7 @@ public interface MessageRecipientInfoDao {
             " AND mri." + MessageRecipientInfo.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity" +
             " AND mri." + MessageRecipientInfo.RETURN_RECEIPT_NONCE + " = :returnReceiptNonce" +
             " AND mri." + MessageRecipientInfo.RETURN_RECEIPT_KEY + " = :returnReceiptKey")
-    List<MessageRecipientInfo> getFromReturnReceipt(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, byte[] returnReceiptNonce, byte[] returnReceiptKey);
+    List<MessageRecipientInfo> getFromReturnReceipt(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, @NonNull byte[] returnReceiptNonce, @NonNull byte[] returnReceiptKey);
 
     @Query("SELECT mri.* FROM " + MessageRecipientInfo.TABLE_NAME + " AS mri " +
             " INNER JOIN " + Message.TABLE_NAME + " AS m " +
@@ -119,7 +121,7 @@ public interface MessageRecipientInfoDao {
             " WHERE d." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND mri." + MessageRecipientInfo.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND mri." + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + " IS NULL")
-    List<MessageRecipientInfo> getUnsentForContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    List<MessageRecipientInfo> getUnsentForContact(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT " + PREFIX_MESSAGE_RECIPIENT_INFO_COLUMNS + ", m.* FROM " + MessageRecipientInfo.TABLE_NAME + " AS mri " +
             " INNER JOIN " + Message.TABLE_NAME + " AS m " +
@@ -127,7 +129,7 @@ public interface MessageRecipientInfoDao {
             " WHERE m." + Message.DISCUSSION_ID + " = :discussionId " +
             " AND mri." + MessageRecipientInfo.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND mri." + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + " IS NULL")
-    List<MessageRecipientInfoAndMessage> getUnsentForContactInDiscussion(long discussionId, byte[] bytesContactIdentity);
+    List<MessageRecipientInfoAndMessage> getUnsentForContactInDiscussion(long discussionId, @NonNull byte[] bytesContactIdentity);
 
 
     @Query("SELECT mri.* FROM " + MessageRecipientInfo.TABLE_NAME + " AS mri " +

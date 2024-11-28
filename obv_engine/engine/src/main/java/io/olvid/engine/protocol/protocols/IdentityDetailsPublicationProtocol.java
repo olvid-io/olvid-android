@@ -476,9 +476,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                             SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             DOWNLOAD_IDENTITY_PHOTO_CHILD_PROTOCOL_ID,
-                            new UID(getPrng()),
-                            false
-                    );
+                            new UID(getPrng()));
                     ChannelMessageToSend messageToSend = new DownloadIdentityPhotoChildProtocol.InitialMessage(coreProtocolMessage, contactIdentity, receivedMessage.jsonIdentityDetailsWithVersionAndPhoto).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -519,9 +517,7 @@ public class IdentityDetailsPublicationProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         DOWNLOAD_IDENTITY_PHOTO_CHILD_PROTOCOL_ID,
-                        new UID(getPrng()),
-                        false
-                );
+                        new UID(getPrng()));
                 ChannelMessageToSend messageToSend = new DownloadIdentityPhotoChildProtocol.InitialMessage(coreProtocolMessage, getOwnedIdentity(), receivedMessage.jsonIdentityDetailsWithVersionAndPhoto).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }

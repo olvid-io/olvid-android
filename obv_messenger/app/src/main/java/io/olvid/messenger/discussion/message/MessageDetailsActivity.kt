@@ -21,6 +21,7 @@ package io.olvid.messenger.discussion.message
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.BitmapFactory
@@ -53,6 +54,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -103,19 +108,29 @@ class MessageDetailsActivity : LockableActivity() {
     private var discussionBackground: ImageView? = null
     private val messageView by lazy { findViewById<ComposeView>(R.id.compose_message_view) }
 
-    private var statusWidth: Float = 0f
     private var messageIsUndelivered = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         handleIntent(intent)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         setContentView(R.layout.activity_message_details)
 
         messageDetailsActivityRoot = findViewById(R.id.message_details_root)
 
-        val actionBar = supportActionBar
-        actionBar?.setDisplayHomeAsUpEnabled(true)
+        messageDetailsActivityRoot?.let {
+            ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                view.updatePadding(top = insets.top, bottom = insets.bottom)
+                windowInsets
+            }
+        }
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.elevation = 0f
 
         messageView.setContent {
             AppCompatTheme {

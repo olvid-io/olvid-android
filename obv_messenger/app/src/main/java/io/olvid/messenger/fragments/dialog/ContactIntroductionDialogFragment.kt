@@ -93,7 +93,7 @@ class ContactIntroductionDialogFragment : DialogFragment() {
                 AppDatabase.getInstance().contactDao()
                     .getAllOneToOneForOwnedIdentityWithChannelExcludingOne(
                         ownedIdentity.bytesOwnedIdentity,
-                        bytesContactIdentityA
+                        bytesContactIdentityA ?: ByteArray(0)
                     )
             })
         val okButton = dialogView.findViewById<Button>(R.id.button_ok)

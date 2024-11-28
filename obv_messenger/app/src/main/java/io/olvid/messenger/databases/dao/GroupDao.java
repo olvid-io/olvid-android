@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
@@ -48,67 +49,67 @@ public interface GroupDao {
             "groop." + Group.FULL_SEARCH_FIELD + " AS group_" + Group.FULL_SEARCH_FIELD;
 
     @Insert
-    void insert(Group group);
+    void insert(@NonNull Group group);
 
     @Delete
-    void delete(Group group);
+    void delete(@NonNull Group group);
 
     @Query("UPDATE " + Group.TABLE_NAME +
             " SET " + Group.NEW_PUBLISHED_DETAILS + " = :newPublishedDetails " +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    void updatePublishedDetailsStatus(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, int newPublishedDetails);
+    void updatePublishedDetailsStatus(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid, int newPublishedDetails);
 
     @Query("UPDATE " + Group.TABLE_NAME +
             " SET " + Group.NAME + " = :name, " +
             Group.PHOTO_URL + " = :photoUrl " +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    void updateNameAndPhoto(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String name, String photoUrl);
+    void updateNameAndPhoto(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid, @NonNull String name, @Nullable String photoUrl);
 
     @Query("UPDATE " + Group.TABLE_NAME + " SET " +
             Group.CUSTOM_NAME + " = :customName, " +
             Group.FULL_SEARCH_FIELD + " = :fullSearchField " +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    void updateCustomName(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String customName, String fullSearchField);
+    void updateCustomName(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid, @Nullable String customName, @NonNull String fullSearchField);
 
     @Query("UPDATE " + Group.TABLE_NAME +
             " SET " + Group.CUSTOM_PHOTO_URL + " = :customPhotoUrl " +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    void updateCustomPhotoUrl(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String customPhotoUrl);
+    void updateCustomPhotoUrl(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid, @Nullable String customPhotoUrl);
 
     @Query("UPDATE " + Group.TABLE_NAME + " SET " +
             Group.PERSONAL_NOTE + " = :personalNote, " +
             Group.FULL_SEARCH_FIELD + " = :fullSearchField " +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    void updatePersonalNote(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String personalNote, String fullSearchField);
+    void updatePersonalNote(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid, @Nullable String personalNote, @NonNull String fullSearchField);
 
     @Query("UPDATE " + Group.TABLE_NAME +
             " SET " + Group.PHOTO_URL + " = :photoUrl " +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    void updatePhotoUrl(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String photoUrl);
+    void updatePhotoUrl(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid, @Nullable String photoUrl);
 
     @Query("UPDATE " + Group.TABLE_NAME + " SET " +
             Group.GROUP_MEMBERS_NAMES + " = :groupMembersNames, " +
             Group.FULL_SEARCH_FIELD + " = :fullSearchField " +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    void updateGroupMembersNames(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, String groupMembersNames,  String fullSearchField);
+    void updateGroupMembersNames(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid, @NonNull String groupMembersNames,  @NonNull String fullSearchField);
 
     @Query("SELECT * FROM " + Group.TABLE_NAME + " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    Group get(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    @Nullable Group get(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 
     @Query("SELECT * FROM " + Group.TABLE_NAME + " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    LiveData<Group> getLiveData(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    LiveData<Group> getLiveData(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 
     @Query("SELECT " + PREFIX_GROUP_COLUMNS + ", " + Group2Dao.GROUP2_NULL_COLUMNS + " FROM " + Group.TABLE_NAME + " AS groop " +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    LiveData<Group2Dao.GroupOrGroup2> getGroupOrGroup2LiveData(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    LiveData<Group2Dao.GroupOrGroup2> getGroupOrGroup2LiveData(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 
 
     @Query("SELECT * FROM " + Group.TABLE_NAME)
@@ -120,26 +121,26 @@ public interface GroupDao {
             " AND g." + Group.BYTES_GROUP_OWNER_AND_UID + " = cgj." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID +
             " WHERE cgj." + ContactGroupJoin.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND cgj." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
-    List<Group> getAllForContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    List<Group> getAllForContact(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
     
     @Query("SELECT * FROM " + Group.TABLE_NAME +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_IDENTITY + " IS NULL")
-    List<Group> getAllOwned(byte[] bytesOwnedIdentity);
+    List<Group> getAllOwned(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT * FROM " + Group.TABLE_NAME +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_IDENTITY + " IS NOT NULL")
-    List<Group> getAllJoined(byte[] bytesOwnedIdentity);
+    List<Group> getAllJoined(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT * FROM " + Group.TABLE_NAME +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
-    List<Group> getAllForOwnedIdentity(byte[] bytesOwnedIdentity);
+    List<Group> getAllForOwnedIdentity(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT * FROM " + Group.TABLE_NAME +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " ORDER BY (" + Group.BYTES_GROUP_OWNER_IDENTITY + " IS NULL) DESC, " + Group.NAME + " COLLATE NOCASE ASC")
-    LiveData<List<Group>> getAllOwnedThenJoined(byte[] bytesOwnedIdentity);
+    LiveData<List<Group>> getAllOwnedThenJoined(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT " + PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + " FROM " + PendingGroupMember.TABLE_NAME +
             " WHERE " + PendingGroupMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
@@ -148,7 +149,7 @@ public interface GroupDao {
             " IN (SELECT " + Group.BYTES_GROUP_OWNER_AND_UID + " FROM " + Group.TABLE_NAME +
             " WHERE " + Group.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group.BYTES_GROUP_OWNER_IDENTITY + " IS NOT NULL)")
-    List<byte[]> getBytesGroupOwnerAndUidOfJoinedGroupWithPendingMember(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    List<byte[]> getBytesGroupOwnerAndUidOfJoinedGroupWithPendingMember(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT " + Group.CUSTOM_PHOTO_URL + " FROM " + Group.TABLE_NAME +
             " WHERE " + Group.CUSTOM_PHOTO_URL + " IS NOT NULL")
@@ -164,7 +165,7 @@ public interface GroupDao {
             " WHERE cgj." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND cgj." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid " +
             " ORDER BY c." + Contact.SORT_DISPLAY_NAME + " ASC ")
-    String[] getGroupMembersNames(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    String[] getGroupMembersNames(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 
     @Nullable
     @Query("SELECT COALESCE(c." + Contact.CUSTOM_DISPLAY_NAME + " , c." + Contact.FIRST_NAME + " , c." + Contact.DISPLAY_NAME + ") " +
@@ -175,5 +176,5 @@ public interface GroupDao {
             " WHERE cgj." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND cgj." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid " +
             " ORDER BY c." + Contact.SORT_DISPLAY_NAME + " ASC ")
-    String[] getGroupMembersFirstNames(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    String[] getGroupMembersFirstNames(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 }

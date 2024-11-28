@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -40,16 +41,16 @@ import io.olvid.messenger.databases.entity.Group;
 @Dao
 public interface CallLogItemDao {
     @Insert
-    long insert(CallLogItem callLogItem);
+    long insert(@NonNull CallLogItem callLogItem);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insert(CallLogItemContactJoin... callLogItemContactJoins);
+    void insert(@NonNull CallLogItemContactJoin... callLogItemContactJoins);
 
     @Delete
-    void delete(CallLogItem callLogItem);
+    void delete(@NonNull CallLogItem callLogItem);
 
     @Update
-    void update(CallLogItem callLogItem);
+    void update(@NonNull CallLogItem callLogItem);
 
     String PREFIX_CALL_LOG_COLUMNS = "log.id AS log_id, " +
             " log." + CallLogItem.BYTES_OWNED_IDENTITY + " AS log_" + CallLogItem.BYTES_OWNED_IDENTITY + ", " +
@@ -77,11 +78,11 @@ public interface CallLogItemDao {
             " AND groop." + Group.BYTES_OWNED_IDENTITY + " = log." + CallLogItem.BYTES_OWNED_IDENTITY +
             " WHERE log." + CallLogItem.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " ORDER BY log." + CallLogItem.TIMESTAMP + " DESC")
-    LiveData<List<CallLogItemAndContacts>> getWithContactForOwnedIdentity(byte[] ownedIdentityBytes);
+    LiveData<List<CallLogItemAndContacts>> getWithContactForOwnedIdentity(@NonNull byte[] ownedIdentityBytes);
 
     @Query("DELETE FROM " + CallLogItem.TABLE_NAME +
             " WHERE " + CallLogItem.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void deleteAll(byte[] bytesOwnedIdentity);
+    void deleteAll(@NonNull byte[] bytesOwnedIdentity);
 
     @Transaction
     @Query("SELECT contact.*, " +
@@ -99,7 +100,7 @@ public interface CallLogItemDao {
             " ON groop." + Group.BYTES_GROUP_OWNER_AND_UID + " = log." + CallLogItem.BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER +
             " AND groop." + Group.BYTES_OWNED_IDENTITY + " = log." + CallLogItem.BYTES_OWNED_IDENTITY +
             " WHERE log.id = :callLogItemId ")
-    CallLogItemAndContacts get(Long callLogItemId);
+    CallLogItemAndContacts get(long callLogItemId);
 
 
     class CallLogItemAndContacts {

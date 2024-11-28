@@ -356,8 +356,7 @@
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"/>
         <activity
             android:name=".settings.SettingsActivity"
-            android:label="@string/activity_title_settings"
-            android:theme="@style/AppTheme.WhiteBackground" />
+            android:label="@string/activity_title_settings" />
         <activity
             android:name=".owneddetails.OwnedIdentityDetailsActivity"
             android:label="@string/activity_title_my_details" />
@@ -441,8 +440,7 @@
             android:label="@string/activity_title_bookmarks" />
         <activity
             android:name=".discussion.settings.DiscussionSettingsActivity"
-            android:label="@string/activity_title_discussion_settings"
-            android:theme="@style/AppTheme.WhiteBackground" />
+            android:label="@string/activity_title_discussion_settings" />
         <activity
             android:name=".activities.LockScreenActivity"
             android:launchMode="singleTop"
@@ -455,6 +453,7 @@
         <activity
             android:name=".onboarding.flow.OnboardingFlowActivity"
             android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.NoActionBar.AlmostWhiteStatusBar" />
         <activity
             android:name=".troubleshooting.TroubleshootingActivity"

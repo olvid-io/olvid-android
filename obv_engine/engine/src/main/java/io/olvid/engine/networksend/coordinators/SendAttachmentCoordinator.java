@@ -103,6 +103,7 @@ public class SendAttachmentCoordinator implements OutboxAttachment.OutboxAttachm
                     for (OutboxAttachment attachment : message.getAttachments()) {
                         if (!attachment.isAcknowledged()) {
                             queueNewSendAttachmentCompositeOperation(attachment.getOwnedIdentity(), attachment.getMessageUid(), attachment.getAttachmentNumber(), attachment.getPriority());
+
                         }
                     }
                 }

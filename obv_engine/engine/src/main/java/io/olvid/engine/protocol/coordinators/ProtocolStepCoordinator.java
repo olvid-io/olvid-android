@@ -165,7 +165,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
                     ReceivedMessage message = ReceivedMessage.get(protocolManagerSession, ((ProtocolOperation) operation).getReceivedMessageUid());
                     message.delete();
 
-                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(message.getToIdentity(), DialogType.createDeleteDialog(), message.getUserDialogUuid()), message.getProtocolId(), message.getProtocolInstanceUid(), false);
+                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(message.getToIdentity(), DialogType.createDeleteDialog(), message.getUserDialogUuid()), message.getProtocolId(), message.getProtocolInstanceUid());
                     ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, prng);
 

@@ -294,6 +294,7 @@ public class DiscussionCustomization {
         public int color;
         public float alpha;
 
+        /** @noinspection unused*/
         public ColorJson() {
         }
 

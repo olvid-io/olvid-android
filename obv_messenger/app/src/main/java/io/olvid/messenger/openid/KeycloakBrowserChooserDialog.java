@@ -53,9 +53,11 @@ import io.olvid.messenger.settings.SettingsActivity;
 public class KeycloakBrowserChooserDialog {
 
     public static void openBrowserChoiceDialog(@NonNull View v) {
-        try {
-            Context context = v.getContext();
+        openBrowserChoiceDialog(v.getContext());
+    }
 
+    public static void openBrowserChoiceDialog(@NonNull Context context) {
+        try {
             String currentBrowser = SettingsActivity.getPreferredKeycloakBrowser();
 
             HashMap<String, String> knownBrowsersMap = buildKnownBrowsersMap();

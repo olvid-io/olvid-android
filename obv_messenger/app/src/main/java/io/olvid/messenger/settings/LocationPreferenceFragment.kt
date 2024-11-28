@@ -21,6 +21,7 @@ package io.olvid.messenger.settings
 import android.os.Bundle
 import android.text.InputType
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.TextView
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -66,11 +67,11 @@ class LocationPreferenceFragment : PreferenceFragmentCompat() {
                 true
             }
 
-            customAddressServerPreference.isVisible = !SettingsActivity.getLocationDisableAddressLookup()
-            customAddressServerPreference.summary = SettingsActivity.getLocationCustomAddressServer()
+            customAddressServerPreference.isVisible = !SettingsActivity.locationDisableAddressLookup
+            customAddressServerPreference.summary = SettingsActivity.locationCustomAddressServer
 
             customAddressServerPreference.onPreferenceClickListener = Preference.OnPreferenceClickListener { preference: Preference? ->
-                if (SettingsActivity.getLocationCustomAddressServer() == null) {
+                if (SettingsActivity.locationCustomAddressServer == null) {
                     context?.let { context ->
                         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_view_message_and_input, null)
 
@@ -81,7 +82,7 @@ class LocationPreferenceFragment : PreferenceFragmentCompat() {
                         textInputLayout.setHint(R.string.hint_custom_address_server_url)
 
                         val editText = dialogView.findViewById<TextInputEditText>(R.id.dialog_edittext)
-                        editText.setText(SettingsActivity.getLocationCustomAddressServerEvenIfDisabled())
+                        editText.setText(SettingsActivity.locationCustomAddressServerEvenIfDisabled)
                         editText.inputType = InputType.TYPE_TEXT_VARIATION_URI
 
                         val builder = SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
@@ -89,7 +90,7 @@ class LocationPreferenceFragment : PreferenceFragmentCompat() {
                             .setView(dialogView)
                             .setPositiveButton(R.string.button_label_ok) { _, _ ->
                                 editText.text?.toString()?.let {
-                                    SettingsActivity.setLocationCustomAddressServer(it)
+                                    SettingsActivity.locationCustomAddressServer = it
                                     customAddressServerPreference.isChecked = true
                                     customAddressServerPreference.summary = it
                                 }
@@ -105,5 +106,9 @@ class LocationPreferenceFragment : PreferenceFragmentCompat() {
                 true
             }
         }
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.setBackgroundColor(resources.getColor(R.color.dialogBackground))
     }
 }

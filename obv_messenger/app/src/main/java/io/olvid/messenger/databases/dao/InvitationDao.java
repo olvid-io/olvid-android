@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -35,10 +37,10 @@ import io.olvid.messenger.databases.entity.Invitation;
 @Dao
 public interface InvitationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Invitation... invitations);
+    void insert(@NonNull Invitation... invitations);
 
     @Delete
-    void delete(Invitation... invitations);
+    void delete(@NonNull Invitation... invitations);
 
     @Query("SELECT * FROM " + Invitation.TABLE_NAME)
     List<Invitation> getAll();
@@ -46,11 +48,11 @@ public interface InvitationDao {
     @Query("SELECT * FROM " + Invitation.TABLE_NAME +
             " WHERE " + Invitation.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " ORDER BY " + Invitation.INVITATION_TIMESTAMP + " DESC")
-    LiveData<List<Invitation>> getAllForOwnedIdentity(byte[] bytesOwnedIdentity);
+    LiveData<List<Invitation>> getAllForOwnedIdentity(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT * FROM " + Invitation.TABLE_NAME +
             " WHERE " + Invitation.DIALOG_UUID + " = :dialogUuid")
-    Invitation getByDialogUuid(UUID dialogUuid);
+    @Nullable Invitation getByDialogUuid(@NonNull UUID dialogUuid);
 
     @Query("SELECT * FROM " + Invitation.TABLE_NAME +
             " WHERE " + Invitation.DISCUSSION_ID + " = :discussionId")
@@ -66,7 +68,7 @@ public interface InvitationDao {
             " AND " + Invitation.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND " + Invitation.CATEGORY_ID + " in ( " + ObvDialog.Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY + ", " + ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY + ") " +
             " LIMIT 1")
-    LiveData<Invitation> getContactOneToOneInvitation(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    LiveData<Invitation> getContactOneToOneInvitation(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT COUNT(*) > 0 FROM " + Invitation.TABLE_NAME +
             " WHERE " + Invitation.DISCUSSION_ID + " = :discussionId")

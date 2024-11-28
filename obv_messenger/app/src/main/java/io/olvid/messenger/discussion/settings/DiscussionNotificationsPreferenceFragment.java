@@ -29,7 +29,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -279,5 +281,10 @@ public class DiscussionNotificationsPreferenceFragment extends PreferenceFragmen
         if (discussionSettingsViewModel != null) {
             discussionSettingsViewModel.removeSettingsChangedListener(this);
         }
+    }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.setBackgroundColor(getResources().getColor(R.color.dialogBackground));
     }
 }

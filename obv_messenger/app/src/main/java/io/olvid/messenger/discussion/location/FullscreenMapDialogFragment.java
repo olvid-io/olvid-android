@@ -254,9 +254,8 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
                 }
             }
         } else {
-            sharingLocationMessageLiveData.removeObservers(this);
             currentlyShownMessagesIdList.clear();
-            sharingLocationMessageLiveData.observe(this, this::sharingLocationMessagesObserver);
+            sharingLocationMessagesObserver(sharingLocationMessageLiveData.getValue());
         }
     }
 

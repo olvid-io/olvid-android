@@ -21,6 +21,7 @@ package io.olvid.messenger.group
 import android.animation.LayoutTransition
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -54,7 +55,14 @@ import androidx.activity.viewModels
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
+import androidx.core.view.updatePadding
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.DiffUtil.Callback
@@ -143,7 +151,19 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
     private lateinit var groupMembersAdapter : GroupMembersAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
         setContentView(layout.activity_group_v2_details)
+        findViewById<CoordinatorLayout>(R.id.group_details_coordinatorLayout)?.let {
+            ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                view.updatePadding(top = insets.top)
+                view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    updateMargins(bottom = insets.bottom)
+                }
+                WindowInsetsCompat.CONSUMED
+            }
+        }
         onBackPressed {
             val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
                 FULL_SCREEN_IMAGE_FRAGMENT_TAG
@@ -1028,8 +1048,8 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                             group2Member.bytesContactIdentity,
                             StringUtils.getInitial(
                                 identityDetails.formatDisplayName(
-                                    SettingsActivity.getContactDisplayNameFormat(),
-                                    SettingsActivity.getUppercaseLastName()
+                                    SettingsActivity.contactDisplayNameFormat,
+                                    SettingsActivity.uppercaseLastName
                                 )
                             )
                         )
@@ -1048,8 +1068,8 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                         holder.contactNameSecondLineTextView.visibility = View.VISIBLE
                         holder.contactNameSecondLineTextView.text =
                             identityDetails.formatDisplayName(
-                                SettingsActivity.getContactDisplayNameFormat(),
-                                SettingsActivity.getUppercaseLastName()
+                                SettingsActivity.contactDisplayNameFormat,
+                                SettingsActivity.uppercaseLastName
                             )
                     }
                 } else {
@@ -1067,11 +1087,11 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                         holder.contactNameSecondLineTextView.visibility = View.GONE
                     } else {
                         holder.contactNameTextView.text = identityDetails.formatFirstAndLastName(
-                            SettingsActivity.getContactDisplayNameFormat(),
-                            SettingsActivity.getUppercaseLastName()
+                            SettingsActivity.contactDisplayNameFormat,
+                            SettingsActivity.uppercaseLastName
                         )
                         val secondLine =
-                            identityDetails.formatPositionAndCompany(SettingsActivity.getContactDisplayNameFormat())
+                            identityDetails.formatPositionAndCompany(SettingsActivity.contactDisplayNameFormat)
                         if (secondLine == null) {
                             holder.contactNameTextView.maxLines = 2
                             holder.contactNameSecondLineTextView.visibility = View.GONE

@@ -21,6 +21,7 @@ package io.olvid.messenger.onboarding.flow
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -31,18 +32,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import io.olvid.engine.Logger
 import io.olvid.engine.engine.types.EngineNotifications
 import io.olvid.engine.engine.types.ObvDialog
 import io.olvid.engine.engine.types.ObvTransferStep.SourceDisplaySessionNumber
@@ -53,9 +53,11 @@ import io.olvid.engine.engine.types.ObvTransferStep.Step.SOURCE_DISPLAY_SESSION_
 import io.olvid.engine.engine.types.ObvTransferStep.Step.SOURCE_SAS_INPUT
 import io.olvid.engine.engine.types.ObvTransferStep.Step.SOURCE_SNAPSHOT_SENT
 import io.olvid.engine.engine.types.ObvTransferStep.Step.SOURCE_WAIT_FOR_SESSION_NUMBER
+import io.olvid.engine.engine.types.ObvTransferStep.Step.TARGET_REQUESTS_KEYCLOAK_AUTHENTICATION_PROOF
 import io.olvid.engine.engine.types.ObvTransferStep.Step.TARGET_SESSION_NUMBER_INPUT
 import io.olvid.engine.engine.types.ObvTransferStep.Step.TARGET_SHOW_SAS
 import io.olvid.engine.engine.types.ObvTransferStep.Step.TARGET_SNAPSHOT_RECEIVED
+import io.olvid.engine.engine.types.ObvTransferStep.TargetRequestsKeycloakAuthenticationProof
 import io.olvid.engine.engine.types.ObvTransferStep.TargetShowSas
 import io.olvid.engine.engine.types.SimpleEngineNotificationListener
 import io.olvid.messenger.App
@@ -74,7 +76,10 @@ import io.olvid.messenger.onboarding.flow.screens.profile.profilePicture
 import io.olvid.messenger.onboarding.flow.screens.transfer.activeDeviceSelection
 import io.olvid.messenger.onboarding.flow.screens.transfer.sourceConfirmation
 import io.olvid.messenger.onboarding.flow.screens.transfer.sourceSession
+import io.olvid.messenger.onboarding.flow.screens.transfer.sourceTransferRestrictedWarning
+import io.olvid.messenger.onboarding.flow.screens.transfer.targetAuthenticationSuccessful
 import io.olvid.messenger.onboarding.flow.screens.transfer.targetDeviceName
+import io.olvid.messenger.onboarding.flow.screens.transfer.targetKeycloakAuthenticationRequired
 import io.olvid.messenger.onboarding.flow.screens.transfer.targetRestoreSuccessful
 import io.olvid.messenger.onboarding.flow.screens.transfer.targetSessionInput
 import io.olvid.messenger.onboarding.flow.screens.transfer.targetShowSas
@@ -108,6 +113,7 @@ data class OnboardingStep(
 class OnboardingFlowActivity : AppCompatActivity() {
     companion object {
         const val TRANSFER_SOURCE_INTENT_EXTRA = "transfer_source"
+        const val TRANSFER_RESTRICTED_INTENT_EXTRA = "transfer_restricted"
         const val TRANSFER_TARGET_INTENT_EXTRA = "transfer_target"
         const val NEW_PROFILE_INTENT_EXTRA = "new_profile"
     }
@@ -126,15 +132,20 @@ class OnboardingFlowActivity : AppCompatActivity() {
         window?.apply {
             addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-            setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-            // TODO use WindowInsets for android 30
         }
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+
+
         val transferSource = intent.getBooleanExtra(TRANSFER_SOURCE_INTENT_EXTRA, false)
+        val transferRestricted = intent.getBooleanExtra(TRANSFER_RESTRICTED_INTENT_EXTRA, false)
         val transferTarget = intent.getBooleanExtra(TRANSFER_TARGET_INTENT_EXTRA, false)
         val newProfile = intent.getBooleanExtra(NEW_PROFILE_INTENT_EXTRA, false)
 
-        val startDestination = if(transferSource)
+        val startDestination = if(transferSource && transferRestricted)
+            OnboardingRoutes.TRANSFER_RESTRICTED_WARNING
+        else if (transferSource)
             OnboardingRoutes.TRANSFER_SOURCE_SESSION
         else if (newProfile)
             OnboardingRoutes.NEW_PROFILE_SCREEN
@@ -251,6 +262,17 @@ class OnboardingFlowActivity : AppCompatActivity() {
                         }, onBack = { navController.navigateUp() },
                         onClose = { finish() })
 
+                    sourceTransferRestrictedWarning(
+                        onContinue = {
+                            onboardingFlowViewModel.updateTransferRestricted(true)
+                            navController.navigate(OnboardingRoutes.TRANSFER_SOURCE_SESSION)
+                        },
+                        onClose = {
+                            onboardingFlowViewModel.abortTransfer()
+                            finish()
+                        }
+                    )
+
                     sourceSession(onboardingFlowViewModel = onboardingFlowViewModel,
                         onSasValidated = { navController.navigate(OnboardingRoutes.TRANSFER_ACTIVE_DEVICES) },
                         onClose = {
@@ -278,13 +300,13 @@ class OnboardingFlowActivity : AppCompatActivity() {
                                     setTransferSessionNumber(
                                         try {
                                             onboardingFlowViewModel.sessionNumber.toLong()
-                                        } catch (e: Exception) {
+                                        } catch (_: Exception) {
                                             0L
                                         }
                                     )
                                     AppSingleton.getEngine().respondToDialog(this)
                                 }
-                            } catch (ex: Exception) {
+                            } catch (_: Exception) {
                                 onboardingFlowViewModel.updateValidationInProgress(false)
                                 App.toast(R.string.toast_message_profile_activation_failed, Toast.LENGTH_SHORT, Gravity.BOTTOM)
                             }
@@ -314,6 +336,37 @@ class OnboardingFlowActivity : AppCompatActivity() {
                             App.openCurrentOwnedIdentityDetails(this@OnboardingFlowActivity)
                             finish()
                         })
+                    targetKeycloakAuthenticationRequired(
+                        onboardingFlowViewModel = onboardingFlowViewModel,
+                        onAuthenticated = {authState, transferProof ->
+                            onboardingFlowViewModel.saveTransferKeycloakAuthState(authState)
+                            try {
+                                onboardingFlowViewModel.dialog?.apply {
+                                    setTransferAuthenticationProof(transferProof, authState.jsonSerializeString())
+                                    AppSingleton.getEngine().respondToDialog(this)
+                                }
+                                runOnUiThread {
+                                    navController.navigate(OnboardingRoutes.TRANSFER_TARGET_AUTHENTICATION_SUCCESSFUL)
+                                }
+                            } catch (e: Exception) {
+                                Logger.x(e)
+                                runOnUiThread {
+                                    onboardingFlowViewModel.abortTransfer()
+                                    finish()
+                                }
+                            }
+                        },
+                        onClose = {
+                            onboardingFlowViewModel.abortTransfer()
+                            finish()
+                        }
+                    )
+                    targetAuthenticationSuccessful(
+                        onClose = {
+                            onboardingFlowViewModel.abortTransfer()
+                            finish()
+                        }
+                    )
                     sourceConfirmation(
                         onboardingFlowViewModel = onboardingFlowViewModel,
                         onFinalize = {
@@ -336,23 +389,6 @@ class OnboardingFlowActivity : AppCompatActivity() {
                             onboardingFlowViewModel.abortTransfer()
                             finish()
                         })
-                    composable(
-                        "scan",
-                        enterTransition = { slideIntoContainer(SlideDirection.Start) },
-                        exitTransition = { slideOutOfContainer(SlideDirection.Start) },
-                        popEnterTransition = { slideIntoContainer(SlideDirection.End) },
-                        popExitTransition = { slideOutOfContainer(SlideDirection.End) },
-                    ) {
-                        OnboardingScreen(
-                            step = OnboardingStep(
-                                title = stringResource(id = string.activity_title_scan_configuration),
-                            ),
-                            onBack = { navController.navigateUp() },
-                            onClose = { finish() }
-                        ) {
-
-                        }
-                    }
                 }
             }
 
@@ -382,6 +418,14 @@ class OnboardingFlowActivity : AppCompatActivity() {
                         TARGET_SNAPSHOT_RECEIVED -> {
                             onboardingFlowViewModel.updateValidationInProgress(false)
                             navController.navigate(OnboardingRoutes.TRANSFER_TARGET_RESTORE_SUCCESSFUL)
+                        }
+
+                        TARGET_REQUESTS_KEYCLOAK_AUTHENTICATION_PROOF -> {
+                            onboardingFlowViewModel.updateValidationInProgress(false)
+                            (dialog.category?.obvTransferStep as? TargetRequestsKeycloakAuthenticationProof)?.let {
+                                onboardingFlowViewModel.setTransferKeycloakParameters(it.keycloakServerUrl, it.clientId, it.clientSecret, it.fullSas, it.sessionNumber)
+                            }
+                            navController.navigate(OnboardingRoutes.TRANSFER_TARGET_KEYCLOAK_AUTHENTICATION_PROOF_REQUIRED)
                         }
 
                         ONGOING_PROTOCOL -> {

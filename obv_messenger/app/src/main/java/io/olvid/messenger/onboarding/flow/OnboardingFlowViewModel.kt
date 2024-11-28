@@ -57,6 +57,7 @@ import io.olvid.messenger.services.BackupCloudProviderService.BackupItem
 import io.olvid.messenger.services.BackupCloudProviderService.CloudProviderConfiguration
 import io.olvid.messenger.services.BackupCloudProviderService.OnBackupDownloadCallback
 import io.olvid.messenger.services.BackupCloudProviderService.OnBackupsListCallback
+import net.openid.appauth.AuthState
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
@@ -100,6 +101,15 @@ class OnboardingFlowViewModel : ViewModel() {
     fun updateValidationError(input: Boolean) {
         validationError = input
     }
+
+    var creatingSimpleIdentity by mutableStateOf(false)
+
+    var capturedImageUri by mutableStateOf<Uri>(Uri.EMPTY)
+
+    var absolutePhotoUrl by mutableStateOf<String?>(null)
+
+    // region Transfer
+
     var sas by mutableStateOf("")
         private set
     fun updateSas(input: String) {
@@ -127,13 +137,38 @@ class OnboardingFlowViewModel : ViewModel() {
         transferMultiDevice = multiDevice
     }
 
-    var creatingSimpleIdentity by mutableStateOf(false)
+    var transferRestricted: Boolean by mutableStateOf(false)
+        private set
 
-    var capturedImageUri by mutableStateOf<Uri>(Uri.EMPTY)
+    fun updateTransferRestricted(restricted: Boolean) {
+        transferRestricted = restricted
+    }
 
-    var absolutePhotoUrl by mutableStateOf<String?>(null)
+    var keycloakServerUrl: String? = null
+        private set
+    var keycloakClientId: String? = null
+        private set
+    var keycloakSas: String? = null
+        private set
+    var keycloakClientSecret: String? = null
+        private set
+    var keycloakSessionNumber: Long? = null
+        private set
+    fun setTransferKeycloakParameters(keycloakServerUrl: String, keycloakClientId: String, keycloakClientSecret: String?, fullSas: String, sessionNumber: Long) {
+        this.keycloakServerUrl = keycloakServerUrl
+        this.keycloakClientId = keycloakClientId
+        this.keycloakClientSecret = keycloakClientSecret
+        this.keycloakSas = fullSas
+        this.keycloakSessionNumber = sessionNumber
+    }
 
-    // region Transfer
+    var transferKeycloakAuthState: AuthState? = null
+        private set
+
+    fun saveTransferKeycloakAuthState(authState: AuthState) {
+        transferKeycloakAuthState = authState
+    }
+
     fun abortTransfer() {
         try {
             dialog?.let {
@@ -184,6 +219,7 @@ class OnboardingFlowViewModel : ViewModel() {
             null,
             null,
             null,
+            false,
             onSuccess
         ) { creatingSimpleIdentity = false }
     }

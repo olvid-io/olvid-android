@@ -3,15 +3,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/group_details_coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
+    android:background="@color/olvid_gradient_dark"
     tools:context=".group.GroupDetailsActivity">
 
     <ScrollView
         android:id="@+id/group_details_scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/lightGrey">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/group_details_main_constraint_layout"

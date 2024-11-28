@@ -21,6 +21,7 @@ package io.olvid.messenger.databases.dao;
 
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
@@ -45,26 +46,26 @@ import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 @Dao
 public interface FyleMessageJoinWithStatusDao {
     @Insert
-    void insert(FyleMessageJoinWithStatus fyleMessageJoinWithStatus);
+    void insert(@NonNull FyleMessageJoinWithStatus fyleMessageJoinWithStatus);
 
     @Update
-    void update(FyleMessageJoinWithStatus fyleMessageJoinWithStatus);
+    void update(@NonNull FyleMessageJoinWithStatus fyleMessageJoinWithStatus);
 
     @Delete
-    void delete(FyleMessageJoinWithStatus fyleMessageJoinWithStatus);
+    void delete(@NonNull FyleMessageJoinWithStatus fyleMessageJoinWithStatus);
 
     @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
             " SET " + FyleMessageJoinWithStatus.ENGINE_MESSAGE_IDENTIFIER + " = :engineMessageIdentifier, " +
             FyleMessageJoinWithStatus.ENGINE_NUMBER + " = :engineNumber " +
             " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
             " AND " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId ")
-    void updateEngineIdentifier(long messageId, long fyleId, byte[] engineMessageIdentifier, int engineNumber);
+    void updateEngineIdentifier(long messageId, long fyleId, @Nullable byte[] engineMessageIdentifier, int engineNumber);
 
     @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
             " SET " + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " = :imageResolution " +
             " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
             " AND " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId ")
-    void updateImageResolution(long messageId, long fyleId, String imageResolution);
+    void updateImageResolution(long messageId, long fyleId, @Nullable String imageResolution);
 
     @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
             " SET " + FyleMessageJoinWithStatus.WAS_OPENED + " = 1 " +
@@ -77,7 +78,7 @@ public interface FyleMessageJoinWithStatusDao {
             FyleMessageJoinWithStatus.TEXT_EXTRACTED + " = 1 " +
             " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
             " AND " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId ")
-    void updateTextContent(long messageId, long fyleId, String content);
+    void updateTextContent(long messageId, long fyleId, @Nullable String content);
 
     @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
             " SET " + FyleMessageJoinWithStatus.RECEPTION_STATUS + " = :receptionStatus " +
@@ -90,13 +91,13 @@ public interface FyleMessageJoinWithStatusDao {
             " WHERE " + FyleMessageJoinWithStatus.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity" +
             " AND " + FyleMessageJoinWithStatus.ENGINE_MESSAGE_IDENTIFIER + " = :messageIdentifier " +
             " AND " + FyleMessageJoinWithStatus.ENGINE_NUMBER + " = :number")
-    void updateMiniPreview(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int number, byte[] miniPreview);
+    void updateMiniPreview(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] messageIdentifier, int number, @Nullable byte[] miniPreview);
 
     @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
             " SET " + FyleMessageJoinWithStatus.FILE_PATH + " = :filePath " +
             " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
             " AND " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId ")
-    void updateFilePath(long messageId, long fyleId, String filePath);
+    void updateFilePath(long messageId, long fyleId, @Nullable String filePath);
 
     @Query("SELECT " + FyleMessageJoinWithStatus.MESSAGE_ID + " FROM " + FyleMessageJoinWithStatus.TABLE_NAME +
             " WHERE " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId")
@@ -135,7 +136,7 @@ public interface FyleMessageJoinWithStatusDao {
             " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
             " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId" +
             " AND FMjoin." + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId")
-    FyleAndStatus getFyleAndStatus(final long messageId, final long fyleId);
+    @Nullable FyleAndStatus getFyleAndStatus(final long messageId, final long fyleId);
 
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
@@ -161,7 +162,7 @@ public interface FyleMessageJoinWithStatusDao {
             " WHERE " + FyleMessageJoinWithStatus.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity" +
             " AND " + FyleMessageJoinWithStatus.ENGINE_MESSAGE_IDENTIFIER + " = :messageIdentifier " +
             " AND " + FyleMessageJoinWithStatus.ENGINE_NUMBER + " = :number")
-    FyleMessageJoinWithStatus getByEngineIdentifierAndNumber(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int number);
+    @Nullable FyleMessageJoinWithStatus getByEngineIdentifierAndNumber(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] messageIdentifier, int number);
 
     @Query("SELECT * FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " WHERE " + FyleMessageJoinWithStatus.STATUS + " = " + FyleMessageJoinWithStatus.STATUS_UPLOADING)
     List<FyleMessageJoinWithStatus> getUploading();
@@ -174,12 +175,12 @@ public interface FyleMessageJoinWithStatusDao {
 
 
     @Query("SELECT * FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " WHERE " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId AND " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId")
-    FyleMessageJoinWithStatus get(long fyleId, long messageId);
+    @Nullable FyleMessageJoinWithStatus get(long fyleId, long messageId);
 
     @Query("SELECT * FROM " + FyleMessageJoinWithStatus.TABLE_NAME +
             " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
             " AND " + FyleMessageJoinWithStatus.ENGINE_NUMBER + " = :attachmentNumber")
-    FyleMessageJoinWithStatus getByIdAndAttachmentNumber(long messageId, Integer attachmentNumber);
+    @Nullable FyleMessageJoinWithStatus getByIdAndAttachmentNumber(long messageId, int attachmentNumber);
 
 
     String IMAGE_AND_VIDEO_FOR_DISCUSSION_QUERY = "SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
@@ -196,12 +197,12 @@ public interface FyleMessageJoinWithStatusDao {
     @Query(IMAGE_AND_VIDEO_FOR_DISCUSSION_QUERY +
             " ORDER BY mess." + Message.SORT_INDEX + " ASC, " +
             " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " ASC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForDiscussion(Long discussionId);
+    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForDiscussion(long discussionId);
 
     @Query(IMAGE_AND_VIDEO_FOR_DISCUSSION_QUERY +
             " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
             " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForDiscussionDescending(Long discussionId);
+    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForDiscussionDescending(long discussionId);
 
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
@@ -226,7 +227,7 @@ public interface FyleMessageJoinWithStatusDao {
             " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
             " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
             " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
-    LiveData<List<FyleAndStatusTimestamped>> getGalleryMediasForDiscussion(Long discussionId);
+    LiveData<List<FyleAndStatusTimestamped>> getGalleryMediasForDiscussion(long discussionId);
 
     @Query("SELECT fyle.*, FMjoin.*, " + "mess." + Message.TIMESTAMP + " AS " + Message.TIMESTAMP + " FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
@@ -240,7 +241,7 @@ public interface FyleMessageJoinWithStatusDao {
             " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
             " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
             " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
-    LiveData<List<FyleAndStatusTimestamped>> getGalleryLinksForDiscussion(Long discussionId);
+    LiveData<List<FyleAndStatusTimestamped>> getGalleryLinksForDiscussion(long discussionId);
 
     @Query("SELECT fyle.*, FMjoin.*, " + "mess." + Message.TIMESTAMP + " AS " + Message.TIMESTAMP + " FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
@@ -257,7 +258,7 @@ public interface FyleMessageJoinWithStatusDao {
             " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
             " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
             " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
-    LiveData<List<FyleAndStatusTimestamped>> getGalleryDocumentsForDiscussion(Long discussionId);
+    LiveData<List<FyleAndStatusTimestamped>> getGalleryDocumentsForDiscussion(long discussionId);
 
     @Query("SELECT fyle.*, FMjoin.*, " + "mess." + Message.TIMESTAMP + " AS " + Message.TIMESTAMP + " FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
@@ -271,7 +272,7 @@ public interface FyleMessageJoinWithStatusDao {
             " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
             " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
             " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
-    LiveData<List<FyleAndStatusTimestamped>> getGalleryAudiosForDiscussion(Long discussionId);
+    LiveData<List<FyleAndStatusTimestamped>> getGalleryAudiosForDiscussion(long discussionId);
 
 
     String IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY = "SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
@@ -288,27 +289,27 @@ public interface FyleMessageJoinWithStatusDao {
 
     @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
             " ORDER BY mess." + Message.TIMESTAMP + " DESC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentity(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentity(@NonNull byte[] bytesOwnedIdentity);
 
     @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
             " ORDER BY mess." + Message.TIMESTAMP + " ASC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityAscending(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityAscending(@NonNull byte[] bytesOwnedIdentity);
 
     @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
             " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityBySize(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityBySize(@NonNull byte[] bytesOwnedIdentity);
 
     @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
             " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " ASC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityBySizeAscending(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityBySizeAscending(@NonNull byte[] bytesOwnedIdentity);
 
     @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
             " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityByName(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityByName(@NonNull byte[] bytesOwnedIdentity);
 
     @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
             " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " ASC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityByNameAscending(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityByNameAscending(@NonNull byte[] bytesOwnedIdentity);
 
 
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
@@ -337,7 +338,7 @@ public interface FyleMessageJoinWithStatusDao {
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL " + // only count complete attachments
             " GROUP BY fyle." + Fyle.SHA256 + ")")
-    LiveData<Long> getTotalUsage(byte[] bytesOwnedIdentity);
+    LiveData<Long> getTotalUsage(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT SUM(size) FROM (SELECT MAX(FMjoin." + FyleMessageJoinWithStatus.SIZE + ") AS size, fyle. " + Fyle.SHA256 +
             " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
@@ -351,7 +352,7 @@ public interface FyleMessageJoinWithStatusDao {
             " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL " + // only count complete attachments
             " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE :mimeStart " +
             " GROUP BY fyle." + Fyle.SHA256 + ")")
-    LiveData<Long> getMimeUsage(byte[] bytesOwnedIdentity, String mimeStart);
+    LiveData<Long> getMimeUsage(@NonNull byte[] bytesOwnedIdentity, @NonNull String mimeStart);
 
 
     String FYLE_AND_ORIGIN_QUERY = "SELECT " + DiscussionDao.PREFIX_DISCUSSION_COLUMNS + ", " + MessageDao.PREFIX_MESSAGE_COLUMNS + ", fyle.*, FMjoin.* " +
@@ -377,56 +378,56 @@ public interface FyleMessageJoinWithStatusDao {
             " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'image/%' ";
 
     @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " ASC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginSizeAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginSizeAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginSizeDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginSizeDesc(@NonNull byte[] bytesOwnedIdentity);
     @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " ASC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginDateAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginDateAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " DESC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginDateDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginDateDesc(@NonNull byte[] bytesOwnedIdentity);
     @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " ASC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginNameAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginNameAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginNameDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginNameDesc(@NonNull byte[] bytesOwnedIdentity);
 
     @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginSizeAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginSizeAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginSizeDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginSizeDesc(@NonNull byte[] bytesOwnedIdentity);
     @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginDateAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginDateAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginDateDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginDateDesc(@NonNull byte[] bytesOwnedIdentity);
     @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginNameAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginNameAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginNameDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginNameDesc(@NonNull byte[] bytesOwnedIdentity);
 
     @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " ASC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginSizeAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginSizeAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginSizeDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginSizeDesc(@NonNull byte[] bytesOwnedIdentity);
     @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " ASC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginDateAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginDateAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " DESC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginDateDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginDateDesc(@NonNull byte[] bytesOwnedIdentity);
     @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " ASC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginNameAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginNameAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginNameDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginNameDesc(@NonNull byte[] bytesOwnedIdentity);
 
     @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginSizeAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFyleAndOriginSizeAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginSizeDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFyleAndOriginSizeDesc(@NonNull byte[] bytesOwnedIdentity);
     @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginDateAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFyleAndOriginDateAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginDateDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFyleAndOriginDateDesc(@NonNull byte[] bytesOwnedIdentity);
     @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginNameAsc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFyleAndOriginNameAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginNameDesc(byte[] bytesOwnedIdentity);
+    LiveData<List<FyleAndOrigin>> getFyleAndOriginNameDesc(@NonNull byte[] bytesOwnedIdentity);
 
 
 

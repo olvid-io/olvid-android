@@ -6,14 +6,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/almostWhite">
 
-    <View
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="0dp"
-        android:layout_height="@dimen/tab_bar_size"
+        android:layout_height="wrap_content"
         android:background="@drawable/background_fragment_top_bar_white"
+        android:minHeight="@dimen/tab_bar_size"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
 
     <ImageView
         android:id="@+id/back_button"
@@ -24,9 +27,9 @@
         android:background="@drawable/background_circular_ripple"
         android:theme="@style/GreyRipple"
         android:layout_marginStart="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/top_bar"
-        app:layout_constraintStart_toStartOf="@+id/top_bar"
-        app:layout_constraintTop_toTopOf="@id/top_bar" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
         android:layout_width="0dp"
@@ -38,11 +41,14 @@
         android:textAppearance="@style/RobotoMedium"
         android:textSize="@dimen/title_font_size"
         android:textColor="@color/blueOrWhite"
-        app:layout_constraintBottom_toBottomOf="@+id/top_bar"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/back_button"
-        app:layout_constraintTop_toTopOf="@+id/top_bar"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:ignore="SpUsage" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <View
         android:id="@+id/focus_hugger"

@@ -135,7 +135,7 @@ public class DownloadAttachmentOperation extends PriorityOperation {
                         cancel(RFC_INVALID_SIGNED_URL);
                         return;
                     }
-                    if (attachment.getChunkDownloadPrivateUrls()[attachment.getReceivedChunkCount()].length() == 0) {
+                    if (attachment.getChunkDownloadPrivateUrls()[attachment.getReceivedChunkCount()].isEmpty()) {
                         cancel(RFC_UPLOAD_CANCELLED_BY_SENDER);
                         return;
                     }
@@ -144,7 +144,7 @@ public class DownloadAttachmentOperation extends PriorityOperation {
                             attachment.getChunkDownloadPrivateUrls()[attachment.getReceivedChunkCount()]
                     );
                     serverMethod.setSslSocketFactory(sslSocketFactory);
-                    serverMethod.setProgressListener(200, new ServerMethodForS3.ServerMethodForS3ProgressListener() {
+                    serverMethod.setProgressListener(150, new ServerMethodForS3.ServerMethodForS3ProgressListener() {
                         final HashMap<String, Object> userInfo;
                         {
                             userInfo = new HashMap<>();

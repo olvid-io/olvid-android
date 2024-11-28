@@ -44,7 +44,6 @@ import androidx.compose.foundation.layout.ContextualFlowRow
 import androidx.compose.foundation.layout.ContextualFlowRowOverflow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -62,12 +61,10 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -95,18 +92,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.map
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
-import io.olvid.engine.engine.types.EngineNotificationListener
-import io.olvid.engine.engine.types.EngineNotifications
 import io.olvid.messenger.App
 import io.olvid.messenger.App.imageLoader
-import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.FyleProgressSingleton
+import io.olvid.messenger.ProgressStatus
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.customClasses.ImageResolution
-import io.olvid.messenger.customClasses.MessageAttachmentAdapter.Visibility
-import io.olvid.messenger.customClasses.MessageAttachmentAdapter.Visibility.HIDDEN
-import io.olvid.messenger.customClasses.MessageAttachmentAdapter.Visibility.VISIBLE
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.PreviewUtilsWithDrawables
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
@@ -124,11 +118,16 @@ import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.gallery.AudioListItem
 import io.olvid.messenger.discussion.gallery.FyleListItem
+import io.olvid.messenger.discussion.search.DiscussionSearchViewModel
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
 
+enum class Visibility {
+    VISIBLE,
+    HIDDEN,
+}
 
 @Composable
 fun constantSp(value: Int): TextUnit = with(LocalDensity.current) { (value / fontScale).sp }
@@ -161,6 +160,7 @@ fun Attachments(
     openOnClick: Boolean = true,
     onLocationClicked: (() -> Unit)? = null,
     openViewerCallback: (() -> Unit)? = null,
+    discussionSearchViewModel: DiscussionSearchViewModel?
 ) {
     val context = LocalContext.current
     val attachmentFyles by AppDatabase.getInstance().fyleMessageJoinWithStatusDao()
@@ -201,18 +201,108 @@ fun Attachments(
         overflow = ContextualFlowRowOverflow.Visible
     ) { index ->
         attachments?.getOrNull(index)?.let { attachment ->
-            val upload by derivedStateOf {
-                if (attachment.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_UPLOADING) true else if (attachment.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_DOWNLOADING) false else null
+            val progressStatus: ProgressStatus? by remember(attachment.fyleMessageJoinWithStatus.fyleId, attachment.fyleMessageJoinWithStatus.messageId) { FyleProgressSingleton.getProgress(attachment.fyleMessageJoinWithStatus.fyleId, attachment.fyleMessageJoinWithStatus.messageId) }.observeAsState()
+
+            val speed: String? by remember {
+                derivedStateOf {
+                    (progressStatus as? ProgressStatus.InProgress)?.speedAndEta?.speedBps?.let {
+                        if (it >= 10000000000f) {
+                            context.getString(
+                                R.string.xx_gbps,
+                                String.format(
+                                    Locale.ENGLISH,
+                                    "%d",
+                                    (it / 1000000000f).toInt()
+                                )
+                            )
+                        } else if (it >= 1000000000f) {
+                            context.getString(
+                                R.string.xx_gbps,
+                                String.format(
+                                    Locale.ENGLISH,
+                                    "%1.1f",
+                                    it / 1000000000f
+                                )
+                            )
+                        } else if (it >= 10000000f) {
+                            context.getString(
+                                R.string.xx_mbps,
+                                String.format(
+                                    Locale.ENGLISH,
+                                    "%d",
+                                    (it / 1000000f).toInt()
+                                )
+                            )
+                        } else if (it >= 1000000f) {
+                            context.getString(
+                                R.string.xx_mbps,
+                                String.format(
+                                    Locale.ENGLISH,
+                                    "%1.1f",
+                                    it / 1000000f
+                                )
+                            )
+                        } else if (it >= 10000f) {
+                            context.getString(
+                                R.string.xx_kbps,
+                                String.format(
+                                    Locale.ENGLISH,
+                                    "%d",
+                                    (it / 1000f).toInt()
+                                )
+                            )
+                        } else if (it >= 1000f) {
+                            context.getString(
+                                R.string.xx_kbps,
+                                String.format(Locale.ENGLISH, "%1.1f", it / 1000f)
+                            )
+                        } else {
+                            context.getString(
+                                R.string.xx_bps,
+                                String.format(
+                                    Locale.ENGLISH,
+                                    "%d",
+                                    Math.round(it)
+                                )
+                            )
+                        }
+                    }
+                }
             }
-            var speed: String? by remember {
-                mutableStateOf(null)
+
+            val eta: String? by remember {
+                derivedStateOf {
+                    (progressStatus as? ProgressStatus.InProgress)?.speedAndEta?.etaSeconds?.let {
+                        if (it > 5940) {
+                            context.getString(
+                                R.string.text_timer_h,
+                                it / 3600
+                            )
+                        } else if (it > 99) {
+                            context.getString(
+                                R.string.text_timer_m,
+                                it / 60
+                            )
+                        } else if (it > 0) {
+                            context.getString(R.string.text_timer_s, it)
+                        } else {
+                            "-"
+                        }
+                    }
+                }
             }
-            var eta: String? by remember {
-                mutableStateOf(null)
+
+            val progress: Float by remember {
+                derivedStateOf {
+                    when(progressStatus) {
+                        ProgressStatus.Finished -> 1f
+                        is ProgressStatus.InProgress -> (progressStatus as ProgressStatus.InProgress).progress
+                        ProgressStatus.Unknown -> 0f
+                        null -> 0f
+                    }
+                }
             }
-            var progress: Float by remember {
-                mutableFloatStateOf(0f)
-            }
+
 
             val downloadAwareClick = { completeClick: () -> Unit ->
                 when (attachment.fyleMessageJoinWithStatus.status) {
@@ -239,93 +329,6 @@ fun Attachments(
                 }
             }
 
-            DownloadListener(
-                fyleAndStatus = attachment,
-                upload = upload
-            ) { attachmentDownloadData ->
-                if (attachmentDownloadData?.speed != null && attachmentDownloadData.eta != null) {
-                    val finalSpeed = attachmentDownloadData.speed
-                    val finalEta = attachmentDownloadData.eta
-                    progress = attachmentDownloadData.progress
-                    speed = if (finalSpeed >= 10000000000f) {
-                        context.getString(
-                            R.string.xx_gbps,
-                            String.format(
-                                Locale.ENGLISH,
-                                "%d",
-                                (finalSpeed / 1000000000f).toInt()
-                            )
-                        )
-                    } else if (finalSpeed >= 1000000000f) {
-                        context.getString(
-                            R.string.xx_gbps,
-                            String.format(
-                                Locale.ENGLISH,
-                                "%1.1f",
-                                finalSpeed / 1000000000f
-                            )
-                        )
-                    } else if (finalSpeed >= 10000000f) {
-                        context.getString(
-                            R.string.xx_mbps,
-                            String.format(
-                                Locale.ENGLISH,
-                                "%d",
-                                (finalSpeed / 1000000f).toInt()
-                            )
-                        )
-                    } else if (finalSpeed >= 1000000f) {
-                        context.getString(
-                            R.string.xx_mbps,
-                            String.format(
-                                Locale.ENGLISH,
-                                "%1.1f",
-                                finalSpeed / 1000000f
-                            )
-                        )
-                    } else if (finalSpeed >= 10000f) {
-                        context.getString(
-                            R.string.xx_kbps,
-                            String.format(
-                                Locale.ENGLISH,
-                                "%d",
-                                (finalSpeed / 1000f).toInt()
-                            )
-                        )
-                    } else if (finalSpeed >= 1000f) {
-                        context.getString(
-                            R.string.xx_kbps,
-                            String.format(Locale.ENGLISH, "%1.1f", finalSpeed / 1000f)
-                        )
-                    } else {
-                        context.getString(
-                            R.string.xx_bps,
-                            String.format(
-                                Locale.ENGLISH,
-                                "%d",
-                                Math.round(finalSpeed)
-                            )
-                        )
-                    }
-                    eta = if (finalEta > 5940) {
-                        context.getString(
-                            R.string.text_timer_h,
-                            finalEta / 3600
-                        )
-                    } else if (finalEta > 99) {
-                        context.getString(
-                            R.string.text_timer_m,
-                            finalEta / 60
-                        )
-                    } else if (finalEta > 0) {
-                        context.getString(R.string.text_timer_s, finalEta)
-                    } else {
-                        "-"
-                    }
-                } else {
-                    progress = attachmentDownloadData?.progress ?: 0f
-                }
-            }
             if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(attachment.fyleMessageJoinWithStatus.getNonNullMimeType())) {
                 Box(
                     Modifier.background(colorResource(id = R.color.almostWhite))
@@ -336,7 +339,7 @@ fun Attachments(
                         onDismiss = { attachmentContextMenuOpened = false },
                         message = message,
                         attachment = attachment,
-                        visibility = VISIBLE,
+                        visibility = Visibility.VISIBLE,
                         readOnce = false,
                         multipleAttachment = attachments.size > 1
                     )
@@ -386,12 +389,22 @@ fun Attachments(
                             readOnce = readOnce
                         )
                     } else {
-                        var imageUri: Any? by remember {
-                            mutableStateOf(attachment.fyleMessageJoinWithStatus.miniPreview)
+                        var imageUri: ImageRequest? by remember {
+                            mutableStateOf(null)
                         }
-                        LaunchedEffect(attachment.fyle.filePath) {
-                            if (attachment.fyle.isComplete) {
-                                imageUri = attachment.deterministicContentUriForGallery
+                        LaunchedEffect(attachment.fyleMessageJoinWithStatus.miniPreview != null, attachment.fyle.filePath) {
+                            imageUri = if (attachment.fyle.isComplete) {
+                                ImageRequest.Builder(context)
+                                    .data(attachment.deterministicContentUriForGallery)
+                                    .placeholderMemoryCacheKey("${attachment.fyleMessageJoinWithStatus.fyleId}-${attachment.fyleMessageJoinWithStatus.messageId}")
+                                    .build()
+                            } else if (attachment.fyleMessageJoinWithStatus.miniPreview != null) {
+                                ImageRequest.Builder(context)
+                                    .data(attachment.fyleMessageJoinWithStatus.miniPreview)
+                                    .memoryCacheKey("${attachment.fyleMessageJoinWithStatus.fyleId}-${attachment.fyleMessageJoinWithStatus.messageId}")
+                                    .build()
+                            } else {
+                                null
                             }
                         }
                         LaunchedEffect(attachment.fyle.id, attachment.fyle.filePath) {
@@ -414,7 +427,9 @@ fun Attachments(
                                             1
                                         )
                                     }.onFailure {
-                                        imageUri = R.drawable.ic_broken_image
+                                        imageUri = ImageRequest.Builder(context)
+                                            .data(R.drawable.ic_broken_image)
+                                            .build()
                                     }
                                 }
                             }
@@ -481,15 +496,33 @@ fun Attachments(
                             ) ContentScale.Crop else ContentScale.Fit,
                             contentDescription = attachment.fyleMessageJoinWithStatus.fileName,
                         )
-                    }
-                    if (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("video/")) {
-                        Image(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .requiredSize(64.dp),
-                            painter = painterResource(id = R.drawable.overlay_video_small),
-                            contentDescription = "video"
-                        )
+
+                        if (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("video/")) {
+                            Image(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .requiredSize(64.dp),
+                                painter = painterResource(id = R.drawable.overlay_video_small),
+                                contentDescription = "video"
+                            )
+                        }
+                        if (discussionSearchViewModel?.matches?.contains(attachment.fyleMessageJoinWithStatus.messageId) == true) {
+                            Text(
+                                modifier = Modifier
+                                    .padding(2.dp)
+                                    .background(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = Color.White.copy(alpha = .4f)
+                                    )
+                                    .padding(2.dp)
+                                    .width(if (wide || imageCount == 1) maxWidth else (maxWidth / 2 - 10.dp)),
+                                text = discussionSearchViewModel.highlight(
+                                    context,
+                                    AnnotatedString(attachment.fyleMessageJoinWithStatus.fileName)
+                                ),
+                                maxLines = 2,
+                            )
+                        }
                     }
                     when (attachment.fyleMessageJoinWithStatus.receptionStatus) {
                         FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED -> {
@@ -588,72 +621,113 @@ fun Attachments(
                                 if (index == (message.totalAttachmentCount - 1)) 6.dp else 0.dp,
                             )
                         )
+                        .then(if (message.isContentHidden) {
+                            Modifier.background(colorResource(R.color.almostWhite))
+                        } else Modifier)
                 ) {
-                    if (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("audio/")) {
-                        var menuOpened by remember { mutableStateOf(false) }
-                        AudioListItem(
+                    if (message.isContentHidden) {
+                        Image(
                             modifier = Modifier
-                                .background(color = colorResource(id = R.color.almostWhite)),
-                            fyleAndStatus = attachment.fyleAndStatus,
-                            activity = context as AppCompatActivity,
-                            audioAttachmentServiceBinding = audioAttachmentServiceBinding,
-                            discussionId = message.discussionId,
-                            onLongClick = {
-                                onAttachmentLongClick(attachment.fyleAndStatus)
-                                menuOpened = true
-                            },
-                            onIncompleteClick = {
-                                downloadAwareClick {}
-                            },
-                            contextMenu = {
-                                AttachmentContextMenu(
-                                    menuOpened = menuOpened,
-                                    message = message,
-                                    attachment = attachment,
-                                    visibility = VISIBLE,
-                                    readOnce = false,
-                                    multipleAttachment = false,
-                                    onDismiss = { menuOpened = false },
-                                )
-                            }
+                                .width(64.dp)
+                                .height(64.dp),
+                            painter = painterResource(id = R.drawable.ic_incognito),
+                            contentScale = ContentScale.Fit,
+                            contentDescription = null
                         )
-                    } else {
-                        var menuOpened by remember { mutableStateOf(false) }
-                        FyleListItem(
+                        EphemeralVisibilityExplanation(
                             modifier = Modifier
-                                .background(colorResource(id = R.color.almostWhite)),
-                            fyleAndStatus = attachment.fyleAndStatus,
-                            fileName = AnnotatedString(attachment.fyleMessageJoinWithStatus.fileName),
-                            onClick = {
-                                downloadAwareClick {
-                                    App.openFyleInExternalViewer(
-                                        context,
-                                        attachment.fyleAndStatus
-                                    ) {
-                                        openViewerCallback?.invoke()
-                                        attachment.fyleMessageJoinWithStatus.markAsOpened()
+                                .fillMaxWidth()
+                                .padding(start = 64.dp)
+                                .align(Alignment.Center),
+                            duration = expiration?.visibilityDuration,
+                            readOnce = readOnce
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)
+                                .then(if (openOnClick) {
+                                Modifier.clickable {
+                                    downloadAwareClick {
+                                        App.runThread(
+                                            InboundEphemeralMessageClicked(
+                                                attachment.fyleMessageJoinWithStatus.bytesOwnedIdentity,
+                                                attachment.fyleMessageJoinWithStatus.messageId
+                                            )
+                                        )
                                     }
                                 }
-                            },
-                            onLongClick = {
-                                onAttachmentLongClick(attachment.fyleAndStatus)
-                                menuOpened = true
-                            },
-                            contextMenu = {
-                                AttachmentContextMenu(
-                                    menuOpened = menuOpened,
-                                    message = message,
-                                    attachment = attachment,
-                                    visibility = VISIBLE,
-                                    readOnce = false,
-                                    multipleAttachment = false,
-                                    onDismiss = { menuOpened = false },
-                                )
-                            },
-                            previewBorder = false
+                            } else Modifier)
                         )
+                    } else {
+                        if (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith("audio/")) {
+                            var menuOpened by remember { mutableStateOf(false) }
+                            AudioListItem(
+                                modifier = Modifier
+                                    .background(color = colorResource(id = R.color.almostWhite)),
+                                fyleAndStatus = attachment.fyleAndStatus,
+                                activity = context as AppCompatActivity,
+                                audioAttachmentServiceBinding = audioAttachmentServiceBinding,
+                                discussionId = message.discussionId,
+                                onLongClick = {
+                                    onAttachmentLongClick(attachment.fyleAndStatus)
+                                    menuOpened = true
+                                },
+                                onIncompleteClick = {
+                                    downloadAwareClick {}
+                                },
+                                contextMenu = {
+                                    AttachmentContextMenu(
+                                        menuOpened = menuOpened,
+                                        message = message,
+                                        attachment = attachment,
+                                        visibility = Visibility.VISIBLE,
+                                        readOnce = false,
+                                        multipleAttachment = false,
+                                        onDismiss = { menuOpened = false },
+                                    )
+                                }
+                            )
+                        } else {
+                            var menuOpened by remember { mutableStateOf(false) }
+                            FyleListItem(
+                                modifier = Modifier
+                                    .background(colorResource(id = R.color.almostWhite)),
+                                fyleAndStatus = attachment.fyleAndStatus,
+                                fileName = discussionSearchViewModel?.highlight(
+                                    context,
+                                    AnnotatedString(attachment.fyleMessageJoinWithStatus.fileName)
+                                ) ?: AnnotatedString(attachment.fyleMessageJoinWithStatus.fileName),
+                                onClick = {
+                                    downloadAwareClick {
+                                        App.openFyleInExternalViewer(
+                                            context,
+                                            attachment.fyleAndStatus
+                                        ) {
+                                            openViewerCallback?.invoke()
+                                            attachment.fyleMessageJoinWithStatus.markAsOpened()
+                                        }
+                                    }
+                                },
+                                onLongClick = {
+                                    onAttachmentLongClick(attachment.fyleAndStatus)
+                                    menuOpened = true
+                                },
+                                contextMenu = {
+                                    AttachmentContextMenu(
+                                        menuOpened = menuOpened,
+                                        message = message,
+                                        attachment = attachment,
+                                        visibility = Visibility.VISIBLE,
+                                        readOnce = false,
+                                        multipleAttachment = false,
+                                        onDismiss = { menuOpened = false },
+                                    )
+                                },
+                                previewBorder = false
+                            )
+                        }
                     }
-
                     getProgressLabel(status = attachment.fyleMessageJoinWithStatus.status)?.let {
                         Text(
                             modifier = Modifier
@@ -908,7 +982,7 @@ fun AttachmentContextMenu(
             )
             .clip(RoundedCornerShape(8.dp)), expanded = menuOpened, onDismissRequest = onDismiss
     ) {
-        if (visibility == HIDDEN || readOnce) {
+        if (visibility == Visibility.HIDDEN || readOnce) {
             delete()
         } else if (attachment.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_DRAFT) {
             open()
@@ -1037,7 +1111,7 @@ fun AttachmentDownloadProgress(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-       if (speed != null || eta != null) {
+        if (speed != null || eta != null) {
             Column(
                 modifier = Modifier
                     .width((scale * 40).dp)
@@ -1127,107 +1201,6 @@ private fun AttachmentDownloadProgressPreview() {
                 large = false
             )
             AttachmentDownloadProgress(speed = null, eta = "12s", progress = 0f, large = false)
-        }
-    }
-}
-
-data class AttachmentDownloadData(val speed: Float?, val eta: Int?, val progress: Float)
-
-@Composable
-fun DownloadListener(
-    fyleAndStatus: Attachment,
-    upload: Boolean?,
-    onUpdate: (AttachmentDownloadData?) -> Unit
-) {
-    val downloadListener = remember {
-        object : EngineNotificationListener {
-            var registrationNumber: Long = 0
-            override fun callback(notificationName: String, userInfo: HashMap<String, Any>) {
-                var ownedIdentity: ByteArray? = null
-                var messageIdentifier: ByteArray? = null
-                var attachmentNumber: Int? = null
-                var speed: Float? = null
-                var eta: Int? = null
-                var progress: Float? = null
-                if (notificationName == EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS) {
-                    ownedIdentity =
-                        userInfo[EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_BYTES_OWNED_IDENTITY_KEY] as ByteArray?
-                    messageIdentifier =
-                        userInfo[EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY] as ByteArray?
-                    attachmentNumber =
-                        userInfo[EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY] as Int?
-                    speed =
-                        userInfo[EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_SPEED_BPS_KEY] as Float?
-                    eta =
-                        userInfo[EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_ETA_SECONDS_KEY] as Int?
-                    progress =
-                        userInfo[EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_PROGRESS_KEY] as Float?
-                } else if (notificationName == EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS) {
-                    ownedIdentity =
-                        userInfo[EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_BYTES_OWNED_IDENTITY_KEY] as ByteArray?
-                    messageIdentifier =
-                        userInfo[EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY] as ByteArray?
-                    attachmentNumber =
-                        userInfo[EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY] as Int?
-                    speed =
-                        userInfo[EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_SPEED_BPS_KEY] as Float?
-                    eta =
-                        userInfo[EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_ETA_SECONDS_KEY] as Int?
-                    progress =
-                        userInfo[EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_PROGRESS_KEY] as Float?
-                }
-                if (fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity.contentEquals(ownedIdentity)
-                    && fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier.contentEquals(messageIdentifier)
-                    && fyleAndStatus.fyleMessageJoinWithStatus.engineNumber == attachmentNumber
-                ) {
-                    onUpdate(
-                        AttachmentDownloadData(
-                            speed = speed,
-                            eta = eta,
-                            progress = progress ?: 0f
-                        )
-                    )
-                }
-            }
-
-            override fun setEngineNotificationListenerRegistrationNumber(registrationNumber: Long) {
-                this.registrationNumber = registrationNumber
-            }
-
-            override fun getEngineNotificationListenerRegistrationNumber(): Long {
-                return this.registrationNumber
-            }
-
-            override fun hasEngineNotificationListenerRegistrationNumber(): Boolean =
-                registrationNumber != 0L
-        }
-    }
-
-    DisposableEffect(upload) {
-        if (upload != null && downloadListener.hasEngineNotificationListenerRegistrationNumber()
-                .not()
-        ) {
-            onUpdate(null)
-            AppSingleton.getEngine().addNotificationListener(
-                if (upload == true) {
-                    EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS
-                } else {
-                    EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS
-                },
-                downloadListener
-            )
-        }
-        onDispose {
-            if (downloadListener.hasEngineNotificationListenerRegistrationNumber()) {
-                AppSingleton.getEngine().removeNotificationListener(
-                    if (upload == true) {
-                        EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS
-                    } else {
-                        EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS
-                    },
-                    downloadListener
-                )
-            }
         }
     }
 }

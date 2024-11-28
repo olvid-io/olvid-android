@@ -92,7 +92,6 @@ public class Group2 {
     @ColumnInfo(name = KEYCLOAK_MANAGED)
     public boolean keycloakManaged;
 
-
     @ColumnInfo(name = NAME)
     @Nullable
     public String name;

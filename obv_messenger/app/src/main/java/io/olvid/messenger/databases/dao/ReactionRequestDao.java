@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -33,13 +35,13 @@ import io.olvid.messenger.databases.entity.ReactionRequest;
 @Dao
 public interface ReactionRequestDao {
     @Insert
-    long insert(ReactionRequest reactionRequest);
+    long insert(@NonNull ReactionRequest reactionRequest);
 
     @Delete
-    void delete(ReactionRequest... reactionRequest);
+    void delete(@NonNull ReactionRequest... reactionRequest);
 
     @Update
-    void update(ReactionRequest reactionRequest);
+    void update(@NonNull ReactionRequest reactionRequest);
 
     @Query("SELECT * FROM " + ReactionRequest.TABLE_NAME +
             " WHERE " + ReactionRequest.DISCUSSION_ID + " = :discussionId " +
@@ -48,14 +50,14 @@ public interface ReactionRequestDao {
             " AND " + ReactionRequest.SENDER_SEQUENCE_NUMBER + " = :senderSequenceNumber " +
             " AND " + ReactionRequest.REACTER + " = :reacter " +
             " LIMIT 1 ")
-    ReactionRequest getBySenderSequenceNumberAndReacter(long senderSequenceNumber, UUID senderThreadIdentifier, byte[] senderIdentifier, long discussionId, byte[] reacter);
+    @Nullable ReactionRequest getBySenderSequenceNumberAndReacter(long senderSequenceNumber, @NonNull UUID senderThreadIdentifier, @NonNull byte[] senderIdentifier, long discussionId, @NonNull byte[] reacter);
 
     @Query("SELECT * FROM " + ReactionRequest.TABLE_NAME +
             " WHERE " + ReactionRequest.DISCUSSION_ID + " = :discussionId " +
             " AND " + ReactionRequest.SENDER_IDENTIFIER + " = :senderIdentifier " +
             " AND " + ReactionRequest.SENDER_THREAD_IDENTIFIER + " = :senderThreadIdentifier " +
             " AND " + ReactionRequest.SENDER_SEQUENCE_NUMBER + " = :senderSequenceNumber ")
-    List<ReactionRequest> getAllBySenderSequenceNumber(long senderSequenceNumber, UUID senderThreadIdentifier, byte[] senderIdentifier, long discussionId);
+    List<ReactionRequest> getAllBySenderSequenceNumber(long senderSequenceNumber, @NonNull UUID senderThreadIdentifier, @NonNull byte[] senderIdentifier, long discussionId);
 
     @Query("DELETE FROM " + ReactionRequest.TABLE_NAME + " WHERE " + ReactionRequest.SERVER_TIMESTAMP + " < :timestamp ")
     void deleteOlderThan(long timestamp);

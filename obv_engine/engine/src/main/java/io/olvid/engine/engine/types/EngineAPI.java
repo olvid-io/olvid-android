@@ -93,6 +93,7 @@ public interface EngineAPI {
     void setOwnedIdentityKeycloakSignatureKey(byte[] bytesOwnedIdentity, JsonWebKey signatureKey) throws Exception;
     ObvIdentity bindOwnedIdentityToKeycloak(byte[] bytesOwnedIdentity, ObvKeycloakState keycloakState, String keycloakUserId);
     void unbindOwnedIdentityFromKeycloak(byte[] bytesOwnedIdentity);
+    void updateKeycloakTransferRestrictedIfNeeded(byte[] bytesOwnedIdentity, String serverUrl, boolean transferRestricted);
     void updateKeycloakPushTopicsIfNeeded(byte[] bytesOwnedIdentity, String serverUrl, List<String> pushTopics);
     void updateKeycloakRevocationList(byte[] bytesOwnedIdentity, long latestRevocationListTimestamp, List<String> signedRevocations);
     void setOwnedIdentityKeycloakSelfRevocationTestNonce(byte[] bytesOwnedIdentity, String serverUrl, String nonce);

@@ -1438,8 +1438,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
             if (triggerDeviceDiscovery) {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                        new UID(getPrng()),
-                        false);
+                        new UID(getPrng()));
                 ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }

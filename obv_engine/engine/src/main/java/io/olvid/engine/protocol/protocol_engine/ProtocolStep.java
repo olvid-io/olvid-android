@@ -108,7 +108,7 @@ public abstract class ProtocolStep extends Operation {
     public abstract ConcreteProtocolState executeStep() throws Exception;
 
     public CoreProtocolMessage buildCoreProtocolMessage(SendChannelInfo sendChannelInfo) {
-        return new CoreProtocolMessage(sendChannelInfo, getProtocolId(), getProtocolInstanceUid(), false);
+        return new CoreProtocolMessage(sendChannelInfo, getProtocolId(), getProtocolInstanceUid());
     }
 
 }

@@ -33,12 +33,18 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.io.File;
@@ -65,6 +71,7 @@ public class SelectDetailsPhotoActivity extends LockableActivity implements View
 
     private final Matrix currentMatrix = new Matrix();
     private RectF overlayRect = new RectF();
+    private RectF insetsRect = new RectF();
 
     private final PointF startPoint = new PointF();
     private final PointF bitmapMiddlePoint = new PointF();
@@ -90,7 +97,21 @@ public class SelectDetailsPhotoActivity extends LockableActivity implements View
         viewModel = new ViewModelProvider(this).get(SelectDetailsPhotoViewModel.class);
 
         setContentView(R.layout.activity_select_details_photo);
-
+        Window window = getWindow();
+        if (window != null) {
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+            WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightNavigationBars(false);
+            WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightStatusBars(false);
+        }
+        ConstraintLayout root = findViewById(R.id.root_constraint_layout);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (view, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime() | WindowInsetsCompat.Type.displayCutout());
+                insetsRect = new RectF(insets.left, insets.top, insets.right, insets.bottom);
+                root.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                return WindowInsetsCompat.CONSUMED;
+            });
+        }
         viewModel.getPhotoBitmap().observe(this, this::resetImage);
 
         photoImageView = findViewById(R.id.photo_image_view);
@@ -114,7 +135,7 @@ public class SelectDetailsPhotoActivity extends LockableActivity implements View
         saturationSeekBar.setOnSeekBarChangeListener(this);
         ImageView overlay = findViewById(R.id.overlay_image_view);
         overlay.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-            overlayRect = new RectF(left, top, right, bottom);
+            overlayRect = new RectF(left - insetsRect.left, top - insetsRect.top, right - insetsRect.left, bottom - insetsRect.top);
             fitBitmapZoneToOverlay();
         });
 

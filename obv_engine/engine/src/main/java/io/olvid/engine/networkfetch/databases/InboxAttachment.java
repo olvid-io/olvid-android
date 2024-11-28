@@ -536,6 +536,26 @@ public class InboxAttachment implements ObvDatabase {
         }
     }
 
+    public static InboxAttachment[] getAllPartialAttachmentsNotToResume(FetchManagerSession fetchManagerSession) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+                "SELECT * FROM " + TABLE_NAME +
+                        " WHERE " + DOWNLOAD_REQUESTED + " = 0 " +
+                        " AND " + KEY + " NOT NULL " +
+                        " AND " + RECEIVED_LENGTH + " < " + EXPECTED_LENGTH  +
+                        " AND " + RECEIVED_LENGTH + " > 0 " +
+                        " AND " + MARKED_FOR_DELETION + " = 0;")) {
+            try (ResultSet res = statement.executeQuery()) {
+                List<InboxAttachment> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new InboxAttachment(fetchManagerSession, res));
+                }
+                return list.toArray(new InboxAttachment[0]);
+            }
+        } catch (SQLException e) {
+            return new InboxAttachment[0];
+        }
+    }
+
     // endregion
 
     // region database

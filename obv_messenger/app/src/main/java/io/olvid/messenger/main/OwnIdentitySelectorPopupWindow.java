@@ -148,7 +148,7 @@ public class OwnIdentitySelectorPopupWindow {
 
         final View separator = popupView.findViewById(R.id.separator);
         separatorObserver = (List<OwnedIdentityDao.OwnedIdentityAndUnreadMessageCount> ownedIdentityAndUnreadMessageCounts) -> {
-            if (ownedIdentityAndUnreadMessageCounts == null || ownedIdentityAndUnreadMessageCounts.size() == 0) {
+            if (ownedIdentityAndUnreadMessageCounts == null || ownedIdentityAndUnreadMessageCounts.isEmpty()) {
                 separator.setVisibility(View.GONE);
             } else {
                 separator.setVisibility(View.VISIBLE);

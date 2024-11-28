@@ -19,12 +19,19 @@
 
 package io.olvid.messenger;
 
+import android.util.Pair;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import io.olvid.engine.datatypes.EtaEstimator;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
@@ -110,6 +117,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                     break;
                 }
                 try {
+                    clearFyleAndMessageIdFromEngineIdentifier(downloadedAttachment.getBytesOwnedIdentity(), downloadedAttachment.getMessageIdentifier(), downloadedAttachment.getNumber());
                     FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(downloadedAttachment.getBytesOwnedIdentity(), downloadedAttachment.getMessageIdentifier(), downloadedAttachment.getNumber());
                     if (fyleMessageJoinWithStatus != null) {
                         final Fyle fyle = db.fyleDao().getById(fyleMessageJoinWithStatus.fyleId);
@@ -141,7 +149,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
 
                                 // mark the corresponding FyleMessageJoinWithStatus as complete too
                                 fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                                fyleMessageJoinWithStatus.progress = 1;
+                                FyleProgressSingleton.INSTANCE.finishProgress(fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.messageId);
                                 //noinspection ConstantConditions
                                 fyleMessageJoinWithStatus.filePath = fyle.filePath;
                                 db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
@@ -162,12 +170,15 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                                         case FyleMessageJoinWithStatus.STATUS_DOWNLOADING:
                                         case FyleMessageJoinWithStatus.STATUS_FAILED:
                                             otherFyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                                            otherFyleMessageJoinWithStatus.progress = 1;
+                                            FyleProgressSingleton.INSTANCE.finishProgress(otherFyleMessageJoinWithStatus.fyleId, otherFyleMessageJoinWithStatus.messageId);
                                             otherFyleMessageJoinWithStatus.filePath = fyleMessageJoinWithStatus.filePath;
                                             otherFyleMessageJoinWithStatus.size = fyleMessageJoinWithStatus.size;
                                             db.fyleMessageJoinWithStatusDao().update(otherFyleMessageJoinWithStatus);
                                             otherFyleMessageJoinWithStatus.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);
-                                            engine.markAttachmentForDeletion(otherFyleMessageJoinWithStatus.bytesOwnedIdentity, otherFyleMessageJoinWithStatus.engineMessageIdentifier, otherFyleMessageJoinWithStatus.engineNumber);
+                                            if (otherFyleMessageJoinWithStatus.engineNumber != null) {
+                                                engine.markAttachmentForDeletion(otherFyleMessageJoinWithStatus.bytesOwnedIdentity, otherFyleMessageJoinWithStatus.engineMessageIdentifier,
+                                                        otherFyleMessageJoinWithStatus.engineNumber);
+                                            }
                                             App.runThread(() -> {
                                                 try {
                                                     otherFyleMessageJoinWithStatus.computeTextContentForFullTextSearch(db, fyle);
@@ -194,15 +205,15 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 byte[] messageIdentifier = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY);
                 Integer attachmentNumber = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY);
                 Float progress = (Float) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_PROGRESS_KEY);
-//                Float speed = (Float) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_SPEED_BPS_KEY);
-//                Integer eta = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_ETA_SECONDS_KEY);
-                if (attachmentNumber == null || progress == null) {
+                Float speed = (Float) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_SPEED_BPS_KEY);
+                Integer eta = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_PROGRESS_ETA_SECONDS_KEY);
+                if (bytesOwnedIdentity == null || messageIdentifier == null || attachmentNumber == null || progress == null) {
                     break;
                 }
-                FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, messageIdentifier, attachmentNumber);
-                if (fyleMessageJoinWithStatus != null) {
-                    fyleMessageJoinWithStatus.setProgress(progress);
-                    db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
+                Pair<Long, Long> ids = getFyleAndMessageIdFromEngineIdentifier(bytesOwnedIdentity, messageIdentifier, attachmentNumber);
+                if (ids != null) {
+                    EtaEstimator.SpeedAndEta speedAndEta = (speed != null && eta != null) ? new EtaEstimator.SpeedAndEta(speed, eta) : null;
+                    FyleProgressSingleton.INSTANCE.updateProgress(ids.first, ids.second, progress, speedAndEta);
                 }
                 break;
             }
@@ -210,10 +221,12 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_FAILED_BYTES_OWNED_IDENTITY_KEY);
                 byte[] engineMessageIdentifier = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_FAILED_MESSAGE_IDENTIFIER_KEY);
                 Integer engineNumber = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_DOWNLOAD_FAILED_ATTACHMENT_NUMBER_KEY);
-                if ((engineMessageIdentifier != null) && (engineNumber != null)) {
+                if (bytesOwnedIdentity != null && engineMessageIdentifier != null && engineNumber != null) {
+                    clearFyleAndMessageIdFromEngineIdentifier(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
                     FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
                     if (fyleMessageJoinWithStatus != null) {
                         fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_FAILED;
+                        FyleProgressSingleton.INSTANCE.finishProgress(fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.messageId);
                         db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                     }
                 }
@@ -223,11 +236,13 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOADED_BYTES_OWNED_IDENTITY_KEY);
                 byte[] engineMessageIdentifier = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOADED_MESSAGE_IDENTIFIER_KEY);
                 Integer engineNumber = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOADED_ATTACHMENT_NUMBER_KEY);
-                if ((engineMessageIdentifier != null) && (engineNumber != null)) {
+                if (bytesOwnedIdentity != null && engineMessageIdentifier != null && engineNumber != null) {
                     db.runInTransaction(() -> {
+                        clearFyleAndMessageIdFromEngineIdentifier(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
                         FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
                         if (fyleMessageJoinWithStatus != null) {
                             fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
+                            FyleProgressSingleton.INSTANCE.finishProgress(fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.messageId);
                             db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                         }
 
@@ -272,15 +287,15 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 byte[] messageIdentifier = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_MESSAGE_IDENTIFIER_KEY);
                 Integer attachmentNumber = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_ATTACHMENT_NUMBER_KEY);
                 Float progress = (Float) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_PROGRESS_KEY);
-//                Float speed = (Float) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_SPEED_BPS_KEY);
-//                Integer eta = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_ETA_SECONDS_KEY);
-                if (attachmentNumber == null || progress == null) {
+                Float speed = (Float) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_SPEED_BPS_KEY);
+                Integer eta = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_PROGRESS_ETA_SECONDS_KEY);
+                if (bytesOwnedIdentity == null || messageIdentifier == null || attachmentNumber == null || progress == null) {
                     break;
                 }
-                FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, messageIdentifier, attachmentNumber);
-                if (fyleMessageJoinWithStatus != null) {
-                    fyleMessageJoinWithStatus.setProgress(progress);
-                    db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
+                Pair<Long, Long> ids = getFyleAndMessageIdFromEngineIdentifier(bytesOwnedIdentity, messageIdentifier, attachmentNumber);
+                if (ids != null) {
+                    EtaEstimator.SpeedAndEta speedAndEta = (speed != null && eta != null) ? new EtaEstimator.SpeedAndEta(speed, eta) : null;
+                    FyleProgressSingleton.INSTANCE.updateProgress(ids.first, ids.second, progress, speedAndEta);
                 }
                 break;
             }
@@ -289,11 +304,13 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_BYTES_OWNED_IDENTITY_KEY);
                 byte[] engineMessageIdentifier = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_MESSAGE_IDENTIFIER_KEY);
                 Integer engineNumber = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_ATTACHMENT_NUMBER_KEY);
-                if ((engineMessageIdentifier != null) && (engineNumber != null)) {
+                if (bytesOwnedIdentity != null && engineMessageIdentifier != null && engineNumber != null) {
                     db.runInTransaction(() -> {
+                        clearFyleAndMessageIdFromEngineIdentifier(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
                         FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
                         if (fyleMessageJoinWithStatus != null) {
                             fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
+                            FyleProgressSingleton.INSTANCE.finishProgress(fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.messageId);
                             db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                         }
 
@@ -400,9 +417,54 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 }
                 break;
             }
-
-
         }
+    }
+
+    private static class FyleEngineIdentifier {
+        @NonNull private final byte[] bytesOwnedIdentity;
+        @NonNull private final byte[] engineMessageIdentifier;
+        private final int engineNumber;
+
+        public FyleEngineIdentifier(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] engineMessageIdentifier, int engineNumber) {
+            this.bytesOwnedIdentity = bytesOwnedIdentity;
+            this.engineMessageIdentifier = engineMessageIdentifier;
+            this.engineNumber = engineNumber;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof FyleEngineIdentifier)) return false;
+            FyleEngineIdentifier that = (FyleEngineIdentifier) o;
+            return engineNumber == that.engineNumber && Arrays.equals(bytesOwnedIdentity, that.bytesOwnedIdentity) && Arrays.equals(engineMessageIdentifier, that.engineMessageIdentifier);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(Arrays.hashCode(bytesOwnedIdentity), Arrays.hashCode(engineMessageIdentifier), engineNumber);
+        }
+    }
+
+    private final HashMap<FyleEngineIdentifier, Pair<Long, Long>> fyleAndMessageIdCache = new HashMap<>();
+
+    private void clearFyleAndMessageIdFromEngineIdentifier(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] engineMessageIdentifier, int engineNumber) {
+        fyleAndMessageIdCache.remove(new FyleEngineIdentifier(bytesOwnedIdentity, engineMessageIdentifier, engineNumber));
+    }
+
+    @Nullable
+    private Pair<Long, Long> getFyleAndMessageIdFromEngineIdentifier(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] engineMessageIdentifier, int engineNumber) {
+        FyleEngineIdentifier fyleEngineIdentifier = new FyleEngineIdentifier(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
+        Pair<Long, Long> ids = fyleAndMessageIdCache.get(fyleEngineIdentifier);
+        if (ids != null) {
+            return ids;
+        }
+        FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
+        if (fyleMessageJoinWithStatus != null) {
+            ids = new Pair<>(fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.messageId);
+            fyleAndMessageIdCache.put(fyleEngineIdentifier, ids);
+            return ids;
+        }
+        return null;
     }
 
 

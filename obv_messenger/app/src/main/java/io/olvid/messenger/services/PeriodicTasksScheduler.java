@@ -49,6 +49,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.AppDatabaseOpenCallback;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
@@ -79,8 +80,13 @@ public class PeriodicTasksScheduler {
 
     public static final String IMAGE_AND_VIDEO_RESOLUTION_WORK_NAME = "image_resolution";
     public static final int IMAGE_AND_VIDEO_RESOLUTION_INTERVAL_IN_HOURS = 2;
+
     public static final String ATTACHMENT_TEXT_EXTRACTOR_WORK_NAME = "attachment_text_extractor";
     public static final int ATTACHMENT_TEXT_EXTRACTOR_INTERVAL_IN_HOURS = 2;
+
+    public static final String ENGINE_AND_APP_SYNCHRONISATION_WORK_NAME = "engine_and_app_synchronisation";
+    public static final int ENGINE_AND_APP_SYNCHRONISATION_INTERVAL_IN_HOURS = 6;
+
 
     public static void schedulePeriodicTasks(Context context) {
         try {
@@ -134,6 +140,13 @@ public class PeriodicTasksScheduler {
                             .setConstraints(AttachmentTextExtractorWorker.getConstraints())
                             .build();
             workManager.enqueueUniquePeriodicWork(ATTACHMENT_TEXT_EXTRACTOR_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, attachmentTextExtractorWorkRequest);
+
+            PeriodicWorkRequest engineAndAppSynchronizationWorkRequest =
+                    new PeriodicWorkRequest.Builder(EngineAndAppSynchronizationWorker.class, ENGINE_AND_APP_SYNCHRONISATION_INTERVAL_IN_HOURS, TimeUnit.HOURS)
+                            .setInitialDelay(ENGINE_AND_APP_SYNCHRONISATION_INTERVAL_IN_HOURS, TimeUnit.HOURS)
+                            .setConstraints(EngineAndAppSynchronizationWorker.getConstraints())
+                            .build();
+            workManager.enqueueUniquePeriodicWork(ENGINE_AND_APP_SYNCHRONISATION_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, engineAndAppSynchronizationWorkRequest);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -150,6 +163,7 @@ public class PeriodicTasksScheduler {
             workManager.cancelUniqueWork(REMOTE_DELETE_AND_EDIT_CLEANUP_WORK_NAME);
             workManager.cancelUniqueWork(IMAGE_AND_VIDEO_RESOLUTION_WORK_NAME);
             workManager.cancelUniqueWork(ATTACHMENT_TEXT_EXTRACTOR_WORK_NAME);
+            workManager.cancelUniqueWork(ENGINE_AND_APP_SYNCHRONISATION_WORK_NAME);
 
             schedulePeriodicTasks(context);
         } catch (Exception e) {
@@ -451,6 +465,7 @@ public class PeriodicTasksScheduler {
         }
 
     }
+
     public static class AttachmentTextExtractorWorker extends Worker {
         public AttachmentTextExtractorWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
             super(context, workerParams);
@@ -486,4 +501,32 @@ public class PeriodicTasksScheduler {
 
     }
 
+
+    public static class EngineAndAppSynchronizationWorker extends Worker {
+        public EngineAndAppSynchronizationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+            super(context, workerParams);
+        }
+
+        private static Constraints getConstraints() {
+            Constraints.Builder builder = new Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                    .setRequiresBatteryNotLow(true);
+            return builder.build();
+        }
+
+        @NonNull
+        @Override
+        public Result doWork() {
+            try {
+                logPeriodicTaskRun(getApplicationContext(), getClass());
+
+                AppDatabaseOpenCallback.syncEngineDatabases(AppSingleton.getEngine(), AppDatabase.getInstance());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return Result.failure();
+            }
+            return Result.success();
+        }
+
+    }
 }

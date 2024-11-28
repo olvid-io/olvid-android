@@ -102,7 +102,6 @@ public class Group {
     @NonNull
     public String groupMembersNames;
 
-
     @ColumnInfo(name = CUSTOM_PHOTO_URL)
     @Nullable
     public String customPhotoUrl;
@@ -179,9 +178,7 @@ public class Group {
         if (personalNote != null) {
             suffix += " " + personalNote;
         }
-        if (name != null) {
-            suffix += " " + name;
-        }
+        suffix += " " + name;
         return StringUtils.unAccent(String.join(" ", membersFullSearch) + suffix);
     }
 }

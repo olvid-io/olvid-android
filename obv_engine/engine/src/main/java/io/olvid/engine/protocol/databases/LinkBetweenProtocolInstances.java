@@ -244,6 +244,7 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
                 parentProtocolInstance.getUid(),
                 linkBetweenProtocolInstances.messageToSendId,
                 inputs,
+                false,
                 false);
     }
 

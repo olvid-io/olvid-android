@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -36,10 +38,10 @@ import io.olvid.messenger.databases.entity.Group;
 @Dao
 public interface ContactGroupJoinDao {
     @Insert
-    void insert(ContactGroupJoin contactGroupJoin);
+    void insert(@NonNull ContactGroupJoin contactGroupJoin);
 
     @Delete
-    void delete(ContactGroupJoin contactGroupJoin);
+    void delete(@NonNull ContactGroupJoin contactGroupJoin);
 
 
     @Query("SELECT contact.* FROM " + Contact.TABLE_NAME + " AS contact " +
@@ -48,7 +50,7 @@ public interface ContactGroupJoinDao {
             " AND contact." + Contact.BYTES_OWNED_IDENTITY + " = CGjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY +
             " WHERE CGjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND CGjoin." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :groupOwnerAndUid")
-    List<Contact> getGroupContactsSync(final byte[] bytesOwnedIdentity, final byte[] groupOwnerAndUid);
+    List<Contact> getGroupContactsSync(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] groupOwnerAndUid);
 
     @Query("SELECT contact.* FROM " + Contact.TABLE_NAME + " AS contact " +
             " INNER JOIN " + ContactGroupJoin.TABLE_NAME + " AS CGjoin " +
@@ -57,7 +59,7 @@ public interface ContactGroupJoinDao {
             " WHERE CGjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND CGjoin." + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :groupOwnerAndUid " +
             " ORDER BY contact." + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getGroupContacts(final byte[] bytesOwnedIdentity, final byte[] groupOwnerAndUid);
+    LiveData<List<Contact>> getGroupContacts(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] groupOwnerAndUid);
 
     @Query("SELECT * FROM (SELECT contact.* FROM " + Contact.TABLE_NAME + " AS contact " +
             " INNER JOIN " + ContactGroupJoin.TABLE_NAME + " AS CGjoin " +
@@ -73,7 +75,7 @@ public interface ContactGroupJoinDao {
             " AND (contact." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
             " OR contact." + Contact.PRE_KEY_COUNT + " > 0)) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getGroupContactsAndMore(final byte[] bytesOwnedIdentity, final byte[] groupOwnerAndUid, final List<byte[]> bytesContactIdentities);
+    LiveData<List<Contact>> getGroupContactsAndMore(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] groupOwnerAndUid, @NonNull List<byte[]> bytesContactIdentities);
 
     @Query("SELECT contact.*, CDJoin." + ContactGroupJoin.TIMESTAMP + " AS timestamp FROM " + Contact.TABLE_NAME + " AS contact " +
             " INNER JOIN " + ContactGroupJoin.TABLE_NAME + " AS CDjoin " +
@@ -86,18 +88,18 @@ public interface ContactGroupJoinDao {
             " AND CDjoin." + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity" +
             " ORDER BY (groop." + Group.BYTES_GROUP_OWNER_IDENTITY + " = contact." + Contact.BYTES_CONTACT_IDENTITY + ") DESC, " +
             " contact." + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<ContactAndTimestamp>> getGroupContactsWithTimestamp(final byte[] bytesOwnedIdentity, final byte[] groupOwnerAndUid);
+    LiveData<List<ContactAndTimestamp>> getGroupContactsWithTimestamp(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] groupOwnerAndUid);
 
     @Query("SELECT * FROM " + ContactGroupJoin.TABLE_NAME + " WHERE " +
             ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid AND " +
             ContactGroupJoin.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity AND " +
             ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    ContactGroupJoin get(byte[] bytesGroupOwnerAndUid, byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    @Nullable ContactGroupJoin get(@NonNull byte[] bytesGroupOwnerAndUid, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT COUNT(*) FROM " + ContactGroupJoin.TABLE_NAME +
             " WHERE " + ContactGroupJoin.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND " + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    int countContactGroups(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    int countContactGroups(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT disc.id FROM " + Discussion.TABLE_NAME + " AS disc " +
             " INNER JOIN " + Group.TABLE_NAME + " AS g " +
@@ -110,18 +112,18 @@ public interface ContactGroupJoinDao {
             " WHERE g." + Group.BYTES_GROUP_OWNER_IDENTITY + " IS NULL " +
             " AND cgj." + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND cgj." + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    List<Long> getAllOwnedGroupDiscussionIdsWithSpecificContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    List<Long> getAllOwnedGroupDiscussionIdsWithSpecificContact(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT EXISTS (SELECT 1 FROM " + ContactGroupJoin.TABLE_NAME +
             " WHERE " + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + ContactGroupJoin.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND " + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid)")
-    boolean isGroupMember(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, byte[] bytesGroupOwnerAndUid);
+    boolean isGroupMember(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 
     @Query("SELECT EXISTS (SELECT 1 FROM " + ContactGroupJoin.TABLE_NAME +
             " WHERE " + ContactGroupJoin.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + ContactGroupJoin.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid )")
-    boolean groupHasMembers(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    boolean groupHasMembers(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 
     class ContactAndTimestamp {
         @Embedded

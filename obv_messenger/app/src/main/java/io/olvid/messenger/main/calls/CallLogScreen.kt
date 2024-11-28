@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -110,9 +111,9 @@ fun CallLogScreen(
                     }
                 }
             }
-            FloatingActionButton(modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 80.dp, end = 16.dp),
+            FloatingActionButton(
+                modifier = Modifier.align(Alignment.BottomEnd)
+                    .padding(bottom = 72.dp, end = 16.dp),
                 onClick = onNewCallClick
             ) {
                 Image(painter = painterResource(id = R.drawable.ic_phone), contentDescription = stringResource(

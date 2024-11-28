@@ -131,7 +131,8 @@ class MessageLongPressPopUp(
     private val parentView: View,
     private val clickX: Int,
     private val clickY: Int,
-    private val messageId: Long
+    private val messageId: Long,
+    private val statusBarTopPadding: Int
 ) {
     private val vibrator: Vibrator? =
         activity.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
@@ -174,7 +175,7 @@ class MessageLongPressPopUp(
                 messageId
             )
             this.previousReaction = reaction?.emoji
-            activity.runOnUiThread { this.buildPopupWindow() }
+            activity.runOnUiThread { this.buildPopupWindow(statusBarTopPadding) }
         }
     }
 
@@ -481,7 +482,7 @@ class MessageLongPressPopUp(
     }
 
     @SuppressLint("InflateParams")
-    private fun buildPopupWindow() {
+    private fun buildPopupWindow(statusBarTopPadding: Int) {
         vibrator?.vibrate(20)
 
         wrappedContext = ContextThemeWrapper(activity, R.style.SubtleBlueRipple)
@@ -721,12 +722,12 @@ class MessageLongPressPopUp(
             layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
             layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
             layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-            reactionConstraintLayout?.setLayoutTransition(layoutTransition)
+            reactionConstraintLayout?.layoutTransition = layoutTransition
 
             val plusLayout = LayoutParams(viewSizePx, viewSizePx)
             plusLayout.bottomToBottom = LayoutParams.PARENT_ID
             plusLayout.endToEnd = LayoutParams.PARENT_ID
-            plusButton?.setLayoutParams(plusLayout)
+            plusButton?.layoutParams = plusLayout
 
             plusButton?.setPadding(viewSizePx / 8, viewSizePx / 8, viewSizePx / 8, viewSizePx / 8)
             plusButton?.setOnClickListener {
@@ -738,7 +739,7 @@ class MessageLongPressPopUp(
         fillReactions()
 
         popupWindow!!.width = parentView.width
-        popupWindow!!.height = parentView.height
+        popupWindow!!.height = parentView.height - statusBarTopPadding
         if (VERSION.SDK_INT < VERSION_CODES.LOLLIPOP_MR1) {
             val pos = IntArray(2)
             parentView.getLocationOnScreen(pos)
@@ -787,7 +788,7 @@ class MessageLongPressPopUp(
     }
 
     private fun fillReactions() {
-        val reactions = SettingsActivity.getPreferredReactions()
+        val reactions = SettingsActivity.preferredReactions
         if (previousReaction != null && !reactions.contains(previousReaction)) {
             reactions.add(previousReaction!!)
         }
@@ -988,13 +989,13 @@ class MessageLongPressPopUp(
     }
 
     private fun togglePreferred(emoji: String) {
-        val preferredReactions = SettingsActivity.getPreferredReactions()
+        val preferredReactions = SettingsActivity.preferredReactions
         if (preferredReactions.contains(emoji)) {
             preferredReactions.remove(emoji)
         } else {
             preferredReactions.add(emoji)
         }
-        SettingsActivity.setPreferredReactions(preferredReactions)
+        SettingsActivity.preferredReactions = preferredReactions
         fillReactions()
     }
 

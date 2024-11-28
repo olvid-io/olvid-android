@@ -93,8 +93,9 @@ fun NavGraphBuilder.activeDeviceSelection(
         popEnterTransition = { slideIntoContainer(SlideDirection.End) },
         popExitTransition = { slideOutOfContainer(SlideDirection.End) },
     ) {
-        val dbDevices = AppDatabase.getInstance().ownedDeviceDao()
-            .getAllSorted(AppSingleton.getBytesCurrentIdentity()).observeAsState()
+        val dbDevices = AppSingleton.getBytesCurrentIdentity()?.let {
+            AppDatabase.getInstance().ownedDeviceDao().getAllSorted(it)
+        }?.observeAsState()
         var loading by remember { mutableStateOf(true) }
         var deviceList: ObvDeviceList? by remember { mutableStateOf(null) }
         val context = LocalContext.current
@@ -221,7 +222,7 @@ fun NavGraphBuilder.activeDeviceSelection(
                                 )
                             )
                             val deviceStatus =
-                                if (device.uid.contentEquals(dbDevices.value?.first { it.currentDevice }?.bytesDeviceUid))
+                                if (device.uid.contentEquals(dbDevices?.value?.first { it.currentDevice }?.bytesDeviceUid))
                                     stringResource(id = R.string.text_this_device)
                                 else if (device.uid == null)
                                     stringResource(id = R.string.text_new_device)

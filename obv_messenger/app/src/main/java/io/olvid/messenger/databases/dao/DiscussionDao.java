@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.ColumnInfo;
@@ -46,34 +47,34 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 @Dao
 public abstract class DiscussionDao {
     @Insert
-    public abstract long insert(Discussion discussion);
+    public abstract long insert(@NonNull Discussion discussion);
 
     @Delete
-    public abstract void delete(Discussion discussion);
+    public abstract void delete(@NonNull Discussion discussion);
 
     @Update
-    public abstract void updateAll(Discussion discussion);
+    public abstract void updateAll(@NonNull Discussion discussion);
 
     @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.KEYCLOAK_MANAGED + " = :keycloakManaged " +
             " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_CONTACT +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesContactIdentity")
-    public abstract void updateKeycloakManaged(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean keycloakManaged);
+    public abstract void updateKeycloakManaged(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, boolean keycloakManaged);
 
     @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.ACTIVE + " = :active " +
             " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity "+
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_CONTACT +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesContactIdentity")
-    public abstract void updateActive(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean active);
+    public abstract void updateActive(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, boolean active);
 
     @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.TRUST_LEVEL + " = :trustLevel " +
             " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_CONTACT +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesContactIdentity")
-    public abstract void updateTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, int trustLevel);
+    public abstract void updateTrustLevel(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, int trustLevel);
 
     @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.LAST_MESSAGE_TIMESTAMP + " = :lastMessageTimestamp " +
@@ -99,7 +100,7 @@ public abstract class DiscussionDao {
             " SET " + Discussion.TITLE + " = :title, " +
             Discussion.PHOTO_URL + " = :photoUrl " +
             " WHERE id = :discussionId ")
-    public abstract void updateTitleAndPhotoUrl(long discussionId, String title, String photoUrl);
+    public abstract void updateTitleAndPhotoUrl(long discussionId, @Nullable String title, @Nullable String photoUrl);
 
     @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.STATUS + " = " + Discussion.STATUS_LOCKED + ", " +
@@ -187,7 +188,7 @@ public abstract class DiscussionDao {
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " != 0 " +
             " ORDER BY " + PINNED_ORDER + ", disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC" )
-    public abstract LiveData<List<DiscussionAndLastMessage>> getNonDeletedDiscussionAndLastMessages(byte[] bytesOwnedIdentity);
+    public abstract LiveData<List<DiscussionAndLastMessage>> getNonDeletedDiscussionAndLastMessages(@NonNull byte[] bytesOwnedIdentity);
 
     @Transaction
     @Query("SELECT " +
@@ -231,11 +232,11 @@ public abstract class DiscussionDao {
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND disc." + Discussion.STATUS + " != " + Discussion.STATUS_PRE_DISCUSSION +
             " ORDER BY " + PINNED_ORDER + ", disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC" )
-    public abstract LiveData<List<DiscussionAndLastMessage>> getAllDiscussionsAndLastMessagesForWebClient(byte[] bytesOwnedIdentity);
+    public abstract LiveData<List<DiscussionAndLastMessage>> getAllDiscussionsAndLastMessagesForWebClient(@NonNull byte[] bytesOwnedIdentity);
 
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME + " WHERE id = :discussionId")
-    public abstract Discussion getById(long discussionId);
+    @Nullable public abstract Discussion getById(long discussionId);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME + " WHERE id = :discussionId")
     public abstract LiveData<Discussion> getByIdAsync(long discussionId);
@@ -245,62 +246,62 @@ public abstract class DiscussionDao {
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_CONTACT +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesContactIdentity " +
             " AND " + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL)
-    public abstract Discussion getByContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    @Nullable public abstract Discussion getByContact(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_CONTACT +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesContactIdentity " +
             " AND " + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL)
-    public abstract LiveData<Discussion> getByContactLiveData(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    public abstract LiveData<Discussion> getByContactLiveData(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_CONTACT +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesContactIdentity ")
-    public abstract Discussion getByContactWithAnyStatus(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    @Nullable public abstract Discussion getByContactWithAnyStatus(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE "  + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes" +
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesGroupOwnerAndUid " +
             " AND " + Discussion.STATUS + " IN (" + Discussion.STATUS_NORMAL + "," + Discussion.STATUS_READ_ONLY + ")")
-    public abstract Discussion getByGroupOwnerAndUid(byte[] ownedIdentityBytes, byte[] bytesGroupOwnerAndUid);
+    @Nullable public abstract Discussion getByGroupOwnerAndUid(@NonNull byte[] ownedIdentityBytes, @NonNull byte[] bytesGroupOwnerAndUid);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE "  + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes" +
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesGroupOwnerAndUid ")
-    public abstract Discussion getByGroupOwnerAndUidWithAnyStatus(byte[] ownedIdentityBytes, byte[] bytesGroupOwnerAndUid);
+    @Nullable public abstract Discussion getByGroupOwnerAndUidWithAnyStatus(@NonNull byte[] ownedIdentityBytes, @NonNull byte[] bytesGroupOwnerAndUid);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE "  + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes" +
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesGroupIdentifier " +
             " AND " + Discussion.STATUS + " IN (" + Discussion.STATUS_NORMAL + "," + Discussion.STATUS_READ_ONLY + ")")
-    public abstract Discussion getByGroupIdentifier(byte[] ownedIdentityBytes, byte[] bytesGroupIdentifier);
+    @Nullable public abstract Discussion getByGroupIdentifier(@NonNull byte[] ownedIdentityBytes, @NonNull byte[] bytesGroupIdentifier);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE "  + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes" +
             " AND " + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesGroupIdentifier ")
-    public abstract Discussion getByGroupIdentifierWithAnyStatus(byte[] ownedIdentityBytes, byte[] bytesGroupIdentifier);
+    @Nullable public abstract Discussion getByGroupIdentifierWithAnyStatus(@NonNull byte[] ownedIdentityBytes, @NonNull byte[] bytesGroupIdentifier);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE "  + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes" +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesGroupOwnerAndUidOrIdentifier " +
             " AND " + Discussion.STATUS + " IN (" + Discussion.STATUS_NORMAL + "," + Discussion.STATUS_READ_ONLY + ")")
-    public abstract Discussion getByGroupOwnerAndUidOrIdentifier(byte[] ownedIdentityBytes, byte[] bytesGroupOwnerAndUidOrIdentifier);
+    @Nullable public abstract Discussion getByGroupOwnerAndUidOrIdentifier(@NonNull byte[] ownedIdentityBytes, @NonNull byte[] bytesGroupOwnerAndUidOrIdentifier);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE "  + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes" +
             " AND " + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesGroupOwnerAndUidOrIdentifier " +
             " AND " + Discussion.STATUS + " IN (" + Discussion.STATUS_NORMAL + "," + Discussion.STATUS_READ_ONLY + ")")
-    public abstract LiveData<Discussion> getByGroupOwnerAndUidOrIdentifierLiveData(byte[] ownedIdentityBytes, byte[] bytesGroupOwnerAndUidOrIdentifier);
+    public abstract LiveData<Discussion> getByGroupOwnerAndUidOrIdentifierLiveData(@NonNull byte[] ownedIdentityBytes, @NonNull byte[] bytesGroupOwnerAndUidOrIdentifier);
 
 
     @Query("SELECT " + Discussion.BYTES_OWNED_IDENTITY + " FROM " + Discussion.TABLE_NAME + "  WHERE id = :discussionId")
-    public abstract byte[] getBytesOwnedIdentityForDiscussionId(long discussionId);
+    @Nullable public abstract byte[] getBytesOwnedIdentityForDiscussionId(long discussionId);
 
     @Query("SELECT discussion.* FROM " + Discussion.TABLE_NAME + " AS discussion " +
             " INNER JOIN ( SELECT " + Message.DISCUSSION_ID + ", MAX(" + Message.TIMESTAMP + ") AS maxTimestamp FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " != " + Message.STATUS_DRAFT + " AND " +  Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE + " GROUP BY " + Message.DISCUSSION_ID + ") AS message " +
@@ -378,7 +379,7 @@ public abstract class DiscussionDao {
             " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " ORDER BY status, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
-    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWithGroupMembersNames(byte[] ownedIdentityBytes);
+    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWithGroupMembersNames(@NonNull byte[] ownedIdentityBytes);
 
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column status is used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
@@ -400,7 +401,7 @@ public abstract class DiscussionDao {
             " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " ORDER BY status DESC, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
-    public abstract List<DiscussionAndGroupMembersNames> getAllForGlobalSearch(byte[] ownedIdentityBytes);
+    public abstract List<DiscussionAndGroupMembersNames> getAllForGlobalSearch(@NonNull byte[] ownedIdentityBytes);
 
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the columns is_group and status are used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
@@ -424,7 +425,7 @@ public abstract class DiscussionDao {
             " AND disc." + Discussion.DISCUSSION_TYPE + " = " + Discussion.TYPE_GROUP_V2 +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " ORDER BY " + PINNED_ORDER + ", status, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
-    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllPinnedFirstWithGroupMembersNames(byte[] ownedIdentityBytes);
+    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllPinnedFirstWithGroupMembersNames(@NonNull byte[] ownedIdentityBytes);
 
     @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH) // the column is_group is used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
@@ -443,7 +444,7 @@ public abstract class DiscussionDao {
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND disc." + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL +
             " ORDER BY " + PINNED_ORDER + ", is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
-    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWritableWithGroupMembersNames(byte[] ownedIdentityBytes);
+    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWritableWithGroupMembersNames(@NonNull byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
@@ -460,7 +461,7 @@ public abstract class DiscussionDao {
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND disc." + Discussion.STATUS + " = " + Discussion.STATUS_NORMAL +
             " ORDER BY " + PINNED_ORDER + ", disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC")
-    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWritableWithGroupMembersNamesOrderedByActivity(byte[] ownedIdentityBytes);
+    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWritableWithGroupMembersNamesOrderedByActivity(@NonNull byte[] ownedIdentityBytes);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
@@ -490,7 +491,7 @@ public abstract class DiscussionDao {
             " WHERE disc." + Discussion.STATUS + " IN (" + Discussion.STATUS_NORMAL + "," + Discussion.STATUS_READ_ONLY + ")" +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " ORDER BY disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
-    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getContactNotLockedGroupDiscussionsWithGroupMembersNames(byte[] bytesContactIdentity, byte[] bytesOwnedIdentity);
+    public abstract LiveData<List<DiscussionAndGroupMembersNames>> getContactNotLockedGroupDiscussionsWithGroupMembersNames(@NonNull byte[] bytesContactIdentity, @NonNull byte[] bytesOwnedIdentity);
 
 
     @Query("DELETE FROM " + Discussion.TABLE_NAME +
@@ -516,7 +517,7 @@ public abstract class DiscussionDao {
 
     @Query("SELECT id FROM " + Discussion.TABLE_NAME +
             " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
-    public abstract List<Long> getAllDiscussionIdsForOwnedIdentity(byte[] bytesOwnedIdentity);
+    public abstract List<Long> getAllDiscussionIdsForOwnedIdentity(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE " + Discussion.STATUS + " = " + Discussion.STATUS_PRE_DISCUSSION)
@@ -527,11 +528,11 @@ public abstract class DiscussionDao {
             " WHERE " + Discussion.PINNED + " != 0 " +
             " AND " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " ORDER BY " + Discussion.PINNED)
-    public abstract List<Discussion> getAllPinned(byte[] bytesOwnedIdentity);
+    public abstract List<Discussion> getAllPinned(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT MAX(" + Discussion.PINNED + ") FROM " + Discussion.TABLE_NAME +
             " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
-    public abstract int getMaxPinnedIndex(byte[] bytesOwnedIdentity);
+    public abstract int getMaxPinnedIndex(@NonNull byte[] bytesOwnedIdentity);
 
 
     public static class DiscussionAndLastMessage {

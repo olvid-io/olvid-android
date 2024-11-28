@@ -27,9 +27,54 @@ import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Fyle
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
 import io.olvid.messenger.databases.entity.Message
+import io.olvid.messenger.discussion.linkpreview.OpenGraph
 
 @Dao
 interface GlobalSearchDao {
+
+    @Query(
+        "SELECT m.id, m.timestamp FROM " + Message.TABLE_NAME + " AS m " +
+                " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid" +
+                " WHERE m." + Message.MESSAGE_TYPE + " <= " + Message.TYPE_OUTBOUND_MESSAGE +
+                " AND m." + Message.DISCUSSION_ID + " = :discussionId" +
+                " AND " + Message.FTS_TABLE_NAME + " MATCH :query" +
+                " UNION " +
+                " SELECT m.id, m.timestamp FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+                " INNER JOIN " + Message.TABLE_NAME + " AS m " +
+                " ON m.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+                " AND m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+                " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
+                " ON disc.id = m." + Message.DISCUSSION_ID +
+                " AND disc.id = :discussionId " +
+                " JOIN " + FyleMessageJoinWithStatus.FTS_TABLE_NAME +
+                " ON FMJoin.rowid = " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + ".rowid " +
+                " WHERE " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " MATCH :query" +
+                " ORDER BY m.timestamp DESC"
+    )
+    fun discussionSearch(discussionId: Long, query: String): List<MessageIdAndTimestamp>
+
+    data class MessageIdAndTimestamp(val id: Long, val timestamp: Long)
+
+//    @Query(
+//        "SELECT mess.id " +
+//                " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+//                " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle " +
+//                " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+//                " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
+//                " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+//                " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+//                " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
+//                " ON disc.id = mess." + Message.DISCUSSION_ID +
+//                " AND disc.id = :discussionId " +
+//                " JOIN " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " ON FMJoin.rowid = " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + ".rowid " +
+//                " WHERE " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " MATCH :query ORDER BY mess.timestamp DESC"
+//    )
+//    fun discussionAttachmentsSearch(
+//        discussionId: Long,
+//        query: String,
+//    ): List<Long>
+
+
     @Query(
         "SELECT " + DiscussionDao.PREFIX_DISCUSSION_COLUMNS + ",m.* FROM " + Message.TABLE_NAME + " AS m " +
                 " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
@@ -50,6 +95,7 @@ interface GlobalSearchDao {
                 " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
                 " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle " +
                 " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+                " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " != '" + OpenGraph.MIME_TYPE + "' " +
                 " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
                 " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
                 " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
@@ -60,6 +106,28 @@ interface GlobalSearchDao {
                 " WHERE " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " MATCH :filter ORDER BY mess.timestamp DESC LIMIT :limit OFFSET :offset"
     )
     suspend fun attachmentsGlobalSearch(
+        bytesOwnedIdentity: ByteArray,
+        filter: String,
+        limit: Int,
+        offset: Int
+    ): List<FyleAndOrigin>
+
+    @Query(
+        "SELECT " + DiscussionDao.PREFIX_DISCUSSION_COLUMNS + ", " + MessageDao.PREFIX_MESSAGE_COLUMNS + ", fyle.*, FMjoin.* " +
+                " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+                " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle " +
+                " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+                " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " = '" + OpenGraph.MIME_TYPE + "' " +
+                " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
+                " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+                " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+                " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
+                " ON disc.id = mess." + Message.DISCUSSION_ID +
+                " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+                " JOIN " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " ON FMJoin.rowid = " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + ".rowid " +
+                " WHERE " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " MATCH :filter ORDER BY mess.timestamp DESC LIMIT :limit OFFSET :offset"
+    )
+    suspend fun linksGlobalSearch(
         bytesOwnedIdentity: ByteArray,
         filter: String,
         limit: Int,

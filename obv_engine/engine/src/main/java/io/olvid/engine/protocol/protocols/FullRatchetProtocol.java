@@ -500,7 +500,7 @@ public class FullRatchetProtocol extends ConcreteProtocol {
                 throw new Exception();
             }
 
-            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), true);
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), true, false);
             ChannelMessageToSend messageToSend = new AliceEphemeralKeyMessage(coreProtocolMessage, (EncryptionPublicKey) keyPair.getPublicKey(), restartCounter).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -546,7 +546,7 @@ public class FullRatchetProtocol extends ConcreteProtocol {
                 throw new Exception();
             }
 
-            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), true);
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), true, false);
             ChannelMessageToSend messageToSend = new AliceEphemeralKeyMessage(coreProtocolMessage, (EncryptionPublicKey) keyPair.getPublicKey(), restartCounter).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -646,7 +646,7 @@ public class FullRatchetProtocol extends ConcreteProtocol {
             Seed seed = Seed.of(k1, k2);
 
 
-            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(startState.contactIdentity, getOwnedIdentity(), new UID[]{startState.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), true);
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(startState.contactIdentity, getOwnedIdentity(), new UID[]{startState.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), true, false);
             ChannelMessageToSend messageToSend = new AliceK2Message(coreProtocolMessage, c2, startState.restartCounter).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 

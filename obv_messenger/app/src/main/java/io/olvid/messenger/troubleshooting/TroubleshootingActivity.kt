@@ -38,12 +38,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +63,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle.State.RESUMED
@@ -66,15 +73,20 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
+import io.olvid.messenger.R
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.AppDatabaseOpenCallback
 import io.olvid.messenger.firebase.ObvFirebaseMessagingService
 import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.services.AvailableSpaceHelper
 import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
+import io.olvid.messenger.troubleshooting.TroubleshootingItemType.DB_SYNC
 import io.olvid.messenger.troubleshooting.TroubleshootingItemType.LOCATION
 import io.olvid.messenger.troubleshooting.TroubleshootingItemType.LOCATION_PERMISSIONS
 import kotlinx.coroutines.delay
@@ -184,6 +196,8 @@ class TroubleshootingActivity : ComponentActivity() {
 
                 list.add(Triple(storageState.valid, true, TroubleshootingItemType.STORAGE))
 
+                list.add(Triple(storageState.valid, true, TroubleshootingItemType.DB_SYNC))
+
                 list.sortBy {
                     when {
                         it.first -> 2
@@ -201,6 +215,7 @@ class TroubleshootingActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
+                        .systemBarsPadding()
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -569,10 +584,46 @@ class TroubleshootingActivity : ComponentActivity() {
                                     }
                                 }
                             }
+
+                            DB_SYNC -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_storage_db_sync_title),
+                                    description = stringResource(id = R.string.troubleshooting_storage_db_sync_description),
+                                    valid = true,
+                                    additionalContent = {
+                                        var inProgress by remember { mutableStateOf(false) }
+                                        AnimatedVisibility(visible = !inProgress) {
+                                            TextButton(
+                                                onClick = {
+                                                    inProgress = true
+                                                    App.runThread {
+                                                        try {
+                                                            AppDatabaseOpenCallback.syncEngineDatabases(AppSingleton.getEngine(), AppDatabase.getInstance())
+                                                            Thread.sleep(1000)
+                                                        } catch (_: Exception) { }
+                                                        inProgress = false
+                                                    }
+                                                }
+                                            ) {
+                                                Text(text = stringResource(id = R.string.button_label_check_now))
+                                            }
+                                        }
+                                        AnimatedVisibility(visible = inProgress) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier
+                                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                                                    .size(24.dp),
+                                                color = colorResource(id = R.color.olvid_gradient_light),
+                                                strokeWidth = 2.dp
+                                            )
+                                        }
+                                    }
+                                ) { }
+                            }
                         }
                     }
 
-                    AppVersionHeader(betaEnabled = SettingsActivity.getBetaFeaturesEnabled())
+                    AppVersionHeader(betaEnabled = SettingsActivity.betaFeaturesEnabled)
                     
                     RestartAppButton()
                 }

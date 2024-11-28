@@ -35,13 +35,13 @@ class OwnedDevicesSynchronisationWithEngineTask(
     companion object {
         private val transferredOrRestoredOwnedIdentities: HashSet<BytesKey> = HashSet()
 
-        public fun ownedIdentityWasTransferredOrRestored(bytesOwnedIdentity: ByteArray) {
+        fun ownedIdentityWasTransferredOrRestored(bytesOwnedIdentity: ByteArray) {
             transferredOrRestoredOwnedIdentities.add(BytesKey(bytesOwnedIdentity))
         }
     }
 
     override fun run() {
-        val deviceDao = AppDatabase.getInstance().ownedDeviceDao();
+        val deviceDao = AppDatabase.getInstance().ownedDeviceDao()
 
         val obvOwnedDevices: List<ObvOwnedDevice> = AppSingleton.getEngine().getOwnedDevices(bytesOwnedIdentity) ?: return
         val dbOwnedDevices: List<OwnedDevice> = deviceDao.getAllSync(bytesOwnedIdentity)

@@ -52,29 +52,30 @@ import androidx.core.util.Pair;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
 
-import com.mapbox.geojson.MultiPolygon;
-import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.camera.CameraUpdate;
-import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
-import com.mapbox.mapboxsdk.location.LocationComponentActivationOptions;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.MapboxMapOptions;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.maps.SupportMapFragment;
-import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
-import com.mapbox.mapboxsdk.style.layers.FillLayer;
-import com.mapbox.mapboxsdk.style.layers.Layer;
-import com.mapbox.mapboxsdk.style.layers.LineLayer;
-import com.mapbox.mapboxsdk.style.layers.PropertyValue;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.mapboxsdk.style.sources.Source;
+import org.maplibre.geojson.MultiPolygon;
+import org.maplibre.geojson.Point;
+import org.maplibre.android.plugins.annotation.Symbol;
+import org.maplibre.android.plugins.annotation.SymbolManager;
+
+import org.maplibre.android.MapLibre;
+import org.maplibre.android.camera.CameraUpdate;
+import org.maplibre.android.camera.CameraUpdateFactory;
+import org.maplibre.android.geometry.LatLng;
+import org.maplibre.android.geometry.LatLngBounds;
+import org.maplibre.android.location.LocationComponentActivationOptions;
+import org.maplibre.android.maps.MapView;
+import org.maplibre.android.maps.MapLibreMap;
+import org.maplibre.android.maps.MapLibreMapOptions;
+import org.maplibre.android.maps.OnMapReadyCallback;
+import org.maplibre.android.maps.Style;
+import org.maplibre.android.maps.SupportMapFragment;
+import org.maplibre.android.plugins.annotation.SymbolOptions;
+import org.maplibre.android.style.layers.FillLayer;
+import org.maplibre.android.style.layers.Layer;
+import org.maplibre.android.style.layers.LineLayer;
+import org.maplibre.android.style.layers.PropertyValue;
+import org.maplibre.android.style.sources.GeoJsonSource;
+import org.maplibre.android.style.sources.Source;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -106,7 +107,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     private FragmentActivity activity;
 
     private SupportMapFragment mapFragment;
-    @Nullable private MapboxMap mapboxMap;
+    @Nullable private MapLibreMap mapLibreMap;
 
     // symbols and markers
     private @Nullable SymbolManager symbolManager;
@@ -136,10 +137,10 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         loadStyleUrls();
 
         // init MapView
-        Mapbox.getInstance(this.activity);
+        MapLibre.getInstance(this.activity);
 
         // prepare map fragment
-        MapboxMapOptions options = MapboxMapOptions.createFromAttributes(this.activity);
+        MapLibreMapOptions options = MapLibreMapOptions.createFromAttributes(this.activity);
         mapFragment = SupportMapFragment.newInstance(options);
         mapFragment.getMapAsync(this);
     }
@@ -211,8 +212,8 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     }
 
     @Override
-    public void onMapReady(@NonNull MapboxMap mapboxMap) {
-        this.mapboxMap = mapboxMap;
+    public void onMapReady(@NonNull MapLibreMap mapLibreMap) {
+        this.mapLibreMap = mapLibreMap;
 
         View mapView = mapFragment.getView();
         if (mapView instanceof MapView) {
@@ -221,17 +222,17 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
                 Logger.w("OSM style not found, trying fallback style");
                 if (!triedStyleFallbackUrl) {
                     triedStyleFallbackUrl = true;
-                    mapboxMap.setStyle(new Style.Builder().fromUri(FALLBACK_OSM_STYLE_URL), this::onStyleLoaded);
+                    mapLibreMap.setStyle(new Style.Builder().fromUri(FALLBACK_OSM_STYLE_URL), this::onStyleLoaded);
                 }
             });
         }
 
         // set style, with a callback for the loading of the first style
-        mapboxMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
+        mapLibreMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
     }
 
     public void onStyleLoaded(Style style) {
-        if (style == null || mapboxMap == null) {
+        if (style == null || mapLibreMap == null) {
             Logger.i("MapLibre.onStyleLoaded: map not initialized or style is null");
             return;
         }
@@ -240,30 +241,30 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         triedStyleFallbackUrl = false;
 
         // setup ui
-        mapboxMap.getUiSettings().setCompassEnabled(true);
+        mapLibreMap.getUiSettings().setCompassEnabled(true);
         Drawable compass = ContextCompat.getDrawable(activity, R.drawable.map_compass);
         if (compass != null) {
-            mapboxMap.getUiSettings().setCompassImage(compass);
+            mapLibreMap.getUiSettings().setCompassImage(compass);
         }
         int sixteenDp = (int) (16 * activity.getResources().getDisplayMetrics().density);
-        mapboxMap.getUiSettings().setCompassMargins(0, (osmServerStyles.size() > 1) ? sixteenDp * 4 : sixteenDp, sixteenDp, 0);
-        mapboxMap.getUiSettings().setCompassGravity(Gravity.TOP | Gravity.END);
-        mapboxMap.getUiSettings().setLogoEnabled(false);
+        mapLibreMap.getUiSettings().setCompassMargins(0, (osmServerStyles.size() > 1) ? sixteenDp * 4 : sixteenDp, sixteenDp, 0);
+        mapLibreMap.getUiSettings().setCompassGravity(Gravity.TOP | Gravity.END);
+        mapLibreMap.getUiSettings().setLogoEnabled(false);
 
         if (layersButtonVisibilitySetter != null) {
             layersButtonVisibilitySetter.accept(osmServerStyles.size() > 1);
         }
 
         // show and change attributions
-        mapboxMap.getUiSettings().setAttributionEnabled(true);
-        mapboxMap.getUiSettings().setAttributionGravity(Gravity.BOTTOM | Gravity.START);
-        mapboxMap.getUiSettings().setAttributionMargins(sixteenDp, sixteenDp, sixteenDp, sixteenDp);
-        mapboxMap.getUiSettings().setAttributionDialogManager(new MapLibreCustomAttributionDialogManager(this.activity, mapboxMap));
+        mapLibreMap.getUiSettings().setAttributionEnabled(true);
+        mapLibreMap.getUiSettings().setAttributionGravity(Gravity.BOTTOM | Gravity.START);
+        mapLibreMap.getUiSettings().setAttributionMargins(sixteenDp, sixteenDp, sixteenDp, sixteenDp);
+        mapLibreMap.getUiSettings().setAttributionDialogManager(new MapLibreCustomAttributionDialogManager(this.activity, mapLibreMap));
 
 
         // create symbol manager and set options
         if (mapFragment.getView() != null) {
-            symbolManager = new SymbolManager((MapView) mapFragment.getView(), mapboxMap, style);
+            symbolManager = new SymbolManager((MapView) mapFragment.getView(), mapLibreMap, style);
             symbolManager.setIconAllowOverlap(true);
             symbolManager.setIconIgnorePlacement(true);
 
@@ -296,17 +297,17 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             firstStyleLoaded = true;
 
             // setup listeners for map gestures
-            mapboxMap.addOnCameraMoveStartedListener((reason) -> {
+            mapLibreMap.addOnCameraMoveStartedListener((reason) -> {
                 currentCameraCenterLiveData.postValue(null);
 
-                if (reason == MapboxMap.OnCameraMoveStartedListener.REASON_API_GESTURE) {
+                if (reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE) {
                     setCurrentlyCenteredSymbol(null);
                 }
             });
             //noinspection DataFlowIssue
-            mapboxMap.addOnCameraIdleListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapboxMap.getCameraPosition().target)));
+            mapLibreMap.addOnCameraIdleListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapLibreMap.getCameraPosition().target)));
             //noinspection DataFlowIssue
-            mapboxMap.addOnCameraMoveCancelListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapboxMap.getCameraPosition().target)));
+            mapLibreMap.addOnCameraMoveCancelListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(mapLibreMap.getCameraPosition().target)));
         }
     }
 
@@ -319,7 +320,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     @Override
     public boolean setEnableCurrentLocation(boolean enabled) {
         // check map and style was initialized
-        if (mapboxMap == null || mapboxMap.getStyle() == null) {
+        if (mapLibreMap == null || mapLibreMap.getStyle() == null) {
             Logger.i("MapLibre.centerOnCurrentLocation: map not initialized");
             return false;
         }
@@ -333,20 +334,20 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         }
 
         // activate location component if needed
-        if (!mapboxMap.getLocationComponent().isLocationComponentActivated()) {
-            if (mapboxMap.getStyle() == null) {
-                Logger.i("MapLibre.centerOnCurrentLocation: subscribeToLocationUpdates: mapboxMap.getStyle is null");
+        if (!mapLibreMap.getLocationComponent().isLocationComponentActivated()) {
+            if (mapLibreMap.getStyle() == null) {
+                Logger.i("MapLibre.centerOnCurrentLocation: subscribeToLocationUpdates: MapLibreMap.getStyle is null");
                 return false;
             }
-            mapboxMap.getLocationComponent().activateLocationComponent(LocationComponentActivationOptions.builder(activity, mapboxMap.getStyle()).build());
+            mapLibreMap.getLocationComponent().activateLocationComponent(LocationComponentActivationOptions.builder(activity, mapLibreMap.getStyle()).build());
 
             // on enable add listener on location icon to recenter on it
-            mapboxMap.getLocationComponent().addOnLocationClickListener(() -> centerOnCurrentLocation(true));
+            mapLibreMap.getLocationComponent().addOnLocationClickListener(() -> centerOnCurrentLocation(true));
         }
         // enable location component if needed
-        if (mapboxMap.getLocationComponent().isLocationComponentEnabled() != enabled) {
+        if (mapLibreMap.getLocationComponent().isLocationComponentEnabled() != enabled) {
             try {
-                mapboxMap.getLocationComponent().setLocationComponentEnabled(enabled);
+                mapLibreMap.getLocationComponent().setLocationComponentEnabled(enabled);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -357,15 +358,15 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     @SuppressLint("MissingPermission")
     @Override
     public void centerOnCurrentLocation(boolean animate) {
-        if (!setEnableCurrentLocation(true) || mapboxMap == null) {
+        if (!setEnableCurrentLocation(true) || mapLibreMap == null) {
             return;
         }
 
         // if lastKnownLocation is accessible use it to center
-        Location lastKnownLocation = mapboxMap.getLocationComponent().getLastKnownLocation();
-        if (mapboxMap.getLocationComponent().isLocationComponentEnabled() &&  lastKnownLocation != null) {
+        Location lastKnownLocation = mapLibreMap.getLocationComponent().getLastKnownLocation();
+        if (mapLibreMap.getLocationComponent().isLocationComponentEnabled() &&  lastKnownLocation != null) {
             centerOnLocation(lastKnownLocation, animate);
-            mapboxMap.getLocationComponent().forceLocationUpdate(lastKnownLocation);
+            mapLibreMap.getLocationComponent().forceLocationUpdate(lastKnownLocation);
         } else {
             // else try to get best provider last location, and else request current location (can be quite long)
             LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
@@ -374,7 +375,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
                 Location location = locationManager.getLastKnownLocation(provider);
                 if (location!= null) {
                     centerOnLocation(location, animate);
-                    mapboxMap.getLocationComponent().forceLocationUpdate(mapboxMap.getLocationComponent().getLastKnownLocation());
+                    mapLibreMap.getLocationComponent().forceLocationUpdate(mapLibreMap.getLocationComponent().getLastKnownLocation());
                     return;
                 }
             }
@@ -384,7 +385,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
                 LocationManagerCompat.getCurrentLocation(locationManager, provider, (CancellationSignal) null, executor, location -> {
                     if (location != null) {
                         centerOnLocation(location, animate);
-                        mapboxMap.getLocationComponent().forceLocationUpdate(location);
+                        mapLibreMap.getLocationComponent().forceLocationUpdate(location);
                     }
                 });
             }
@@ -392,15 +393,15 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     }
 
     private void centerOnLocation(@NonNull Location location, boolean animate) {
-        if (mapboxMap != null) {
+        if (mapLibreMap != null) {
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
                     new LatLng(location.getLatitude(), location.getLongitude()),
-                    Double.max(DEFAULT_ZOOM, mapboxMap.getCameraPosition().zoom));
+                    Double.max(DEFAULT_ZOOM, mapLibreMap.getCameraPosition().zoom));
             if (animate) {
-                mapboxMap.animateCamera(cameraUpdate, 750);
+                mapLibreMap.animateCamera(cameraUpdate, 750);
             }
             else {
-                mapboxMap.moveCamera(cameraUpdate);
+                mapLibreMap.moveCamera(cameraUpdate);
             }
         }
     }
@@ -412,25 +413,25 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
 
     @Override
     public double getCameraZoom() {
-        if (mapboxMap == null) {
+        if (mapLibreMap == null) {
             return 0;
         }
-        return mapboxMap.getCameraPosition().zoom;
+        return mapLibreMap.getCameraPosition().zoom;
     }
 
     @Override
     public void launchMapSnapshot(@NonNull Consumer<Bitmap> onSnapshotReadyCallback) {
-        if (mapboxMap == null) {
+        if (mapLibreMap == null) {
             Logger.i("MapLibre.launchMapSnapshot: map not ready when taking snapshot");
             onSnapshotReadyCallback.accept(null);
             return;
         }
         // hide attributions icon7
-        mapboxMap.getUiSettings().setAttributionEnabled(false);
-        mapboxMap.getUiSettings().setCompassEnabled(false);
+        mapLibreMap.getUiSettings().setAttributionEnabled(false);
+        mapLibreMap.getUiSettings().setCompassEnabled(false);
 
         // manually add attributions to bitmap before passing to parent
-        mapboxMap.snapshot((bitmap) -> {
+        mapLibreMap.snapshot((bitmap) -> {
             String attributionString = "©OpenStreetMap ©OpenMapTiles ©Olvid";
             float padding = 4 * activity.getResources().getDisplayMetrics().density;
             float textSize = 12 * activity.getResources().getDisplayMetrics().density;
@@ -526,8 +527,9 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             if (!Objects.equals(currentStyleId, menuStyleIds.get(item.getItemId()))) {
                 currentStyleId = menuStyleIds.get(item.getItemId());
                 SettingsActivity.setLocationLastOsmStyleId(currentStyleId);
-                if (mapboxMap != null) {
-                    mapboxMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
+                if (mapLibreMap != null) {
+                    removeAllMarkers();
+                    mapLibreMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
                 }
             }
             return true;
@@ -537,20 +539,20 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
 
     //    @Override
 //    public void setGestureEnabled(boolean enabled) {
-//        if (mapboxMap == null || mapboxMap.getStyle() == null) {
+//        if (mapboxMap == null || MapLibreMap.getStyle() == null) {
 //            Logger.i("MapLibreMapView: setGestureEnabled: mapboxMap is not ready to use");
 //            return;
 //        }
-//        mapboxMap.getUiSettings().setAllGesturesEnabled(enabled);
+//        MapLibreMap.getUiSettings().setAllGesturesEnabled(enabled);
 //    }
 //
 //    @Override
 //    public void setOnMapClickListener(Runnable clickListener) {
-//        if (mapboxMap == null || mapboxMap.getStyle() == null) {
+//        if (mapboxMap == null || MapLibreMap.getStyle() == null) {
 //            Logger.i("MapLibreMapView: setOnMapClickListener: mapboxMap is not ready to use");
 //            return;
 //        }
-//        mapboxMap.addOnMapClickListener((latLng) -> {
+//        MapLibreMap.addOnMapClickListener((latLng) -> {
 //            clickListener.run();
 //            return false;
 //        });
@@ -558,11 +560,11 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
 //
 //    @Override
 //    public void setOnMapLongClickListener(Runnable clickListener) {
-//        if (mapboxMap == null || mapboxMap.getStyle() == null) {
+//        if (mapboxMap == null || MapLibreMap.getStyle() == null) {
 //            Logger.i("MapLibreMapView: setOnMapLongClickListener: mapboxMap is not ready to use");
 //            return;
 //        }
-//        mapboxMap.addOnMapLongClickListener((latLng) -> {
+//        MapLibreMap.addOnMapLongClickListener((latLng) -> {
 //            clickListener.run();
 //            return false;
 //        });
@@ -576,13 +578,12 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     @Override
     void setRedrawMarkersCallback(@Nullable Runnable callback) {
         this.redrawMarkersCallback = callback;
-
     }
 
     @Override
     public void addMarker(long id, Bitmap icon, @NonNull LatLngWrapper latLngWrapper, @Nullable Float precision) {
-        if (mapboxMap == null || mapboxMap.getStyle() == null || symbolManager == null) {
-            Logger.i("MapLibreMapView: addMarker: mapboxMap is not ready to use");
+        if (mapLibreMap == null || mapLibreMap.getStyle() == null || symbolManager == null) {
+            Logger.i("MapLibreMapView: addMarker: maplibreMap is not ready to use");
             return;
         }
 
@@ -591,7 +592,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             removeMarker(id);
         }
 
-        mapboxMap.getStyle().addImage("marker-icon-" + id, icon);
+        mapLibreMap.getStyle().addImage("marker-icon-" + id, icon);
 
         Symbol symbol = symbolManager.create(new SymbolOptions()
                 .withIconImage("marker-icon-" + id)
@@ -644,8 +645,8 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             symbolManager.delete(symbol);
             symbolsByIdHashMap.remove(id);
             // clean created images
-            if (mapboxMap != null && mapboxMap.getStyle() != null) {
-                mapboxMap.getStyle().removeImage("marker-icon" + id);
+            if (mapLibreMap != null && mapLibreMap.getStyle() != null) {
+                mapLibreMap.getStyle().removeImage("marker-icon" + id);
             }
         }
         if (precisionCirclesHashMap.remove(id) != null) {
@@ -653,9 +654,26 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         }
     }
 
+    private void removeAllMarkers() {
+        if (symbolManager == null) {
+            Logger.i("MapViewMapLibreFragment: called removeAllMarkers before map was initialized");
+            return;
+        }
+
+        for (Map.Entry<Long, Symbol> entry : symbolsByIdHashMap.entrySet()) {
+            symbolManager.delete(entry.getValue());
+            if (mapLibreMap != null && mapLibreMap.getStyle() != null) {
+                mapLibreMap.getStyle().removeImage("marker-icon" + entry.getKey());
+            }
+        }
+        symbolsByIdHashMap.clear();
+        precisionCirclesHashMap.clear();
+        recomputePrecisionCirclesLayer();
+    }
+
     @Override
     public void centerOnMarkers(boolean animate, boolean includeMyLocation) {
-        if (mapboxMap == null) {
+        if (mapLibreMap == null) {
             return;
         }
 
@@ -664,39 +682,39 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             markersPositions.add(new LatLngWrapper(symbol.getLatLng()));
         }
         // if current location is enabled add it in bounds
-        if (includeMyLocation && mapboxMap.getLocationComponent().isLocationComponentActivated()
-                && mapboxMap.getLocationComponent().isLocationComponentEnabled()
-                && mapboxMap.getLocationComponent().getLastKnownLocation() != null) {
-            markersPositions.add(new LatLngWrapper(mapboxMap.getLocationComponent().getLastKnownLocation()));
+        if (includeMyLocation && mapLibreMap.getLocationComponent().isLocationComponentActivated()
+                && mapLibreMap.getLocationComponent().isLocationComponentEnabled()
+                && mapLibreMap.getLocationComponent().getLastKnownLocation() != null) {
+            markersPositions.add(new LatLngWrapper(mapLibreMap.getLocationComponent().getLastKnownLocation()));
         }
 
-        MapboxMap.CancelableCallback cancelableCallback = new MapboxMap.CancelableCallback() {
+        MapLibreMap.CancelableCallback cancelableCallback = new MapLibreMap.CancelableCallback() {
             @Override
-            public void onCancel() { mapboxMap.getUiSettings().setAllGesturesEnabled(true); }
+            public void onCancel() { mapLibreMap.getUiSettings().setAllGesturesEnabled(true); }
             @Override
-            public void onFinish() { mapboxMap.getUiSettings().setAllGesturesEnabled(true); }
+            public void onFinish() { mapLibreMap.getUiSettings().setAllGesturesEnabled(true); }
         };
         Pair<LatLngWrapper, LatLngWrapper> bounds = computeBounds(markersPositions);
         if (bounds == null) {
             // if no symbols: center on 0 0 0
-            mapboxMap.getUiSettings().setAllGesturesEnabled(false);
-            mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.world(), 0), TRANSITION_DURATION_MS, cancelableCallback);
+            mapLibreMap.getUiSettings().setAllGesturesEnabled(false);
+            mapLibreMap.easeCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.world(), 0), TRANSITION_DURATION_MS, cancelableCallback);
         } else if (bounds.second == null) {
             // else center on single symbol
-            double zoom = markersPositions.size() == 1 ? Math.max(DEFAULT_ZOOM, mapboxMap.getCameraPosition().zoom) : DEFAULT_ZOOM;
+            double zoom = markersPositions.size() == 1 ? Math.max(DEFAULT_ZOOM, mapLibreMap.getCameraPosition().zoom) : DEFAULT_ZOOM;
             if (animate) {
-                mapboxMap.getUiSettings().setAllGesturesEnabled(false);
-                mapboxMap.easeCamera(CameraUpdateFactory.newLatLngZoom(bounds.first.toMapLibre(), zoom), TRANSITION_DURATION_MS, cancelableCallback);
+                mapLibreMap.getUiSettings().setAllGesturesEnabled(false);
+                mapLibreMap.easeCamera(CameraUpdateFactory.newLatLngZoom(bounds.first.toMapLibre(), zoom), TRANSITION_DURATION_MS, cancelableCallback);
             } else {
-                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bounds.first.toMapLibre(), zoom));
+                mapLibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bounds.first.toMapLibre(), zoom));
             }
         } else {
             int padding = Math.min(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels) * 2 / 7;
             if (animate) {
-                mapboxMap.getUiSettings().setAllGesturesEnabled(false);
-                mapboxMap.easeCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.from(bounds.second.getLatitude(), bounds.second.getLongitude(), bounds.first.getLatitude(), bounds.first.getLongitude()), padding), TRANSITION_DURATION_MS, cancelableCallback);
+                mapLibreMap.getUiSettings().setAllGesturesEnabled(false);
+                mapLibreMap.easeCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.from(bounds.second.getLatitude(), bounds.second.getLongitude(), bounds.first.getLatitude(), bounds.first.getLongitude()), padding), TRANSITION_DURATION_MS, cancelableCallback);
             } else {
-                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.from(bounds.second.getLatitude(), bounds.second.getLongitude(), bounds.first.getLatitude(), bounds.first.getLongitude()), padding));
+                mapLibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.from(bounds.second.getLatitude(), bounds.second.getLongitude(), bounds.first.getLatitude(), bounds.first.getLongitude()), padding));
             }
         }
 
@@ -709,7 +727,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     }
 
     private void centerOnSymbol(Symbol symbol, boolean animate) {
-        if (symbolManager == null || mapboxMap == null) {
+        if (symbolManager == null || mapLibreMap == null) {
             Logger.i("MapViewMapLibreFragment: called centerOnSymbol before map was initialized");
             return;
         }
@@ -718,18 +736,18 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             setCurrentlyCenteredSymbol(symbol);
 
             // move camera to marker
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(symbol.getLatLng(), Math.max(DEFAULT_ZOOM, mapboxMap.getCameraPosition().zoom));
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(symbol.getLatLng(), Math.max(DEFAULT_ZOOM, mapLibreMap.getCameraPosition().zoom));
             if (animate) {
-                mapboxMap.easeCamera(cameraUpdate, TRANSITION_DURATION_MS);
+                mapLibreMap.easeCamera(cameraUpdate, TRANSITION_DURATION_MS);
             }
             else {
-                mapboxMap.moveCamera(cameraUpdate);
+                mapLibreMap.moveCamera(cameraUpdate);
             }
         }
     }
 
     private void setCurrentlyCenteredSymbol(@Nullable Symbol symbol) {
-        if (symbolManager == null || mapboxMap == null) {
+        if (symbolManager == null || mapLibreMap == null) {
             Logger.i("MapViewMapLibreFragment: called setCurrentlyCenteredSymbol before map was initialized");
             return;
         }
@@ -780,8 +798,8 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
 
 
     private void recomputePrecisionCirclesLayer() {
-        if (mapboxMap != null && symbolManager != null) {
-            Style style = mapboxMap.getStyle();
+        if (mapLibreMap != null && symbolManager != null) {
+            Style style = mapLibreMap.getStyle();
             if (style != null) {
                 // remove any outdated source/layer
                 Layer circlesLayer = style.getLayer("circles-layer");

@@ -51,7 +51,7 @@ class LinkPreviewRepository {
         .cache(null)
         .addInterceptor(UserAgentInterceptor(this::userAgentForUrl))
         .apply {
-            if (!SettingsActivity.getNoNotifyCertificateChangeForPreviews()) {
+            if (!SettingsActivity.noNotifyCertificateChangeForPreviews) {
                 AppSingleton.getSslSocketFactory()?.let { sslSocketFactory ->
                     try {
                         val trustManagerFactory = TrustManagerFactory.getInstance(

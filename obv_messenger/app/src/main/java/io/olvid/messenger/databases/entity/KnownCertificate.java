@@ -53,6 +53,7 @@ public class KnownCertificate {
     public byte[] certificateBytes;
 
     @ColumnInfo(name = TRUST_TIMESTAMP)
+    @Nullable
     public Long trustTimestamp;
 
     @ColumnInfo(name = EXPIRATION_TIMESTAMP)

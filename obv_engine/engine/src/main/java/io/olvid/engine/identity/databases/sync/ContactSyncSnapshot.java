@@ -120,7 +120,7 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
         contactIdentityObject.insert();
 
         // check for keycloak badge
-        JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakSignature(identityManagerSession.session, ownedIdentity, trustedDetails.getJsonIdentityDetailsWithVersionAndPhoto().getIdentityDetails().getSignedUserDetails());
+        JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakIdentitySignature(identityManagerSession.session, ownedIdentity, trustedDetails.getJsonIdentityDetailsWithVersionAndPhoto().getIdentityDetails().getSignedUserDetails());
         if (jsonKeycloakUserDetails != null) {
             contactIdentityObject.setCertifiedByOwnKeycloak(true, trustedDetails.getSerializedJsonDetails());
         }

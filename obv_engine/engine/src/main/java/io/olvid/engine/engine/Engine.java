@@ -808,6 +808,17 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
+    public void updateKeycloakTransferRestrictedIfNeeded(byte[] bytesOwnedIdentity, String serverUrl, boolean transferRestricted) {
+        try (EngineSession engineSession = getSession()) {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            identityManager.updateKeycloakTransferRestrictedIfNeeded(engineSession.session, ownedIdentity, serverUrl, transferRestricted);
+            engineSession.session.commit();
+        } catch (Exception e) {
+            Logger.x(e);
+        }
+    }
+
+    @Override
     public void updateKeycloakPushTopicsIfNeeded(byte[] bytesOwnedIdentity, String serverUrl, List<String> pushTopics) {
         try (EngineSession engineSession = getSession()) {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);

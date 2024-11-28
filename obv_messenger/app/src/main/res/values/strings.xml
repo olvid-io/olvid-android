@@ -99,6 +99,7 @@
     <string name="explanation_no_group_match_filter">No group found</string>
     <string name="explanation_no_message_found">No message found</string>
     <string name="explanation_no_attachment_found">No attachment found</string>
+    <string name="explanation_no_link_found">No link found</string>
     <string name="format_identity_details_custom_field">%1$s: %2$s</string>
     <string name="hint_company">Company (optional)</string>
     <string name="hint_compose_your_message">Write message</string>
@@ -910,7 +911,9 @@
     <string name="toast_message_unable_to_keycloak_bind">Failed to switch to a managed ID</string>
     <string name="menu_action_unbind_from_keycloak">Remove identity provider</string>
     <string name="dialog_title_unbind_from_keycloak">Remove identity provider</string>
+    <string name="dialog_title_unbind_from_keycloak_restricted">Unable to remove identity provider</string>
     <string name="dialog_message_unbind_from_keycloak">Your Olvid ID is currently managed by your company\'s identity provider. You are about to switch to a normal, un-managed, Olvid ID.\n\nIf you proceed, you will no longer be able to seamlessly add contacts from your company to Olvid. Please contact your administrator for more details.\n\nDo you wish to proceed?</string>
+    <string name="dialog_message_unbind_from_keycloak_restricted">Your Olvid ID is currently managed by your company\'s identity provider which restricts transfers. It can not be removed at your initiative.\n\nPlease contact your administrator for more details.</string>
     <string name="text_explanation_warning_identity_creation_keycloak_revocation_needed">Your identity provider indicates that an Olvid ID is already associated to the user you signed in as. If you proceed, this Olvid ID will be revoked and your new one will be associated to this user.\nPlease contact your administrator for more details.</string>
     <string name="text_explanation_warning_identity_creation_keycloak_revocation_impossible">Your identity provider indicates that an Olvid ID is already associated to the user you signed in as. You cannot proceed with the creation of your ID.\n\nPlease contact your administrator for more details.</string>
     <string name="text_explanation_warning_binding_keycloak_revocation_impossible">Your identity provider indicates that an Olvid ID is already associated to the user you signed in as. You cannot proceed with the configuration.\n\nPlease contact your administrator for more details.</string>
@@ -1907,6 +1910,7 @@
     <string name="global_search_result_contacts">Contacts</string>
     <string name="global_search_result_messages">Messages</string>
     <string name="global_search_result_attachments">Attachments</string>
+    <string name="global_search_result_links">Links</string>
     <string name="preference_filename_database" translatable="false">io.olvid.messenger.DATABASE_PREFERENCE_FILE</string>
     <string name="button_label_send_read_receipts">Notify my contacts</string>
     <string name="button_label_do_not_send">Do not notify them</string>
@@ -1964,6 +1968,24 @@
     <string name="restriction_alternate_turn_server_username_description" translatable="false">The username to use for authentication with the alternate TURN sever.</string>
     <string name="restriction_alternate_turn_server_password_title" translatable="false">Alternate TURN server password</string>
     <string name="restriction_alternate_turn_server_password_description" translatable="false">The password to use for authentication with the alternate TURN sever.</string>
+    <string name="onboarding_transfer_restricted_title">Profile transfer restriction</string>
+    <string name="explanation_transfer_restriction_title_1">Important</string>
+    <string name="explanation_transfer_restriction_text_1">Your company requires you to authenticate with their identity provider on your new device to access your profile.</string>
+    <string name="explanation_transfer_restriction_title_2">Why?</string>
+    <string name="explanation_transfer_restriction_text_2">This ensures that only authorized devices can access your profile.</string>
+    <string name="explanation_transfer_restriction_authentication_needed">Your company requires additional authentication: you will need to authenticate with their identity provider directly on this new device.\n\n**If your new device does not prompt you to authenticate, please make sure it is running the latest version of Olvid.**</string>
+    <string name="onboarding_authentication_required_title">Authentication required</string>
+    <string name="onboarding_transfer_keycloak_error_message_unreachable">Your company\'s identity provider is not reachable</string>
+    <string name="onboarding_transfer_keycloak_error_message_authentication_failed">Authentication failed</string>
+    <string name="onboarding_transfer_keycloak_error_message_authentication_proof_error">Unable to retrieve authentication proof</string>
+    <string name="onboarding_transfer_authentication_successful_title">Authentication successful</string>
+    <string name="onboarding_transfer_authentication_successful">Profile import in progress</string>
+    <string name="onboarding_transfer_keycloak_authentication_required">Please authenticate with your company\'s identity provider to proceed.</string>
+    <string name="dialog_title_rebind_keycloak_restricted">Unable to change identity provider</string>
+    <string name="dialog_message_rebind_keycloak_restricted">Your Olvid ID is currently managed by your company\'s identity provider which restricts transfers. It can not be changed at your initiative.\n\nPlease contact your administrator for more details.</string>
+    <string name="troubleshooting_storage_db_sync_title">Database consistency check</string>
+    <string name="troubleshooting_storage_db_sync_description">After an application crash, internal databases might have consistency issues. Run this check to ensure everything is fine 😁</string>
+    <string name="button_label_check_now">Check now</string>
 
 
     <plurals name="dialog_title_delete_discussions">

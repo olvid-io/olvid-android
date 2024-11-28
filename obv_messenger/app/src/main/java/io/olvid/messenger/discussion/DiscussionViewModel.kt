@@ -93,7 +93,7 @@ class DiscussionViewModel : ViewModel() {
             if (discussionId == null) {
                 return@switchMap null
             }
-            if (SettingsActivity.getHideGroupMemberChanges()) {
+            if (SettingsActivity.hideGroupMemberChanges) {
                 return@switchMap getPagedMessagesWithoutGroupMemberChanges(discussionId)
             } else {
                 return@switchMap getPagedMessages(discussionId)

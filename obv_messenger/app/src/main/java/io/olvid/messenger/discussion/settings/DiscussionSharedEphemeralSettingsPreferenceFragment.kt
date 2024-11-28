@@ -19,9 +19,11 @@
 package io.olvid.messenger.discussion.settings
 
 import android.os.Bundle
+import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import androidx.preference.PreferenceCategory
@@ -83,5 +85,9 @@ class DiscussionSharedEphemeralSettingsPreferenceFragment : PreferenceFragmentCo
     override fun onDestroy() {
         super.onDestroy()
         discussionSettingsViewModel.removeSettingsChangedListener(this)
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.setBackgroundColor(ContextCompat.getColor(view.context, R.color.dialogBackground))
     }
 }

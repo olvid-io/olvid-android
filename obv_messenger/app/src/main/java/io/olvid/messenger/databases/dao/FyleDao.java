@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -36,13 +38,13 @@ import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 @Dao
 public interface FyleDao {
     @Insert
-    long insert(Fyle fyle);
+    long insert(@NonNull Fyle fyle);
 
     @Delete
-    void delete(Fyle fyle);
+    void delete(@NonNull Fyle fyle);
 
     @Update
-    void update(Fyle fyle);
+    void update(@NonNull Fyle fyle);
 
 
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
@@ -54,11 +56,11 @@ public interface FyleDao {
     LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> getDiscussionDraftFyles(long discussionId);
 
     @Query("SELECT * FROM " + Fyle.TABLE_NAME + " WHERE id = :fyleId")
-    Fyle getById(long fyleId);
+    @Nullable Fyle getById(long fyleId);
 
 
     @Query("SELECT * FROM " + Fyle.TABLE_NAME + " WHERE " + Fyle.SHA256 + " = :sha256")
-    Fyle getBySha256(byte[] sha256);
+    @Nullable Fyle getBySha256(@NonNull byte[] sha256);
 
     @Query("SELECT fyle.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " LEFT JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMJoin " +

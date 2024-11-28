@@ -21,6 +21,8 @@ package io.olvid.messenger.databases.dao;
 
 import static io.olvid.messenger.databases.dao.DiscussionDao.PREFIX_DISCUSSION_COLUMNS;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.paging.PagingSource;
 import androidx.room.ColumnInfo;
@@ -79,20 +81,20 @@ public interface MessageDao {
 
 
     @Insert
-    long insert(Message message);
+    long insert(@NonNull Message message);
 
     @Delete
-    void delete(Message... messages);
+    void delete(@NonNull Message... messages);
 
     @Update
-    void update(Message message);
+    void update(@NonNull Message message);
 
     @Query("SELECT m.id FROM " + Message.TABLE_NAME + " AS m " +
             " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid" +
             " WHERE m." + Message.MESSAGE_TYPE + " <= " + Message.TYPE_OUTBOUND_MESSAGE +
             " AND m." + Message.DISCUSSION_ID + " = :discussionId" +
             " AND " + Message.FTS_TABLE_NAME + " MATCH :query ORDER BY m." + Message.TIMESTAMP + " DESC")
-    List<Long> discussionSearch(long discussionId, String query);
+    List<Long> discussionSearch(long discussionId, @NonNull String query);
 
 
     class DiscussionAndMessage {
@@ -135,7 +137,7 @@ public interface MessageDao {
             Message.WIPED_ATTACHMENT_COUNT + " = :wipedAttachmentCount, " +
             Message.IMAGE_RESOLUTIONS + " = :imageResolutions " +
             " WHERE id = :messageId")
-    void updateAttachmentCount(long messageId, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, String imageResolutions);
+    void updateAttachmentCount(long messageId, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, @Nullable String imageResolutions);
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.WIPE_STATUS + " = :wipeStatus, " +
@@ -152,13 +154,13 @@ public interface MessageDao {
             " SET " + Message.CONTENT_BODY + " = :body, " +
             Message.EDITED + " = " + Message.EDITED_UNSEEN +
             " WHERE id = :messageId")
-    void updateBody(long messageId, String body);
+    void updateBody(long messageId, @Nullable String body);
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.CONTENT_BODY + " = :body, " +
             Message.JSON_LOCATION + " = :jsonLocation " +
             " WHERE id = :messageId")
-    void updateLocation(long messageId, String body, String jsonLocation);
+    void updateLocation(long messageId, @Nullable String body, @Nullable String jsonLocation);
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.LOCATION_TYPE + " = :locationType " +
@@ -168,12 +170,12 @@ public interface MessageDao {
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.REACTIONS + " = :reactions " +
             " WHERE id = :messageId")
-    void updateReactions(long messageId, String reactions);
+    void updateReactions(long messageId, @Nullable String reactions);
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.JSON_MENTIONS + " = :mentions " +
             " WHERE id = :messageId")
-    void updateMentions(long messageId, String mentions);
+    void updateMentions(long messageId, @Nullable String mentions);
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.MENTIONED + " = :mentioned " +
@@ -193,21 +195,21 @@ public interface MessageDao {
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.LINK_PREVIEW_FYLE_ID + " = :linkPreviewFyleId " +
             " WHERE id = :messageId")
-    void updateLinkPreviewFyleId(long messageId, Long linkPreviewFyleId);
+    void updateLinkPreviewFyleId(long messageId, @Nullable Long linkPreviewFyleId);
 
-    @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " ASC")
-    LiveData<List<Message>> getDiscussionMessages(long discussionId);
+//    @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " ASC")
+//    LiveData<List<Message>> getDiscussionMessages(long discussionId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " DESC")
     PagingSource<Integer,Message> getDiscussionMessagesPaged(long discussionId);
 
-    @Query("SELECT * FROM " + Message.TABLE_NAME +
-            " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
-            " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
-            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_GROUP_MEMBER_JOINED +
-            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_GROUP_MEMBER_LEFT +
-            " ORDER BY " + Message.SORT_INDEX + " ASC")
-    LiveData<List<Message>> getDiscussionMessagesWithoutGroupMemberChanges(long discussionId);
+//    @Query("SELECT * FROM " + Message.TABLE_NAME +
+//            " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
+//            " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
+//            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_GROUP_MEMBER_JOINED +
+//            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_GROUP_MEMBER_LEFT +
+//            " ORDER BY " + Message.SORT_INDEX + " ASC")
+//    LiveData<List<Message>> getDiscussionMessagesWithoutGroupMemberChanges(long discussionId);
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
@@ -262,7 +264,7 @@ public interface MessageDao {
             " WHERE " + Message.STATUS + " = " + Message.STATUS_DRAFT +
             " AND " + Message.DISCUSSION_ID + " = :discussionId " +
             " ORDER BY " + Message.TIMESTAMP + " DESC LIMIT 1")
-    Message getDiscussionDraftMessageSync(long discussionId);
+    @Nullable Message getDiscussionDraftMessageSync(long discussionId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.STATUS + " = " + Message.STATUS_DRAFT +
@@ -271,7 +273,7 @@ public interface MessageDao {
     LiveData<Message> getDiscussionDraftMessage(long discussionId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE id = :messageId")
-    Message get(long messageId);
+    @Nullable Message get(long messageId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE id = :messageId")
     LiveData<Message> getLive(long messageId);
@@ -281,7 +283,7 @@ public interface MessageDao {
             " AND " + Message.SENDER_IDENTIFIER + " = :senderIdentifier " +
             " AND " + Message.SENDER_THREAD_IDENTIFIER + " = :senderThreadIdentifier " +
             " AND " + Message.SENDER_SEQUENCE_NUMBER + " = :senderSequenceNumber ")
-    Message getBySenderSequenceNumber(long senderSequenceNumber, UUID senderThreadIdentifier, byte[] senderIdentifier, long discussionId);
+    @Nullable Message getBySenderSequenceNumber(long senderSequenceNumber, @NonNull UUID senderThreadIdentifier, @NonNull byte[] senderIdentifier, long discussionId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
@@ -290,43 +292,43 @@ public interface MessageDao {
             " AND " + Message.SENDER_SEQUENCE_NUMBER + " > :senderSequenceNumber " +
             " ORDER BY " + Message.SENDER_SEQUENCE_NUMBER + " ASC " +
             " LIMIT 1")
-    Message getFollowingBySenderSequenceNumber(long senderSequenceNumber, UUID senderThreadIdentifier, byte[] senderIdentifier, long discussionId);
+    @Nullable Message getFollowingBySenderSequenceNumber(long senderSequenceNumber, @NonNull UUID senderThreadIdentifier, @NonNull byte[] senderIdentifier, long discussionId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.SENDER_IDENTIFIER + " = :senderIdentifier " +
             " AND " + Message.SENDER_THREAD_IDENTIFIER + " = :senderThreadIdentifier " +
             " AND " + Message.SENDER_SEQUENCE_NUMBER + " = :senderSequenceNumber ")
-    LiveData<Message> getBySenderSequenceNumberAsync(long senderSequenceNumber, UUID senderThreadIdentifier, byte[] senderIdentifier, long discussionId);
+    LiveData<Message> getBySenderSequenceNumberAsync(long senderSequenceNumber, @NonNull UUID senderThreadIdentifier, @NonNull byte[] senderIdentifier, long discussionId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE id IN (:selectedMessageIds)")
-    List<Message> getMany(List<Long> selectedMessageIds);
+    List<Message> getMany(@NonNull List<Long> selectedMessageIds);
 
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", m.* FROM " + Message.TABLE_NAME + " AS m " +
             " JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " WHERE m." + Message.BOOKMARKED + " = 1 " +
             " ORDER BY m." + Message.SORT_INDEX + " ASC")
-    LiveData<List<DiscussionAndMessage>> getAllBookmarkedLiveData(byte[] bytesOwnedIdentity);
+    LiveData<List<DiscussionAndMessage>> getAllBookmarkedLiveData(@NonNull byte[] bytesOwnedIdentity);
 
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.STATUS + " = " + Message.STATUS_READ +
             " WHERE id IN(:messageIds) " +
             " AND " + Message.STATUS + " = " + Message.STATUS_UNREAD)
-    void markMessagesRead(Long[] messageIds);
+    void markMessagesRead(@NonNull Long[] messageIds);
 
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.EDITED + " = " + Message.EDITED_SEEN +
             " WHERE id IN(:messageIds) " +
             " AND " + Message.EDITED + " = " + Message.EDITED_UNSEEN)
-    void markEditedMessagesSeen(Long[] messageIds);
+    void markEditedMessagesSeen(@NonNull Long[] messageIds);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE id IN(:messageIds) " +
             " AND " + Message.WIPE_STATUS + " = " + Message.WIPE_STATUS_WIPE_ON_READ)
-    List<Message> getWipeOnReadSubset(Long[] messageIds);
+    List<Message> getWipeOnReadSubset(@NonNull Long[] messageIds);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.WIPE_STATUS + " = " + Message.WIPE_STATUS_WIPE_ON_READ)
@@ -340,7 +342,7 @@ public interface MessageDao {
             " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
             " ORDER BY " + Message.SENDER_SEQUENCE_NUMBER + " ASC " +
             " LIMIT 1")
-    Message getNextMessageBySequenceNumber(long senderSequenceNumber, UUID senderThreadIdentifier, byte[] senderIdentifier, long discussionId);
+    @Nullable Message getNextMessageBySequenceNumber(long senderSequenceNumber, @NonNull UUID senderThreadIdentifier, @NonNull byte[] senderIdentifier, long discussionId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
@@ -350,34 +352,34 @@ public interface MessageDao {
             " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
             " ORDER BY " + Message.SENDER_SEQUENCE_NUMBER + " DESC " +
             " LIMIT 1")
-    Message getPreviousMessageBySequenceNumber(long senderSequenceNumber, UUID senderThreadIdentifier, byte[] senderIdentifier, long discussionId);
+    @Nullable Message getPreviousMessageBySequenceNumber(long senderSequenceNumber, @NonNull UUID senderThreadIdentifier, @NonNull byte[] senderIdentifier, long discussionId);
 
 
     @Query("SELECT " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME +
-            " WHERE " + Message.DISCUSSION_ID + " = :disucssionId " +
+            " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.SORT_INDEX + " < :maxSortIndex " +
             " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
             " ORDER BY " + Message.SORT_INDEX + " DESC " +
             " LIMIT 1")
-    Double getPreviousSortIndex(double maxSortIndex, long disucssionId);
+    @Nullable Double getPreviousSortIndex(double maxSortIndex, long discussionId);
 
     @Query("SELECT " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME +
-            " WHERE " + Message.DISCUSSION_ID + " = :disucssionId " +
+            " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.SORT_INDEX + " > :maxSortIndex " +
             " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
             " ORDER BY " + Message.SORT_INDEX + " ASC " +
             " LIMIT 1")
-    Double getNextSortIndex(double maxSortIndex, long disucssionId);
+    @Nullable Double getNextSortIndex(double maxSortIndex, long discussionId);
 
     @Query("SELECT MAX(" + Message.SORT_INDEX + ") FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId")
-    double getDiscussionMaxSortIndex(long discussionId);
+    @Nullable Double getDiscussionMaxSortIndex(long discussionId);
 
     @Query("SELECT count(*) FROM " + Message.TABLE_NAME + " AS mess " +
             " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
             " ON mess." + Message.DISCUSSION_ID + " = disc.id " +
             " WHERE mess." + Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER + " = :engineIdentifier " +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    int getCountForEngineIdentifier(byte[] bytesOwnedIdentity, byte[] engineIdentifier);
+    int getCountForEngineIdentifier(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] engineIdentifier);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId")
     List<Message> getAllDiscussionMessagesSync(long discussionId);
@@ -426,7 +428,7 @@ public interface MessageDao {
             ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY +  ") " +
             " AND inv." + Invitation.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " )")
-    LiveData<Boolean> hasUnreadMessagesOrDiscussionsOrInvitations(byte[] bytesOwnedIdentity);
+    LiveData<Boolean> hasUnreadMessagesOrDiscussionsOrInvitations(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT EXISTS " +
             " ( SELECT 1 FROM " + Message.TABLE_NAME + " AS message " +
@@ -435,7 +437,7 @@ public interface MessageDao {
             " WHERE discussion." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND message." + Message.BOOKMARKED + " = 1 " +
             ")")
-    LiveData<Boolean> hasBookmarkedMessages(byte[] bytesOwnedIdentity);
+    LiveData<Boolean> hasBookmarkedMessages(@NonNull byte[] bytesOwnedIdentity);
 
 
     @Query("SELECT COUNT(*) as unread_count, id as message_id, min(" + Message.SORT_INDEX + ") as min_sort_index FROM " + Message.TABLE_NAME +
@@ -517,7 +519,7 @@ public interface MessageDao {
     " ON FMjoin." + FyleMessageJoinWithStatus.FYLE_ID + " = fyle.id " +
     " WHERE fyle." + Fyle.FILE_PATH + " IS NULL " +
     " AND mess.id IN ( :selectedMessageIds )")
-    int countMessagesWithIncompleteFyles(List<Long> selectedMessageIds);
+    int countMessagesWithIncompleteFyles(@NonNull List<Long> selectedMessageIds);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
@@ -547,7 +549,7 @@ public interface MessageDao {
             " AND m." + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " ORDER BY " + Message.TIMESTAMP + " ASC ")
-    LiveData<List<Message>> getCurrentlySharingLocationMessagesForOwnedIdentityLiveData(byte[] bytesOwnedIdentity);
+    LiveData<List<Message>> getCurrentlySharingLocationMessagesForOwnedIdentityLiveData(@NonNull byte[] bytesOwnedIdentity);
 
 
     @Query("SELECT EXISTS " +
@@ -557,7 +559,7 @@ public interface MessageDao {
             " WHERE m." + Message.JSON_LOCATION + " NOT NULL " +
             " AND m." + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity)")
-    LiveData<Boolean> hasLocationSharing(byte[] bytesOwnedIdentity);
+    LiveData<Boolean> hasLocationSharing(@NonNull byte[] bytesOwnedIdentity);
 
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
@@ -584,7 +586,7 @@ public interface MessageDao {
             " AND " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.SENDER_IDENTIFIER + " = :senderIdentifier " +
             " ORDER BY " + Message.SORT_INDEX + " ASC ")
-    List<Message> getCurrentLocationSharingMessagesOfIdentityInDiscussion(byte[] senderIdentifier, long discussionId);
+    List<Message> getCurrentLocationSharingMessagesOfIdentityInDiscussion(@NonNull byte[] senderIdentifier, long discussionId);
 
     @Query("SELECT id FROM " + Message.TABLE_NAME +
             " WHERE " + Message.LIMITED_VISIBILITY + " = 1")
@@ -594,7 +596,7 @@ public interface MessageDao {
             " WHERE " + Message.MESSAGE_TYPE + " IN (" + Message.TYPE_INBOUND_MESSAGE + "," + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE + ") " +
             " AND " + Message.STATUS + " = " + Message.STATUS_UNREAD +
             " AND " + Message.DISCUSSION_ID + " = :discussionId ")
-    Long getServerTimestampOfLatestUnreadInboundMessageInDiscussion(long discussionId);
+    @Nullable Long getServerTimestampOfLatestUnreadInboundMessageInDiscussion(long discussionId);
 
     @Query("SELECT COUNT(*) FROM " + Message.TABLE_NAME +
             " WHERE " + Message.WIPE_STATUS + " = " + Message.WIPE_STATUS_REMOTE_DELETED)

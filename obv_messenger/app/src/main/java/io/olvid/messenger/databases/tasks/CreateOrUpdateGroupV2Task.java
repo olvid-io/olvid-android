@@ -87,8 +87,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 boolean hasUntrustedDetails = false;
                 boolean messageInserted = false;
                 boolean needToPostSettingsUpdateMessage = groupWasJustCreatedByMe && !createdOnOtherDevice && db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(groupV2.bytesOwnedIdentity);
-                boolean thereAreNewMembersWithChangeSettingsPermissionChanged = false;
-                List<byte[]> bytesIdentitiesOfMembersWithChangeSettingsPermission = new ArrayList<>();
+                List<byte[]> bytesIdentitiesOfNewMembersWithChangeSettingsPermission = new ArrayList<>();
 
                 byte[] bytesGroupIdentifier = groupV2.groupIdentifier.getBytes();
 
@@ -143,7 +142,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         insertLostSendMessage = true;
                     }
                     if (groupV2.ownPermissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
-                        thereAreNewMembersWithChangeSettingsPermissionChanged = true;
+                        bytesIdentitiesOfNewMembersWithChangeSettingsPermission.add(groupV2.bytesOwnedIdentity);
                     }
                 } else {
                     // if it exists, update any field that might have changed
@@ -164,7 +163,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     group.ownPermissionRemoteDeleteAnything = groupV2.ownPermissions.contains(GroupV2.Permission.REMOTE_DELETE_ANYTHING);
                     group.ownPermissionEditOrRemoteDeleteOwnMessages = groupV2.ownPermissions.contains(GroupV2.Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES);
                     if (!group.ownPermissionChangeSettings && groupV2.ownPermissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
-                        thereAreNewMembersWithChangeSettingsPermissionChanged = true;
+                        bytesIdentitiesOfNewMembersWithChangeSettingsPermission.add(groupV2.bytesOwnedIdentity);
                     }
                     group.ownPermissionChangeSettings = groupV2.ownPermissions.contains(GroupV2.Permission.CHANGE_SETTINGS);
                     if (group.ownPermissionSendMessage != groupV2.ownPermissions.contains(GroupV2.Permission.SEND_MESSAGE)) {
@@ -175,13 +174,9 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         }
                     }
                     group.ownPermissionSendMessage = groupV2.ownPermissions.contains(GroupV2.Permission.SEND_MESSAGE);
-                    db.group2Dao().update(group); // TODO: update fullSearchField too
+                    db.group2Dao().update(group);
                 }
 
-                if (group.ownPermissionChangeSettings) {
-                    // add myself to users with change settings permission, so I can query my other devices for shared settings
-                    bytesIdentitiesOfMembersWithChangeSettingsPermission.add(group.bytesOwnedIdentity);
-                }
 
                 //////////
                 // create (or reuse) the associated discussion if there is none
@@ -292,10 +287,6 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         }
                     }
 
-                    if (obvGroupV2Member.permissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
-                        bytesIdentitiesOfMembersWithChangeSettingsPermission.add(obvGroupV2Member.bytesIdentity);
-                    }
-
                     BytesKey key = new BytesKey(obvGroupV2Member.bytesIdentity);
                     Group2Member existingMember = membersToRemove.remove(key);
                     if (existingMember == null) {
@@ -308,8 +299,8 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                                 existingMember.permissionChangeSettings != obvGroupV2Member.permissions.contains(GroupV2.Permission.CHANGE_SETTINGS) ||
                                 existingMember.permissionSendMessage != obvGroupV2Member.permissions.contains(GroupV2.Permission.SEND_MESSAGE)) {
 
-                            if (existingMember.permissionChangeSettings != obvGroupV2Member.permissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
-                                thereAreNewMembersWithChangeSettingsPermissionChanged = true;
+                            if (!existingMember.permissionChangeSettings && obvGroupV2Member.permissions.contains(GroupV2.Permission.CHANGE_SETTINGS)) {
+                                bytesIdentitiesOfNewMembersWithChangeSettingsPermission.add(existingMember.bytesContactIdentity);
                             }
                             existingMember.permissionAdmin = obvGroupV2Member.permissions.contains(GroupV2.Permission.GROUP_ADMIN);
                             existingMember.permissionRemoteDeleteAnything = obvGroupV2Member.permissions.contains(GroupV2.Permission.REMOTE_DELETE_ANYTHING);
@@ -440,7 +431,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         Group2Member group2Member = new Group2Member(groupV2.bytesOwnedIdentity, bytesGroupIdentifier, key.bytes, permissions);
                         db.group2MemberDao().insert(group2Member);
                         if (group2Member.permissionChangeSettings) {
-                            thereAreNewMembersWithChangeSettingsPermissionChanged = true;
+                            bytesIdentitiesOfNewMembersWithChangeSettingsPermission.add(key.bytes);
                         }
 
                         if (!pendingToRemove.containsKey(key)) {
@@ -587,7 +578,8 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                 }
 
-                if (((groupWasJustCreatedByMe && createdOnOtherDevice) || (!updatedByMe && thereAreNewMembersWithChangeSettingsPermissionChanged)) && !bytesIdentitiesOfMembersWithChangeSettingsPermission.isEmpty()) {
+                if (((groupWasJustCreatedByMe && createdOnOtherDevice) || !updatedByMe)
+                        && !bytesIdentitiesOfNewMembersWithChangeSettingsPermission.isEmpty()) {
                     // the list of users with the permission to change group shared settings has changed
                     //    --> send a query shared settings message to them to have the most up to date shared settings
                     Integer jsonSharedSettingsVersion;
@@ -608,7 +600,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                                     Message.getDiscussionQuerySharedSettingsPayloadAsBytes(finalDiscussion, jsonSharedSettingsVersion, jsonExpiration),
                                     null,
                                     new ObvOutboundAttachment[0],
-                                    bytesIdentitiesOfMembersWithChangeSettingsPermission,
+                                    bytesIdentitiesOfNewMembersWithChangeSettingsPermission,
                                     groupV2.bytesOwnedIdentity,
                                     false,
                                     false

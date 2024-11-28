@@ -44,7 +44,8 @@ public class KeycloakSyncSnapshot implements ObvSyncSnapshotNode {
     public static final String JWKS = "jwks";
     public static final String SIGNATURE_KEY = "signature_key";
     public static final String SELF_REVOCATION_TEST_NONCE = "self_revocation_test_nonce";
-    static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(Arrays.asList(SERVER_URL, CLIENT_ID, CLIENT_SECRET, KEYCLOAK_USER_ID, JWKS, SIGNATURE_KEY, SELF_REVOCATION_TEST_NONCE));
+    public static final String TRANSFER_RESTRICTED = "transfer_restricted";
+    static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(Arrays.asList(SERVER_URL, CLIENT_ID, CLIENT_SECRET, KEYCLOAK_USER_ID, JWKS, SIGNATURE_KEY, SELF_REVOCATION_TEST_NONCE, TRANSFER_RESTRICTED));
 
 
     public String server_url;
@@ -54,6 +55,7 @@ public class KeycloakSyncSnapshot implements ObvSyncSnapshotNode {
     public String jwks;
     public String signature_key;
     public String self_revocation_test_nonce;
+    public boolean transfer_restricted;
     public HashSet<String> domain;
 
 
@@ -66,6 +68,7 @@ public class KeycloakSyncSnapshot implements ObvSyncSnapshotNode {
         keycloakSyncSnapshot.jwks = keycloakServer.getSerializedJwks();
         keycloakSyncSnapshot.signature_key = keycloakServer.getSerializedSignatureKey();
         keycloakSyncSnapshot.self_revocation_test_nonce = keycloakServer.getSelfRevocationTestNonce();
+        keycloakSyncSnapshot.transfer_restricted = keycloakServer.isTransferRestricted();
         keycloakSyncSnapshot.domain = DEFAULT_DOMAIN;
         return keycloakSyncSnapshot;
     }
@@ -81,7 +84,7 @@ public class KeycloakSyncSnapshot implements ObvSyncSnapshotNode {
         }
 
         try {
-            KeycloakServer keycloakServer = new KeycloakServer(identityManagerSession, server_url, ownedIdentity, jwks, domain.contains(SIGNATURE_KEY) ? signature_key : null, client_id, client_secret);
+            KeycloakServer keycloakServer = new KeycloakServer(identityManagerSession, server_url, ownedIdentity, jwks, domain.contains(SIGNATURE_KEY) ? signature_key : null, client_id, client_secret, domain.contains(TRANSFER_RESTRICTED) && transfer_restricted);
             keycloakServer.insert();
             keycloakServer.setKeycloakUserId(keycloak_user_id);
             keycloakServer.setSelfRevocationTestNonce(self_revocation_test_nonce);
@@ -145,6 +148,12 @@ public class KeycloakSyncSnapshot implements ObvSyncSnapshotNode {
                 }
                 case SELF_REVOCATION_TEST_NONCE: {
                     if (!Objects.equals(self_revocation_test_nonce, other.self_revocation_test_nonce)) {
+                        return false;
+                    }
+                    break;
+                }
+                case TRANSFER_RESTRICTED: {
+                    if (transfer_restricted ^ other.transfer_restricted) {
                         return false;
                     }
                     break;

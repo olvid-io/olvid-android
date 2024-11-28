@@ -23,6 +23,7 @@ import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
@@ -35,6 +36,7 @@ import android.view.MenuItem.OnActionExpandListener
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnClickListener
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.TextView
@@ -47,6 +49,7 @@ import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.SnackbarDuration
@@ -60,10 +63,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
@@ -177,12 +187,29 @@ class MainActivity : LockableActivity(), OnClickListener {
         }
 
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+
         setContentView(R.layout.activity_main)
         root = findViewById(R.id.root_coordinator)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        val actionBar = supportActionBar
-        actionBar?.setDisplayShowTitleEnabled(false)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
+        toolbar?.let {
+            ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    updateMargins(top = insets.top)
+                }
+                root?.let { rootLayout ->
+                    rootLayout.updatePadding(rootLayout.paddingLeft, rootLayout.paddingTop, rootLayout.paddingRight, insets.bottom)
+                }
+                WindowInsetsCompat.CONSUMED
+            }
+        }
+
         val snackBarContainer = findViewById<ComposeView>(R.id.snackbar_container)
         snackBarContainer.setContent {
             val snackbarState = remember {
@@ -213,6 +240,7 @@ class MainActivity : LockableActivity(), OnClickListener {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .navigationBarsPadding()
                 ) {
                     SnackbarHost(
                         hostState = snackbarState, modifier = Modifier
@@ -340,7 +368,8 @@ class MainActivity : LockableActivity(), OnClickListener {
             if (ownedIdentity == null) {
                 return@switchMap null
             }
-            AppDatabase.getInstance().messageDao().hasLocationSharing(ownedIdentity.bytesOwnedIdentity)
+            AppDatabase.getInstance().messageDao()
+                .hasLocationSharing(ownedIdentity.bytesOwnedIdentity)
         }.observe(this) { locationShared: Boolean? ->
             if (showLocationSharing != (locationShared == true)) {
                 showLocationSharing = locationShared == true
@@ -427,43 +456,38 @@ class MainActivity : LockableActivity(), OnClickListener {
         } else {
             intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA)
         }
-        if (bytesOwnedIdentityToSelect != null && !Arrays.equals(
-                bytesOwnedIdentityToSelect,
-                AppSingleton.getBytesCurrentIdentity()
-            )
-        ) {
+        if (bytesOwnedIdentityToSelect != null && !bytesOwnedIdentityToSelect.contentEquals(AppSingleton.getBytesCurrentIdentity())) {
             // if a profile switch is required, execute only once the identity is switched
             intent.removeExtra(HEX_STRING_BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA)
             intent.removeExtra(BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA)
 
             // check if identity is hidden before selecting it
-            val finalBytesOwnedIdentityToSelect: ByteArray = bytesOwnedIdentityToSelect
             App.runThread {
-                val ownedIdentity =
-                    AppDatabase.getInstance().ownedIdentityDao()[finalBytesOwnedIdentityToSelect]
-                if (ownedIdentity.isHidden) {
-                    runOnUiThread {
-                        object : OpenHiddenProfileDialog(this) {
-                            override fun onHiddenIdentityPasswordEntered(
-                                dialog: AlertDialog,
-                                byteOwnedIdentity: ByteArray
-                            ) {
-                                if (finalBytesOwnedIdentityToSelect.contentEquals(byteOwnedIdentity)
+                AppDatabase.getInstance().ownedIdentityDao()[bytesOwnedIdentityToSelect]?.let { ownedIdentity ->
+                    if (ownedIdentity.isHidden) {
+                        runOnUiThread {
+                            object : OpenHiddenProfileDialog(this) {
+                                override fun onHiddenIdentityPasswordEntered(
+                                    dialog: AlertDialog,
+                                    byteOwnedIdentity: ByteArray
                                 ) {
-                                    dialog.dismiss()
-                                    AppSingleton.getInstance()
-                                        .selectIdentity(finalBytesOwnedIdentityToSelect) {
-                                            executeIntentAction(intent)
-                                        }
+                                    if (bytesOwnedIdentityToSelect.contentEquals(byteOwnedIdentity)
+                                    ) {
+                                        dialog.dismiss()
+                                        AppSingleton.getInstance()
+                                            .selectIdentity(bytesOwnedIdentityToSelect) {
+                                                executeIntentAction(intent)
+                                            }
+                                    }
                                 }
                             }
                         }
+                    } else {
+                        AppSingleton.getInstance()
+                            .selectIdentity(bytesOwnedIdentityToSelect) {
+                                executeIntentAction(intent)
+                            }
                     }
-                } else {
-                    AppSingleton.getInstance()
-                        .selectIdentity(finalBytesOwnedIdentityToSelect) {
-                            executeIntentAction(intent)
-                        }
                 }
             }
         } else {
@@ -779,7 +803,7 @@ class MainActivity : LockableActivity(), OnClickListener {
     override fun onResume() {
         super.onResume()
         mainActivityPageChangeListener!!.onPageSelected(viewPager.currentItem)
-        val pingSetting = SettingsActivity.getPingConnectivityIndicator()
+        val pingSetting = SettingsActivity.pingConnectivityIndicator
         if (previousPingConnectivityIndicator != NONE || pingSetting != NONE) {
             showPingIndicator(pingSetting)
             if (pingSetting != NONE) {
@@ -825,7 +849,7 @@ class MainActivity : LockableActivity(), OnClickListener {
                 if (showBookmarks) {
                     menuInflater.inflate(R.menu.menu_main_bookmarks, menu)
                 }
-                if (showLocationSharing && SettingsActivity.getLocationIntegration() != LocationIntegrationEnum.BASIC) {
+                if (showLocationSharing && SettingsActivity.locationIntegration != LocationIntegrationEnum.BASIC) {
                     menuInflater.inflate(R.menu.menu_main_location, menu)
                 }
                 val bookmarkAction = menu.findItem(R.id.menu_action_bookmarks)
@@ -908,21 +932,44 @@ class MainActivity : LockableActivity(), OnClickListener {
             }
         } else if (itemId == R.id.menu_action_location) {
             if (viewPager.currentItem == DISCUSSIONS_TAB) {
-                when (SettingsActivity.getLocationIntegration()) {
-                    LocationIntegrationEnum.NONE -> LocationIntegrationSelectorDialog(this, false, object : OnIntegrationSelectedListener {
-                        override fun onIntegrationSelected(integration: LocationIntegrationEnum, customOsmServerUrl: String?) {
-                            SettingsActivity.setLocationIntegration(integration.string, customOsmServerUrl)
-                            if (integration == LocationIntegrationEnum.OSM || integration == LocationIntegrationEnum.MAPS || integration == LocationIntegrationEnum.BASIC || integration == LocationIntegrationEnum.CUSTOM_OSM) {
-                                FullscreenMapDialogFragment.newInstance(null, null, AppSingleton.getBytesCurrentIdentity(), SettingsActivity.getLocationIntegration())?.show(supportFragmentManager, DiscussionActivity.FULL_SCREEN_MAP_FRAGMENT_TAG)
-                            } else {
-                                invalidateOptionsMenu();
+                when (SettingsActivity.locationIntegration) {
+                    LocationIntegrationEnum.NONE -> LocationIntegrationSelectorDialog(
+                        this,
+                        false,
+                        object : OnIntegrationSelectedListener {
+                            override fun onIntegrationSelected(
+                                integration: LocationIntegrationEnum,
+                                customOsmServerUrl: String?
+                            ) {
+                                SettingsActivity.setLocationIntegration(
+                                    integration.string,
+                                    customOsmServerUrl
+                                )
+                                if (integration == LocationIntegrationEnum.OSM || integration == LocationIntegrationEnum.MAPS || integration == LocationIntegrationEnum.BASIC || integration == LocationIntegrationEnum.CUSTOM_OSM) {
+                                    FullscreenMapDialogFragment.newInstance(
+                                        null,
+                                        null,
+                                        AppSingleton.getBytesCurrentIdentity(),
+                                        SettingsActivity.locationIntegration
+                                    )?.show(
+                                        supportFragmentManager,
+                                        DiscussionActivity.FULL_SCREEN_MAP_FRAGMENT_TAG
+                                    )
+                                } else {
+                                    invalidateOptionsMenu();
+                                }
                             }
-                        }
-                    }).show()
+                        }).show()
 
                     LocationIntegrationEnum.OSM,
                     LocationIntegrationEnum.MAPS,
-                    LocationIntegrationEnum.CUSTOM_OSM -> FullscreenMapDialogFragment.newInstance(null, null, AppSingleton.getBytesCurrentIdentity(), SettingsActivity.getLocationIntegration())?.show(supportFragmentManager, FULL_SCREEN_MAP_FRAGMENT_TAG)
+                    LocationIntegrationEnum.CUSTOM_OSM -> FullscreenMapDialogFragment.newInstance(
+                        null,
+                        null,
+                        AppSingleton.getBytesCurrentIdentity(),
+                        SettingsActivity.locationIntegration
+                    )?.show(supportFragmentManager, FULL_SCREEN_MAP_FRAGMENT_TAG)
+
                     else -> Unit
                 }
             }

@@ -289,7 +289,7 @@ public class ContactIdentity implements ObvDatabase {
             identityManagerSession.session.addSessionCommitListener(this);
         }
         if (jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails() != null) {
-            JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakSignature(identityManagerSession.session, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
+            JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakIdentitySignature(identityManagerSession.session, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
             if (jsonKeycloakUserDetails != null) {
                 // the details are properly signed --> the call to markContactAsCertifiedByOwnKeycloak() will auto-trust the new details, so we can return
                 JsonIdentityDetails certifiedJsonIdentityDetails = jsonKeycloakUserDetails.getIdentityDetails(jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
@@ -609,7 +609,7 @@ public class ContactIdentity implements ObvDatabase {
             contactIdentityObject.revokedAsCompromised = revokedAsCompromised;
             contactIdentityObject.insert();
 
-            JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakSignature(identityManagerSession.session, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
+            JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakIdentitySignature(identityManagerSession.session, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
 
             if (jsonKeycloakUserDetails != null) {
                 try {
@@ -1300,7 +1300,7 @@ public class ContactIdentity implements ObvDatabase {
         contactIdentityObject.forcefullyTrustedByUser = pojo.forcefully_trusted;
         contactIdentityObject.insert();
 
-        JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakSignature(identityManagerSession.session, ownedIdentity, trusted_details.getJsonIdentityDetailsWithVersionAndPhoto().getIdentityDetails().getSignedUserDetails());
+        JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakIdentitySignature(identityManagerSession.session, ownedIdentity, trusted_details.getJsonIdentityDetailsWithVersionAndPhoto().getIdentityDetails().getSignedUserDetails());
         if (jsonKeycloakUserDetails != null) {
             contactIdentityObject.setCertifiedByOwnKeycloak(true, null);
         }

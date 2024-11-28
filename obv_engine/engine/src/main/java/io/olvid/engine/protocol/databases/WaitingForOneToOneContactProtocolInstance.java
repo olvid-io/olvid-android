@@ -260,6 +260,7 @@ public class WaitingForOneToOneContactProtocolInstance implements ObvDatabase {
                 protocolUid,
                 messageId,
                 new Encoded[]{Encoded.of(contactIdentity)},
+                false,
                 false);
     }
 

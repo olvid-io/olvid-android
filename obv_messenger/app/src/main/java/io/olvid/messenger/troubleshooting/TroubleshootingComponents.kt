@@ -219,6 +219,7 @@ fun TroubleShootItem(
     valid: Boolean,
     critical: Boolean = true,
     checkState: CheckState<out Any>? = null,
+    additionalContent: (@Composable RowScope.() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit
 ) {
     var expanded by rememberSaveable {
@@ -288,14 +289,26 @@ fun TroubleShootItem(
                     )
                 }
                 AnimatedVisibility(visible = expanded) {
-                    Text(
-                        modifier = Modifier.padding(top = 4.dp, bottom = if (valid) 4.dp else 0.dp),
-                        text = if (valid) description else descriptionInvalid ?: description,
-                        color = colorResource(id = color.greyTint),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Normal,
-                        lineHeight = 18.sp,
-                    )
+                    Column {
+                        Text(
+                            modifier = Modifier.padding(top = 4.dp, bottom = if (valid && additionalContent == null) 4.dp else 0.dp),
+                            text = if (valid) description else descriptionInvalid ?: description,
+                            color = colorResource(id = color.greyTint),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 18.sp,
+                        )
+                        additionalContent?.let {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                it()
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -339,7 +352,7 @@ fun TroubleShootItem(
                 actions()
             }
         }
-        AnimatedVisibility(visible = valid) {
+        AnimatedVisibility(visible = valid && (expanded.not() || additionalContent == null)) {
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
@@ -359,6 +372,7 @@ enum class TroubleshootingItemType {
     BACKUPS,
     CONNECTIVITY,
     STORAGE,
+    DB_SYNC,
 }
 
 @Preview

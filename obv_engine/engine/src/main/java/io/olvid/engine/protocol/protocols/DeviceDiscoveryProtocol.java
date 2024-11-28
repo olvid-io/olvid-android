@@ -289,9 +289,7 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                     SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                     DEVICE_DISCOVERY_CHILD_PROTOCOL_ID,
-                    childProtocolInstanceUid,
-                    false
-            );
+                    childProtocolInstanceUid);
             ChannelMessageToSend messageToSend = new DeviceDiscoveryChildProtocol.InitialMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 

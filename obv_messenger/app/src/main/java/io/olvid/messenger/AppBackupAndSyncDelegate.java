@@ -107,6 +107,7 @@ public class AppBackupAndSyncDelegate implements ObvBackupAndSyncDelegate {
                                         keycloakState.jwks,
                                         keycloakState.signatureKey,
                                         keycloakState.serializedAuthState,
+                                        keycloakState.transferRestricted,
                                         null,
                                         0,
                                         0,
