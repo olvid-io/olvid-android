@@ -677,7 +677,7 @@ public class KeycloakManager {
         });
     }
 
-    private static void registerMeApiKeyOnServer(KeycloakManagerState kms, BytesKey identityBytesKey, UUID apiKey) {
+    private static void registerMeApiKeyOnServer(KeycloakManagerState kms, BytesKey identityBytesKey, @NonNull UUID apiKey) {
         // retry at most 10 times
         for (int i=0; i<10; i++) {
             RegisterApiKeyResult registerApiKeyResult = AppSingleton.getEngine().registerOwnedIdentityApiKeyOnServer(identityBytesKey.bytes, apiKey);

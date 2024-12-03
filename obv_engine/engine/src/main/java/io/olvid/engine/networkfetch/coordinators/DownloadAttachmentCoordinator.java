@@ -77,10 +77,8 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
         this.refreshInboxAttachmentSignedUrlDelegate = refreshInboxAttachmentSignedUrlDelegate;
 
         downloadAttachmentOperationWeightQueue = new PriorityOperationQueue();
-        downloadAttachmentOperationWeightQueue.execute(4, "Engine-DownloadAttachmentCoordinator-weight");
 
         downloadAttachmentOperationTimestampQueue = new PriorityOperationQueue();
-        downloadAttachmentOperationTimestampQueue.execute(4, "Engine-DownloadAttachmentCoordinator-timestamp");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -90,6 +88,11 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
 
         awaitingIdentityReactivationOperations = new HashMap<>();
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
+    }
+
+    public void startProcessing() {
+        downloadAttachmentOperationWeightQueue.execute(4, "Engine-DownloadAttachmentCoordinator-weight");
+        downloadAttachmentOperationTimestampQueue.execute(4, "Engine-DownloadAttachmentCoordinator-timestamp");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {

@@ -71,7 +71,6 @@ public class DownloadMessageExtendedPayloadCoordinator implements Operation.OnCa
         this.createServerSessionDelegate = createServerSessionDelegate;
 
         downloadMessagesExtendedPayloadOperationQueue = new NoDuplicateOperationQueue();
-        downloadMessagesExtendedPayloadOperationQueue.execute(1, "Engine-DownloadMessagesExtendedPayloadCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
         awaitingNotificationListener = new AwaitingNotificationListener();
@@ -81,6 +80,10 @@ public class DownloadMessageExtendedPayloadCoordinator implements Operation.OnCa
 
         awaitingIdentityReactivationOperations = new HashMap<>();
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
+    }
+
+    public void startProcessing() {
+        downloadMessagesExtendedPayloadOperationQueue.execute(1, "Engine-DownloadMessagesExtendedPayloadCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {

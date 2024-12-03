@@ -53,9 +53,9 @@
         android:padding="8dp"
         app:srcCompat="@drawable/ic_three_dots_always_white"
         android:theme="@style/AlwaysWhiteSubtleRipple"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/top_bar"
-        app:layout_constraintEnd_toEndOf="@+id/top_bar"
-        app:layout_constraintTop_toTopOf="@+id/top_bar" />
+        app:layout_constraintEnd_toEndOf="@+id/top_bar" />
 
 
     <FrameLayout

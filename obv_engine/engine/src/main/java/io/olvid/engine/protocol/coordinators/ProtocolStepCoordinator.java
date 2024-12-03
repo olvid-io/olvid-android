@@ -56,8 +56,11 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
         this.jsonObjectMapper = jsonObjectMapper;
 
         protocolOperationQueue = new NoDuplicateOperationQueue();
-        protocolOperationQueue.execute(1, "Engine-ProtocolStepCoordinator");
         stepFailedAttemptCount = new HashMap<>();
+    }
+
+    public void startProcessing() {
+        protocolOperationQueue.execute(1, "Engine-ProtocolStepCoordinator");
     }
 
     private void queueNewProtocolOperation(UID receivedMessageUid) {

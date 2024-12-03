@@ -76,7 +76,6 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         this.downloadMessagesAndListAttachmentsDelegate = downloadMessagesAndListAttachmentsDelegate;
 
         registerPushNotificationOperationQueue = new NoDuplicateOperationQueue();
-        registerPushNotificationOperationQueue.execute(1, "Engine-RegisterServerPushNotificationsCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -84,6 +83,10 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         ownedIdentitiesThatNeedAnOwnedDeviceDiscovery = new HashSet<>();
 
         serverSessionCreatedNotificationListener = new ServerSessionCreatedNotificationListener();
+    }
+
+    public void startProcessing() {
+        registerPushNotificationOperationQueue.execute(1, "Engine-RegisterServerPushNotificationsCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {

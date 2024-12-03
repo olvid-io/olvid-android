@@ -69,9 +69,12 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
         this.wellKnownCache = new HashMap<>();
 
         this.wellKnownDownloadOperationQueue = new NoDuplicateOperationQueue();
-        this.wellKnownDownloadOperationQueue.execute(1, "Engine-WellKnownDownloadCoordinator");
 
         this.wellKnownDownloadTimer = new Timer("Engine-WellKnownDownloadTimer");
+    }
+
+    public void startProcessing() {
+        this.wellKnownDownloadOperationQueue.execute(1, "Engine-WellKnownDownloadCoordinator");
     }
 
     public void setNotificationPostingDelegate(NotificationPostingDelegate notificationPostingDelegate) {

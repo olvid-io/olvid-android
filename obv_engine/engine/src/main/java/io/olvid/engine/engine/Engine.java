@@ -74,7 +74,6 @@ import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
-import io.olvid.engine.datatypes.containers.UidAndPreKey;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionEciesMDCKeyPair;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaMDCKeyPair;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
@@ -296,6 +295,13 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         registerToInternalNotifications();
         initializationComplete();
         metaManager.initializationComplete();
+    }
+
+    @Override
+    public void startProcessing() {
+        fetchManager.startProcessing();
+        sendManager.startProcessing();
+        protocolManager.startProcessing();
     }
 
     private static void upgradeTables(Session session, int oldVersion, int newVersion) throws SQLException {

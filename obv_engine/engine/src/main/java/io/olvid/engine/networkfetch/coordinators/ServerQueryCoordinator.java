@@ -96,6 +96,10 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
         notificationListener = new NotificationListener();
     }
 
+    public void startProcessing() {
+        serverQueriesOperationQueue.execute(1, "Engine-ServerQueryCoordinator");
+    }
+
     public void initialQueueing() {
         try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
             PendingServerQuery[] pendingServerQueries = PendingServerQuery.getAll(fetchManagerSession);
@@ -111,9 +115,6 @@ public class ServerQueryCoordinator implements PendingServerQuery.PendingServerQ
         } catch (Exception e) {
             Logger.x(e);
         }
-
-        // only start processing queries after the initial queueing is performed (otherwise a query could be queued while its already being executed)
-        serverQueriesOperationQueue.execute(1, "Engine-ServerQueryCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {

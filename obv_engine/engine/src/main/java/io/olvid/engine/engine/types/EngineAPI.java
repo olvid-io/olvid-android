@@ -59,6 +59,8 @@ public interface EngineAPI {
         FREE_TRIAL_KEY_EXPIRED,
     }
 
+    void startProcessing();
+
     // Engine notifications
     void addNotificationListener(String notificationName, EngineNotificationListener engineNotificationListener);
     void addNotificationListener(String notificationName, EngineNotificationListener engineNotificationListener, ListenerPriority priority);

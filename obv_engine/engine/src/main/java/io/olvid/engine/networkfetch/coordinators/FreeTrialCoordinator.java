@@ -37,6 +37,9 @@ public class FreeTrialCoordinator {
         this.sslSocketFactory = sslSocketFactory;
 
         freeTrialOperationQueue = new OperationQueue(true);
+    }
+
+    public void startProcessing() {
         freeTrialOperationQueue.execute(1, "Engine-FreeTrialCoordinator");
     }
 

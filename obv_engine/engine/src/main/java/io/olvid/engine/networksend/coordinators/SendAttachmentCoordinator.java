@@ -75,7 +75,6 @@ public class SendAttachmentCoordinator implements OutboxAttachment.OutboxAttachm
         this.refreshOutboxAttachmentSignedUrlDelegate = refreshOutboxAttachmentSignedUrlCoordinator;
 
         sendAttachmentOperationQueue = new PriorityOperationQueue();
-        sendAttachmentOperationQueue.execute(4, "Engine-SendAttachmentCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -87,6 +86,10 @@ public class SendAttachmentCoordinator implements OutboxAttachment.OutboxAttachm
 
         awaitingIdentityReactivationOperations = new HashMap<>();
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
+    }
+
+    public void startProcessing() {
+        sendAttachmentOperationQueue.execute(4, "Engine-SendAttachmentCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {

@@ -59,9 +59,12 @@ public class CreateServerSessionCoordinator implements Operation.OnFinishCallbac
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
         createServerSessionOperationQueue = new NoDuplicateOperationQueue();
-        createServerSessionOperationQueue.execute(1, "Engine-CreateServerSessionCoordinator");
 
         queryApiKeyStatusOperationQueue = new OperationQueue(true);
+    }
+
+    public void startProcessing() {
+        createServerSessionOperationQueue.execute(1, "Engine-CreateServerSessionCoordinator");
         queryApiKeyStatusOperationQueue.execute(1, "Engine-CreateServerSessionCoordinator-QueryApiKeyStatus");
     }
 

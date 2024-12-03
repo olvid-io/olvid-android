@@ -63,7 +63,6 @@ public class CancelAttachmentUploadCoordinator implements OutboxAttachment.Outbo
         this.sslSocketFactory = sslSocketFactory;
 
         cancelAttachmentUploadOperationQueue = new NoDuplicateOperationQueue();
-        cancelAttachmentUploadOperationQueue.execute(1, "Engine-CancelAttachmentUploadCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -71,6 +70,10 @@ public class CancelAttachmentUploadCoordinator implements OutboxAttachment.Outbo
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
 
         notificationListener = new NotificationListener();
+    }
+
+    public void startProcessing() {
+        cancelAttachmentUploadOperationQueue.execute(1, "Engine-CancelAttachmentUploadCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {

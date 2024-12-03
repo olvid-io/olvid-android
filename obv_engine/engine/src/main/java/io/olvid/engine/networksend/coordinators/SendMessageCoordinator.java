@@ -78,18 +78,15 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
         this.sslSocketFactory = sslSocketFactory;
 
         sendMessageWithAttachmentOperationQueue = new OperationQueue(true);
-        sendMessageWithAttachmentOperationQueue.execute(1, "Engine-SendMessageCoordinator-WithAttachment");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
 
         userContentMessageUidsByServer = new HashMap<>();
         batchSendUserContentMessageOperationQueue = new NoDuplicateOperationQueue();
-        batchSendUserContentMessageOperationQueue.execute(1, "Engine-SendMessageCoordinator-WithUserContent");
 
         protocolMessageUidsByServer = new HashMap<>();
         batchSendProtocolMessageOperationQueue = new NoDuplicateOperationQueue();
-        batchSendProtocolMessageOperationQueue.execute(1, "Engine-SendMessageCoordinator-Protocol");
 
         batchScheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -98,6 +95,12 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
 
         notificationListener = new NotificationListener();
+    }
+
+    public void startProcessing() {
+        sendMessageWithAttachmentOperationQueue.execute(1, "Engine-SendMessageCoordinator-WithAttachment");
+        batchSendUserContentMessageOperationQueue.execute(1, "Engine-SendMessageCoordinator-WithUserContent");
+        batchSendProtocolMessageOperationQueue.execute(1, "Engine-SendMessageCoordinator-Protocol");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {

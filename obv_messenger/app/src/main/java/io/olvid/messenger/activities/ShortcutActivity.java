@@ -152,7 +152,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
             }
             AppSingleton.getInstance().selectIdentity(bytesOwnedIdentity, null);
         });
-        Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? null : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
+        Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? new byte[0] : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
 
 
         FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();

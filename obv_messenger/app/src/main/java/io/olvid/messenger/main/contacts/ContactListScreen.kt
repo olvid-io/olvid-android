@@ -60,6 +60,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -95,7 +96,7 @@ import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-data class ContactFilterTab(val label: String, val filter: (ContactOrKeycloakDetails) -> Boolean)
+data class ContactFilterTab(val labelResId: Int, val filter: (ContactOrKeycloakDetails) -> Boolean)
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -114,23 +115,24 @@ fun ContactListScreen(
 
     val contacts by contactListViewModel.filteredContacts.observeAsState()
     val refreshState = onRefresh?.let { rememberPullRefreshState(refreshing, onRefresh) }
-    val tabs = arrayListOf(
-        ContactFilterTab(
-            label = stringResource(id = R.string.contact_list_tab_contact),
-            filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == true }
-        ),
-        ContactFilterTab(
-            label = stringResource(id = R.string.contact_list_tab_others),
-            filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == false }
-        )
-    )
-    if (contactListViewModel.keycloakManaged.value) {
-        tabs.add(ContactFilterTab(
-            label = stringResource(id = R.string.contact_list_tab_directory),
-            filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contactType != CONTACT }
-        ))
-    }
 
+    val tabs = arrayListOf(
+            ContactFilterTab(
+                labelResId = R.string.contact_list_tab_contact,
+                filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == true }
+            ),
+            ContactFilterTab(
+                labelResId = R.string.contact_list_tab_others,
+                filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == false }
+            )
+        ).apply {
+            if (contactListViewModel.keycloakManaged.value) {
+                add(ContactFilterTab(
+                    labelResId = R.string.contact_list_tab_directory,
+                    filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contactType != CONTACT }
+                ))
+            }
+        }
 
     AppCompatTheme {
         Box(
@@ -138,8 +140,7 @@ fun ContactListScreen(
                 .then(refreshState?.let { Modifier.pullRefresh(it) } ?: Modifier)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                val pagerState =
-                    rememberPagerState { if (contactListViewModel.keycloakManaged.value) 3 else 2 }
+                val pagerState = rememberPagerState { tabs.size }
                 LaunchedEffect(pagerState) {
                     snapshotFlow { pagerState.currentPage }.collect { page ->
                         if (page == 2) {
@@ -369,7 +370,7 @@ private fun Header(
     contacts: List<ContactOrKeycloakDetails>?,
 ) {
     TabRow(
-        selectedTabIndex = pagerState.currentPage,
+        selectedTabIndex = pagerState.currentPage.coerceAtMost(tabs.size - 1) ,
         backgroundColor = colorResource(id = R.color.almostWhite),
         contentColor = colorResource(id = R.color.almostBlack),
     ) {
@@ -384,7 +385,7 @@ private fun Header(
                 },
                 text = {
                     if (contactListViewModel.getFilter().isNullOrEmpty()) {
-                        Text(text = tab.label, softWrap = false, overflow = TextOverflow.Ellipsis)
+                        Text(text = stringResource(tab.labelResId), softWrap = false, overflow = TextOverflow.Ellipsis)
                     } else if (index == 2 && contactListViewModel.keycloakSearchInProgress) {
                         BadgedBox(badge = {
                             CircularProgressIndicator(
@@ -396,7 +397,7 @@ private fun Header(
                             )
                         }) {
                             Text(
-                                text = tab.label,
+                                text = stringResource(tab.labelResId),
                                 softWrap = false,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -421,7 +422,7 @@ private fun Header(
                             }
                         }) {
                             Text(
-                                text = tab.label,
+                                text = stringResource(tab.labelResId),
                                 softWrap = false,
                                 overflow = TextOverflow.Ellipsis
                             )

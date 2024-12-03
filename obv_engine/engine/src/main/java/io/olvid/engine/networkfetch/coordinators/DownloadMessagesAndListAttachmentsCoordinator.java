@@ -79,13 +79,16 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
         this.createServerSessionDelegate = createServerSessionDelegate;
 
         downloadMessagesAndListAttachmentsOperationQueue = new NoDuplicateOperationQueue();
-        downloadMessagesAndListAttachmentsOperationQueue.execute(1, "Engine-DownloadMessagesAndListAttachmentsCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
         awaitingServerSessionOperations = new HashMap<>();
         awaitingServerSessionOperationsLock = new ReentrantLock();
 
         awaitingNotificationListener = new AwaitingNotificationListener();
+    }
+
+    public void startProcessing() {
+        downloadMessagesAndListAttachmentsOperationQueue.execute(1, "Engine-DownloadMessagesAndListAttachmentsCoordinator");
     }
 
     public void setRegisterServerPushNotificationDelegate(RegisterServerPushNotificationDelegate registerServerPushNotificationDelegate) {

@@ -133,10 +133,8 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         this.jsonObjectMapper = jsonObjectMapper;
 
         websocketCreationOperationQueue = new NoDuplicateOperationQueue();
-        websocketCreationOperationQueue.execute(1, "Engine-WebsocketCoordinator-create");
 
         identityRegistrationOperationQueue = new NoDuplicateOperationQueue();
-        identityRegistrationOperationQueue.execute(1, "Engine-WebsocketCoordinator-register");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>() {
             @Override
@@ -162,6 +160,11 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         existingWebsockets = new HashMap<>();
 
         okHttpClient = initializeOkHttpClientForWebSocket(sslSocketFactory);
+    }
+
+    public void startProcessing() {
+        websocketCreationOperationQueue.execute(1, "Engine-WebsocketCoordinator-create");
+        identityRegistrationOperationQueue.execute(1, "Engine-WebsocketCoordinator-register");
     }
 
     public static OkHttpClient initializeOkHttpClientForWebSocket(SSLSocketFactory sslSocketFactory) {

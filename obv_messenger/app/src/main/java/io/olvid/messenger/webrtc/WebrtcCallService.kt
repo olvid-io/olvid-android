@@ -2784,7 +2784,7 @@ class WebrtcCallService : Service() {
         }
         val endCallIntent = Intent(this, WebrtcCallService::class.java)
         endCallIntent.setAction(ACTION_HANG_UP)
-        endCallIntent.putExtra(CALL_IDENTIFIER_INTENT_EXTRA, Logger.getUuidString(callIdentifier))
+        endCallIntent.putExtra(CALL_IDENTIFIER_INTENT_EXTRA, callIdentifier?.let{Logger.getUuidString(it)} ?: "")
         endCallIntent.putExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity)
         val endCallPendingIntent = PendingIntent.getService(
             this,
@@ -3510,14 +3510,12 @@ class WebrtcCallService : Service() {
                     jsonIceCandidate.sdpMLineIndex,
                     jsonIceCandidate.sdpMid
                 )
-                Logger.d(
-                    """☎ sending peer an ice candidate for call ${
-                        Logger.getUuidString(
-                            callIdentifier
-                        )
-                    }
+                callIdentifier?.let {
+                    Logger.d(
+                        """☎ sending peer an ice candidate for call ${Logger.getUuidString(it)}
 ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
-                )
+                    )
+                }
                 if (callParticipant.contact != null && callParticipant.contact.hasChannelOrPreKey()) {
                     postMessage(listOf(callParticipant), jsonNewIceCandidateMessage)
                 } else {

@@ -85,6 +85,14 @@ public class SendManager implements NetworkSendDelegate, SendManagerSessionFacto
         sendReturnReceiptCoordinator.initialQueueing();
     }
 
+    public void startProcessing() {
+        cancelAttachmentUploadCoordinator.startProcessing();
+        refreshOutboxAttachmentSignedUrlCoordinator.startProcessing();
+        sendAttachmentCoordinator.startProcessing();
+        sendMessageCoordinator.startProcessing();
+        sendReturnReceiptCoordinator.startProcessing();
+    }
+
     public void setDelegate(CreateSessionDelegate createSessionDelegate) {
         this.createSessionDelegate = createSessionDelegate;
 

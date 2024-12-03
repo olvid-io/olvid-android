@@ -70,7 +70,6 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
 
         returnReceiptOwnedIdentityAndIdByServer = new HashMap<>();
         sendReturnReceiptOperationQueue = new NoDuplicateOperationQueue();
-        sendReturnReceiptOperationQueue.execute(1, "Engine-SendReturnReceiptCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -78,6 +77,10 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
 
         notificationListener = new NotificationListener();
+    }
+
+    public void startProcessing() {
+        sendReturnReceiptOperationQueue.execute(1, "Engine-SendReturnReceiptCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {

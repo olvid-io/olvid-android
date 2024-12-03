@@ -92,7 +92,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     private final DownloadMessagesAndListAttachmentsCoordinator downloadMessagesAndListAttachmentsCoordinator;
     private final DownloadMessageExtendedPayloadCoordinator downloadMessageExtendedPayloadCoordinator;
     private final DeleteMessageAndAttachmentsCoordinator deleteMessageAndAttachmentsCoordinator;
-    private final RegisterServerPushNotificationsCoordinator serverPushNotificationsCoordinator;
+    private final RegisterServerPushNotificationsCoordinator registerServerPushNotificationsCoordinator;
     private final WebsocketCoordinator websocketCoordinator;
     private final ServerQueryCoordinator serverQueryCoordinator;
     private final ServerUserDataCoordinator serverUserDataCoordinator;
@@ -116,8 +116,8 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         this.downloadMessagesAndListAttachmentsCoordinator = new DownloadMessagesAndListAttachmentsCoordinator(this, sslSocketFactory, createServerSessionCoordinator);
         this.downloadMessageExtendedPayloadCoordinator = new DownloadMessageExtendedPayloadCoordinator(this, sslSocketFactory, createServerSessionCoordinator);
         this.deleteMessageAndAttachmentsCoordinator = new DeleteMessageAndAttachmentsCoordinator(this, sslSocketFactory, createServerSessionCoordinator);
-        this.serverPushNotificationsCoordinator = new RegisterServerPushNotificationsCoordinator(this, sslSocketFactory, createServerSessionCoordinator, downloadMessagesAndListAttachmentsCoordinator);
-        this.downloadMessagesAndListAttachmentsCoordinator.setRegisterServerPushNotificationDelegate(this.serverPushNotificationsCoordinator);
+        this.registerServerPushNotificationsCoordinator = new RegisterServerPushNotificationsCoordinator(this, sslSocketFactory, createServerSessionCoordinator, downloadMessagesAndListAttachmentsCoordinator);
+        this.downloadMessagesAndListAttachmentsCoordinator.setRegisterServerPushNotificationDelegate(this.registerServerPushNotificationsCoordinator);
         this.serverUserDataCoordinator = new ServerUserDataCoordinator(this, sslSocketFactory, createServerSessionCoordinator, jsonObjectMapper, prng);
         this.serverQueryCoordinator = new ServerQueryCoordinator(this, sslSocketFactory, prng, createServerSessionCoordinator, serverUserDataCoordinator, jsonObjectMapper);
         this.freeTrialCoordinator = new FreeTrialCoordinator(this, sslSocketFactory);
@@ -144,7 +144,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     @Override
     public void initialisationComplete() {
         wellKnownCoordinator.initialQueueing();
-        serverPushNotificationsCoordinator.initialQueueing();
+        registerServerPushNotificationsCoordinator.initialQueueing();
         downloadAttachmentCoordinator.initialQueueing();
         serverQueryCoordinator.initialQueueing();
         downloadMessagesAndListAttachmentsCoordinator.initialQueueing();
@@ -152,6 +152,23 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         websocketCoordinator.initialQueueing();
         serverUserDataCoordinator.initialQueueing();
         createServerSessionCoordinator.initialQueueing();
+    }
+
+    public void startProcessing() {
+        createServerSessionCoordinator.startProcessing();
+        deleteMessageAndAttachmentsCoordinator.startProcessing();
+        downloadAttachmentCoordinator.startProcessing();
+        downloadMessageExtendedPayloadCoordinator.startProcessing();
+        downloadMessagesAndListAttachmentsCoordinator.startProcessing();
+        freeTrialCoordinator.startProcessing();
+        getTurnCredentialsCoordinator.startProcessing();
+        refreshInboxAttachmentSignedUrlCoordinator.startProcessing();
+        registerServerPushNotificationsCoordinator.startProcessing();
+        serverQueryCoordinator.startProcessing();
+        serverUserDataCoordinator.startProcessing();
+        verifyReceiptCoordinator.startProcessing();
+        websocketCoordinator.startProcessing();
+        wellKnownCoordinator.startProcessing();
     }
 
     @SuppressWarnings("unused")
@@ -201,7 +218,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
 
     @SuppressWarnings("unused")
     public void setDelegate(NotificationListeningDelegate notificationListeningDelegate) {
-        this.serverPushNotificationsCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
+        this.registerServerPushNotificationsCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
         this.websocketCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
         this.downloadMessagesAndListAttachmentsCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
         this.downloadMessageExtendedPayloadCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
@@ -216,7 +233,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     @SuppressWarnings("unused")
     public void setDelegate(NotificationPostingDelegate notificationPostingDelegate) {
         this.notificationPostingDelegate = notificationPostingDelegate;
-        this.serverPushNotificationsCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
+        this.registerServerPushNotificationsCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
         this.downloadAttachmentCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
         this.createServerSessionCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
         this.refreshInboxAttachmentSignedUrlCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
@@ -240,7 +257,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     @SuppressWarnings("unused")
     public void setDelegate(ProtocolStarterDelegate protocolStarterDelegate) {
         this.websocketCoordinator.setProtocolStarterDelegate(protocolStarterDelegate);
-        this.serverPushNotificationsCoordinator.setProtocolStarterDelegate(protocolStarterDelegate);
+        this.registerServerPushNotificationsCoordinator.setProtocolStarterDelegate(protocolStarterDelegate);
     }
 
     // endregion
@@ -281,7 +298,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
                 deleteMessageAndAttachmentsCoordinator,
                 downloadAttachmentCoordinator,
 //                deleteMessageAndAttachmentsCoordinator,
-                serverPushNotificationsCoordinator,
+                registerServerPushNotificationsCoordinator,
                 serverQueryCoordinator,
                 identityDelegate,
                 engineBaseDirectory,
@@ -296,7 +313,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
                 deleteMessageAndAttachmentsCoordinator,
                 downloadAttachmentCoordinator,
 //                deleteMessageAndAttachmentsCoordinator,
-                serverPushNotificationsCoordinator,
+                registerServerPushNotificationsCoordinator,
                 serverQueryCoordinator,
                 identityDelegate,
                 engineBaseDirectory,
@@ -640,7 +657,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         downloadMessagesAndListAttachmentsCoordinator.retryScheduledNetworkTasks();
         downloadMessageExtendedPayloadCoordinator.retryScheduledNetworkTasks();
         refreshInboxAttachmentSignedUrlCoordinator.retryScheduledNetworkTasks();
-        serverPushNotificationsCoordinator.retryScheduledNetworkTasks();
+        registerServerPushNotificationsCoordinator.retryScheduledNetworkTasks();
         serverQueryCoordinator.retryScheduledNetworkTasks();
         websocketCoordinator.retryScheduledNetworkTasks();
     }
@@ -730,17 +747,17 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
 
     @Override
     public void processAndroidPushNotification(String maskingUidString) {
-        serverPushNotificationsCoordinator.processAndroidPushNotification(maskingUidString);
+        registerServerPushNotificationsCoordinator.processAndroidPushNotification(maskingUidString);
     }
 
     @Override
     public void forceRegisterPushNotification(Identity ownedIdentity, boolean triggerAnOwnedDeviceDiscoveryWhenFinished) {
-        serverPushNotificationsCoordinator.registerServerPushNotification(ownedIdentity, triggerAnOwnedDeviceDiscoveryWhenFinished);
+        registerServerPushNotificationsCoordinator.registerServerPushNotification(ownedIdentity, triggerAnOwnedDeviceDiscoveryWhenFinished);
     }
 
     @Override
     public Identity getOwnedIdentityFromMaskingUid(String maskingUidString) {
-        return serverPushNotificationsCoordinator.getOwnedIdentityFromMaskingUid(maskingUidString);
+        return registerServerPushNotificationsCoordinator.getOwnedIdentityFromMaskingUid(maskingUidString);
     }
 
     // endregion

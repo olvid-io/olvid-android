@@ -69,7 +69,6 @@ public class RefreshOutboxAttachmentSignedUrlCoordinator implements Operation.On
         this.lastUrlRefreshTimestamps = new HashMap<>();
 
         refreshOutboxAttachmentSignedUrlOperationQueue = new NoDuplicateOperationQueue();
-        refreshOutboxAttachmentSignedUrlOperationQueue.execute(1, "Engine-RefreshOutboxAttachmentSignedUrlCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -77,6 +76,10 @@ public class RefreshOutboxAttachmentSignedUrlCoordinator implements Operation.On
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
 
         notificationListener = new NotificationListener();
+    }
+
+    public void startProcessing() {
+        refreshOutboxAttachmentSignedUrlOperationQueue.execute(1, "Engine-RefreshOutboxAttachmentSignedUrlCoordinator");
     }
 
     public void setNotificationPostingDelegate(NotificationPostingDelegate notificationPostingDelegate) {

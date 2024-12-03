@@ -86,9 +86,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
         this.prng = prng;
 
         deleteUserDataOperationQueue = new NoDuplicateOperationQueue();
-        deleteUserDataOperationQueue.execute(1, "Engine-ServerUserDataCoordinator-delete");
         refreshUserDataOperationQueue = new NoDuplicateOperationQueue();
-        refreshUserDataOperationQueue.execute(1, "Engine-ServerUserDataCoordinator-refresh");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -98,6 +96,11 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
         awaitingServerSessionRefreshOperationsLock = new ReentrantLock();
 
         notificationListener = new NotificationListener();
+    }
+
+    public void startProcessing() {
+        deleteUserDataOperationQueue.execute(1, "Engine-ServerUserDataCoordinator-delete");
+        refreshUserDataOperationQueue.execute(1, "Engine-ServerUserDataCoordinator-refresh");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {

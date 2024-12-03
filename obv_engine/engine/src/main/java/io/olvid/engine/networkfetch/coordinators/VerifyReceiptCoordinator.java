@@ -57,7 +57,6 @@ public class VerifyReceiptCoordinator implements Operation.OnCancelCallback {
         this.createServerSessionDelegate = createServerSessionDelegate;
 
         verifyReceiptOperationQueue = new OperationQueue(true);
-        verifyReceiptOperationQueue.execute(1, "Engine-VerifyReceiptCoordinator");
 
         awaitingServerSessionOperations = new HashMap<>();
         awaitingServerSessionOperationsLock = new ReentrantLock();
@@ -75,7 +74,9 @@ public class VerifyReceiptCoordinator implements Operation.OnCancelCallback {
         verifyReceiptOperationQueue.queue(op);
     }
 
-
+    public void startProcessing() {
+        verifyReceiptOperationQueue.execute(1, "Engine-VerifyReceiptCoordinator");
+    }
 
     @Override
     public void onCancelCallback(Operation operation) {

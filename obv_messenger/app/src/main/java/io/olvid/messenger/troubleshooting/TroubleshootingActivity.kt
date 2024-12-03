@@ -34,16 +34,14 @@ import android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
 import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 import android.text.format.Formatter
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -94,7 +92,7 @@ import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalPermissionsApi::class)
-class TroubleshootingActivity : ComponentActivity() {
+class TroubleshootingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -118,7 +116,7 @@ class TroubleshootingActivity : ComponentActivity() {
                 CheckState(SOCKET_CHECK_STATE, troubleshootingDataStore) { getPermanentSocketState() }
             }
             val backupState = remember {
-                CheckState(BACKUP_CHECK_STATE, troubleshootingDataStore, statusIsOk = {a -> a == 0}) { getBackupState()}
+                CheckState(BACKUP_CHECK_STATE, troubleshootingDataStore, statusIsOk = { a -> a == 0 }) { getBackupState() }
             }
             val fullScreenIntentState = remember {
                 CheckState(FULL_SCREEN_CHECK_STATE, troubleshootingDataStore) { getFullScreenIntentState() }
@@ -127,7 +125,7 @@ class TroubleshootingActivity : ComponentActivity() {
                 CheckState(LOCATION_CHECK_STATE, troubleshootingDataStore) { getLocationState() }
             }
 
-            val postNotificationsState = rememberPermissionState( permission.POST_NOTIFICATIONS )
+            val postNotificationsState = rememberPermissionState(permission.POST_NOTIFICATIONS)
             val cameraState = rememberPermissionState(permission.CAMERA)
             val microphoneState = rememberPermissionState(permission.RECORD_AUDIO)
             val locationPermissionState = rememberMultiplePermissionsState(listOf(permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION))
@@ -145,12 +143,12 @@ class TroubleshootingActivity : ComponentActivity() {
                 )
             )
 
-            val troubleshootingItems : MutableState<List<TroubleshootingItemType>> = remember {
+            val troubleshootingItems: MutableState<List<TroubleshootingItemType>> = remember {
                 mutableStateOf(mutableListOf())
             }
 
             LaunchedEffect(Unit) {
-                val list : ArrayList<Triple<Boolean, Boolean, TroubleshootingItemType>> = ArrayList() // triple is (valid, critical, TroubleshootItemType)
+                val list: ArrayList<Triple<Boolean, Boolean, TroubleshootingItemType>> = ArrayList() // triple is (valid, critical, TroubleshootItemType)
                 if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
                     list.add(Triple(postNotificationsState.status.isGranted, true, TroubleshootingItemType.NOTIFICATIONS))
                 } else {
@@ -221,7 +219,7 @@ class TroubleshootingActivity : ComponentActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    FaqLinkHeader (
+                    FaqLinkHeader(
                         openFaq = {
                             startActivity(
                                 Intent(
@@ -236,7 +234,7 @@ class TroubleshootingActivity : ComponentActivity() {
                     )
 
                     troubleshootingItems.value.forEach { troubleshootingItem ->
-                        when(troubleshootingItem) {
+                        when (troubleshootingItem) {
 
                             TroubleshootingItemType.NOTIFICATIONS -> {
                                 val notificationsPermissionLauncher = rememberLauncherForActivityResult(
@@ -624,7 +622,7 @@ class TroubleshootingActivity : ComponentActivity() {
                     }
 
                     AppVersionHeader(betaEnabled = SettingsActivity.betaFeaturesEnabled)
-                    
+
                     RestartAppButton()
                 }
             }

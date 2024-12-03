@@ -20,6 +20,8 @@ package io.olvid.messenger.group
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.InputType
 import android.util.Pair
 import android.view.LayoutInflater
@@ -28,13 +30,11 @@ import android.view.MenuItem
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.viewModels
-import androidx.appcompat.widget.AppCompatEditText
-import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
@@ -323,6 +323,7 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                 val expandListener = object : MenuItem.OnActionExpandListener {
                     override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                         searchView.requestFocus()
+                        Handler(Looper.getMainLooper()).postDelayed({ (getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager)?.showSoftInput(searchView, InputMethodManager.SHOW_IMPLICIT) }, 200)
                         return true
                     }
 
@@ -342,7 +343,7 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                 }
                 searchView.inputType =
                     InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or InputType.TYPE_TEXT_VARIATION_FILTER
-                contactsSelectionFragment!!.setContactFilterEditText(searchView)
+                contactsSelectionFragment?.setContactFilterEditText(searchView)
             }
         }
         return true

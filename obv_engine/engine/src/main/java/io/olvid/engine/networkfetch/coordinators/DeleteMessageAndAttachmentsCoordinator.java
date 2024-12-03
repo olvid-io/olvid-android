@@ -72,7 +72,7 @@ public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCance
         this.createServerSessionDelegate = createServerSessionDelegate;
 
         deleteMessageAndAttachmentsFromServerOperationQueue = new NoDuplicateOperationQueue();
-        deleteMessageAndAttachmentsFromServerOperationQueue.execute(1, "Engine-DeleteMessageAndAttachmentsCoordinator");
+
         messageUidsToDeleteByOwnedIdentity = new HashMap<>();
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
@@ -82,6 +82,12 @@ public class DeleteMessageAndAttachmentsCoordinator implements Operation.OnCance
         // register to NotificationCenter for NOTIFICATION_SERVER_SESSION_CREATED
         serverSessionCreatedNotificationListener = new ServerSessionCreatedNotificationListener();
     }
+
+
+    public void startProcessing() {
+        deleteMessageAndAttachmentsFromServerOperationQueue.execute(1, "Engine-DeleteMessageAndAttachmentsCoordinator");
+    }
+
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
         // register to NotificationCenter for NOTIFICATION_SERVER_SESSION_CREATED

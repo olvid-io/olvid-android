@@ -1,3 +1,8 @@
+# Build 258 (3.4.1)
+2024-12-03
+
+- Fix a few occasional crashes
+
 # Build 257 (3.4)
 2024-11-28
 

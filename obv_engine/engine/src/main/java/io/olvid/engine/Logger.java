@@ -108,6 +108,9 @@ public class Logger {
 
 
     public static String getUuidString(UUID uuid) {
+        if (uuid == null) {
+            return "";
+        }
         return (digits(uuid.getMostSignificantBits() >> 32, 8) + "-" +
                 digits(uuid.getMostSignificantBits() >> 16, 4) + "-" +
                 digits(uuid.getMostSignificantBits(), 4) + "-" +

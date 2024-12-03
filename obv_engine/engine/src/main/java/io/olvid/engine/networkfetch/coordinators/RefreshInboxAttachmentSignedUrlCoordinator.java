@@ -68,13 +68,16 @@ public class RefreshInboxAttachmentSignedUrlCoordinator implements Operation.OnF
         this.lastUrlRefreshTimestamps = new HashMap<>();
 
         refreshInboxAttachmentSignedUrlOperationQueue = new NoDuplicateOperationQueue();
-        refreshInboxAttachmentSignedUrlOperationQueue.execute(1, "Engine-RefreshInboxAttachmentSignedUrlCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
         awaitingIdentityReactivationOperations = new HashMap<>();
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
         awaitingIdentityReactivationNotificationListener = new AwaitingIdentityReactivationNotificationListener();
+    }
+
+    public void startProcessing() {
+        refreshInboxAttachmentSignedUrlOperationQueue.execute(1, "Engine-RefreshInboxAttachmentSignedUrlCoordinator");
     }
 
     public void setNotificationPostingDelegate(NotificationPostingDelegate notificationPostingDelegate) {

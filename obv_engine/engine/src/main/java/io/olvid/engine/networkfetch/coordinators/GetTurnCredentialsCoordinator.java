@@ -50,6 +50,9 @@ public class GetTurnCredentialsCoordinator implements Operation.OnFinishCallback
         this.wellKnownCacheDelegate = wellKnownCacheDelegate;
 
         getTurnCredentialsOperationQueue = new OperationQueue(true);
+    }
+
+    public void startProcessing() {
         getTurnCredentialsOperationQueue.execute(1, "Engine-GetTurnCredentialsCoordinator");
     }
 

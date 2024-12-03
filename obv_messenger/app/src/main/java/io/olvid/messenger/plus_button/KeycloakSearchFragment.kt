@@ -190,7 +190,7 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
     }
 
     private fun startSearch() {
-        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         imm?.hideSoftInputFromWindow(keycloakSearchEditText?.windowToken, 0)
 
         val ownedIdentity = viewModel.currentIdentity
@@ -342,9 +342,9 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                         userDetails.identity
                     ) != null
                 ) {
-                    holder.initialView.setFromCache(userDetails.identity)
+                    holder.initialView?.setFromCache(userDetails.identity)
                 } else {
-                    holder.initialView.setInitial(
+                    holder.initialView?.setInitial(
                         if (userDetails.identity == null) ByteArray(0) else userDetails.identity,
                         StringUtils.getInitial(name)
                     )
@@ -352,12 +352,12 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
 
                 val posComp = identityDetails.formatPositionAndCompany(contactDisplayNameFormat)
                 if (posComp != null) {
-                    holder.keycloakUserNameTextView.maxLines = 1
-                    holder.keycloakUserPositionTextView.visibility = View.VISIBLE
+                    holder.keycloakUserNameTextView?.maxLines = 1
+                    holder.keycloakUserPositionTextView?.visibility = View.VISIBLE
                     matchAndHighlight(posComp, holder.keycloakUserPositionTextView)
                 } else {
-                    holder.keycloakUserNameTextView.maxLines = 2
-                    holder.keycloakUserPositionTextView.visibility = View.GONE
+                    holder.keycloakUserNameTextView?.maxLines = 2
+                    holder.keycloakUserPositionTextView?.visibility = View.GONE
                 }
 
                 if (userDetails.identity != null) {
@@ -368,11 +368,11 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                                     .contactDao()[bytesOwnedIdentity, userDetails.identity]
                             Handler(Looper.getMainLooper()).post {
                                 if (contact != null) {
-                                    holder.initialView.setContact(contact)
-                                    holder.keycloakUserKnownImageView.visibility =
+                                    holder.initialView?.setContact(contact)
+                                    holder.keycloakUserKnownImageView?.visibility =
                                         if (contact.oneToOne) View.VISIBLE else View.GONE
                                 } else {
-                                    holder.keycloakUserKnownImageView.visibility =
+                                    holder.keycloakUserKnownImageView?.visibility =
                                         View.GONE
                                 }
                             }
@@ -389,7 +389,7 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
             }
         }
 
-        private fun matchAndHighlight(text: String, textView: TextView) {
+        private fun matchAndHighlight(text: String, textView: TextView?) {
             val regexes: MutableList<Regex> = ArrayList(patterns.size)
             for (pattern in patterns) {
                 regexes.add(Regex(pattern.toString()))
@@ -409,7 +409,7 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                 )
                 i++
             }
-            textView.text = highlightedString
+            textView?.text = highlightedString
         }
 
 
@@ -459,11 +459,11 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
 
         internal class SearchResultViewHolder(itemView: View, onClick: (userDetails: JsonKeycloakUserDetails) -> Unit) :
             ViewHolder(itemView) {
-            val keycloakUserNameTextView: TextView = itemView.findViewById(R.id.keycloak_user_name)
-            val keycloakUserPositionTextView: TextView =
+            val keycloakUserNameTextView: TextView? = itemView.findViewById(R.id.keycloak_user_name)
+            val keycloakUserPositionTextView: TextView? =
                 itemView.findViewById(R.id.keycloak_user_position)
-            val initialView: InitialView = itemView.findViewById(R.id.initial_view)
-            val keycloakUserKnownImageView: ImageView =
+            val initialView: InitialView? = itemView.findViewById(R.id.initial_view)
+            val keycloakUserKnownImageView: ImageView? =
                 itemView.findViewById(R.id.keycloak_user_known_image_view)
             val missingCountTextView: TextView? = itemView.findViewById(R.id.keycloak_missing_count)
 

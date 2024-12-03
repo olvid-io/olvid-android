@@ -254,7 +254,7 @@ class WebClientScannedFragment : Fragment(), OnClickListener {
                         sasCodeError!!.visibility = View.INVISIBLE
                         sasCodeEditText!!.requestFocus()
                         val imm =
-                            activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                            activity.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
                         imm?.showSoftInput(sasCodeEditText, InputMethodManager.SHOW_IMPLICIT)
                     }
                 }

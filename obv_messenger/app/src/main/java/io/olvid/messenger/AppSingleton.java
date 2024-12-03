@@ -275,6 +275,8 @@ public class AppSingleton {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+        this.engine.startProcessing();
+
         this.engineNotificationProcessor = new EngineNotificationProcessor(this.engine);
         this.engineNotificationProcessorForContacts = new EngineNotificationProcessorForContacts(this.engine);
         this.engineNotificationProcessorForGroups = new EngineNotificationProcessorForGroups(this.engine);

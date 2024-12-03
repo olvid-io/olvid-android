@@ -207,8 +207,14 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             Logger.x(e);
         }
 
-//        schedulerForPeriodicSync.scheduleAtFixedRate(this::triggerOwnedDevicesSync, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, TimeUnit.MILLISECONDS);
+//        schedulerForPeriodicSync.schedule(this::triggerOwnedDevicesSync, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, TimeUnit.MILLISECONDS);
     }
+
+    public void startProcessing() {
+        protocolStepCoordinator.startProcessing();
+    }
+
+
 
 //    private void triggerOwnedDevicesSync() {
 //        try (ProtocolManagerSession protocolManagerSession = getSession()) {
