@@ -20,7 +20,6 @@
 package io.olvid.messenger.discussion.location;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -28,13 +27,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.CancellationSignal;
-import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -46,7 +40,6 @@ import android.widget.PopupMenu;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.core.location.LocationManagerCompat;
 import androidx.core.util.Consumer;
 import androidx.core.util.Pair;
 import androidx.fragment.app.FragmentActivity;
@@ -84,21 +77,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.JsonOsmStyle;
-import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
-import io.olvid.messenger.customClasses.HandlerExecutor;
+import io.olvid.messenger.customClasses.LocationShareQuality;
+import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class MapViewMapLibreFragment extends MapViewAbstractFragment implements OnMapReadyCallback {
 
     private static final String FALLBACK_OSM_STYLE_URL = "https://map.olvid.io/styles/osm.json";
     public static final String OSM_STYLE_LANGUAGE_PLACEHOLDER = "[LANG]";
-    private static final double DEFAULT_ZOOM = 15;
+    private static final double DEFAULT_ZOOM = 17;
     private static final int TRANSITION_DURATION_MS = 500;
 
     @Nullable private Runnable onMapReadyCallback = null;
@@ -123,6 +115,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
 
     // store previously centered marker to unset Zindex
     private Symbol currentlyCenteredSymbol = null;
+
     @NonNull
     private Map<String, JsonOsmStyle> osmServerStyles = Collections.emptyMap();
     private String currentStyleId = null;
@@ -301,6 +294,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
                 currentCameraCenterLiveData.postValue(null);
 
                 if (reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE) {
+                    currentlyCenteredOnGpsPosition.postValue(false);
                     setCurrentlyCenteredSymbol(null);
                 }
             });
@@ -362,33 +356,16 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             return;
         }
 
+        currentlyCenteredOnGpsPosition.postValue(true);
+        setCurrentlyCenteredSymbol(null);
+
         // if lastKnownLocation is accessible use it to center
         Location lastKnownLocation = mapLibreMap.getLocationComponent().getLastKnownLocation();
-        if (mapLibreMap.getLocationComponent().isLocationComponentEnabled() &&  lastKnownLocation != null) {
+        if (mapLibreMap.getLocationComponent().isLocationComponentEnabled() && lastKnownLocation != null) {
+            lastLocation = lastKnownLocation;
+            lastLocationUpdate = System.currentTimeMillis();
             centerOnLocation(lastKnownLocation, animate);
             mapLibreMap.getLocationComponent().forceLocationUpdate(lastKnownLocation);
-        } else {
-            // else try to get best provider last location, and else request current location (can be quite long)
-            LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-            String provider = locationManager.getBestProvider(new Criteria(), true);
-            if (provider != null) {
-                Location location = locationManager.getLastKnownLocation(provider);
-                if (location!= null) {
-                    centerOnLocation(location, animate);
-                    mapLibreMap.getLocationComponent().forceLocationUpdate(mapLibreMap.getLocationComponent().getLastKnownLocation());
-                    return;
-                }
-            }
-
-            Executor executor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ? App.getContext().getMainExecutor() : new HandlerExecutor(Looper.getMainLooper());
-            if (provider != null) {
-                LocationManagerCompat.getCurrentLocation(locationManager, provider, (CancellationSignal) null, executor, location -> {
-                    if (location != null) {
-                        centerOnLocation(location, animate);
-                        mapLibreMap.getLocationComponent().forceLocationUpdate(location);
-                    }
-                });
-            }
         }
     }
 
@@ -398,9 +375,8 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
                     new LatLng(location.getLatitude(), location.getLongitude()),
                     Double.max(DEFAULT_ZOOM, mapLibreMap.getCameraPosition().zoom));
             if (animate) {
-                mapLibreMap.animateCamera(cameraUpdate, 750);
-            }
-            else {
+                mapLibreMap.animateCamera(cameraUpdate, TRANSITION_DURATION_MS);
+            } else {
                 mapLibreMap.moveCamera(cameraUpdate);
             }
         }
@@ -435,6 +411,10 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             String attributionString = "©OpenStreetMap ©OpenMapTiles ©Olvid";
             float padding = 4 * activity.getResources().getDisplayMetrics().density;
             float textSize = 12 * activity.getResources().getDisplayMetrics().density;
+
+            if (bitmap.getConfig() == null) {
+                return;
+            }
 
             // prepare bitmap and canvas
             Bitmap result = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
@@ -718,12 +698,28 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             }
         }
 
+        currentlyCenteredOnGpsPosition.postValue(false);
         setCurrentlyCenteredSymbol(null);
     }
 
     @Override
     public void centerOnMarker(long id, boolean animate) {
         centerOnSymbol(symbolsByIdHashMap.get(id), animate);
+    }
+
+
+    private Location lastLocation = null;
+    private long lastLocationUpdate = 0;
+
+    @Override
+    void onLocationUpdate(Location location) {
+        if (currentlyCenteredOnGpsPosition.getValue() != null
+                && currentlyCenteredOnGpsPosition.getValue()
+                && UnifiedForegroundService.LocationSharingSubService.filterLocationUpdate(lastLocation, lastLocationUpdate, location, LocationShareQuality.QUALITY_BALANCED, false)) {
+            lastLocation = location;
+            lastLocationUpdate = System.currentTimeMillis();
+            centerOnLocation(location, true);
+        }
     }
 
     private void centerOnSymbol(Symbol symbol, boolean animate) {
@@ -733,6 +729,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         }
 
         if (symbol != null) {
+            currentlyCenteredOnGpsPosition.postValue(false);
             setCurrentlyCenteredSymbol(symbol);
 
             // move camera to marker

@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,11 +72,11 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
     private final ChannelManagerSession channelManagerSession;
 
-    private UID currentDeviceUid;
+    private final UID currentDeviceUid;
     static final String CURRENT_DEVICE_UID = "current_device_uid";
-    private UID remoteDeviceUid;
+    private final UID remoteDeviceUid;
     static final String REMOTE_DEVICE_UID = "remote_device_uid";
-    private Identity remoteIdentity;
+    private final Identity remoteIdentity;
     static final String REMOTE_IDENTITY = "contact_identity";
     private boolean confirmed;
     static final String CONFIRMED = "confirmed";
@@ -742,7 +741,9 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             case SendChannelInfo.ALL_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_ON_SAME_SERVER_TYPE: {
                 List<NetworkChannel> acceptableChannels = new ArrayList<>();
                 UID currentDeviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
-                for (Identity toIdentity: message.getSendChannelInfo().getToIdentities()) {
+                for (int i = 0; i < message.getSendChannelInfo().getToIdentities().length; i++) {
+                    Identity toIdentity = message.getSendChannelInfo().getToIdentities()[i];
+                    UID toDeviceUid = message.getSendChannelInfo().getRemoteDeviceUids()[i];
                     List<UidAndPreKey> uidsAndPreKeys = new ArrayList<>();
                     if (Objects.equals(message.getSendChannelInfo().getFromIdentity(), toIdentity)) {
                         List<OwnedDeviceAndPreKey> ownedDeviceAndPreKeys = channelManagerSession.identityDelegate.getDevicesAndPreKeysOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
@@ -753,6 +754,20 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                         }
                     } else {
                         uidsAndPreKeys = channelManagerSession.identityDelegate.getDeviceUidsAndPreKeysOfContactIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity(), toIdentity);
+                    }
+                    // if a toDeviceUid is specified, only send to it. If not found, still send to all devices
+                    if (toDeviceUid != null) {
+                        UidAndPreKey uidAndPreKeyFound = null;
+                        for (UidAndPreKey uidAndPreKey : uidsAndPreKeys) {
+                            if (uidAndPreKey.uid.equals(toDeviceUid)) {
+                                uidAndPreKeyFound = uidAndPreKey;
+                                break;
+                            }
+                        }
+                        if (uidAndPreKeyFound != null) {
+                            acceptableChannels.addAll(ObliviousChannel.getAcceptableObliviousOrPreKeyChannels(channelManagerSession, message.getSendChannelInfo().getFromIdentity(), currentDeviceUid, new UidAndPreKey[]{uidAndPreKeyFound}, toIdentity));
+                            continue;
+                        }
                     }
                     acceptableChannels.addAll(ObliviousChannel.getAcceptableObliviousOrPreKeyChannels(channelManagerSession, message.getSendChannelInfo().getFromIdentity(), currentDeviceUid, uidsAndPreKeys.toArray(new UidAndPreKey[0]), toIdentity));
                 }

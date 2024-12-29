@@ -19,7 +19,6 @@
 package io.olvid.messenger.owneddetails
 
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -33,9 +32,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import io.olvid.engine.Logger
-import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto
 import io.olvid.engine.engine.types.sync.ObvSyncAtom
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
@@ -48,23 +46,9 @@ import io.olvid.messenger.owneddetails.OwnedIdentityDetailsViewModel.ValidStatus
 import io.olvid.messenger.settings.SettingsActivity.Companion.isHiddenProfileClosePolicyDefined
 import io.olvid.messenger.settings.SettingsActivity.Companion.preventScreenCapture
 
-class EditOwnedIdentityDetailsDialogFragment(val bytesOwnedIdentity: ByteArray?,
-                                             val identityDetails: JsonIdentityDetailsWithVersionAndPhoto?,
-                                             val customDisplayName: String?,
-                                             val hidden: Boolean,
-                                             val keycloakManaged: Boolean,
-                                             val identityActive: Boolean,
-                                             private val onOkCallback: (() -> Unit)?) : DialogFragment() {
-    private lateinit var viewModel: OwnedIdentityDetailsViewModel
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity())[OwnedIdentityDetailsViewModel::class.java]
-        viewModel.bytesOwnedIdentity = bytesOwnedIdentity
-        viewModel.setOwnedIdentityDetails(identityDetails, customDisplayName, hidden)
-        viewModel.detailsLocked = keycloakManaged
-        viewModel.isIdentityInactive = !identityActive
-    }
+class EditOwnedIdentityDetailsDialogFragment :
+    DialogFragment() {
+    private val viewModel: OwnedIdentityDetailsViewModel by activityViewModels()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
@@ -126,10 +110,12 @@ class EditOwnedIdentityDetailsDialogFragment(val bytesOwnedIdentity: ByteArray?,
                     publishButton.isEnabled = false
                     publishButton.setText(R.string.button_label_publish)
                 }
+
                 PUBLISH -> {
                     publishButton.isEnabled = true
                     publishButton.setText(R.string.button_label_publish)
                 }
+
                 else -> {
                     publishButton.isEnabled = true
                     publishButton.setText(R.string.button_label_save)
@@ -163,7 +149,7 @@ class EditOwnedIdentityDetailsDialogFragment(val bytesOwnedIdentity: ByteArray?,
                 .setNegativeButton(R.string.button_label_cancel, null)
                 .setPositiveButton(
                     R.string.button_label_proceed
-                ) { dialog: DialogInterface?, which: Int -> dismiss() }
+                ) { _, _ -> dismiss() }
             builder.create().show()
         } else {
             dismiss()
@@ -177,7 +163,7 @@ class EditOwnedIdentityDetailsDialogFragment(val bytesOwnedIdentity: ByteArray?,
             builder.setTitle(R.string.dialog_title_unhide_profile)
                 .setMessage(R.string.dialog_message_unhide_profile)
                 .setNegativeButton(R.string.button_label_cancel, null)
-                .setPositiveButton(R.string.button_label_proceed) { dialog: DialogInterface?, which: Int ->
+                .setPositiveButton(R.string.button_label_proceed) { _, _ ->
                     dismiss()
                     doPublish()
                 }
@@ -188,7 +174,7 @@ class EditOwnedIdentityDetailsDialogFragment(val bytesOwnedIdentity: ByteArray?,
             builder.setTitle(R.string.dialog_title_hide_profile)
                 .setMessage(R.string.dialog_message_hide_profile)
                 .setNegativeButton(R.string.button_label_cancel, null)
-                .setPositiveButton(R.string.button_label_proceed) { dialog: DialogInterface?, which: Int ->
+                .setPositiveButton(R.string.button_label_proceed) { _, _ ->
                     dismiss()
                     doPublish()
                 }
@@ -235,8 +221,10 @@ class EditOwnedIdentityDetailsDialogFragment(val bytesOwnedIdentity: ByteArray?,
                     .publishLatestIdentityDetails(viewModel.bytesOwnedIdentity)
             }
             if (viewModel.nicknameChanged()) {
-                AppDatabase.getInstance().ownedIdentityDao()
-                    .updateCustomDisplayName(viewModel.bytesOwnedIdentity, viewModel.nickname)
+                viewModel.bytesOwnedIdentity?.let {
+                    AppDatabase.getInstance().ownedIdentityDao()
+                        .updateCustomDisplayName(it, viewModel.nickname)
+                }
                 try {
                     AppSingleton.getEngine()
                         .propagateAppSyncAtomToOtherDevicesIfNeeded(
@@ -251,27 +239,31 @@ class EditOwnedIdentityDetailsDialogFragment(val bytesOwnedIdentity: ByteArray?,
                 }
             }
             if (viewModel.profileHiddenChanged()) {
-                AppDatabase.getInstance().ownedIdentityDao()
-                    .updateUnlockPasswordAndSalt(
-                        viewModel.bytesOwnedIdentity,
-                        viewModel.password,
-                        viewModel.salt
-                    )
+                viewModel.bytesOwnedIdentity?.let {
+                    AppDatabase.getInstance().ownedIdentityDao()
+                        .updateUnlockPasswordAndSalt(
+                            it,
+                            viewModel.password,
+                            viewModel.salt
+                        )
+                }
 
                 if (viewModel.password != null) {
                     // profile became hidden
                     if (!isHiddenProfileClosePolicyDefined) {
                         App.openAppDialogConfigureHiddenProfileClosePolicy()
                     }
-                    AppSingleton.getInstance()
-                        .ownedIdentityBecameHidden(viewModel.bytesOwnedIdentity)
+                    viewModel.bytesOwnedIdentity?.let {
+                        AppSingleton.getInstance()
+                            .ownedIdentityBecameHidden(it)
+                    }
                 } else {
                     // profile became un-hidden --> reselect it to memorize as latest identity
                     AppSingleton.getInstance().selectIdentity(viewModel.bytesOwnedIdentity, null)
                 }
             }
-            onOkCallback?.let {
-                Handler(Looper.getMainLooper()).post(onOkCallback)
+            (activity as? OwnedIdentityDetailsActivity?)?.let { activity: OwnedIdentityDetailsActivity ->
+                Handler(Looper.getMainLooper()).post { activity.reloadIdentity() }
             }
         }
     }

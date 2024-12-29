@@ -160,6 +160,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     private ChannelDelegate channelDelegate;
     private final Timer deviceDiscoveryTimer;
 
+    private final HashMap<Identity, UID> currentDeviceUidCache = new HashMap<>();
+
     public IdentityManager(MetaManager metaManager, String engineBaseDirectory, ObjectMapper jsonObjectMapper, PRNGService prng) {
         this.engineBaseDirectory = engineBaseDirectory;
         this.jsonObjectMapper = jsonObjectMapper;
@@ -559,6 +561,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void deleteOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException {
+        currentDeviceUidCache.remove(ownedIdentity);
         OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
         if (ownedIdentityObject != null) {
             // delete all contact groups (and associated details)
@@ -1380,9 +1383,15 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public UID getCurrentDeviceUidOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException {
+        UID cachedUid = currentDeviceUidCache.get(ownedIdentity);
+        if (cachedUid != null) {
+            return cachedUid;
+        }
         OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
         if (ownedIdentityObject != null) {
-            return ownedIdentityObject.getCurrentDeviceUid();
+            UID deviceUid = ownedIdentityObject.getCurrentDeviceUid();
+            currentDeviceUidCache.put(ownedIdentity, deviceUid);
+            return deviceUid;
         }
         return null;
     }

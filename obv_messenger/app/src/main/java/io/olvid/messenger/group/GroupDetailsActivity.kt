@@ -43,6 +43,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.LinearLayout.LayoutParams
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -135,8 +136,13 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
         setContentView(layout.activity_group_details)
         findViewById<CoordinatorLayout>(R.id.group_details_coordinatorLayout)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
                 view.updatePadding(top = insets.top)
+                findViewById<ScrollView>(R.id.group_details_scroll_view)?.updatePadding(
+                    left = insets.left,
+                    right = insets.right
+                )
                 view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     updateMargins(bottom = insets.bottom)
                 }

@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.entity;
 
+import android.net.Uri;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
@@ -28,18 +30,23 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.messenger.App;
 import io.olvid.messenger.customClasses.PreviewUtils;
+import io.olvid.messenger.customClasses.TextBlockKt;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
+import io.olvid.messenger.google_services.GoogleTextRecognizer;
 import io.olvid.messenger.settings.SettingsActivity;
+import kotlin.Unit;
 
 @SuppressWarnings("CanBeFinal")
 @Entity(
@@ -97,6 +104,9 @@ public class FyleMessageJoinWithStatus {
     public static final int RECEPTION_STATUS_NONE = 0;
     public static final int RECEPTION_STATUS_DELIVERED = 1;
     public static final int RECEPTION_STATUS_DELIVERED_AND_READ = 2;
+    public static final int RECEPTION_STATUS_DELIVERED_ALL = 3;
+    public static final int RECEPTION_STATUS_DELIVERED_ALL_READ_ONE = 4;
+    public static final int RECEPTION_STATUS_DELIVERED_ALL_READ_ALL = 5;
 
     @ColumnInfo(name = FYLE_ID)
     public final long fyleId;
@@ -267,22 +277,50 @@ public class FyleMessageJoinWithStatus {
         }
         // when computing the message status, do not take the recipient info of my other owned devices into account, unless this is the only recipient info (discussion with myself)
         boolean ignoreOwnRecipientInfo = messageRecipientInfos.size() > 1;
+        int recipientsCount = 0;
+        int deliveredCount = 0;
+        int readCount = 0;
 
-        int newStatus = 100000;
         for (MessageRecipientInfo messageRecipientInfo : messageRecipientInfos) {
             if (ignoreOwnRecipientInfo && Arrays.equals(messageRecipientInfo.bytesContactIdentity, bytesOwnedIdentity)) {
                 continue;
             }
 
-            if (MessageRecipientInfo.isAttachmentNumberPresent(engineNumber, messageRecipientInfo.undeliveredAttachmentNumbers)) {
-                newStatus = RECEPTION_STATUS_NONE;
-                break;
-            } else if (MessageRecipientInfo.isAttachmentNumberPresent(engineNumber, messageRecipientInfo.unreadAttachmentNumbers)) {
-                newStatus = RECEPTION_STATUS_DELIVERED;
-            } else {
-                newStatus = Math.min(newStatus, RECEPTION_STATUS_DELIVERED_AND_READ);
+            recipientsCount++;
+
+            if (messageRecipientInfo.engineMessageIdentifier == null) {
+                continue;
+            }
+
+            if (!MessageRecipientInfo.isAttachmentNumberPresent(engineNumber, messageRecipientInfo.unreadAttachmentNumbers)) {
+                readCount++;
+                deliveredCount++;
+                // small optimization: if the attachment was not yet delivered to at least one recipient, no need to look further
+                if (deliveredCount != recipientsCount) {
+                    break;
+                }
+            } else  if (!MessageRecipientInfo.isAttachmentNumberPresent(engineNumber, messageRecipientInfo.undeliveredAttachmentNumbers)) {
+                deliveredCount++;
             }
         }
+
+        final int newStatus;
+        if (deliveredCount == 0) {
+            newStatus = RECEPTION_STATUS_NONE;
+        } else if (recipientsCount > 1 && deliveredCount == recipientsCount) {
+            if (readCount == recipientsCount) {
+                newStatus = RECEPTION_STATUS_DELIVERED_ALL_READ_ALL;
+            } else if (readCount > 0) {
+                newStatus = RECEPTION_STATUS_DELIVERED_ALL_READ_ONE;
+            } else {
+                newStatus = RECEPTION_STATUS_DELIVERED_ALL;
+            }
+        } else if (readCount > 0) {
+            newStatus = RECEPTION_STATUS_DELIVERED_AND_READ;
+        } else {
+            newStatus = RECEPTION_STATUS_DELIVERED;
+        }
+
         if (newStatus != receptionStatus) {
             receptionStatus = newStatus;
             return true;
@@ -361,11 +399,49 @@ public class FyleMessageJoinWithStatus {
                     bos.write(buffer, 0, c);
                 }
                 OpenGraph openGraph = OpenGraph.Companion.of(new Encoded(bos.toByteArray()), null);
-                String content = openGraph.getUrl() + " " + (openGraph.getTitle() != null ? openGraph.getTitle() + " " : " ") + (openGraph.getDescription() != null ? openGraph.getDescription() : "").trim();
+                String content = (openGraph.getUrl() != null ? openGraph.getUrl() + " " : "") + (openGraph.getTitle() != null ? openGraph.getTitle() + " " : " ") + (openGraph.getDescription() != null ? openGraph.getDescription() : "").trim();
                 textContent = content;
                 textExtracted = true;
                 db.fyleMessageJoinWithStatusDao().updateTextContent(messageId, fyleId, content);
             }
+        } else if (mimeType != null && mimeType.startsWith("image/") && App.absolutePathFromRelative(fyle.filePath) != null) {
+            GoogleTextRecognizer.recognizeTextFromImage(Uri.fromFile(new File(App.absolutePathFromRelative(fyle.filePath))), texts -> {
+                if (texts == null) {
+                    return Unit.INSTANCE;
+                }
+                textContent = TextBlockKt.getText(texts);
+                textExtracted = true;
+                App.runThread(() -> db.fyleMessageJoinWithStatusDao().updateTextContent(messageId, fyleId, textContent));
+                return Unit.INSTANCE;
+            });
+            /* TODO add pdf fts indexation later with some limits ?
+        } else if (fyle.isComplete() && "application/pdf".equals(mimeType)) {
+            if (Build.VERSION.SDK_INT >= 35) {
+                try {
+                    ParcelFileDescriptor fd = null;
+                    if (fyle.filePath != null) {
+                        fd = ParcelFileDescriptor.open(new File(App.absolutePathFromRelative(fyle.filePath)), ParcelFileDescriptor.MODE_READ_ONLY);
+                    }
+                    StringBuffer sb = new StringBuffer();
+                    if (fd != null) {
+                        try (PdfRenderer renderer = new PdfRenderer(fd)) {
+                            for (int i = 0; i < renderer.getPageCount(); i++) {
+                                try (PdfRenderer.Page page = renderer.openPage(i)) {
+                                    page.getTextContents().forEach(pdfPageTextContent -> sb.append(pdfPageTextContent.getText()));
+                                }
+                            }
+                        }
+                    }
+                    if (sb.length() > 0) {
+                        textContent = sb.toString();
+                        textExtracted = true;
+                        App.runThread(() -> db.fyleMessageJoinWithStatusDao().updateTextContent(messageId, fyleId, textContent));
+                    }
+                } catch (Exception e) {
+                    Logger.e("Pdf text extraction failed", e);
+                }
+            }
+             */
         }
     }
 

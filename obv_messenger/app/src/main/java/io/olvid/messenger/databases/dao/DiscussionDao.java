@@ -82,6 +82,11 @@ public abstract class DiscussionDao {
     public abstract void updateLastMessageTimestamp(long discussionId, long lastMessageTimestamp);
 
     @Query("UPDATE " + Discussion.TABLE_NAME +
+            " SET " + Discussion.LAST_REMOTE_DELETE_TIMESTAMP + " = :lastRemoteDeleteTimestamp " +
+            " WHERE id = :discussionId ")
+    public abstract void updateLastRemoteDeleteTimestamp(long discussionId, long lastRemoteDeleteTimestamp);
+
+    @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.STATUS + " = :status " +
             " WHERE id = :discussionId ")
     public abstract void updateStatus(long discussionId, int status);

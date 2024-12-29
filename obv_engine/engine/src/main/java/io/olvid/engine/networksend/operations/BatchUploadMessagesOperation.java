@@ -76,10 +76,10 @@ public class BatchUploadMessagesOperation extends Operation {
 
                 HashMap<Identity, List<UID>> messageUidsByIdentity = new HashMap<>();
                 for (IdentityAndUid identityAndUid : messageIdentitiesAndUids) {
-                    List<UID> list = messageUidsByIdentity.get(identityAndUid.ownedIdentity);
+                    List<UID> list = messageUidsByIdentity.get(identityAndUid.identity);
                     if (list == null) {
                         list = new ArrayList<>();
-                        messageUidsByIdentity.put(identityAndUid.ownedIdentity, list);
+                        messageUidsByIdentity.put(identityAndUid.identity, list);
                     }
                     list.add(identityAndUid.uid);
                 }

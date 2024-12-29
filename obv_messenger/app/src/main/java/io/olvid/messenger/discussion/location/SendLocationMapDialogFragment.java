@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.discussion.location;
 
+import static io.olvid.messenger.services.UnifiedForegroundService.LocationSharingSubService.PASSIVE_PROVIDER_UPDATE_INTERVAL_MILLIS;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
@@ -27,6 +29,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -48,16 +51,23 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.location.LocationListenerCompat;
+import androidx.core.location.LocationManagerCompat;
+import androidx.core.location.LocationRequestCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.List;
+import java.util.concurrent.Executor;
+
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.HandlerExecutor;
 import io.olvid.messenger.databases.tasks.PostOsmLocationMessageInDiscussionTask;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -68,9 +78,10 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
     private long discussionId;
     private SettingsActivity.LocationIntegrationEnum integration;
     private FragmentActivity activity;
+    private LocationManager locationManager = null;
+    private final LocationListenerCompat locationListenerCompat = this::onLocationUpdate;
 
     private MapViewAbstractFragment mapView;
-
     private TextView addressTextView;
     private TextView fetchingAddressTextView;
     private boolean showAddress = false;
@@ -122,6 +133,7 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
 
         // get current activity
         this.activity = requireActivity();
+        this.locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
 
         Bundle arguments = getArguments();
         if (arguments != null) {
@@ -165,6 +177,9 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
         mapView.setOnMapReadyCallback(() -> {
             // when map is ready: show center pointer, and hide spinner
 
+            // register to GPS updates
+            registerToLocationUpdate();
+
             // if location is possible use current location as center and manually request address
             if (!isLocationPermissionGranted(activity)) {
                 requestLocationPermission();
@@ -191,6 +206,13 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
         rootView.findViewById(R.id.button_send_location).setOnClickListener(this::handleSendLocationButtonClick);
         rootView.findViewById(R.id.button_live_share_location).setOnClickListener(this::handleShareLocationButtonClick);
         currentLocationButtonFab.setOnClickListener(this::handleCenterOnCurrentLocationFabClick);
+        mapView.currentlyCenteredOnGpsPosition.observe(this, tracking -> {
+            if (tracking != null && tracking) {
+                currentLocationButtonFab.setImageResource(R.drawable.ic_location_current_location_enabled);
+            } else {
+                currentLocationButtonFab.setImageResource(R.drawable.ic_location_current_location_disabled);
+            }
+        });
         backButtonFab.setOnClickListener(this::handleBackFabClick);
 
         // every time camera center is modified (camera stopped moving) update address field
@@ -246,7 +268,7 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
                 fetchingAddressTextView.setText(R.string.label_fetching_address);
                 fade(addressTextView, thirtyTwoDp, false, false);
                 fade(fetchingAddressTextView, thirtyTwoDp, false, true);
-            } else if (address.length() == 0) {
+            } else if (address.isEmpty()) {
                 fetchingAddressTextView.setText(R.string.label_no_address_found);
                 fade(addressTextView, thirtyTwoDp, false, false);
                 fade(fetchingAddressTextView, thirtyTwoDp, false, true);
@@ -270,6 +292,73 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
         return rootView;
     }
 
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (locationManager != null) {
+            if (isLocationPermissionGranted(activity)) {
+                LocationManagerCompat.removeUpdates(locationManager, locationListenerCompat);
+                LocationManagerCompat.removeUpdates(locationManager, fakeLocationListenerForGps);
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        registerToLocationUpdate();
+    }
+
+    private final LocationListenerCompat fakeLocationListenerForGps = (Location location) -> {};
+
+    @SuppressLint("MissingPermission")
+    private void registerToLocationUpdate() {
+        if (locationManager != null
+                && isLocationPermissionGranted(activity)
+                && isLocationEnabled()) {
+            // setup location updates
+            LocationRequestCompat locationRequest = new LocationRequestCompat.Builder(1000)
+                    .setQuality(LocationRequestCompat.QUALITY_HIGH_ACCURACY)
+                    .build();
+
+            // get executor
+            Executor executor;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                executor = App.getContext().getMainExecutor();
+            } else {
+                executor = new HandlerExecutor(Looper.getMainLooper());
+            }
+
+
+            List<String> providers = locationManager.getProviders(true);
+            if (providers.contains(LocationManager.PASSIVE_PROVIDER)) { // this should always be the case (if the documentation is correct)
+                LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.PASSIVE_PROVIDER, new LocationRequestCompat.Builder(PASSIVE_PROVIDER_UPDATE_INTERVAL_MILLIS).build(), executor, locationListenerCompat);
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && providers.contains(LocationManager.FUSED_PROVIDER)) {
+                LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.FUSED_PROVIDER, locationRequest, executor, locationListenerCompat);
+                if (providers.contains(LocationManager.GPS_PROVIDER)) {
+                    // also enable gps callback (on Android 12 emulator, fused does not always trigger updates on its own)
+                    LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.GPS_PROVIDER, locationRequest, executor, fakeLocationListenerForGps);
+                }
+            } else if (providers.contains(LocationManager.GPS_PROVIDER) || providers.contains(LocationManager.NETWORK_PROVIDER)) {
+                if (providers.contains(LocationManager.GPS_PROVIDER)) {
+                    LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.GPS_PROVIDER, locationRequest, executor, locationListenerCompat);
+                }
+                if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+                    LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.NETWORK_PROVIDER, locationRequest, executor, locationListenerCompat);
+                }
+            }
+        }
+    }
+
+    private void onLocationUpdate(Location location) {
+        if (mapView != null) {
+            mapView.onLocationUpdate(location);
+        }
+    }
 
     private void fade(View view, int translationPx, boolean directionUp, boolean showView) {
         boolean currentShowView;
@@ -366,7 +455,6 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
     @Override
     protected void checkPermissionsAndUpdateDialog() {
         // check location services are accessible
-        LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         if (locationManager == null) {
             App.toast(R.string.toast_message_location_services_unavailable, Toast.LENGTH_SHORT);
             dismiss();
@@ -381,6 +469,9 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
             requestLocationActivation(activity);
             return ;
         }
+
+        // register to GPS updates
+        registerToLocationUpdate();
 
         // if we can reach here this means user allowed and enabled location (so force centering)
         if (mapView != null) {

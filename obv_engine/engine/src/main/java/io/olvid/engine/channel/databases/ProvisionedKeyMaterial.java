@@ -42,6 +42,9 @@ import io.olvid.engine.encoder.Encoded;
 
 public class ProvisionedKeyMaterial implements ObvDatabase {
     static final String TABLE_NAME = "provisioned_key_material";
+    static final String GET_ALL_INDEX_NAME = "provisioned_key_material_get_all_index";
+    static final String EXPIRE_INDEX_NAME = "provisioned_key_material_expire_index";
+
 
     private final ChannelManagerSession channelManagerSession;
 
@@ -202,6 +205,9 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
                     PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + " BLOB NOT NULL, " +
                     "CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + SELF_RATCHETING_COUNT + ", " + PROVISION_FULL_RATCHETING_COUNT + ", " + PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + ", " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID  + ", " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + "), " +
                     "FOREIGN KEY (" + PROVISION_FULL_RATCHETING_COUNT + ", " + PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + ", " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + ", " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + ") REFERENCES " + Provision.TABLE_NAME + "(" + Provision.FULL_RATCHETING_COUNT + ", " + Provision.OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + ", " + Provision.OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + ", " + Provision.OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + ") ON DELETE CASCADE);");
+
+            statement.execute("CREATE INDEX IF NOT EXISTS " + GET_ALL_INDEX_NAME + " ON " + TABLE_NAME + "(" + KEY_ID + "," + PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + ")");
+            statement.execute("CREATE INDEX IF NOT EXISTS " + EXPIRE_INDEX_NAME + " ON " + TABLE_NAME + "(" + EXPIRATION_TIMESTAMP + "," + PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + "," + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + "," + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + ")");
         }
     }
 

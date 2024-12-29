@@ -25,7 +25,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,7 +44,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -68,13 +66,15 @@ import java.util.List;
 import io.olvid.engine.Logger;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog;
+import io.olvid.messenger.customClasses.LocationShareQuality;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.google_services.GoogleServicesUtils;
+import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implements OnMapReadyCallback {
 
-    private static final float DEFAULT_ZOOM = 16;
+    private static final float DEFAULT_ZOOM = 18;
     private static final int TRANSITION_DURATION_MS = 500;
 
     @Nullable private Runnable onMapReadyCallback = null;
@@ -141,6 +141,7 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
 
             // if user move map consider marker as not centered anymore
             if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+                currentlyCenteredOnGpsPosition.postValue(false);
                 setCurrentlyCenteredMarker(null);
             }
         });
@@ -236,18 +237,17 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
             return;
         }
 
+        currentlyCenteredOnGpsPosition.postValue(true);
+        setCurrentlyCenteredMarker(null);
+
         // we concurrently request lastLocation and current location and we only keep the first one
         FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this.activity);
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         CancellationToken cancellationToken = cancellationTokenSource.getToken();
         fusedLocationProviderClient.getLastLocation().addOnSuccessListener((result) -> {
             if (!cancellationToken.isCancellationRequested() && result != null) {
-                centerOnLocation(result, animate);
-                cancellationTokenSource.cancel();
-            }
-        });
-        fusedLocationProviderClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.getToken()).addOnSuccessListener((result) -> {
-            if (!cancellationToken.isCancellationRequested() && result != null) {
+                lastLocation = result;
+                lastLocationUpdate = System.currentTimeMillis();
                 centerOnLocation(result, animate);
                 cancellationTokenSource.cancel();
             }
@@ -261,8 +261,7 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
                     Float.max(DEFAULT_ZOOM, googleMap.getCameraPosition().zoom));
             if (animate) {
                 googleMap.animateCamera(cameraUpdate, TRANSITION_DURATION_MS, null);
-            }
-            else {
+            } else {
                 googleMap.moveCamera(cameraUpdate);
             }
         }
@@ -496,12 +495,27 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
             }
         }
 
+        currentlyCenteredOnGpsPosition.postValue(false);
         setCurrentlyCenteredMarker(null);
     }
 
     @Override
     public void centerOnMarker(long id, boolean animate) {
         centerOnMarker(markersByIdHashMap.get(id), animate);
+    }
+
+    private Location lastLocation = null;
+    private long lastLocationUpdate = 0;
+
+    @Override
+    void onLocationUpdate(Location location) {
+        if (currentlyCenteredOnGpsPosition.getValue() != null
+                && currentlyCenteredOnGpsPosition.getValue()
+                && UnifiedForegroundService.LocationSharingSubService.filterLocationUpdate(lastLocation, lastLocationUpdate, location, LocationShareQuality.QUALITY_BALANCED, false)) {
+            lastLocation = location;
+            lastLocationUpdate = System.currentTimeMillis();
+            centerOnLocation(location, true);
+        }
     }
 
     private void centerOnMarker(Marker marker, boolean animate) {
@@ -511,6 +525,7 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
         }
 
         if (marker != null) {
+            currentlyCenteredOnGpsPosition.postValue(false);
             setCurrentlyCenteredMarker(marker);
 
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(

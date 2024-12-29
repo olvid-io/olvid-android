@@ -428,7 +428,7 @@ public class SynchronizationProtocol extends ConcreteProtocol {
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 } catch (NoAcceptableChannelException ignored) { }
 
-//                // send an AtomProcessedMessage to all ongoing instances of the synchronisation protocol
+                // send an AtomProcessedMessage to all ongoing instances of the synchronisation protocol
 //                UID currentDeviceUid = protocolManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
 //                for (UID otherDeviceUid : otherDeviceUids) {
 //                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),

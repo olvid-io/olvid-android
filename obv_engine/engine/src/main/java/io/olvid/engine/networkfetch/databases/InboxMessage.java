@@ -82,6 +82,8 @@ public class InboxMessage implements ObvDatabase {
     static final String EXTENDED_PAYLOAD_KEY = "extended_payload_key";
     private byte[] extendedPayload;
     static final String EXTENDED_PAYLOAD = "extended_payload";
+    private UID fromDeviceUid;
+    static final String FROM_DEVICE_UID = "from_device_uid";
 
 
     public Identity getOwnedIdentity() {
@@ -108,14 +110,6 @@ public class InboxMessage implements ObvDatabase {
         return payload;
     }
 
-    public Identity getFromIdentity() {
-        return fromIdentity;
-    }
-
-    public long getDownloadTimestamp() {
-        return downloadTimestamp;
-    }
-
     public AuthEncKey getExtendedPayloadKey() {
         return extendedPayloadKey;
     }
@@ -140,7 +134,7 @@ public class InboxMessage implements ObvDatabase {
         if ((payload == null) || (fromIdentity == null)) {
             return null;
         }
-        return new DecryptedApplicationMessage(uid, payload, fromIdentity, ownedIdentity, serverTimestamp, downloadTimestamp, localDownloadTimestamp);
+        return new DecryptedApplicationMessage(uid, payload, fromIdentity, fromDeviceUid, ownedIdentity, serverTimestamp, downloadTimestamp, localDownloadTimestamp);
     }
 
     public static UID computeUniqueUid(Identity ownedIdentity, UID messageUid, boolean markAsListed) {
@@ -180,22 +174,26 @@ public class InboxMessage implements ObvDatabase {
     }
 
 
-    public void setPayloadAndFromIdentity(byte[] payload, Identity fromIdentity, AuthEncKey extendedPayloadKey) {
+    public void setPayloadAndFromIdentity(byte[] payload, Identity fromIdentity, UID fromDeviceUid, AuthEncKey extendedPayloadKey, InboxAttachment[] attachments) {
         try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
                 " SET " + PAYLOAD + " = ?, " +
                 FROM_IDENTITY + " = ?, " +
+                FROM_DEVICE_UID + " = ?, " +
                 EXTENDED_PAYLOAD_KEY + " = ? " +
                 "WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + UID_ + " = ?;")) {
             statement.setBytes(1, payload);
             statement.setBytes(2, fromIdentity.getBytes());
-            statement.setBytes(3, (extendedPayloadKey == null) ? null : Encoded.of(extendedPayloadKey).getBytes());
-            statement.setBytes(4, ownedIdentity.getBytes());
-            statement.setBytes(5, uid.getBytes());
+            statement.setBytes(3, (fromDeviceUid == null) ? null : fromDeviceUid.getBytes());
+            statement.setBytes(4, (extendedPayloadKey == null) ? null : Encoded.of(extendedPayloadKey).getBytes());
+            statement.setBytes(5, ownedIdentity.getBytes());
+            statement.setBytes(6, uid.getBytes());
             statement.executeUpdate();
             this.payload = payload;
             this.fromIdentity = fromIdentity;
+            this.fromDeviceUid = fromDeviceUid;
             this.extendedPayloadKey = extendedPayloadKey;
+            attachmentsToNotify = attachments;
             commitHookBits |= HOOK_BIT_PAYLOAD_AND_FROM_IDENTITY_SET;
             fetchManagerSession.session.addSessionCommitListener(this);
         } catch (SQLException e) {
@@ -281,6 +279,7 @@ public class InboxMessage implements ObvDatabase {
         this.serverTimestamp = serverTimestamp;
         this.payload = null;
         this.fromIdentity = null;
+        this.fromDeviceUid = null;
         this.downloadTimestamp = downloadTimestamp;
         this.localDownloadTimestamp = localDownloadTimestamp;
         this.hasExtendedPayload = hasExtendedContent;
@@ -312,6 +311,12 @@ public class InboxMessage implements ObvDatabase {
             } catch (DecodingException e) {
                 Logger.x(e);
             }
+        }
+        byte[] fromDeviceUidBytes = res.getBytes(FROM_DEVICE_UID);
+        if (fromDeviceUidBytes == null || fromDeviceUidBytes.length != UID.UID_LENGTH) {
+            this.fromDeviceUid = null;
+        } else {
+            this.fromDeviceUid = new UID(fromDeviceUidBytes);
         }
         this.downloadTimestamp = res.getLong(DOWNLOAD_TIMESTAMP);
         this.localDownloadTimestamp = res.getLong(LOCAL_DOWNLOAD_TIMESTAMP);
@@ -549,6 +554,7 @@ public class InboxMessage implements ObvDatabase {
                             HAS_EXTENDED_PAYLOAD + " BIT NOT NULL, " +
                             EXTENDED_PAYLOAD_KEY + " BLOB, " +
                             EXTENDED_PAYLOAD + " BLOB, " +
+                            FROM_DEVICE_UID + " BLOB, " +
                             " CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + OWNED_IDENTITY + ", " + UID_ + "));"
             );
         }
@@ -651,12 +657,19 @@ public class InboxMessage implements ObvDatabase {
             }
             oldVersion = 40;
         }
+        if (oldVersion < 43 && newVersion >= 43) {
+            Logger.d("MIGRATING `inbox_message` DATABASE FROM VERSION " + oldVersion + " TO 43");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE inbox_message ADD COLUMN `from_device_uid` BLOB DEFAULT NULL");
+            }
+            oldVersion = 43;
+        }
     }
 
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?, ?,?,?);")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, uid.getBytes());
             statement.setBytes(3, wrappedKey.getBytes());
@@ -672,6 +685,7 @@ public class InboxMessage implements ObvDatabase {
             statement.setBoolean(11, hasExtendedPayload);
             statement.setBytes(12, (extendedPayloadKey == null) ? null : Encoded.of(extendedPayloadKey).getBytes());
             statement.setBytes(13, extendedPayload);
+            statement.setBytes(14, fromDeviceUid == null ? null : fromDeviceUid.getBytes());
 
             statement.executeUpdate();
             this.commitHookBits |= HOOK_BIT_INSERT;
@@ -725,8 +739,7 @@ public class InboxMessage implements ObvDatabase {
 
     public interface InboxMessageListener {
         void messageWasDownloaded(NetworkReceivedMessage networkReceivedMessage);
-
-        void messageDecrypted(Identity ownedIdentity, UID uid);
+        void messageDecrypted(InboxMessage inboxMessage, InboxAttachment[] attachments);
     }
 
     public interface ExtendedPayloadListener {
@@ -741,6 +754,7 @@ public class InboxMessage implements ObvDatabase {
 
 
     private long commitHookBits = 0;
+    private InboxAttachment[] attachmentsToNotify;
     private static final long HOOK_BIT_INSERT = 0x1;
     private static final long HOOK_BIT_PAYLOAD_AND_FROM_IDENTITY_SET = 0x2;
     private static final long HOOK_BIT_EXTENDED_PAYLOAD_SET = 0x4;
@@ -754,7 +768,7 @@ public class InboxMessage implements ObvDatabase {
         }
         if ((commitHookBits & HOOK_BIT_PAYLOAD_AND_FROM_IDENTITY_SET) != 0) {
             if (fetchManagerSession.inboxMessageListener != null) {
-                fetchManagerSession.inboxMessageListener.messageDecrypted(ownedIdentity, uid);
+                fetchManagerSession.inboxMessageListener.messageDecrypted(this, attachmentsToNotify);
                 if (extendedPayloadKey != null && fetchManagerSession.extendedPayloadListener != null) {
                     fetchManagerSession.extendedPayloadListener.messageHasExtendedPayloadToDownload(ownedIdentity, uid);
                 }

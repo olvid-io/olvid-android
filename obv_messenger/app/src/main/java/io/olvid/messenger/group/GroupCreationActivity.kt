@@ -192,8 +192,13 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
         }
         findViewById<CoordinatorLayout>(R.id.root_coordinator)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
                 toolbar.updatePadding(top = insets.top)
+                findViewById<ViewPager>(R.id.group_creation_view_pager)?.updatePadding(
+                    left = insets.left,
+                    right = insets.right
+                )
                 view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     updateMargins(bottom = insets.bottom)
                 }

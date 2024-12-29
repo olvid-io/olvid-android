@@ -225,6 +225,13 @@ public class SubscriptionStatusFragment extends Fragment {
                     apiKeyExpirationTextView.setVisibility(View.VISIBLE);
                     apiKeyExpirationTextView.setText(getString(R.string.text_premium_features_available_until, StringUtils.getPreciseAbsoluteDateString(activity, apiKeyExpirationTimestamp, getString(R.string.text_date_time_separator))));
                 }
+                if (!licenseQuery) {
+                    if (showInAppPurchase) {
+                        subscribeButton.setVisibility(View.VISIBLE);
+                    } else {
+                        subscribeButton.setVisibility(View.GONE);
+                    }
+                }
                 break;
             case AWAITING_PAYMENT_GRACE_PERIOD:
             case AWAITING_PAYMENT_ON_HOLD: { // this case should never occur in a license query

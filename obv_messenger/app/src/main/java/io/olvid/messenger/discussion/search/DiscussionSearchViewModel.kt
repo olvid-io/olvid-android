@@ -20,6 +20,7 @@
 package io.olvid.messenger.discussion.search
 
 import android.content.Context
+import androidx.annotation.ColorRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -30,12 +31,20 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils2.Companion.computeHighlightRanges
+import io.olvid.messenger.customClasses.TextBlock
 
 class DiscussionSearchViewModel : ViewModel() {
     var filterRegexes by mutableStateOf<List<Regex>?>(null)
     var matches by mutableStateOf<List<Long>>(emptyList())
+    val textBlocksCache = mutableMapOf<Pair<Long, Long>, List<TextBlock>>()
 
-    fun highlight(context: Context, content: AnnotatedString): AnnotatedString {
+
+    fun highlightColored(
+        context: Context,
+        content: AnnotatedString,
+        @ColorRes textColor: Int = R.color.black,
+        backgroundAlpha: Float = 1f
+    ): AnnotatedString {
         return AnnotatedString.Builder(content).apply {
             filterRegexes?.let {
                 computeHighlightRanges(content.toString(), it).forEach { range ->
@@ -46,8 +55,8 @@ class DiscussionSearchViewModel : ViewModel() {
                                     context,
                                     R.color.searchHighlightColor
                                 )
-                            ),
-                            color = Color(ContextCompat.getColor(context, R.color.black))
+                            ).copy(alpha = backgroundAlpha),
+                            color = Color(ContextCompat.getColor(context, textColor))
                         ),
                         range.first,
                         range.second
@@ -55,5 +64,9 @@ class DiscussionSearchViewModel : ViewModel() {
                 }
             }
         }.toAnnotatedString()
+    }
+
+    fun highlight(context: Context, content: AnnotatedString): AnnotatedString {
+        return highlightColored(context, content)
     }
 }

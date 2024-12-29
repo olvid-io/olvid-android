@@ -54,7 +54,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.View.OnLayoutChangeListener
-import android.view.View.OnTouchListener
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
@@ -115,6 +114,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.customClasses.DiscussionInputEditText
 import io.olvid.messenger.customClasses.DraftAttachmentAdapter
+import io.olvid.messenger.customClasses.DraftAttachmentAdapter.AttachmentLongClickListener
 import io.olvid.messenger.customClasses.DraftAttachmentAdapter.AttachmentSpaceItemDecoration
 import io.olvid.messenger.customClasses.EmptyRecyclerView
 import io.olvid.messenger.customClasses.InitialView
@@ -130,7 +130,6 @@ import io.olvid.messenger.customClasses.MarkdownListItem
 import io.olvid.messenger.customClasses.MarkdownOrderedListItem
 import io.olvid.messenger.customClasses.MarkdownQuote
 import io.olvid.messenger.customClasses.MarkdownStrikeThrough
-import io.olvid.messenger.customClasses.DraftAttachmentAdapter.AttachmentLongClickListener
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
@@ -167,7 +166,7 @@ import io.olvid.messenger.discussion.mention.MentionViewModel.MentionStatus
 import io.olvid.messenger.discussion.mention.MentionViewModel.MentionStatus.End
 import io.olvid.messenger.discussion.mention.MentionViewModel.MentionStatus.Filter
 import io.olvid.messenger.discussion.mention.MentionViewModel.MentionStatus.None
-import io.olvid.messenger.discussion.message.Visibility
+import io.olvid.messenger.discussion.message.attachments.Visibility
 import io.olvid.messenger.fragments.FilteredContactListFragment
 import io.olvid.messenger.fragments.FilteredContactListFragment.FilteredContactListOnClickDelegate
 import io.olvid.messenger.fragments.dialog.ContactIntroductionDialogFragment.Companion.newInstance
@@ -661,8 +660,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             .addOnLayoutChangeListener(composeMessageSizeChangeListener)
         sendButton = view.findViewById(R.id.compose_message_send_button)
         sendButton?.setOnClickListener(this)
-        hasCamera =
-            context?.packageManager?.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) ?: false
+        hasCamera = context?.packageManager?.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) == true
         attachStuffPlus = view.findViewById(R.id.attach_stuff_plus)
         attachStuffPlus?.setOnClickListener(this)
         attachStuffPlusGoldenDot = view.findViewById(R.id.golden_dot)
@@ -1561,10 +1559,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                                 false
                             ),
                             object : OnHandlePressedListener {
-                                override fun onHandlePressed(iconOrderViewHolder: IconOrderViewHolder?) {
-                                    if (itemTouchHelper != null) {
-                                        itemTouchHelper!!.startDrag(iconOrderViewHolder!!)
-                                    }
+                                override fun onHandlePressed(iconOrderViewHolder: IconOrderViewHolder) {
+                                    itemTouchHelper?.startDrag(iconOrderViewHolder)
                                 }
                             })
                     } else {
@@ -1640,9 +1636,9 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 }
             }
         itemTouchHelper = ItemTouchHelper(simpleCallback)
-        itemTouchHelper!!.attachToRecyclerView(iconOrderRecyclerView)
+        itemTouchHelper?.attachToRecyclerView(iconOrderRecyclerView)
         adapterIcons = SettingsActivity.composeMessageIconPreferredOrder
-        if (adapterIcons.isNullOrEmpty()) {
+        if (adapterIcons == null) {
             adapterIcons = DEFAULT_ICON_ORDER.toMutableList()
             adapterIcons?.add(-1)
         } else if (adapterIcons!!.size < DEFAULT_ICON_ORDER.size) {
@@ -1675,26 +1671,25 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
     }
 
     private interface OnHandlePressedListener {
-        fun onHandlePressed(iconOrderViewHolder: IconOrderViewHolder?)
+        fun onHandlePressed(iconOrderViewHolder: IconOrderViewHolder)
     }
 
-    private class IconOrderViewHolder @SuppressLint("ClickableViewAccessibility") constructor(
+    @SuppressLint("ClickableViewAccessibility")
+    private class IconOrderViewHolder(
         itemView: View,
         onHandlePressedListener: OnHandlePressedListener?
     ) : ViewHolder(itemView) {
-        val textView: TextView
-        val handle: View?
-
+        val textView: TextView = itemView.findViewById(R.id.icon_text_view)
         init {
-            textView = itemView.findViewById(R.id.icon_text_view)
-            handle = itemView.findViewById(R.id.handle)
-            if (handle != null && onHandlePressedListener != null) {
-                handle.setOnTouchListener(OnTouchListener { _: View?, event: MotionEvent ->
-                    if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                        onHandlePressedListener.onHandlePressed(this)
+            itemView.findViewById<View?>(R.id.handle)?.apply {
+                onHandlePressedListener?.let { pressHandler ->
+                    setOnTouchListener { _, event: MotionEvent ->
+                        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                            pressHandler.onHandlePressed(this@IconOrderViewHolder)
+                        }
+                        true
                     }
-                    true
-                })
+                }
             }
         }
     }
@@ -1743,23 +1738,24 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         val widthDp = widthPixels.toFloat() / metrics.density
         iconSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 36f, metrics).toInt()
         fourDp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, metrics).toInt()
-        var icons = SettingsActivity.composeMessageIconPreferredOrder
-        if (icons.isNullOrEmpty()) {
-            icons = DEFAULT_ICON_ORDER.toMutableList()
-        }
+        val icons = SettingsActivity.composeMessageIconPreferredOrder ?: DEFAULT_ICON_ORDER.toMutableList()
+        val otherIcons : MutableList<Int> = mutableListOf()
         if (icons.size < DEFAULT_ICON_ORDER.size) {
             for (icon in DEFAULT_ICON_ORDER) {
                 if (!icons.contains(icon)) {
-                    icons.add(icon)
+                    otherIcons.add(icon)
                 }
             }
         }
         if (!hasCamera) {
             icons.remove(ICON_TAKE_PICTURE)
             icons.remove(ICON_TAKE_VIDEO)
+            otherIcons.remove(ICON_TAKE_PICTURE)
+            otherIcons.remove(ICON_TAKE_VIDEO)
         }
         if (discussionViewModel.discussion.value?.discussionType != Discussion.TYPE_CONTACT) {
             icons.remove(ICON_INTRODUCE)
+            otherIcons.remove(ICON_INTRODUCE)
         }
 
         // Compose area layout
@@ -1769,14 +1765,25 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         iconsShown.clear()
         iconsOverflow.clear()
         if (widthDp > 512 + 36 * icons.size) {
-            neverOverflow = true
             iconsShown.addAll(icons)
+            if (otherIcons.isEmpty()) {
+                neverOverflow = true
+            } else {
+                neverOverflow = false
+                iconsOverflow.addAll(otherIcons)
+            }
         } else {
             neverOverflow = false
             val iconsToShow = max(0, min((widthDp - 272).toInt() / 36, icons.size))
-            iconsShown.addAll(icons.subList(0, iconsToShow))
-            iconsOverflow.addAll(icons.subList(iconsToShow, icons.size))
+            if (iconsToShow < icons.size) {
+                iconsShown.addAll(icons.subList(0, iconsToShow))
+                iconsOverflow.addAll(icons.subList(iconsToShow, icons.size))
+            } else {
+                iconsShown.addAll(icons)
+            }
+            iconsOverflow.addAll(otherIcons)
         }
+
         attachIconsGroup.removeAllViews()
         for (icon in iconsShown) {
             val imageView = ImageView(ContextThemeWrapper(activity, R.style.SubtleBlueRipple))

@@ -73,8 +73,10 @@ import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
+import io.olvid.messenger.discussion.message.OutboundMessageStatus
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
+import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.main.invitations.getAnnotatedDate
 import io.olvid.messenger.main.invitations.getAnnotatedTitle
@@ -104,7 +106,13 @@ fun DiscussionListScreen(
 
     AppCompatTheme {
         if (globalSearchViewModel.filter.isNullOrEmpty().not()) {
-            GlobalSearchScreen(modifier = Modifier.fillMaxSize().navigationBarsPadding(), globalSearchViewModel = globalSearchViewModel, linkPreviewViewModel = linkPreviewViewModel)
+            GlobalSearchScreen(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding(),
+                globalSearchViewModel = globalSearchViewModel,
+                linkPreviewViewModel = linkPreviewViewModel
+            )
         } else {
             LaunchedEffect(discussionsAndLastMessages) {
                 discussionListViewModel.reorderList = discussionsAndLastMessages
@@ -141,7 +149,8 @@ fun DiscussionListScreen(
                         }
                 }
 
-                val reorderable = discussionListViewModel.selection.isEmpty().not() && (discussionListViewModel.reorderList?.size ?:0) > 1
+                val reorderable = discussionListViewModel.selection.isEmpty()
+                    .not() && (discussionListViewModel.reorderList?.size ?: 0) > 1
 
                 discussionListViewModel.reorderList?.partition { it.discussion.pinned != 0 }
                     ?.toList()?.let { grouped ->
@@ -188,15 +197,35 @@ fun DiscussionListScreen(
                                                         }
                                                     }
                                                     DiscussionListItem(
+                                                        modifier = Modifier
+                                                            .background(
+                                                                if (discussionListViewModel.isSelected(
+                                                                        discussion
+                                                                    )
+                                                                ) {
+                                                                    colorResource(id = R.color.greySubtleOverlay)
+                                                                } else {
+                                                                    colorResource(
+                                                                        id = R.color.almostWhite
+                                                                    )
+                                                                }
+                                                            )
+                                                            .cutoutHorizontalPadding(),
                                                         title = invitation?.getAnnotatedTitle(
                                                             context
                                                         )
                                                             .takeIf { discussion.isPreDiscussion }
                                                             ?: discussion.getAnnotatedTitle(context),
                                                         body = invitation?.let { AnnotatedString(it.statusText) }
-                                                            ?: discussion.getAnnotatedBody(context, message),
+                                                            ?: discussion.getAnnotatedBody(
+                                                                context,
+                                                                message
+                                                            ),
                                                         date = invitation?.getAnnotatedDate(context)
-                                                            ?: discussion.getAnnotatedDate(context, message),
+                                                            ?: discussion.getAnnotatedDate(
+                                                                context,
+                                                                message
+                                                            ),
                                                         initialViewSetup = { initialView ->
                                                             invitation?.takeIf { discussion.isPreDiscussion }
                                                                 ?.let {
@@ -236,6 +265,17 @@ fun DiscussionListScreen(
                                                         },
                                                         onDragStopped = {
                                                             discussionListViewModel.syncPinnedDiscussions()
+                                                        },
+                                                        lastOutboundMessageStatus = {
+                                                            message?.let { lastMessage ->
+                                                                OutboundMessageStatus(
+                                                                    modifier = Modifier.padding(
+                                                                        end = 4.dp
+                                                                    ),
+                                                                    size = 14.dp,
+                                                                    message = lastMessage
+                                                                )
+                                                            }
                                                         }
                                                     )
                                                     if (index < list.size - 1) {
@@ -294,18 +334,20 @@ fun PinDivider() {
     ) {
         Icon(imageVector = Icons.Rounded.KeyboardArrowUp, contentDescription = "up")
         Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = stringResource(id = R.string.label_discussion_list_pin_divider),
-                fontWeight = FontWeight.Medium,
-                style = OlvidTypography.body2,
-                textAlign = TextAlign.Center
-            )
+        Text(
+            text = stringResource(id = R.string.label_discussion_list_pin_divider),
+            fontWeight = FontWeight.Medium,
+            style = OlvidTypography.body2,
+            textAlign = TextAlign.Center
+        )
         Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                modifier = Modifier.padding(top = 2.dp).size(16.dp),
-                painter = painterResource(id = R.drawable.ic_pinned),
-                contentDescription = "pinned"
-            )
+        Icon(
+            modifier = Modifier
+                .padding(top = 2.dp)
+                .size(16.dp),
+            painter = painterResource(id = R.drawable.ic_pinned),
+            contentDescription = "pinned"
+        )
         Spacer(modifier = Modifier.width(16.dp))
         Icon(imageVector = Icons.Rounded.KeyboardArrowUp, contentDescription = "up")
     }

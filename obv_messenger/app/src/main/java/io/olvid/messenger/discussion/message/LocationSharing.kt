@@ -86,6 +86,8 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.designsystem.theme.OlvidTypography
+import io.olvid.messenger.discussion.message.attachments.Attachments
+import io.olvid.messenger.discussion.message.attachments.constantSp
 import io.olvid.messenger.services.UnifiedForegroundService.LocationSharingSubService
 import io.olvid.messenger.settings.SettingsActivity
 

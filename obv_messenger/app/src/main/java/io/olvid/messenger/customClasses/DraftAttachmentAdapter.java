@@ -57,8 +57,7 @@ import io.olvid.messenger.R;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
-import io.olvid.messenger.discussion.message.Attachment;
-import io.olvid.messenger.discussion.message.Visibility;
+import io.olvid.messenger.discussion.message.attachments.Visibility;
 import io.olvid.messenger.services.MediaPlayerService;
 import io.olvid.messenger.settings.SettingsActivity;
 

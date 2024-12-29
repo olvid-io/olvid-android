@@ -26,15 +26,17 @@ public class DecryptedApplicationMessage {
     private final UID messageUid;
     private final byte[] messagePayload;
     private final Identity fromIdentity;
+    private final UID fromDeviceUid;
     private final Identity toIdentity;
     private final long serverTimestamp;
     private final long downloadTimestamp;
     private final long localDownloadTimestamp;
 
-    public DecryptedApplicationMessage(UID messageUid, byte[] messagePayload, Identity fromIdentity, Identity toIdentity, long serverTimestamp, long downloadTimestamp, long localDownloadTimestamp) {
+    public DecryptedApplicationMessage(UID messageUid, byte[] messagePayload, Identity fromIdentity, UID fromDeviceUid, Identity toIdentity, long serverTimestamp, long downloadTimestamp, long localDownloadTimestamp) {
         this.messageUid = messageUid;
         this.messagePayload = messagePayload;
         this.fromIdentity = fromIdentity;
+        this.fromDeviceUid = fromDeviceUid;
         this.toIdentity = toIdentity;
         this.serverTimestamp = serverTimestamp;
         this.downloadTimestamp = downloadTimestamp;
@@ -55,6 +57,10 @@ public class DecryptedApplicationMessage {
 
     public Identity getToIdentity() {
         return toIdentity;
+    }
+
+    public UID getFromDeviceUid() {
+        return fromDeviceUid;
     }
 
     public long getServerTimestamp() {

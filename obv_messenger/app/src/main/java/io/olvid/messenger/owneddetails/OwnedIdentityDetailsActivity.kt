@@ -55,6 +55,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupMenu
+import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -120,7 +121,6 @@ import io.olvid.messenger.plus_button.PlusButtonActivity
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.settings.SettingsActivity.Companion.contactDisplayNameFormat
 import io.olvid.messenger.settings.SettingsActivity.Companion.uppercaseLastName
-import java.util.Collections
 import java.util.Locale
 
 class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
@@ -140,6 +140,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
 
     private var latestDetails: JsonIdentityDetailsWithVersionAndPhoto? = null
     private val identityObserver: IdentityObserver by lazy { IdentityObserver() }
+    private val ownedIdentityDetailsViewModel: OwnedIdentityDetailsViewModel by viewModels()
     private var primary700 = 0
 
     @SuppressLint("NotifyDataSetChanged")
@@ -152,15 +153,21 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         supportActionBar?.elevation = 0f
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
 
         findViewById<CoordinatorLayout>(R.id.root_coordinator)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
                 view.updateLayoutParams<MarginLayoutParams> {
                     updateMargins(bottom = insets.bottom)
                 }
                 view.updatePadding(top = insets.top)
+                findViewById<ScrollView>(R.id.root_scrollview)?.updatePadding(
+                    left = insets.left,
+                    right = insets.right
+                )
                 windowInsets
             }
         }
@@ -239,7 +246,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         }
         viewModel.ownedIdentityActive.observe(
             this
-        ) { active: Boolean? -> deviceListAdapter.notifyDataSetChanged() }
+        ) { deviceListAdapter.notifyDataSetChanged() }
 
         val addDeviceButton = findViewById<Button>(R.id.add_device_button)
         addDeviceButton.setOnClickListener(this)
@@ -321,9 +328,9 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                         .setTitle(R.string.dialog_title_unmute_notifications)
                         .setPositiveButton(
                             R.string.button_label_unmute_notifications
-                        ) { dialog: DialogInterface?, which: Int ->
+                        ) { _, _ ->
                             App.runThread {
-                                identityObserver.ownedIdentity!!.prefMuteNotifications = false
+                                identityObserver.ownedIdentity?.prefMuteNotifications = false
                                 AppDatabase.getInstance().ownedIdentityDao()
                                     .updateMuteNotifications(
                                         identityObserver.ownedIdentity!!.bytesOwnedIdentity,
@@ -335,7 +342,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                         }
                         .setNegativeButton(R.string.button_label_cancel, null)
 
-                    if (identityObserver.ownedIdentity!!.prefMuteNotificationsTimestamp == null) {
+                    if (identityObserver.ownedIdentity?.prefMuteNotificationsTimestamp == null) {
                         builder.setMessage(R.string.dialog_message_unmute_notifications)
                     } else {
                         builder.setMessage(
@@ -356,7 +363,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
             R.id.action_mute -> {
                 val muteNotificationDialog = MuteNotificationDialog(
                     this,
-                    { muteExpirationTimestamp: Long?, muteWholeProfile: Boolean, exceptMentioned: Boolean ->
+                    { muteExpirationTimestamp: Long?, _: Boolean, exceptMentioned: Boolean ->
                         App.runThread {
                             if (identityObserver.ownedIdentity != null) {
                                 identityObserver.ownedIdentity!!.prefMuteNotifications = true
@@ -397,7 +404,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                             .setMessage(R.string.dialog_message_neutral_notification_when_hidden)
                             .setPositiveButton(
                                 R.string.button_label_activate
-                            ) { dialog: DialogInterface?, which: Int ->
+                            ) { _, _ ->
                                 App.runThread {
                                     AppDatabase.getInstance().ownedIdentityDao()
                                         .updateShowNeutralNotificationWhenHidden(
@@ -414,15 +421,21 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
             }
 
             R.id.action_rename -> {
-                if (identityObserver.ownedIdentity != null) {
-                    val dialogFragment = EditOwnedIdentityDetailsDialogFragment(
-                        bytesOwnedIdentity = identityObserver.ownedIdentity!!.bytesOwnedIdentity,
-                        identityDetails = latestDetails,
-                        customDisplayName = identityObserver.ownedIdentity!!.customDisplayName,
-                        hidden = identityObserver.ownedIdentity!!.unlockPassword != null,
-                        keycloakManaged = identityObserver.ownedIdentity!!.keycloakManaged,
-                        identityActive = identityObserver.ownedIdentity!!.active
-                    ) { identityObserver.reload() }
+
+                identityObserver.ownedIdentity?.let { ownedIdentity ->
+                    ownedIdentityDetailsViewModel.bytesOwnedIdentity =
+                        ownedIdentity.bytesOwnedIdentity
+                    latestDetails?.let {
+                        ownedIdentityDetailsViewModel.setOwnedIdentityDetails(
+                            it,
+                            ownedIdentity.customDisplayName,
+                            ownedIdentity.unlockPassword != null
+                        )
+                    }
+                    ownedIdentityDetailsViewModel.detailsLocked = ownedIdentity.keycloakManaged
+                    ownedIdentityDetailsViewModel.isIdentityInactive = ownedIdentity.active.not()
+                    val dialogFragment =
+                        EditOwnedIdentityDetailsDialogFragment()
                     dialogFragment.show(supportFragmentManager, "dialog")
                 }
                 return true
@@ -439,24 +452,25 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
 
             R.id.action_unbind_from_keycloak -> {
                 identityObserver.ownedIdentity?.let { ownedId ->
-                    val builder = if (KeycloakManager.isOwnedIdentityTransferRestricted(ownedId.bytesOwnedIdentity)) {
-                        SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                            .setTitle(R.string.dialog_title_unbind_from_keycloak_restricted)
-                            .setMessage(R.string.dialog_message_unbind_from_keycloak_restricted)
-                            .setPositiveButton(R.string.button_label_ok, null)
-                    } else {
-                        SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                            .setTitle(R.string.dialog_title_unbind_from_keycloak)
-                            .setMessage(R.string.dialog_message_unbind_from_keycloak)
-                            .setPositiveButton(R.string.button_label_ok) { dialog: DialogInterface?, which: Int ->
-                                KeycloakManager.getInstance().unregisterKeycloakManagedIdentity(
-                                    identityObserver.ownedIdentity!!.bytesOwnedIdentity
-                                )
-                                AppSingleton.getEngine()
-                                    .unbindOwnedIdentityFromKeycloak(identityObserver.ownedIdentity!!.bytesOwnedIdentity)
-                            }
-                            .setNegativeButton(R.string.button_label_cancel, null)
-                    }
+                    val builder =
+                        if (KeycloakManager.isOwnedIdentityTransferRestricted(ownedId.bytesOwnedIdentity)) {
+                            SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                                .setTitle(R.string.dialog_title_unbind_from_keycloak_restricted)
+                                .setMessage(R.string.dialog_message_unbind_from_keycloak_restricted)
+                                .setPositiveButton(R.string.button_label_ok, null)
+                        } else {
+                            SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                                .setTitle(R.string.dialog_title_unbind_from_keycloak)
+                                .setMessage(R.string.dialog_message_unbind_from_keycloak)
+                                .setPositiveButton(R.string.button_label_ok) { _, _ ->
+                                    KeycloakManager.getInstance().unregisterKeycloakManagedIdentity(
+                                        identityObserver.ownedIdentity!!.bytesOwnedIdentity
+                                    )
+                                    AppSingleton.getEngine()
+                                        .unbindOwnedIdentityFromKeycloak(identityObserver.ownedIdentity!!.bytesOwnedIdentity)
+                                }
+                                .setNegativeButton(R.string.button_label_cancel, null)
+                        }
                     builder.create().show()
                 }
                 return true
@@ -479,7 +493,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                             .setNegativeButton(R.string.button_label_cancel, null)
                             .setPositiveButton(
                                 R.string.button_label_next
-                            ) { dialogInterface: DialogInterface?, which: Int ->
+                            ) { _, _ ->
                                 showDeleteProfileDialog(
                                     ownedIdentity,
                                     otherNotHiddenOwnedIdentityCount < 1,
@@ -570,7 +584,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         deleteButton.isEnabled = false
         @SuppressLint("UseSwitchCompatOrMaterialCode") val deleteEverywhereSwitch =
             dialogView.findViewById<Switch>(R.id.delete_profile_everywhere_switch)
-        deleteEverywhereSwitch.setOnCheckedChangeListener { compoundButton: CompoundButton?, checked: Boolean ->
+        deleteEverywhereSwitch.setOnCheckedChangeListener { _: CompoundButton?, checked: Boolean ->
             deleteProfileEverywhere = checked
             deleteButton.setText(if (checked) R.string.button_label_delete_everywhere else R.string.button_label_delete)
         }
@@ -608,8 +622,8 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
             .setTitle(R.string.dialog_title_delete_profile)
             .setView(dialogView)
         val dialog: Dialog = builder.create()
-        cancelButton.setOnClickListener { v: View? -> dialog.dismiss() }
-        deleteButton.setOnClickListener { v: View? ->
+        cancelButton.setOnClickListener { dialog.dismiss() }
+        deleteButton.setOnClickListener {
             App.runThread {
                 val bytesOwnedIdentities: MutableList<ByteArray> =
                     ArrayList()
@@ -662,7 +676,8 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         }
 
         keycloakManaged = ownedIdentity.keycloakManaged
-        keycloakTransferRestricted = KeycloakManager.isOwnedIdentityTransferRestricted(ownedIdentity.bytesOwnedIdentity)
+        keycloakTransferRestricted =
+            KeycloakManager.isOwnedIdentityTransferRestricted(ownedIdentity.bytesOwnedIdentity)
         invalidateOptionsMenu()
 
         myIdInitialView!!.setOwnedIdentity(ownedIdentity)
@@ -687,10 +702,10 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         transaction.replace(R.id.subscription_status_placeholder, subscriptionStatusFragment)
         transaction.commit()
 
-        try {
+        kotlin.runCatching {
             val jsons = AppSingleton.getEngine()
                 .getOwnedIdentityPublishedAndLatestDetails(ownedIdentity.bytesOwnedIdentity)
-            if (jsons == null || jsons.size == 0) {
+            if (jsons == null || jsons.isEmpty()) {
                 return
             }
             publishedDetailsTextViews!!.removeAllViews()
@@ -718,7 +733,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                 tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
                 publishedDetailsTextViews!!.addView(tv)
             }
-            if (publishedSecondLine != null && publishedSecondLine.length > 0) {
+            if (!publishedSecondLine.isNullOrEmpty()) {
                 val tv = makeTextView()
                 tv.text = publishedSecondLine
                 publishedDetailsTextViews!!.addView(tv)
@@ -726,7 +741,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
             if (publishedDetails.customFields != null) {
                 val keys: MutableList<String> = ArrayList(publishedDetails.customFields.size)
                 keys.addAll(publishedDetails.customFields.keys)
-                Collections.sort(keys)
+                keys.sort()
                 for (key in keys) {
                     val tv = makeTextView()
                     val value = publishedDetails.customFields[key]
@@ -795,7 +810,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                     }
                     latestDetailsTextViews!!.addView(tv)
                 }
-                if (latestSecondLine != null && latestSecondLine.length > 0) {
+                if (!latestSecondLine.isNullOrEmpty()) {
                     val tv = makeTextView()
                     tv.text = latestSecondLine
                     if (latestSecondLine != publishedSecondLine) {
@@ -806,7 +821,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                 if (latestDetails.customFields != null) {
                     val keys: MutableList<String> = ArrayList(latestDetails.customFields.size)
                     keys.addAll(latestDetails.customFields.keys)
-                    Collections.sort(keys)
+                    keys.sort()
                     for (key in keys) {
                         val tv = makeTextView()
                         val value = latestDetails.customFields[key] ?: continue
@@ -850,8 +865,6 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                     )
                 }
             }
-        } catch (_: Exception) {
-            // nothing to do
         }
     }
 
@@ -913,7 +926,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
             AppSingleton.getEngine().publishLatestIdentityDetails(bytesOwnedIdentity)
         } else if (id == R.id.button_discard) {
             AppSingleton.getEngine().discardLatestIdentityDetails(bytesOwnedIdentity)
-            identityObserver.reload()
+            reloadIdentity()
         } else if (id == R.id.button_reactivate_identity) {
             val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
             if (ownedIdentity != null) {
@@ -934,7 +947,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                 val checkBox = dialogView.findViewById<CheckBox>(R.id.checkbox)
-                checkBox.setOnCheckedChangeListener { buttonView: CompoundButton?, isChecked: Boolean ->
+                checkBox.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
                     val editor = prefs.edit()
                     editor.putBoolean(
                         SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION,
@@ -949,20 +962,26 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                 builder.setTitle(R.string.dialog_title_add_device_explanation)
                     .setView(dialogView)
                     .setNegativeButton(R.string.button_label_cancel, null)
-                    .setPositiveButton(R.string.button_label_proceed) { dialog: DialogInterface?, which: Int ->
+                    .setPositiveButton(R.string.button_label_proceed) { _, _ ->
                         val intent = Intent(
                             this,
                             OnboardingFlowActivity::class.java
                         )
                         intent.putExtra(OnboardingFlowActivity.TRANSFER_SOURCE_INTENT_EXTRA, true)
-                        intent.putExtra(OnboardingFlowActivity.TRANSFER_RESTRICTED_INTENT_EXTRA, keycloakTransferRestricted)
+                        intent.putExtra(
+                            OnboardingFlowActivity.TRANSFER_RESTRICTED_INTENT_EXTRA,
+                            keycloakTransferRestricted
+                        )
                         startActivity(intent)
                     }
                 builder.create().show()
             } else {
                 val intent = Intent(this, OnboardingFlowActivity::class.java)
                 intent.putExtra(OnboardingFlowActivity.TRANSFER_SOURCE_INTENT_EXTRA, true)
-                intent.putExtra(OnboardingFlowActivity.TRANSFER_RESTRICTED_INTENT_EXTRA, keycloakTransferRestricted)
+                intent.putExtra(
+                    OnboardingFlowActivity.TRANSFER_RESTRICTED_INTENT_EXTRA,
+                    keycloakTransferRestricted
+                )
                 startActivity(intent)
             }
         } else if (view is InitialView) {
@@ -980,15 +999,15 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
     internal inner class IdentityObserver : Observer<OwnedIdentity?> {
         var ownedIdentity: OwnedIdentity? = null
 
-        override fun onChanged(ownedIdentity: OwnedIdentity?) {
-            if (this.ownedIdentity != null && (ownedIdentity == null || !ownedIdentity.bytesOwnedIdentity.contentEquals(
+        override fun onChanged(value: OwnedIdentity?) {
+            if (this.ownedIdentity != null && (value == null || !value.bytesOwnedIdentity.contentEquals(
                     this.ownedIdentity!!.bytesOwnedIdentity
                 ))
             ) {
                 // the owned identity change --> leave the activity
                 finish()
             } else {
-                this.ownedIdentity = ownedIdentity
+                this.ownedIdentity = value
                 reload()
             }
         }
@@ -997,6 +1016,10 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
             latestDetails = null
             displayDetails(ownedIdentity)
         }
+    }
+
+    fun reloadIdentity() {
+        identityObserver.reload()
     }
 
     internal class OwnedDeviceViewHolder(
@@ -1202,7 +1225,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                             .setMessage(R.string.dialog_message_remove_device)
                             .setPositiveButton(
                                 R.string.button_label_remove,
-                                (DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
+                                (DialogInterface.OnClickListener { _, _ ->
                                     try {
                                         viewModel.showRefreshSpinner()
                                         AppSingleton.getEngine().processDeviceManagementRequest(
@@ -1244,7 +1267,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                         SecureAlertDialogBuilder(itemView.context, R.style.CustomAlertDialog)
                             .setTitle(R.string.dialog_title_rename_device)
                             .setView(dialogView)
-                            .setPositiveButton(R.string.button_label_ok) { dialog: DialogInterface?, which: Int ->
+                            .setPositiveButton(R.string.button_label_ok) { _, _ ->
                                 val nickname: CharSequence? = deviceNameEditText.text
                                 if (nickname != null) {
                                     try {
@@ -1266,7 +1289,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                     }
 
                     val dialog = builder.create()
-                    dialog.setOnShowListener { dialogInterface: DialogInterface? ->
+                    dialog.setOnShowListener {
                         val ok =
                             dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                         if (ok != null) {
@@ -1325,7 +1348,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                                             )
                                             .setPositiveButton(
                                                 R.string.button_label_proceed,
-                                                (DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
+                                                (DialogInterface.OnClickListener { _, _ ->
                                                     try {
                                                         viewModel.showRefreshSpinner()
                                                         AppSingleton.getEngine()

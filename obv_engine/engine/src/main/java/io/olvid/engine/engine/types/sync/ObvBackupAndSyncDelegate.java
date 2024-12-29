@@ -29,7 +29,7 @@ public interface ObvBackupAndSyncDelegate {
 
     //////
     // This method computes a snapshot of the data to sync
-    ObvSyncSnapshotNode getSyncSnapshot(Identity ownedIdentity); // TODO: we probably need to add a context as we do not want to include the same elements for a backup or a sync
+    ObvSyncSnapshotNode getSyncSnapshot(Identity ownedIdentity);
 
     //////
     // This method allows each delegate to crate an owned identity base on the ObvIdentity the engine has restored

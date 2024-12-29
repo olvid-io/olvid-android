@@ -1245,6 +1245,11 @@ public class AppSingleton {
                     new UpdateAllGroupMembersNames().run();
                 });
             }
+            if (lastBuildExecuted != 0 && lastBuildExecuted < 259) {
+                App.runThread(() -> {
+                    db.fyleMessageJoinWithStatusDao().clearTextExtractedFromImages();
+                });
+            }
 
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());
             saveLastExecutedVersions(BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);

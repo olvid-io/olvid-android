@@ -118,7 +118,11 @@ public class ChannelCoordinator {
                     if (!channelManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(channelManagerSession.session, ownedIdentity, contactIdentity)) {
                         // contact unknown, set the from identity of the inbox message to reprocess it once the contact is created
                         Logger.i("Received a PreKey encrypted message from an unknown contact, putting it on hold...");
-                        channelManagerSession.networkFetchDelegate.setInboxMessageFromIdentityForMissingPreKeyContact(channelManagerSession.session, networkReceivedMessage.getOwnedIdentity(), networkReceivedMessage.getMessageUid(), contactIdentity);
+                        channelManagerSession.networkFetchDelegate.setInboxMessageFromIdentityForMissingPreKeyContact(
+                                channelManagerSession.session,
+                                networkReceivedMessage.getOwnedIdentity(),
+                                networkReceivedMessage.getMessageUid(),
+                                contactIdentity);
                         return;
                     } else {
                         EnumSet<ObvContactActiveOrInactiveReason> reasons = channelManagerSession.identityDelegate.getContactActiveOrInactiveReasons(channelManagerSession.session, ownedIdentity, contactIdentity);
@@ -166,6 +170,7 @@ public class ChannelCoordinator {
                             channelReceivedApplicationMessage.getOwnedIdentity(),
                             channelReceivedApplicationMessage.getMessageUid(),
                             authEncKeyAndChannelInfo.getReceptionChannelInfo().getRemoteIdentity(),
+                            authEncKeyAndChannelInfo.getReceptionChannelInfo().getRemoteDeviceUid(),
                             channelReceivedApplicationMessage.getAttachmentsKeyAndMetadata(),
                             channelReceivedApplicationMessage.getMessagePayload(),
                             channelReceivedMessage.getExtendedPayloadKey()

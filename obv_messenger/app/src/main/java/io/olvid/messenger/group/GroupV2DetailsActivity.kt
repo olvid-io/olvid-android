@@ -48,6 +48,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.LinearLayout.LayoutParams
+import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -156,8 +157,13 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
         setContentView(layout.activity_group_v2_details)
         findViewById<CoordinatorLayout>(R.id.group_details_coordinatorLayout)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
                 view.updatePadding(top = insets.top)
+                findViewById<ScrollView>(R.id.group_details_scroll_view)?.updatePadding(
+                    left = insets.left,
+                    right = insets.right
+                )
                 view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     updateMargins(bottom = insets.bottom)
                 }
@@ -883,7 +889,7 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
             if (group.updateInProgress == Group2.UPDATE_NONE) {
                 groupDetailsViewModel.groupMembers.value?.mapNotNull { group2MemberOrPending ->
                     group2MemberOrPending.contact?.let { contact ->
-                        if ((contact.hasChannelOrPreKey() || contact.keycloakManaged) && contact.oneToOne.not()) {
+                        if ((contact.hasChannelOrPreKey() || contact.keycloakManaged) && contact.active && contact.oneToOne.not()) {
                             contact
                         } else {
                             null

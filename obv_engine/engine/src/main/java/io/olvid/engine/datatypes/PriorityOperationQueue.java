@@ -47,7 +47,7 @@ public class PriorityOperationQueue {
     }
 
     public void queue(PriorityOperation op) {
-        if (op.getDependencies().size() > 0) {
+        if (!op.getDependencies().isEmpty()) {
             Logger.e("Cannot queue an operation with dependencies into a PriorityOperationQueue.");
             return;
         }

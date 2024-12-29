@@ -57,8 +57,6 @@ import androidx.lifecycle.switchMap
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.CollapsingToolbarLayout
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
@@ -72,7 +70,6 @@ import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.customClasses.EmptyRecyclerView
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.LockScreenOrNotActivity
-import io.olvid.messenger.customClasses.OpenHiddenProfileDialog
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
@@ -156,8 +153,13 @@ class StorageManagerActivity : LockScreenOrNotActivity() {
 
         findViewById<CoordinatorLayout>(R.id.root_coordinator)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
                 view.updatePadding(top = insets.top)
+                findViewById<ViewPager2>(R.id.view_pager_container)?.updatePadding(
+                    left = insets.left,
+                    right = insets.right
+                )
                 view.updateLayoutParams<MarginLayoutParams> {
                     updateMargins(bottom = insets.bottom)
                 }

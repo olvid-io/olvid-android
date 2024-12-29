@@ -28,12 +28,13 @@ import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
+import io.olvid.engine.datatypes.PriorityOperation;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
 
-public class ProcessPreKeyMessagesForNewContactOperation extends Operation {
+public class ProcessPreKeyMessagesForNewContactOperation extends PriorityOperation {
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
     private final Identity ownedIdentity;
     private final Identity contactIdentity;
@@ -52,6 +53,11 @@ public class ProcessPreKeyMessagesForNewContactOperation extends Operation {
         this.fetchManagerSessionFactory = fetchManagerSessionFactory;
         this.ownedIdentity = ownedIdentity;
         this.contactIdentity = contactIdentity;
+    }
+
+    @Override
+    public long getPriority() {
+        return 1;
     }
 
     private static UID computeUniqueUid(Identity ownedIdentity, Identity contactIdentity) {

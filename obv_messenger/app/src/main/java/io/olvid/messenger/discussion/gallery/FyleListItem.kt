@@ -58,7 +58,7 @@ import io.olvid.messenger.databases.entity.Fyle
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.linkpreview.OpenGraph
-import io.olvid.messenger.discussion.message.constantSp
+import io.olvid.messenger.discussion.message.attachments.constantSp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -104,7 +104,7 @@ fun FyleListItem(
                     else
                         Modifier
                 ),
-            contentScale = ContentScale.Crop,
+            contentScale = if (fyleAndStatus.fyleMessageJoinWithStatus.mimeType == "application/pdf") ContentScale.Fit else ContentScale.Crop,
             painter = rememberAsyncImagePainter(
                 model = PreviewUtils.getBitmapPreview(
                     fyleAndStatus.fyle,

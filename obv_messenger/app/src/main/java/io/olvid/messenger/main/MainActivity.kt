@@ -64,6 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.Constraints
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -73,6 +74,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updateMargins
+import androidx.core.view.updateMarginsRelative
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -198,14 +200,16 @@ class MainActivity : LockableActivity(), OnClickListener {
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         toolbar?.let {
+            val density = it.resources.displayMetrics.density
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
                 view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     updateMargins(top = insets.top)
                 }
                 root?.let { rootLayout ->
                     rootLayout.updatePadding(rootLayout.paddingLeft, rootLayout.paddingTop, rootLayout.paddingRight, insets.bottom)
                 }
+                toolbar.updatePadding(left = insets.left + (16 * density).toInt(), right = insets.right + (16 * density).toInt())
                 WindowInsetsCompat.CONSUMED
             }
         }

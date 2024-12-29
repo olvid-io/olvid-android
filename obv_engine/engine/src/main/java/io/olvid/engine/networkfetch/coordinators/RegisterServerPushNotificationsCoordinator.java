@@ -235,8 +235,8 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
             UID androidIdentityMaskingUid = new UID(androidMaskingUidString);
             IdentityAndUid identityAndUid = androidIdentityMaskingUids.get(androidIdentityMaskingUid);
             if (identityAndUid != null) {
-                fetchManagerSessionFactory.markOwnedIdentityAsNotUpToDate(identityAndUid.ownedIdentity, OwnedIdentitySynchronizationStatus.OTHER_SYNC_IN_PROGRESS);
-                downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(identityAndUid.ownedIdentity, identityAndUid.uid);
+                fetchManagerSessionFactory.markOwnedIdentityAsNotUpToDate(identityAndUid.identity, OwnedIdentitySynchronizationStatus.OTHER_SYNC_IN_PROGRESS);
+                downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(identityAndUid.identity, identityAndUid.uid);
             }
         } catch (Exception e) {
             Logger.x(e);
@@ -249,7 +249,7 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
                 UID androidIdentityMaskingUid = new UID(androidMaskingUidString);
                 IdentityAndUid identityAndUid = androidIdentityMaskingUids.get(androidIdentityMaskingUid);
                 if (identityAndUid != null) {
-                    return identityAndUid.ownedIdentity;
+                    return identityAndUid.identity;
                 }
             } catch (Exception e) {
                 Logger.x(e);

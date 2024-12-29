@@ -246,8 +246,7 @@
     <string name="text_joined_the_group">%1$s a rejoint le groupe</string>
     <string name="text_left_the_group">%1$s a quitté le groupe</string>
     <string name="text_nobody">Personne</string>
-    <string name="text_draft_message_prefix">Brouillon\u00a0: %1$s</string>
-    <string name="text_outbound_message_prefix">Vous : %1$s</string>
+    <string name="text_draft_message_prefix">Brouillon\u00a0:\u0020</string>
     <string name="text_inbound_group_message_prefix">%1$s :\u0020</string>
     <string name="text_today">aujourd\'hui</string>
     <string name="text_deleted_contact">Contact supprimé</string>
@@ -277,6 +276,7 @@
     <string name="toast_message_invite_sent">Invitation envoyée</string>
     <string name="toast_message_leaving_group">Vous avez quitté le groupe</string>
     <string name="toast_message_message_text_copied_to_clipboard">Le texte du message a été copié dans le presse-papier</string>
+    <string name="toast_message_text_copied_to_clipboard">Texte copié dans le presse-papier</string>
     <string name="toast_message_no_channel_message_delayed">Votre message est en attente et sera envoyé dès que possible</string>
     <string name="toast_message_sharing_failed">Impossible de partager le contenu sélectionné</string>
     <string name="toast_message_shortcut_creation_failed">Erreur lors de la création de raccourci</string>
@@ -1635,6 +1635,8 @@
     <string name="pref_no_notify_certificate_change_for_previews_summary">Activez cette option pour désactiver la détection de changement de certificat lors du téléchargement d\'aperçus de liens. Certains sites peuvent présenter un certificat différent à chaque connexion, induisant des notifications fréquentes sans cette option.</string>
     <string name="pref_use_legacy_zxing_scanner_title">Utiliser ZXing pour scanner les codes QR</string>
     <string name="pref_use_legacy_zxing_scanner_summary">Par défaut, Olvid utilise ML Kit pour cela. Activez cette option si le scan de codes QR fonctionne mal dans Olvid.</string>
+    <string name="pref_use_internal_pdf_viewer_title">Utiliser la visionneuse PDF interne (expérimental)</string>
+    <string name="pref_use_internal_pdf_viewer_summary">Par défaut, les pièces jointes PDF sont ouvertes dans une visionneuse externe. Activez cette option pour utiliser la visionneuse interne à la place.</string>
     <string name="label_my_devices">Mes appareils</string>
     <string name="text_device_xxxx">Appareil %1$s</string>
     <string name="text_this_device">Cet appareil</string>

@@ -1617,7 +1617,7 @@ public class AndroidNotificationManager {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
             switch (errorType) {
                 case LOCATION_DISABLED: {
-                    builder.setSmallIcon(R.drawable.ic_location_current_location_disabled)
+                    builder.setSmallIcon(R.drawable.ic_location_current_location_failed)
                             .setContentTitle(App.getContext().getString(R.string.text_notification_location_disabled_title))
                             .setContentText(App.getContext().getString(R.string.text_notification_location_disabled_message));
 

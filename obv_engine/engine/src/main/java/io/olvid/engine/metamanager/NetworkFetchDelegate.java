@@ -37,13 +37,11 @@ import io.olvid.engine.engine.types.JsonOsmStyle;
 public interface NetworkFetchDelegate {
     void downloadMessages(Identity ownedIdentity, UID deviceUid);
     DecryptedApplicationMessage getMessage(Identity ownedIdentity, UID messageUid);
-    boolean canAllAttachmentsBeDownloaded(Identity ownedIdentity, UID messageUid) throws SQLException;
-    void setAttachmentKeyAndMetadataAndMessagePayload(Session session, Identity ownedIdentity, UID messageUid, Identity remoteIdentity, AttachmentKeyAndMetadata[] attachmentKeyAndMetadata, byte[] messagePayload, AuthEncKey extendedPayloadKey) throws Exception;
+    void setAttachmentKeyAndMetadataAndMessagePayload(Session session, Identity ownedIdentity, UID messageUid, Identity remoteIdentity, UID remoteDeviceUid, AttachmentKeyAndMetadata[] attachmentKeyAndMetadata, byte[] messagePayload, AuthEncKey extendedPayloadKey) throws Exception;
     void setInboxMessageFromIdentityForMissingPreKeyContact(Session session, Identity ownedIdentity, UID messageUid, Identity contactIdentity) throws Exception;
     void downloadAttachment(Identity ownedIdentity, UID messageUid, int attachmentNumber, int priorityCategory);
     void pauseDownloadAttachment(Identity ownedIdentity, UID messageUid, int attachmentNumber);
     ReceivedAttachment getAttachment(Identity ownedIdentity, UID messageUid, int attachmentNumber);
-    ReceivedAttachment[] getMessageAttachments(Identity ownedIdentity, UID messageUid);
     boolean isInboxAttachmentReceived(Session session, Identity ownedIdentity, UID uid, int engineNumber) throws Exception;
 
     void messageCannotBeDecrypted(Session session, Identity ownedIdentity, UID messageUid);

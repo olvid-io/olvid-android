@@ -40,6 +40,7 @@ import android.util.Base64
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AlertDialog.Builder
@@ -48,7 +49,9 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -164,8 +167,12 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         findViewById<CoordinatorLayout>(R.id.root_coordinator)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                val insets =
+                    windowInsets.getInsets(Type.systemBars() or Type.ime() or Type.displayCutout())
                 view.updatePadding(top = insets.top, bottom = insets.bottom)
+                view.updateLayoutParams<MarginLayoutParams> {
+                    updateMargins(left = insets.left, right = insets.right)
+                }
                 windowInsets
             }
         }
@@ -733,6 +740,8 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_USE_LEGACY_ZXING_SCANNER: String = "pref_key_use_legacy_zxing_scanner"
         const val PREF_KEY_USE_LEGACY_ZXING_SCANNER_DEFAULT: Boolean = false
 
+        const val PREF_KEY_USE_INTERNAL_PDF_VIEWER: String = "pref_key_use_internal_pdf_viewer"
+        const val PREF_KEY_USE_INTERNAL_PDF_VIEWER_DEFAULT: Boolean = false
 
         const val PREF_KEY_PREFERRED_KEYCLOAK_BROWSER: String =
             "pref_key_preferred_keycloak_browser"
@@ -1863,6 +1872,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         fun useLegacyZxingScanner(): Boolean {
             return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
                 PREF_KEY_USE_LEGACY_ZXING_SCANNER, PREF_KEY_USE_LEGACY_ZXING_SCANNER_DEFAULT
+            )
+        }
+
+        @JvmStatic
+        fun useInternalPdfViewer(): Boolean {
+            return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
+                PREF_KEY_USE_INTERNAL_PDF_VIEWER, PREF_KEY_USE_INTERNAL_PDF_VIEWER_DEFAULT
             )
         }
 

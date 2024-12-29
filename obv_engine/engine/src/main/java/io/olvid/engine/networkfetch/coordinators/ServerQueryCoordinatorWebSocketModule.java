@@ -358,7 +358,7 @@ public class ServerQueryCoordinatorWebSocketModule {
 
         private void onMessage(String text) {
             // ignore empty messages
-            if (text == null || text.trim().length() == 0) {
+            if (text == null || text.trim().isEmpty()) {
                 return;
             }
             executor.execute(() -> {

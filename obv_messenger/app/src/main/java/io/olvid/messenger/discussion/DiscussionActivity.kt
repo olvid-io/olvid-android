@@ -194,12 +194,13 @@ import io.olvid.messenger.discussion.message.Message
 import io.olvid.messenger.discussion.message.MessageDisclaimer
 import io.olvid.messenger.discussion.message.MissedMessageCount
 import io.olvid.messenger.discussion.message.ScrollDownButton
-import io.olvid.messenger.discussion.message.Visibility
+import io.olvid.messenger.discussion.message.attachments.Visibility
 import io.olvid.messenger.discussion.message.copyLocationToClipboard
 import io.olvid.messenger.discussion.search.DiscussionSearch
 import io.olvid.messenger.discussion.settings.DiscussionSettingsActivity
 import io.olvid.messenger.fragments.FullScreenImageFragment
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment
+import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.main.invitations.InvitationListItem
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.main.invitations.getAnnotatedDate
@@ -302,6 +303,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
     private var actionModeCallback: Callback? = null
 
     private var locked: Boolean? = null
+    private var canEdit: Boolean? = null
 
     private val messageIdsToMarkAsRead: MutableSet<Long> by lazy { HashSet() }
     private val editedMessageIdsToMarkAsSeen: MutableSet<Long> by lazy { HashSet() }
@@ -511,7 +513,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     LaunchedEffect(
                         scrollToMessageRequest,
                         messages.itemCount,
-                        messages.itemSnapshotList.indexOfFirst { it == null }) { // TODO: can we do better than this? We only need to b notified everytime the snapshot is updated
+                        messages.itemSnapshotList.indexOfFirst { it == null }) {
                         when (scrollToMessageRequest) {
                             ScrollRequest.None -> Unit
                             ScrollRequest.ToBottom -> {
@@ -780,14 +782,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                                     )
                                                                 ),
                                                                 onDoubleClick = {
-                                                                    if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE
-                                                                        && message.wipeStatus != Message.WIPE_STATUS_WIPED
-                                                                        && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
-                                                                        && !message.isLocationMessage
-                                                                        && locked != true
-                                                                    ) {
-                                                                        enterEditMode(message)
-                                                                    }
+                                                                    enterEditModeIfAllowed(message)
                                                                 },
                                                                 onLongClick = {
                                                                     messageLongClicked(
@@ -812,6 +807,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                             Color.Transparent
                                                     )
                                                     .padding(horizontal = 8.dp, vertical = 2.dp)
+                                                    .cutoutHorizontalPadding()
                                                     .onGloballyPositioned {
                                                         offset = it.positionOnScreen()
                                                     },
@@ -824,14 +820,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                     )
                                                 },
                                                 onDoubleClick = {
-                                                    if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE
-                                                        && message.wipeStatus != Message.WIPE_STATUS_WIPED
-                                                        && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
-                                                        && !message.isLocationMessage
-                                                        && locked != true
-                                                    ) {
-                                                        enterEditMode(message)
-                                                    }
+                                                    enterEditModeIfAllowed(message)
                                                 },
                                                 onLocationClick = {
                                                     onLocationClick(message)
@@ -1060,7 +1049,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             }
 
             override fun editMessage(message: Message) {
-                enterEditMode(message)
+                enterEditModeIfAllowed(message)
                 composeMessageDelegate.showSoftInputKeyboard()
 
             }
@@ -1305,6 +1294,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     null
                 }
                 discussionNoChannelMessage.text = null
+                canEdit = false
                 setLocked(
                     locked = true,
                     lockedAsInactive = false,
@@ -1316,6 +1306,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     Discussion.TYPE_CONTACT -> {
                         toolBarTitle.text = discussion.title
                         if (!discussion.isPreDiscussion) {
+                            canEdit = true
                             toolbarClickedCallback = Runnable {
                                 App.openContactDetailsActivity(
                                     this@DiscussionActivity,
@@ -1329,6 +1320,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     Discussion.TYPE_GROUP -> {
                         toolBarTitle.text = discussion.title
                         if (!discussion.isPreDiscussion) {
+                            canEdit = true
                             toolbarClickedCallback = Runnable {
                                 App.openGroupDetailsActivity(
                                     this@DiscussionActivity,
@@ -1354,6 +1346,11 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                             toolBarTitle.text = discussion.title
                         }
                         if (!discussion.isPreDiscussion) {
+                            App.runThread {
+                                canEdit = AppDatabase.getInstance()
+                                    .group2Dao()[discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier]
+                                    ?.ownPermissionEditOrRemoteDeleteOwnMessages == true
+                            }
                             toolbarClickedCallback = Runnable {
                                 App.openGroupV2DetailsActivity(
                                     this@DiscussionActivity,
@@ -1808,9 +1805,14 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         locationMessagePopUp.show()
     }
 
-    private fun enterEditMode(message: Message) {
-        if (message.jsonLocation != null) {
-            // prevent editing location messages
+    private fun enterEditModeIfAllowed(message: Message) {
+        if (message.messageType != Message.TYPE_OUTBOUND_MESSAGE
+            || message.wipeStatus == Message.WIPE_STATUS_WIPED
+            || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
+            || message.isLocationMessage
+            || locked == true
+            || canEdit != true) {
+            // prevent editing messages that cannot be edited
             return
         }
         discussionViewModel.discussionId?.let {
@@ -1833,7 +1835,6 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             }
             composeMessageViewModel.setDraftMessageEdit(message)
             composeMessageDelegate.showSoftInputKeyboard()
-
         }
     }
 
@@ -1995,6 +1996,9 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
     private fun finishAndClearViewModel() {
         saveDraft()
+        discussionViewModel.discussionId?.let { discussionId ->
+            App.runThread(ApplyDiscussionRetentionPoliciesTask(discussionId))
+        }
         discussionViewModel.deselectAll()
         discussionViewModel.discussionId = null
         finish()
@@ -2047,17 +2051,14 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
     override fun onDestroy() {
         super.onDestroy()
         audioAttachmentServiceBinding?.release()
-        discussionViewModel.discussionId?.let { discussionId ->
-            App.runThread(ApplyDiscussionRetentionPoliciesTask(discussionId))
-        }
     }
 
     override fun onPause() {
         super.onPause()
         AndroidNotificationManager.setCurrentShowingDiscussionId(null)
+        saveDraft()
         if (markAsReadOnPause) {
             markMessagesRead(true)
-            saveDraft()
         }
     }
 

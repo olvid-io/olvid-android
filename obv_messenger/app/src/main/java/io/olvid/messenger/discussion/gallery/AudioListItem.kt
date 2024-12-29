@@ -80,7 +80,7 @@ import io.olvid.messenger.databases.entity.Fyle
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.gallery.DiscussionMediaGalleryActivity.AudioServiceBindable
-import io.olvid.messenger.discussion.message.constantSp
+import io.olvid.messenger.discussion.message.attachments.constantSp
 import io.olvid.messenger.services.MediaPlayerService.AudioOutput
 import io.olvid.messenger.services.MediaPlayerService.AudioOutput.PHONE
 import kotlin.math.roundToInt

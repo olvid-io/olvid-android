@@ -86,9 +86,11 @@ import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.gallery.FyleListItem
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
+import io.olvid.messenger.discussion.message.OutboundMessageStatus
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.contacts.CustomTab
+import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.main.discussions.getAnnotatedBody
 import io.olvid.messenger.main.discussions.getAnnotatedTitle
 import io.olvid.messenger.settings.SettingsActivity
@@ -127,7 +129,8 @@ fun GlobalSearchScreen(
     )
 
     val pagerState = rememberPagerState { pages.size }
-    val loading = globalSearchViewModel.searching || messages.isLoading() || attachments.isLoading() || links.isLoading()
+    val loading =
+        globalSearchViewModel.searching || messages.isLoading() || attachments.isLoading() || links.isLoading()
 
     Column(modifier = modifier) {
         if (bookmarks != null) {
@@ -236,7 +239,8 @@ fun GlobalSearchScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(colorResource(id = R.color.almostWhite)),
+                        .background(colorResource(id = R.color.almostWhite))
+                        .cutoutHorizontalPadding(),
                     contentAlignment = Alignment.TopStart
                 ) {
                     when (page) {
@@ -678,14 +682,23 @@ private fun SearchResult(
                             body = discussionAndMessage.message.getStringContent(context)
                         )
                     }))?.let {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = globalSearchViewModel.highlight(it),
-                    color = colorResource(id = R.color.greyTint),
-                    style = OlvidTypography.body2,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    discussionAndMessage?.message?.let { lastMessage ->
+                        OutboundMessageStatus(
+                            modifier = Modifier.padding(end = 4.dp),
+                            size = 14.dp,
+                            message = lastMessage
+                        )
+                    }
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = globalSearchViewModel.highlight(it),
+                        color = colorResource(id = R.color.greyTint),
+                        style = OlvidTypography.body2,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
 
             discussionAndMessage?.message?.timestamp?.let {

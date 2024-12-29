@@ -49,6 +49,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.LinearLayout.LayoutParams
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -154,11 +155,16 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
         findViewById<CoordinatorLayout>(R.id.contact_details_coordinatorLayout)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
                 view.updatePadding(top = insets.top)
                 view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     updateMargins(bottom = insets.bottom)
                 }
+                findViewById<ScrollView>(R.id.contact_details_scroll_view)?.updatePadding(
+                    left = insets.left,
+                    right = insets.right
+                )
                 WindowInsetsCompat.CONSUMED
             }
         }
@@ -339,7 +345,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                         R.string.explanation_contact_not_one_to_one,
                         contact.getCustomDisplayName()
                     )
-                notOneToOneInviteButton.visibility = View.VISIBLE
+                notOneToOneInviteButton.visibility = if (contact.active) View.VISIBLE else View.GONE
                 notOneToOneInviteButton.setText(R.string.button_label_invite)
                 notOneToOneRejectButton.visibility = View.GONE
             } else if (invitation.categoryId == Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY) {
@@ -1244,14 +1250,10 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
             App.startWebrtcCall(this, contact.bytesOwnedIdentity, contact.bytesContactIdentity)
             return true
         } else if (itemId == R.id.action_rename) {
-            if (contactDetailsViewModel.contactAndInvitation == null || contactDetailsViewModel.contactAndInvitation.value == null) {
-                return true
-            }
-            val contact = contactDetailsViewModel.contactAndInvitation.value!!.contact
-
-            val editNameAndPhotoDialogFragment =
+            contactDetailsViewModel.contactAndInvitation?.value?.contact?.let { contact ->
                 EditNameAndPhotoDialogFragment.newInstance(this, contact)
-            editNameAndPhotoDialogFragment.show(supportFragmentManager, "dialog")
+                    .show(supportFragmentManager, "dialog")
+            }
             return true
         } else if (itemId == R.id.action_recreate_channels) {
             val contactAndInvitation = contactDetailsViewModel.contactAndInvitation.value

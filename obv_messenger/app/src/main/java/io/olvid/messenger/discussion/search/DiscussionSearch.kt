@@ -114,7 +114,7 @@ class DiscussionSearch(
             ?.filter { it.isNotEmpty() }
             ?.map {
                 Regex(
-                    """\b${Regex.escape(StringUtils.unAccent(it))}""",
+                    """(\b|(?<=_)(?!_))${Regex.escape(StringUtils.unAccent(it))}""",
                     RegexOption.IGNORE_CASE
                 )
             }

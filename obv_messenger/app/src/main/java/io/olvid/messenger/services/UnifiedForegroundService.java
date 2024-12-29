@@ -1318,43 +1318,7 @@ public class UnifiedForegroundService extends Service {
                             }
 
                             // We filter here to avoid too frequent updates if the position did not change much
-                            boolean sendUpdate;
-                            String provider = location.getProvider();
-                            if (provider == null) {
-                                provider = "";
-                            }
-                            switch (provider) {
-                                case LocationManager.GPS_PROVIDER: {
-                                    sendUpdate = ((
-                                            holder.lastSharedLocation == null
-                                                    || LocationManager.NETWORK_PROVIDER.equals(holder.lastSharedLocation.getProvider()) // always prefer gps updates to previously received network updates
-                                                    || location.distanceTo(holder.lastSharedLocation) > holder.quality.getMinUpdateDistanceMeters())
-                                            && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .5 * holder.quality.getMinUpdateFrequencyMs()))
-                                            || (System.currentTimeMillis() - holder.lastUpdateTimestamp > holder.quality.getDefaultUpdateFrequencyMs());
-                                    break;
-                                }
-                                case LocationManager.NETWORK_PROVIDER: {
-                                    // when receiving network updates, if the previous update was GPS, only send if we are almost sure no gps update was available since then
-                                    if (holder.lastSharedLocation != null && LocationManager.GPS_PROVIDER.equals(holder.lastSharedLocation.getProvider())) {
-                                        sendUpdate = System.currentTimeMillis() - holder.lastUpdateTimestamp > holder.quality.getDefaultUpdateFrequencyMs() + holder.quality.getMinUpdateFrequencyMs();
-                                    } else {
-                                        // don't update too frequently between network updates to give the GPS a chance to send a better update
-                                        sendUpdate = (holder.lastSharedLocation == null || location.distanceTo(holder.lastSharedLocation) > holder.quality.getMinUpdateDistanceMeters())
-                                                && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .5 * holder.quality.getMinUpdateFrequencyMs())
-                                                || (System.currentTimeMillis() - holder.lastUpdateTimestamp > holder.quality.getDefaultUpdateFrequencyMs());
-                                    }
-                                    break;
-                                }
-                                case LocationManager.FUSED_PROVIDER:
-                                default: {
-                                    sendUpdate = (holder.lastSharedLocation == null || location.distanceTo(holder.lastSharedLocation) > holder.quality.getMinUpdateDistanceMeters())
-                                            && (System.currentTimeMillis() - holder.lastUpdateTimestamp > .5 * holder.quality.getMinUpdateFrequencyMs())
-                                            || (System.currentTimeMillis() - holder.lastUpdateTimestamp > holder.quality.getDefaultUpdateFrequencyMs());
-                                    break;
-                                }
-                            }
-
-                            if (sendUpdate) {
+                            if (filterLocationUpdate(holder.lastSharedLocation, holder.lastUpdateTimestamp, location, holder.quality, true)) {
                                 holder.updateLocation(location);
                             }
                         }
@@ -1490,6 +1454,41 @@ public class UnifiedForegroundService extends Service {
                     task.run();
                 } else {
                     App.runThread(task);
+                }
+            }
+        }
+
+
+        public static boolean filterLocationUpdate(Location lastLocation, long lastLocationTimestamp, Location newLocation, LocationShareQuality quality, boolean keepFresh) {
+            String provider = newLocation.getProvider();
+            if (provider == null) {
+                provider = "";
+            }
+            switch (provider) {
+                case LocationManager.GPS_PROVIDER: {
+                    return  ((
+                            lastLocation == null
+                                    || LocationManager.NETWORK_PROVIDER.equals(lastLocation.getProvider()) // always prefer gps updates to previously received network updates
+                                    || newLocation.distanceTo(lastLocation) > quality.getMinUpdateDistanceMeters())
+                            && (System.currentTimeMillis() - lastLocationTimestamp > .5 * quality.getMinUpdateFrequencyMs()))
+                            || (keepFresh && (System.currentTimeMillis() - lastLocationTimestamp > quality.getDefaultUpdateFrequencyMs()));
+                }
+                case LocationManager.NETWORK_PROVIDER: {
+                    // when receiving network updates, if the previous update was GPS, only send if we are almost sure no gps update was available since then
+                    if (lastLocation != null && LocationManager.GPS_PROVIDER.equals(lastLocation.getProvider())) {
+                        return System.currentTimeMillis() - lastLocationTimestamp > quality.getDefaultUpdateFrequencyMs() + quality.getMinUpdateFrequencyMs();
+                    } else {
+                        // don't update too frequently between network updates to give the GPS a chance to send a better update
+                        return  (lastLocation == null || newLocation.distanceTo(lastLocation) > quality.getMinUpdateDistanceMeters())
+                                && (System.currentTimeMillis() - lastLocationTimestamp > .5 * quality.getMinUpdateFrequencyMs())
+                                || (keepFresh && (System.currentTimeMillis() - lastLocationTimestamp > quality.getDefaultUpdateFrequencyMs()));
+                    }
+                }
+                case LocationManager.FUSED_PROVIDER:
+                default: {
+                    return (lastLocation == null || newLocation.distanceTo(lastLocation) > quality.getMinUpdateDistanceMeters())
+                            && (System.currentTimeMillis() - lastLocationTimestamp > .5 * quality.getMinUpdateFrequencyMs())
+                            || (keepFresh && (System.currentTimeMillis() - lastLocationTimestamp > quality.getDefaultUpdateFrequencyMs()));
                 }
             }
         }

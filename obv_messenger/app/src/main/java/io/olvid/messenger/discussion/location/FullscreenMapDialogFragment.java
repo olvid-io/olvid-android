@@ -19,8 +19,11 @@
 
 package io.olvid.messenger.discussion.location;
 
+import static io.olvid.messenger.services.UnifiedForegroundService.LocationSharingSubService.PASSIVE_PROVIDER_UPDATE_INTERVAL_MILLIS;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -28,7 +31,11 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +46,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.location.LocationListenerCompat;
+import androidx.core.location.LocationManagerCompat;
+import androidx.core.location.LocationRequestCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
@@ -49,10 +59,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.customClasses.HandlerExecutor;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Message;
@@ -85,6 +97,8 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
     private byte[] bytesOwnedIdentity;
 
     private FragmentActivity activity;
+    private LocationManager locationManager = null;
+    private final LocationListenerCompat locationListenerCompat = this::onLocationUpdate;
 
     MapViewAbstractFragment mapView;
 
@@ -129,6 +143,7 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
 
         // get current activity
         this.activity = requireActivity();
+        this.locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
 
         // make fragment transparent
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_NoActionBar_Transparent);
@@ -215,6 +230,74 @@ public class FullscreenMapDialogFragment extends AbstractLocationDialogFragment 
 
         return rootView;
     }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (locationManager != null) {
+            if (isLocationPermissionGranted(activity)) {
+                LocationManagerCompat.removeUpdates(locationManager, locationListenerCompat);
+                LocationManagerCompat.removeUpdates(locationManager, fakeLocationListenerForGps);
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        registerToLocationUpdate();
+    }
+
+    private final LocationListenerCompat fakeLocationListenerForGps = (Location location) -> {};
+
+    @SuppressLint("MissingPermission")
+    private void registerToLocationUpdate() {
+        if (locationManager != null
+                && isLocationPermissionGranted(activity)
+                && isLocationEnabled()) {
+            // setup location updates
+            LocationRequestCompat locationRequest = new LocationRequestCompat.Builder(1000)
+                    .setQuality(LocationRequestCompat.QUALITY_HIGH_ACCURACY)
+                    .build();
+
+            // get executor
+            Executor executor;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                executor = App.getContext().getMainExecutor();
+            } else {
+                executor = new HandlerExecutor(Looper.getMainLooper());
+            }
+
+
+            List<String> providers = locationManager.getProviders(true);
+            if (providers.contains(LocationManager.PASSIVE_PROVIDER)) { // this should always be the case (if the documentation is correct)
+                LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.PASSIVE_PROVIDER, new LocationRequestCompat.Builder(PASSIVE_PROVIDER_UPDATE_INTERVAL_MILLIS).build(), executor, locationListenerCompat);
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && providers.contains(LocationManager.FUSED_PROVIDER)) {
+                LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.FUSED_PROVIDER, locationRequest, executor, locationListenerCompat);
+                if (providers.contains(LocationManager.GPS_PROVIDER)) {
+                    // also enable gps callback (on Android 12 emulator, fused does not always trigger updates on its own)
+                    LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.GPS_PROVIDER, locationRequest, executor, fakeLocationListenerForGps);
+                }
+            } else if (providers.contains(LocationManager.GPS_PROVIDER) || providers.contains(LocationManager.NETWORK_PROVIDER)) {
+                if (providers.contains(LocationManager.GPS_PROVIDER)) {
+                    LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.GPS_PROVIDER, locationRequest, executor, locationListenerCompat);
+                }
+                if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+                    LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.NETWORK_PROVIDER, locationRequest, executor, locationListenerCompat);
+                }
+            }
+        }
+    }
+
+    private void onLocationUpdate(Location location) {
+        if (mapView != null) {
+            mapView.onLocationUpdate(location);
+        }
+    }
+
 
     @SuppressLint("MissingPermission")
     public void onMapReadyCallback() {

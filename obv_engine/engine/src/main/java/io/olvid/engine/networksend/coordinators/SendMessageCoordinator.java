@@ -227,7 +227,7 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
 
         // handle message the operations couldn't because of inactive identity
         for (IdentityAndUid identityAndUid : identityInactiveMessageUids) {
-            waitForIdentityReactivation(identityAndUid.ownedIdentity, identityAndUid.uid);
+            waitForIdentityReactivation(identityAndUid.identity, identityAndUid.uid);
         }
     }
 
@@ -245,7 +245,7 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
                 if (identityAndMessageUids != null) {
                     // if the payload is too large when batching, queue each message individually
                     for (IdentityAndUid identityAndMessageUid : identityAndMessageUids) {
-                        queueNewSendMessageCompositeOperation(null, identityAndMessageUid.ownedIdentity, identityAndMessageUid.uid, true, true);
+                        queueNewSendMessageCompositeOperation(null, identityAndMessageUid.identity, identityAndMessageUid.uid, true, true);
                     }
                 }
                 break;
@@ -280,7 +280,7 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
 
         // handle message the operations couldn't because of inactive identity
         for (IdentityAndUid identityAndUid : identityInactiveMessageUids) {
-            waitForIdentityReactivation(identityAndUid.ownedIdentity, identityAndUid.uid);
+            waitForIdentityReactivation(identityAndUid.identity, identityAndUid.uid);
         }
     }
 
@@ -298,7 +298,7 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
                 if (identityAndMessageUids != null) {
                     // if the payload is too large when batching, queue each message individually
                     for (IdentityAndUid identityAndMessageUid : identityAndMessageUids) {
-                        queueNewSendMessageCompositeOperation(null, identityAndMessageUid.ownedIdentity, identityAndMessageUid.uid, true, true);
+                        queueNewSendMessageCompositeOperation(null, identityAndMessageUid.identity, identityAndMessageUid.uid, true, true);
                     }
                 }
                 break;

@@ -32,8 +32,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
+import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -71,6 +73,7 @@ import io.olvid.engine.datatypes.containers.ChannelDialogResponseMessageToSend;
 import io.olvid.engine.datatypes.containers.DialogType;
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
+import io.olvid.engine.datatypes.containers.IdentityAndUid;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
@@ -2112,6 +2115,100 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                         messagePayload,
                         extendedMessagePayload,
                         attachments,
+                        hasUserContent,
+                        isVoipMessage
+                );
+
+
+                UID messageUid = null;
+                try (EngineSession engineSession = getSession()) {
+                    try {
+                        engineSession.session.startTransaction();
+                        messageUid = channelManager.post(engineSession.session, message, prng);
+                        engineSession.session.commit();
+                    } catch (Exception e) {
+                        engineSession.session.rollback();
+                    }
+                }
+
+                if (messageUid != null) {
+                    for (Identity contactIdentity : contactIdentities) {
+                        messageIdentifierByContactIdentity.put(new ObvBytesKey(contactIdentity.getBytes()), messageUid.getBytes());
+                    }
+                } else {
+                    for (Identity contactIdentity : contactIdentities) {
+                        messageIdentifierByContactIdentity.put(new ObvBytesKey(contactIdentity.getBytes()), null);
+                    }
+                    continue;
+                }
+
+                // message is considered SENT even if a single recipient receives it.
+                messageSent = true;
+            } catch (Exception e) {
+                for (Identity contactIdentity : contactIdentities) {
+                    messageIdentifierByContactIdentity.put(new ObvBytesKey(contactIdentity.getBytes()), null);
+                }
+                Logger.x(e);
+            }
+        }
+
+        return new ObvPostMessageOutput(messageSent, messageIdentifierByContactIdentity);
+    }
+
+    // some bytesContactDeviceUids may be null: send to all devices for this contact in that case
+    public ObvPostMessageOutput postToSpecificDevices(byte[] messagePayload, List<byte[]> bytesContactIdentities, List<byte[]> bytesContactDeviceUids, byte[] bytesOwnedIdentity, boolean hasUserContent, boolean isVoipMessage ) {
+        if (bytesContactIdentities.size() != bytesContactDeviceUids.size()) {
+            return new ObvPostMessageOutput(false, new HashMap<>());
+        }
+        HashMap<String, HashSet<Identity>> contactServersHashMap = new HashMap<>();
+        HashMap<Identity, UID> contactDeviceUids = new HashMap<>();
+        for (int i = 0; i < bytesContactIdentities.size(); i++) {
+            try {
+                Identity contactIdentity = Identity.of(bytesContactIdentities.get(i));
+                HashSet<Identity> list = contactServersHashMap.get(contactIdentity.getServer());
+                if (list == null) {
+                    list = new HashSet<>();
+                    contactServersHashMap.put(contactIdentity.getServer(), list);
+                }
+                list.add(contactIdentity);
+
+                byte[] bytesContactDeviceUid = bytesContactDeviceUids.get(i);
+                if (bytesContactDeviceUid != null) {
+                    contactDeviceUids.put(contactIdentity, new UID(bytesContactDeviceUid));
+                }
+            } catch (DecodingException e) {
+                Logger.x(e);
+                Logger.w("Error decoding a bytesContactIdentity while postingToSpecificDevices a message!");
+            }
+        }
+
+        HashMap<ObvBytesKey, byte[]> messageIdentifierByContactIdentity = new HashMap<>();
+        boolean messageSent = false;
+
+        for (String server : contactServersHashMap.keySet()) {
+            HashSet<Identity> contactIdentities = contactServersHashMap.get(server);
+            if (contactIdentities == null) {
+                continue;
+            }
+            try {
+                Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+
+                Identity[] contactIdentityArray = new Identity[contactIdentities.size()];
+                UID[] contactDeviceUidArray = new UID[contactIdentities.size()];
+                int i = 0;
+                for (Identity contactIdentity: contactIdentities) {
+                    contactIdentityArray[i] = contactIdentity;
+                    contactDeviceUidArray[i] = contactDeviceUids.get(contactIdentity);
+                    i++;
+                }
+
+                ChannelApplicationMessageToSend message = new ChannelApplicationMessageToSend(
+                        contactIdentityArray,
+                        contactDeviceUidArray,
+                        ownedIdentity,
+                        messagePayload,
+                        null,
+                        new ChannelApplicationMessageToSend.Attachment[0],
                         hasUserContent,
                         isVoipMessage
                 );

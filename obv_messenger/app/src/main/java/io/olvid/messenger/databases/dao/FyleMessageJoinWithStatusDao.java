@@ -320,6 +320,11 @@ public interface FyleMessageJoinWithStatusDao {
             " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL")
     List<FyleAndStatus> getCompleteFyleAndStatusForTextExtraction();
 
+    @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
+            " SET " + FyleMessageJoinWithStatus.TEXT_EXTRACTED + " = 0 " +
+            " WHERE " + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'image/%'")
+    void clearTextExtractedFromImages();
+
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
             " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
@@ -428,7 +433,6 @@ public interface FyleMessageJoinWithStatusDao {
     LiveData<List<FyleAndOrigin>> getFyleAndOriginNameAsc(@NonNull byte[] bytesOwnedIdentity);
     @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC ")
     LiveData<List<FyleAndOrigin>> getFyleAndOriginNameDesc(@NonNull byte[] bytesOwnedIdentity);
-
 
 
     class FyleAndStatusTimestamped {

@@ -354,6 +354,9 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.MESSAGE_UPLOADED_BYTES_OWNED_IDENTITY_KEY);
                 byte[] engineMessageIdentifier = (byte[]) userInfo.get(EngineNotifications.MESSAGE_UPLOADED_IDENTIFIER_KEY);
                 Long timestampFromServer = (Long) userInfo.get(EngineNotifications.MESSAGE_UPLOADED_TIMESTAMP_FROM_SERVER);
+                if (bytesOwnedIdentity == null || engineMessageIdentifier == null || timestampFromServer == null) {
+                    break;
+                }
 
                 List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getAllByEngineMessageIdentifier(bytesOwnedIdentity, engineMessageIdentifier);
                 if (!messageRecipientInfos.isEmpty()) {

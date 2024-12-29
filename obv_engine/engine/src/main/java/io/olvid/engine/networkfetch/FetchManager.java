@@ -350,20 +350,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     }
 
     @Override
-    public boolean canAllAttachmentsBeDownloaded(Identity ownedIdentity, UID messageUid) throws SQLException {
-        try (FetchManagerSession fetchManagerSession = getSession()) {
-            InboxAttachment[] attachments = InboxAttachment.getAll(fetchManagerSession, ownedIdentity, messageUid);
-            for (InboxAttachment attachment: attachments) {
-                if (attachment.cannotBeFetched()) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
-    @Override
-    public void setAttachmentKeyAndMetadataAndMessagePayload(Session session, Identity ownedIdentity, UID messageUid, Identity remoteIdentity, AttachmentKeyAndMetadata[] attachmentKeyAndMetadata, byte[] messagePayload, AuthEncKey extendedPayloadKey) throws Exception {
+    public void setAttachmentKeyAndMetadataAndMessagePayload(Session session, Identity ownedIdentity, UID messageUid, Identity remoteIdentity, UID remoteDeviceUid, AttachmentKeyAndMetadata[] attachmentKeyAndMetadata, byte[] messagePayload, AuthEncKey extendedPayloadKey) throws Exception {
         if (attachmentKeyAndMetadata == null) {
             Logger.e("FetchManager is trying to setAttachmentKeyAndMetadataAndMessagePayload with a null attachmentKeyAndMetadata.");
             throw new Exception();
@@ -384,7 +371,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
             attachments[i].setKeyAndMetadata(attachmentKeyAndMetadata[i].getKey(),
                     attachmentKeyAndMetadata[i].getMetadata());
         }
-        inboxMessage.setPayloadAndFromIdentity(messagePayload, remoteIdentity, extendedPayloadKey);
+        inboxMessage.setPayloadAndFromIdentity(messagePayload, remoteIdentity, remoteDeviceUid, extendedPayloadKey, attachments);
         // just in case, also mark recentlyOnline as true (otherwise, a contact could remain not recently online until a contact discovery)
         identityDelegate.setContactRecentlyOnline(session, ownedIdentity, remoteIdentity, true);
     }
@@ -457,38 +444,6 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
                     inboxAttachment.isDownloadRequested());
         } catch (SQLException e) {
             Logger.e("FetchManager was unable to getAttachment " + messageUid + "-" + attachmentNumber);
-            return null;
-        }
-    }
-
-    @Override
-    public ReceivedAttachment[] getMessageAttachments(Identity ownedIdentity, UID messageUid) {
-        try (FetchManagerSession fetchManagerSession = getSession()) {
-            InboxAttachment[] inboxAttachments = InboxAttachment.getAll(fetchManagerSession, ownedIdentity, messageUid);
-            if (inboxAttachments == null) {
-                Logger.e("FetchManager received a getAttachment request for an unknown attachment " + messageUid);
-                return null;
-            }
-            ReceivedAttachment[] receivedAttachments = new ReceivedAttachment[inboxAttachments.length];
-            for (int i=0; i<inboxAttachments.length; i++) {
-                InboxAttachment inboxAttachment = inboxAttachments[i];
-                if (inboxAttachment.cannotBeFetched()) {
-                    Logger.e("FetchManager received a getAttachment request for an attachment not yet ready " + messageUid + "-" + i);
-                    return null;
-                }
-                receivedAttachments[i] = new ReceivedAttachment(
-                        inboxAttachment.getOwnedIdentity(),
-                        inboxAttachment.getMessageUid(),
-                        inboxAttachment.getAttachmentNumber(),
-                        inboxAttachment.getMetadata(),
-                        inboxAttachment.getUrl(),
-                        inboxAttachment.getPlaintextExpectedLength(),
-                        inboxAttachment.getPlaintextReceivedLength(),
-                        inboxAttachment.isDownloadRequested());
-            }
-            return  receivedAttachments;
-        } catch (SQLException e) {
-            Logger.e("FetchManager was unable to getAttachments " + messageUid);
             return null;
         }
     }

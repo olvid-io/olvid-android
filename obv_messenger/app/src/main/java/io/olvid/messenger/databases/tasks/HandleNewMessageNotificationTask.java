@@ -139,7 +139,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             JsonLimitedVisibilityMessageOpened jsonLimitedVisibilityMessageOpened = messagePayload.getJsonLimitedVisibilityMessageOpened();
 
             if (jsonWebrtcMessage != null) {
-                App.handleWebrtcMessage(obvMessage.getBytesToIdentity(), obvMessage.getBytesFromIdentity(), jsonWebrtcMessage, obvMessage.getDownloadTimestamp(), obvMessage.getServerTimestamp());
+                App.handleWebrtcMessage(obvMessage.getBytesToIdentity(), obvMessage.getBytesFromIdentity(), obvMessage.getBytesFromDeviceUid(), jsonWebrtcMessage, obvMessage.getDownloadTimestamp(), obvMessage.getServerTimestamp());
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
@@ -247,8 +247,8 @@ public class HandleNewMessageNotificationTask implements Runnable {
             }
 
             Discussion discussion = getDiscussion(jsonMessage.getGroupUid(), jsonMessage.getGroupOwner(), jsonMessage.getGroupV2Identifier(), jsonMessage.getOneToOneIdentifier(), messageSender, GroupV2.Permission.SEND_MESSAGE);
-            if (discussion == null) {
-                // we don't have a discussion to post this message in: probably a message from a not-oneToOne contact --> discarding it
+            if (discussion == null || obvMessage.getServerTimestamp() < discussion.lastRemoteDeleteTimestamp) {
+                // we don't have a discussion to post this message in or discussion has been remotely deleted: probably a message from a not-oneToOne contact --> discarding it
                 engine.deleteMessageAndAttachments(obvMessage.getBytesToIdentity(), obvMessage.getIdentifier());
                 return;
             }
@@ -872,6 +872,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
         if (discussion == null) {
             return;
         }
+        if (discussion.lastRemoteDeleteTimestamp < serverTimestamp) {
+            db.discussionDao().updateLastRemoteDeleteTimestamp(discussion.id, serverTimestamp);
+        }
 
         int messagesToDelete = db.messageDao().countMessagesInDiscussion(discussion.id);
 
@@ -918,7 +921,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
                         UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussion.id, true);
                     }
 
-                    if (messageSender.type == MessageSender.Type.OWNED_IDENTITY || !SettingsActivity.getRetainRemoteDeletedMessages()) {
+                    if (messageSender.type == MessageSender.Type.OWNED_IDENTITY
+                            || Arrays.equals(message.senderIdentifier, messageSender.getSenderIdentity())
+                            || !SettingsActivity.getRetainRemoteDeletedMessages()) {
                         db.runInTransaction(() -> message.delete(db));
                     } else {
                         db.runInTransaction(() -> {

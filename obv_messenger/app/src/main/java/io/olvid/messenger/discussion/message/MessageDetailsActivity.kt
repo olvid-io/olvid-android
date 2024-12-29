@@ -81,6 +81,7 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.MessageMetadata
 import io.olvid.messenger.databases.entity.MessageRecipientInfo
 import io.olvid.messenger.discussion.message.MessageDetailsActivity.RecipientInfosAdapter.ViewHolder
+import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel
 import io.olvid.messenger.viewModels.MessageDetailsViewModel
 import java.io.IOException
@@ -93,7 +94,7 @@ class MessageDetailsActivity : LockableActivity() {
         runCatching { AudioAttachmentServiceBinding(this) }.onFailure { finish() }
             .getOrNull()
     }
-    private var recipientInfosRecyclerView: RecyclerView? = null
+    private val recipientInfosRecyclerView: RecyclerView by lazy { findViewById(R.id.recipient_infos_recycler_view) }
     var recipientInfosAdapter: RecipientInfosAdapter? = null
     var recipientInfoHeaderAndSeparatorDecoration: RecipientInfoHeaderAndSeparatorDecoration? = null
     private var metadataRecyclerView: EmptyRecyclerView? = null
@@ -147,6 +148,7 @@ class MessageDetailsActivity : LockableActivity() {
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Message(
+                            modifier = Modifier.cutoutHorizontalPadding(),
                             message = it,
                             scrollToMessage = {},
                             replyAction = { },
@@ -193,14 +195,13 @@ class MessageDetailsActivity : LockableActivity() {
             val recipientsStatusTextView = findViewById<TextView>(R.id.recipient_status_text_view)
             val otherDeviceExplanationTextView =
                 findViewById<TextView>(R.id.sent_from_other_device_text_view)
-            recipientInfosRecyclerView = findViewById(R.id.recipient_infos_recycler_view)
             if (sentFromOtherDevice) {
                 recipientsStatusTextView.visibility = View.GONE
-                recipientInfosRecyclerView!!.setVisibility(View.GONE)
+                recipientInfosRecyclerView.visibility = View.GONE
                 otherDeviceExplanationTextView.visibility = View.VISIBLE
             } else {
                 recipientsStatusTextView.visibility = View.VISIBLE
-                recipientInfosRecyclerView!!.setVisibility(View.VISIBLE)
+                recipientInfosRecyclerView.visibility = View.VISIBLE
                 otherDeviceExplanationTextView.visibility = View.GONE
 
                 recipientInfosAdapter = RecipientInfosAdapter(
@@ -209,9 +210,9 @@ class MessageDetailsActivity : LockableActivity() {
                 recipientInfoHeaderAndSeparatorDecoration =
                     RecipientInfoHeaderAndSeparatorDecoration()
 
-                recipientInfosRecyclerView!!.setAdapter(recipientInfosAdapter)
-                recipientInfosRecyclerView!!.setLayoutManager(LinearLayoutManager(this))
-                recipientInfosRecyclerView!!.addItemDecoration(
+                recipientInfosRecyclerView.setAdapter(recipientInfosAdapter)
+                recipientInfosRecyclerView.setLayoutManager(LinearLayoutManager(this))
+                recipientInfosRecyclerView.addItemDecoration(
                     recipientInfoHeaderAndSeparatorDecoration!!
                 )
                 messageDetailsViewModel.messageRecipientInfos.observe(
@@ -222,7 +223,7 @@ class MessageDetailsActivity : LockableActivity() {
 
             // outbound status
             val statusIndicator = findViewById<View>(R.id.message_details_status_indicator)
-            statusIndicator?.setOnClickListener { view: View -> this.statusClicked(view) }
+            statusIndicator?.setOnClickListener { view: View -> this.statusClicked() }
         }
 
 
@@ -311,7 +312,7 @@ class MessageDetailsActivity : LockableActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun statusClicked(view: View) {
+    private fun statusClicked() {
         val dialogView =
             layoutInflater.inflate(R.layout.dialog_view_message_status_explanation, null)
         val alertDialog = SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
@@ -728,7 +729,7 @@ class MessageDetailsActivity : LockableActivity() {
             }
         }
 
-        internal inner class ViewHolder(rootView: View) : RecyclerView.ViewHolder(rootView) {
+        inner class ViewHolder(rootView: View) : RecyclerView.ViewHolder(rootView) {
             val metadataDescriptionTextView: TextView =
                 rootView.findViewById(R.id.metadata_description_text_view)
             val metadataTimestampDateTextView: TextView =

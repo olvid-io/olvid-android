@@ -10,6 +10,7 @@
     tools:context=".owneddetails.OwnedIdentityDetailsActivity">
 
     <ScrollView
+        android:id="@+id/root_scrollview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/lightGrey">

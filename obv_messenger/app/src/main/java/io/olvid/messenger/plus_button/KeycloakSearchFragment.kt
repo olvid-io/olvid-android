@@ -329,7 +329,7 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
             if (searchResults != null && position < searchResults!!.size) {
                 val userDetails = searchResults!![position]
 
-                holder.setUserDetails(userDetails)
+                holder.userDetails = userDetails
 
                 val identityDetails = userDetails.getIdentityDetails(null)
                 val name = identityDetails.formatFirstAndLastName(
@@ -344,6 +344,7 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                 ) {
                     holder.initialView?.setFromCache(userDetails.identity)
                 } else {
+                    holder.initialView?.reset()
                     holder.initialView?.setInitial(
                         if (userDetails.identity == null) ByteArray(0) else userDetails.identity,
                         StringUtils.getInitial(name)
@@ -360,6 +361,7 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                     holder.keycloakUserPositionTextView?.visibility = View.GONE
                 }
 
+                holder.keycloakUserKnownImageView?.visibility = View.GONE
                 if (userDetails.identity != null) {
                     if (bytesOwnedIdentity != null) {
                         App.runThread {
@@ -367,13 +369,15 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                                 AppDatabase.getInstance()
                                     .contactDao()[bytesOwnedIdentity, userDetails.identity]
                             Handler(Looper.getMainLooper()).post {
-                                if (contact != null) {
-                                    holder.initialView?.setContact(contact)
-                                    holder.keycloakUserKnownImageView?.visibility =
-                                        if (contact.oneToOne) View.VISIBLE else View.GONE
-                                } else {
-                                    holder.keycloakUserKnownImageView?.visibility =
-                                        View.GONE
+                                if (holder.userDetails?.identity.contentEquals(contact.bytesContactIdentity)) {
+                                    if (contact != null) {
+                                        holder.initialView?.setContact(contact)
+                                        holder.keycloakUserKnownImageView?.visibility =
+                                            if (contact.oneToOne) View.VISIBLE else View.GONE
+                                    } else {
+                                        holder.keycloakUserKnownImageView?.visibility =
+                                            View.GONE
+                                    }
                                 }
                             }
                         }
@@ -467,7 +471,7 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                 itemView.findViewById(R.id.keycloak_user_known_image_view)
             val missingCountTextView: TextView? = itemView.findViewById(R.id.keycloak_missing_count)
 
-            private var userDetails: JsonKeycloakUserDetails? = null
+            var userDetails: JsonKeycloakUserDetails? = null
 
             init {
                     itemView.setOnClickListener { v: View? ->
@@ -477,10 +481,6 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                             )
                         }
                     }
-            }
-
-            fun setUserDetails(userDetails: JsonKeycloakUserDetails) {
-                this.userDetails = userDetails
             }
         }
 

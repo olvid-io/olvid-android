@@ -72,6 +72,7 @@ public class Discussion {
     public static final String SENDER_THREAD_IDENTIFIER = "sender_thread_identifier";
     public static final String LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER = "last_outbound_message_sequence_number";
     public static final String LAST_MESSAGE_TIMESTAMP = "last_message_timestamp";
+    public static final String LAST_REMOTE_DELETE_TIMESTAMP = "last_remote_delete_timestamp";
     public static final String PHOTO_URL = "photo_url";
     public static final String KEYCLOAK_MANAGED = "keycloak_managed";
     public static final String PINNED = "pinned";
@@ -116,6 +117,9 @@ public class Discussion {
 
     @ColumnInfo(name = LAST_MESSAGE_TIMESTAMP)
     public long lastMessageTimestamp;
+
+    @ColumnInfo(name = LAST_REMOTE_DELETE_TIMESTAMP)
+    public long lastRemoteDeleteTimestamp;
 
     @ColumnInfo(name = PHOTO_URL)
     @Nullable

@@ -94,7 +94,7 @@ public class BatchUploadMessagesCompositeOperation extends Operation {
 
                 suboperations[0] = new BatchUploadMessagesOperation(sendManagerSessionFactory, sslSocketFactory, server, messageIdentitiesAndUids);
                 for (int i = 0; i < messageIdentitiesAndUids.length; i++) {
-                    suboperations[i + 1] = new TryToDeleteMessageAndAttachmentsOperation(sendManagerSessionFactory, messageIdentitiesAndUids[i].ownedIdentity, messageIdentitiesAndUids[i].uid);
+                    suboperations[i + 1] = new TryToDeleteMessageAndAttachmentsOperation(sendManagerSessionFactory, messageIdentitiesAndUids[i].identity, messageIdentitiesAndUids[i].uid);
                     suboperations[i + 1].addDependency(suboperations[0]);
                 }
             }

@@ -29,9 +29,12 @@ import java.util.Set;
 import javax.net.ssl.SSLSocketFactory;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.crypto.Hash;
+import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
+import io.olvid.engine.datatypes.PriorityOperation;
 import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
@@ -44,7 +47,7 @@ import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
 
 
-public class DownloadMessagesAndListAttachmentsOperation extends Operation {
+public class DownloadMessagesAndListAttachmentsOperation extends PriorityOperation {
     // possible reasons for cancel
     public static final int RFC_NETWORK_ERROR = 1;
     public static final int RFC_INVALID_SERVER_SESSION = 2;
@@ -57,15 +60,16 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
     private final SSLSocketFactory sslSocketFactory;
     private final Identity ownedIdentity;
     private final UID deviceUid;
-    private boolean listingTruncated = false;
+    private final long listStartTimestamp;
+    private Long timestampOfLastMessageBeforeTruncation = null;
     private long downloadTimestamp = 0;
 
     public Identity getOwnedIdentity() {
         return ownedIdentity;
     }
 
-    public boolean getListingTruncated() {
-        return listingTruncated;
+    public Long getTimestampOfLastMessageBeforeTruncation() {
+        return timestampOfLastMessageBeforeTruncation;
     }
 
     public UID getDeviceUid() {
@@ -76,12 +80,27 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
         return downloadTimestamp;
     }
 
-    public DownloadMessagesAndListAttachmentsOperation(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, UID deviceUid, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
-        super(ownedIdentity.computeUniqueUid(), onFinishCallback, onCancelCallback);
+    public DownloadMessagesAndListAttachmentsOperation(FetchManagerSessionFactory fetchManagerSessionFactory, SSLSocketFactory sslSocketFactory, Identity ownedIdentity, UID deviceUid, long listStartTimestamp, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
+        super(computeUniqueUid(ownedIdentity, listStartTimestamp), onFinishCallback, onCancelCallback);
         this.fetchManagerSessionFactory = fetchManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
         this.ownedIdentity = ownedIdentity;
         this.deviceUid = deviceUid;
+        this.listStartTimestamp = listStartTimestamp;
+    }
+
+    private static UID computeUniqueUid(Identity ownedIdentity, long listStartTimestamp) {
+        Hash sha256 = Suite.getHash(Hash.SHA256);
+        byte[] input = new byte[ownedIdentity.getBytes().length + 1];
+        System.arraycopy(ownedIdentity.getBytes(), 0, input, 0, ownedIdentity.getBytes().length);
+        input[input.length - 1] = (byte) ((listStartTimestamp == 0) ? 0x00 : 0x01);
+        return new UID(sha256.digest(input));
+    }
+
+
+    @Override
+    public long getPriority() {
+        return (listStartTimestamp == 0) ? 10 : 5;
     }
 
 
@@ -119,7 +138,8 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                 DownloadMessagesAndListAttachmentsServerMethod serverMethod = new DownloadMessagesAndListAttachmentsServerMethod(
                         ownedIdentity,
                         serverSessionToken,
-                        deviceUid
+                        deviceUid,
+                        listStartTimestamp
                 );
                 serverMethod.setSslSocketFactory(sslSocketFactory);
 
@@ -174,8 +194,8 @@ public class DownloadMessagesAndListAttachmentsOperation extends Operation {
                             }
                         }
                         Logger.d("DownloadMessagesAndListAttachmentsOperation found " + messageAndAttachmentLengthsArray.length + " messages (" + count + " new) on the server.");
-                        listingTruncated = (returnStatus == ServerMethod.LISTING_TRUNCATED);
-                        if (!listingTruncated) {
+                        timestampOfLastMessageBeforeTruncation = (returnStatus == ServerMethod.LISTING_TRUNCATED) ? messageAndAttachmentLengthsArray[messageAndAttachmentLengthsArray.length - 1].serverTimestamp : null;
+                        if (timestampOfLastMessageBeforeTruncation == null) {
                             // if the listing was not truncated, we can delete expired PreKeys
                             fetchManagerSession.identityDelegate.expireCurrentDeviceOwnedPreKeys(fetchManagerSession.session, ownedIdentity, downloadTimestamp);
                         }
@@ -232,6 +252,7 @@ class DownloadMessagesAndListAttachmentsServerMethod extends ServerMethod {
     private final Identity ownedIdentity;
     private final byte[] token;
     private final UID deviceUid;
+    private final long listStartTimestamp;
 
     private MessageAndAttachmentLengths[] messageAndAttachmentLengthsArray;
     private long downloadTimestamp;
@@ -244,11 +265,12 @@ class DownloadMessagesAndListAttachmentsServerMethod extends ServerMethod {
         return downloadTimestamp;
     }
 
-    DownloadMessagesAndListAttachmentsServerMethod(Identity ownedIdentity, byte[] token, UID deviceUid) {
+    DownloadMessagesAndListAttachmentsServerMethod(Identity ownedIdentity, byte[] token, UID deviceUid, long listStartTimestamp) {
         this.server = ownedIdentity.getServer();
         this.ownedIdentity = ownedIdentity;
         this.token = token;
         this.deviceUid = deviceUid;
+        this.listStartTimestamp = listStartTimestamp;
     }
 
     @Override
@@ -266,7 +288,8 @@ class DownloadMessagesAndListAttachmentsServerMethod extends ServerMethod {
         return Encoded.of(new Encoded[]{
                 Encoded.of(ownedIdentity),
                 Encoded.of(token),
-                Encoded.of(deviceUid)
+                Encoded.of(deviceUid),
+                Encoded.of(listStartTimestamp)
         }).getBytes();
     }
 

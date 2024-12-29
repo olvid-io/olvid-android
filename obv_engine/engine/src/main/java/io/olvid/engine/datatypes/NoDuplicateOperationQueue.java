@@ -52,8 +52,6 @@ public class NoDuplicateOperationQueue {
         if (uid != null) {
             lockOnQueuedOperationUids.lock();
             if (queuedOperationUids.contains(uid)) {
-                Logger.d("NoDuplicateOperationQueue already contains an operation of type " + op.getClass() + " with UID " + uid);
-                Logger.d("queue size: " + operations.size() + "  set size: " + queuedOperationUids.size());
                 lockOnQueuedOperationUids.unlock();
                 return;
             }

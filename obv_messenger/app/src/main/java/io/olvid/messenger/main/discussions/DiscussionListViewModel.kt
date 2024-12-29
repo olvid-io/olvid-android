@@ -179,42 +179,18 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                     val body = message.getStringContent(context)
                     if (message.status == Message.STATUS_DRAFT) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                            append(
-                                context.getString(
-                                    string.text_draft_message_prefix,
-                                    ""
-                                )
-                            )
+                            append(context.getString(string.text_draft_message_prefix))
                             append(body.formatSingleLineMarkdown())
                         }
                     } else if (message.wipeStatus == Message.WIPE_STATUS_WIPED
                         || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
+                        || message.isLocationMessage
                     ) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                             append(AnnotatedString(body).formatMarkdown())
                         }
                     } else {
-                        if (message.isLocationMessage) {
-                            append(
-                                context.getString(
-                                    string.text_outbound_message_prefix,
-                                    body
-                                )
-                            )
-                            addStyle(
-                                SpanStyle(fontStyle = FontStyle.Italic),
-                                0,
-                                length - body.length
-                            )
-                        } else {
-                            append(
-                                context.getString(
-                                    string.text_outbound_message_prefix,
-                                    ""
-                                )
-                            )
-                            append(body.formatSingleLineMarkdown())
-                        }
+                        append(body.formatSingleLineMarkdown())
                     }
                 }
 

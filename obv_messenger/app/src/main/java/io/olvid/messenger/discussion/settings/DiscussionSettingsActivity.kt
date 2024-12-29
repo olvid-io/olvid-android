@@ -61,8 +61,12 @@ class DiscussionSettingsActivity : LockableActivity(), OnPreferenceStartFragment
 
         findViewById<CoordinatorLayout>(R.id.root_coordinator)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
                 view.updatePadding(top = insets.top, bottom = insets.bottom)
+                view.updateLayoutParams<MarginLayoutParams> {
+                    updateMargins(left = insets.left, right = insets.right)
+                }
                 windowInsets
             }
         }

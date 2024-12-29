@@ -65,7 +65,7 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionViewModel
-import io.olvid.messenger.discussion.message.Attachment
+import io.olvid.messenger.discussion.message.attachments.Attachment
 import io.olvid.messenger.settings.SettingsActivity
 import kotlin.math.roundToInt
 

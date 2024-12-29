@@ -1,3 +1,19 @@
+# Build 260 (3.5)
+2024-12-29
+
+- Fix some issues with internal PDF viewer
+
+# ~~Build 259 (3.5)~~
+2024-12-22
+
+- optimized message download at app startup
+- better GPS management when sharing your location
+- show sent message status in discussion list
+- recognize text content inside images (OCR)
+- avoid some useless messages during phone calls in a multi-device settings
+- (experimental) internal PDF viewer (opt-in in "other settings")
+- several small bug fixes
+
 # Build 258 (3.4.1)
 2024-12-03
 

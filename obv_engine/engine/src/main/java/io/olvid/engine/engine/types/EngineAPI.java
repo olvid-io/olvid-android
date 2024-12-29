@@ -21,6 +21,7 @@ package io.olvid.engine.engine.types;
 
 import org.jose4j.jwk.JsonWebKey;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -201,6 +202,7 @@ public interface EngineAPI {
     void deleteReturnReceipt(byte[] bytesOwnedIdentity, byte[] serverUid);
     ObvReturnReceipt decryptReturnReceipt(byte[] returnReceiptKey, byte[] encryptedPayload);
     ObvPostMessageOutput post(byte[] messagePayload, byte[] extendedMessagePayload, ObvOutboundAttachment[] attachments, List<byte[]> bytesContactIdentities, byte[] bytesOwnedIdentity, boolean hasUserContent, boolean isVoipMessage);
+    ObvPostMessageOutput postToSpecificDevices(byte[] messagePayload, List<byte[]> bytesContactIdentities, List<byte[]> bytesContactDeviceUids, byte[] bytesOwnedIdentity, boolean hasUserContent, boolean isVoipMessage );
     void sendReturnReceipt(byte[] bytesOwnedIdentity, byte[] senderIdentifier, int status, byte[] returnReceiptNonce, byte[] returnReceiptKey, Integer attachmentNumber);
     boolean isOutboxAttachmentSent(byte[] bytesOwnedIdentity, byte[] engineMessageIdentifier, int engineNumber);
     boolean isOutboxMessageSent(byte[] bytesOwnedIdentity, byte[] engineMessageIdentifier);

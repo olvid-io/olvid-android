@@ -60,7 +60,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -92,6 +91,7 @@ import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDe
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_MORE_RESULTS
+import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -117,22 +117,22 @@ fun ContactListScreen(
     val refreshState = onRefresh?.let { rememberPullRefreshState(refreshing, onRefresh) }
 
     val tabs = arrayListOf(
-            ContactFilterTab(
-                labelResId = R.string.contact_list_tab_contact,
-                filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == true }
-            ),
-            ContactFilterTab(
-                labelResId = R.string.contact_list_tab_others,
-                filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == false }
-            )
-        ).apply {
-            if (contactListViewModel.keycloakManaged.value) {
-                add(ContactFilterTab(
-                    labelResId = R.string.contact_list_tab_directory,
-                    filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contactType != CONTACT }
-                ))
-            }
+        ContactFilterTab(
+            labelResId = R.string.contact_list_tab_contact,
+            filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == true }
+        ),
+        ContactFilterTab(
+            labelResId = R.string.contact_list_tab_others,
+            filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == false }
+        )
+    ).apply {
+        if (contactListViewModel.keycloakManaged.value) {
+            add(ContactFilterTab(
+                labelResId = R.string.contact_list_tab_directory,
+                filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contactType != CONTACT }
+            ))
         }
+    }
 
     AppCompatTheme {
         Box(
@@ -146,7 +146,7 @@ fun ContactListScreen(
                         if (page == 2) {
                             if (contactListViewModel.getFilter() == null) {
                                 contactListViewModel.setFilter("")
-                            } else if (contactListViewModel.getFilter() == ""){
+                            } else if (contactListViewModel.getFilter() == "") {
                                 contactListViewModel.refreshKeycloakSearch()
                             }
                         }
@@ -250,6 +250,7 @@ fun ContactListScreen(
                                                             when {
                                                                 contactOrKeycloakDetails.contactType == CONTACT
                                                                         && contactOrKeycloakDetails.contact?.oneToOne == false
+                                                                        && contactOrKeycloakDetails.contact.active
                                                                         && contactOrKeycloakDetails.contact.shouldShowChannelCreationSpinner()
                                                                     .not() -> {
                                                                     {
@@ -268,7 +269,9 @@ fun ContactListScreen(
                                                                 }
 
                                                                 contactOrKeycloakDetails.contactType == KEYCLOAK
-                                                                        && AppSingleton.getContactCacheInfo(contactOrKeycloakDetails.keycloakUserDetails?.identity) == null -> {
+                                                                        && AppSingleton.getContactCacheInfo(
+                                                                    contactOrKeycloakDetails.keycloakUserDetails?.identity
+                                                                ) == null -> {
                                                                     {
                                                                         TextButton(onClick = {
                                                                             onClick.invoke(
@@ -370,7 +373,7 @@ private fun Header(
     contacts: List<ContactOrKeycloakDetails>?,
 ) {
     TabRow(
-        selectedTabIndex = pagerState.currentPage.coerceAtMost(tabs.size - 1) ,
+        selectedTabIndex = pagerState.currentPage.coerceAtMost(tabs.size - 1),
         backgroundColor = colorResource(id = R.color.almostWhite),
         contentColor = colorResource(id = R.color.almostBlack),
     ) {
@@ -385,7 +388,11 @@ private fun Header(
                 },
                 text = {
                     if (contactListViewModel.getFilter().isNullOrEmpty()) {
-                        Text(text = stringResource(tab.labelResId), softWrap = false, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            text = stringResource(tab.labelResId),
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     } else if (index == 2 && contactListViewModel.keycloakSearchInProgress) {
                         BadgedBox(badge = {
                             CircularProgressIndicator(
@@ -488,8 +495,7 @@ private fun Contact(
                         )
                     AppSingleton.getContactPhotoUrl(keycloakUserDetails.identity)?.let {
                         initialView.setPhotoUrl(keycloakUserDetails.identity, it)
-                    } ?:
-                    initialView.setInitial(
+                    } ?: initialView.setInitial(
                         keycloakUserDetails.identity,
                         StringUtils.getInitial(
                             name
@@ -544,7 +550,8 @@ private fun KeycloakSearching() {
                 shape = RoundedCornerShape(8.dp)
             )
             .border(1.dp, colorResource(id = R.color.greyTint), RoundedCornerShape(8.dp))
-            .padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 16.dp),
+            .padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 16.dp)
+            .cutoutHorizontalPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CircularProgressIndicator(color = colorResource(id = R.color.olvid_gradient_light))
@@ -578,6 +585,7 @@ private fun KeycloakMissingCount(missingResults: Int?) {
                     id = R.color.lighterGrey
                 )
             )
+            .cutoutHorizontalPadding()
 
     ) {
         Text(

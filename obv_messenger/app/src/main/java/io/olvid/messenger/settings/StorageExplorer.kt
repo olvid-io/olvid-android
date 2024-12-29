@@ -76,8 +76,14 @@ class StorageExplorer : LockableActivity() {
 
         findViewById<ConstraintLayout>(R.id.root_constraint_layout)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
-                view.updatePadding(top = insets.top, bottom = insets.bottom)
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
+                view.updatePadding(
+                    top = insets.top,
+                    bottom = insets.bottom,
+                    left = insets.left,
+                    right = insets.right
+                )
                 windowInsets
             }
         }

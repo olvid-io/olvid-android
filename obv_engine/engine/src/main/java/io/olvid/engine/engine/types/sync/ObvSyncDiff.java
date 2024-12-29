@@ -20,7 +20,7 @@
 package io.olvid.engine.engine.types.sync;
 
 public class ObvSyncDiff {
-    // TODO only used to notify the app, needs to be encodable to send to other device
+    // only used to notify the app, needs to be encodable to send to other device
     public static final int TYPE_SETTING_AUTO_JOIN_GROUPS = 0;
     public static final int TYPE_SETTING_SEND_READ_RECEIPT = 1;
 

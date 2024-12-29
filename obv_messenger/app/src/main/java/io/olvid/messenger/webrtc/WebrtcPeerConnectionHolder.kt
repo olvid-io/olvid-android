@@ -112,6 +112,7 @@ class WebrtcPeerConnectionHolder(
     private var gatheringPolicy: GatheringPolicy
     private var readyToProcessPeerIceCandidates = false
     private val pendingPeerIceCandidates: MutableList<JsonIceCandidate>
+    private val pendingIceCandidatesToSend: MutableList<JsonIceCandidate>
     var peerConnection: PeerConnection? = null
     private var audioTrack: AudioTrack? = null
     var remoteVideoTrack by mutableStateOf<VideoTrack?>(null)
@@ -304,18 +305,26 @@ class WebrtcPeerConnectionHolder(
                     Type.fromCanonicalForm(sessionDescriptionType), sessionDescription
                 )
             )
-            readyToProcessPeerIceCandidates = true
-            for (jsonIceCandidate in pendingPeerIceCandidates) {
-                peerConnection?.addIceCandidate(
-                    IceCandidate(
-                        jsonIceCandidate.sdpMid,
-                        jsonIceCandidate.sdpMLineIndex,
-                        jsonIceCandidate.sdp
-                    )
-                )
-            }
-            pendingPeerIceCandidates.clear()
+            markAsReadyToProcessPeerIceCandidates()
         }
+    }
+
+    private fun markAsReadyToProcessPeerIceCandidates() {
+        readyToProcessPeerIceCandidates = true
+        for (jsonIceCandidate in pendingPeerIceCandidates) {
+            peerConnection?.addIceCandidate(
+                IceCandidate(
+                    jsonIceCandidate.sdpMid,
+                    jsonIceCandidate.sdpMLineIndex,
+                    jsonIceCandidate.sdp
+                )
+            )
+        }
+        pendingPeerIceCandidates.clear()
+        for (jsonIceCandidate in pendingIceCandidatesToSend) {
+            webrtcCallService.sendAddIceCandidateMessage(callParticipant, jsonIceCandidate)
+        }
+        pendingIceCandidatesToSend.clear()
     }
 
     fun setGatheringPolicy(gatheringPolicy: GatheringPolicy) {
@@ -497,17 +506,7 @@ class WebrtcPeerConnectionHolder(
                 )
                 peerSessionDescription = null
                 peerSessionDescriptionType = null
-                readyToProcessPeerIceCandidates = true
-                for (jsonIceCandidate in pendingPeerIceCandidates) {
-                    peerConnection?.addIceCandidate(
-                        IceCandidate(
-                            jsonIceCandidate.sdpMid,
-                            jsonIceCandidate.sdpMLineIndex,
-                            jsonIceCandidate.sdp
-                        )
-                    )
-                }
-                pendingPeerIceCandidates.clear()
+                markAsReadyToProcessPeerIceCandidates()
             }
         }
     }
@@ -639,6 +638,7 @@ class WebrtcPeerConnectionHolder(
     init {
         gatheringPolicy = callParticipant.gatheringPolicy
         pendingPeerIceCandidates = ArrayList()
+        pendingIceCandidatesToSend = ArrayList()
     }
 
     @Synchronized
@@ -917,7 +917,7 @@ class WebrtcPeerConnectionHolder(
             Logger.d("☎ onIceCandidate")
             when (gatheringPolicy) {
                 GatheringPolicy.GATHER_ONCE -> {
-                    if ("" != candidate.serverUrl) {
+                    if (!candidate.serverUrl.isNullOrEmpty()) {
                         turnCandidates++
                         if (turnCandidates == 1) {
                             App.runThread {
@@ -933,16 +933,20 @@ class WebrtcPeerConnectionHolder(
                 }
 
                 GATHER_CONTINUOUSLY -> {
-                    if ("" != candidate.serverUrl) {
+                    if (!candidate.serverUrl.isNullOrEmpty()) {
                         turnCandidates++
-                        webrtcCallService.sendAddIceCandidateMessage(
-                            callParticipant,
-                            JsonIceCandidate(
-                                candidate.sdp,
-                                candidate.sdpMLineIndex,
-                                candidate.sdpMid
-                            )
+                        val jsonIceCandidate = JsonIceCandidate(
+                            candidate.sdp,
+                            candidate.sdpMLineIndex,
+                            candidate.sdpMid
                         )
+                        webrtcCallService.execute {
+                            if (readyToProcessPeerIceCandidates) {
+                                webrtcCallService.sendAddIceCandidateMessage(callParticipant, jsonIceCandidate)
+                            } else {
+                                pendingIceCandidatesToSend.add(jsonIceCandidate)
+                            }
+                        }
                     }
                 }
             }

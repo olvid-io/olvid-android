@@ -22,9 +22,7 @@ package io.olvid.messenger.main.bookmarks
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,8 +31,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.colorResource
 import androidx.core.view.WindowCompat
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
