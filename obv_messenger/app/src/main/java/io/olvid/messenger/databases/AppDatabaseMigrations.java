@@ -42,6 +42,18 @@ import io.olvid.messenger.customClasses.StringUtils;
 class AppDatabaseMigrations {
     static final Migration[] MIGRATIONS = new Migration[]{
 
+            new Migration(72, 73) {
+                @Override
+                public void migrate(@NonNull SupportSQLiteDatabase database) {
+                    Logger.w("ROOM MIGRATING FROM VERSION 72 TO 73");
+                    database.execSQL("DROP INDEX `index_message_table_discussion_id_status`");
+                    database.execSQL("DROP INDEX `index_message_table_sort_index`");
+                    database.execSQL("DROP INDEX `index_message_table_timestamp`");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_table_discussion_id_sort_index` ON `message_table` (`discussion_id`, `sort_index`)");
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_message_table_discussion_id_status_sort_index` ON `message_table` (`discussion_id`, `status`, `sort_index`)");
+                }
+            },
+
             new Migration(71, 72) {
                 @Override
                 public void migrate(@NonNull SupportSQLiteDatabase database) {

@@ -163,6 +163,7 @@ public abstract class DiscussionDao {
                     "cust." + DiscussionCustomization.SETTING_READ_ONCE + " AS cust_" + DiscussionCustomization.SETTING_READ_ONCE;
 
     static final String PINNED_ORDER = "disc." + Discussion.PINNED + " = 0 ASC, disc." + Discussion.PINNED + " ASC";
+
     @Transaction
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " message.*, unread.count AS unread_count, (unreadMention.count != 0) AS unread_mention, (locations.count != 0) AS locations_shared, " +

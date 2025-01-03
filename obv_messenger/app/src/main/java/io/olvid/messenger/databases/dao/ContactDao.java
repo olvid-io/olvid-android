@@ -213,7 +213,7 @@ public interface ContactDao {
 
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME + " WHERE " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity AND " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    Contact get(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    @Nullable Contact get(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME + " WHERE " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity AND " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
     LiveData<Contact> getAsync(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);

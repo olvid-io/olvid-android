@@ -1,3 +1,9 @@
+# Build 261 (3.5.1)
+2024-01-03
+
+- Fix an NPE in user directory search results
+- Improve messages load time in discussion
+
 # Build 260 (3.5)
 2024-12-29
 

@@ -686,10 +686,10 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_VIDEO_RESOLUTION_DEFAULT: Int = 720
 
         const val PREF_KEY_HARDWARE_NOISE_SUPPRESSOR: String = "pref_key_hardware_noise_suppressor"
-        const val PREF_KEY_HARDWARE_NOISE_SUPPRESSOR_DEFAULT: Boolean = false
+        const val PREF_KEY_HARDWARE_NOISE_SUPPRESSOR_DEFAULT: Boolean = true
 
         const val PREF_KEY_HARDWARE_ECHO_CANCELER: String = "pref_key_hardware_echo_canceler"
-        const val PREF_KEY_HARDWARE_ECHO_CANCELER_DEFAULT: Boolean = false
+        const val PREF_KEY_HARDWARE_ECHO_CANCELER_DEFAULT: Boolean = true
 
         const val PREF_KEY_LOW_BANDWIDTH_CALLS: String = "pref_key_low_bandwidth_calls"
         const val PREF_KEY_LOW_BANDWIDTH_CALLS_DEFAULT: Boolean = false

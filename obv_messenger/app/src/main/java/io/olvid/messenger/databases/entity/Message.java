@@ -87,10 +87,9 @@ import io.olvid.messenger.services.UnifiedForegroundService;
         indices = {
                 @Index(Message.DISCUSSION_ID),
                 @Index(Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER),
-                @Index(Message.SORT_INDEX),
-                @Index(Message.TIMESTAMP),
                 @Index(value = {Message.MESSAGE_TYPE, Message.STATUS}),
-                @Index(value = {Message.DISCUSSION_ID, Message.STATUS}),
+                @Index(value = {Message.DISCUSSION_ID, Message.SORT_INDEX}),
+                @Index(value = {Message.DISCUSSION_ID, Message.STATUS, Message.SORT_INDEX}),
                 @Index(value = {Message.SENDER_SEQUENCE_NUMBER, Message.SENDER_THREAD_IDENTIFIER, Message.SENDER_IDENTIFIER, Message.DISCUSSION_ID}),
         }
 )

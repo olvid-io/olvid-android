@@ -365,11 +365,9 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                 if (userDetails.identity != null) {
                     if (bytesOwnedIdentity != null) {
                         App.runThread {
-                            val contact =
-                                AppDatabase.getInstance()
-                                    .contactDao()[bytesOwnedIdentity, userDetails.identity]
+                            val contact = AppDatabase.getInstance().contactDao()[bytesOwnedIdentity, userDetails.identity]
                             Handler(Looper.getMainLooper()).post {
-                                if (holder.userDetails?.identity.contentEquals(contact.bytesContactIdentity)) {
+                                if (holder.userDetails?.identity.contentEquals(contact?.bytesContactIdentity)) {
                                     if (contact != null) {
                                         holder.initialView?.setContact(contact)
                                         holder.keycloakUserKnownImageView?.visibility =
