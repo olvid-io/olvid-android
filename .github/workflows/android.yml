@@ -42,7 +42,7 @@ jobs:
           mv ./obv_messenger/app/build/outputs/apk/prodNogoogle/release/app-prod-nogoogle-release-unsigned.apk Olvid-nogoogle.apk
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: apk
           path: Olvid*.apk
@@ -68,7 +68,7 @@ jobs:
           echo Last build tool version is: $BUILD_TOOL_VERSION
 
       - name: Download APK from build
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: apk
 
