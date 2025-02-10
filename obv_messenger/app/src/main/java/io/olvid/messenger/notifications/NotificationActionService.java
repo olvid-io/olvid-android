@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -32,6 +32,7 @@ import java.util.UUID;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
@@ -323,6 +324,9 @@ public class NotificationActionService extends IntentService {
             }
         }
         AppDatabase.getInstance().messageDao().markAllDiscussionMessagesRead(discussionId);
-        AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(discussionId, false);
+        if (discussion.unread) {
+            AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(discussionId, false);
+        }
+        UnreadCountsSingleton.INSTANCE.markDiscussionRead(discussionId, null);
     }
 }

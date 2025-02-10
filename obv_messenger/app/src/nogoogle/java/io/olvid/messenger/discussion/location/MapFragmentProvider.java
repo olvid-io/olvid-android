@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -30,6 +30,7 @@ public class MapFragmentProvider {
         }
         switch (integration) {
             case OSM:
+            case CUSTOM_OSM:
                 return new MapViewMapLibreFragment();
             case MAPS:
             case BASIC:

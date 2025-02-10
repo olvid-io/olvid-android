@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,6 +26,7 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.customClasses.TextBlock
+import io.olvid.messenger.customClasses.TextElement
 
 class GoogleTextRecognizer {
     companion object {
@@ -43,12 +44,24 @@ class GoogleTextRecognizer {
                         uri
                     )
                 ).addOnSuccessListener {
-                    onSuccess(it.textBlocks.map { textBlock ->
-                        TextBlock(
-                            text = textBlock.text,
-                            boundingBox = textBlock.boundingBox
-                        )
-                    })
+                    val textBlocks = mutableListOf<TextBlock>()
+                    it.textBlocks.forEach { block ->
+                                textBlocks.add(
+                                    TextBlock(
+                                        text = block.text,
+                                        boundingBox = block.boundingBox,
+                                        elements = block.lines.flatMap { line ->
+                                            line.elements.map { element ->
+                                                TextElement(
+                                                    element.text,
+                                                    element.boundingBox
+                                                )
+                                            }
+                                        }
+                                    )
+                                )
+                    }
+                    onSuccess(textBlocks)
                 }.addOnFailureListener { e -> Logger.e("Text recognition failed", e) }
             }
         }

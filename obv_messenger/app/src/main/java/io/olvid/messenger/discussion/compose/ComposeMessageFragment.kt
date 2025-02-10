@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -317,7 +317,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             if (activityResult?.data == null || activityResult.resultCode != Activity.RESULT_OK) {
                 return@registerForActivityResult
             }
-            val dataUri = activityResult.data!!.data
+            val dataUri = activityResult.data?.data
             val discussionId =
                 discussionViewModel.discussionId ?: return@registerForActivityResult
             if (dataUri != null) {
@@ -325,7 +325,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                     App.runThread(AddFyleToDraftFromUriTask(dataUri, discussionId))
                 }
             } else {
-                val clipData = activityResult.data!!.clipData
+                val clipData = activityResult.data?.clipData
                 if (clipData != null) {
                     val uris: MutableSet<Uri> = HashSet()
                     // Samsung Android 7.0 bug --> different files may return the same uri!
@@ -922,20 +922,19 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                         null
                     )
                     newMessageEditText?.setHint(R.string.label_edit_your_message)
-                    composeMessageEditGroup!!.setOnClickListener {
-                        if (discussionDelegate != null) {
-                            discussionDelegate!!.scrollToMessage(editMessage.id)
-                        }
+                    composeMessageEditGroup?.setOnClickListener {
+                        discussionDelegate?.scrollToMessage(editMessage.id)
+
                     }
                     linkPreviewViewModel.reset()
-                    if (newMessageEditText?.text != null) {
-                        newMessageEditText?.setText(
+                    newMessageEditText?.apply {
+                        setText(
                             Utils.protectMentionUrlSpansWithFEFF(
-                                newMessageEditText!!.text
+                                text
                             )
                         )
                         Utils.applyBodyWithSpans(
-                            newMessageEditText!!,
+                            this,
                             editMessage.senderIdentifier,
                             editMessage,
                             null,
@@ -943,11 +942,11 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                             false,
                             null
                         )
-                        newMessageEditText?.setSelection(newMessageEditText?.text?.length ?: 0)
+                        setSelection(newMessageEditText?.text?.length ?: 0)
                     }
                 } else {
-                    composeMessageEditGroup!!.visibility = View.GONE
-                    composeMessageEditGroup!!.setOnClickListener(null)
+                    composeMessageEditGroup?.visibility = View.GONE
+                    composeMessageEditGroup?.setOnClickListener(null)
                     newMessageEditText?.setHint(R.string.hint_compose_your_message)
                 }
                 context?.resources?.displayMetrics?.widthPixels?.let { updateIconsToShow(it) }
@@ -1045,8 +1044,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
 
     private fun onSendAction() {
         if (isEditMode()) {
-            if (composeMessageViewModel.getDraftMessageEdit().value != null) {
-                editMessage(composeMessageViewModel.getDraftMessageEdit().value!!.id)
+            composeMessageViewModel.getDraftMessageEdit().value?.let {
+                editMessage(it.id)
             }
         } else {
             sendMessage()
@@ -1058,12 +1057,10 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         if (sending) {
             return
         }
-        composeMessageLinkPreviewGroup!!.visibility = View.GONE
-        if (discussionViewModel.discussionId != null) {
+        composeMessageLinkPreviewGroup?.visibility = View.GONE
+        discussionViewModel.discussionId?.let { discussionId ->
             if (composeMessageViewModel.trimmedNewMessageText != null || composeMessageViewModel.hasAttachments() || recording) {
-                if (discussionDelegate != null) {
-                    discussionDelegate!!.markMessagesRead()
-                }
+                discussionDelegate?.markMessagesRead()
                 val trimAndMentions = Utils.removeProtectionFEFFsAndTrim(
                     composeMessageViewModel.rawNewMessageText ?: "",
                     mentionViewModel.mentions
@@ -1079,7 +1076,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                         }
                         PostMessageInDiscussionTask(
                             trimAndMentions.first,
-                            discussionViewModel.discussionId!!,
+                            discussionId,
                             true,
                             linkPreviewViewModel.openGraph.value,
                             trimAndMentions.second
@@ -1096,8 +1093,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
     }
 
     private fun editMessage(messageId: Long) {
-        composeMessageEditGroup!!.visibility = View.GONE
-        composeMessageLinkPreviewGroup!!.visibility = View.GONE
+        composeMessageEditGroup?.visibility = View.GONE
+        composeMessageLinkPreviewGroup?.visibility = View.GONE
         if (composeMessageViewModel.trimmedNewMessageText != null) {
             val trimAndMentions = Utils.removeProtectionFEFFsAndTrim(
                 composeMessageViewModel.rawNewMessageText ?: "", mentionViewModel.mentions
@@ -1149,7 +1146,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             val transaction = childFragmentManager.beginTransaction()
             transaction.hide(mentionCandidatesFragment)
             transaction.commit()
-            mentionCandidatesSpacer!!.visibility = View.GONE
+            mentionCandidatesSpacer?.visibility = View.GONE
         }
     }
 
@@ -1158,7 +1155,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             val transaction = childFragmentManager.beginTransaction()
             transaction.show(mentionCandidatesFragment)
             transaction.commit()
-            mentionCandidatesSpacer!!.visibility = View.INVISIBLE
+            mentionCandidatesSpacer?.visibility = View.INVISIBLE
         }
     }
 
@@ -1178,25 +1175,21 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         } else if (id == R.id.attach_configure) {
             showIconOrderSelector()
         } else if (id == R.id.attach_file) {
-            if (discussionDelegate != null) {
-                discussionDelegate!!.doNotMarkAsReadOnPause()
-            }
+            discussionDelegate?.doNotMarkAsReadOnPause()
             val intent = Intent(Intent.ACTION_GET_CONTENT)
                 .setType("*/*")
                 .addCategory(Intent.CATEGORY_OPENABLE)
                 .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
             App.prepareForStartActivityForResult(this)
-            attachFileLauncher!!.launch(intent)
+            attachFileLauncher?.launch(intent)
         } else if (id == R.id.attach_image) {
-            if (discussionDelegate != null) {
-                discussionDelegate!!.doNotMarkAsReadOnPause()
-            }
+            discussionDelegate?.doNotMarkAsReadOnPause()
             val intent = Intent(Intent.ACTION_GET_CONTENT)
                 .setType("image/*")
                 .addCategory(Intent.CATEGORY_OPENABLE)
                 .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
             App.prepareForStartActivityForResult(this)
-            attachFileLauncher!!.launch(intent)
+            attachFileLauncher?.launch(intent)
         } else if (id == R.id.attach_camera) {
             if (hasCamera) {
                 if (ContextCompat.checkSelfPermission(
@@ -1204,7 +1197,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                         permission.CAMERA
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
-                    requestPermissionForPictureLauncher!!.launch(permission.CAMERA)
+                    requestPermissionForPictureLauncher?.launch(permission.CAMERA)
                 } else {
                     takePicture()
                 }
@@ -1218,7 +1211,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                         permission.CAMERA
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
-                    requestPermissionForVideoLauncher!!.launch(permission.CAMERA)
+                    requestPermissionForVideoLauncher?.launch(permission.CAMERA)
                 } else {
                     takeVideo()
                 }
@@ -1228,55 +1221,58 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         } else if (id == R.id.attach_emoji) {
             showEmojiKeyboard()
         } else if (id == R.id.attach_location) {
-            // if currently sharing location: stop sharing location
-            if (LocationSharingSubService.isDiscussionSharingLocation(discussionViewModel.discussionId!!)) {
-                SecureAlertDialogBuilder(view.context, R.style.CustomAlertDialog)
-                    .setTitle(R.string.title_stop_sharing_location)
-                    .setMessage(R.string.label_stop_sharing_location)
-                    .setPositiveButton(R.string.button_label_stop) { _, _ ->
-                        LocationSharingSubService.stopSharingInDiscussion(
-                            discussionViewModel.discussionId!!, false
+            discussionViewModel.discussionId?.let { discussionId ->
+                // if currently sharing location: stop sharing location
+                if (LocationSharingSubService.isDiscussionSharingLocation(discussionId)) {
+                    SecureAlertDialogBuilder(view.context, R.style.CustomAlertDialog)
+                        .setTitle(R.string.title_stop_sharing_location)
+                        .setMessage(R.string.label_stop_sharing_location)
+                        .setPositiveButton(R.string.button_label_stop) { _, _ ->
+                            LocationSharingSubService.stopSharingInDiscussion(
+                                discussionViewModel.discussionId!!, false
+                            )
+                        }
+                        .setNegativeButton(R.string.button_label_cancel, null)
+                        .create()
+                        .show()
+                    return
+                }
+                when (SettingsActivity.locationIntegration) {
+                    OSM, MAPS, CUSTOM_OSM -> {
+                        val dialogFragment = SendLocationMapDialogFragment.newInstance(
+                            discussionId,
+                            SettingsActivity.locationIntegration
                         )
+                        dialogFragment.show(childFragmentManager, "send-location-fragment-osm")
                     }
-                    .setNegativeButton(R.string.button_label_cancel, null)
-                    .create()
-                    .show()
-                return
-            }
-            when (SettingsActivity.locationIntegration) {
-                OSM, MAPS, CUSTOM_OSM -> {
-                    val dialogFragment = SendLocationMapDialogFragment.newInstance(
-                        discussionViewModel.discussionId!!,
-                        SettingsActivity.locationIntegration
-                    )
-                    dialogFragment.show(childFragmentManager, "send-location-fragment-osm")
-                }
 
-                BASIC -> {
-                    val dialogFragment =
-                        SendLocationBasicDialogFragment.newInstance(discussionViewModel.discussionId!!)
-                    dialogFragment.show(childFragmentManager, "send-location-fragment-basic")
-                }
+                    BASIC -> {
+                        val dialogFragment =
+                            SendLocationBasicDialogFragment.newInstance(discussionId)
+                        dialogFragment.show(childFragmentManager, "send-location-fragment-basic")
+                    }
 
-                NONE -> {
-                    LocationIntegrationSelectorDialog(
-                        view.context,
-                        false,
-                        object : LocationIntegrationSelectorDialog.OnIntegrationSelectedListener {
-                            override fun onIntegrationSelected(
-                                integration: LocationIntegrationEnum,
-                                customOsmServerUrl: String?
-                            ) {
-                                SettingsActivity.setLocationIntegration(
-                                    integration.string,
-                                    customOsmServerUrl
-                                )
-                                // re-run onClick if something was selected
-                                if (integration == OSM || integration == MAPS || integration == BASIC || integration == CUSTOM_OSM) {
-                                    onClick(view)
+                    NONE -> {
+                        LocationIntegrationSelectorDialog(
+                            view.context,
+                            false,
+                            object :
+                                LocationIntegrationSelectorDialog.OnIntegrationSelectedListener {
+                                override fun onIntegrationSelected(
+                                    integration: LocationIntegrationEnum,
+                                    customOsmServerUrl: String?
+                                ) {
+                                    SettingsActivity.setLocationIntegration(
+                                        integration.string,
+                                        customOsmServerUrl
+                                    )
+                                    // re-run onClick if something was selected
+                                    if (integration == OSM || integration == MAPS || integration == BASIC || integration == CUSTOM_OSM) {
+                                        onClick(view)
+                                    }
                                 }
-                            }
-                        }).show()
+                            }).show()
+                    }
                 }
             }
         } else if (id == R.id.attach_introduce) {
@@ -1334,11 +1330,9 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 )
                 composeMessageViewModel.photoOrVideoUri = photoUri
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                if (discussionDelegate != null) {
-                    discussionDelegate!!.doNotMarkAsReadOnPause()
-                }
+                discussionDelegate?.doNotMarkAsReadOnPause()
                 App.prepareForStartActivityForResult(this)
-                takePictureLauncher!!.launch(takePictureIntent)
+                takePictureLauncher?.launch(takePictureIntent)
             } catch (_: IOException) {
                 Logger.w("Error creating photo capture file $photoFile")
             }
@@ -1370,11 +1364,9 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 )
                 composeMessageViewModel.photoOrVideoUri = photoUri
                 takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                if (discussionDelegate != null) {
-                    discussionDelegate!!.doNotMarkAsReadOnPause()
-                }
+                discussionDelegate?.doNotMarkAsReadOnPause()
                 App.prepareForStartActivityForResult(this)
-                takeVideoLauncher!!.launch(takeVideoIntent)
+                takeVideoLauncher?.launch(takeVideoIntent)
             } catch (_: IOException) {
                 Logger.w("Error creating video capture file $videoFile")
             }
@@ -1405,7 +1397,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                     .setMessage(
                         getString(
                             R.string.dialog_message_delete_attachment,
-                            longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.fileName
+                            longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.fileName
                         )
                     )
                     .setPositiveButton(R.string.button_label_ok) { _, _ ->
@@ -1420,28 +1412,21 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         } else if (itemId == R.id.popup_action_open_attachment) {
             if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(
                     PreviewUtils.getNonNullMimeType(
-                        longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.mimeType,
-                        longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.fileName
+                        longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.mimeType,
+                        longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.fileName
                     )
                 ) && SettingsActivity.useInternalImageViewer()
             ) {
-                // we do not mark as opened here as this is done in the gallery activity
-                App.openDiscussionGalleryActivity(
+                App.openDraftGalleryActivity(
                     activity,
-                    discussionViewModel.discussionId!!,
                     longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.messageId,
-                    longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.fyleId,
-                    true
+                    longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.fyleId
                 )
-                if (discussionDelegate != null) {
-                    discussionDelegate!!.doNotMarkAsReadOnPause()
-                }
+                discussionDelegate?.doNotMarkAsReadOnPause()
             } else {
-                App.openFyleInExternalViewer(activity, longClickedFyleAndStatus) {
-                    if (discussionDelegate != null) {
-                        discussionDelegate!!.doNotMarkAsReadOnPause()
-                    }
-                    longClickedFyleAndStatus!!.fyleMessageJoinWithStatus.markAsOpened()
+                App.openFyleViewer(activity, longClickedFyleAndStatus) {
+                    discussionDelegate?.doNotMarkAsReadOnPause()
+                    longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.markAsOpened()
                 }
             }
             return true
@@ -1463,12 +1448,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
 
     val composeMessageDelegate: ComposeMessageDelegate = object : ComposeMessageDelegate {
         override fun setDiscussionId(discussionId: Long) {
-            if (newMessageEditText != null) {
-                newMessageEditText?.setText("")
-            }
-            if (newMessageAttachmentAdapter != null) {
-                newMessageAttachmentAdapter!!.setDiscussionId(discussionId)
-            }
+            newMessageEditText?.setText("")
+            newMessageAttachmentAdapter?.setDiscussionId(discussionId)
         }
 
         override fun hideSoftInputKeyboard() {
@@ -1575,8 +1556,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 }
 
                 override fun onBindViewHolder(holder: IconOrderViewHolder, position: Int) {
-                    val icon = adapterIcons!![position]
-                    if (icon != -1) {
+                    adapterIcons?.getOrNull(position)?.takeIf { it != -1 }?.let { icon ->
                         holder.textView.setText(getStringResourceForIcon(icon))
                         holder.textView.setCompoundDrawablesRelativeWithIntrinsicBounds(
                             getImageResourceForIcon(icon),
@@ -1721,8 +1701,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             previousSelectionStart = newMessageEditText?.selectionStart ?: 0
             previousSelectionEnd = newMessageEditText?.selectionEnd ?: 0
         } else if (preserveOldSelection) {
-            val messageLength =
-                if (newMessageEditText?.text == null) 0 else newMessageEditText?.text!!.length
+            val messageLength = newMessageEditText?.text?.length ?: 0
             if (previousSelectionStart >= 0 && previousSelectionEnd >= 0 && previousSelectionStart <= messageLength && previousSelectionEnd <= messageLength) {
                 newMessageEditText?.setSelection(previousSelectionStart, previousSelectionEnd)
             } else {
@@ -1810,8 +1789,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
     private var currentLayout = 0
     fun updateComposeAreaLayout() {
         if (!recording && !hasAttachments && !hasText && !isEditMode()) {
-            sendButton!!.isGone = true
-            directAttachVoiceMessageImageView!!.isVisible = true
+            sendButton?.isGone = true
+            directAttachVoiceMessageImageView?.isVisible = true
         } else {
             if (isEditMode()) {
                 sendButton?.setImageDrawable(
@@ -1828,9 +1807,9 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                     }
                 )
             }
-            sendButton!!.isVisible = true
-            directAttachVoiceMessageImageView!!.isGone = true
-            sendButton!!.isEnabled =
+            sendButton?.isVisible = true
+            directAttachVoiceMessageImageView?.isGone = true
+            sendButton?.isEnabled =
                 (hasAttachments || composeMessageViewModel.trimmedNewMessageText != null || recording) && !identicalEditMessage()
         }
         val attachIconsGroupParams = attachIconsGroup.layoutParams as LayoutParams
@@ -1842,7 +1821,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         if (showAttachIcons && !isEditMode()) {
             if (currentLayout != 1) {
                 currentLayout = 1
-                attachStuffPlus!!.setImageResource(R.drawable.ic_attach_add)
+                attachStuffPlus?.setImageResource(R.drawable.ic_attach_add)
                 newMessageEditText?.maxLines = 1
                 newMessageEditText?.isVerticalScrollBarEnabled = false
                 newMessageEditText?.movementMethod = null
@@ -1874,10 +1853,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             if (neverOverflow && !isEditMode()) {
                 if (currentLayout != 2) {
                     currentLayout = 2
-                    attachStuffPlus!!.setImageResource(R.drawable.ic_attach_add)
-                    if (widthAnimator != null) {
-                        widthAnimator!!.cancel()
-                    }
+                    attachStuffPlus?.setImageResource(R.drawable.ic_attach_add)
+                    widthAnimator?.cancel()
                     if (animateLayoutChanges) {
                         widthAnimator = ValueAnimator.ofInt(
                             attachIconsGroupParams.width,
@@ -1896,9 +1873,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 }
             } else {
                 if (currentLayout != 3 && currentLayout != 4) {
-                    if (widthAnimator != null) {
-                        widthAnimator!!.cancel()
-                    }
+                    widthAnimator?.cancel()
                     if (animateLayoutChanges) {
                         widthAnimator = ValueAnimator.ofInt(attachIconsGroupParams.width, -3)
                         widthAnimator?.duration = 200

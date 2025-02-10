@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -21,6 +21,7 @@ package io.olvid.messenger.databases.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.RoomWarnings
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndOrigin
 import io.olvid.messenger.databases.dao.MessageDao.DiscussionAndMessage
 import io.olvid.messenger.databases.entity.Discussion
@@ -32,14 +33,15 @@ import io.olvid.messenger.discussion.linkpreview.OpenGraph
 @Dao
 interface GlobalSearchDao {
 
+    @SuppressWarnings(RoomWarnings.CURSOR_MISMATCH)
     @Query(
-        "SELECT m.id, m.timestamp FROM " + Message.TABLE_NAME + " AS m " +
+        "SELECT m.id, NULL AS fyleId, m." + Message.TIMESTAMP + ", m." + Message.SORT_INDEX + "  FROM " + Message.TABLE_NAME + " AS m " +
                 " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid" +
                 " WHERE m." + Message.MESSAGE_TYPE + " <= " + Message.TYPE_OUTBOUND_MESSAGE +
                 " AND m." + Message.DISCUSSION_ID + " = :discussionId" +
                 " AND " + Message.FTS_TABLE_NAME + " MATCH :query" +
                 " UNION " +
-                " SELECT m.id, m.timestamp FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+                " SELECT m.id, FMjoin.fyle_id AS fyleId, m." + Message.TIMESTAMP + ", m." + Message.SORT_INDEX + " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
                 " INNER JOIN " + Message.TABLE_NAME + " AS m " +
                 " ON m.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
                 " AND m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
@@ -49,11 +51,11 @@ interface GlobalSearchDao {
                 " JOIN " + FyleMessageJoinWithStatus.FTS_TABLE_NAME +
                 " ON FMJoin.rowid = " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + ".rowid " +
                 " WHERE " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " MATCH :query" +
-                " ORDER BY m.timestamp DESC"
+                " ORDER BY m." + Message.SORT_INDEX + " DESC"
     )
     fun discussionSearch(discussionId: Long, query: String): List<MessageIdAndTimestamp>
 
-    data class MessageIdAndTimestamp(val id: Long, val timestamp: Long)
+    data class MessageIdAndTimestamp(val id: Long, val fyleId: Long, val timestamp: Long)
 
 //    @Query(
 //        "SELECT mess.id " +

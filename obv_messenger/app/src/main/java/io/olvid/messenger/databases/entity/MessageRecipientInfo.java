@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -147,7 +147,7 @@ public class MessageRecipientInfo {
         if (timestampDelivered != null) {
             return 3;
         }
-        if (timestampSent != null && timestampSent > 0) {
+        if (timestampSent != null && (timestampSent > 0 || Arrays.equals(engineMessageIdentifier, new byte[0]))) { // the 0-length engine identifier is only used for messages sent from another device
             return 2;
         }
         if (engineMessageIdentifier != null) {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -115,7 +115,7 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                         groupDetailsViewModel.setGroupName(getString(R.string.text_copy_of_prefix) + groupDetails.name)
                     }
                     groupDetailsViewModel.groupDescription = groupDetails.description
-                } catch (ignored: Exception) {
+                } catch (_: Exception) {
                 }
             }
             if (intent.hasExtra(SERIALIZED_GROUP_TYPE_INTENT_EXTRA)) {
@@ -128,7 +128,7 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                         groupV2DetailsViewModel.setGroupType(groupType.toGroupCreationModel())
                         groupCreationViewModel.setIsCustomGroup(groupType.type == JsonGroupType.TYPE_CUSTOM)
                     }
-                } catch (ignored: Exception) {
+                } catch (_: Exception) {
                 }
             }
             if (intent.hasExtra(ABSOLUTE_PHOTO_URL_INTENT_EXTRA)) {
@@ -150,12 +150,14 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                     val admins : HashSet<Contact> = hashSetOf()
                     val preselectedContacts: MutableList<Contact> = ArrayList()
                     for (bytesKey in preselectedContactBytesKeys) {
-                        val contact = AppDatabase.getInstance()
-                            .contactDao()[AppSingleton.getBytesCurrentIdentity(), bytesKey.bytes]
-                        if (contact != null) {
-                            preselectedContacts.add(contact)
-                            if (preselectedContactAdminBytesKeys.contains(bytesKey)) {
-                                admins.add(contact)
+                        AppSingleton.getBytesCurrentIdentity()?.let { bytesOwnedIdentity ->
+                            val contact = AppDatabase.getInstance()
+                                .contactDao()[bytesOwnedIdentity, bytesKey.bytes]
+                            if (contact != null) {
+                                preselectedContacts.add(contact)
+                                if (preselectedContactAdminBytesKeys.contains(bytesKey)) {
+                                    admins.add(contact)
+                                }
                             }
                         }
                     }

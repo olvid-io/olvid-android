@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -123,10 +123,12 @@ import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.Discussion
+import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.Group
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.MessageExpiration
 import io.olvid.messenger.databases.entity.MessageMetadata
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
 import io.olvid.messenger.designsystem.theme.OlvidTypography
@@ -258,6 +260,8 @@ fun Message(
     openDiscussionDetailsCallback: (() -> Unit)? = null,
     openOnClick: Boolean = true,
     openViewerCallback: (() -> Unit)? = null,
+    saveAttachment: () -> Unit = {},
+    saveAllAttachments: () -> Unit = {}
 ) {
     Box {
         val maxWidth = 400.dp
@@ -492,7 +496,9 @@ fun Message(
                                     openOnClick = openOnClick,
                                     onAttachmentLongClick = onAttachmentLongClick,
                                     openViewerCallback = openViewerCallback,
-                                    discussionSearchViewModel = discussionSearch?.viewModel
+                                    discussionSearchViewModel = discussionSearch?.viewModel,
+                                    saveAttachment = saveAttachment,
+                                    saveAllAttachments = saveAllAttachments
                                 )
                             }
                         }
@@ -559,7 +565,7 @@ fun MessageInnerStack(
 
 @Composable
 private fun Forwarded(message: Message) {
-    if (message.forwarded) {
+    if (message.forwarded && message.edited == Message.EDITED_NONE) {
         Row(
             modifier = Modifier
                 .padding(horizontal = 4.dp)
@@ -788,7 +794,6 @@ const val INLINE_CONTENT_TAG =
     "androidx.compose.foundation.text.inlineContent" // WARNING: this string is copied from the InlineTextContent source and may change without notice....
 const val QUOTE_BLOCK_START_ANNOTATION = "quote"
 
-
 @Composable
 fun MessageBody(
     message: Message,
@@ -803,6 +808,22 @@ fun MessageBody(
     messageBubbleInteractionSource: MutableInteractionSource,
 ) {
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        if (message.isContentHidden) {
+            val expiration: JsonExpiration? = message.jsonMessage.jsonExpiration
+
+            expiration?.let {
+                autoOpenInboundEphemeralIfNeeded(
+                    discussionViewModel?.discussionCustomization?.value,
+                    discussionViewModel?.discussion?.value?.bytesOwnedIdentity,
+                    it,
+                    message.id,
+                )
+            }
+        }
+    }
+
     if (message.wipeStatus == Message.WIPE_STATUS_WIPED || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
         var text by remember {
             mutableStateOf(message.getStringContent(context))
@@ -943,34 +964,13 @@ fun MessageBody(
             }
 
             Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> {
-                val expiration = message.jsonMessage.jsonExpiration
-                val readOnce = expiration.readOnce == true
-
-                // Check for auto-open
-                discussionViewModel?.discussionCustomization?.value?.let { discussionCustomization ->
-                    // check the ephemeral settings match
-                    if (readOnce == discussionCustomization.settingReadOnce && expiration.getVisibilityDuration() == discussionCustomization.settingVisibilityDuration && expiration.getExistenceDuration() == discussionCustomization.settingExistenceDuration) {
-                        // settings are the default, verify if auto-open
-                        val autoOpen =
-                            if (discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages != null) discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages == true else SettingsActivity.defaultAutoOpenLimitedVisibilityInboundMessages
-                        if (autoOpen) {
-                            App.runThread {
-                                discussionViewModel.discussion.value?.bytesOwnedIdentity?.let {
-                                    InboundEphemeralMessageClicked(
-                                        it,
-                                        message.id
-                                    ).run()
-                                }
-                            }
-                        }
-                    }
-                }
-
                 if (message.isWithoutText.not()) {
+                    val expiration: JsonExpiration? = message.jsonMessage.jsonExpiration
+
                     EphemeralVisibilityExplanation(
                         modifier = Modifier.fillMaxWidth(),
-                        duration = expiration.visibilityDuration,
-                        readOnce = readOnce,
+                        duration = expiration?.visibilityDuration,
+                        readOnce = expiration?.readOnce == true,
                     ) {
                         App.runThread {
                             discussionViewModel?.discussion?.value?.bytesOwnedIdentity?.let {
@@ -1115,13 +1115,12 @@ fun MessageBody(
                                                 } else {
                                                     // check that there is indeed a contact
                                                     App.runThread {
-                                                        if (AppDatabase
+                                                        val bytesOwnedIdentity =
+                                                            AppSingleton.getBytesCurrentIdentity()
+                                                        if (bytesOwnedIdentity != null
+                                                            && AppDatabase
                                                                 .getInstance()
-                                                                .contactDao()
-                                                                .get(
-                                                                    AppSingleton.getBytesCurrentIdentity(),
-                                                                    userIdentifier
-                                                                ) != null
+                                                                .contactDao()[bytesOwnedIdentity, userIdentifier] != null
                                                         ) {
                                                             App.openContactDetailsActivity(
                                                                 context,
@@ -1166,6 +1165,34 @@ fun MessageBody(
         }
     }
 }
+
+fun autoOpenInboundEphemeralIfNeeded(
+    discussionCustomization: DiscussionCustomization?,
+    bytesOwnedIdentity: ByteArray?,
+    expiration: JsonExpiration,
+    messageId: Long,
+) {
+    // Check for auto-open
+    discussionCustomization?.let { discussionCustomization ->
+        // check the ephemeral settings match
+        if ((expiration.readOnce == true) == discussionCustomization.settingReadOnce && expiration.getVisibilityDuration() == discussionCustomization.settingVisibilityDuration && expiration.getExistenceDuration() == discussionCustomization.settingExistenceDuration) {
+            // settings are the default, verify if auto-open
+            val autoOpen =
+                if (discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages != null) discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages == true else SettingsActivity.defaultAutoOpenLimitedVisibilityInboundMessages
+            if (autoOpen) {
+                App.runThread {
+                    bytesOwnedIdentity?.let {
+                        InboundEphemeralMessageClicked(
+                            it,
+                            messageId
+                        ).run()
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun inlineContentMap(scale: Float = 1f) = mapOf(

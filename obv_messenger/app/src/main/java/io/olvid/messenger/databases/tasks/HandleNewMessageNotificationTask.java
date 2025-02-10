@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -41,6 +41,7 @@ import io.olvid.engine.engine.types.ObvMessage;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.FyleProgressSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
@@ -58,6 +59,7 @@ import io.olvid.messenger.databases.entity.LatestDiscussionSenderSequenceNumber;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageExpiration;
 import io.olvid.messenger.databases.entity.MessageMetadata;
+import io.olvid.messenger.databases.entity.MessageRecipientInfo;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.ReactionRequest;
 import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
@@ -470,9 +472,11 @@ public class HandleNewMessageNotificationTask implements Runnable {
                             message.jsonMentions = mentions;
                             message.mentioned = message.isIdentityMentioned(messageSender.bytesOwnedIdentity) || message.isOwnMessageReply(messageSender.bytesOwnedIdentity);
                             message.edited = Message.EDITED_UNSEEN;
+                            message.forwarded = false;
                         }
                     }
 
+                    // TODO: why stop. We should be able to share/receive share from 2 devices in the same discussion
                     // if start sharing location message check this contact is not already sharing their location in this discussion
                     // if already sharing force end of previous sharing message
                     if (message.locationType == Message.LOCATION_TYPE_SHARE) {
@@ -484,6 +488,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                 for (Message m : currentLocationSharingMessages) {
                                     Logger.e("This identity was already sharing it location, marking sharing as finished for message: " + m.id);
                                     db.messageDao().updateLocationType(m.id, Message.LOCATION_TYPE_SHARE_FINISHED);
+                                    UnreadCountsSingleton.INSTANCE.removeLocationSharingMessage(m.discussionId, m.id);
                                 }
                             }
                         }
@@ -538,7 +543,63 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     return;
                 }
 
+                if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE && jsonReturnReceipt != null) {
+                    HashMap<BytesKey, MessageRecipientInfo> messageRecipientInfoHashMap = new HashMap<>();
+
+                    switch (discussion.discussionType) {
+                        case Discussion.TYPE_CONTACT: {
+                            Contact contact = db.contactDao().get(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                            if (contact != null && contact.active) {
+                                messageRecipientInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new MessageRecipientInfo(message.id, message.totalAttachmentCount, contact.bytesContactIdentity));
+                            }
+                            break;
+                        }
+                        case Discussion.TYPE_GROUP: {
+                            List<Contact> contacts = db.contactGroupJoinDao().getGroupContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                            for (Contact contact : contacts) {
+                                if (contact.active) {
+                                    messageRecipientInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new MessageRecipientInfo(message.id, message.totalAttachmentCount, contact.bytesContactIdentity));
+                                }
+                            }
+                            break;
+                        }
+                        case Discussion.TYPE_GROUP_V2: {
+                            List<Contact> contacts = db.group2MemberDao().getGroupMemberContactsSync(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier);
+                            for (Contact contact : contacts) {
+                                if (contact.active) {
+                                    messageRecipientInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new MessageRecipientInfo(message.id, message.totalAttachmentCount, contact.bytesContactIdentity));
+                                }
+                            }
+                            for (Group2PendingMember group2PendingMember : db.group2PendingMemberDao().getGroupPendingMembers(discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier)) {
+                                messageRecipientInfoHashMap.put(new BytesKey(group2PendingMember.bytesContactIdentity), new MessageRecipientInfo(message.id, message.totalAttachmentCount, group2PendingMember.bytesContactIdentity));
+                            }
+                            break;
+                        }
+                    }
+                    if (!messageRecipientInfoHashMap.isEmpty()) {
+                        // set all required messageRecipientInfo attributes to make sure the message is not resent!
+                        for (MessageRecipientInfo messageRecipientInfo: messageRecipientInfoHashMap.values()) {
+                            messageRecipientInfo.timestampSent = 0L;
+                            messageRecipientInfo.engineMessageIdentifier = new byte[0];
+                            messageRecipientInfo.returnReceiptNonce = jsonReturnReceipt.getNonce();
+                            messageRecipientInfo.returnReceiptKey = jsonReturnReceipt.getKey();
+                        }
+
+                        db.messageRecipientInfoDao().insert(messageRecipientInfoHashMap.values().toArray(new MessageRecipientInfo[0]));
+                    }
+                }
+
+                if (message.status == Message.STATUS_UNREAD) {
+                    UnreadCountsSingleton.INSTANCE.newUnreadMessage(message.discussionId, message.id, message.mentioned, message.timestamp);
+                }
+                if (message.isLocationMessage() && message.locationType == Message.LOCATION_TYPE_SHARE) {
+                    UnreadCountsSingleton.INSTANCE.newLocationSharingMessage(message.discussionId, message.id);
+                }
+
                 if (jsonReturnReceipt != null) {
+                    if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                        new HandleStalledReturnReceipts(engine, messageSender.bytesOwnedIdentity, jsonReturnReceipt.nonce, jsonReturnReceipt.key).run();
+                    }
                     // send DELIVERED return receipt
                     message.sendMessageReturnReceipt(discussion, Message.RETURN_RECEIPT_STATUS_DELIVERED);
                 }
@@ -584,6 +645,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                                     }
                                     db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                                     fyleMessageJoinWithStatus.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, message);
+                                    fyleMessageJoinWithStatus.computeTextContentForFullTextSearchOnOtherThread(db, fyle);
                                     engine.markAttachmentForDeletion(attachment);
                                 } else {
                                     // the fyle is incomplete, so no need to create the Fyle, but still create a STATUS_DOWNLOADABLE FyleMessageJoinWithStatus
@@ -672,7 +734,8 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 for (FyleMessageJoinWithStatus fyleMessageJoinWithStatus : fyleMessageJoinWithStatusesToDownload) {
                     if (Objects.equals(message.linkPreviewFyleId, fyleMessageJoinWithStatus.fyleId) // always download link previews
                             || ((downloadSize == -1 || fyleMessageJoinWithStatus.size < downloadSize)
-                            && (AvailableSpaceHelper.getAvailableSpace() == null || AvailableSpaceHelper.getAvailableSpace() > fyleMessageJoinWithStatus.size))) {
+                            && (AvailableSpaceHelper.getAvailableSpace() == null || AvailableSpaceHelper.getAvailableSpace() > fyleMessageJoinWithStatus.size)
+                            && (!discussion.archived || SettingsActivity.getAutoDownloadArchivedDiscussion()))) {
                         if (fyleMessageJoinWithStatus.engineNumber != null) {
                             AppSingleton.getEngine().downloadSmallAttachment(obvMessage.getBytesToIdentity(), fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
                             fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADING;
@@ -1001,6 +1064,9 @@ public class HandleNewMessageNotificationTask implements Runnable {
                     db.messageDao().updateMentioned(message.id, message.isIdentityMentioned(discussion.bytesOwnedIdentity) || message.isOwnMessageReply(discussion.bytesOwnedIdentity));
                     message.contentBody = newBody;
                     db.messageDao().updateBody(message.id, newBody);
+                    if (message.forwarded) {
+                        db.messageDao().updateForwarded(message.id, false);
+                    }
                     db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_EDITED, serverTimestamp));
                 });
 
@@ -1038,6 +1104,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
                 if (jsonLocation.getType() == JsonLocation.TYPE_END_SHARING) {
                     db.messageDao().updateLocationType(message.id, Message.LOCATION_TYPE_SHARE_FINISHED);
                     db.messageMetadataDao().insert(new MessageMetadata(message.id, MessageMetadata.KIND_LOCATION_SHARING_END, serverTimestamp));
+                    UnreadCountsSingleton.INSTANCE.removeLocationSharingMessage(message.discussionId, message.id);
                 }
                 // handle simple location update messages
                 else if (jsonLocation.getType() == JsonLocation.TYPE_SHARING) {
@@ -1171,6 +1238,8 @@ public class HandleNewMessageNotificationTask implements Runnable {
         }
 
         db.messageDao().markDiscussionMessagesReadUpTo(discussion.id, jsonDiscussionRead.getLastReadMessageServerTimestamp());
+        UnreadCountsSingleton.INSTANCE.markDiscussionRead(discussion.id, jsonDiscussionRead.getLastReadMessageServerTimestamp());
+
         if (db.messageDao().getServerTimestampOfLatestUnreadInboundMessageInDiscussion(discussion.id) == null) {
             AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussion.id);
 

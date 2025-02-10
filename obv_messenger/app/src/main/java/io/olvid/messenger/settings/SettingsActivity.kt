@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -63,6 +63,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.Constants
+import io.olvid.engine.engine.types.sync.ObvSyncAtom
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
@@ -158,11 +159,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+            false
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.elevation = 0f
-        
+
         setContentView(R.layout.activity_settings)
 
         findViewById<CoordinatorLayout>(R.id.root_coordinator)?.let {
@@ -507,6 +510,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_MESSAGE_VIBRATION_PATTERN_DEFAULT: String = "1"
 
         const val PREF_KEY_MESSAGE_RINGTONE: String = "pref_key_message_ringtone"
+
         @JvmField
         val PREF_KEY_MESSAGE_RINGTONE_DEFAULT: String =
             Settings.System.DEFAULT_NOTIFICATION_URI.toString()
@@ -518,6 +522,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_CALL_VIBRATION_PATTERN_DEFAULT: String = "20"
 
         const val PREF_KEY_CALL_RINGTONE: String = "pref_key_call_ringtone"
+
         @JvmField
         val PREF_KEY_CALL_RINGTONE_DEFAULT: String = Settings.System.DEFAULT_RINGTONE_URI.toString()
 
@@ -598,6 +603,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_HIDDEN_PROFILE_CLOSE_POLICY_BACKGROUND_GRACE_DELAY: String =
             "pref_key_hidden_profile_close_policy_background_grace_delay"
         const val PREF_KEY_HIDDEN_PROFILE_CLOSE_POLICY_BACKGROUND_GRACE_DELAY_DEFAULT: Int = -1
+
         @JvmField
         val PREF_KEY_HIDDEN_PROFILE_CLOSE_POLICY_BACKGROUND_GRACE_DELAY_VALUES: IntArray =
             intArrayOf(0, 10, 30, 60, 120, 300)
@@ -608,6 +614,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_DISABLE_PUSH_NOTIFICATIONS_DEFAULT: Boolean = false
 
         const val PREF_KEY_PERMANENT_WEBSOCKET: String = "pref_key_permanent_websocket"
+
         @Suppress("KotlinConstantConditions")
         val PREF_KEY_PERMANENT_WEBSOCKET_DEFAULT: Boolean = !BuildConfig.USE_FIREBASE_LIB
 
@@ -725,6 +732,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS: String =
             "pref_key_no_notify_certificate_change_for_previews"
         const val PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS_DEFAULT: Boolean = false
+
         //        const val USER_DIALOG_HIDE_GOOGLE_APIS: String = "user_dialog_hide_google_apis"
         const val USER_DIALOG_HIDE_OPEN_EXTERNAL_APP: String = "user_dialog_hide_open_external_app"
         const val USER_DIALOG_HIDE_FORWARD_MESSAGE_EXPLANATION: String =
@@ -741,7 +749,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_USE_LEGACY_ZXING_SCANNER_DEFAULT: Boolean = false
 
         const val PREF_KEY_USE_INTERNAL_PDF_VIEWER: String = "pref_key_use_internal_pdf_viewer"
-        const val PREF_KEY_USE_INTERNAL_PDF_VIEWER_DEFAULT: Boolean = false
+        const val PREF_KEY_USE_INTERNAL_PDF_VIEWER_DEFAULT: Boolean = true
 
         const val PREF_KEY_PREFERRED_KEYCLOAK_BROWSER: String =
             "pref_key_preferred_keycloak_browser"
@@ -757,6 +765,16 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_AUTODOWNLOAD_SIZE: String = "pref_key_autodownload_size"
         const val PREF_KEY_AUTODOWNLOAD_SIZE_DEFAULT: String = "10000000"
 
+        const val PREF_KEY_AUTODOWNLOAD_ARCHIVED_DISCUSSION: String =
+            "pref_key_autodownload_archived_discussion"
+        const val PREF_KEY_AUTODOWNLOAD_ARCHIVED_DISCUSSION_DEFAULT: Boolean = false
+
+        const val PREF_KEY_UNARCHIVE_DISCUSSION_ON_NOTIFICATION: String =
+            "pref_key_unarchive_discussion_on_notification"
+        const val PREF_KEY_UNARCHIVE_DISCUSSION_ON_NOTIFICATION_DEFAULT: Boolean = false
+
+        const val USER_DIALOG_HIDE_UNARCHIVE_SETTINGS: String =
+            "user_dialog_hide_unarchive_settings"
 
         const val PREF_KEY_LINK_PREVIEW_OUTBOUND: String = "pref_key_link_preview_outbound"
         const val PREF_KEY_LINK_PREVIEW_OUTBOUND_DEFAULT: Boolean = true
@@ -1173,6 +1191,55 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 )
                 editor.apply()
             }
+
+        @JvmStatic
+        var autoDownloadArchivedDiscussion: Boolean
+            get() = PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                .getBoolean(
+                    PREF_KEY_AUTODOWNLOAD_ARCHIVED_DISCUSSION,
+                    PREF_KEY_AUTODOWNLOAD_ARCHIVED_DISCUSSION_DEFAULT
+                )
+            set(autoDownloadArchivedDiscussion) {
+                val editor: Editor =
+                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit()
+                editor.putBoolean(
+                    PREF_KEY_AUTODOWNLOAD_ARCHIVED_DISCUSSION,
+                    autoDownloadArchivedDiscussion
+                )
+                editor.apply()
+            }
+
+        @JvmStatic
+        var unarchiveDiscussionOnNotification: Boolean
+            get() = PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                .getBoolean(
+                    PREF_KEY_UNARCHIVE_DISCUSSION_ON_NOTIFICATION,
+                    PREF_KEY_UNARCHIVE_DISCUSSION_ON_NOTIFICATION_DEFAULT
+                )
+            set(unarchiveDiscussionOnNotification) {
+                val editor: Editor =
+                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit()
+                editor.putBoolean(
+                    PREF_KEY_UNARCHIVE_DISCUSSION_ON_NOTIFICATION,
+                    unarchiveDiscussionOnNotification
+                )
+                editor.apply()
+            }
+
+        @JvmStatic
+        fun setUnarchiveDiscussionOnNotification(unarchive: Boolean, propagate: Boolean = false) {
+            unarchiveDiscussionOnNotification = unarchive
+            if (propagate) {
+                AppSingleton.getBytesCurrentIdentity()?.let { ownedIdentity ->
+                    AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(
+                        ownedIdentity,
+                        ObvSyncAtom.createSettingUnarchiveOnNotification(unarchiveDiscussionOnNotification)
+                    )
+                }
+            }
+        }
 
         @JvmStatic
         fun isLinkPreviewInbound(context: Context): Boolean {

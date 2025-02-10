@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -42,6 +42,7 @@ import io.olvid.engine.engine.types.ObvOutboundAttachment;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.StringUtils;
@@ -212,7 +213,8 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
 
                 if (insertDetailsUpdatedMessage) {
                     Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, discussion.bytesOwnedIdentity);
-                    db.messageDao().insert(newDetailsMessage);
+                    newDetailsMessage.id = db.messageDao().insert(newDetailsMessage);
+                    UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
                     if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }

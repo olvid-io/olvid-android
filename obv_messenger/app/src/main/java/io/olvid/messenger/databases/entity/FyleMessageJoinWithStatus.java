@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -37,7 +37,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import io.olvid.engine.Logger;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.messenger.App;
 import io.olvid.messenger.customClasses.PreviewUtils;
@@ -411,7 +410,13 @@ public class FyleMessageJoinWithStatus {
                 }
                 textContent = TextBlockKt.getText(texts);
                 textExtracted = true;
-                App.runThread(() -> db.fyleMessageJoinWithStatusDao().updateTextContent(messageId, fyleId, textContent));
+                App.runThread(() -> db.runInTransaction(() -> {
+                    // delete all existing text blocks for this fyle/message
+                    db.fyleMessageTextBlockDao().deleteAllForMessageAndFyle(messageId, fyleId);
+                    db.fyleMessageJoinWithStatusDao().updateTextContent(messageId, fyleId, textContent);
+                    // save all new blocks
+                    TextBlockKt.saveToDatabase(texts, messageId, fyleId);
+                }));
                 return Unit.INSTANCE;
             });
             /* TODO add pdf fts indexation later with some limits ?
@@ -443,6 +448,16 @@ public class FyleMessageJoinWithStatus {
             }
              */
         }
+    }
+
+    public void computeTextContentForFullTextSearchOnOtherThread(AppDatabase db, Fyle fyle) {
+        App.runThread(() -> {
+            try {
+                computeTextContentForFullTextSearch(db, fyle);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override

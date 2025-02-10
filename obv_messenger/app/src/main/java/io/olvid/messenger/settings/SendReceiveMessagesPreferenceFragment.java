@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -65,6 +65,21 @@ public class SendReceiveMessagesPreferenceFragment extends PreferenceFragmentCom
                         AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingDefaultSendReadReceipts((Boolean) checked));
                     } catch (Exception e) {
                         Logger.w("Failed to propagate default send read receipt setting change to other devices");
+                        e.printStackTrace();
+                    }
+                }
+                return true;
+            });
+        }
+
+        SwitchPreference unarchiveOnNotificationPreference = screen.findPreference(SettingsActivity.PREF_KEY_UNARCHIVE_DISCUSSION_ON_NOTIFICATION);
+        if (unarchiveOnNotificationPreference != null) {
+            unarchiveOnNotificationPreference.setOnPreferenceChangeListener((Preference preference, Object checked) -> {
+                if (checked instanceof Boolean) {
+                    try {
+                        AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingUnarchiveOnNotification((Boolean) checked));
+                    } catch (Exception e) {
+                        Logger.w("Failed to propagate unarchive on notification setting change to other devices");
                         e.printStackTrace();
                     }
                 }

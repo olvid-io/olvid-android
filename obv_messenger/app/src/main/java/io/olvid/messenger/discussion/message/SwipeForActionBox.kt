@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -52,10 +52,10 @@ fun SwipeForActionBox(
     maxOffset: Dp,
     enabledFromStartToEnd: Boolean = true,
     enabledFromEndToStart: Boolean = true,
-    backgroundContentFromStartToEnd: @Composable (BoxScope.() -> Unit)? = null,
-    backgroundContentFromEndToStart: @Composable (BoxScope.() -> Unit)? = null,
-    callbackStartToEnd: (() -> Unit)? = null,
-    callbackEndToStart: (() -> Unit)? = null,
+    backgroundContentFromStartToEnd: @Composable (BoxScope.(progress: Float) -> Unit)? = null,
+    backgroundContentFromEndToStart: @Composable (BoxScope.(progress: Float) -> Unit)? = null,
+    callbackStartToEnd:  (() -> Unit)? = null,
+    callbackEndToStart:  (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
@@ -87,7 +87,7 @@ fun SwipeForActionBox(
 
     Box(
         modifier = modifier
-            .pointerInput(maxOffset, enabledFromEndToStart, enabledFromStartToEnd) {
+            .pointerInput(maxOffset, enabledFromEndToStart, enabledFromStartToEnd, callbackStartToEnd, callbackEndToStart) {
                 var initialOffset : Offset? = null
                 var isSwiping = false
                 val mnOffset = if (enabledFromEndToStart) -maxOffsetPx else 0
@@ -157,7 +157,7 @@ fun SwipeForActionBox(
                         .matchParentSize()
                         .alpha(offset.toFloat() / maxOffsetPx)
                 ) {
-                    backgroundContent.invoke(this)
+                    backgroundContent(offset.toFloat() / maxOffsetPx)
                 }
             }
         }
@@ -168,7 +168,7 @@ fun SwipeForActionBox(
                         .matchParentSize()
                         .alpha(-offset.toFloat() / maxOffsetPx)
                 ) {
-                    backgroundContent.invoke(this)
+                    backgroundContent(-offset.toFloat() / maxOffsetPx)
                 }
             }
         }

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -70,6 +70,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
 import io.olvid.messenger.R;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.HandlerExecutor;
 import io.olvid.messenger.customClasses.LocationShareQuality;
@@ -1060,6 +1061,7 @@ public class UnifiedForegroundService extends Service {
                         Discussion discussion = AppDatabase.getInstance().discussionDao().getById(message.discussionId);
                         if (discussion == null || discussion.status != Discussion.STATUS_NORMAL) {
                             AppDatabase.getInstance().messageDao().updateLocationType(message.id, Message.LOCATION_TYPE_SHARE_FINISHED);
+                            UnreadCountsSingleton.INSTANCE.removeLocationSharingMessage(message.discussionId, message.id);
                             continue;
                         }
 
@@ -1149,7 +1151,7 @@ public class UnifiedForegroundService extends Service {
                 return;
             }
             if (!subscriber.isSharingLocationInDiscussion(discussionId)) {
-                Logger.e("LocationSharingSubService: trying to stop sharing for a non sharing discussion");
+                Logger.i("LocationSharingSubService: trying to stop sharing for a non sharing discussion");
                 // Try to stop sharing even if not marked as sharing in service
                 Runnable forceStopSharingTask = () -> {
                     List<Message> currentlySharingMessages = AppDatabase.getInstance().messageDao().getCurrentlySharingOutboundLocationMessagesInDiscussion(discussionId);
@@ -1347,7 +1349,7 @@ public class UnifiedForegroundService extends Service {
                 return holdersByDiscussionId.containsKey(discussionId);
             }
             public boolean isCurrentlySharingLocation() {
-                return holdersByDiscussionId.size() != 0;
+                return !holdersByDiscussionId.isEmpty();
             }
 
             synchronized void startSharingInDiscussion(byte[] bytesOwnedIdentity, long discussionId, @Nullable Long shareExpiration, LocationShareQuality quality, long messageId) {
@@ -1442,7 +1444,7 @@ public class UnifiedForegroundService extends Service {
 
                     // take every outbound sharing location messages in database and stop them (to be sure there )
                     List<Message> currentlySharingMessages = AppDatabase.getInstance().messageDao().getCurrentlySharingOutboundLocationMessagesInDiscussion(discussionId);
-                    if (currentlySharingMessages != null && currentlySharingMessages.size() != 0) {
+                    if (currentlySharingMessages != null && !currentlySharingMessages.isEmpty()) {
                         for (Message message : currentlySharingMessages) {
                             UpdateLocationMessageTask.createPostEndOfSharingMessageTask(discussionId, message.id).run();
                         }

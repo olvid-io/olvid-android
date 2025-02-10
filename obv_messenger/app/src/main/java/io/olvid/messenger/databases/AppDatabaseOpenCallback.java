@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -39,6 +39,7 @@ import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.StringUtils;
@@ -199,6 +200,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                             message.recomputeAttachmentCount(db);
                             if (message.isEmpty()) {
                                 db.messageDao().delete(message);
+                                UnreadCountsSingleton.INSTANCE.messageDeleted(message);
                             } else {
                                 db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, 0, message.imageResolutions);
                             }

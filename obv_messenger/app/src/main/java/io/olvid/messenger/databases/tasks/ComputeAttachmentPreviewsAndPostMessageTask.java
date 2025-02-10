@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -124,7 +124,7 @@ public class ComputeAttachmentPreviewsAndPostMessageTask implements Runnable {
                 }
 
 
-                if (previewBitmaps.size() != 0) {
+                if (!previewBitmaps.isEmpty()) {
                     // assemble the previews
                     int rowSize = (int) Math.ceil(Math.sqrt(previewBitmaps.size()));
                     Bitmap assembled = Bitmap.createBitmap(PREVIEW_SIZE * rowSize, PREVIEW_SIZE * ((previewBitmaps.size() - 1) / rowSize + 1), Bitmap.Config.ARGB_8888);

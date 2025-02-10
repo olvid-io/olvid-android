@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import io.olvid.engine.Logger;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.customClasses.LocationShareQuality;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -117,6 +118,7 @@ public class PostLocationMessageInDiscussionTask implements Runnable {
             // start sharing location service for this discussion
             if (isSharingLocationMessage) {
                 UnifiedForegroundService.LocationSharingSubService.startSharingInDiscussion(discussionId, shareExpirationInMs, quality, message.id);
+                UnreadCountsSingleton.INSTANCE.newLocationSharingMessage(discussionId, message.id);
             }
         });
     }

@@ -66,11 +66,27 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_bar"
         android:layout_width="0dp"
-        android:layout_height="@dimen/tab_bar_size"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:background="@color/blackOverlay">
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/bottom_bar_compose_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <View
+            android:id="@+id/height_padder"
+            android:layout_height="@dimen/tab_bar_size"
+            android:layout_width="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/bottom_bar_compose_view"
+            android:background="@color/blackOverlay" />
 
         <TextView
             android:id="@+id/file_name_text_view"
@@ -86,7 +102,7 @@
             app:layout_constraintBottom_toTopOf="@id/mime_type_text_view"
             app:layout_constraintEnd_toStartOf="@id/file_size_text_view"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@id/height_padder"
             app:layout_constraintVertical_chainStyle="packed"
             tools:text="Image file.jpg" />
 

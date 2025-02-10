@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -81,10 +81,13 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
+import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.customClasses.LockableActivity.CLIPBOARD_SERVICE
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Message
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration
+import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.message.attachments.Attachments
 import io.olvid.messenger.discussion.message.attachments.constantSp
@@ -301,6 +304,7 @@ fun LocationMessage(
                             message.id,
                             Message.LOCATION_TYPE_SHARE_FINISHED
                         )
+                        UnreadCountsSingleton.removeLocationSharingMessage(message.discussionId, message.id)
                     }
                 }
             }
@@ -391,14 +395,17 @@ private fun LocationMessageContent(
     if (message.hasAttachments()) {
         BoxWithConstraints {
             Attachments(message = message,
+                showStatuses = false,
                 audioAttachmentServiceBinding = null,
                 onAttachmentLongClick = { _ -> onLongClick() },
                 maxWidth = maxWidth,
                 onLocationClicked = onClick,
-                discussionSearchViewModel = null
+                discussionSearchViewModel = null,
+                saveAttachment = {},
+                saveAllAttachments = {}
             )
         }
-    } else {
+    } else if (message.isContentHidden.not()){
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -546,18 +553,39 @@ private fun LocationMessageContent(
             textAlign = TextAlign.Center
         )
     }
-    address?.takeIf { it.isNotEmpty() }?.let {
-        Text(
-            modifier = Modifier,
-            text = highlighter?.invoke(LocalContext.current, AnnotatedString(address)) ?: AnnotatedString(address),
-            color = if (message.isInbound) colorResource(id = R.color.inboundMessageBody) else colorResource(
-                id = R.color.primary700
-            ),
-            style = OlvidTypography.body1.copy(
-                fontSize = (16 * scale).sp,
-                lineHeight = (16 * scale).sp
+    if (message.isContentHidden.not()) {
+        address?.takeIf { it.isNotEmpty() }?.let {
+            Text(
+                modifier = Modifier,
+                text = highlighter?.invoke(LocalContext.current, AnnotatedString(address))
+                    ?: AnnotatedString(address),
+                color = if (message.isInbound) colorResource(id = R.color.inboundMessageBody) else colorResource(
+                    id = R.color.primary700
+                ),
+                style = OlvidTypography.body1.copy(
+                    fontSize = (16 * scale).sp,
+                    lineHeight = (16 * scale).sp
+                )
             )
-        )
+        }
+    } else if (address.isNullOrEmpty().not() || message.hasAttachments().not()) {
+        val expiration: JsonExpiration? = message.jsonMessage.jsonExpiration
+
+        EphemeralVisibilityExplanation(
+            modifier = Modifier.fillMaxWidth(),
+            duration = expiration?.visibilityDuration,
+            readOnce = expiration?.readOnce == true,
+        ) {
+            App.runThread {
+                AppDatabase.getInstance().discussionDao()
+                    .getById(message.discussionId)?.bytesOwnedIdentity?.let {
+                    InboundEphemeralMessageClicked(
+                        it,
+                        message.id
+                    ).run()
+                }
+            }
+        }
     }
 }
 

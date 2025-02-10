@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -283,7 +283,11 @@ public class AppSingleton {
         this.engineNotificationProcessorForGroupsV2 = new EngineNotificationProcessorForGroupsV2(this.engine);
         this.engineNotificationProcessorForMessages = new EngineNotificationProcessorForMessages(this.engine);
         this.websocketConnectivityStateLiveData = new MutableLiveData<>(0);
-        this.engine.startSendingNotifications();
+        App.runThread(() -> {
+            // start processing engine notifications once all unread message counts are properly initialized
+            UnreadCountsSingleton.INSTANCE.initialize();
+            this.engine.startSendingNotifications();
+        });
 
         db = AppDatabase.getInstance();
         bytesCurrentIdentityLiveData = new MutableLiveData<>();
@@ -368,15 +372,11 @@ public class AppSingleton {
         AndroidNotificationManager.createChannels(lastBuildExecuted);
 
         if (lastBuildExecuted != BuildConfig.VERSION_CODE || lastAndroidSdkVersionExecuted != Build.VERSION.SDK_INT) {
-            App.runThread(() -> {
-                runBuildUpgrade(lastBuildExecuted, lastAndroidSdkVersionExecuted);
-            });
+            App.runThread(() -> runBuildUpgrade(lastBuildExecuted, lastAndroidSdkVersionExecuted));
         }
 
         if (lastFtsGlobalSearchVersion != AppDatabase.DB_FTS_GLOBAL_SEARCH_VERSION) {
-            App.runThread(() -> {
-                runFtsGlobalSearchRebuild(lastFtsGlobalSearchVersion);
-            });
+            App.runThread(() -> runFtsGlobalSearchRebuild(lastFtsGlobalSearchVersion));
         }
 
         App.runThread(() -> {
@@ -1245,10 +1245,8 @@ public class AppSingleton {
                     new UpdateAllGroupMembersNames().run();
                 });
             }
-            if (lastBuildExecuted != 0 && lastBuildExecuted < 259) {
-                App.runThread(() -> {
-                    db.fyleMessageJoinWithStatusDao().clearTextExtractedFromImages();
-                });
+            if (lastBuildExecuted != 0 && (lastBuildExecuted < 262)) {
+                App.runThread(() -> db.fyleMessageJoinWithStatusDao().clearTextExtractedFromImages());
             }
 
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());

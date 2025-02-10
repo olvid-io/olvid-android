@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -33,6 +33,7 @@ import androidx.room.Update;
 
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.Objects;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.AppSingleton;
@@ -174,7 +175,9 @@ public interface FyleMessageJoinWithStatusDao {
     List<FyleMessageJoinWithStatus> getForFyleId(long fyleId);
 
 
-    @Query("SELECT * FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " WHERE " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId AND " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId")
+    @Query("SELECT * FROM " + FyleMessageJoinWithStatus.TABLE_NAME +
+            " WHERE " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId " +
+            " AND " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId")
     @Nullable FyleMessageJoinWithStatus get(long fyleId, long messageId);
 
     @Query("SELECT * FROM " + FyleMessageJoinWithStatus.TABLE_NAME +
@@ -219,12 +222,13 @@ public interface FyleMessageJoinWithStatusDao {
             " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
             " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
             " WHERE mess." + Message.DISCUSSION_ID + " = :discussionId " +
-            " AND ( FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != ''" +
-            " OR FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + "= 'image/svg+xml' " +
+            " AND ( FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != '' " +
+            " OR FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " = 'image/svg+xml' " +
             " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL) " +
             " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
             " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT +
-            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
+            " AND (fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
+            " OR FMjoin." + FyleMessageJoinWithStatus.MINI_PREVIEW + " IS NOT NULL) " +
             " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
             " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
     LiveData<List<FyleAndStatusTimestamped>> getGalleryMediasForDiscussion(long discussionId);
@@ -439,6 +443,15 @@ public interface FyleMessageJoinWithStatusDao {
         @Embedded
         public FyleAndStatus fyleAndStatus;
         public long timestamp;
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (!(obj instanceof FyleAndStatusTimestamped)) {
+                return false;
+            }
+            FyleAndStatusTimestamped other = (FyleAndStatusTimestamped) obj;
+            return (other.timestamp == timestamp) && (other.fyleAndStatus.equals(fyleAndStatus)) && Objects.equals(other.fyleAndStatus.fyle.filePath, fyleAndStatus.fyle.filePath);
+        }
     }
 
     class FyleAndOrigin {

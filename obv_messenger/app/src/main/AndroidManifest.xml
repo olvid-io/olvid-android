@@ -436,6 +436,9 @@
             android:name=".discussion.message.MessageDetailsActivity"
             android:label="@string/activity_title_message_details" />
         <activity
+            android:name=".main.archived.ArchivedDiscussionsActivity"
+            android:label="@string/activity_title_archived_discussions" />
+        <activity
             android:name=".main.bookmarks.BookmarksActivity"
             android:label="@string/activity_title_bookmarks" />
         <activity

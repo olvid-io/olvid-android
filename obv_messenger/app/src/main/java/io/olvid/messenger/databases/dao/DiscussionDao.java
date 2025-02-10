@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -97,6 +97,11 @@ public abstract class DiscussionDao {
     public abstract void updatePinned(long discussionId, int pinned);
 
     @Query("UPDATE " + Discussion.TABLE_NAME +
+            " SET " + Discussion.ARCHIVED + " = :archived " +
+            " WHERE id = :discussionId ")
+    public abstract void updateArchived(long discussionId, boolean archived);
+
+    @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER + " = :lastOutboundMessageSequenceNumber " +
             " WHERE id = :discussionId ")
     public abstract void updateLastOutboundMessageSequenceNumber(long discussionId, long lastOutboundMessageSequenceNumber);
@@ -129,9 +134,11 @@ public abstract class DiscussionDao {
             " disc." + Discussion.SENDER_THREAD_IDENTIFIER + " AS disc_" + Discussion.SENDER_THREAD_IDENTIFIER + ", " +
             " disc." + Discussion.LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER + " AS disc_" + Discussion.LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER + ", " +
             " disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " AS disc_" + Discussion.LAST_MESSAGE_TIMESTAMP + ", " +
+            " disc." + Discussion.LAST_REMOTE_DELETE_TIMESTAMP + " AS disc_" + Discussion.LAST_REMOTE_DELETE_TIMESTAMP + ", " +
             " disc." + Discussion.PHOTO_URL + " AS disc_" + Discussion.PHOTO_URL + ", " +
             " disc." + Discussion.KEYCLOAK_MANAGED + " AS disc_" + Discussion.KEYCLOAK_MANAGED + ", " +
             " disc." + Discussion.PINNED + " AS disc_" + Discussion.PINNED + ", " +
+            " disc." + Discussion.ARCHIVED + " AS disc_" + Discussion.ARCHIVED + ", " +
             " disc." + Discussion.UNREAD + " AS disc_" + Discussion.UNREAD + ", " +
             " disc." + Discussion.ACTIVE + " AS disc_" + Discussion.ACTIVE + ", " +
             " disc." + Discussion.TRUST_LEVEL + " AS disc_" + Discussion.TRUST_LEVEL + ", " +
@@ -166,7 +173,7 @@ public abstract class DiscussionDao {
 
     @Transaction
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
-            " message.*, unread.count AS unread_count, (unreadMention.count != 0) AS unread_mention, (locations.count != 0) AS locations_shared, " +
+            " message.*, " +
             PREFIX_DISCUSSION_CUSTOMIZATION_COLUMNS +
             " FROM " + Discussion.TABLE_NAME + " AS disc " +
             " LEFT JOIN ( SELECT id, " + Message.SENDER_SEQUENCE_NUMBER + ", " +
@@ -182,19 +189,13 @@ public abstract class DiscussionDao {
             Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " + Message.JSON_MENTIONS + ", " + Message.MENTIONED + ", " + Message.BOOKMARKED + ", " +
             " MAX(" + Message.SORT_INDEX + ") AS " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME + " GROUP BY " + Message.DISCUSSION_ID + " ) AS message " +
             " ON message." + Message.DISCUSSION_ID + " = disc.id " +
-            " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unread " +
-            " ON unread." + Message.DISCUSSION_ID + " = disc.id " +
-            " LEFT JOIN ( SELECT COUNT(*) AS count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_UNREAD + " AND " + Message.MENTIONED + " = 1" + " GROUP BY " + Message.DISCUSSION_ID + " ) AS unreadMention " +
-            " ON unreadMention." + Message.DISCUSSION_ID + " = disc.id " +
-            " LEFT JOIN ( SELECT COUNT(*) as count, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME + " WHERE " + Message.JSON_LOCATION + " NOT NULL " + " AND " +
-            Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE + " GROUP BY " + Message.DISCUSSION_ID + ") AS locations" +
-            " ON locations." + Message.DISCUSSION_ID + " = disc.id " +
             " LEFT JOIN " + DiscussionCustomization.TABLE_NAME + " AS cust " +
             " ON cust." + DiscussionCustomization.DISCUSSION_ID + " = disc.id " +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND disc." + Discussion.ARCHIVED + " = :archived " +
             " AND disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " != 0 " +
             " ORDER BY " + PINNED_ORDER + ", disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC" )
-    public abstract LiveData<List<DiscussionAndLastMessage>> getNonDeletedDiscussionAndLastMessages(@NonNull byte[] bytesOwnedIdentity);
+    public abstract LiveData<List<SimpleDiscussionAndLastMessage>> getNonDeletedDiscussionAndLastMessages(@NonNull byte[] bytesOwnedIdentity, boolean archived);
 
     @Transaction
     @Query("SELECT " +
@@ -206,9 +207,11 @@ public abstract class DiscussionDao {
             " disc." + Discussion.SENDER_THREAD_IDENTIFIER + " AS disc_" + Discussion.SENDER_THREAD_IDENTIFIER + ", " +
             " disc." + Discussion.LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER + " AS disc_" + Discussion.LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER + ", " +
             " (disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " + 1000000000000 * " + Discussion.PINNED + ") AS disc_" + Discussion.LAST_MESSAGE_TIMESTAMP + ", " +
+            " disc." + Discussion.LAST_REMOTE_DELETE_TIMESTAMP + " AS disc_" + Discussion.LAST_REMOTE_DELETE_TIMESTAMP + ", " +
             " disc." + Discussion.PHOTO_URL + " AS disc_" + Discussion.PHOTO_URL + ", " +
             " disc." + Discussion.KEYCLOAK_MANAGED + " AS disc_" + Discussion.KEYCLOAK_MANAGED + ", " +
             " disc." + Discussion.PINNED + " AS disc_" + Discussion.PINNED + ", " +
+            " disc." + Discussion.ARCHIVED + " AS disc_" + Discussion.ARCHIVED + ", " +
             " disc." + Discussion.UNREAD + " AS disc_" + Discussion.UNREAD + ", " +
             " disc." + Discussion.ACTIVE + " AS disc_" + Discussion.ACTIVE + ", " +
             " disc." + Discussion.TRUST_LEVEL + " AS disc_" + Discussion.TRUST_LEVEL + ", " +
@@ -529,7 +532,6 @@ public abstract class DiscussionDao {
             " WHERE " + Discussion.STATUS + " = " + Discussion.STATUS_PRE_DISCUSSION)
     public abstract List<Discussion> getAllPreDiscussions();
 
-
     @Query("SELECT * FROM " + Discussion.TABLE_NAME +
             " WHERE " + Discussion.PINNED + " != 0 " +
             " AND " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
@@ -539,7 +541,6 @@ public abstract class DiscussionDao {
     @Query("SELECT MAX(" + Discussion.PINNED + ") FROM " + Discussion.TABLE_NAME +
             " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
     public abstract int getMaxPinnedIndex(@NonNull byte[] bytesOwnedIdentity);
-
 
     public static class DiscussionAndLastMessage {
         @Embedded(prefix = "disc_")
@@ -561,6 +562,19 @@ public abstract class DiscussionDao {
 
         @ColumnInfo(name = "locations_shared")
         public boolean locationsShared;
+    }
+
+    public static class SimpleDiscussionAndLastMessage {
+        @Embedded(prefix = "disc_")
+        public Discussion discussion;
+
+        @Embedded
+        @Nullable
+        public Message message;
+
+        @Embedded(prefix = "cust_")
+        @Nullable
+        public DiscussionCustomization discussionCustomization;
     }
 
     public static class DiscussionAndGroupMembersNames {

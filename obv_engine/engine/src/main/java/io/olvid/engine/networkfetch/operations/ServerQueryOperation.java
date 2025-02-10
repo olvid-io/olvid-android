@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -959,6 +959,15 @@ class PutGroupLogServerMethod extends ServerQueryServerMethod {
                 Encoded.of(groupUid),
                 Encoded.of(signature),
         }).getBytes();
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+        if (returnStatus == ServerMethod.DELETED_FROM_SERVER) {
+            // if the group was deleted from the server, still mark the query as successful
+            returnStatus = ServerMethod.OK;
+        }
     }
 
     @Override

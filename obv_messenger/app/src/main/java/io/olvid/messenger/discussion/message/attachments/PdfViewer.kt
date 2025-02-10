@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -31,12 +31,15 @@ import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
@@ -75,6 +78,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.AsyncImage
@@ -186,7 +191,25 @@ fun PdfViewerScreen(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .requiredWidth(screenWidthDp * scale),
-                contentPadding = WindowInsets.safeDrawing.asPaddingValues(),
+                contentPadding = WindowInsets.safeDrawing.asPaddingValues() // add an 8.dp content padding at the top and bottom
+                    .let { object: PaddingValues {
+                        override fun calculateBottomPadding(): Dp {
+                            return it.calculateBottomPadding() + 8.dp
+                        }
+
+                        override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp {
+                            return it.calculateLeftPadding(layoutDirection)
+                        }
+
+                        override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp {
+                            return it.calculateRightPadding(layoutDirection)
+                        }
+
+                        override fun calculateTopPadding(): Dp {
+                            return it.calculateTopPadding() + 8.dp
+                        }
+
+                    } },
                 state = lazyListState,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -204,7 +227,7 @@ fun PdfViewerScreen(
                 .statusBarsPadding()
                 .displayCutoutPadding()
                 .align(Alignment.TopEnd)
-                .padding(end = 16.dp, top = 8.dp),
+                .padding(end = 16.dp, top = 16.dp),
             visible = lazyListState.isScrollInProgress.not(),
             enter = fadeIn() + scaleIn(),
             exit = fadeOut() + scaleOut()

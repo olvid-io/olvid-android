@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -180,9 +181,11 @@ fun ContactListScreen(
                                     }
 
                                     LazyColumn(
-                                        modifier = Modifier.fillMaxSize(),
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .navigationBarsPadding(),
                                         state = lazyListState,
-                                        contentPadding = PaddingValues(bottom = 80.dp),
+                                        contentPadding = PaddingValues(bottom = 32.dp),
                                     ) {
                                         items(items = list) { contactOrKeycloakDetails ->
 

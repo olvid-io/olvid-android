@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -69,6 +69,8 @@ public abstract class MapViewAbstractFragment extends Fragment {
     abstract void centerOnMarkers(boolean animate, boolean includeMyLocation); // center on all markers currently shown
     abstract void centerOnMarker(long id, @SuppressWarnings("SameParameterValue") boolean animate); // center on a specific marker use message.id as unique id
     abstract void onLocationUpdate(Location location); // return true if the update was taken into account
+    abstract Double getLatestLocationAltitude();
+    abstract Float getLatestLocationAccuracy();
 
     protected MutableLiveData<Boolean> currentlyCenteredOnGpsPosition = new MutableLiveData<>(false);
 

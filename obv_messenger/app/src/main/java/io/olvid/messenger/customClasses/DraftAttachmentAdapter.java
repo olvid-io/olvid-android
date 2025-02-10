@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -233,7 +233,7 @@ public class DraftAttachmentAdapter extends RecyclerView.Adapter<DraftAttachment
         if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(PreviewUtils.getNonNullMimeType(fyleAndStatus.fyleMessageJoinWithStatus.mimeType, fyleAndStatus.fyleMessageJoinWithStatus.fileName)) && SettingsActivity.useInternalImageViewer()) {
             App.openDraftGalleryActivity(activity, fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
         } else {
-            App.openFyleInExternalViewer(activity, fyleAndStatus, null);
+            App.openFyleViewer(activity, fyleAndStatus, null);
         }
     }
 

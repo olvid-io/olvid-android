@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -154,13 +154,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                                 fyleMessageJoinWithStatus.filePath = fyle.filePath;
                                 db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                                 fyleMessageJoinWithStatus.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);
-                                App.runThread(() -> {
-                                    try {
-                                        fyleMessageJoinWithStatus.computeTextContentForFullTextSearch(db, fyle);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                });
+                                fyleMessageJoinWithStatus.computeTextContentForFullTextSearchOnOtherThread(db, fyle);
 
                                 // check all other FyleMessageJoinWithStatus that are still in STATUS_DOWNLOADABLE or STATUS_DOWNLOADING and "complete" them
                                 List<FyleMessageJoinWithStatus> fyleMessageJoinWithStatusList = db.fyleMessageJoinWithStatusDao().getForFyleId(fyle.id);
@@ -179,13 +173,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                                                 engine.markAttachmentForDeletion(otherFyleMessageJoinWithStatus.bytesOwnedIdentity, otherFyleMessageJoinWithStatus.engineMessageIdentifier,
                                                         otherFyleMessageJoinWithStatus.engineNumber);
                                             }
-                                            App.runThread(() -> {
-                                                try {
-                                                    otherFyleMessageJoinWithStatus.computeTextContentForFullTextSearch(db, fyle);
-                                                } catch (IOException e) {
-                                                    e.printStackTrace();
-                                                }
-                                            });
+                                            otherFyleMessageJoinWithStatus.computeTextContentForFullTextSearchOnOtherThread(db, fyle);
                                             break;
                                     }
                                 }

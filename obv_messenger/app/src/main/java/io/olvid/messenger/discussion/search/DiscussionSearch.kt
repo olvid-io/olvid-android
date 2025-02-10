@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -29,6 +29,7 @@ import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.fragment.app.FragmentActivity
+import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
@@ -40,7 +41,7 @@ import io.olvid.messenger.settings.SettingsActivity
 class DiscussionSearch(
     private val activity: FragmentActivity,
     private val menu: Menu,
-    searchItem: MenuItem,
+    val searchItem: MenuItem,
     private val discussionId: Long
 ) : OnMenuItemClickListener, OnActionExpandListener, OnQueryTextListener {
     private var menuPrev: MenuItem? = null
@@ -68,6 +69,11 @@ class DiscussionSearch(
     }
 
     override fun onMenuItemActionCollapse(searchItem: MenuItem): Boolean {
+        (searchItem.actionView as? SearchView)?.let {
+            if (!it.hasFocus()) {
+                activity.onBackPressedDispatcher.onBackPressed()
+            }
+        }
         activity.invalidateOptionsMenu()
         return true
     }
@@ -86,19 +92,30 @@ class DiscussionSearch(
         return true
     }
 
+    fun setInitialSearchQuery(filter: String, matchingMessageId: Long?) {
+        App.runThread {
+            filter(
+                filter,
+                lazyListState?.layoutInfo?.visibleItemsInfo?.first()?.key as? Long ?: Long.MAX_VALUE,
+                matchingMessageId
+            )
+        }
+    }
+
+
     override fun onMenuItemClick(item: MenuItem): Boolean {
         try {
             val id = item.itemId
             if (id == R.id.action_prev) {
-                if (currentPosition < viewModel.matches.lastIndex) {
-                    scrollTo?.invoke(viewModel.matches[++currentPosition])
+                if (currentPosition < viewModel.matchedMessageAndFyleIds.lastIndex) {
+                    scrollTo?.invoke(viewModel.matchedMessageAndFyleIds[++currentPosition].first)
                 }
             } else if (id == R.id.action_next) {
                 if (currentPosition > 0) {
-                    scrollTo?.invoke(viewModel.matches[--currentPosition])
+                    scrollTo?.invoke(viewModel.matchedMessageAndFyleIds[--currentPosition].first)
                 }
             }
-            menuPrev?.isEnabled = currentPosition < viewModel.matches.lastIndex
+            menuPrev?.isEnabled = currentPosition < viewModel.matchedMessageAndFyleIds.lastIndex
             menuNext?.isEnabled = currentPosition > 0
         } catch (ignored: Exception) {
         }
@@ -106,7 +123,7 @@ class DiscussionSearch(
     }
 
     @Synchronized
-    private fun filter(filterString: String?, firstVisibleMessageId: Long) {
+    private fun filter(filterString: String?, firstVisibleMessageId: Long, messageIdToSetAsCurrent: Long? = null) {
         currentPosition = 0
         viewModel.filterRegexes = filterString
             ?.trim()
@@ -118,38 +135,56 @@ class DiscussionSearch(
                     RegexOption.IGNORE_CASE
                 )
             }
-        if (filterString != null) {
+        if (!filterString.isNullOrBlank()) {
             val tokenizedQuery = GlobalSearchTokenizer.tokenize(filterString).fullTextSearchEscape()
-            viewModel.matches = AppDatabase.getInstance().globalSearchDao()
-                .discussionSearch(discussionId, tokenizedQuery).map { it.id }
-            if (viewModel.matches.isNotEmpty()) {
-                activity.runOnUiThread {
-                    menuPrev?.isEnabled = currentPosition < viewModel.matches.lastIndex
-                    menuNext?.isEnabled = currentPosition > 0
+            val result = AppDatabase.getInstance().globalSearchDao()
+                .discussionSearch(discussionId, tokenizedQuery).map { it.id to it.fyleId }
+            if (viewModel.matchedMessageAndFyleIds != result || messageIdToSetAsCurrent != null) {
+                viewModel.matchedMessageAndFyleIds = result
+                val found: Boolean
+                if (messageIdToSetAsCurrent != null) {
+                    result.indexOfFirst { it.first == messageIdToSetAsCurrent }.let {
+                        if (it == -1) {
+                            found = false
+                        } else {
+                            found = true
+                            currentPosition = it
+                        }
+                    }
+                } else {
+                    found = false
                 }
-                val forwardMatch =
-                    viewModel.matches.indexOfLast { messageId -> messageId >= firstVisibleMessageId }
-                if (forwardMatch != -1) {
-                    currentPosition = forwardMatch
+
+                if (viewModel.matchedMessageAndFyleIds.isNotEmpty()) {
+                    activity.runOnUiThread {
+                        menuPrev?.isEnabled =
+                            currentPosition < viewModel.matchedMessageAndFyleIds.lastIndex
+                        menuNext?.isEnabled = currentPosition > 0
+                    }
+                    if (!found) {
+                        val forwardMatch =
+                            viewModel.matchedMessageAndFyleIds.indexOfLast { messageAndFyleId -> messageAndFyleId.first >= firstVisibleMessageId } // TODO: comparing messageIds is a little risky, it would be better to compare their sortIndex...
+                        if (forwardMatch != -1) {
+                            currentPosition = forwardMatch
+                        }
+                        scrollTo?.invoke(viewModel.matchedMessageAndFyleIds[currentPosition].first)
+                        return
+                    }
                 }
-                scrollTo?.invoke(viewModel.matches[currentPosition])
-                return
             }
         }
     }
 
     init {
         searchItem.setOnActionExpandListener(this)
-        val searchView = searchItem.actionView as SearchView?
-        if (searchView != null) {
-            searchView.queryHint = activity.getString(R.string.hint_search_message)
-            searchView.inputType =
+        (searchItem.actionView as SearchView?)?.apply {
+            queryHint = activity.getString(R.string.hint_search_message)
+            inputType =
                 InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or InputType.TYPE_TEXT_VARIATION_FILTER
             if (SettingsActivity.useKeyboardIncognitoMode()) {
-                searchView.imeOptions =
-                    searchView.imeOptions or EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
+                imeOptions = imeOptions or EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
             }
-            searchView.setOnQueryTextListener(this)
+            setOnQueryTextListener(this@DiscussionSearch)
         }
     }
 }

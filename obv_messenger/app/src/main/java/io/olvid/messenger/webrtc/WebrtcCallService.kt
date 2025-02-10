@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -80,12 +80,14 @@ import io.olvid.engine.engine.types.ObvTurnCredentialsFailedReason.PERMISSION_DE
 import io.olvid.engine.engine.types.ObvTurnCredentialsFailedReason.UNABLE_TO_CONTACT_SERVER
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.R
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.dimen
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.plurals
 import io.olvid.messenger.R.raw
 import io.olvid.messenger.R.string
+import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.StringUtils
@@ -271,7 +273,7 @@ class WebrtcCallService : Service() {
     private val wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver()
     private val objectMapper = AppSingleton.getJsonObjectMapper()
     private var role = NONE
-    var closeCallActivity : () -> Unit = {}
+    var closeCallActivity: () -> Unit = {}
 
     @JvmField
     var callIdentifier: UUID? = null
@@ -321,9 +323,10 @@ class WebrtcCallService : Service() {
     // call duration
     private var callDurationTimer: Timer? = null
     private val callDuration = MutableLiveData<Int?>(null)
-    private val receivedOfferMessages = HashMap<BytesKey, Pair<JsonNewParticipantOfferMessage, ByteArray?>>()
+    private val receivedOfferMessages =
+        mutableMapOf<BytesKey, Pair<JsonNewParticipantOfferMessage, ByteArray?>>()
     private var callParticipantIndex = 0
-    private val callParticipantIndexes: MutableMap<BytesKey, Int?> = HashMap()
+    private val callParticipantIndexes = mutableMapOf<BytesKey, Int?>()
     private val callParticipants: MutableMap<Int, CallParticipant> = TreeMap()
     private val callParticipantsLiveData = MutableLiveData<List<CallParticipantPojo>>(ArrayList(0))
     val timeoutTimer = Timer()
@@ -373,7 +376,7 @@ class WebrtcCallService : Service() {
     private var currentIncomingCallLiveData: MutableLiveData<Call?> = MutableLiveData(null)
     private var lastRoleWasNone: Boolean = true
 
-    fun getCurrentIncomingCallLiveData() : LiveData<Call?> {
+    fun getCurrentIncomingCallLiveData(): LiveData<Call?> {
         return currentIncomingCallLiveData
     }
 
@@ -416,6 +419,7 @@ class WebrtcCallService : Service() {
             } else {
                 @Suppress("DEPRECATION")
                 stopForeground(true)
+                CallNotificationManager.currentCallData = null
 
                 if (callIdentifier != null) {
                     uncalledReceivedIceCandidates.remove(callIdentifier)
@@ -453,24 +457,26 @@ class WebrtcCallService : Service() {
 
         private fun createRingingTimeout() {
             ringingTimer?.cancel()
-            ringingTimer = Timer().apply { schedule(timerTask {
-                executor.execute {
-                    dequeueIncomingCall(this@Call)
-                    CallLogItem(
-                        bytesOwnedIdentity,
-                        bytesGroupOwnerAndUidOrIdentifier,
-                        CallLogItem.TYPE_INCOMING,
-                        CallLogItem.STATUS_MISSED
-                    ).insert(
-                        listOf(
-                            ParticipantBytesAndRole(
-                                callerContact.bytesContactIdentity,
-                                CALLER
+            ringingTimer = Timer().apply {
+                schedule(timerTask {
+                    executor.execute {
+                        dequeueIncomingCall(this@Call)
+                        CallLogItem(
+                            bytesOwnedIdentity,
+                            bytesGroupOwnerAndUidOrIdentifier,
+                            CallLogItem.TYPE_INCOMING,
+                            CallLogItem.STATUS_MISSED
+                        ).insert(
+                            listOf(
+                                ParticipantBytesAndRole(
+                                    callerContact.bytesContactIdentity,
+                                    CALLER
+                                )
                             )
                         )
-                    )
-                }
-            }, RINGING_TIMEOUT_MILLIS) }
+                    }
+                }, RINGING_TIMEOUT_MILLIS)
+            }
         }
 
         fun clearRingingTimeout() {
@@ -519,7 +525,6 @@ class WebrtcCallService : Service() {
         callParticipantIndex = 1
 
         notifyCallParticipantsChanged()
-        stopThisServiceOrRefreshNotificationAndRingers()
     }
 
 
@@ -534,15 +539,18 @@ class WebrtcCallService : Service() {
                         ) {
                             return@apply
                         }
-                        val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
-                        val contactIdentitiesBundle = intent.getBundleExtra(CONTACT_IDENTITIES_BUNDLE_INTENT_EXTRA)
+                        val bytesOwnedIdentity =
+                            intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
+                        val contactIdentitiesBundle =
+                            intent.getBundleExtra(CONTACT_IDENTITIES_BUNDLE_INTENT_EXTRA)
                         if (bytesOwnedIdentity == null || contactIdentitiesBundle == null) {
                             return@apply
                         }
-                        val bytesContactIdentities: MutableList<ByteArray?> =
-                            ArrayList(contactIdentitiesBundle.size())
+                        val bytesContactIdentities: MutableList<ByteArray> = mutableListOf()
                         for (key in contactIdentitiesBundle.keySet()) {
-                            bytesContactIdentities.add(contactIdentitiesBundle.getByteArray(key))
+                            contactIdentitiesBundle.getByteArray(key)?.let {
+                                bytesContactIdentities.add(it)
+                            }
                         }
                         val bytesGroupOwnerAndUid = intent.getByteArrayExtra(
                             BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA
@@ -583,14 +591,20 @@ class WebrtcCallService : Service() {
                         if (messageType != START_CALL_MESSAGE_TYPE
                             && messageType != NEW_ICE_CANDIDATE_MESSAGE_TYPE
                             && messageType != REMOVE_ICE_CANDIDATES_MESSAGE_TYPE
-                            && messageType != ANSWERED_OR_REJECTED_ON_OTHER_DEVICE_MESSAGE_TYPE) {
+                            && messageType != ANSWERED_OR_REJECTED_ON_OTHER_DEVICE_MESSAGE_TYPE
+                        ) {
                             return@apply
                         }
-                        val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
-                        val bytesContactIdentity = intent.getByteArrayExtra(BYTES_CONTACT_IDENTITY_INTENT_EXTRA)
-                        val bytesContactDeviceUid = intent.getByteArrayExtra(BYTES_CONTACT_DEVICE_UID_INTENT_EXTRA)
-                        val callIdentifier = UUID.fromString(intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA))
-                        val serializedMessagePayload = intent.getStringExtra(SERIALIZED_MESSAGE_PAYLOAD_INTENT_EXTRA)
+                        val bytesOwnedIdentity =
+                            intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
+                        val bytesContactIdentity =
+                            intent.getByteArrayExtra(BYTES_CONTACT_IDENTITY_INTENT_EXTRA)
+                        val bytesContactDeviceUid =
+                            intent.getByteArrayExtra(BYTES_CONTACT_DEVICE_UID_INTENT_EXTRA)
+                        val callIdentifier =
+                            UUID.fromString(intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA))
+                        val serializedMessagePayload =
+                            intent.getStringExtra(SERIALIZED_MESSAGE_PAYLOAD_INTENT_EXTRA)
                         if (serializedMessagePayload == null || callIdentifier == null) {
                             return@apply
                         }
@@ -601,19 +615,21 @@ class WebrtcCallService : Service() {
                                         serializedMessagePayload,
                                         JsonStartCallMessage::class.java
                                     )
-                                    recipientReceiveCall(
-                                        bytesOwnedIdentity,
-                                        bytesContactIdentity,
-                                        bytesContactDeviceUid,
-                                        callIdentifier,
-                                        startCallMessage.sessionDescriptionType,
-                                        startCallMessage.gzippedSessionDescription,
-                                        startCallMessage.turnUserName,
-                                        startCallMessage.turnPassword /*, startCallMessage.turnServers*/,
-                                        startCallMessage.participantCount,
-                                        startCallMessage.bytesGroupOwnerAndUid,
-                                        startCallMessage.gatheringPolicy
-                                    )
+                                    if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
+                                        recipientReceiveCall(
+                                            bytesOwnedIdentity,
+                                            bytesContactIdentity,
+                                            bytesContactDeviceUid,
+                                            callIdentifier,
+                                            startCallMessage.sessionDescriptionType,
+                                            startCallMessage.gzippedSessionDescription,
+                                            startCallMessage.turnUserName,
+                                            startCallMessage.turnPassword /*, startCallMessage.turnServers*/,
+                                            startCallMessage.participantCount,
+                                            startCallMessage.bytesGroupOwnerAndUid,
+                                            startCallMessage.gatheringPolicy
+                                        )
+                                    }
                                     return START_NOT_STICKY
                                 }
 
@@ -655,7 +671,10 @@ class WebrtcCallService : Service() {
 
                                 ANSWERED_OR_REJECTED_ON_OTHER_DEVICE_MESSAGE_TYPE -> {
                                     // only accept this type of message from other owned devices
-                                    if (bytesOwnedIdentity != null && bytesContactIdentity != null && bytesOwnedIdentity.contentEquals(bytesContactIdentity)) {
+                                    if (bytesOwnedIdentity != null && bytesContactIdentity != null && bytesOwnedIdentity.contentEquals(
+                                            bytesContactIdentity
+                                        )
+                                    ) {
                                         val jsonAnsweredOrRejectedOnOtherDeviceMessage =
                                             objectMapper.readValue(
                                                 serializedMessagePayload,
@@ -676,27 +695,43 @@ class WebrtcCallService : Service() {
                     }
 
                     ACTION_ANSWER_CALL -> {
-                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA) || !intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)) {
+                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA) || !intent.hasExtra(
+                                BYTES_OWNED_IDENTITY_INTENT_EXTRA
+                            )
+                        ) {
                             return@apply
                         }
-                        val callIdentifier = UUID.fromString(intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA))
-                        val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
+                        val callIdentifier =
+                            UUID.fromString(intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA))
+                        val bytesOwnedIdentity =
+                            intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
                         if (callIdentifier == null || bytesOwnedIdentity == null) {
                             return@apply
                         }
-                        val audioPermissionGranted = ContextCompat.checkSelfPermission(this@WebrtcCallService, permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-                        recipientAnswerCall(bytesOwnedIdentity, callIdentifier, !audioPermissionGranted)
+                        val audioPermissionGranted = ContextCompat.checkSelfPermission(
+                            this@WebrtcCallService,
+                            permission.RECORD_AUDIO
+                        ) == PackageManager.PERMISSION_GRANTED
+                        recipientAnswerCall(
+                            bytesOwnedIdentity,
+                            callIdentifier,
+                            !audioPermissionGranted
+                        )
                         return START_NOT_STICKY
                     }
 
                     ACTION_REJECT_CALL -> {
-                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA) || !intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)) {
+                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA) || !intent.hasExtra(
+                                BYTES_OWNED_IDENTITY_INTENT_EXTRA
+                            )
+                        ) {
                             return@apply
                         }
                         val callIdentifier = UUID.fromString(
                             intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA)
                         )
-                        val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
+                        val bytesOwnedIdentity =
+                            intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
                         if (callIdentifier == null || bytesOwnedIdentity == null) {
                             return@apply
                         }
@@ -705,13 +740,17 @@ class WebrtcCallService : Service() {
                     }
 
                     ACTION_HANG_UP -> {
-                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA) || !intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)) {
+                        if (!intent.hasExtra(CALL_IDENTIFIER_INTENT_EXTRA) || !intent.hasExtra(
+                                BYTES_OWNED_IDENTITY_INTENT_EXTRA
+                            )
+                        ) {
                             return@apply
                         }
                         val callIdentifier = UUID.fromString(
                             intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA)
                         )
-                        val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
+                        val bytesOwnedIdentity =
+                            intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
                         if (callIdentifier == null || bytesOwnedIdentity == null) {
                             return@apply
                         }
@@ -729,23 +768,38 @@ class WebrtcCallService : Service() {
         executor.execute {
             val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
             val bytesContactIdentity = intent.getByteArrayExtra(BYTES_CONTACT_IDENTITY_INTENT_EXTRA)
-            val bytesContactDeviceUid = intent.getByteArrayExtra(BYTES_CONTACT_DEVICE_UID_INTENT_EXTRA)
-            val callIdentifier = UUID.fromString(intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA))
+            val bytesContactDeviceUid =
+                intent.getByteArrayExtra(BYTES_CONTACT_DEVICE_UID_INTENT_EXTRA)
+            val callIdentifier =
+                UUID.fromString(intent.getStringExtra(CALL_IDENTIFIER_INTENT_EXTRA))
 
             if (bytesOwnedIdentity == null) {
                 return@execute
             }
 
             // if the message is for another call, ignore it
-            if ((!bytesOwnedIdentity.contentEquals(this.bytesOwnedIdentity) || callIdentifier != this.callIdentifier )
-                && queuedIncomingCalls.none { it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity) }) {
+            if ((!bytesOwnedIdentity.contentEquals(this.bytesOwnedIdentity) || callIdentifier != this.callIdentifier)
+                && queuedIncomingCalls.none {
+                    it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(
+                        bytesOwnedIdentity
+                    )
+                }
+            ) {
                 return@execute
             }
             val messageType = intent.getIntExtra(MESSAGE_TYPE_INTENT_EXTRA, -1)
-            val serializedMessagePayload = intent.getStringExtra(SERIALIZED_MESSAGE_PAYLOAD_INTENT_EXTRA)
-                ?: return@execute
+            val serializedMessagePayload =
+                intent.getStringExtra(SERIALIZED_MESSAGE_PAYLOAD_INTENT_EXTRA)
+                    ?: return@execute
             // if message does not contain a payload, ignore it
-            handleMessage(bytesOwnedIdentity, bytesContactIdentity, bytesContactDeviceUid, messageType, serializedMessagePayload, callIdentifier)
+            handleMessage(
+                bytesOwnedIdentity,
+                bytesContactIdentity,
+                bytesContactDeviceUid,
+                messageType,
+                serializedMessagePayload,
+                callIdentifier
+            )
         }
     }
 
@@ -792,11 +846,18 @@ class WebrtcCallService : Service() {
                 }
 
                 HANGED_UP_MESSAGE_TYPE -> {
-                    if (callIdentifier == this.callIdentifier && bytesOwnedIdentity.contentEquals(this.bytesOwnedIdentity)) {
+                    if (callIdentifier == this.callIdentifier && bytesOwnedIdentity.contentEquals(
+                            this.bytesOwnedIdentity
+                        )
+                    ) {
                         val callParticipant = getCallParticipant(bytesContactIdentity)
                         callParticipant?.let { handleHangedUpMessage(it) }
                     } else {
-                        queuedIncomingCalls.find { it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)}?.let {
+                        queuedIncomingCalls.find {
+                            it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(
+                                bytesOwnedIdentity
+                            )
+                        }?.let {
                             dequeueIncomingCall(it)
                             CallLogItem(
                                 bytesOwnedIdentity,
@@ -847,7 +908,8 @@ class WebrtcCallService : Service() {
                     )
                     if (callParticipant == null) {
                         // put the message in queue as we might simply receive the update call participant message later
-                        receivedOfferMessages[BytesKey(bytesContactIdentity)] = Pair(newParticipantOfferMessage, bytesContactDeviceUid)
+                        receivedOfferMessages[BytesKey(bytesContactIdentity)] =
+                            Pair(newParticipantOfferMessage, bytesContactDeviceUid)
                     } else {
                         if (callParticipant.bytesContactDeviceUid == null) {
                             callParticipant.bytesContactDeviceUid = bytesContactDeviceUid
@@ -994,7 +1056,7 @@ class WebrtcCallService : Service() {
 
     private fun callerStartCall(
         bytesOwnedIdentity: ByteArray,
-        bytesContactIdentities: List<ByteArray?>,
+        bytesContactIdentities: List<ByteArray>,
         bytesGroupOwnerAndUidOrIdentifier: ByteArray?,
         groupV2: Boolean
     ) {
@@ -1028,7 +1090,7 @@ class WebrtcCallService : Service() {
 
     private fun callerWaitForAudioPermission(
         bytesOwnedIdentity: ByteArray,
-        bytesContactIdentities: List<ByteArray?>,
+        bytesContactIdentities: List<ByteArray>,
         bytesGroupOwnerAndUidOrIdentifier: ByteArray?,
         groupV2: Boolean
     ) {
@@ -1131,7 +1193,8 @@ class WebrtcCallService : Service() {
 
         // check if my current owned identity has call permission, if not, check if another non-hidden identity has it
         var bytesOwnedIdentityWithCallPermission = bytesOwnedIdentity
-        val currentOwnedIdentity = bytesOwnedIdentity?.let { AppDatabase.getInstance().ownedIdentityDao()[it] }
+        val currentOwnedIdentity =
+            bytesOwnedIdentity?.let { AppDatabase.getInstance().ownedIdentityDao()[it] }
         if (currentOwnedIdentity == null || !currentOwnedIdentity.getApiKeyPermissions().contains(
                 CALL
             )
@@ -1404,7 +1467,10 @@ class WebrtcCallService : Service() {
 
     private fun hangUpCall(bytesOwnedIdentity: ByteArray, callIdentifier: UUID) {
         executor.execute {
-            if (this.callIdentifier == callIdentifier && this.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)) {
+            if (this.callIdentifier == callIdentifier && this.bytesOwnedIdentity.contentEquals(
+                    bytesOwnedIdentity
+                )
+            ) {
                 hangUpCallInternal(true)
             }
         }
@@ -1465,8 +1531,8 @@ class WebrtcCallService : Service() {
     }
 
     private fun recipientReceiveCall(
-        bytesOwnedIdentity: ByteArray?,
-        bytesContactIdentity: ByteArray?,
+        bytesOwnedIdentity: ByteArray,
+        bytesContactIdentity: ByteArray,
         bytesContactDeviceUid: ByteArray?,
         callIdentifier: UUID,
         peerSdpType: String?,
@@ -1487,7 +1553,8 @@ class WebrtcCallService : Service() {
                 .onFailure { e -> Logger.x(e) }
                 .getOrNull()
 
-            val contact = AppDatabase.getInstance().contactDao()[bytesOwnedIdentity, bytesContactIdentity]
+            val contact =
+                AppDatabase.getInstance().contactDao()[bytesOwnedIdentity, bytesContactIdentity]
 
             if (contact == null || peerSdpDescription == null || peerSdpType == null) {
                 return@execute
@@ -1499,26 +1566,36 @@ class WebrtcCallService : Service() {
             if (alreadyAnsweredOrRejectedOnOtherDevice != null) {
                 App.runThread {
                     val callLogItem = CallLogItem(
-                        bytesOwnedIdentity!!,
+                        bytesOwnedIdentity,
                         bytesGroupOwnerAndUidOrIdentifier,
                         CallLogItem.TYPE_INCOMING,
                         if (alreadyAnsweredOrRejectedOnOtherDevice) CallLogItem.STATUS_ANSWERED_ON_OTHER_DEVICE else CallLogItem.STATUS_REJECTED_ON_OTHER_DEVICE
                     )
-                    callLogItem.insert(listOf(
-                        ParticipantBytesAndRole(
-                        contact.bytesContactIdentity,
-                        CALLER
+                    callLogItem.insert(
+                        listOf(
+                            ParticipantBytesAndRole(
+                                contact.bytesContactIdentity,
+                                CALLER
+                            )
+                        )
                     )
-                    ))
                 }
                 return@execute
             }
 
-            if (queuedIncomingCalls.none { it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)}) {
-                val discussion = getDiscussion(bytesOwnedIdentity, bytesContactIdentity, bytesGroupOwnerAndUidOrIdentifier)
+            if (queuedIncomingCalls.none {
+                    it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(
+                        bytesOwnedIdentity
+                    )
+                }) {
+                val discussion = getDiscussion(
+                    bytesOwnedIdentity,
+                    bytesContactIdentity,
+                    bytesGroupOwnerAndUidOrIdentifier
+                )
                 val call = Call(
                     callIdentifier = callIdentifier,
-                    bytesOwnedIdentity = bytesOwnedIdentity!!,
+                    bytesOwnedIdentity = bytesOwnedIdentity,
                     callerContact = contact,
                     callerDeviceUid = bytesContactDeviceUid,
                     bytesGroupOwnerAndUidOrIdentifier = bytesGroupOwnerAndUidOrIdentifier,
@@ -1559,7 +1636,11 @@ class WebrtcCallService : Service() {
     }
 
 
-    private fun getDiscussion(bytesOwnedIdentity: ByteArray?, bytesContactIdentity: ByteArray?,bytesGroupOwnerAndUidOrIdentifier: ByteArray?) : Discussion? {
+    private fun getDiscussion(
+        bytesOwnedIdentity: ByteArray?,
+        bytesContactIdentity: ByteArray?,
+        bytesGroupOwnerAndUidOrIdentifier: ByteArray?
+    ): Discussion? {
         return if (bytesGroupOwnerAndUidOrIdentifier == null) {
             if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
                 AppDatabase.getInstance().discussionDao()
@@ -1579,6 +1660,7 @@ class WebrtcCallService : Service() {
             }
         }
     }
+
     private fun getDiscussionCustomization(discussion: Discussion?): DiscussionCustomization? {
         return discussion?.let {
             AppDatabase.getInstance().discussionCustomizationDao()[it.id]
@@ -1591,9 +1673,17 @@ class WebrtcCallService : Service() {
         }
     }
 
-    private fun recipientAnswerCall(bytesOwnedIdentity: ByteArray, callIdentifier: UUID, waitForAudioPermission: Boolean) {
+    private fun recipientAnswerCall(
+        bytesOwnedIdentity: ByteArray,
+        callIdentifier: UUID,
+        waitForAudioPermission: Boolean
+    ) {
         executor.execute {
-            queuedIncomingCalls.find { it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)}?.let { call ->
+            queuedIncomingCalls.find {
+                it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(
+                    bytesOwnedIdentity
+                )
+            }?.let { call ->
                 // stop current call if any
                 if (role != NONE) {
                     hangUpCallInternal(notifyPeers = true, closeActivity = false)
@@ -1608,7 +1698,8 @@ class WebrtcCallService : Service() {
                     call.callerDeviceUid,
                     call.callIdentifier
                 )
-                this@WebrtcCallService.bytesGroupOwnerAndUidOrIdentifier = call.bytesGroupOwnerAndUidOrIdentifier
+                this@WebrtcCallService.bytesGroupOwnerAndUidOrIdentifier =
+                    call.bytesGroupOwnerAndUidOrIdentifier
                 this@WebrtcCallService.incomingParticipantCount = call.participantCount
                 this@WebrtcCallService.discussionType = call.discussionType
                 this@WebrtcCallService.turnUserName = call.turnUserName
@@ -1661,7 +1752,11 @@ class WebrtcCallService : Service() {
 
     fun recipientRejectCall(bytesOwnedIdentity: ByteArray, callIdentifier: UUID) {
         executor.execute {
-            queuedIncomingCalls.find { it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)}?.let { call ->
+            queuedIncomingCalls.find {
+                it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(
+                    bytesOwnedIdentity
+                )
+            }?.let { call ->
                 rejectCallInternal(call = call, endedFromOtherDevice = false, answered = false)
             }
         }
@@ -1686,7 +1781,7 @@ class WebrtcCallService : Service() {
         }
         dequeueIncomingCall(call)
     }
-    
+
 
     fun peerConnectionHolderFailed(callParticipant: CallParticipant, failReason: FailReason) {
         executor.execute {
@@ -1794,7 +1889,8 @@ class WebrtcCallService : Service() {
                     continue
                 }
                 Logger.d("☎ Adding a call participant")
-                val callParticipant = this.CallParticipant(callIdentifier!!, contact, RECIPIENT, null)
+                val callParticipant =
+                    this.CallParticipant(callIdentifier!!, contact, RECIPIENT, null)
                 newCallParticipants.add(callParticipant)
                 callParticipantIndexes[BytesKey(callParticipant.bytesContactIdentity)] =
                     callParticipantIndex
@@ -1961,8 +2057,10 @@ class WebrtcCallService : Service() {
             }
 
             // this is not the right call, store the candidate on the side
-            val callerCandidatesMap = uncalledReceivedIceCandidates.getOrPut(callIdentifier) { HashMap() }
-            val candidates = callerCandidatesMap.getOrPut(BytesKey(bytesContactIdentity)) { HashSet() }
+            val callerCandidatesMap =
+                uncalledReceivedIceCandidates.getOrPut(callIdentifier) { mutableMapOf() }
+            val candidates =
+                callerCandidatesMap.getOrPut(BytesKey(bytesContactIdentity)) { mutableSetOf() }
             candidates.add(jsonIceCandidate)
         }
     }
@@ -2007,9 +2105,10 @@ class WebrtcCallService : Service() {
         executor.execute {
             Logger.d("☎ Call handled on other owned device: " + if (answered) "answered" else "rejected")
             // try rejecting from queue
-            queuedIncomingCalls.find { bytesOwnedIdentity.contentEquals(it.bytesOwnedIdentity) && callIdentifier == it.callIdentifier }?.also { call ->
-                rejectCallInternal(call, true, answered)
-            } ?: run {
+            queuedIncomingCalls.find { bytesOwnedIdentity.contentEquals(it.bytesOwnedIdentity) && callIdentifier == it.callIdentifier }
+                ?.also { call ->
+                    rejectCallInternal(call, true, answered)
+                } ?: run {
                 if (this.callIdentifier != callIdentifier) {
                     // call not in the queue yet, mark it as already handled on other device
                     uncalledAnsweredOrRejectedOnOtherDevice[callIdentifier] = answered
@@ -2020,8 +2119,9 @@ class WebrtcCallService : Service() {
 
     private fun handleUpdateCallParticipantsMessage(jsonUpdateParticipantsInnerMessage: JsonUpdateParticipantsInnerMessage) {
         executor.execute {
-            val participantsToRemove: MutableSet<BytesKey> = HashSet(callParticipantIndexes.keys)
-            val newCallParticipants: MutableList<CallParticipant> = ArrayList()
+            val participantsToRemove: MutableSet<BytesKey> =
+                callParticipantIndexes.keys.toMutableSet() // we make a copy of the set
+            val newCallParticipants: MutableList<CallParticipant> = mutableListOf()
             for (jsonContactBytesAndName in jsonUpdateParticipantsInnerMessage.callParticipants) {
                 if (jsonContactBytesAndName.bytesContactIdentity.contentEquals(bytesOwnedIdentity)) {
                     // the received array contains the user himself
@@ -2032,13 +2132,17 @@ class WebrtcCallService : Service() {
                     participantsToRemove.remove(bytesKey)
                 } else {
                     // call participant not already in the call --> we add him
-                    val callParticipant = CallParticipant(
-                        callIdentifier!!,
-                        bytesOwnedIdentity,
-                        jsonContactBytesAndName.bytesContactIdentity,
-                        jsonContactBytesAndName.displayName,
-                        jsonContactBytesAndName.gatheringPolicy
-                    )
+                    val callParticipant = callIdentifier?.let { nonNullCallIdentifier ->
+                        bytesOwnedIdentity?.let { nonNullBytesOwnedIdentity ->
+                            CallParticipant(
+                                nonNullCallIdentifier,
+                                nonNullBytesOwnedIdentity,
+                                jsonContactBytesAndName.bytesContactIdentity,
+                                jsonContactBytesAndName.displayName,
+                                jsonContactBytesAndName.gatheringPolicy
+                            )
+                        }
+                    } ?: return@execute
                     if (callParticipant.contact == null) {
                         // contact not found --> we use the name pushed by the caller
                         callParticipant.displayName = jsonContactBytesAndName.displayName
@@ -2064,18 +2168,20 @@ class WebrtcCallService : Service() {
                     } else {
                         Logger.d("☎ I am NOT in charge of sending the offer to a new participant")
                         // check if we already received the offer the CallParticipant is supposed to send us
-                        receivedOfferMessages.remove(BytesKey(callParticipant.bytesContactIdentity))?.let { newParticipantOfferMessageAndDeviceUid ->
-                            Logger.d("☎ Reusing previously received participant offer message")
-                            if (callParticipant.bytesContactDeviceUid == null) {
-                                callParticipant.bytesContactDeviceUid = newParticipantOfferMessageAndDeviceUid.second
+                        receivedOfferMessages.remove(BytesKey(callParticipant.bytesContactIdentity))
+                            ?.let { newParticipantOfferMessageAndDeviceUid ->
+                                Logger.d("☎ Reusing previously received participant offer message")
+                                if (callParticipant.bytesContactDeviceUid == null) {
+                                    callParticipant.bytesContactDeviceUid =
+                                        newParticipantOfferMessageAndDeviceUid.second
+                                }
+                                handleNewParticipantOfferMessage(
+                                    callParticipant,
+                                    newParticipantOfferMessageAndDeviceUid.first.sessionDescriptionType,
+                                    newParticipantOfferMessageAndDeviceUid.first.gzippedSessionDescription,
+                                    newParticipantOfferMessageAndDeviceUid.first.gatheringPolicy
+                                )
                             }
-                            handleNewParticipantOfferMessage(
-                                callParticipant,
-                                newParticipantOfferMessageAndDeviceUid.first.sessionDescriptionType,
-                                newParticipantOfferMessageAndDeviceUid.first.gzippedSessionDescription,
-                                newParticipantOfferMessageAndDeviceUid.first.gatheringPolicy
-                            )
-                        }
                     }
                 }
             }
@@ -2599,7 +2705,8 @@ class WebrtcCallService : Service() {
                 return
             }
         }
-        val type = if (call == null && isCaller) CallLogItem.TYPE_OUTGOING else CallLogItem.TYPE_INCOMING
+        val type =
+            if (call == null && isCaller) CallLogItem.TYPE_OUTGOING else CallLogItem.TYPE_INCOMING
         var callLogItem: CallLogItem? = null
         when (callLogItemStatus) {
             CallLogItem.STATUS_SUCCESSFUL,
@@ -2630,9 +2737,22 @@ class WebrtcCallService : Service() {
         callLogItem?.let {
             if (call == null) {
                 this.callLogItem = it
-                it.insert(callParticipants.values.toList().map { callParticipant -> ParticipantBytesAndRole(callParticipant.bytesContactIdentity, callParticipant.role) })
+                it.insert(
+                    callParticipants.values.toList().map { callParticipant ->
+                        ParticipantBytesAndRole(
+                            callParticipant.bytesContactIdentity,
+                            callParticipant.role
+                        )
+                    })
             } else {
-                it.insert(listOf(ParticipantBytesAndRole(call.callerContact.bytesContactIdentity, CALLER)))
+                it.insert(
+                    listOf(
+                        ParticipantBytesAndRole(
+                            call.callerContact.bytesContactIdentity,
+                            CALLER
+                        )
+                    )
+                )
             }
         }
     }
@@ -2735,7 +2855,17 @@ class WebrtcCallService : Service() {
                                 callParticipant.bytesContactIdentity,
                                 this
                             )
-                            AppDatabase.getInstance().messageDao().insert(callMessage)
+                            callMessage.id =
+                                AppDatabase.getInstance().messageDao().insert(callMessage)
+                            if (callMessage.status == Message.STATUS_UNREAD) {
+                                UnreadCountsSingleton.newUnreadMessage(
+                                    it.id,
+                                    callMessage.id,
+                                    false,
+                                    callMessage.timestamp
+                                )
+                            }
+
                             if (it.updateLastMessageTimestamp(callMessage.timestamp)) {
                                 AppDatabase.getInstance().discussionDao()
                                     .updateLastMessageTimestamp(
@@ -2801,11 +2931,14 @@ class WebrtcCallService : Service() {
         if (callParticipants.isEmpty()) {
             @Suppress("DEPRECATION")
             stopForeground(true)
+            CallNotificationManager.currentCallData = null
             return
         }
         val endCallIntent = Intent(this, WebrtcCallService::class.java)
         endCallIntent.setAction(ACTION_HANG_UP)
-        endCallIntent.putExtra(CALL_IDENTIFIER_INTENT_EXTRA, callIdentifier?.let{Logger.getUuidString(it)} ?: "")
+        endCallIntent.putExtra(
+            CALL_IDENTIFIER_INTENT_EXTRA,
+            callIdentifier?.let { Logger.getUuidString(it) } ?: "")
         endCallIntent.putExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity)
         val endCallPendingIntent = PendingIntent.getService(
             this,
@@ -2821,6 +2954,7 @@ class WebrtcCallService : Service() {
             PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val initialView = InitialView(App.getContext())
+        val setupInitialView = mutableListOf<(InitialView) -> Unit>()
         var notificationName: String? = null
         if (callParticipants.size > 1 && bytesGroupOwnerAndUidOrIdentifier != null) {
             when (discussionType) {
@@ -2832,10 +2966,12 @@ class WebrtcCallService : Service() {
                         }
                     }
                     group?.getCustomPhotoUrl()?.let {
-                        initialView.setPhotoUrl(
-                            bytesGroupOwnerAndUidOrIdentifier,
-                            it
-                        )
+                        setupInitialView.add { iv ->
+                            iv.setPhotoUrl(
+                                bytesGroupOwnerAndUidOrIdentifier,
+                                it
+                            )
+                        }
                         notificationName = getString(
                             string.text_count_contacts_from_group,
                             callParticipants.size,
@@ -2852,10 +2988,12 @@ class WebrtcCallService : Service() {
                         }
                     }
                     group?.getCustomPhotoUrl()?.let {
-                        initialView.setPhotoUrl(
-                            bytesGroupOwnerAndUidOrIdentifier,
-                            it
-                        )
+                        setupInitialView.add { iv ->
+                            iv.setPhotoUrl(
+                                bytesGroupOwnerAndUidOrIdentifier,
+                                it
+                            )
+                        }
                         notificationName = getString(
                             string.text_count_contacts_from_group,
                             callParticipants.size,
@@ -2865,26 +3003,42 @@ class WebrtcCallService : Service() {
                 }
             }
             if (notificationName == null) {
-                initialView.setGroup(bytesGroupOwnerAndUidOrIdentifier)
+                setupInitialView.add {
+                    it.setGroup(bytesGroupOwnerAndUidOrIdentifier)
+                }
                 notificationName = getString(string.text_count_contacts, callParticipants.size)
             }
         } else {
             val callParticipant = callParticipants.values.iterator().next()
             notificationName = if (callParticipant.contact != null) {
-                initialView.setContact(callParticipant.contact)
+                setupInitialView.add {
+                    it.setContact(callParticipant.contact)
+                }
                 callParticipant.contact.getCustomDisplayName()
             } else {
-                initialView.setInitial(
-                    callParticipant.bytesContactIdentity,
-                    StringUtils.getInitial(callParticipant.displayName)
-                )
+                setupInitialView.add {
+                    it.setInitial(
+                        callParticipant.bytesContactIdentity,
+                        StringUtils.getInitial(callParticipant.displayName)
+                    )
+                }
                 callParticipant.displayName
             }
         }
         val size = App.getContext().resources.getDimensionPixelSize(dimen.notification_icon_size)
         initialView.setSize(size, size)
+        setupInitialView.forEach { it.invoke(initialView) }
         val largeIcon = Bitmap.createBitmap(size, size, ARGB_8888)
         initialView.drawOnCanvas(Canvas(largeIcon))
+        CallNotificationManager.currentCallData = CallData(
+            initialViewSetup = { iv ->
+                setupInitialView.forEach { it.invoke(iv) }
+            },
+            title = notificationName ?: "",
+            subtitle = getString(R.string.call_notification_ongoing_call),
+            fullScreenIntent = callActivityIntent,
+            rejectCall = { startService(endCallIntent) }
+        )
         if (VERSION.SDK_INT >= VERSION_CODES.S) {
             val caller = Person.Builder()
                 .setName(notificationName)
@@ -2970,7 +3124,10 @@ class WebrtcCallService : Service() {
         )
         val answerCallIntent = Intent(this, WebrtcCallActivity::class.java)
         answerCallIntent.setAction(ANSWER_CALL_ACTION)
-        answerCallIntent.putExtra(WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER, Logger.getUuidString(callIdentifier))
+        answerCallIntent.putExtra(
+            WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER,
+            Logger.getUuidString(callIdentifier)
+        )
         answerCallIntent.putExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA, contact.bytesOwnedIdentity)
         answerCallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         val answerCallPendingIntent = PendingIntent.getActivity(
@@ -2992,6 +3149,21 @@ class WebrtcCallService : Service() {
         initialView.setContact(contact)
         val largeIcon = Bitmap.createBitmap(size, size, ARGB_8888)
         initialView.drawOnCanvas(Canvas(largeIcon))
+        CallNotificationManager.currentCallData = CallData(
+            initialViewSetup = { it.setContact(contact) },
+            title = contact.getCustomDisplayName(),
+            subtitle = if (participantCount > 1) {
+                resources.getQuantityString(
+                    plurals.text_and_x_other,
+                    participantCount - 1,
+                    participantCount - 1
+                )
+            } else getString(R.string.call_notification_incoming_call),
+            fullScreenIntent = fullScreenIntent,
+            rejectCall = { startService(rejectCallIntent) },
+            acceptCall = { startActivity(answerCallIntent) },
+            isDoubleCall = role != NONE
+        )
         if (VERSION.SDK_INT >= VERSION_CODES.S) {
             val caller = Person.Builder()
                 .setName(contact.getCustomDisplayName())
@@ -3501,7 +3673,8 @@ class WebrtcCallService : Service() {
                 }
             }
         }
-        return postMessage(listOf(callParticipant),
+        return postMessage(
+            listOf(callParticipant),
             startCallMessage
                 ?: JsonStartCallMessage(
                     sessionDescriptionType,
@@ -3629,7 +3802,9 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
             listOf(Pair(call.callerContact.bytesContactIdentity, call.callerDeviceUid)),
             call.callIdentifier
         )
-        if (AppDatabase.getInstance().ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(call.bytesOwnedIdentity)) {
+        if (AppDatabase.getInstance().ownedDeviceDao()
+                .doesOwnedIdentityHaveAnotherDeviceWithChannel(call.bytesOwnedIdentity)
+        ) {
             postMessage(
                 JsonAnsweredOrRejectedOnOtherDeviceMessage(false),
                 call.bytesOwnedIdentity,
@@ -3815,12 +3990,18 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         callParticipants: Collection<CallParticipant>,
         protocolMessage: JsonWebrtcProtocolMessage
     ): Boolean {
-        val bytesContactIdentitiesAndDeviceUids: MutableList<Pair<ByteArray, ByteArray?>> = ArrayList(callParticipants.size)
+        val bytesContactIdentitiesAndDeviceUids: MutableList<Pair<ByteArray, ByteArray?>> =
+            ArrayList(callParticipants.size)
         var callId = callIdentifier
         var ownedIdentity = this.bytesOwnedIdentity
         for (callParticipant in callParticipants) {
             if (callParticipant.contact != null && callParticipant.contact.hasChannelOrPreKey()) {
-                bytesContactIdentitiesAndDeviceUids.add(Pair(callParticipant.bytesContactIdentity, callParticipant.bytesContactDeviceUid))
+                bytesContactIdentitiesAndDeviceUids.add(
+                    Pair(
+                        callParticipant.bytesContactIdentity,
+                        callParticipant.bytesContactDeviceUid
+                    )
+                )
             }
             // get call identifier from participant
             callId = callParticipant.callIdentifier
@@ -4026,7 +4207,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
     inner class CallParticipant {
         internal val role: Role
         val callIdentifier: UUID
-        val bytesOwnedIdentity: ByteArray?
+        val bytesOwnedIdentity: ByteArray
 
         @JvmField
         val bytesContactIdentity: ByteArray
@@ -4054,7 +4235,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
 
         constructor(
             callIdentifier: UUID,
-            bytesOwnedIdentity: ByteArray?,
+            bytesOwnedIdentity: ByteArray,
             bytesContactIdentity: ByteArray,
             displayName: String,
             gatheringPolicy: GatheringPolicy
@@ -4065,7 +4246,8 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
             this.role = RECIPIENT
             this.bytesContactIdentity = bytesContactIdentity
             this.bytesContactDeviceUid = null
-            contact = AppDatabase.getInstance().contactDao()[bytesOwnedIdentity, bytesContactIdentity]
+            contact =
+                AppDatabase.getInstance().contactDao()[bytesOwnedIdentity, bytesContactIdentity]
             if (contact != null) {
                 this.displayName = contact.getCustomDisplayName()
             } else {
@@ -4085,7 +4267,12 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
             addUncalledReceivedIceCandidates()
         }
 
-        constructor(callIdentifier: UUID, contact: Contact, contactRole: Role, bytesContactDeviceUid: ByteArray?) {
+        constructor(
+            callIdentifier: UUID,
+            contact: Contact,
+            contactRole: Role,
+            bytesContactDeviceUid: ByteArray?
+        ) {
             this.role = contactRole
             this.callIdentifier = callIdentifier
             this.bytesOwnedIdentity = contact.bytesOwnedIdentity
@@ -4317,9 +4504,11 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         const val RINGING_TIMEOUT_MILLIS: Long = 50_000
         const val PEER_CALL_ENDED_WAIT_MILLIS: Long = 3_000
 
-        // HashMap containing ICE candidates received while outside a call: callIdentifier -> (bytesContactIdentity -> candidate)
+        // Map containing ICE candidates received while outside a call: callIdentifier -> (bytesContactIdentity -> candidate)
         // with continuous gathering, we may send/receive candidates before actually sending/receiving the startCall message
-        private val uncalledReceivedIceCandidates = HashMap<UUID, HashMap<BytesKey, HashSet<JsonIceCandidate>>>() // TODO: Use ownedIdentity in key too
-        private val uncalledAnsweredOrRejectedOnOtherDevice = HashMap<UUID, Boolean>() // TODO: Use ownedIdentity in key too
+        private val uncalledReceivedIceCandidates =
+            mutableMapOf<UUID, MutableMap<BytesKey, MutableSet<JsonIceCandidate>>>() // TODO: Use ownedIdentity in key too
+        private val uncalledAnsweredOrRejectedOnOtherDevice =
+            mutableMapOf<UUID, Boolean>() // TODO: Use ownedIdentity in key too
     }
 }

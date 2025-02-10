@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -140,13 +140,17 @@ public interface MessageDao {
     void updateAttachmentCount(long messageId, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, @Nullable String imageResolutions);
 
     @Query("UPDATE " + Message.TABLE_NAME +
-            " SET " + Message.WIPE_STATUS + " = :wipeStatus, " +
-            Message.EDITED + " = " + Message.EDITED_NONE + ", " +
-            Message.CONTENT_BODY + " = NULL, " +
-            Message.REACTIONS + " = NULL, " +
+            " SET " + Message.CONTENT_BODY + " = NULL, " +
             Message.JSON_REPLY + " = NULL, " +
             Message.JSON_LOCATION + " = NULL, " +
-            Message.JSON_MENTIONS + " = NULL " +
+            Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_NONE + ", " +
+            Message.EDITED + " = " + Message.EDITED_NONE + ", " +
+            Message.FORWARDED + " = 0, " +
+            Message.WIPE_STATUS + " = :wipeStatus, " +
+            Message.REACTIONS + " = NULL, " +
+            Message.IMAGE_RESOLUTIONS + " = NULL, " +
+            Message.JSON_MENTIONS + " = NULL, " +
+            Message.LIMITED_VISIBILITY + " = 0 " +
             " WHERE id = :messageId")
     void updateWipe(long messageId, int wipeStatus);
 
@@ -155,6 +159,11 @@ public interface MessageDao {
             Message.EDITED + " = " + Message.EDITED_UNSEEN +
             " WHERE id = :messageId")
     void updateBody(long messageId, @Nullable String body);
+
+    @Query("UPDATE " + Message.TABLE_NAME +
+            " SET " + Message.FORWARDED + " = :forwarded " +
+            " WHERE id = :messageId")
+    void updateForwarded(long messageId, boolean forwarded);
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.CONTENT_BODY + " = :body, " +
@@ -624,6 +633,18 @@ public interface MessageDao {
             " )")
     boolean unreadMessagesOrInvitationsExist();
 
+    @Query("SELECT id, " + Message.DISCUSSION_ID + ", " + Message.MENTIONED + ", " + Message.TIMESTAMP + " FROM " + Message.TABLE_NAME +
+            " WHERE (" + Message.MESSAGE_TYPE + " = " + Message.TYPE_INBOUND_MESSAGE +
+            " OR " + Message.MESSAGE_TYPE + " = " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " OR " + Message.MESSAGE_TYPE + " = " + Message.TYPE_PHONE_CALL +
+            " OR " + Message.MESSAGE_TYPE + " = " + Message.TYPE_NEW_PUBLISHED_DETAILS + " ) " +
+            " AND " + Message.STATUS + " = " + Message.STATUS_UNREAD)
+    List<UnreadMessageStub> getAllUnreadMessageStubs();
+
+    @Query("SELECT id, " + Message.DISCUSSION_ID + " FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.JSON_LOCATION + " NOT NULL " +
+            " AND " + Message.LOCATION_TYPE + " = " + Message.LOCATION_TYPE_SHARE)
+    List<LocationMessageStub> getAllLocationMessageStubs();
 
     class UnreadCountAndFirstMessage {
         @ColumnInfo(name = "unread_count")
@@ -634,5 +655,27 @@ public interface MessageDao {
 
         @ColumnInfo(name = "min_sort_index")
         public double minSortIndex;
+    }
+
+    class UnreadMessageStub {
+        @ColumnInfo(name = "id")
+        public long messageId;
+
+        @ColumnInfo(name = Message.DISCUSSION_ID)
+        public long discussionId;
+
+        @ColumnInfo(name = Message.MENTIONED)
+        public boolean mentioned;
+
+        @ColumnInfo(name = Message.TIMESTAMP)
+        public long timestamp;
+    }
+
+    class LocationMessageStub {
+        @ColumnInfo(name = "id")
+        public long messageId;
+
+        @ColumnInfo(name = Message.DISCUSSION_ID)
+        public long discussionId;
     }
 }

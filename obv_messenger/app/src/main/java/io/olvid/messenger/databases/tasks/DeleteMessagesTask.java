@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -31,6 +31,7 @@ import io.olvid.engine.engine.Engine;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
@@ -141,14 +142,16 @@ public class DeleteMessagesTask implements Runnable {
             if (message.hasAttachments() || message.linkPreviewFyleId != null) {
                 List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses = db.fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(message.id);
                 for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fyleAndStatuses) {
-                    switch (fyleAndStatus.fyleMessageJoinWithStatus.status) {
-                        case FyleMessageJoinWithStatus.STATUS_DOWNLOADING:
-                        case FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE:
-                            engine.markAttachmentForDeletion(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
-                            break;
-                        case FyleMessageJoinWithStatus.STATUS_UPLOADING:
-                            engine.cancelAttachmentUpload(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
-                            break;
+                    if (fyleAndStatus.fyleMessageJoinWithStatus.engineNumber != null) {
+                        switch (fyleAndStatus.fyleMessageJoinWithStatus.status) {
+                            case FyleMessageJoinWithStatus.STATUS_DOWNLOADING:
+                            case FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE:
+                                engine.markAttachmentForDeletion(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
+                                break;
+                            case FyleMessageJoinWithStatus.STATUS_UPLOADING:
+                                engine.cancelAttachmentUpload(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier, fyleAndStatus.fyleMessageJoinWithStatus.engineNumber);
+                                break;
+                        }
                     }
                     fyles.put(fyleAndStatus.fyle.id, fyleAndStatus.fyle);
                 }
@@ -161,6 +164,7 @@ public class DeleteMessagesTask implements Runnable {
             for (int i = 0; i < size; i += BATCH_SIZE) {
                 db.messageDao().delete(messages.subList(i, Math.min(i + BATCH_SIZE, size)).toArray(new Message[0]));
             }
+            UnreadCountsSingleton.INSTANCE.messageBatchDeleted(messages);
         }
 
         // Check whether this discussion is locked and empty. If so, delete it

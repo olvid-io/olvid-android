@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -401,14 +401,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                                     if (otherFyleMessageJoinWithStatus.engineNumber != null) {
                                         AppSingleton.getEngine().markAttachmentForDeletion(otherFyleMessageJoinWithStatus.bytesOwnedIdentity, otherFyleMessageJoinWithStatus.engineMessageIdentifier, otherFyleMessageJoinWithStatus.engineNumber);
                                     }
-                                    Fyle finalFyle1 = fyle;
-                                    App.runThread(() -> {
-                                        try {
-                                            otherFyleMessageJoinWithStatus.computeTextContentForFullTextSearch(db, finalFyle1);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    });
+                                    otherFyleMessageJoinWithStatus.computeTextContentForFullTextSearchOnOtherThread(db, fyle);
                                     break;
                             }
                         }

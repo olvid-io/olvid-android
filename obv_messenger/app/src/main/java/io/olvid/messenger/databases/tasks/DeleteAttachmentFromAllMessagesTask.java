@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,6 +22,7 @@ package io.olvid.messenger.databases.tasks;
 import java.util.List;
 
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
@@ -45,14 +46,16 @@ public class DeleteAttachmentFromAllMessagesTask implements Runnable {
         }
 
         for (FyleMessageJoinWithStatus fyleMessageJoinWithStatus : fyleMessageJoinWithStatuses) {
-            switch (fyleMessageJoinWithStatus.status) {
-                case FyleMessageJoinWithStatus.STATUS_DOWNLOADING:
-                case FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE:
-                    AppSingleton.getEngine().markAttachmentForDeletion(fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
-                    break;
-                case FyleMessageJoinWithStatus.STATUS_UPLOADING:
-                    AppSingleton.getEngine().cancelAttachmentUpload(fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
-                    break;
+            if (fyleMessageJoinWithStatus.engineNumber != null) {
+                switch (fyleMessageJoinWithStatus.status) {
+                    case FyleMessageJoinWithStatus.STATUS_DOWNLOADING:
+                    case FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE:
+                        AppSingleton.getEngine().markAttachmentForDeletion(fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
+                        break;
+                    case FyleMessageJoinWithStatus.STATUS_UPLOADING:
+                        AppSingleton.getEngine().cancelAttachmentUpload(fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
+                        break;
+                }
             }
         }
 
@@ -73,6 +76,7 @@ public class DeleteAttachmentFromAllMessagesTask implements Runnable {
                 message.recomputeAttachmentCount(db);
                 if (message.status != Message.STATUS_DRAFT && message.isEmpty()) {
                     db.messageDao().delete(message);
+                    UnreadCountsSingleton.INSTANCE.messageDeleted(message);
                 } else {
                     db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.wipedAttachmentCount, message.imageResolutions);
                 }

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -76,6 +76,7 @@ import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.MessageMetadata
@@ -336,8 +337,8 @@ class MessageDetailsActivity : LockableActivity() {
             setHasStableIds(true)
         }
 
-        override fun onChanged(messageRecipientInfos: List<MessageRecipientInfo>?) {
-            this.messageRecipientInfos = messageRecipientInfos
+        override fun onChanged(value: List<MessageRecipientInfo>?) {
+            this.messageRecipientInfos = value
             recipientInfoHeaderAndSeparatorDecoration!!.clearCache()
             recomputeCounts()
             notifyDataSetChanged()
@@ -439,18 +440,23 @@ class MessageDetailsActivity : LockableActivity() {
                             messageRecipientInfo.timestampRead!!
                         ) as String)
 
-                    val builder = SecureAlertDialogBuilder(
-                        this@MessageDetailsActivity,
-                        R.style.CustomAlertDialog
-                    )
+                    val builder = SecureAlertDialogBuilder(this@MessageDetailsActivity, R.style.CustomAlertDialog)
                         .setTitle(recipientNameTextView.text)
                         .setMessage(
-                            getString(
-                                R.string.dialog_message_recipient_details,
-                                sentTime,
-                                deliveredTime,
-                                readTime
-                            )
+                            if (messageRecipientInfo.engineMessageIdentifier?.size == 0) {
+                                getString(
+                                    R.string.dialog_message_recipient_details_other_device,
+                                    deliveredTime,
+                                    readTime
+                                ).formatMarkdown()
+                            } else {
+                                getString(
+                                    R.string.dialog_message_recipient_details,
+                                    sentTime,
+                                    deliveredTime,
+                                    readTime
+                                ).formatMarkdown()
+                            }
                         )
                         .setPositiveButton(R.string.button_label_ok, null)
                     builder.create().show()
@@ -613,22 +619,16 @@ class MessageDetailsActivity : LockableActivity() {
             setHasStableIds(true)
         }
 
-        fun setSentTimestamp(sentTimestamp: Long?, inbound: Boolean) {
-            this.sentTimestamp = sentTimestamp
-            this.inbound = inbound
-            notifyDataSetChanged()
-        }
-
-        override fun onChanged(messageMetadatas: List<MessageMetadata>) {
+        override fun onChanged(value: List<MessageMetadata>) {
             // check if a messageMetadata is of kind KIND_UPLOADED
             hasUploadedMetadata = false
-            for (messageMetadata in messageMetadatas) {
+            for (messageMetadata in value) {
                 if (messageMetadata.kind == MessageMetadata.KIND_UPLOADED) {
                     hasUploadedMetadata = true
                     break
                 }
             }
-            this.messageMetadatas = messageMetadatas
+            this.messageMetadatas = value
             notifyDataSetChanged()
         }
 

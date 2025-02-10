@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -103,7 +103,6 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
     private var autoViewGroup: ViewGroup? = null
     private var autoLogoImageView: ImageView? = null
     private var autoExplanationTextView: TextView? = null
-    private val restoreBackupButton: Button? = null
 
     private val keycloakAuthenticationStartFragment by lazy { KeycloakAuthenticationStartFragment() }
 
@@ -197,7 +196,7 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
         keycloakClientSecretEditText = view.findViewById(R.id.keycloak_client_secret_edit_text)
 
         keycloakServerEditText?.addTextChangedListener(object : TextChangeListener() {
-            override fun afterTextChanged(s: Editable) {
+            override fun afterTextChanged(s: Editable?) {
                 if (started) {
                     viewModel.keycloakServer = s?.toString()
                 }
@@ -205,7 +204,7 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
         })
 
         keycloakClientIdEditText?.addTextChangedListener(object : TextChangeListener() {
-            override fun afterTextChanged(s: Editable) {
+            override fun afterTextChanged(s: Editable?) {
                 if (started) {
                     viewModel.keycloakClientId = s?.toString()
                 }
@@ -214,7 +213,7 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
         })
 
         keycloakClientSecretEditText?.addTextChangedListener(object : TextChangeListener() {
-            override fun afterTextChanged(s: Editable) {
+            override fun afterTextChanged(s: Editable?) {
                 if (started) {
                     viewModel.keycloakClientSecret = s?.toString()
                 }
@@ -499,7 +498,7 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
                                                                 )
                                                             )
                                                         )
-                                                    } catch (e: ActivityNotFoundException) {
+                                                    } catch (_: ActivityNotFoundException) {
                                                         try {
                                                             startActivity(
                                                                 Intent(

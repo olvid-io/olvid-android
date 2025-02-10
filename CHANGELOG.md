@@ -1,5 +1,20 @@
+# Build 263 (3.6)
+2025-02-10
+
+- Greatly improve groups v2 administrator chain verification time for large groups 
+
+# ~~Build 262 (3.6)~~
+2025-02-04
+
+- Add the possibility to archive a discussion
+- Display the reception status of messages sent from your other devices
+- Add an incoming/ongoing call panel inside the app to answer/reject a call if the Android notification is not visible
+- Integrate image text recognition (OCR) into the internal image viewer
+- Performances improvement for the discussion list screen
+- Make the new internal pdf viewer the default when opening a pdf attachment
+
 # Build 261 (3.5.1)
-2024-01-03
+2025-01-03
 
 - Fix an NPE in user directory search results
 - Improve messages load time in discussion

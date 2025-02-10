@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -55,6 +55,7 @@ import io.olvid.messenger.databases.dao.DiscussionDao.DiscussionAndLastMessage
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
+import io.olvid.messenger.databases.tasks.propagateMuteSettings
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.main.RefreshingFragment
 import io.olvid.messenger.main.invitations.InvitationListViewModel
@@ -101,6 +102,8 @@ class DiscussionListFragment : RefreshingFragment() {
                     onRefresh = ::onRefresh,
                     onClick = ::discussionClicked,
                     onLongClick = ::discussionLongClicked,
+                    onMarkAsRead = ::markAllDiscussionMessagesRead,
+                    onMarkAsUnread = ::markDiscussionAsUnread,
                     invalidateActionMode = {
                         discussionListViewModel.refreshSelection()
                         actionMode?.invalidate()
@@ -165,7 +168,7 @@ class DiscussionListFragment : RefreshingFragment() {
                                         .discussionCustomizationDao()[selected.discussion.id]?.let {
                                         AppDatabase.getInstance().discussionCustomizationDao()
                                             .update(it.apply {
-                                                prefMuteNotifications = muted
+                                                prefMuteNotifications = true
                                                 prefMuteNotificationsTimestamp =
                                                     muteExpirationTimestamp
                                                 prefMuteNotificationsExceptMentioned =
@@ -174,7 +177,7 @@ class DiscussionListFragment : RefreshingFragment() {
                                     } ifNull {
                                         AppDatabase.getInstance().discussionCustomizationDao()
                                             .insert(DiscussionCustomization(selected.discussion.id).apply {
-                                                prefMuteNotifications = muted
+                                                prefMuteNotifications = true
                                                 prefMuteNotificationsTimestamp =
                                                     muteExpirationTimestamp
                                                 prefMuteNotificationsExceptMentioned =
@@ -182,6 +185,7 @@ class DiscussionListFragment : RefreshingFragment() {
                                             })
                                     }
                                 }
+                                discussionsAndLastMessage.map { it.discussion }.propagateMuteSettings(true, muteExpirationTimestamp, muteExceptMentioned)
                             }
                         },
                         MuteNotificationDialog.MuteType.DISCUSSIONS,
@@ -206,6 +210,7 @@ class DiscussionListFragment : RefreshingFragment() {
                                                 })
                                         }
                                     }
+                                    discussionsAndLastMessage.map { it.discussion }.propagateMuteSettings(false, null, false)
                                 }
                             }
                             .setNegativeButton(string.button_label_cancel, null)
@@ -314,7 +319,8 @@ class DiscussionListFragment : RefreshingFragment() {
                 } else {
                     inflater.inflate(R.menu.popup_discussion_unpin, menu)
                 }
-                if (discussionListViewModel.selection.any { it.discussion.unread || it.unreadCount > 0}) {
+                inflater.inflate(R.menu.popup_discussion_archive, menu)
+                if (discussionListViewModel.selection.any { it.discussion.unread || it.unreadCount > 0 }) {
                     inflater.inflate(R.menu.popup_discussion_mark_as_read, menu)
                 } else {
                     inflater.inflate(R.menu.popup_discussion_mark_as_unread, menu)
@@ -353,6 +359,12 @@ class DiscussionListFragment : RefreshingFragment() {
 
                     R.id.popup_action_discussion_unpin -> {
                         discussionListViewModel.unpinSelectedDiscussions()
+                        mode.finish()
+                        return true
+                    }
+
+                    R.id.popup_action_discussion_archive -> {
+                        discussionListViewModel.archiveSelectedDiscussions(true)
                         mode.finish()
                         return true
                     }

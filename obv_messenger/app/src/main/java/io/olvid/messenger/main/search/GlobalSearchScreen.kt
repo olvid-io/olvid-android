@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
@@ -137,12 +138,13 @@ fun GlobalSearchScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(colorResource(id = R.color.almostWhite)),
+                    .background(colorResource(id = R.color.almostWhite))
+                    .navigationBarsPadding(),
                 contentAlignment = Alignment.TopStart
             ) {
                 bookmarks.takeIf { it.isNotEmpty() }?.let {
                     LazyColumn(
-                        contentPadding = PaddingValues(bottom = 80.dp)
+                        contentPadding = PaddingValues(bottom = 32.dp)
                     ) {
                         items(it) { message ->
                             SearchResult(
@@ -240,6 +242,7 @@ fun GlobalSearchScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(colorResource(id = R.color.almostWhite))
+                        .navigationBarsPadding()
                         .cutoutHorizontalPadding(),
                     contentAlignment = Alignment.TopStart
                 ) {
@@ -252,7 +255,7 @@ fun GlobalSearchScreen(
                             } else {
                                 LazyColumn(
                                     state = lazyListState,
-                                    contentPadding = PaddingValues(bottom = 80.dp)
+                                    contentPadding = PaddingValues(bottom = 32.dp)
                                 ) {
                                     globalSearchViewModel.contactsFound?.takeIf { it.isNotEmpty() }
                                         ?.let {
@@ -290,7 +293,7 @@ fun GlobalSearchScreen(
                             globalSearchViewModel.groupsFound?.takeIf { it.isNotEmpty() }?.let {
                                 LazyColumn(
                                     state = lazyListState,
-                                    contentPadding = PaddingValues(bottom = 80.dp)
+                                    contentPadding = PaddingValues(bottom = 32.dp)
                                 ) {
                                     items(it) { searchableDiscussion ->
                                         SearchResult(
@@ -310,7 +313,7 @@ fun GlobalSearchScreen(
                             messages?.takeIf { it.itemCount > 0 }?.let {
                                 LazyColumn(
                                     state = lazyListState,
-                                    contentPadding = PaddingValues(bottom = 80.dp)
+                                    contentPadding = PaddingValues(bottom = 32.dp)
                                 ) {
                                     items(
                                         count = messages.itemCount,
@@ -337,7 +340,7 @@ fun GlobalSearchScreen(
                             attachments?.takeIf { it.itemCount > 0 }?.let {
                                 LazyColumn(
                                     state = lazyListState,
-                                    contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
+                                    contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
                                 ) {
                                     items(
                                         count = attachments.itemCount,
@@ -383,7 +386,12 @@ fun GlobalSearchScreen(
                                                         content = fyle.fyleAndStatus.fyleMessageJoinWithStatus.fileName
                                                     ),
                                                     extraHorizontalPadding = 4.dp,
-                                                    onClick = { fyle.message.goto(context) },
+                                                    onClick = {
+                                                        fyle.message.goto(
+                                                            context,
+                                                            globalSearchViewModel.filter
+                                                        )
+                                                    },
                                                     onLongClick = {
                                                         if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(
                                                                 PreviewUtils.getNonNullMimeType(
@@ -395,12 +403,13 @@ fun GlobalSearchScreen(
                                                             App.openMessageGalleryActivity(
                                                                 context,
                                                                 fyle.fyleAndStatus.fyleMessageJoinWithStatus.messageId,
-                                                                fyle.fyleAndStatus.fyleMessageJoinWithStatus.fyleId
+                                                                fyle.fyleAndStatus.fyleMessageJoinWithStatus.fyleId,
+                                                                true
                                                             )
                                                         } else {
-                                                            App.openFyleInExternalViewer(
+                                                            App.openFyleViewer(
                                                                 context,
-                                                                fyle.fyleAndStatus,
+                                                                fyle.fyleAndStatus
                                                             ) {
                                                                 fyle.fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened()
                                                             }
@@ -423,7 +432,7 @@ fun GlobalSearchScreen(
                             links?.takeIf { it.itemCount > 0 }?.let {
                                 LazyColumn(
                                     state = lazyListState,
-                                    contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
+                                    contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
                                 ) {
                                     items(
                                         count = links.itemCount,
@@ -467,7 +476,10 @@ fun GlobalSearchScreen(
                                                 LinkListItem(
                                                     fyleAndStatus = fyle.fyleAndStatus,
                                                     onClick = {
-                                                        fyle.message.goto(context)
+                                                        fyle.message.goto(
+                                                            context,
+                                                            globalSearchViewModel.filter
+                                                        )
                                                     },
                                                     linkPreviewViewModel = linkPreviewViewModel,
                                                     globalSearchViewModel = globalSearchViewModel
@@ -527,7 +539,7 @@ private fun NoBookmarksFound() {
     }
 }
 
-fun Message.goto(context: Context) {
+fun Message.goto(context: Context, searchQuery: String? = null) {
     context.startActivity(Intent(context, DiscussionActivity::class.java).apply {
         putExtra(
             DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA,
@@ -537,6 +549,9 @@ fun Message.goto(context: Context) {
             DiscussionActivity.MESSAGE_ID_INTENT_EXTRA,
             id
         )
+        searchQuery?.let {
+            putExtra(DiscussionActivity.SEARCH_QUERY_INTENT_EXTRA, it)
+        }
     })
 }
 
@@ -576,7 +591,10 @@ private fun SearchResult(
                             )
                         }
                     } ifNull {
-                        discussionAndMessage?.message?.goto(context)
+                        discussionAndMessage?.message?.goto(
+                            context,
+                            globalSearchViewModel.filter
+                        )
                     }
                 }
             },

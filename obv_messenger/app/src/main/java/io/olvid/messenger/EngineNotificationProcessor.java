@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -25,9 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 
-import io.olvid.engine.Logger;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.engine.engine.types.EngineNotificationListener;
@@ -620,6 +618,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         false,
                         false,
                         0,
+                        false,
                         true,
                         -1,
                         Discussion.STATUS_PRE_DISCUSSION
@@ -651,6 +650,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         false,
                         false,
                         0,
+                        false,
                         true,
                         -1,
                         Discussion.STATUS_PRE_DISCUSSION
@@ -698,6 +698,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         false,
                         false,
                         0,
+                        false,
                         true,
                         -1,
                         Discussion.STATUS_PRE_DISCUSSION

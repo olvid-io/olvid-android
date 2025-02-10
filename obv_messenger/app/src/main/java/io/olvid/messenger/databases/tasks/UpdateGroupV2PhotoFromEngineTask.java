@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -31,6 +31,7 @@ import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -64,7 +65,8 @@ public class UpdateGroupV2PhotoFromEngineTask implements Runnable {
                 if (discussion != null) {
                     // group indicates there is nothing new, still, after the photo download we realize that he should be notified --> notify him
                     Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, discussion.bytesOwnedIdentity);
-                    db.messageDao().insert(newDetailsMessage);
+                    newDetailsMessage.id = db.messageDao().insert(newDetailsMessage);
+                    UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
                     if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }
@@ -106,7 +108,7 @@ public class UpdateGroupV2PhotoFromEngineTask implements Runnable {
                         if (Objects.equals(detailsAndPhotos.photoUrl, detailsAndPhotos.publishedPhotoUrl)) {
                             // same photo --> trust
                             return true;
-                        } else if (detailsAndPhotos.publishedPhotoUrl != null && detailsAndPhotos.publishedPhotoUrl.length() > 0){
+                        } else if (detailsAndPhotos.publishedPhotoUrl != null && !detailsAndPhotos.publishedPhotoUrl.isEmpty()){
                             // both photoUrl and publishedPhotoUrl are non null but have different values --> compare the file contents
                             File trustedPhotoFile = new File(App.absolutePathFromRelative(detailsAndPhotos.photoUrl));
                             File publishedPhotoFile = new File(App.absolutePathFromRelative(detailsAndPhotos.publishedPhotoUrl));

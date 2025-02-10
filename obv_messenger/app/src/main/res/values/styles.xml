@@ -63,6 +63,12 @@
         <item name="android:windowBackground">@color/almostWhite</item>
     </style>
 
+    <style name="AppTheme.DialogFullScreen">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
     <!-- Camera activity + Select Details Photo Activity-->
     <style name="AppTheme.NoActionBar.FullScreen.Black">
         <item name="android:windowBackground">@color/black</item>

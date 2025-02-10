@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -47,10 +47,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.appcompat.widget.Toolbar
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarHost
@@ -58,13 +60,14 @@ import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.SnackbarResult.ActionPerformed
 import androidx.compose.material.SnackbarResult.Dismissed
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.Constraints
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -74,7 +77,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updateMargins
-import androidx.core.view.updateMarginsRelative
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -135,8 +137,10 @@ import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.NO
 import io.olvid.messenger.troubleshooting.TroubleshootingActivity
 import io.olvid.messenger.troubleshooting.TroubleshootingDataStore
 import io.olvid.messenger.troubleshooting.shouldShowTroubleshootingSnackbar
+import io.olvid.messenger.webrtc.CallNotificationManager
+import io.olvid.messenger.webrtc.components.CallNotification
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.Arrays
 
 
 class MainActivity : LockableActivity(), OnClickListener {
@@ -190,8 +194,10 @@ class MainActivity : LockableActivity(), OnClickListener {
 
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+            false
 
         setContentView(R.layout.activity_main)
         root = findViewById(R.id.root_coordinator)
@@ -202,20 +208,29 @@ class MainActivity : LockableActivity(), OnClickListener {
         toolbar?.let {
             val density = it.resources.displayMetrics.density
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
                 view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     updateMargins(top = insets.top)
                 }
                 root?.let { rootLayout ->
-                    rootLayout.updatePadding(rootLayout.paddingLeft, rootLayout.paddingTop, rootLayout.paddingRight, insets.bottom)
+                    rootLayout.updatePadding(
+                        rootLayout.paddingLeft,
+                        rootLayout.paddingTop,
+                        rootLayout.paddingRight,
+                        insets.bottom
+                    )
                 }
-                toolbar.updatePadding(left = insets.left + (16 * density).toInt(), right = insets.right + (16 * density).toInt())
+                toolbar.updatePadding(
+                    left = insets.left + (16 * density).toInt(),
+                    right = insets.right
+                )
                 WindowInsetsCompat.CONSUMED
             }
         }
 
-        val snackBarContainer = findViewById<ComposeView>(R.id.snackbar_container)
-        snackBarContainer.setContent {
+        val composeOverlay = findViewById<ComposeView>(R.id.compose_overlay)
+        composeOverlay?.setContent {
             val snackbarState = remember {
                 SnackbarHostState()
             }
@@ -241,17 +256,43 @@ class MainActivity : LockableActivity(), OnClickListener {
                 }
             }
             AppCompatTheme {
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .navigationBarsPadding()
+                        .systemBarsPadding(),
+                    verticalArrangement = Arrangement.Bottom,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     SnackbarHost(
                         hostState = snackbarState, modifier = Modifier
                             .widthIn(max = 400.dp)
-                            .align(Alignment.BottomCenter)
-                            .padding(vertical = 80.dp)
+                            .padding(bottom = 32.dp)
                     )
+
+                    var cachedCallData by remember { mutableStateOf(CallNotificationManager.currentCallData) }
+                    LaunchedEffect(CallNotificationManager.currentCallData) {
+                        if (CallNotificationManager.currentCallData != null) {
+                            cachedCallData = CallNotificationManager.currentCallData
+                        } else {
+                            delay(500)
+                            cachedCallData = null
+                        }
+                    }
+                    AnimatedVisibility(
+                        // visibility is the && otherwise when currentCallData becomes non-null,
+                        // cachedCallData is still null and the animation applies to a empty CallNotification
+                        visible = cachedCallData != null && CallNotificationManager.currentCallData != null
+                    ) {
+                        cachedCallData?.let {
+                            CallNotification(
+                                modifier = Modifier
+                                    .padding(
+                                        top = 8.dp,
+                                        bottom = 48.dp
+                                    ),
+                                callData = it)
+                        }
+                    }
                 }
             }
         }
@@ -460,14 +501,18 @@ class MainActivity : LockableActivity(), OnClickListener {
         } else {
             intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA)
         }
-        if (bytesOwnedIdentityToSelect != null && !bytesOwnedIdentityToSelect.contentEquals(AppSingleton.getBytesCurrentIdentity())) {
+        if (bytesOwnedIdentityToSelect != null && !bytesOwnedIdentityToSelect.contentEquals(
+                AppSingleton.getBytesCurrentIdentity()
+            )
+        ) {
             // if a profile switch is required, execute only once the identity is switched
             intent.removeExtra(HEX_STRING_BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA)
             intent.removeExtra(BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA)
 
             // check if identity is hidden before selecting it
             App.runThread {
-                AppDatabase.getInstance().ownedIdentityDao()[bytesOwnedIdentityToSelect]?.let { ownedIdentity ->
+                AppDatabase.getInstance()
+                    .ownedIdentityDao()[bytesOwnedIdentityToSelect]?.let { ownedIdentity ->
                     if (ownedIdentity.isHidden) {
                         runOnUiThread {
                             object : OpenHiddenProfileDialog(this) {

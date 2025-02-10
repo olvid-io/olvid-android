@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -448,7 +448,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                             App.openOwnedIdentityGalleryActivity(activity, AppSingleton.getBytesCurrentIdentity(), sortOrder, viewModel.currentSortOrder.ascending, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
                         }
                     } else {
-                        App.openFyleInExternalViewer(activity, fyleAndOrigin.fyleAndStatus, null);
+                        App.openFyleViewer(activity, fyleAndOrigin.fyleAndStatus, null);
                     }
                 }
             }

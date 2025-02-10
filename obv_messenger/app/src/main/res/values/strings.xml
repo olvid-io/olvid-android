@@ -199,6 +199,8 @@
     <string name="menu_action_bookmark">Bookmark</string>
     <string name="menu_action_unbookmark">Unbookmark</string>
     <string name="menu_action_bookmarks">Bookmarks</string>
+    <string name="menu_action_archive">Archive</string>
+    <string name="menu_action_unarchive">Unarchive</string>
     <string name="menu_check_update">Check Google Play for update</string>
     <string name="message_discussion_locked">This discussion is locked</string>
     <string name="message_discussion_readonly">This discussion is read-only</string>
@@ -326,11 +328,13 @@
     <string name="label_no_longer_available">No longer available</string>
     <string name="activity_title_message_details">Message Details</string>
     <string name="activity_title_bookmarks">Bookmarked messages</string>
+    <string name="activity_title_archived_discussions">Archived discussions</string>
     <string name="text_processing">Processing</string>
     <string name="text_sent">Sent</string>
     <string name="text_delivered">Delivered</string>
     <string name="text_read">Read</string>
-    <string name="dialog_message_recipient_details">Uploaded: %1$s\nDelivered: %2$s\nRead: %3$s</string>
+    <string name="dialog_message_recipient_details_other_device">**Delivered:** %1$s\n**Read:** %2$s</string>
+    <string name="dialog_message_recipient_details">**Uploaded:** %1$s\n**Delivered:** %2$s\n**Read:** %3$s</string>
     <string name="text_null_timestamp">-</string>
     <string name="text_no_recipient_details">No message details available</string>
     <string name="activity_title_discussion_settings">Discussion Settings</string>
@@ -1583,6 +1587,8 @@
     <string name="text_setting_lock_biometry">\u2023 Unlock with biometry:\u0020</string>
     <string name="text_setting_lock_notification">\u2023 Permanent lock screen notification:\u0020</string>
     <string name="text_setting_lock_wipe_on_fail">\u2023 Erase sensitive messages after 3 bad PINs:\u0020</string>
+    <string name="text_setting_auto_download_archived">\u2023 Auto-download archived discussion attachments:\u0020</string>
+    <string name="text_setting_unarchive_on_notification">\u2023 Unarchive discussion on notification:\u0020</string>
     <string name="text_setting_link_preview_inbound">\u2023 Link preview received:\u0020</string>
     <string name="text_setting_link_preview_outbound">\u2023 Link preview sent:\u0020</string>
     <string name="text_setting_send_read_receipt">\u2023 Send read receipts:\u0020</string>
@@ -1936,6 +1942,7 @@
     <string name="at_least_xxx">At least %1$d</string>
     <string name="label_discussion_list_pin_divider">Pinned discussions</string>
     <string name="explanation_empty_bookmarks">No bookmarked message</string>
+    <string name="explanation_empty_archived_discussion">No archived discussion</string>
     <string name="button_label_delete_from_my_devices">Delete from my devices</string>
     <string name="label_delete_from_this_device">Delete from this device only</string>
     <string name="label_delete_from_all_my_devices">Delete from all my devices</string>
@@ -1988,8 +1995,31 @@
     <string name="troubleshooting_storage_db_sync_title">Database consistency check</string>
     <string name="troubleshooting_storage_db_sync_description">After an application crash, internal databases might have consistency issues. Run this check to ensure everything is fine 😁</string>
     <string name="button_label_check_now">Check now</string>
+    <string name="snackbar_action_label_undo">Undo</string>
+    <string name="dialog_unarchive_setting_title">Unarchive setting</string>
+    <string name="dialog_unarchive_setting_message">When do you want your discussions to be unarchived?</string>
+    <string name="dialog_unarchive_setting_button_notified">On message notification</string>
+    <string name="dialog_unarchive_setting_button_never">Never</string>
+    <string name="dialog_unarchive_setting_explain">You can modify the notifications behavior in each discussion settings</string>
+    <string name="pref_archived_attachments_title">Automatically download archived discussion attachments</string>
+    <string name="pref_archived_attachments_summary">When this is on, archived discussions attachments will be automatically downloaded according to above setting.</string>
+    <string name="pref_unarchive_on_notification_title">Unarchive discussions on notification</string>
+    <string name="pref_unarchive_on_notification_summary">When this is on, archived discussions are automatically unarchived when a new message notification is received.</string>
+    <string name="call_notification_ongoing_call">Ongoing call</string>
+    <string name="call_notification_incoming_call">Incoming call</string>
+    <string name="menu_action_copy_text_from_image">Copy this word</string>
+    <string name="menu_action_copy_text_block_from_image">Copy whole block</string>
 
 
+
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Discussion archived</item>
+        <item quantity="other">%1$d discussions archived</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Discussion unarchived</item>
+        <item quantity="other">%1$d discussions unarchived</item>
+    </plurals>
     <plurals name="dialog_title_delete_discussions">
         <item quantity="one">Delete selected discussion?</item>
         <item quantity="other">Delete selected discussions?</item>

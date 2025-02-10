@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -442,21 +442,24 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_GROUP_PUBLISHED_DETAILS_BYTES_OWNED_IDENTITY_KEY);
                 byte[] bytesGroupOwnerAndUid = (byte[]) userInfo.get(EngineNotifications.NEW_GROUP_PUBLISHED_DETAILS_BYTES_GROUP_OWNER_AND_UID_KEY);
 
-                Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUid);
-                if (group != null && group.bytesGroupOwnerIdentity != null) {
-                    try {
-                        group.newPublishedDetails = Contact.PUBLISHED_DETAILS_NEW_UNSEEN;
-                        db.groupDao().updatePublishedDetailsStatus(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.newPublishedDetails);
-                        Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupOwnerAndUid);
-                        if (discussion != null) {
-                            Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, group.bytesGroupOwnerIdentity);
-                            db.messageDao().insert(newDetailsMessage);
-                            if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
-                                db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                if (bytesOwnedIdentity != null && bytesGroupOwnerAndUid != null) {
+                    Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUid);
+                    if (group != null && group.bytesGroupOwnerIdentity != null) {
+                        try {
+                            group.newPublishedDetails = Contact.PUBLISHED_DETAILS_NEW_UNSEEN;
+                            db.groupDao().updatePublishedDetailsStatus(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.newPublishedDetails);
+                            Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupOwnerAndUid);
+                            if (discussion != null) {
+                                Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, group.bytesGroupOwnerIdentity);
+                                newDetailsMessage.id = db.messageDao().insert(newDetailsMessage);
+                                UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
+                                if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
+                                    db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                                }
                             }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
                 break;

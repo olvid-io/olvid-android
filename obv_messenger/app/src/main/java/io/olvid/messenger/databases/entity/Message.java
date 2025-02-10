@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -51,6 +51,7 @@ import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.databases.AppDatabase;
@@ -87,6 +88,7 @@ import io.olvid.messenger.services.UnifiedForegroundService;
         indices = {
                 @Index(Message.DISCUSSION_ID),
                 @Index(Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER),
+                @Index(Message.LOCATION_TYPE),
                 @Index(value = {Message.MESSAGE_TYPE, Message.STATUS}),
                 @Index(value = {Message.DISCUSSION_ID, Message.SORT_INDEX}),
                 @Index(value = {Message.DISCUSSION_ID, Message.STATUS, Message.SORT_INDEX}),
@@ -1823,8 +1825,8 @@ public class Message {
         if (isCurrentSharingOutboundLocationMessage()) {
             UnifiedForegroundService.LocationSharingSubService.stopSharingInDiscussion(discussionId, false);
         }
-
         db.messageDao().delete(this);
+        UnreadCountsSingleton.INSTANCE.messageDeleted(this);
     }
 
     // this never deletes the message, even if it has an empty body
@@ -1884,12 +1886,13 @@ public class Message {
             wipeStatus = WIPE_STATUS_WIPED;
             reactions = null;
             imageResolutions = null;
-            limitedVisibility = false;
             jsonMentions = null;
+            limitedVisibility = false;
             db.messageDao().updateWipe(id, WIPE_STATUS_WIPED);
             db.reactionDao().deleteAllForMessage(id);
             db.messageMetadataDao().insert(new MessageMetadata(id, MessageMetadata.KIND_WIPED, System.currentTimeMillis()));
             db.messageExpirationDao().deleteWipeExpiration(id);
+            UnreadCountsSingleton.INSTANCE.removeLocationSharingMessage(discussionId, id);
         }
     }
 
@@ -1913,6 +1916,7 @@ public class Message {
         }
         db.messageMetadataDao().insert(new MessageMetadata(id, MessageMetadata.KIND_REMOTE_DELETED, serverTimestamp, bytesRemoteIdentity));
         db.messageExpirationDao().deleteWipeExpiration(id);
+        UnreadCountsSingleton.INSTANCE.removeLocationSharingMessage(discussionId, id);
     }
 
 

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -407,6 +407,10 @@ public class SendLocationMapDialogFragment extends AbstractLocationDialogFragmen
             return;
         }
         Location location = mapView.getCurrentCameraCenterLiveData().getValue().toLocation();
+        if (mapView.currentlyCenteredOnGpsPosition.getValue() != null && mapView.currentlyCenteredOnGpsPosition.getValue()) {
+            location.setAccuracy(mapView.getLatestLocationAccuracy());
+            location.setAltitude(mapView.getLatestLocationAltitude());
+        }
 
         // show spinner and hide center pointer
         loadingSpinnerLayout.setVisibility(View.VISIBLE);

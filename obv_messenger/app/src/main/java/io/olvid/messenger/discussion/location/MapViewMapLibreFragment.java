@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -720,6 +720,16 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             lastLocationUpdate = System.currentTimeMillis();
             centerOnLocation(location, true);
         }
+    }
+
+    @Override
+    Double getLatestLocationAltitude() {
+        return lastLocation == null ? null : lastLocation.getAltitude();
+    }
+
+    @Override
+    Float getLatestLocationAccuracy() {
+        return lastLocation == null ? null : lastLocation.getAccuracy();
     }
 
     private void centerOnSymbol(Symbol symbol, boolean animate) {

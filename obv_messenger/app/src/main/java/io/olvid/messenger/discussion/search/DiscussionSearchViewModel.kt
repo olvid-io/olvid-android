@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -31,13 +31,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils2.Companion.computeHighlightRanges
-import io.olvid.messenger.customClasses.TextBlock
 
 class DiscussionSearchViewModel : ViewModel() {
     var filterRegexes by mutableStateOf<List<Regex>?>(null)
-    var matches by mutableStateOf<List<Long>>(emptyList())
-    val textBlocksCache = mutableMapOf<Pair<Long, Long>, List<TextBlock>>()
-
+    var matchedMessageAndFyleIds by mutableStateOf<List<Pair<Long, Long?>>>(emptyList()) // messageId, fyleId
 
     fun highlightColored(
         context: Context,
