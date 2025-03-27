@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -128,7 +128,7 @@ class InvitationListViewModel : ViewModel() {
                             )
                         identityDetails.formatDisplayName(
                             JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                            SettingsActivity.getUppercaseLastName()
+                            SettingsActivity.uppercaseLastName
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -152,7 +152,7 @@ class InvitationListViewModel : ViewModel() {
                         )
                     identityDetails.formatDisplayName(
                         JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                        SettingsActivity.getUppercaseLastName()
+                        SettingsActivity.uppercaseLastName
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -181,8 +181,8 @@ class InvitationListViewModel : ViewModel() {
                     AppDatabase.getInstance().contactDao()[bytesOwnedIdentity, contactIdentity.bytesIdentity]?.getCustomDisplayName()?.let {
                         ContactAnnotation(it, "${String(android.util.Base64.encode(bytesOwnedIdentity, android.util.Base64.NO_PADDING))}|${String(android.util.Base64.encode(contactIdentity.bytesIdentity, android.util.Base64.NO_PADDING))}")
                     } ?: ContactAnnotation(contactIdentity.identityDetails.formatDisplayName(
-                        SettingsActivity.getContactDisplayNameFormat(),
-                        SettingsActivity.getUppercaseLastName())
+                        SettingsActivity.contactDisplayNameFormat,
+                        SettingsActivity.uppercaseLastName)
                     )
                 }.sortedWith(Comparator { cs1, cs2 ->
                     val minLen = min(cs1.name.length, cs2.name.length)
@@ -235,8 +235,8 @@ class InvitationListViewModel : ViewModel() {
                                 )
                             ContactAnnotation(
                                 identityDetails.formatDisplayName(
-                                    SettingsActivity.getContactDisplayNameFormat(),
-                                    SettingsActivity.getUppercaseLastName()
+                                    SettingsActivity.contactDisplayNameFormat,
+                                    SettingsActivity.uppercaseLastName
                                 )
                             )
                         } catch (e: JsonProcessingException) {
@@ -303,7 +303,7 @@ class InvitationListViewModel : ViewModel() {
                     R.string.invitation_status_description_accept_invite,
                     identityDetails.formatDisplayName(
                         JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                        SettingsActivity.getUppercaseLastName()
+                        SettingsActivity.uppercaseLastName
                     )
                 )
             } catch (e: java.lang.Exception) {
@@ -321,7 +321,7 @@ class InvitationListViewModel : ViewModel() {
                         R.string.invitation_status_description_enter_their_sas,
                         identityDetails.formatDisplayName(
                             JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                            SettingsActivity.getUppercaseLastName()
+                            SettingsActivity.uppercaseLastName
                         )
                     )
                 } catch (e: java.lang.Exception) {
@@ -340,7 +340,7 @@ class InvitationListViewModel : ViewModel() {
                         R.string.invitation_status_description_give_him_sas,
                         identityDetails.formatDisplayName(
                             JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                            SettingsActivity.getUppercaseLastName()
+                            SettingsActivity.uppercaseLastName
                         )
                     )
                 } catch (e: java.lang.Exception) {
@@ -359,7 +359,7 @@ class InvitationListViewModel : ViewModel() {
                         R.string.invitation_status_description_invite_accepted,
                         identityDetails.formatDisplayName(
                             JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                            SettingsActivity.getUppercaseLastName()
+                            SettingsActivity.uppercaseLastName
                         )
                     )
                 } catch (e: java.lang.Exception) {
@@ -384,7 +384,7 @@ class InvitationListViewModel : ViewModel() {
                             mediator.getCustomDisplayName(),
                             identityDetails.formatDisplayName(
                                 JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName()
+                                SettingsActivity.uppercaseLastName
                             )
                         )
                     } else {
@@ -392,7 +392,7 @@ class InvitationListViewModel : ViewModel() {
                             R.string.invitation_status_description_accept_mediator_invite_deleted,
                             identityDetails.formatDisplayName(
                                 JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName()
+                                SettingsActivity.uppercaseLastName
                             )
                         )
                     }
@@ -419,7 +419,7 @@ class InvitationListViewModel : ViewModel() {
                             R.string.invitation_status_description_mediator_invite_accepted,
                             identityDetails.formatDisplayName(
                                 JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName()
+                                SettingsActivity.uppercaseLastName
                             ),
                             mediator.getCustomDisplayName()
                         )
@@ -428,7 +428,7 @@ class InvitationListViewModel : ViewModel() {
                             R.string.invitation_status_description_mediator_invite_accepted_deleted,
                             identityDetails.formatDisplayName(
                                 JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName()
+                                SettingsActivity.uppercaseLastName
                             )
                         )
                     }
@@ -702,7 +702,7 @@ fun Invitation.getAnnotatedTitle(context: Context): AnnotatedString {
                         JsonIdentityDetails::class.java
                     ).formatDisplayName(
                         JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                        SettingsActivity.getUppercaseLastName()
+                        SettingsActivity.uppercaseLastName
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -719,7 +719,7 @@ fun Invitation.getAnnotatedTitle(context: Context): AnnotatedString {
                         JsonIdentityDetails::class.java
                     ).formatDisplayName(
                         JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                        SettingsActivity.getUppercaseLastName()
+                        SettingsActivity.uppercaseLastName
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -756,8 +756,8 @@ fun ObvGroupV2.getReadableMembers(): String? {
                         it.serializedDetails,
                         JsonIdentityDetails::class.java
                     ).formatDisplayName(
-                        SettingsActivity.getContactDisplayNameFormat(),
-                        SettingsActivity.getUppercaseLastName()
+                        SettingsActivity.contactDisplayNameFormat,
+                        SettingsActivity.uppercaseLastName
                     )
                 }.orEmpty()).toTypedArray()
         )

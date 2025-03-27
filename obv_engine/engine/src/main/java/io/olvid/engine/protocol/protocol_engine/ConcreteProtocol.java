@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -258,7 +258,7 @@ public abstract class ConcreteProtocol {
             Constructor<?> constructor = messageClass.getConstructor(ReceivedMessage.class);
             return (ConcreteProtocolMessage) constructor.newInstance(receivedMessage);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -281,7 +281,7 @@ public abstract class ConcreteProtocol {
             }
             return (ProtocolStep) constructor.newInstance(currentState, concreteProtocolMessage, this);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

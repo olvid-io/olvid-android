@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -77,7 +77,7 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_CREATED_ON_OTHER_DEVICE, createdOnOtherDevice);
                     engine.postEngineNotification(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED, engineInfo);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -102,7 +102,7 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_CREATED_ON_OTHER_DEVICE, false);
                     engine.postEngineNotification(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED, engineInfo);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }

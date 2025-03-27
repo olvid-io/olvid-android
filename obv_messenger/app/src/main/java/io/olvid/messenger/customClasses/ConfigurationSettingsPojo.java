@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -62,6 +62,8 @@ public class ConfigurationSettingsPojo {
     public Integer lw; // lock_wipe_on_fail;
 
     public Long ad; // auto_download_size;
+    public Integer aa; // auto_download_archived;
+    public Integer un; // unarchive_on_notification;
     public Integer rr; // send_read_receipt;
     public Integer lpi; // link_preview_inbound;
     public Integer lpo; // link_preview_outbound;
@@ -128,6 +130,8 @@ public class ConfigurationSettingsPojo {
         if (lw != null) { pojo.lock_wipe_on_fail = lw != 0; }
 
         if (ad != null) { pojo.auto_download_size = ad; }
+        if (aa != null) { pojo.auto_download_archived = aa != 0; }
+        if (un != null) { pojo.unarchive_on_notification = un != 0; }
         if (lpi != null) { pojo.link_preview_inbound = lpi != 0; }
         if (lpo != null) { pojo.link_preview_outbound = lpo != 0; }
         if (rr != null) { pojo.send_read_receipt = rr != 0; }
@@ -279,6 +283,8 @@ public class ConfigurationSettingsPojo {
             }
             sb.append("\n");
         }
+        if (aa != null) { sb.append(highlight(c, R.string.text_setting_auto_download_archived)).append(bool(c, aa != 0)).append("\n"); }
+        if (un != null) { sb.append(highlight(c, R.string.text_setting_unarchive_on_notification)).append(bool(c, un != 0)).append("\n"); }
 
         if (lpi != null) { sb.append(highlight(c, R.string.text_setting_link_preview_inbound)).append(bool(c, lpi != 0)).append("\n"); }
         if (lpo != null) { sb.append(highlight(c, R.string.text_setting_link_preview_outbound)).append(bool(c, lpo != 0)).append("\n"); }

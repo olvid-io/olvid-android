@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -48,11 +48,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,6 +69,7 @@ import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.designsystem.theme.OlvidTypography
@@ -93,8 +96,9 @@ fun NavGraphBuilder.sourceConfirmation(
         popExitTransition = { slideOutOfContainer(SlideDirection.End) },
     ) {
         var clicked by remember { mutableStateOf(false) }
-        val dbDevices = AppDatabase.getInstance().ownedDeviceDao()
-            .getAllSorted(AppSingleton.getBytesCurrentIdentity()).observeAsState()
+        val dbDevices = AppSingleton.getBytesCurrentIdentity()?.let {
+            AppDatabase.getInstance().ownedDeviceDao().getAllSorted(it)
+        }?.observeAsState()
 
         OnboardingScreen(
             step = OnboardingStep(
@@ -155,12 +159,16 @@ fun NavGraphBuilder.sourceConfirmation(
                         val line2: String?
                         if (ownedIdentity != null) {
                             val identityDetails = ownedIdentity.getIdentityDetails()
-                            if (ownedIdentity.customDisplayName != null) {
-                                line1 = ownedIdentity.customDisplayName
-                                line2 = identityDetails?.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY, SettingsActivity.getUppercaseLastName()) ?: ownedIdentity.displayName
+                            val customDisplayName = ownedIdentity.customDisplayName
+                            if (customDisplayName == null) {
+                                line1 = identityDetails?.formatFirstAndLastName(SettingsActivity.contactDisplayNameFormat, SettingsActivity.uppercaseLastName) ?: ownedIdentity.displayName
+                                line2 = identityDetails?.formatPositionAndCompany(SettingsActivity.contactDisplayNameFormat)
                             } else {
-                                line1 = identityDetails?.formatFirstAndLastName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()) ?: ownedIdentity.displayName
-                                line2 = identityDetails?.formatPositionAndCompany(SettingsActivity.getContactDisplayNameFormat())
+                                line1 = customDisplayName
+                                line2 = identityDetails?.formatDisplayName(
+                                    JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
+                                    SettingsActivity.uppercaseLastName
+                                ) ?: ownedIdentity.displayName
                             }
                         } else {
                             line1 = ""
@@ -280,7 +288,7 @@ fun NavGraphBuilder.sourceConfirmation(
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                     val deviceStatus =
-                                        if (device.uid.contentEquals(dbDevices.value?.first { it.currentDevice }?.bytesDeviceUid))
+                                        if (device.uid.contentEquals(dbDevices?.value?.first { it.currentDevice }?.bytesDeviceUid))
                                             stringResource(id = R.string.text_this_device)
                                         else device.lastRegistrationTimestamp?.let {
                                             stringResource(
@@ -334,6 +342,30 @@ fun NavGraphBuilder.sourceConfirmation(
                                 )
                             )
                         }
+                    }
+                }
+
+                if (onboardingFlowViewModel.transferRestricted) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(top = 16.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Image(
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .size(20.dp),
+                            painter = painterResource(id = R.drawable.ic_question_mark_white),
+                            colorFilter = ColorFilter.tint(colorResource(R.color.greyTint)),
+                            contentDescription = ""
+                        )
+                        Text(
+                            modifier = Modifier.weight(1f, true),
+                            style = OlvidTypography.body2.copy(
+                                color = colorResource(R.color.greyTint)
+                            ),
+                            text = AnnotatedString(stringResource(R.string.explanation_transfer_restriction_authentication_needed)).formatMarkdown()
+                        )
                     }
                 }
             }

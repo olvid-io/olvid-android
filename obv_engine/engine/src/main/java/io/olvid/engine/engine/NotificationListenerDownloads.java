@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -29,13 +29,17 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NotificationListener;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.DecryptedApplicationMessage;
 import io.olvid.engine.datatypes.containers.OwnedIdentitySynchronizationStatus;
+import io.olvid.engine.datatypes.containers.ReceivedAttachment;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.ObvAttachment;
 import io.olvid.engine.engine.types.ObvMessage;
 import io.olvid.engine.engine.types.ObvTurnCredentialsFailedReason;
+import io.olvid.engine.networkfetch.databases.InboxAttachment;
+import io.olvid.engine.networkfetch.databases.InboxMessage;
 import io.olvid.engine.networkfetch.databases.ServerSession;
 import io.olvid.engine.notification.NotificationManager;
 
@@ -90,10 +94,13 @@ public class NotificationListenerDownloads implements NotificationListener {
     public void callback(String notificationName, HashMap<String, Object> userInfo) {
         switch (notificationName) {
             case DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED: {
-                Identity ownedIdentity = (Identity) userInfo.get(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_OWNED_IDENTITY_KEY);
-                UID messageUid = (UID) userInfo.get(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_UID_KEY);
+                DecryptedApplicationMessage decryptedMessage = (DecryptedApplicationMessage) userInfo.get(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_MESSAGE_KEY);
+                ReceivedAttachment[] receivedAttachments = (ReceivedAttachment[]) userInfo.get(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_ATTACHMENTS_KEY);
+                if (decryptedMessage == null || receivedAttachments == null) {
+                    break;
+                }
 
-                ObvMessage message = new ObvMessage(engine.fetchManager, ownedIdentity, messageUid);
+                ObvMessage message = new ObvMessage(decryptedMessage, receivedAttachments);
 
                 HashMap<String, Object> engineInfo = new HashMap<>();
                 engineInfo.put(EngineNotifications.NEW_MESSAGE_RECEIVED_MESSAGE_KEY, message);

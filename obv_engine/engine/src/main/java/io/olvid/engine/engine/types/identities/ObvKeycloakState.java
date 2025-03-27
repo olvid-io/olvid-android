@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -37,17 +37,19 @@ public class ObvKeycloakState {
     public final JsonWebKeySet jwks; // non-null --> only set to null when sending to app and deserialization failed
     public final JsonWebKey signatureKey; // non-null --> only set to null when sending to app and deserialization failed
     public final String serializedAuthState; // device dependant --> do not share with other devices
+    public final boolean transferRestricted;
     public final String ownApiKey; // not included in the serialized version
     public final long latestRevocationListTimestamp; // not included in the serialized version
     public final long latestGroupUpdateTimestamp; // not included in the serialized version
 
-    public ObvKeycloakState(String keycloakServer, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, String serializedAuthState, String ownApiKey, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp) {
+    public ObvKeycloakState(String keycloakServer, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, String serializedAuthState, boolean transferRestricted, String ownApiKey, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp) {
         this.keycloakServer = keycloakServer;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.jwks = jwks;
         this.signatureKey = signatureKey;
         this.serializedAuthState = serializedAuthState;
+        this.transferRestricted = transferRestricted;
         this.ownApiKey = ownApiKey;
         this.latestRevocationListTimestamp = latestRevocationListTimestamp;
         this.latestGroupUpdateTimestamp = latestGroupUpdateTimestamp;
@@ -73,6 +75,9 @@ public class ObvKeycloakState {
         if (serializedAuthState != null) {
             dict.put(new DictionaryKey("sas"), Encoded.of(serializedAuthState));
         }
+        if (transferRestricted) {
+            dict.put(new DictionaryKey("tr"), Encoded.of(transferRestricted));
+        }
         return Encoded.of(dict);
     }
 
@@ -83,6 +88,7 @@ public class ObvKeycloakState {
         JsonWebKeySet jwks;
         JsonWebKey signatureKey;
         final String serializedAuthState;
+        boolean transferRestricted;
 
         HashMap<DictionaryKey, Encoded> dict = encoded.decodeDictionary();
         DictionaryKey key = new DictionaryKey("ks");
@@ -135,7 +141,13 @@ public class ObvKeycloakState {
         } else {
             serializedAuthState = null;
         }
-
-        return new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedAuthState, null, 0, 0);
+        key = new DictionaryKey("tr");
+        encodedValue = dict.get(key);
+        if (encodedValue != null) {
+             transferRestricted = encodedValue.decodeBoolean();
+        } else {
+            transferRestricted = false;
+        }
+        return new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedAuthState, transferRestricted, null, 0, 0);
     }
 }

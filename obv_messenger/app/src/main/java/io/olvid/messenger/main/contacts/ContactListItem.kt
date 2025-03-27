@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -62,6 +62,7 @@ import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.EstablishingChannel
 import io.olvid.messenger.main.InitialView
+import io.olvid.messenger.main.cutoutHorizontalPadding
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -80,7 +81,11 @@ fun ContactListItem(
     useDialogBackgroundColor: Boolean = false,
     additionalHorizontalPadding: Dp = 0.dp,
 ) {
-    Box(modifier = Modifier.background(colorResource(id = if (useDialogBackgroundColor) R.color.dialogBackground else R.color.almostWhite))) {
+    Box(
+        modifier = Modifier
+            .background(colorResource(id = if (useDialogBackgroundColor) R.color.dialogBackground else R.color.almostWhite))
+            .cutoutHorizontalPadding()
+    ) {
 
         // menu
         var menuOpened by remember { mutableStateOf(false) }

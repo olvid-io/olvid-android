@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -25,11 +25,11 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
 
 public class IdentityAndUid {
-    public final Identity ownedIdentity;
+    public final Identity identity;
     public final UID uid;
 
-    public IdentityAndUid(Identity ownedIdentity, UID uid) {
-        this.ownedIdentity = ownedIdentity;
+    public IdentityAndUid(Identity identity, UID uid) {
+        this.identity = identity;
         this.uid = uid;
     }
 
@@ -39,17 +39,17 @@ public class IdentityAndUid {
             return false;
         }
         IdentityAndUid other = (IdentityAndUid) o;
-        return ownedIdentity.equals(other.ownedIdentity) && uid.equals(other.uid);
+        return identity.equals(other.identity) && uid.equals(other.uid);
     }
 
     @Override
     public int hashCode() {
-        return ownedIdentity.hashCode() ^ uid.hashCode();
+        return identity.hashCode() ^ uid.hashCode();
     }
 
     @Override
     public String toString() {
-        return  ownedIdentity + " - " + uid;
+        return  identity + " - " + uid;
     }
 
     public static UID computeUniqueUid(Identity ownedIdentity, UID uid) {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,6 +26,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
@@ -68,7 +69,7 @@ public class ChannelCreationProtocolInstance implements ObvDatabase {
             channelCreationProtocolInstance.insert();
             return channelCreationProtocolInstance;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

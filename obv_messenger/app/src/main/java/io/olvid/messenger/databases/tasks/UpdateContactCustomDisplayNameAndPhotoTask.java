@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -75,9 +75,10 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                 }
             }
 
+            boolean refreshGroupNames = false;
             if (!Objects.equals(contact.personalNote, personalNote)) {
-                contact.personalNote = personalNote;
-                db.contactDao().updatePersonalNote(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.personalNote);
+                contact.setPersonalNote(personalNote);
+                db.contactDao().updatePersonalNote(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.personalNote, contact.fullSearchDisplayName);
 
                 if (!propagated) {
                     try {
@@ -87,6 +88,7 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                         e.printStackTrace();
                     }
                 }
+                refreshGroupNames = true;
             }
 
             if (!Objects.equals(contact.customDisplayName, customDisplayName)) {
@@ -105,7 +107,10 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                         e.printStackTrace();
                     }
                 }
+                refreshGroupNames = true;
+            }
 
+            if (refreshGroupNames) {
                 new UpdateAllGroupMembersNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity).run();
             }
 

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -50,6 +50,9 @@ class UpdateMessageBodyTask(val messageId: Long, val body: String, val mentions:
             return
         }
         db.messageDao().updateBody(message.id, body)
+        if (message.forwarded) {
+            db.messageDao().updateForwarded(message.id, false)
+        }
         db.messageDao().updateMentions(message.id, message.jsonMentions)
         db.messageMetadataDao().insert(
             MessageMetadata(

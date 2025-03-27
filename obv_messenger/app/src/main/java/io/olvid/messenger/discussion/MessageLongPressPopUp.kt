@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -131,18 +131,21 @@ class MessageLongPressPopUp(
     private val parentView: View,
     private val clickX: Int,
     private val clickY: Int,
-    private val messageId: Long
+    private val messageId: Long,
+    private val statusBarTopPadding: Int
 ) {
     private val vibrator: Vibrator? =
         activity.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
     private val metrics: DisplayMetrics = activity.resources.displayMetrics
     private var previousReaction: String? = null
 
-    private var message: Message? = null
-    private var discussion: Discussion? = null
+    private lateinit var message: Message
+    private lateinit var discussion: Discussion
+
+    private var canEdit: Boolean = false
 
     private var wrappedContext: Context? = null
-    private var popupWindow: PopupWindow? = null
+    private lateinit var popupWindow: PopupWindow
     private var reactionsPopUpLinearLayout: LinearLayout? = null
     private var reactionConstraintLayout: ConstraintLayout? = null
     private var reactionFlow: Flow? = null
@@ -160,21 +163,31 @@ class MessageLongPressPopUp(
 
     init {
         App.runThread {
-            this.message = AppDatabase.getInstance().messageDao()[messageId]
-            if (message == null) {
+            AppDatabase.getInstance().messageDao()[messageId]?.let {
+                this.message = it
+            } ?: run {
                 return@runThread
             }
-            this.discussion =
-                AppDatabase.getInstance().discussionDao().getById(message!!.discussionId)
-            if (discussion == null) {
+
+            AppDatabase.getInstance().discussionDao().getById(message.discussionId)?.let {
+                this.discussion = it
+            } ?: run {
                 return@runThread
+            }
+
+            canEdit = discussion.isNormal
+            if (discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                canEdit = discussion.isNormal &&
+                    AppDatabase.getInstance()
+                    .group2Dao()[discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier]
+                    ?.ownPermissionEditOrRemoteDeleteOwnMessages == true
             }
 
             val reaction = AppDatabase.getInstance().reactionDao().getMyReactionForMessage(
                 messageId
             )
             this.previousReaction = reaction?.emoji
-            activity.runOnUiThread { this.buildPopupWindow() }
+            activity.runOnUiThread { this.buildPopupWindow(statusBarTopPadding) }
         }
     }
 
@@ -322,10 +335,10 @@ class MessageLongPressPopUp(
         when (actionType) {
             REPLY -> {
                 discussionDelegate.replyToMessage(
-                    message!!.discussionId,
+                    message.discussionId,
                     messageId
                 )
-                popupWindow?.dismiss()
+                popupWindow.dismiss()
             }
 
             SHARE -> {
@@ -335,21 +348,21 @@ class MessageLongPressPopUp(
                         messageId
                     )
                 )
-                popupWindow?.dismiss()
+                popupWindow.dismiss()
             }
 
             FORWARD -> {
                 discussionDelegate.initiateMessageForward(
                     messageId
-                ) { popupWindow?.dismiss() }
+                ) { popupWindow.dismiss() }
             }
 
             COPY -> {
-                if (message!!.hasAttachments() && message!!.contentBody.isNullOrEmpty()
+                if (message.hasAttachments() && message.contentBody.isNullOrEmpty()
                         .not()
                 ) {
                     copyMenuExpanded = true
-                } else if (message!!.hasAttachments()) {
+                } else if (message.hasAttachments()) {
                     App.runThread(
                         CopySelectedMessageTask(
                             activity,
@@ -357,7 +370,7 @@ class MessageLongPressPopUp(
                             true
                         )
                     )
-                    popupWindow?.dismiss()
+                    popupWindow.dismiss()
                 } else {
                     App.runThread(
                         CopySelectedMessageTask(
@@ -366,20 +379,20 @@ class MessageLongPressPopUp(
                             false
                         )
                     )
-                    popupWindow?.dismiss()
+                    popupWindow.dismiss()
                 }
             }
 
             SELECT -> {
                 discussionDelegate.selectMessage(
                     messageId,
-                    message?.isForwardable == true,
-                    if (message?.isBookmarkableAndDetailable == true)
-                        message?.bookmarked == true
+                    message.isForwardable,
+                    if (message.isBookmarkableAndDetailable)
+                        message.bookmarked
                     else
                         null
                 )
-                popupWindow?.dismiss()
+                popupWindow.dismiss()
             }
 
             DETAILS -> {
@@ -387,35 +400,31 @@ class MessageLongPressPopUp(
                 App.openMessageDetails(
                     activity,
                     messageId,
-                    message?.isInbound == true,
-                    message?.status == Message.STATUS_SENT_FROM_ANOTHER_DEVICE
+                    message.isInbound,
+                    message.status == Message.STATUS_SENT_FROM_ANOTHER_DEVICE
                 )
-                popupWindow?.dismiss()
+                popupWindow.dismiss()
             }
 
             EDIT -> {
-                message?.let { discussionDelegate.editMessage(it) }
-                popupWindow!!.dismiss()
+                discussionDelegate.editMessage(message)
+                popupWindow.dismiss()
             }
 
             BOOKMARK -> {
                 App.runThread {
-                    message?.let { message ->
-                        discussion?.let { discussion ->
-                            AppDatabase.getInstance().messageDao()
-                                .updateBookmarked(
-                                    messageId,
-                                    !message.bookmarked
-                                )
-                            PropagateBookmarkedMessageChangeTask(
-                                discussion.bytesOwnedIdentity,
-                                message,
-                                !message.bookmarked
-                            ).run()
-                        }
-                    }
+                    AppDatabase.getInstance().messageDao()
+                        .updateBookmarked(
+                            messageId,
+                            !message.bookmarked
+                        )
+                    PropagateBookmarkedMessageChangeTask(
+                        discussion.bytesOwnedIdentity,
+                        message,
+                        !message.bookmarked
+                    ).run()
                 }
-                popupWindow?.dismiss()
+                popupWindow.dismiss()
             }
 
             DELETE -> {
@@ -425,19 +434,19 @@ class MessageLongPressPopUp(
                         Message.TYPE_INBOUND_MESSAGE,
                         Message.TYPE_OUTBOUND_MESSAGE,
                         Message.TYPE_INBOUND_EPHEMERAL_MESSAGE
-                    ).contains(message?.messageType) && (message?.wipeStatus == Message.WIPE_STATUS_NONE)
+                    ).contains(message.messageType) && (message.wipeStatus == Message.WIPE_STATUS_NONE)
                     if (remoteDeletingMakesSense) {
-                        when (discussion?.discussionType) {
+                        when (discussion.discussionType) {
                             Discussion.TYPE_GROUP_V2 -> {
                                 val group2 = AppDatabase.getInstance()
-                                    .group2Dao()[discussion!!.bytesOwnedIdentity, discussion!!.bytesDiscussionIdentifier]
+                                    .group2Dao()[discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier]
                                 offerToRemoteDeleteEverywhere = if (group2 != null) {
-                                    (((group2.ownPermissionEditOrRemoteDeleteOwnMessages && (message?.messageType == Message.TYPE_OUTBOUND_MESSAGE))
-                                            || (group2.ownPermissionRemoteDeleteAnything && ((message?.messageType == Message.TYPE_INBOUND_MESSAGE) || (message?.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE))))
+                                    (((group2.ownPermissionEditOrRemoteDeleteOwnMessages && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE))
+                                            || (group2.ownPermissionRemoteDeleteAnything && ((message.messageType == Message.TYPE_INBOUND_MESSAGE) || (message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE))))
                                             && AppDatabase.getInstance().group2MemberDao()
                                         .groupHasMembers(
-                                            discussion!!.bytesOwnedIdentity,
-                                            discussion!!.bytesDiscussionIdentifier
+                                            discussion.bytesOwnedIdentity,
+                                            discussion.bytesDiscussionIdentifier
                                         ))
                                 } else {
                                     false
@@ -446,17 +455,17 @@ class MessageLongPressPopUp(
 
                             Discussion.TYPE_GROUP -> {
                                 offerToRemoteDeleteEverywhere =
-                                    (discussion!!.isNormal && (message?.messageType == Message.TYPE_OUTBOUND_MESSAGE))
+                                    (discussion.isNormal && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE))
                                             && AppDatabase.getInstance().contactGroupJoinDao()
                                         .groupHasMembers(
-                                            discussion!!.bytesOwnedIdentity,
-                                            discussion!!.bytesDiscussionIdentifier
+                                            discussion.bytesOwnedIdentity,
+                                            discussion.bytesDiscussionIdentifier
                                         )
                             }
 
                             else -> {
                                 offerToRemoteDeleteEverywhere =
-                                    (discussion!!.isNormal && (message?.messageType == Message.TYPE_OUTBOUND_MESSAGE))
+                                    (discussion.isNormal && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE))
                             }
                         }
                     } else {
@@ -475,60 +484,49 @@ class MessageLongPressPopUp(
                         }
                     Handler(Looper.getMainLooper()).post { builder.create().show() }
                 }
-                popupWindow?.dismiss()
+                popupWindow.dismiss()
             }
         }
     }
 
     @SuppressLint("InflateParams")
-    private fun buildPopupWindow() {
+    private fun buildPopupWindow(statusBarTopPadding: Int) {
         vibrator?.vibrate(20)
 
         wrappedContext = ContextThemeWrapper(activity, R.style.SubtleBlueRipple)
 
         val popUpView = LayoutInflater.from(activity)
             .inflate(R.layout.view_unified_reaction_and_swipe, null) as ConstraintLayout
-        popUpView.setOnClickListener { popupWindow!!.dismiss() }
+        popUpView.setOnClickListener { popupWindow.dismiss() }
 
         val owner = activity.window.decorView.findViewTreeLifecycleOwner()
         val saveOwner = activity.window.decorView.findViewTreeSavedStateRegistryOwner()
 
         val actions = listOf<PopupActionType>().toMutableList().apply {
-            if (discussion?.isNormal == true
-                && message?.messageType == Message.TYPE_OUTBOUND_MESSAGE
-                && message?.wipeStatus != Message.WIPE_STATUS_WIPED
-                && message?.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
-                && message?.isLocationMessage == false
+            if (canEdit && message.messageType == Message.TYPE_OUTBOUND_MESSAGE && message.wipeStatus != Message.WIPE_STATUS_WIPED && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED && !message.isLocationMessage
             ) {
-                // TODO: check EDIT_OR_DELETE_OWNED_MESSAGES permission for group V2
                 add(EDIT)
             }
-            if (discussion?.isNormal == true
-                && message?.messageType == Message.TYPE_INBOUND_MESSAGE
-                && message?.wipeStatus != Message.WIPE_STATUS_WIPED
-                && message?.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
+            if (discussion.isNormal && message.messageType == Message.TYPE_INBOUND_MESSAGE && message.wipeStatus != Message.WIPE_STATUS_WIPED && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
             ) {
                 add(REPLY)
             }
-            if (message?.isForwardable == true) {
+            if (message.isForwardable) {
                 add(SHARE)
                 add(FORWARD)
                 add(COPY)
             }
             add(SELECT)
-            if (message?.isBookmarkableAndDetailable == true) {
+            if (message.isBookmarkableAndDetailable) {
                 add(DETAILS)
-                if (message?.bookmarked == true) {
+                if (message.bookmarked) {
                     add(0, BOOKMARK) // un-bookmark as the first action for bookmarked messages
                 } else {
                     add(BOOKMARK)
                 }
             }
             // for outbound messages, put REPLY at the end
-            if (discussion?.isNormal == true
-                && message?.messageType == Message.TYPE_OUTBOUND_MESSAGE
-                && message?.wipeStatus != Message.WIPE_STATUS_WIPED
-                && message?.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
+            if (discussion.isNormal && message.messageType == Message.TYPE_OUTBOUND_MESSAGE && message.wipeStatus != Message.WIPE_STATUS_WIPED && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
             ) {
                 add(REPLY)
             }
@@ -572,13 +570,13 @@ class MessageLongPressPopUp(
                                                 CopyPopupMenu(expanded = copyMenuExpanded,
                                                     dismiss = {
                                                         copyMenuExpanded = false
-                                                        popupWindow?.dismiss()
+                                                        popupWindow.dismiss()
                                                     })
                                             }
 
                                         BOOKMARK ->
                                             PopupActionButton(
-                                                text = if (message?.bookmarked == true) stringResource(
+                                                text = if (message.bookmarked) stringResource(
                                                     id = R.string.menu_action_unbookmark
                                                 )
                                                 else stringResource(id = R.string.menu_action_bookmark),
@@ -598,7 +596,8 @@ class MessageLongPressPopUp(
 
                                 }
                             if (actions.size > maxVisibleActions) {
-                                val overflowActions = actions.subList(maxVisibleActions, actions.size)
+                                val overflowActions =
+                                    actions.subList(maxVisibleActions, actions.size)
                                 var overflowMenuExpanded by remember {
                                     mutableStateOf(false)
                                 }
@@ -619,34 +618,34 @@ class MessageLongPressPopUp(
                                             ) {
                                                 Column(modifier = Modifier.width(Max)) {
                                                     overflowActions.forEach { popupActionType ->
-                                                            DropdownMenuItem(
-                                                                leadingIcon = popupActionType.getImage(
-                                                                    message = message,
-                                                                    tint = colorResource(
-                                                                        id = R.color.red
-                                                                    ).takeIf { popupActionType == DELETE }),
-                                                                text = {
-                                                                    Text(
-                                                                        text = if (popupActionType == BOOKMARK) {
-                                                                            if (message?.bookmarked == true) stringResource(
-                                                                                id = R.string.menu_action_unbookmark
-                                                                            )
-                                                                            else stringResource(id = R.string.menu_action_bookmark)
-                                                                        } else {
-                                                                            stringResource(id = popupActionType.stringRes)
-                                                                        },
-                                                                        color = if (popupActionType == DELETE) colorResource(
-                                                                            id = R.color.red
-                                                                        ) else colorResource(
-                                                                            id = R.color.almostBlack
+                                                        DropdownMenuItem(
+                                                            leadingIcon = popupActionType.getImage(
+                                                                message = message,
+                                                                tint = colorResource(
+                                                                    id = R.color.red
+                                                                ).takeIf { popupActionType == DELETE }),
+                                                            text = {
+                                                                Text(
+                                                                    text = if (popupActionType == BOOKMARK) {
+                                                                        if (message.bookmarked) stringResource(
+                                                                            id = R.string.menu_action_unbookmark
                                                                         )
+                                                                        else stringResource(id = R.string.menu_action_bookmark)
+                                                                    } else {
+                                                                        stringResource(id = popupActionType.stringRes)
+                                                                    },
+                                                                    color = if (popupActionType == DELETE) colorResource(
+                                                                        id = R.color.red
+                                                                    ) else colorResource(
+                                                                        id = R.color.almostBlack
                                                                     )
-                                                                },
-                                                                onClick = {
-                                                                    overflowMenuExpanded = false
-                                                                    onAction(popupActionType)
-                                                                })
-                                                        }
+                                                                )
+                                                            },
+                                                            onClick = {
+                                                                overflowMenuExpanded = false
+                                                                onAction(popupActionType)
+                                                            })
+                                                    }
                                                 }
                                             }
                                         }
@@ -662,7 +661,7 @@ class MessageLongPressPopUp(
                                         CopyPopupMenu(expanded = copyMenuExpanded,
                                             dismiss = {
                                                 copyMenuExpanded = false
-                                                popupWindow?.dismiss()
+                                                popupWindow.dismiss()
                                             })
                                     }
                                 }
@@ -706,10 +705,10 @@ class MessageLongPressPopUp(
         reactionFlow = popUpView.findViewById(R.id.reactions_flow)
         plusButton = popUpView.findViewById(R.id.plus_button)
 
-        if ((message!!.messageType != Message.TYPE_OUTBOUND_MESSAGE && message!!.messageType != Message.TYPE_INBOUND_MESSAGE)
-            || (message!!.wipeStatus == Message.WIPE_STATUS_WIPED
-                    ) || (message!!.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
-                    ) || !discussion!!.isNormalOrReadOnly
+        if ((message.messageType != Message.TYPE_OUTBOUND_MESSAGE && message.messageType != Message.TYPE_INBOUND_MESSAGE)
+            || (message.wipeStatus == Message.WIPE_STATUS_WIPED
+                    ) || (message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
+                    ) || !discussion.isNormalOrReadOnly
         ) {
             // no reactions in this case
             reactionsPopUpLinearLayout?.visibility = View.GONE
@@ -721,12 +720,12 @@ class MessageLongPressPopUp(
             layoutTransition.disableTransitionType(LayoutTransition.APPEARING)
             layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING)
             layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
-            reactionConstraintLayout?.setLayoutTransition(layoutTransition)
+            reactionConstraintLayout?.layoutTransition = layoutTransition
 
             val plusLayout = LayoutParams(viewSizePx, viewSizePx)
             plusLayout.bottomToBottom = LayoutParams.PARENT_ID
             plusLayout.endToEnd = LayoutParams.PARENT_ID
-            plusButton?.setLayoutParams(plusLayout)
+            plusButton?.layoutParams = plusLayout
 
             plusButton?.setPadding(viewSizePx / 8, viewSizePx / 8, viewSizePx / 8, viewSizePx / 8)
             plusButton?.setOnClickListener {
@@ -737,14 +736,14 @@ class MessageLongPressPopUp(
 
         fillReactions()
 
-        popupWindow!!.width = parentView.width
-        popupWindow!!.height = parentView.height
+        popupWindow.width = parentView.width
+        popupWindow.height = parentView.height - statusBarTopPadding
         if (VERSION.SDK_INT < VERSION_CODES.LOLLIPOP_MR1) {
             val pos = IntArray(2)
             parentView.getLocationOnScreen(pos)
-            popupWindow!!.showAtLocation(parentView, Gravity.NO_GRAVITY, 0, pos[1])
+            popupWindow.showAtLocation(parentView, Gravity.NO_GRAVITY, 0, pos[1])
         } else {
-            popupWindow!!.showAtLocation(parentView, Gravity.NO_GRAVITY, 0, 0)
+            popupWindow.showAtLocation(parentView, Gravity.NO_GRAVITY, 0, 0)
         }
     }
 
@@ -767,15 +766,23 @@ class MessageLongPressPopUp(
                 ) {
                     Column(modifier = Modifier.width(Max)) {
                         DropdownMenuItem(
-                            text = { Text(text = stringResource(id = R.string.menu_action_copy_message_text),
-                                color = colorResource(id = R.color.almostBlack)) },
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.menu_action_copy_message_text),
+                                    color = colorResource(id = R.color.almostBlack)
+                                )
+                            },
                             onClick = {
                                 App.runThread(CopySelectedMessageTask(activity, messageId, false))
                                 dismiss()
                             })
                         DropdownMenuItem(
-                            text = { Text(text = stringResource(id = R.string.menu_action_copy_text_and_attachments),
-                                color = colorResource(id = R.color.almostBlack)) },
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.menu_action_copy_text_and_attachments),
+                                    color = colorResource(id = R.color.almostBlack)
+                                )
+                            },
                             onClick = {
                                 App.runThread(CopySelectedMessageTask(activity, messageId, true))
                                 dismiss()
@@ -787,7 +794,7 @@ class MessageLongPressPopUp(
     }
 
     private fun fillReactions() {
-        val reactions = SettingsActivity.getPreferredReactions()
+        val reactions = SettingsActivity.preferredReactions
         if (previousReaction != null && !reactions.contains(previousReaction)) {
             reactions.add(previousReaction!!)
         }
@@ -831,12 +838,12 @@ class MessageLongPressPopUp(
                 textView.setBackgroundResource(R.drawable.background_reactions_panel_previous_reaction)
                 textView.setOnClickListener {
                     react(null)
-                    popupWindow!!.dismiss()
+                    popupWindow.dismiss()
                 }
                 textView.setOnLongClickListener {
                     if (!plusOpen) {
                         react(null)
-                        popupWindow!!.dismiss()
+                        popupWindow.dismiss()
                     }
                     true
                 }
@@ -844,14 +851,14 @@ class MessageLongPressPopUp(
                 textView.setBackgroundResource(R.drawable.background_circular_ripple)
                 textView.setOnClickListener {
                     react(reaction)
-                    popupWindow!!.dismiss()
+                    popupWindow.dismiss()
                 }
                 textView.setOnLongClickListener {
                     if (plusOpen) {
                         togglePreferred(reaction)
                     } else {
                         react(reaction)
-                        popupWindow!!.dismiss()
+                        popupWindow.dismiss()
                     }
                     true
                 }
@@ -903,12 +910,12 @@ class MessageLongPressPopUp(
                 val emojiClickListener: EmojiClickListener = object : EmojiClickListener {
                     override fun onClick(emoji: String) {
                         react(emoji)
-                        popupWindow!!.dismiss()
+                        popupWindow.dismiss()
                     }
 
                     override fun onHighlightedClick(emojiView: View, emoji: String) {
                         react(null)
-                        popupWindow!!.dismiss()
+                        popupWindow.dismiss()
                     }
 
                     override fun onLongClick(emoji: String) {
@@ -934,12 +941,10 @@ class MessageLongPressPopUp(
                     true,
                     previousReaction
                 )
-                emojiPickerView?.setLayoutParams(
-                    LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        0f
-                    )
+                emojiPickerView?.layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    0f
                 )
             }
             if (emojiPickerView!!.parent == null) {
@@ -988,13 +993,13 @@ class MessageLongPressPopUp(
     }
 
     private fun togglePreferred(emoji: String) {
-        val preferredReactions = SettingsActivity.getPreferredReactions()
+        val preferredReactions = SettingsActivity.preferredReactions
         if (preferredReactions.contains(emoji)) {
             preferredReactions.remove(emoji)
         } else {
             preferredReactions.add(emoji)
         }
-        SettingsActivity.setPreferredReactions(preferredReactions)
+        SettingsActivity.preferredReactions = preferredReactions
         fillReactions()
     }
 

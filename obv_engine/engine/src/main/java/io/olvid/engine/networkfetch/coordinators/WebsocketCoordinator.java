@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -133,10 +133,8 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         this.jsonObjectMapper = jsonObjectMapper;
 
         websocketCreationOperationQueue = new NoDuplicateOperationQueue();
-        websocketCreationOperationQueue.execute(1, "Engine-WebsocketCoordinator-create");
 
         identityRegistrationOperationQueue = new NoDuplicateOperationQueue();
-        identityRegistrationOperationQueue.execute(1, "Engine-WebsocketCoordinator-register");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>() {
             @Override
@@ -164,6 +162,11 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         okHttpClient = initializeOkHttpClientForWebSocket(sslSocketFactory);
     }
 
+    public void startProcessing() {
+        websocketCreationOperationQueue.execute(1, "Engine-WebsocketCoordinator-create");
+        identityRegistrationOperationQueue.execute(1, "Engine-WebsocketCoordinator-register");
+    }
+
     public static OkHttpClient initializeOkHttpClientForWebSocket(SSLSocketFactory sslSocketFactory) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         if (sslSocketFactory != null) {
@@ -180,7 +183,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                 builder.sslSocketFactory(sslSocketFactory, trustManager);
             } catch (Exception e) {
                 Logger.e("Error initializing websocket okHttpClient trustManager");
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
 
@@ -254,7 +257,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                     identityAndUids.add(new IdentityAndUid(ownedIdentity, deviceUid));
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
         resetWebsockets();
@@ -420,7 +423,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                         identityAndUids.add(new IdentityAndUid(ownedIdentity, deviceUid));
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
             resetWebsockets();
@@ -501,7 +504,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                 new WebSocketClient(server, wsUrl);
                 finished = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             } finally {
                 if (finished) {
                     setFinished();
@@ -579,7 +582,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                     webSocketClient.send(jsonObjectMapper.writeValueAsString(messageMap));
                     finished = true;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 } finally {
                     if (finished) {
                         setFinished();
@@ -591,7 +594,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                     }
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 cancel(null);
                 processCancel();
             }
@@ -608,7 +611,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                 messageMap.put("serverUid", Base64.encodeBytes(serverUid));
                 webSocketClient.send(jsonObjectMapper.writeValueAsString(messageMap));
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
     }
@@ -728,7 +731,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                                             ServerSession.deleteCurrentTokenIfEqualTo(fetchManagerSession, ownedIdentityServerSessionTokens.get(identity), identity);
                                             fetchManagerSession.session.commit();
                                         } catch (SQLException e) {
-                                            e.printStackTrace();
+                                            Logger.x(e);
                                         }
                                     }
                                     synchronized (awaitingServerSessionIdentitiesLock) {
@@ -744,7 +747,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                             }
                         } catch (IOException | DecodingException e) {
                             Logger.d("Error decoding identity");
-                            e.printStackTrace();
+                            Logger.x(e);
                         }
                         break;
                     }
@@ -782,7 +785,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                             downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(identity, deviceUid);
                         } catch (IOException | DecodingException e) {
                             Logger.d("Error decoding identity");
-                            e.printStackTrace();
+                            Logger.x(e);
                         }
                         break;
                     }
@@ -812,7 +815,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                                 }
                             } catch (Exception e) {
                                 Logger.d("Error parsing return receipt");
-                                e.printStackTrace();
+                                Logger.x(e);
                             }
                         }
                         break;
@@ -830,7 +833,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                                 }
                             } catch (Exception e) {
                                 Logger.d("Error parsing push topic");
-                                e.printStackTrace();
+                                Logger.x(e);
                             }
                         }
                         break;
@@ -853,7 +856,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                                     timestamp = (long) timestampObj;
                                 }
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Logger.x(e);
                                 // this is treated after
                             }
                             if (notificationPostingDelegate != null) {
@@ -881,7 +884,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                             notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_PUSH_KEYCLOAK_UPDATE_REQUIRED, userInfo);
                         } catch (IOException | DecodingException e) {
                             Logger.d("Error decoding identity in keycloak websocket notification");
-                            e.printStackTrace();
+                            Logger.x(e);
                         }
                         break;
                     }
@@ -897,12 +900,12 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                                 try {
                                     protocolStarterDelegate.startOwnedDeviceDiscoveryProtocol(identity);
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    Logger.x(e);
                                 }
                             }
                         } catch (IOException | DecodingException e) {
                             Logger.d("Error decoding identity in ownedDevices websocket notification");
-                            e.printStackTrace();
+                            Logger.x(e);
                         }
                         break;
                     }
@@ -936,7 +939,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
 
                 this.webSocket.send(jsonObjectMapper.writeValueAsString(messageMap));
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
 
@@ -968,7 +971,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
         public void onFailure(WebSocket webSocket, Throwable t, Response response) {
             if (websocketConnected) {
                 Logger.w("Websocket exception");
-                t.printStackTrace();
+                Logger.x(t);
             }
             close();
             if (doConnect) {

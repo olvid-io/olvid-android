@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -148,7 +148,7 @@ public class OwnIdentitySelectorPopupWindow {
 
         final View separator = popupView.findViewById(R.id.separator);
         separatorObserver = (List<OwnedIdentityDao.OwnedIdentityAndUnreadMessageCount> ownedIdentityAndUnreadMessageCounts) -> {
-            if (ownedIdentityAndUnreadMessageCounts == null || ownedIdentityAndUnreadMessageCounts.size() == 0) {
+            if (ownedIdentityAndUnreadMessageCounts == null || ownedIdentityAndUnreadMessageCounts.isEmpty()) {
                 separator.setVisibility(View.GONE);
             } else {
                 separator.setVisibility(View.VISIBLE);

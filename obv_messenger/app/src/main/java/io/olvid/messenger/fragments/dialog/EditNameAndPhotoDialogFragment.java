@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -513,7 +513,9 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
-        viewModel.clearData();
+        if (getActivity() != null && !getActivity().isChangingConfigurations()) {
+            viewModel.clearData();
+        }
     }
 
     private void takePicture() throws IllegalStateException {

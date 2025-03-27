@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -93,8 +93,8 @@ import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.Timer
-import java.util.TimerTask
 import java.util.regex.Pattern
+import kotlin.concurrent.timer
 import kotlin.text.RegexOption.MULTILINE
 
 class WebrtcPeerConnectionHolder(
@@ -112,6 +112,7 @@ class WebrtcPeerConnectionHolder(
     private var gatheringPolicy: GatheringPolicy
     private var readyToProcessPeerIceCandidates = false
     private val pendingPeerIceCandidates: MutableList<JsonIceCandidate>
+    private val pendingIceCandidatesToSend: MutableList<JsonIceCandidate>
     var peerConnection: PeerConnection? = null
     private var audioTrack: AudioTrack? = null
     var remoteVideoTrack by mutableStateOf<VideoTrack?>(null)
@@ -216,9 +217,8 @@ class WebrtcPeerConnectionHolder(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            val userAgentProperty = System.getProperty("http.agent")
-            if (userAgentProperty != null) {
-                builder.setUserAgent(userAgentProperty)
+            System.getProperty("http.agent")?.let {
+                builder.setUserAgent(it)
             }
             peerConnectionFactory = builder.createPeerConnectionFactory()
             audioSource = peerConnectionFactory?.createAudioSource(MediaConstraints())
@@ -227,8 +227,8 @@ class WebrtcPeerConnectionHolder(
         }
 
         private fun getIceServer(username: String?, password: String?): IceServer {
-            val servers: List<String> = if (SettingsActivity.getScaledTurn() != null) {
-                when (SettingsActivity.getScaledTurn()) {
+            val servers: List<String> = if (SettingsActivity.scaledTurn != null) {
+                when (SettingsActivity.scaledTurn) {
                     "par" -> TURN_SCALED_SERVERS_EU
                     "nyc" -> TURN_SCALED_SERVERS_US
                     "sng" -> TURN_SCALED_SERVERS_AP
@@ -305,18 +305,26 @@ class WebrtcPeerConnectionHolder(
                     Type.fromCanonicalForm(sessionDescriptionType), sessionDescription
                 )
             )
-            readyToProcessPeerIceCandidates = true
-            for (jsonIceCandidate in pendingPeerIceCandidates) {
-                peerConnection?.addIceCandidate(
-                    IceCandidate(
-                        jsonIceCandidate.sdpMid,
-                        jsonIceCandidate.sdpMLineIndex,
-                        jsonIceCandidate.sdp
-                    )
-                )
-            }
-            pendingPeerIceCandidates.clear()
+            markAsReadyToProcessPeerIceCandidates()
         }
+    }
+
+    private fun markAsReadyToProcessPeerIceCandidates() {
+        readyToProcessPeerIceCandidates = true
+        for (jsonIceCandidate in pendingPeerIceCandidates) {
+            peerConnection?.addIceCandidate(
+                IceCandidate(
+                    jsonIceCandidate.sdpMid,
+                    jsonIceCandidate.sdpMLineIndex,
+                    jsonIceCandidate.sdp
+                )
+            )
+        }
+        pendingPeerIceCandidates.clear()
+        for (jsonIceCandidate in pendingIceCandidatesToSend) {
+            webrtcCallService.sendAddIceCandidateMessage(callParticipant, jsonIceCandidate)
+        }
+        pendingIceCandidatesToSend.clear()
     }
 
     fun setGatheringPolicy(gatheringPolicy: GatheringPolicy) {
@@ -342,54 +350,42 @@ class WebrtcPeerConnectionHolder(
 
     private fun startLocalAudioLevelListener() {
         if (localAudioLevelListener == null) {
-            localAudioLevelListener = Timer().apply {
-                schedule(object : TimerTask() {
-                    override fun run() {
-                        try {
-                            peerConnection?.getStats(
-                                audioSender
-                            ) {
-                                (it.statsMap.values.find { it.type == "media-source" }?.members?.getOrDefault(
-                                    "audioLevel",
-                                    null
-                                ) as? Double)?.let {
-                                    if (webrtcCallService.microphoneMuted && webrtcCallService.speakingWhileMuted.not() && it > 0.3) {
-                                        webrtcCallService.speakingWhileMuted = true
-                                    }
-                                    localAudioLevel = if (webrtcCallService.microphoneMuted) 0.0 else it
-                                }
-
+            localAudioLevelListener = timer(period = 200) {
+                runCatching {
+                    peerConnection?.getStats(
+                        audioSender
+                    ) { report ->
+                        (report.statsMap.values.find { it.type == "media-source" }?.members?.getOrDefault(
+                            "audioLevel",
+                            null
+                        ) as? Double)?.let {
+                            if (webrtcCallService.microphoneMuted && webrtcCallService.speakingWhileMuted.not() && it > 0.3) {
+                                webrtcCallService.speakingWhileMuted = true
                             }
-                        } catch (ignored: Exception) {
-                            cancel()
+                            localAudioLevel = if (webrtcCallService.microphoneMuted) 0.0 else it
                         }
+
                     }
-                }, 0, 200)
+                }.onFailure { cancel() }
             }
         }
     }
 
     private fun startPeerAudioLevelListener() {
         if (peerAudioLevelListener == null) {
-            peerAudioLevelListener = Timer().apply {
-                schedule(object : TimerTask() {
-                    override fun run() {
-                        try {
-                            peerConnection?.getStats(
-                                audioReceiver
-                            ) {
-                                (it.statsMap.values.find { it.type == "inbound-rtp" }?.members?.getOrDefault(
-                                    "audioLevel",
-                                    null
-                                ) as? Double)?.let {
-                                    peerAudioLevel = it
-                                }
-                            }
-                        } catch (ignored: Exception) {
-                            cancel()
+            peerAudioLevelListener = timer(period = 200) {
+                runCatching {
+                    peerConnection?.getStats(
+                        audioReceiver
+                    ) { report ->
+                        (report.statsMap.values.find { it.type == "inbound-rtp" }?.members?.getOrDefault(
+                            "audioLevel",
+                            null
+                        ) as? Double)?.let {
+                            peerAudioLevel = it
                         }
                     }
-                }, 0, 200)
+                }.onFailure { cancel() }
             }
         }
     }
@@ -510,23 +506,13 @@ class WebrtcPeerConnectionHolder(
                 )
                 peerSessionDescription = null
                 peerSessionDescriptionType = null
-                readyToProcessPeerIceCandidates = true
-                for (jsonIceCandidate in pendingPeerIceCandidates) {
-                    peerConnection?.addIceCandidate(
-                        IceCandidate(
-                            jsonIceCandidate.sdpMid,
-                            jsonIceCandidate.sdpMLineIndex,
-                            jsonIceCandidate.sdp
-                        )
-                    )
-                }
-                pendingPeerIceCandidates.clear()
+                markAsReadyToProcessPeerIceCandidates()
             }
         }
     }
 
     fun createLocalDescription(reason: String) {
-        Logger.d("☎ createLocalDescription " + reason)
+        Logger.d("☎ createLocalDescription $reason")
         // only called from onRenegotiationNeeded
         when (peerConnection?.signalingState()) {
             STABLE -> {
@@ -652,6 +638,7 @@ class WebrtcPeerConnectionHolder(
     init {
         gatheringPolicy = callParticipant.gatheringPolicy
         pendingPeerIceCandidates = ArrayList()
+        pendingIceCandidatesToSend = ArrayList()
     }
 
     @Synchronized
@@ -930,7 +917,7 @@ class WebrtcPeerConnectionHolder(
             Logger.d("☎ onIceCandidate")
             when (gatheringPolicy) {
                 GatheringPolicy.GATHER_ONCE -> {
-                    if ("" != candidate.serverUrl) {
+                    if (!candidate.serverUrl.isNullOrEmpty()) {
                         turnCandidates++
                         if (turnCandidates == 1) {
                             App.runThread {
@@ -946,16 +933,20 @@ class WebrtcPeerConnectionHolder(
                 }
 
                 GATHER_CONTINUOUSLY -> {
-                    if ("" != candidate.serverUrl) {
+                    if (!candidate.serverUrl.isNullOrEmpty()) {
                         turnCandidates++
-                        webrtcCallService.sendAddIceCandidateMessage(
-                            callParticipant,
-                            JsonIceCandidate(
-                                candidate.sdp,
-                                candidate.sdpMLineIndex,
-                                candidate.sdpMid
-                            )
+                        val jsonIceCandidate = JsonIceCandidate(
+                            candidate.sdp,
+                            candidate.sdpMLineIndex,
+                            candidate.sdpMid
                         )
+                        webrtcCallService.execute {
+                            if (readyToProcessPeerIceCandidates) {
+                                webrtcCallService.sendAddIceCandidateMessage(callParticipant, jsonIceCandidate)
+                            } else {
+                                pendingIceCandidatesToSend.add(jsonIceCandidate)
+                            }
+                        }
                     }
                 }
             }

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -1141,8 +1141,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
                 UID childProtocolInstanceUid = new UID(getPrng());
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ConcreteProtocol.CONTACT_MANAGEMENT_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false);
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new ContactManagementProtocol.InitiateContactDowngradeMessage(coreProtocolMessage, receivedMessage.getReceptionChannelInfo().getRemoteIdentity()).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -1288,8 +1287,7 @@ public class OneToOneContactInvitationProtocol extends ConcreteProtocol {
                     // we generate a new random UID as her protocol instance already reached a final state (and she may receive other responses for the same protocol Uid)
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), getOwnedIdentity()),
                             getProtocolId(),
-                            new UID(getPrng()),
-                            false);
+                            new UID(getPrng()));
                     ChannelMessageToSend messageToSend = new OneToOneStatusSyncRequestMessage(coreProtocolMessage, false).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }

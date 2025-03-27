@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -79,7 +79,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
     private boolean showPinned = false;
     private boolean selectable = false;
 
-    protected FilteredDiscussionListAdapter filteredDiscussionListAdapter;
+    FilteredDiscussionListAdapter filteredDiscussionListAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -246,6 +246,7 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
             }
         }
 
+        @SuppressLint("NotifyDataSetChanged")
         @Override
         public void onChanged(@Nullable List<FilteredDiscussionListViewModel.SearchableDiscussion> searchableDiscussions) {
             this.filteredDiscussions = searchableDiscussions;
@@ -408,6 +409,9 @@ public class FilteredDiscussionListFragment extends Fragment implements TextWatc
                 int position = this.getLayoutPosition();
                 if (selectable) {
                     filteredDiscussionListViewModel.selectedDiscussionId(filteredDiscussions.get(position).discussionId);
+                    if (discussionFilterEditText != null) {
+                        discussionFilterEditText.selectAll();
+                    }
                 } else if (FilteredDiscussionListFragment.this.onClickDelegate != null) {
                     FilteredDiscussionListFragment.this.onClickDelegate.discussionClicked(view, filteredDiscussions.get(position));
                 }

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -50,7 +50,7 @@ public class PreKeyBlobOnServer {
                     Logger.i("PreKey signature verification failed.");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
 
             if (verifiedEncodedPreKey != null) {
@@ -88,7 +88,7 @@ public class PreKeyBlobOnServer {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return null;
     }

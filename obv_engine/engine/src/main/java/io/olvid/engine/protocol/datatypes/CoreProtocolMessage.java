@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -33,6 +33,7 @@ public class CoreProtocolMessage {
     private final int protocolId;
     private final UID protocolInstanceUid;
     private final boolean partOfFullRatchetProtocolOfTheSendSeed;
+    private final boolean hasUserContent;
     private final long serverTimestamp;
 
     public CoreProtocolMessage(ReceivedMessage message) {
@@ -42,16 +43,29 @@ public class CoreProtocolMessage {
         this.protocolId = message.getProtocolId();
         this.protocolInstanceUid = message.getProtocolInstanceUid();
         this.partOfFullRatchetProtocolOfTheSendSeed = false;
+        this.hasUserContent = false;
         this.serverTimestamp = message.getServerTimestamp();
     }
 
-    public CoreProtocolMessage(SendChannelInfo sendChannelInfo, int protocolId, UID protocolInstanceUid, boolean partOfFullRatchetProtocolOfTheSendSeed) {
+    public CoreProtocolMessage(SendChannelInfo sendChannelInfo, int protocolId, UID protocolInstanceUid) {
+        this.sendChannelInfo = sendChannelInfo;
+        this.receptionChannelInfo = null;
+        this.toIdentity = null;
+        this.protocolId = protocolId;
+        this.protocolInstanceUid = protocolInstanceUid;
+        this.partOfFullRatchetProtocolOfTheSendSeed = false;
+        this.hasUserContent = false;
+        this.serverTimestamp = System.currentTimeMillis();
+    }
+
+    public CoreProtocolMessage(SendChannelInfo sendChannelInfo, int protocolId, UID protocolInstanceUid, boolean partOfFullRatchetProtocolOfTheSendSeed, boolean hasUserContent) {
         this.sendChannelInfo = sendChannelInfo;
         this.receptionChannelInfo = null;
         this.toIdentity = null;
         this.protocolId = protocolId;
         this.protocolInstanceUid = protocolInstanceUid;
         this.partOfFullRatchetProtocolOfTheSendSeed = partOfFullRatchetProtocolOfTheSendSeed;
+        this.hasUserContent = hasUserContent;
         this.serverTimestamp = System.currentTimeMillis();
     }
 
@@ -77,6 +91,10 @@ public class CoreProtocolMessage {
 
     public boolean isPartOfFullRatchetProtocolOfTheSendSeed() {
         return partOfFullRatchetProtocolOfTheSendSeed;
+    }
+
+    public boolean hasUserContent() {
+        return hasUserContent;
     }
 
     public long getServerTimestamp() {

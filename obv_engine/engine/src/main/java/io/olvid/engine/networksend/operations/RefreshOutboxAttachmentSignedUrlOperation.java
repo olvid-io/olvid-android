@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -23,6 +23,7 @@ import java.sql.SQLException;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
@@ -127,7 +128,7 @@ public class RefreshOutboxAttachmentSignedUrlOperation extends Operation {
                         return;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 sendManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -141,7 +142,7 @@ public class RefreshOutboxAttachmentSignedUrlOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }
@@ -200,7 +201,7 @@ class RefreshOutboxAttachmentSignedUrlServerMethod extends ServerMethod {
                 }
                 this.signedUrls = signedUrls;
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         }

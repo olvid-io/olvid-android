@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -45,17 +45,14 @@ import java.io.IOException
 import java.util.UUID
 
 class IncomingCallRinger(private val context: Context) {
-    private val vibrator: Vibrator?
+    private val vibrator: Vibrator? = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     private var cameraManager: CameraManager? = null
-    private val cameraIdsToFlash: MutableSet<String>
-    private val cameraIdsFlashThreads: HashMap<String, Thread>
+    private val cameraIdsToFlash: MutableSet<String> = HashSet()
+    private val cameraIdsFlashThreads: HashMap<String, Thread> = HashMap()
     private var mediaPlayer: MediaPlayer? = null
     private var mediaSession: MediaSession? = null
 
     init {
-        vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        cameraIdsToFlash = HashSet()
-        cameraIdsFlashThreads = HashMap()
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
             cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager?
             cameraManager?.let {
@@ -75,7 +72,7 @@ class IncomingCallRinger(private val context: Context) {
         }
     }
 
-    fun ring(callIdentifier: UUID?, discussionCustomization: DiscussionCustomization?) {
+    fun ring(call: WebrtcCallService.Call) {
         var ringerMode = AudioManager.RINGER_MODE_NORMAL
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
         if (audioManager != null) {
@@ -85,22 +82,22 @@ class IncomingCallRinger(private val context: Context) {
         val ringtone: Uri
         val vibrationPattern: LongArray
         val useFlash: Boolean
-        if (discussionCustomization == null || !discussionCustomization.prefUseCustomCallNotification) {
-            ringtone = SettingsActivity.getCallRingtone()
-            vibrationPattern = SettingsActivity.getCallVibrationPattern()
+        if (call.discussionCustomization == null || !call.discussionCustomization.prefUseCustomCallNotification) {
+            ringtone = SettingsActivity.callRingtone
+            vibrationPattern = SettingsActivity.callVibrationPattern
             useFlash = SettingsActivity.useFlashOnIncomingCall()
         } else {
             ringtone =
-                if (discussionCustomization.prefCallNotificationRingtone == null) Uri.EMPTY else Uri.parse(
-                    discussionCustomization.prefCallNotificationRingtone
+                if (call.discussionCustomization.prefCallNotificationRingtone == null) Uri.EMPTY else Uri.parse(
+                    call.discussionCustomization.prefCallNotificationRingtone
                 )
             vibrationPattern =
-                if (discussionCustomization.prefCallNotificationVibrationPattern == null) LongArray(
+                if (call.discussionCustomization.prefCallNotificationVibrationPattern == null) LongArray(
                     0
                 ) else SettingsActivity.intToVibrationPattern(
-                    discussionCustomization.prefCallNotificationVibrationPattern!!.toInt()
+                    call.discussionCustomization.prefCallNotificationVibrationPattern!!.toInt()
                 )
-            useFlash = discussionCustomization.prefCallNotificationUseFlash
+            useFlash = call.discussionCustomization.prefCallNotificationUseFlash
         }
         try {
             mediaPlayer = MediaPlayer()
@@ -129,10 +126,8 @@ class IncomingCallRinger(private val context: Context) {
                     if (keyEvent != null && keyEvent.action == KeyEvent.ACTION_DOWN && (keyEvent.keyCode == KeyEvent.KEYCODE_HEADSETHOOK || keyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE || keyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PLAY || keyEvent.keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE)) {
                         val answerCallIntent = Intent(context, WebrtcCallService::class.java)
                         answerCallIntent.setAction(WebrtcCallService.ACTION_ANSWER_CALL)
-                        answerCallIntent.putExtra(
-                            WebrtcCallService.CALL_IDENTIFIER_INTENT_EXTRA,
-                            Logger.getUuidString(callIdentifier)
-                        )
+                        answerCallIntent.putExtra(WebrtcCallService.CALL_IDENTIFIER_INTENT_EXTRA, Logger.getUuidString(call.callIdentifier))
+                        answerCallIntent.putExtra(WebrtcCallService.BYTES_OWNED_IDENTITY_INTENT_EXTRA, call.bytesOwnedIdentity)
                         context.startService(answerCallIntent)
                         return true
                     }

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,6 +22,7 @@ import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
@@ -42,19 +43,23 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.View.OnLayoutChangeListener
+import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager.LayoutParams
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.PopupMenu.OnMenuItemClickListener
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.view.ActionMode.Callback
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -70,6 +75,7 @@ import androidx.compose.foundation.gestures.calculateCentroidSize
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction.Press
 import androidx.compose.foundation.interaction.PressInteraction.Release
+import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -95,7 +101,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -120,6 +125,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
+import androidx.core.view.updatePadding
 import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
@@ -139,17 +150,15 @@ import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason.
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
+import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.activities.ShortcutActivity
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.customClasses.BytesKey
+import io.olvid.messenger.customClasses.DraftAttachmentAdapter.AttachmentLongClickListener
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog
 import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog.OnIntegrationSelectedListener
 import io.olvid.messenger.customClasses.LockableActivity
-import io.olvid.messenger.customClasses.MessageAttachmentAdapter.AttachmentLongClickListener
-import io.olvid.messenger.customClasses.MessageAttachmentAdapter.AttachmentSpaceItemDecoration
-import io.olvid.messenger.customClasses.MessageAttachmentAdapter.Visibility
-import io.olvid.messenger.customClasses.MessageAttachmentAdapter.Visibility.HIDDEN
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder
@@ -177,6 +186,7 @@ import io.olvid.messenger.databases.tasks.ReplaceDiscussionDraftTask
 import io.olvid.messenger.databases.tasks.SaveDraftTask
 import io.olvid.messenger.databases.tasks.SaveMultipleAttachmentsTask
 import io.olvid.messenger.databases.tasks.SetDraftReplyTask
+import io.olvid.messenger.databases.tasks.propagateMuteSettings
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.compose.ComposeMessageFragment
 import io.olvid.messenger.discussion.compose.ComposeMessageFragment.EmojiKeyboardAttachDelegate
@@ -190,10 +200,13 @@ import io.olvid.messenger.discussion.message.Message
 import io.olvid.messenger.discussion.message.MessageDisclaimer
 import io.olvid.messenger.discussion.message.MissedMessageCount
 import io.olvid.messenger.discussion.message.ScrollDownButton
+import io.olvid.messenger.discussion.message.attachments.Visibility
 import io.olvid.messenger.discussion.message.copyLocationToClipboard
+import io.olvid.messenger.discussion.search.DiscussionSearch
 import io.olvid.messenger.discussion.settings.DiscussionSettingsActivity
 import io.olvid.messenger.fragments.FullScreenImageFragment
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment
+import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.main.invitations.InvitationListItem
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.main.invitations.getAnnotatedDate
@@ -207,6 +220,8 @@ import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.CUST
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.MAPS
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.NONE
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.OSM
+import io.olvid.messenger.webrtc.CallNotificationManager
+import io.olvid.messenger.webrtc.components.CallNotification
 import kotlinx.coroutines.delay
 import java.io.FileInputStream
 import java.io.IOException
@@ -227,6 +242,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         runCatching { AudioAttachmentServiceBinding(this) }.onFailure { finishAndClearViewModel() }
             .getOrNull()
     }
+    private val rootLayout: ConstraintLayout by lazy { findViewById(R.id.root_constraint_layout) }
     private val toolBar: Toolbar by lazy { findViewById(R.id.discussion_toolbar) }
     private val toolBarInitialView: InitialView by lazy { toolBar.findViewById(R.id.title_bar_initial_view) }
     private val toolBarTitle: TextView by lazy { toolBar.findViewById(R.id.title_bar_title) }
@@ -237,6 +253,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
     private var composeAreaBottomPadding: Int? by mutableStateOf(null)
     private var lockGroupBottomPadding by mutableIntStateOf(0)
+    private var statusBarTopPadding by mutableIntStateOf(0)
 
     private val rootBackgroundImageView: ImageView by lazy { findViewById(R.id.discussion_root_background_imageview) }
     lateinit var discussionDelegate: DiscussionDelegate
@@ -294,6 +311,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
     private var actionModeCallback: Callback? = null
 
     private var locked: Boolean? = null
+    private var canEdit: Boolean? = null
 
     private val messageIdsToMarkAsRead: MutableSet<Long> by lazy { HashSet() }
     private val editedMessageIdsToMarkAsSeen: MutableSet<Long> by lazy { HashSet() }
@@ -363,12 +381,27 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             finishAndClearViewModel()
         }
 
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+            false
         setContentView(R.layout.activity_discussion)
 
         monitorLockViewHeight()
 
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { view, windowInsets ->
+            val insets =
+                windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+            statusBarTopPadding = insets.top
+            view.updateLayoutParams<MarginLayoutParams> {
+                updateMargins(bottom = insets.bottom)
+            }
+            toolBar.updatePadding(top = insets.top)
+            windowInsets
+        }
+
+
         composeView.setContent {
-            val coroutineScope = rememberCoroutineScope()
             val context = LocalContext.current
             val density = LocalDensity.current
             CompositionLocalProvider(LocalUriHandler provides SecureUriHandler(context)) {
@@ -453,7 +486,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                 if (searchInProgress) {
                                     lazyListState.scrollToItem(
                                         index = 1 + pos,
-                                        scrollOffset = -(lockGroupBottomPadding + (composeAreaBottomPadding ?: 0))
+                                        scrollOffset = -(lockGroupBottomPadding + (composeAreaBottomPadding
+                                            ?: 0))
                                     )
                                 } else {
                                     lazyListState.scrollToItem(
@@ -461,7 +495,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                         scrollOffset = -2 * context.resources.displayMetrics.heightPixels / 3
                                     )
                                 }
-                                highlightMessageId = if (scrollRequest.highlight) scrollRequest.messageId else -1L
+                                highlightMessageId =
+                                    if (scrollRequest.highlight) scrollRequest.messageId else -1L
                             } else {
                                 val firstNull = snapshot.indexOfFirst { it == null }
                                 if (firstNull != -1) {
@@ -480,16 +515,39 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     LaunchedEffect(discussionSearch) {
                         discussionSearch?.apply {
                             this.lazyListState = lazyListState
-                            scrollTo = { messageId -> scrollToMessageRequest = ScrollRequest(messageId = messageId, triggeredBySearch = true) }
+                            scrollTo = { messageId ->
+                                scrollToMessageRequest =
+                                    ScrollRequest(messageId = messageId, triggeredBySearch = true)
+                            }
+                            intent.getStringExtra(SEARCH_QUERY_INTENT_EXTRA)?.let { searchQuery ->
+                                intent.removeExtra(SEARCH_QUERY_INTENT_EXTRA)
+                                val messageId = intent.getLongExtra(MESSAGE_ID_INTENT_EXTRA, -1)
+                                searchItem.expandActionView()
+                                (searchItem.actionView as? SearchView?)?.apply {
+                                    clearFocus()
+                                    setQuery(
+                                        searchQuery,
+                                        false
+                                    )
+                                }
+                                setInitialSearchQuery(
+                                    searchQuery,
+                                    if (messageId < 0) null else messageId
+                                )
+                            }
                         }
                     }
-                    LaunchedEffect(scrollToMessageRequest, messages.itemCount, messages.itemSnapshotList.indexOfFirst { it == null }) { // TODO: can we do better than this? We only need to b notified everytime the snapshot is updated
+                    LaunchedEffect(
+                        scrollToMessageRequest,
+                        messages.itemCount,
+                        messages.itemSnapshotList.indexOfFirst { it == null }) {
                         when (scrollToMessageRequest) {
                             ScrollRequest.None -> Unit
                             ScrollRequest.ToBottom -> {
                                 lazyListState.animateScrollToItem(0)
                                 scrollToMessageRequest = ScrollRequest.None
                             }
+
                             else -> {
                                 if (messages.itemCount > 0 && scrollTo(scrollToMessageRequest)) {
                                     // if the scroll was successful, reset the scroll request
@@ -502,7 +560,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                         if (scrollToFirstUnread) {
                             unreadCountAndFirstMessage?.messageId?.takeIf { it > 0 }
                                 ?.let { firstUnreadMessageId ->
-                                    scrollToMessageRequest = ScrollRequest(firstUnreadMessageId, false)
+                                    scrollToMessageRequest =
+                                        ScrollRequest(firstUnreadMessageId, false)
                                     scrollToFirstUnread = false
                                 }
                         }
@@ -574,8 +633,13 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                             ) {
                                 // dummy item for animation
                                 item(key = Long.MAX_VALUE) {
-                                    Spacer(modifier = Modifier
-                                        .height(1.dp.coerceAtLeast(with(LocalDensity.current) {(lockGroupBottomPadding +  (composeAreaBottomPadding ?: 0)).toDp()})))
+                                    Spacer(
+                                        modifier = Modifier
+                                            .height(1.dp.coerceAtLeast(with(LocalDensity.current) {
+                                                (lockGroupBottomPadding + (composeAreaBottomPadding
+                                                    ?: 0)).toDp()
+                                            }))
+                                    )
                                 }
                                 // invitations
                                 invitations?.reversed()?.let { invites ->
@@ -618,7 +682,11 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                 ) { index ->
                                     val message = messages[index]
                                     message?.let {
-                                        LaunchedEffect(message.id, message.status, message.messageType) {
+                                        LaunchedEffect(
+                                            message.id,
+                                            message.status,
+                                            message.messageType
+                                        ) {
                                             // here we do everything that only needs to be set once for a message
                                             if (message.status == Message.STATUS_UNREAD
                                                 || message.wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ
@@ -714,7 +782,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                 )
                                             }
                                             // message
-                                            val interactionSource = remember { MutableInteractionSource() }
+                                            val interactionSource =
+                                                remember { MutableInteractionSource() }
                                             LaunchedEffect(highlightMessageId) {
                                                 if (message.id == highlightMessageId) {
                                                     val press = Press(offset)
@@ -740,14 +809,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                                     )
                                                                 ),
                                                                 onDoubleClick = {
-                                                                    if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE
-                                                                        && message.wipeStatus != Message.WIPE_STATUS_WIPED
-                                                                        && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
-                                                                        && !message.isLocationMessage
-                                                                        && locked != true
-                                                                    ) {
-                                                                        enterEditMode(message)
-                                                                    }
+                                                                    enterEditModeIfAllowed(message)
                                                                 },
                                                                 onLongClick = {
                                                                     messageLongClicked(
@@ -772,6 +834,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                             Color.Transparent
                                                     )
                                                     .padding(horizontal = 8.dp, vertical = 2.dp)
+                                                    .cutoutHorizontalPadding()
                                                     .onGloballyPositioned {
                                                         offset = it.positionOnScreen()
                                                     },
@@ -784,14 +847,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                     )
                                                 },
                                                 onDoubleClick = {
-                                                    if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE
-                                                        && message.wipeStatus != Message.WIPE_STATUS_WIPED
-                                                        && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
-                                                        && !message.isLocationMessage
-                                                        && locked != true
-                                                    ) {
-                                                        enterEditMode(message)
-                                                    }
+                                                    enterEditModeIfAllowed(message)
                                                 },
                                                 onLocationClick = {
                                                     onLocationClick(message)
@@ -807,14 +863,18 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                     }
                                                 },
                                                 onAttachmentLongClick = { fyleAndStatus ->
-                                                    discussionViewModel.longClickedFyleAndStatus = fyleAndStatus
+                                                    discussionViewModel.longClickedFyleAndStatus =
+                                                        fyleAndStatus
                                                 },
                                                 onCallBackButtonClicked = { callLogId ->
                                                     onCallBackButtonClicked(
                                                         callLogId
                                                     )
                                                 },
-                                                scrollToMessage = { messageId -> scrollToMessageRequest = ScrollRequest(messageId) },
+                                                scrollToMessage = { messageId ->
+                                                    scrollToMessageRequest =
+                                                        ScrollRequest(messageId)
+                                                },
                                                 scale = scale,
                                                 replyAction = {
                                                     discussionDelegate.replyToMessage(
@@ -841,25 +901,34 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                         parentView = composeView.parent as View,
                                                         clickX = offset.x.roundToInt(),
                                                         clickY = offset.y.roundToInt(),
-                                                        messageId = message.id
+                                                        messageId = message.id,
+                                                        statusBarTopPadding = statusBarTopPadding
                                                     )
                                                 },
                                                 showSender = message.isInbound && discussionViewModel.discussion.value?.discussionType != Discussion.TYPE_CONTACT,
-                                                lastFromSender = messages.itemSnapshotList.getOrNull(index + 1)?.let {
+                                                lastFromSender = messages.itemSnapshotList.getOrNull(
+                                                    index + 1
+                                                )?.let {
                                                     !it.senderIdentifier.contentEquals(message.senderIdentifier)
                                                             || (it.messageType != Message.TYPE_INBOUND_MESSAGE && it.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE)
-                                                            || Utils.notTheSameDay(message.timestamp, it.timestamp)
+                                                            || Utils.notTheSameDay(
+                                                        message.timestamp,
+                                                        it.timestamp
+                                                    )
                                                             || !message.isTextOnly
                                                             || (message.status == Message.STATUS_UNREAD && it.status != Message.STATUS_UNREAD)
-                                                } ?: true,
+                                                } != false,
                                                 linkPreviewViewModel = linkPreviewViewModel,
                                                 messageExpiration = messageExpiration,
                                                 discussionViewModel = discussionViewModel,
+                                                discussionSearch = discussionSearch,
                                                 audioAttachmentServiceBinding = audioAttachmentServiceBinding,
                                                 openDiscussionDetailsCallback = {
                                                     toolbarClickedCallback?.run()
                                                 },
-                                                openViewerCallback = { markAsReadOnPause = false }
+                                                openViewerCallback = { markAsReadOnPause = false },
+                                                saveAttachment = { saveAttachment() },
+                                                saveAllAttachments = { saveAllAttachments() }
                                             )
                                         }
                                         // date header
@@ -874,7 +943,10 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                 context,
                                                 message.timestamp
                                             ).toString()
-                                            DateHeader(modifier = Modifier.animateItem(), date = date)
+                                            DateHeader(
+                                                modifier = Modifier.animateItem(),
+                                                date = date
+                                            )
                                         }
                                     }
                                     // disclaimer
@@ -901,34 +973,59 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                 }
                             }
                             val locationMessages by discussionViewModel.currentlySharingLocationMessagesLiveData.observeAsState()
-                            AnimatedVisibility(
+                            Column(
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)
-                                    .padding(6.dp),
-                                enter = slideInVertically(),
-                                exit = slideOutVertically(),
-                                visible = locationMessages.isNullOrEmpty()
-                                    .not() && lazyListState.isScrollInProgress.not()
+                                    .padding(top = 6.dp),
+                                verticalArrangement = spacedBy(8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                val isDiscussionSharingLocation =
-                                    discussionViewModel.discussionId?.let {
-                                        LocationSharingSubService.isDiscussionSharingLocation(
-                                            it
+                                var cachedCallData by remember { mutableStateOf(CallNotificationManager.currentCallData) }
+                                LaunchedEffect(CallNotificationManager.currentCallData) {
+                                    if (CallNotificationManager.currentCallData != null) {
+                                        cachedCallData = CallNotificationManager.currentCallData
+                                    } else {
+                                        delay(500)
+                                        cachedCallData = null
+                                    }
+                                }
+                                AnimatedVisibility(
+                                    // visibility is the && otherwise when currentCallData becomes non-null,
+                                    // cachedCallData is still null and the animation applies to a empty CallNotification
+                                    visible = cachedCallData != null && CallNotificationManager.currentCallData != null
+                                ) {
+                                    cachedCallData?.let {
+                                        CallNotification(callData = it)
+                                    }
+                                }
+
+
+                                AnimatedVisibility(
+                                    visible = locationMessages.isNullOrEmpty()
+                                        .not() && lazyListState.isScrollInProgress.not()
+                                ) {
+                                    val isDiscussionSharingLocation =
+                                        discussionViewModel.discussionId?.let {
+                                            LocationSharingSubService.isDiscussionSharingLocation(
+                                                it
+                                            )
+                                        } == true
+                                    locationMessages?.let { messages ->
+                                        LocationSharing(messages = messages,
+                                            isDiscussionSharingLocation = isDiscussionSharingLocation,
+                                            onGotoMessage = { messageId ->
+                                                scrollToMessageRequest = ScrollRequest(messageId)
+                                            },
+                                            onStopSharingLocation = {
+                                                discussionViewModel.discussionId?.let {
+                                                    LocationSharingSubService.stopSharingInDiscussion(
+                                                        it, false
+                                                    )
+                                                }
+                                            },
+                                            onOpenMap = { openMap() }
                                         )
-                                    } ?: false
-                                locationMessages?.let { messages ->
-                                    LocationSharing(messages = messages,
-                                        isDiscussionSharingLocation = isDiscussionSharingLocation,
-                                        onGotoMessage = { messageId -> scrollToMessageRequest =ScrollRequest(messageId) },
-                                        onStopSharingLocation = {
-                                            discussionViewModel.discussionId?.let {
-                                                LocationSharingSubService.stopSharingInDiscussion(
-                                                    it, false
-                                                )
-                                            }
-                                        },
-                                        onOpenMap = { openMap() }
-                                    )
+                                    }
                                 }
                             }
                             AnimatedVisibility(
@@ -1004,7 +1101,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             }
 
             override fun editMessage(message: Message) {
-                enterEditMode(message)
+                enterEditModeIfAllowed(message)
                 composeMessageDelegate.showSoftInputKeyboard()
 
             }
@@ -1218,7 +1315,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
 
             if (discussion.isLocked) {
-                if (discussion.title == null || discussion.title.isEmpty()) {
+                if (discussion.title.isNullOrEmpty()) {
                     val spannableString =
                         SpannableString(getString(R.string.text_unnamed_discussion))
                     spannableString.setSpan(
@@ -1249,6 +1346,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     null
                 }
                 discussionNoChannelMessage.text = null
+                canEdit = false
                 setLocked(
                     locked = true,
                     lockedAsInactive = false,
@@ -1260,6 +1358,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     Discussion.TYPE_CONTACT -> {
                         toolBarTitle.text = discussion.title
                         if (!discussion.isPreDiscussion) {
+                            canEdit = true
                             toolbarClickedCallback = Runnable {
                                 App.openContactDetailsActivity(
                                     this@DiscussionActivity,
@@ -1273,6 +1372,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     Discussion.TYPE_GROUP -> {
                         toolBarTitle.text = discussion.title
                         if (!discussion.isPreDiscussion) {
+                            canEdit = true
                             toolbarClickedCallback = Runnable {
                                 App.openGroupDetailsActivity(
                                     this@DiscussionActivity,
@@ -1284,7 +1384,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     }
 
                     Discussion.TYPE_GROUP_V2 -> {
-                        if (discussion.title == null || discussion.title.isEmpty()) {
+                        if (discussion.title.isNullOrEmpty()) {
                             val spannableString =
                                 SpannableString(getString(R.string.text_unnamed_group))
                             spannableString.setSpan(
@@ -1298,6 +1398,11 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                             toolBarTitle.text = discussion.title
                         }
                         if (!discussion.isPreDiscussion) {
+                            App.runThread {
+                                canEdit = AppDatabase.getInstance()
+                                    .group2Dao()[discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier]
+                                    ?.ownPermissionEditOrRemoteDeleteOwnMessages == true
+                            }
                             toolbarClickedCallback = Runnable {
                                 App.openGroupV2DetailsActivity(
                                     this@DiscussionActivity,
@@ -1373,11 +1478,11 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                         toolBarSubtitle.visibility = View.VISIBLE
                         toolBarSubtitle.text = identityDetails.formatDisplayName(
                             JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                            SettingsActivity.getUppercaseLastName()
+                            SettingsActivity.uppercaseLastName
                         )
                     } else {
                         val posComp =
-                            identityDetails.formatPositionAndCompany(SettingsActivity.getContactDisplayNameFormat())
+                            identityDetails.formatPositionAndCompany(SettingsActivity.contactDisplayNameFormat)
                         if (posComp != null) {
                             toolBarSubtitle.visibility = View.VISIBLE
                             toolBarSubtitle.text = posComp
@@ -1446,7 +1551,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                 ExifInterface.ORIENTATION_NORMAL
                             )
                             bitmap = PreviewUtils.rotateBitmap(bitmap, orientation)
-                        } catch (e: IOException) {
+                        } catch (_: IOException) {
                             Logger.d("Error creating ExifInterface for file $backgroundImageAbsolutePath")
                         }
                         val finalBitmap = bitmap
@@ -1484,7 +1589,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
             // readReceipt
             val sendReadReceipt = discussionCustomization?.prefSendReadReceipt
-                ?: SettingsActivity.getDefaultSendReadReceipt()
+                ?: SettingsActivity.defaultSendReadReceipt
 
             if (sendReadReceipt && !this@DiscussionActivity.sendReadReceipt) {
                 // receipts were just switched to true, or settings were loaded --> send read receipts for all messages already ready for notification
@@ -1506,7 +1611,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             }
             val retainWipedOutboundMessages =
                 discussionCustomization?.prefRetainWipedOutboundMessages
-                    ?: SettingsActivity.getDefaultRetainWipedOutboundMessages()
+                    ?: SettingsActivity.defaultRetainWipedOutboundMessages
 
             this@DiscussionActivity.retainWipedOutboundMessages = retainWipedOutboundMessages
         }
@@ -1552,7 +1657,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
     }
 
     private fun onLocationClick(message: Message) {
-        when (SettingsActivity.getLocationIntegration()) {
+        when (SettingsActivity.locationIntegration) {
             OSM, CUSTOM_OSM, MAPS -> {
                 openMap(message)
             }
@@ -1574,14 +1679,16 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                 discussionViewModel.discussionId ?: -1,
                                 message.id,
                                 fyleAndStatuses[0].fyle.id,
-                                true
+                                true,
+                                false
                             )
                         } else {
                             // in case we don't have a single attachment, simply open the message gallery... This should never happen :)
                             App.openMessageGalleryActivity(
                                 this@DiscussionActivity,
                                 message.id,
-                                -1
+                                -1,
+                                false
                             )
                         }
                     }
@@ -1632,11 +1739,12 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     discussionViewModel.discussionId ?: -1,
                     message.id,
                     fyleAndStatuses[0].fyle.id,
-                    true
+                    true,
+                    false
                 )
             } else {
                 // in case we don't have a single attachment, simply open the message gallery... This should never happen :)
-                App.openMessageGalleryActivity(this@DiscussionActivity, message.id, -1)
+                App.openMessageGalleryActivity(this@DiscussionActivity, message.id, -1, false)
             }
         }
     }
@@ -1647,7 +1755,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             message,
             discussionViewModel.discussionId,
             null,
-            SettingsActivity.getLocationIntegration()
+            SettingsActivity.locationIntegration
         )?.show(
             supportFragmentManager,
             FULL_SCREEN_MAP_FRAGMENT_TAG
@@ -1670,7 +1778,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             val stopSharingItem =
                 locationMessagePopUp.menu.findItem(R.id.popup_action_location_message_stop_sharing)
             if (stopSharingItem != null) {
-                stopSharingItem.setVisible(true)
+                stopSharingItem.isVisible = true
                 val spannableString = SpannableString(stopSharingItem.title)
                 spannableString.setSpan(
                     ForegroundColorSpan(
@@ -1680,7 +1788,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                         )
                     ), 0, spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-                stopSharingItem.setTitle(spannableString)
+                stopSharingItem.title = spannableString
             }
         }
 
@@ -1689,7 +1797,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         if (message.totalAttachmentCount == 0) {
             val openPreviewItem =
                 locationMessagePopUp.menu.findItem(R.id.popup_action_location_message_open_preview)
-            openPreviewItem?.setVisible(false)
+            openPreviewItem?.isVisible = false
         }
 
         locationMessagePopUp.setOnMenuItemClickListener { item: MenuItem ->
@@ -1752,9 +1860,15 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         locationMessagePopUp.show()
     }
 
-    private fun enterEditMode(message: Message) {
-        if (message.jsonLocation != null) {
-            // prevent editing location messages
+    private fun enterEditModeIfAllowed(message: Message) {
+        if (message.messageType != Message.TYPE_OUTBOUND_MESSAGE
+            || message.wipeStatus == Message.WIPE_STATUS_WIPED
+            || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
+            || message.isLocationMessage
+            || locked == true
+            || canEdit != true
+        ) {
+            // prevent editing messages that cannot be edited
             return
         }
         discussionViewModel.discussionId?.let {
@@ -1777,7 +1891,6 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             }
             composeMessageViewModel.setDraftMessageEdit(message)
             composeMessageDelegate.showSoftInputKeyboard()
-
         }
     }
 
@@ -1814,7 +1927,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
         attachmentSpace = 2 * TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
-            AttachmentSpaceItemDecoration.attachmentDpSpace.toFloat(),
+            2f,
             metrics
         ).toInt()
         attachmentRecyclerViewWidth = min(
@@ -1870,12 +1983,19 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     }
                 }
             }
-        } else if (intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA) && intent.hasExtra(BYTES_CONTACT_IDENTITY_INTENT_EXTRA)) {
+        } else if (intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA) && intent.hasExtra(
+                BYTES_CONTACT_IDENTITY_INTENT_EXTRA
+            )
+        ) {
             val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
             val bytesContactIdentity = intent.getByteArrayExtra(BYTES_CONTACT_IDENTITY_INTENT_EXTRA)
             App.runThread {
-                val discussion = AppDatabase.getInstance().discussionDao()
-                    .getByContactWithAnyStatus(bytesOwnedIdentity, bytesContactIdentity)
+                val discussion =
+                    if (bytesOwnedIdentity != null && bytesContactIdentity != null) AppDatabase.getInstance()
+                        .discussionDao().getByContactWithAnyStatus(
+                            bytesOwnedIdentity,
+                            bytesContactIdentity
+                        ) else null
                 runOnUiThread {
                     if (discussion == null) {
                         discussionNotFound()
@@ -1884,14 +2004,22 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     }
                 }
             }
-        } else if (intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA) && intent.hasExtra(BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA)) {
+        } else if (intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA) && intent.hasExtra(
+                BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA
+            )
+        ) {
             val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
             val bytesGroupOwnerAndUid = intent.getByteArrayExtra(
                 BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA
             )
             App.runThread {
-                val discussion = AppDatabase.getInstance().discussionDao()
-                    .getByGroupOwnerAndUidWithAnyStatus(bytesOwnedIdentity, bytesGroupOwnerAndUid)
+                val discussion = if (bytesOwnedIdentity != null && bytesGroupOwnerAndUid != null)
+                    AppDatabase.getInstance().discussionDao().getByGroupOwnerAndUidWithAnyStatus(
+                        bytesOwnedIdentity,
+                        bytesGroupOwnerAndUid
+                    )
+                else
+                    null
                 runOnUiThread {
                     if (discussion == null) {
                         discussionNotFound()
@@ -1900,12 +2028,18 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     }
                 }
             }
-        } else if (intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA) && intent.hasExtra(BYTES_GROUP_IDENTIFIER_INTENT_EXTRA)) {
+        } else if (intent.hasExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA) && intent.hasExtra(
+                BYTES_GROUP_IDENTIFIER_INTENT_EXTRA
+            )
+        ) {
             val bytesOwnedIdentity = intent.getByteArrayExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA)
             val bytesGroupIdentifier = intent.getByteArrayExtra(BYTES_GROUP_IDENTIFIER_INTENT_EXTRA)
             App.runThread {
-                val discussion = AppDatabase.getInstance().discussionDao()
-                    .getByGroupIdentifierWithAnyStatus(bytesOwnedIdentity, bytesGroupIdentifier)
+                val discussion = if (bytesOwnedIdentity != null && bytesGroupIdentifier != null)
+                    AppDatabase.getInstance().discussionDao()
+                        .getByGroupIdentifierWithAnyStatus(bytesOwnedIdentity, bytesGroupIdentifier)
+                else
+                    null
                 runOnUiThread {
                     if (discussion == null) {
                         discussionNotFound()
@@ -1927,6 +2061,9 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
     private fun finishAndClearViewModel() {
         saveDraft()
+        discussionViewModel.discussionId?.let { discussionId ->
+            App.runThread(ApplyDiscussionRetentionPoliciesTask(discussionId))
+        }
         discussionViewModel.deselectAll()
         discussionViewModel.discussionId = null
         finish()
@@ -1979,17 +2116,14 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
     override fun onDestroy() {
         super.onDestroy()
         audioAttachmentServiceBinding?.release()
-        discussionViewModel.discussionId?.let { discussionId ->
-            App.runThread(ApplyDiscussionRetentionPoliciesTask(discussionId))
-        }
     }
 
     override fun onPause() {
         super.onPause()
         AndroidNotificationManager.setCurrentShowingDiscussionId(null)
+        saveDraft()
         if (markAsReadOnPause) {
             markMessagesRead(true)
-            saveDraft()
         }
     }
 
@@ -2064,7 +2198,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                         )
                     ), 0, spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-                deleteItem.setTitle(spannableString)
+                deleteItem.title = spannableString
             }
         }
         return true
@@ -2074,7 +2208,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         val itemId = item.itemId
         when (itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
                 return true
             }
 
@@ -2154,9 +2288,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     val discussion = discussionViewModel.discussion.value
                     if (discussion != null) {
                         App.runThread {
-                            val title = discussion.title.ifEmpty {
-                                getString(R.string.text_unnamed_discussion)
-                            }
+                            val title = discussion.title.takeUnless { it.isNullOrEmpty() }
+                                ?: getString(R.string.text_unnamed_discussion)
                             val builder = ShortcutActivity.getShortcutInfo(discussion.id, title)
                             if (builder != null) {
                                 try {
@@ -2223,11 +2356,15 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                             .setTitle(R.string.dialog_title_unmute_notifications)
                             .setPositiveButton(R.string.button_label_unmute_notifications) { _: DialogInterface?, _: Int ->
                                 App.runThread {
-                                    val reDiscussionCustomization = AppDatabase.getInstance()
-                                        .discussionCustomizationDao()[discussionCustomization.discussionId]
-                                    reDiscussionCustomization.prefMuteNotifications = false
-                                    AppDatabase.getInstance().discussionCustomizationDao()
-                                        .update(reDiscussionCustomization)
+                                    val reDiscussionCustomization = AppDatabase.getInstance().discussionCustomizationDao()[discussionCustomization.discussionId]
+                                    reDiscussionCustomization?.let {
+                                        reDiscussionCustomization.prefMuteNotifications = false
+                                        AppDatabase.getInstance().discussionCustomizationDao()
+                                            .update(reDiscussionCustomization)
+                                        discussionViewModel.discussion.value?.propagateMuteSettings(
+                                            reDiscussionCustomization
+                                        )
+                                    }
                                 }
                             }
                             .setNegativeButton(R.string.button_label_cancel, null)
@@ -2311,7 +2448,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         val id = view.id
 
         if (id == R.id.back_button || id == R.id.back_button_backdrop) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         } else if (id == R.id.title_bar_initial_view) {
             val alreadyShownFragment = supportFragmentManager.findFragmentByTag(
                 FULL_SCREEN_IMAGE_FRAGMENT_TAG
@@ -2340,11 +2477,23 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            REQUEST_CODE_SAVE_ATTACHMENT -> {
-                if (resultCode == RESULT_OK && data != null) {
+    private fun saveAttachment() {
+        if (discussionViewModel.longClickedFyleAndStatus?.fyle?.isComplete == true) {
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+                .addCategory(Intent.CATEGORY_OPENABLE)
+                .setType(discussionViewModel.longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.nonNullMimeType)
+                .putExtra(
+                    Intent.EXTRA_TITLE,
+                    discussionViewModel.longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.fileName
+                )
+            App.startActivityForResult(this, saveAttachmentLauncher, intent)
+        }
+    }
+
+    private val saveAttachmentLauncher =
+        registerForActivityResult(StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                result.data?.let { data ->
                     val uri = data.data
                     if (StringUtils.validateUri(uri)) {
                         App.runThread {
@@ -2376,7 +2525,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                         Toast.LENGTH_SHORT
                                     )
                                 }
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 App.toast(
                                     R.string.toast_message_failed_to_save_attachment,
                                     Toast.LENGTH_SHORT
@@ -2386,9 +2535,30 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     }
                 }
             }
+        }
 
-            REQUEST_CODE_SAVE_ALL_ATTACHMENTS -> {
-                if (resultCode == RESULT_OK && data != null && discussionViewModel.longClickedFyleAndStatus != null) {
+    private fun saveAllAttachments() {
+        if (discussionViewModel.longClickedFyleAndStatus != null) {
+            val builder =
+                SecureAlertDialogBuilder(this@DiscussionActivity, R.style.CustomAlertDialog)
+                    .setTitle(R.string.dialog_title_save_all_attachments)
+                    .setMessage(R.string.dialog_message_save_all_attachments)
+                    .setPositiveButton(R.string.button_label_ok) { _: DialogInterface?, _: Int ->
+                        App.startActivityForResult(
+                            this,
+                            saveAllAttachmentsLauncher,
+                            Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                        )
+                    }
+                    .setNegativeButton(R.string.button_label_cancel, null)
+            builder.create().show()
+        }
+    }
+
+    private val saveAllAttachmentsLauncher =
+        registerForActivityResult(StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                result.data?.let { data ->
                     val folderUri = data.data
                     if (StringUtils.validateUri(folderUri) && discussionViewModel.longClickedFyleAndStatus != null) {
                         App.runThread(
@@ -2402,7 +2572,6 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                 }
             }
         }
-    }
 
     private fun markMessagesRead(wipeReadOnceMessages: Boolean) {
         val messageIds = messageIdsToMarkAsRead.toTypedArray<Long>()
@@ -2411,6 +2580,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         if (messageIds.isNotEmpty() || editedMessageIds.isNotEmpty()) {
             val latestTimestamp = latestServerTimestampOfMessageToMarkAsRead
             val discussion = discussionViewModel.discussion.value
+            val discussionId = discussionViewModel.discussionId
 
             editedMessageIdsToMarkAsSeen.clear()
             if (wipeReadOnceMessages) {
@@ -2418,6 +2588,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                 messageIdsToMarkAsRead.clear()
                 latestServerTimestampOfMessageToMarkAsRead = 0
             }
+
 
             App.runThread {
                 val db = AppDatabase.getInstance()
@@ -2428,6 +2599,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                 }
                 db.messageDao().markMessagesRead(messageIds)
                 db.messageDao().markEditedMessagesSeen(editedMessageIds)
+                UnreadCountsSingleton.markMessagesRead(discussionId, messageIds)
+
                 if (wipeReadOnceMessages) {
                     for (message in db.messageDao().getWipeOnReadSubset(messageIds)) {
                         db.runInTransaction {
@@ -2530,7 +2703,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                 composeView.parent as View,
                 offset.x.roundToInt(),
                 offset.y.roundToInt(),
-                message.id
+                message.id,
+                statusBarTopPadding
             )
         }
     }
@@ -2552,7 +2726,10 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                             discussionViewModel.discussion.value?.let { discussion ->
                                 if (!discussion.bytesDiscussionIdentifier.contentEquals(message.senderIdentifier)) {
                                     val contact: Contact? = AppDatabase.getInstance().contactDao()
-                                        .get(discussion.bytesOwnedIdentity, message.senderIdentifier)
+                                        .get(
+                                            discussion.bytesOwnedIdentity,
+                                            message.senderIdentifier
+                                        )
                                     contact?.let {
                                         runOnUiThread {
                                             App.openOneToOneDiscussionActivity(
@@ -2565,7 +2742,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                     }
                                 }
                             }
-                        } catch (ignored: Exception) { }
+                        } catch (_: Exception) {
+                        }
                     }
                 }
             }
@@ -2586,7 +2764,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             discussionViewModel.longClickedFyleAndStatus = longClickedFyleAndStatus
             runOnUiThread {
                 val popup = PopupMenu(this, clickedView)
-                if (visibility == HIDDEN || readOnce) {
+                if (visibility == Visibility.HIDDEN || readOnce) {
                     popup.inflate(R.menu.popup_attachment_delete)
                 } else if (longClickedFyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_DRAFT) {
                     popup.inflate(R.menu.popup_attachment_incomplete_or_draft)
@@ -2651,10 +2829,11 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                             ?: -1,
                         discussionViewModel.longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.fyleId
                             ?: -1,
-                        true
+                        true,
+                        false
                     )
                 } else {
-                    App.openFyleInExternalViewer(
+                    App.openFyleViewer(
                         this,
                         discussionViewModel.longClickedFyleAndStatus
                     ) {
@@ -2684,35 +2863,12 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             }
 
             R.id.popup_action_save_attachment -> {
-                if (discussionViewModel.longClickedFyleAndStatus?.fyle?.isComplete == true) {
-                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-                        .addCategory(Intent.CATEGORY_OPENABLE)
-                        .setType(discussionViewModel.longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.nonNullMimeType)
-                        .putExtra(
-                            Intent.EXTRA_TITLE,
-                            discussionViewModel.longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.fileName
-                        )
-                    App.startActivityForResult(this, intent, REQUEST_CODE_SAVE_ATTACHMENT)
-                }
+                saveAttachment()
                 return true
             }
 
             R.id.popup_action_save_all_attachments -> {
-                if (discussionViewModel.longClickedFyleAndStatus != null) {
-                    val builder =
-                        SecureAlertDialogBuilder(this@DiscussionActivity, R.style.CustomAlertDialog)
-                            .setTitle(R.string.dialog_title_save_all_attachments)
-                            .setMessage(R.string.dialog_message_save_all_attachments)
-                            .setPositiveButton(R.string.button_label_ok) { _: DialogInterface?, _: Int ->
-                                App.startActivityForResult(
-                                    this,
-                                    Intent(Intent.ACTION_OPEN_DOCUMENT_TREE),
-                                    REQUEST_CODE_SAVE_ALL_ATTACHMENTS
-                                )
-                            }
-                            .setNegativeButton(R.string.button_label_cancel, null)
-                    builder.create().show()
-                }
+                saveAllAttachments()
                 return true
             }
 
@@ -2761,14 +2917,11 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         private const val ALREADY_PLAYED_INTENT_EXTRA = "already_played"
         const val DISCUSSION_ID_INTENT_EXTRA: String = "discussion_id"
         const val MESSAGE_ID_INTENT_EXTRA: String = "msg_id"
+        const val SEARCH_QUERY_INTENT_EXTRA: String = "search_query"
         const val BYTES_OWNED_IDENTITY_INTENT_EXTRA: String = "bytes_owned_identity"
         const val BYTES_CONTACT_IDENTITY_INTENT_EXTRA: String = "bytes_contact_identity"
         const val BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA: String = "bytes_group_uid"
         const val BYTES_GROUP_IDENTIFIER_INTENT_EXTRA: String = "bytes_group_identifier"
-
-        const val REQUEST_CODE_SAVE_ATTACHMENT = 5
-        const val REQUEST_CODE_SAVE_ALL_ATTACHMENTS = 6
-
 
         const val SHORTCUT_PREFIX: String = "discussion_"
     }

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -237,14 +237,12 @@ public class Contact {
 
     @NonNull
     private String computeFullSearchDisplayName(JsonIdentityDetails jsonIdentityDetails) {
+        String custDisp = this.customDisplayName == null ? "" : this.customDisplayName;
+        String persNote = personalNote == null ? "" : personalNote;
         if (jsonIdentityDetails == null) {
-            return this.customDisplayName == null ? "" : this.customDisplayName;
+            return StringUtils.unAccent(custDisp + " " + persNote);
         } else {
-            if (customDisplayName == null) {
-                return StringUtils.unAccent(jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false));
-            } else {
-                return StringUtils.unAccent(customDisplayName + " " + jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false));
-            }
+            return StringUtils.unAccent(custDisp + " " + jsonIdentityDetails.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false) + " " + persNote);
         }
     }
 
@@ -272,6 +270,11 @@ public class Contact {
             this.sortDisplayName = ContactDisplayNameFormatChangedTask.computeSortDisplayName(identityDetails, customDisplayName, SettingsActivity.getSortContactsByLastName());
         }
         this.fullSearchDisplayName = computeFullSearchDisplayName(identityDetails);
+    }
+
+    public void setPersonalNote(@Nullable String personalNote) {
+        this.personalNote = personalNote;
+        this.fullSearchDisplayName = computeFullSearchDisplayName(getIdentityDetails());
     }
 
     @Nullable

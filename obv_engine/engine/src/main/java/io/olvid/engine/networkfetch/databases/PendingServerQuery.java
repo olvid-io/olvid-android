@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -78,7 +78,7 @@ public class PendingServerQuery implements ObvDatabase {
             pendingServerQuery.insert();
             return pendingServerQuery;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

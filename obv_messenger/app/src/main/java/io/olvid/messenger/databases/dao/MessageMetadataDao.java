@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
@@ -31,7 +33,7 @@ import io.olvid.messenger.databases.entity.MessageMetadata;
 @Dao
 public interface MessageMetadataDao {
     @Insert
-    long insert(MessageMetadata messageMetadata);
+    long insert(@NonNull MessageMetadata messageMetadata);
 
     @Query("UPDATE " + MessageMetadata.TABLE_NAME +
             " SET " + MessageMetadata.TIMESTAMP + " = :timestamp " +
@@ -47,7 +49,7 @@ public interface MessageMetadataDao {
     @Query("SELECT * FROM " + MessageMetadata.TABLE_NAME +
             " WHERE " + MessageMetadata.MESSAGE_ID + " = :messageId " +
             " AND " + MessageMetadata.KIND + " = :kind")
-    MessageMetadata getByKind(long messageId, int kind);
+    @Nullable MessageMetadata getByKind(long messageId, int kind);
 
     @Query("SELECT * FROM " + MessageMetadata.TABLE_NAME +
             " WHERE " + MessageMetadata.MESSAGE_ID + " = :messageId " +

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -95,7 +95,7 @@ public class IdentityDetailsSyncSnapshot implements ObvSyncSnapshotNode {
                 photoServerLabel = new UID(photo_server_label);
                 photoServerKey = (AuthEncKey) new Encoded(photo_server_key).decodeSymmetricKey();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 photoServerLabel = null;
                 photoServerKey = null;
             }
@@ -125,7 +125,7 @@ public class IdentityDetailsSyncSnapshot implements ObvSyncSnapshotNode {
                 photoServerLabel = new UID(photo_server_label);
                 photoServerKey = (AuthEncKey) new Encoded(photo_server_key).decodeSymmetricKey();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 photoServerLabel = null;
                 photoServerKey = null;
             }

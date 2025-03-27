@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -47,7 +47,7 @@ public class PriorityOperationQueue {
     }
 
     public void queue(PriorityOperation op) {
-        if (op.getDependencies().size() > 0) {
+        if (!op.getDependencies().isEmpty()) {
             Logger.e("Cannot queue an operation with dependencies into a PriorityOperationQueue.");
             return;
         }
@@ -137,7 +137,7 @@ public class PriorityOperationQueue {
                             op.execute();
                         } catch (Exception e) {
                             Logger.e("Exception in operation that could have killed a queue!");
-                            e.printStackTrace();
+                            Logger.x(e);
                         }
 
                         lockOnExecutingOperations.lock();

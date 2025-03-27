@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.EncryptedBytes;
@@ -306,7 +307,7 @@ public class DownloadGroupV2PhotoProtocol extends ConcreteProtocol {
                 //noinspection ResultOfMethodCallIgnored
                 new File(protocolManagerSession.engineBaseDirectory, receivedMessage.photoPathToDelete).delete();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
             return new PhotoDownloadedState();
         }

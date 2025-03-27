@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,7 @@
 
 package io.olvid.messenger;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -111,11 +112,14 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                             }
                         }
 
+                        List<String> fullSearchItems = new ArrayList<>();
+
                         // add members
                         boolean messageInserted = false;
                         for (byte[] bytesGroupMemberIdentity : obvGroup.getBytesGroupMembersIdentities()) {
                             Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesGroupMemberIdentity);
                             if (contact != null) {
+                                fullSearchItems.add(contact.fullSearchDisplayName);
                                 ContactGroupJoin contactGroupJoin = new ContactGroupJoin(bytesGroupUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                                 db.contactGroupJoinDao().insert(contactGroupJoin);
                                 Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity);
@@ -144,7 +148,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                         db.groupDao().getGroupMembersFirstNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
                                         :
                                         db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid));
-                        db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
+                        db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.computeFullSearch(fullSearchItems));
 
                         // if createdByMeOnOtherDevice, query my devices for the sharedSettings
                         if (obvGroup.getBytesGroupOwnerIdentity() == null && createdOnOtherDevice && db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(bytesOwnedIdentity)) {
@@ -205,7 +209,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                                         :
                                                         db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
                                         );
-                                        db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
+                                        db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.fullSearchField + " " + contact.fullSearchDisplayName);
 
                                         Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity);
                                         db.messageDao().insert(groupJoinedMessage);
@@ -284,7 +288,15 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                                     :
                                                     db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
                                     );
-                                    db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames);
+
+                                    List<String> fullSearchItems = new ArrayList<>();
+                                    for (Contact groupContact : db.contactGroupJoinDao().getGroupContactsSync(bytesOwnedIdentity, bytesGroupUid)) {
+                                        if (groupContact != null) {
+                                            fullSearchItems.add(groupContact.fullSearchDisplayName);
+                                        }
+                                    }
+
+                                    db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.computeFullSearch(fullSearchItems));
 
                                     Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, contact.bytesContactIdentity);
                                     db.messageDao().insert(groupLeftMessage);
@@ -430,21 +442,24 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_GROUP_PUBLISHED_DETAILS_BYTES_OWNED_IDENTITY_KEY);
                 byte[] bytesGroupOwnerAndUid = (byte[]) userInfo.get(EngineNotifications.NEW_GROUP_PUBLISHED_DETAILS_BYTES_GROUP_OWNER_AND_UID_KEY);
 
-                Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUid);
-                if (group != null && group.bytesGroupOwnerIdentity != null) {
-                    try {
-                        group.newPublishedDetails = Contact.PUBLISHED_DETAILS_NEW_UNSEEN;
-                        db.groupDao().updatePublishedDetailsStatus(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.newPublishedDetails);
-                        Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupOwnerAndUid);
-                        if (discussion != null) {
-                            Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, group.bytesGroupOwnerIdentity);
-                            db.messageDao().insert(newDetailsMessage);
-                            if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
-                                db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                if (bytesOwnedIdentity != null && bytesGroupOwnerAndUid != null) {
+                    Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUid);
+                    if (group != null && group.bytesGroupOwnerIdentity != null) {
+                        try {
+                            group.newPublishedDetails = Contact.PUBLISHED_DETAILS_NEW_UNSEEN;
+                            db.groupDao().updatePublishedDetailsStatus(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.newPublishedDetails);
+                            Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupOwnerAndUid);
+                            if (discussion != null) {
+                                Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, group.bytesGroupOwnerIdentity);
+                                newDetailsMessage.id = db.messageDao().insert(newDetailsMessage);
+                                UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
+                                if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
+                                    db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                                }
                             }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
                 break;

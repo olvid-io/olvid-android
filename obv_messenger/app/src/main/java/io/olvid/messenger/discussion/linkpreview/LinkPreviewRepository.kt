@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -51,7 +51,7 @@ class LinkPreviewRepository {
         .cache(null)
         .addInterceptor(UserAgentInterceptor(this::userAgentForUrl))
         .apply {
-            if (!SettingsActivity.getNoNotifyCertificateChangeForPreviews()) {
+            if (!SettingsActivity.noNotifyCertificateChangeForPreviews) {
                 AppSingleton.getSslSocketFactory()?.let { sslSocketFactory ->
                     try {
                         val trustManagerFactory = TrustManagerFactory.getInstance(

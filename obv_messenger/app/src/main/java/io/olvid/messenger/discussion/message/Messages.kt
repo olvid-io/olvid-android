@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -39,7 +39,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -104,11 +103,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.text.util.LinkifyCompat
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.engine.datatypes.ObvBase64
@@ -124,17 +123,21 @@ import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.Discussion
+import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.Group
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.MessageExpiration
 import io.olvid.messenger.databases.entity.MessageMetadata
+import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.discussion.DiscussionSearch
 import io.olvid.messenger.discussion.DiscussionViewModel
 import io.olvid.messenger.discussion.linkpreview.LinkPreview
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
+import io.olvid.messenger.discussion.message.attachments.Attachments
+import io.olvid.messenger.discussion.search.DiscussionSearch
+import io.olvid.messenger.discussion.search.DiscussionSearchViewModel
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.contacts.PublishedDetails
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity
@@ -252,10 +255,13 @@ fun Message(
     linkPreviewViewModel: LinkPreviewViewModel? = null,
     messageExpiration: MessageExpiration? = null,
     discussionViewModel: DiscussionViewModel? = null,
+    discussionSearch: DiscussionSearch? = null,
     audioAttachmentServiceBinding: AudioAttachmentServiceBinding?,
     openDiscussionDetailsCallback: (() -> Unit)? = null,
     openOnClick: Boolean = true,
     openViewerCallback: (() -> Unit)? = null,
+    saveAttachment: () -> Unit = {},
+    saveAllAttachments: () -> Unit = {}
 ) {
     Box {
         val maxWidth = 400.dp
@@ -380,7 +386,11 @@ fun Message(
                                         .widthIn(max = maxWidth)
                                         .align(Alignment.End)
 
-                                    Message.TYPE_INBOUND_MESSAGE, Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> Modifier
+                                    Message.TYPE_INBOUND_MESSAGE -> Modifier
+                                        .widthIn(max = maxWidth)
+
+                                    Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> Modifier
+                                        .fillMaxWidth()
                                         .widthIn(max = maxWidth)
 
                                     else -> Modifier
@@ -444,6 +454,7 @@ fun Message(
                             onLongClick = if (message.isLocationMessage) onLocationLongClick else onLongClick,
                             onCallBackButtonClicked = onCallBackButtonClicked,
                             discussionViewModel = discussionViewModel,
+                            discussionSearch = discussionSearch,
                             scale = scale,
                             openDiscussionDetailsCallback = openDiscussionDetailsCallback,
                             messageBubbleInteractionSource = interactionSource
@@ -463,12 +474,17 @@ fun Message(
                         )
 
                         // LinkPreview
-                        LinkPreview(
-                            message = message,
-                            discussionViewModel = discussionViewModel,
-                            linkPreviewViewModel = linkPreviewViewModel,
-                            onLongClick = onLongClick
-                        )
+                        if (!message.isLocationMessage) {
+                            LinkPreview(
+                                message = message,
+                                discussionViewModel = discussionViewModel,
+                                linkPreviewViewModel = linkPreviewViewModel,
+                                highlighter = discussionSearch?.viewModel?.let {
+                                    it::highlight
+                                },
+                                onLongClick = onLongClick
+                            )
+                        }
 
                         // Attachments
                         if (message.hasAttachments() && message.isLocationMessage.not()) {
@@ -480,6 +496,9 @@ fun Message(
                                     openOnClick = openOnClick,
                                     onAttachmentLongClick = onAttachmentLongClick,
                                     openViewerCallback = openViewerCallback,
+                                    discussionSearchViewModel = discussionSearch?.viewModel,
+                                    saveAttachment = saveAttachment,
+                                    saveAllAttachments = saveAllAttachments
                                 )
                             }
                         }
@@ -546,7 +565,7 @@ fun MessageInnerStack(
 
 @Composable
 private fun Forwarded(message: Message) {
-    if (message.forwarded) {
+    if (message.forwarded && message.edited == Message.EDITED_NONE) {
         Row(
             modifier = Modifier
                 .padding(horizontal = 4.dp)
@@ -641,18 +660,22 @@ private fun MessageFooter(
             color = Color(0xCC7D7D7D)
         )
         // outbound status
-        getOutboundStatusIcon(message)?.let {
-            Image(
-                modifier = Modifier
-                    .padding(start = 4.dp)
-                    .height(height = 16.dp)
-                    .width(width = (16 * getOutboundStatusIconAspectRation(message)).dp),
-                painter = painterResource(id = it),
-                contentDescription = stringResource(
-                    id = R.string.content_description_message_status
-                )
+        OutboundMessageStatus(modifier = Modifier.padding(start = 4.dp), message = message)
+    }
+}
+
+@Composable
+fun OutboundMessageStatus(modifier: Modifier = Modifier, size: Dp = 16.dp, message: Message) {
+    getOutboundStatusIcon(message)?.let {
+        Image(
+            modifier = modifier
+                .height(height = size)
+                .width(width = (size.value * getOutboundStatusIconAspectRation(message)).dp),
+            painter = painterResource(id = it),
+            contentDescription = stringResource(
+                id = R.string.content_description_message_status
             )
-        }
+        )
     }
 }
 
@@ -700,46 +723,37 @@ private fun Replied(
                 .background(color = colorResource(id = R.color.almostWhite))
                 .padding(4.dp)
         ) {
-            Text(text = message.jsonMessage?.jsonReply?.senderIdentifier?.let {
-                AppSingleton.getContactCustomDisplayName(it)
-            } ?: stringResource(id = R.string.text_deleted_contact),
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = message.jsonMessage?.jsonReply?.senderIdentifier?.let {
+                    AppSingleton.getContactCustomDisplayName(it)
+                } ?: stringResource(id = R.string.text_deleted_contact),
                 style = OlvidTypography.body2,
                 fontWeight = FontWeight.Medium,
                 color = color)
             repliedToMessage?.value?.let { repliedToMessage ->
-                if (repliedToMessage == Message.emptyMessage()) {
-                    Text(
-                        modifier = Modifier.padding(top = 2.dp),
-                        text = "",
-                        color = colorResource(id = R.color.greyTint),
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                } else {
-                    repliedToMessage.contentBody?.let { replyBody ->
-                        Text(
-                            modifier = Modifier.padding(top = 2.dp),
-                            text = AnnotatedString(replyBody).formatMarkdown(
-                                complete = true,
-                                context = context,
-                                message = repliedToMessage,
-                                bytesOwnedIdentity = discussionViewModel?.discussion?.value?.bytesOwnedIdentity,
-                                backgroundColor = Color(
-                                    ContextCompat.getColor(
-                                        context,
-                                        R.color.greySubtleOverlay
-                                    )
-                                )
-                            ),
-                            color = colorResource(id = R.color.greyTint),
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis,
-                            inlineContent = inlineContentMap(.9f)
+                Text(
+                    modifier = Modifier.padding(top = 2.dp),
+                    text = AnnotatedString(repliedToMessage.getStringContent(context)).formatMarkdown(
+                        complete = true,
+                        context = context,
+                        message = repliedToMessage,
+                        bytesOwnedIdentity = discussionViewModel?.discussion?.value?.bytesOwnedIdentity,
+                        backgroundColor = Color(
+                            ContextCompat.getColor(
+                                context,
+                                R.color.greySubtleOverlay
+                            )
                         )
-                    }
-                    if (repliedToMessage.hasAttachments()) {
-                        AttachmentCount(repliedToMessage.totalAttachmentCount)
-                    }
+                    ),
+                    style = OlvidTypography.body2,
+                    color = colorResource(id = R.color.greyTint),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    inlineContent = inlineContentMap(.9f)
+                )
+                if (repliedToMessage.hasAttachments()) {
+                    AttachmentCount(repliedToMessage.totalAttachmentCount)
                 }
             } ?: Text(
                 text = stringResource(id = R.string.text_original_message_not_found),
@@ -780,8 +794,6 @@ const val INLINE_CONTENT_TAG =
     "androidx.compose.foundation.text.inlineContent" // WARNING: this string is copied from the InlineTextContent source and may change without notice....
 const val QUOTE_BLOCK_START_ANNOTATION = "quote"
 
-
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MessageBody(
     message: Message,
@@ -791,10 +803,27 @@ fun MessageBody(
     onCallBackButtonClicked: (callLogId: Long) -> Unit,
     scale: Float,
     discussionViewModel: DiscussionViewModel? = null,
+    discussionSearch: DiscussionSearch? = null,
     openDiscussionDetailsCallback: (() -> Unit)? = null,
     messageBubbleInteractionSource: MutableInteractionSource,
 ) {
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        if (message.isContentHidden) {
+            val expiration: JsonExpiration? = message.jsonMessage.jsonExpiration
+
+            expiration?.let {
+                autoOpenInboundEphemeralIfNeeded(
+                    discussionViewModel?.discussionCustomization?.value,
+                    discussionViewModel?.discussion?.value?.bytesOwnedIdentity,
+                    it,
+                    message.id,
+                )
+            }
+        }
+    }
+
     if (message.wipeStatus == Message.WIPE_STATUS_WIPED || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
         var text by remember {
             mutableStateOf(message.getStringContent(context))
@@ -872,7 +901,10 @@ fun MessageBody(
             discussionId = discussionViewModel?.discussionId,
             scale = scale,
             onClick = onClick,
-            onLongClick = onLongClick
+            onLongClick = onLongClick,
+            highlighter = discussionSearch?.viewModel?.let {
+                it::highlight
+            },
         )
     } else {
         when (message.messageType) {
@@ -932,33 +964,13 @@ fun MessageBody(
             }
 
             Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> {
-                val expiration = message.jsonMessage.jsonExpiration
-                val readOnce = expiration.readOnce == true
-
-                // Check for auto-open
-                discussionViewModel?.discussionCustomization?.value?.let { discussionCustomization ->
-                    // check the ephemeral settings match
-                    if (readOnce == discussionCustomization.settingReadOnce && expiration.getVisibilityDuration() == discussionCustomization.settingVisibilityDuration && expiration.getExistenceDuration() == discussionCustomization.settingExistenceDuration) {
-                        // settings are the default, verify if auto-open
-                        val autoOpen =
-                            if (discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages != null) discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages == true else SettingsActivity.getDefaultAutoOpenLimitedVisibilityInboundMessages()
-                        if (autoOpen) {
-                            App.runThread {
-                                discussionViewModel.discussion.value?.bytesOwnedIdentity?.let {
-                                    InboundEphemeralMessageClicked(
-                                        it,
-                                        message.id
-                                    ).run()
-                                }
-                            }
-                        }
-                    }
-                }
-
                 if (message.isWithoutText.not()) {
+                    val expiration: JsonExpiration? = message.jsonMessage.jsonExpiration
+
                     EphemeralVisibilityExplanation(
-                        duration = expiration.visibilityDuration,
-                        readOnce = readOnce,
+                        modifier = Modifier.fillMaxWidth(),
+                        duration = expiration?.visibilityDuration,
+                        readOnce = expiration?.readOnce == true,
                     ) {
                         App.runThread {
                             discussionViewModel?.discussion?.value?.bytesOwnedIdentity?.let {
@@ -1043,12 +1055,17 @@ fun MessageBody(
                 val linkUrl by remember {
                     derivedStateOf { discussionViewModel?.messageLinkPreviewUrlCache?.get(message.id) }
                 }
-                val text = remember(linkUrl, DiscussionSearch.filterRegexes, message.contentBody) {
+                val text = remember(
+                    linkUrl,
+                    discussionSearch?.viewModel?.filterRegexes,
+                    message.contentBody
+                ) {
                     getAnnotatedStringContent(
                         context,
                         message,
                         linkUrl,
-                        discussionViewModel?.discussion?.value?.bytesOwnedIdentity
+                        discussionViewModel?.discussion?.value?.bytesOwnedIdentity,
+                        discussionSearch?.viewModel
                     )
                 }
                 val uriHandler = LocalUriHandler.current
@@ -1089,24 +1106,21 @@ fun MessageBody(
                                                 val userIdentifier =
                                                     ObvBase64.decode(annotation.item)
                                                 if (bytesOwnedIdentity.contentEquals(userIdentifier)) {
-                                                    startActivity(
-                                                        context,
+                                                    context.startActivity(
                                                         Intent(
                                                             context,
                                                             OwnedIdentityDetailsActivity::class.java
-                                                        ),
-                                                        null
+                                                        )
                                                     )
                                                 } else {
                                                     // check that there is indeed a contact
                                                     App.runThread {
-                                                        if (AppDatabase
+                                                        val bytesOwnedIdentity =
+                                                            AppSingleton.getBytesCurrentIdentity()
+                                                        if (bytesOwnedIdentity != null
+                                                            && AppDatabase
                                                                 .getInstance()
-                                                                .contactDao()
-                                                                .get(
-                                                                    AppSingleton.getBytesCurrentIdentity(),
-                                                                    userIdentifier
-                                                                ) != null
+                                                                .contactDao()[bytesOwnedIdentity, userIdentifier] != null
                                                         ) {
                                                             App.openContactDetailsActivity(
                                                                 context,
@@ -1151,6 +1165,34 @@ fun MessageBody(
         }
     }
 }
+
+fun autoOpenInboundEphemeralIfNeeded(
+    discussionCustomization: DiscussionCustomization?,
+    bytesOwnedIdentity: ByteArray?,
+    expiration: JsonExpiration,
+    messageId: Long,
+) {
+    // Check for auto-open
+    discussionCustomization?.let { discussionCustomization ->
+        // check the ephemeral settings match
+        if ((expiration.readOnce == true) == discussionCustomization.settingReadOnce && expiration.getVisibilityDuration() == discussionCustomization.settingVisibilityDuration && expiration.getExistenceDuration() == discussionCustomization.settingExistenceDuration) {
+            // settings are the default, verify if auto-open
+            val autoOpen =
+                if (discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages != null) discussionCustomization.prefAutoOpenLimitedVisibilityInboundMessages == true else SettingsActivity.defaultAutoOpenLimitedVisibilityInboundMessages
+            if (autoOpen) {
+                App.runThread {
+                    bytesOwnedIdentity?.let {
+                        InboundEphemeralMessageClicked(
+                            it,
+                            messageId
+                        ).run()
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun inlineContentMap(scale: Float = 1f) = mapOf(
@@ -1203,7 +1245,8 @@ fun getAnnotatedStringContent(
     context: Context,
     message: Message,
     linkPreviewUrl: String? = null,
-    bytesOwnedIdentity: ByteArray? = null
+    bytesOwnedIdentity: ByteArray? = null,
+    discussionSearchViewModel: DiscussionSearchViewModel?,
 ): AnnotatedString {
     return buildAnnotatedString {
         var stringContent = message.getStringContent(context)
@@ -1252,17 +1295,25 @@ fun getAnnotatedStringContent(
             )
         }
     }.run {
-        DiscussionSearch.highlight(
-            content = this,
-            context = context
-        )
+        if (message.messageType == Message.TYPE_INBOUND_MESSAGE || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+            discussionSearchViewModel?.highlight(
+                content = this,
+                context = context
+            ) ?: this
+        } else {
+            this
+        }
     }
 }
 
 @DrawableRes
-fun getOutboundStatusIcon(message: Message): Int? =
+private fun getOutboundStatusIcon(message: Message): Int? =
     if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
         when (message.status) {
+            Message.STATUS_DRAFT -> {
+                R.drawable.ic_message_status_draft
+            }
+
             Message.STATUS_SENT -> {
                 R.drawable.ic_message_status_sent
             }
@@ -1318,6 +1369,7 @@ fun getOutboundStatusIcon(message: Message): Int? =
 fun getOutboundStatusIconAspectRation(message: Message): Float =
     if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
         when (message.status) {
+            Message.STATUS_DRAFT,
             Message.STATUS_SENT,
             Message.STATUS_DELIVERED,
             Message.STATUS_DELIVERED_AND_READ,

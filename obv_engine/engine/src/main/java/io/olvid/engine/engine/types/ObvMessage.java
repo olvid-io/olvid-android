@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,11 +19,9 @@
 
 package io.olvid.engine.engine.types;
 
-import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.DecryptedApplicationMessage;
 import io.olvid.engine.datatypes.containers.ReceivedAttachment;
-import io.olvid.engine.metamanager.NetworkFetchDelegate;
 
 public class ObvMessage {
     private final UID messageUid;
@@ -32,6 +30,7 @@ public class ObvMessage {
     private final long localDownloadTimestamp;
     private final byte[] messagePayload;
     private final byte[] bytesFromIdentity;
+    private final byte[] bytesFromDeviceUid;
     private final byte[] bytesToIdentity;
     private final ObvAttachment[] attachments;
 
@@ -60,6 +59,10 @@ public class ObvMessage {
         return bytesFromIdentity;
     }
 
+    public byte[] getBytesFromDeviceUid() {
+        return bytesFromDeviceUid;
+    }
+
     public byte[] getBytesToIdentity() {
         return bytesToIdentity;
     }
@@ -68,44 +71,30 @@ public class ObvMessage {
         return attachments;
     }
 
-    public ObvMessage(NetworkFetchDelegate networkFetchDelegate, Identity ownedIdentity, UID messageUid) {
-        DecryptedApplicationMessage receivedMessage = networkFetchDelegate.getMessage(ownedIdentity, messageUid);
-        this.messageUid = messageUid;
+    public ObvMessage(DecryptedApplicationMessage receivedMessage, ReceivedAttachment[] receivedAttachments) {
+        this.messageUid = receivedMessage.getMessageUid();
+        this.messagePayload = receivedMessage.getMessagePayload();
+        this.serverTimestamp = receivedMessage.getServerTimestamp();
+        this.downloadTimestamp = receivedMessage.getDownloadTimestamp();
+        this.localDownloadTimestamp = receivedMessage.getLocalDownloadTimestamp();
+        this.bytesFromIdentity = receivedMessage.getFromIdentity().getBytes();
+        this.bytesFromDeviceUid = receivedMessage.getFromDeviceUid().getBytes();
+        this.bytesToIdentity = receivedMessage.getToIdentity().getBytes();
 
-        if (receivedMessage == null) {
-            this.serverTimestamp = 0;
-            this.downloadTimestamp = 0;
-            this.localDownloadTimestamp = 0;
-            this.messagePayload = null;
-            this.bytesFromIdentity = null;
-            this.bytesToIdentity = null;
-            this.attachments = new ObvAttachment[0];
-        } else {
-            this.messagePayload = receivedMessage.getMessagePayload();
-            this.serverTimestamp = receivedMessage.getServerTimestamp();
-            this.downloadTimestamp = receivedMessage.getDownloadTimestamp();
-            this.localDownloadTimestamp = receivedMessage.getLocalDownloadTimestamp();
-            this.bytesFromIdentity = receivedMessage.getFromIdentity().getBytes();
-            this.bytesToIdentity = receivedMessage.getToIdentity().getBytes();
-
-
-            ReceivedAttachment[] receivedAttachments = networkFetchDelegate.getMessageAttachments(ownedIdentity, messageUid);
-
-            this.attachments = new ObvAttachment[receivedAttachments.length];
-            for (int i = 0; i < this.attachments.length; i++) {
-                ReceivedAttachment receivedAttachment = receivedAttachments[i];
-                this.attachments[i] = new ObvAttachment(
-                        receivedAttachment.getMetadata(),
-                        receivedAttachment.getUrl(),
-                        receivedAttachment.isDownloadRequested(),
-                        receivedAttachment.getOwnedIdentity(),
-                        receivedAttachment.getMessageUid(),
-                        receivedMessage.getServerTimestamp(),
-                        receivedAttachment.getAttachmentNumber(),
-                        receivedAttachment.getExpectedLength(),
-                        receivedAttachment.getReceivedLength()
-                );
-            }
+        this.attachments = new ObvAttachment[receivedAttachments.length];
+        for (int i = 0; i < this.attachments.length; i++) {
+            ReceivedAttachment receivedAttachment = receivedAttachments[i];
+            this.attachments[i] = new ObvAttachment(
+                    receivedAttachment.getMetadata(),
+                    receivedAttachment.getUrl(),
+                    receivedAttachment.isDownloadRequested(),
+                    receivedAttachment.getOwnedIdentity(),
+                    receivedAttachment.getMessageUid(),
+                    receivedMessage.getServerTimestamp(),
+                    receivedAttachment.getAttachmentNumber(),
+                    receivedAttachment.getExpectedLength(),
+                    receivedAttachment.getReceivedLength()
+            );
         }
     }
 }

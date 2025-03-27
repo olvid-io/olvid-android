@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -37,6 +37,9 @@ public class FreeTrialCoordinator {
         this.sslSocketFactory = sslSocketFactory;
 
         freeTrialOperationQueue = new OperationQueue(true);
+    }
+
+    public void startProcessing() {
         freeTrialOperationQueue.execute(1, "Engine-FreeTrialCoordinator");
     }
 

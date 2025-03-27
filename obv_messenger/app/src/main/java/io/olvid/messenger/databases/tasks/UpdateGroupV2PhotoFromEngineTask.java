@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -31,6 +31,7 @@ import io.olvid.engine.engine.types.JsonGroupDetails;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -64,7 +65,8 @@ public class UpdateGroupV2PhotoFromEngineTask implements Runnable {
                 if (discussion != null) {
                     // group indicates there is nothing new, still, after the photo download we realize that he should be notified --> notify him
                     Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, discussion.bytesOwnedIdentity);
-                    db.messageDao().insert(newDetailsMessage);
+                    newDetailsMessage.id = db.messageDao().insert(newDetailsMessage);
+                    UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
                     if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }
@@ -101,12 +103,12 @@ public class UpdateGroupV2PhotoFromEngineTask implements Runnable {
                     if (detailsAndPhotos.photoUrl == null) {
                         // always auto-trust the new photo if there was no previous photo
                         return true;
-                    } else if (detailsAndPhotos.photoUrl.length() != 0) {
+                    } else if (!detailsAndPhotos.photoUrl.isEmpty()) {
                         // there was a photo, and we download it
                         if (Objects.equals(detailsAndPhotos.photoUrl, detailsAndPhotos.publishedPhotoUrl)) {
                             // same photo --> trust
                             return true;
-                        } else if (detailsAndPhotos.publishedPhotoUrl != null && detailsAndPhotos.publishedPhotoUrl.length() > 0){
+                        } else if (detailsAndPhotos.publishedPhotoUrl != null && !detailsAndPhotos.publishedPhotoUrl.isEmpty()){
                             // both photoUrl and publishedPhotoUrl are non null but have different values --> compare the file contents
                             File trustedPhotoFile = new File(App.absolutePathFromRelative(detailsAndPhotos.photoUrl));
                             File publishedPhotoFile = new File(App.absolutePathFromRelative(detailsAndPhotos.publishedPhotoUrl));
@@ -160,16 +162,16 @@ public class UpdateGroupV2PhotoFromEngineTask implements Runnable {
 
                 // photo was removed, notify if old photo was downloaded
                 if (detailsAndPhotos.publishedPhotoUrl == null) {
-                    return detailsAndPhotos.photoUrl.length() > 0;
+                    return !detailsAndPhotos.photoUrl.isEmpty();
                 }
 
                 // new photo not downloaded yet, do not notify (too early to decide)
-                if (detailsAndPhotos.publishedPhotoUrl.length() == 0) {
+                if (detailsAndPhotos.publishedPhotoUrl.isEmpty()) {
                     return false;
                 }
 
                 // new photo was downloaded, but not the old one --> notify
-                if (detailsAndPhotos.photoUrl.length() == 0) {
+                if (detailsAndPhotos.photoUrl.isEmpty()) {
                     return true;
                 }
 

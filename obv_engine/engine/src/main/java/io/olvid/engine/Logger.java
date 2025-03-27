@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -78,9 +78,13 @@ public class Logger {
     }
     public static void e(String message, Exception e) {
         log(ERROR, message + "( " + e.toString() + ")");
-        e.printStackTrace();
+        x(e);
     }
-
+    public static void x(Throwable throwable) {
+        if (WARNING >= outputLogLevel) {
+            outputter.x("Logger", throwable);
+        }
+    }
 
     private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
     public static String toHexString(byte[] bytes) {
@@ -104,6 +108,9 @@ public class Logger {
 
 
     public static String getUuidString(UUID uuid) {
+        if (uuid == null) {
+            return "";
+        }
         return (digits(uuid.getMostSignificantBits() >> 32, 8) + "-" +
                 digits(uuid.getMostSignificantBits() >> 16, 4) + "-" +
                 digits(uuid.getMostSignificantBits(), 4) + "-" +
@@ -121,5 +128,6 @@ public class Logger {
         void i(String tag, String message);
         void w(String tag, String message);
         void e(String tag, String message);
+        void x(String tag, Throwable throwable);
     }
 }

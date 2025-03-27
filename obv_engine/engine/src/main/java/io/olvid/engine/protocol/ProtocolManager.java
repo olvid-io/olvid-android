@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -204,11 +204,17 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             protocolManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
-//        schedulerForPeriodicSync.scheduleAtFixedRate(this::triggerOwnedDevicesSync, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, TimeUnit.MILLISECONDS);
+//        schedulerForPeriodicSync.schedule(this::triggerOwnedDevicesSync, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, Constants.PERIODIC_OWNED_DEVICE_SYNC_INTERVAL, TimeUnit.MILLISECONDS);
     }
+
+    public void startProcessing() {
+        protocolStepCoordinator.startProcessing();
+    }
+
+
 
 //    private void triggerOwnedDevicesSync() {
 //        try (ProtocolManagerSession protocolManagerSession = getSession()) {
@@ -223,7 +229,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 //
 //            protocolManagerSession.session.commit();
 //        } catch (Exception e) {
-//            e.printStackTrace();
+//            Logger.x(e);
 //        }
 //    }
 
@@ -245,7 +251,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             IdentityDeletionSignatureReceived.createTable(protocolManagerSession.session);
             protocolManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new RuntimeException("Unable to create protocol databases");
         }
     }
@@ -314,7 +320,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                             startChannelCreationWithContactDeviceProtocol(ownedIdentity, contactIdentity, contactDeviceUid);
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                     break;
                 }
@@ -327,7 +333,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                             startChannelCreationWithOwnedDeviceProtocol(ownedIdentity, ownedDeviceUid);
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                     break;
                 }
@@ -356,7 +362,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                         }
                         // To improve: delete any other protocol related to this contact
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                     break;
             }
@@ -384,7 +390,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                             }
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                     break;
             }
@@ -530,8 +536,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             UID protocolInstanceUid = new UID(prng);
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
             ChannelMessageToSend message = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, contactIdentity).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
             protocolManagerSession.session.commit();
@@ -548,8 +553,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
         ChannelMessageToSend message = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, contactIdentity).generateChannelProtocolMessageToSend();
         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
     }
@@ -560,8 +564,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             UID protocolInstanceUid = new UID(prng);
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.OWNED_DEVICE_DISCOVERY_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
             ChannelMessageToSend message = new OwnedDeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
             protocolManagerSession.session.commit();
@@ -574,8 +577,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.OWNED_DEVICE_DISCOVERY_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
         ChannelMessageToSend message = new OwnedDeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
         protocolManagerSession.channelDelegate.post(session, message, prng);
     }
@@ -586,8 +588,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.CHANNEL_CREATION_WITH_OWNED_DEVICE_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
         ChannelMessageToSend message = new ChannelCreationWithOwnedDeviceProtocol.InitialMessage(coreProtocolMessage, ownedDeviceUid).generateChannelProtocolMessageToSend();
         protocolManagerSession.channelDelegate.post(session, message, prng);
     }
@@ -602,8 +603,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
         ChannelMessageToSend message = new ChannelCreationWithContactDeviceProtocol.InitialMessage(coreProtocolMessage, contactIdentity, contactDeviceUid).generateChannelProtocolMessageToSend();
         protocolManagerSession.channelDelegate.post(session, message, prng);
     }
@@ -617,8 +617,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.DOWNLOAD_IDENTITY_PHOTO_CHILD_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
         ChannelMessageToSend message = new DownloadIdentityPhotoChildProtocol.InitialMessage(coreProtocolMessage, contactIdentity, jsonObjectMapper.writeValueAsString(jsonIdentityDetailsWithVersionAndPhoto)).generateChannelProtocolMessageToSend();
         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
     }
@@ -637,8 +636,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.DOWNLOAD_GROUP_PHOTO_CHILD_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
         ChannelMessageToSend message = new DownloadGroupPhotoChildProtocol.InitialMessage(coreProtocolMessage, groupInformation).generateChannelProtocolMessageToSend();
         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
     }
@@ -653,8 +651,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
         ChannelMessageToSend message = new DownloadGroupV2PhotoProtocol.InitialMessage(coreProtocolMessage, groupIdentifier, serverPhotoInfo).generateChannelProtocolMessageToSend();
         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
     }
@@ -674,8 +671,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
 
         ChannelMessageToSend message = new GroupsV2Protocol.GroupReDownloadInitialMessage(coreProtocolMessage, groupIdentifier).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
@@ -692,8 +688,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
 
         ChannelMessageToSend message = new GroupsV2Protocol.InitiateTargetedPingMessage(coreProtocolMessage, groupIdentifier, contactIdentity).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
@@ -708,8 +703,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             UID protocolInstanceUid = new UID(prng);
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.TRUST_ESTABLISHMENT_WITH_SAS_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
             String ownedIdentityDetails = identityDelegate.getSerializedPublishedDetailsOfOwnedIdentity(protocolManagerSession.session, ownedIdentity);
             if (ownedIdentityDetails == null) {
                 Logger.e("Error finding own identity details in startTrustEstablishmentProtocol");
@@ -731,8 +725,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             UID protocolInstanceUid = new UID(prng);
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.TRUST_ESTABLISHMENT_WITH_MUTUAL_SCAN_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new TrustEstablishmentWithMutualScanProtocol.InitialMessage(coreProtocolMessage, contactIdentity, signature).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -750,8 +743,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             UID protocolInstanceUid = new UID(prng);
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
             ChannelMessageToSend message = new ChannelCreationWithContactDeviceProtocol.InitialMessage(coreProtocolMessage, contactIdentity, contactDeviceUid).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
             protocolManagerSession.session.commit();
@@ -763,8 +755,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             UID protocolInstanceUid = new UID(prng);
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.CHANNEL_CREATION_WITH_OWNED_DEVICE_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
             ChannelMessageToSend message = new ChannelCreationWithOwnedDeviceProtocol.InitialMessage(coreProtocolMessage, ownedDeviceUid).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
             protocolManagerSession.session.commit();
@@ -787,8 +778,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                 UID protocolInstanceUid = new UID(prng);
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                         ConcreteProtocol.CONTACT_MUTUAL_INTRODUCTION_PROTOCOL_ID,
-                        protocolInstanceUid,
-                        false);
+                        protocolInstanceUid);
                 ChannelMessageToSend message = new ContactMutualIntroductionProtocol.InitialMessage(coreProtocolMessage, contactIdentityA, contactIdentityB).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
             }
@@ -814,8 +804,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupManagementProtocol.InitiateGroupCreationMessage(coreProtocolMessage, groupInformation, absolutePhotoUrl, groupMemberIdentitiesAndSerializedDetails).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -844,8 +833,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupsV2Protocol.GroupCreationInitialMessage(coreProtocolMessage, ownPermissions, otherGroupMembers, serializedGroupDetails, absolutePhotoUrl, serializedGroupType).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -864,8 +852,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupsV2Protocol.GroupUpdateInitialMessage(coreProtocolMessage, groupIdentifier, changeSet).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -884,8 +871,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupsV2Protocol.GroupLeaveInitialMessage(coreProtocolMessage, groupIdentifier).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -904,8 +890,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupsV2Protocol.GroupDisbandInitialMessage(coreProtocolMessage, groupIdentifier).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -925,8 +910,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupsV2Protocol.GroupReDownloadInitialMessage(coreProtocolMessage, groupIdentifier).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -943,8 +927,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
         ChannelMessageToSend message = new GroupsV2Protocol.InitiateBatchKeysResendMessage(coreProtocolMessage, contactIdentity, contactDeviceUid).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
     }
@@ -958,8 +941,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = groupIdentifier.computeProtocolInstanceUid();
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
         ChannelMessageToSend message = new GroupsV2Protocol.CreateOrUpdateKeycloakGroupMessage(coreProtocolMessage, groupIdentifier, serializedKeycloakGroupBlob).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
     }
@@ -982,8 +964,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.OWNED_DEVICE_MANAGEMENT_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
         ChannelMessageToSend message = new OwnedDeviceManagementProtocol.InitialMessage(coreProtocolMessage, deviceManagementRequest).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
     }
@@ -997,8 +978,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         UID protocolInstanceUid = new UID(prng);
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.IDENTITY_DETAILS_PUBLICATION_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
         ChannelMessageToSend message = new IdentityDetailsPublicationProtocol.InitialMessage(coreProtocolMessage, version).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
     }
@@ -1017,9 +997,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                 SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID,
-                protocolInstanceUid,
-                false
-        );
+                protocolInstanceUid);
         ChannelMessageToSend message = new GroupManagementProtocol.GroupMembersOrDetailsChangedTriggerMessage(coreProtocolMessage, groupInformation).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
     }
@@ -1034,8 +1012,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             UID protocolInstanceUid = new UID(prng);
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
             ChannelMessageToSend message = new OneToOneContactInvitationProtocol.InitialMessage(coreProtocolMessage, contactIdentity).generateChannelProtocolMessageToSend();
             channelDelegate.post(protocolManagerSession.session, message, prng);
             protocolManagerSession.session.commit();
@@ -1080,8 +1057,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupManagementProtocol.AddGroupMembersMessage(coreProtocolMessage, groupInformation, newMembersIdentity).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1112,8 +1088,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupManagementProtocol.ReinvitePendingMemberMessage(coreProtocolMessage, groupInformation, pendingMemberIdentity).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1154,8 +1129,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupManagementProtocol.RemoveGroupMembersMessage(coreProtocolMessage, groupInformation, removedMemberIdentities).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1187,8 +1161,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupManagementProtocol.LeaveGroupMessage(coreProtocolMessage, groupInformation).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1219,8 +1192,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupManagementProtocol.DisbandGroupMessage(coreProtocolMessage, groupInformation).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1250,8 +1222,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupManagementProtocol.InitiateGroupMembersQueryMessage(coreProtocolMessage, groupInformation).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1283,8 +1254,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new GroupManagementProtocol.TriggerReinviteMessage(coreProtocolMessage, groupInformation, contactIdentity).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1309,8 +1279,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.CONTACT_MANAGEMENT_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new ContactManagementProtocol.InitiateContactDeletionMessage(coreProtocolMessage, contactIdentity).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1334,8 +1303,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.CONTACT_MANAGEMENT_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new ContactManagementProtocol.InitiateContactDowngradeMessage(coreProtocolMessage, contactIdentity).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1354,8 +1322,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.KEYCLOAK_CONTACT_ADDITION_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new KeycloakContactAdditionProtocol.InitialMessage(coreProtocolMessage, contactIdentity, signedContactDetails).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1377,8 +1344,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
 
         ChannelMessageToSend message = new KeycloakBindingAndUnbindingProtocol.OwnedIdentityKeycloakBindingMessage(coreProtocolMessage, keycloakState, keycloakUserId).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
@@ -1394,8 +1360,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
 
         ChannelMessageToSend message = new DeviceCapabilitiesDiscoveryProtocol.InitialForAddingOwnCapabilitiesMessage(coreProtocolMessage, newOwnCapabilities).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
@@ -1412,8 +1377,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new KeycloakBindingAndUnbindingProtocol.OwnedIdentityKeycloakUnbindingMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1431,8 +1395,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.OWNED_IDENTITY_DELETION_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
 
         ChannelMessageToSend message = new OwnedIdentityDeletionProtocol.InitialMessage(coreProtocolMessage, deleteEverywhere).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
@@ -1449,8 +1412,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                 ConcreteProtocol.SYNCHRONIZATION_PROTOCOL_ID,
-                protocolInstanceUid,
-                false);
+                protocolInstanceUid);
 
         ChannelMessageToSend message = new SynchronizationProtocol.InitiateSingleItemSyncMessage(coreProtocolMessage, obvSyncAtom).generateChannelProtocolMessageToSend();
         channelDelegate.post(session, message, prng);
@@ -1469,7 +1431,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 //                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
 //            }
 //        } catch (Exception e) {
-//            e.printStackTrace();
+//            Logger.x(e);
 //        }
 //    }
 
@@ -1484,8 +1446,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                     ConcreteProtocol.OWNED_IDENTITY_TRANSFER_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new OwnedIdentityTransferProtocol.InitiateTransferOnSourceDeviceMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1509,8 +1470,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ephemeralIdentity),
                     ConcreteProtocol.OWNED_IDENTITY_TRANSFER_PROTOCOL_ID,
-                    protocolInstanceUid,
-                    false);
+                    protocolInstanceUid);
 
             ChannelMessageToSend message = new OwnedIdentityTransferProtocol.InitiateTransferOnTargetDeviceMessage(coreProtocolMessage, deviceName, (ServerAuthenticationPrivateKey) serverAuthKeyPair.getPrivateKey(), (EncryptionPrivateKey) encryptionKeyPair.getPrivateKey(), macKey).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);
@@ -1532,7 +1492,8 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                         ConcreteProtocol.FULL_RATCHET_PROTOCOL_ID,
                         protocolInstanceUid,
-                        true);
+                        true,
+                        false);
 
                 ChannelMessageToSend message = new FullRatchetProtocol.InitialMessage(coreProtocolMessage, remoteIdentity, remoteDeviceUid).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, prng);

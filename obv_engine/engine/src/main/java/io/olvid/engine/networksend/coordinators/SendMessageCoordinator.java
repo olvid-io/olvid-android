@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -78,18 +78,15 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
         this.sslSocketFactory = sslSocketFactory;
 
         sendMessageWithAttachmentOperationQueue = new OperationQueue(true);
-        sendMessageWithAttachmentOperationQueue.execute(1, "Engine-SendMessageCoordinator-WithAttachment");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
 
         userContentMessageUidsByServer = new HashMap<>();
         batchSendUserContentMessageOperationQueue = new NoDuplicateOperationQueue();
-        batchSendUserContentMessageOperationQueue.execute(1, "Engine-SendMessageCoordinator-WithUserContent");
 
         protocolMessageUidsByServer = new HashMap<>();
         batchSendProtocolMessageOperationQueue = new NoDuplicateOperationQueue();
-        batchSendProtocolMessageOperationQueue.execute(1, "Engine-SendMessageCoordinator-Protocol");
 
         batchScheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -98,6 +95,12 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
 
         notificationListener = new NotificationListener();
+    }
+
+    public void startProcessing() {
+        sendMessageWithAttachmentOperationQueue.execute(1, "Engine-SendMessageCoordinator-WithAttachment");
+        batchSendUserContentMessageOperationQueue.execute(1, "Engine-SendMessageCoordinator-WithUserContent");
+        batchSendProtocolMessageOperationQueue.execute(1, "Engine-SendMessageCoordinator-Protocol");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
@@ -112,7 +115,7 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
                 queueNewSendMessageCompositeOperation(outboxMessage.getServer(), outboxMessage.getOwnedIdentity(), outboxMessage.getUid(), outboxMessage.getAttachments().length != 0, outboxMessage.isApplicationMessage());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -224,7 +227,7 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
 
         // handle message the operations couldn't because of inactive identity
         for (IdentityAndUid identityAndUid : identityInactiveMessageUids) {
-            waitForIdentityReactivation(identityAndUid.ownedIdentity, identityAndUid.uid);
+            waitForIdentityReactivation(identityAndUid.identity, identityAndUid.uid);
         }
     }
 
@@ -242,7 +245,7 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
                 if (identityAndMessageUids != null) {
                     // if the payload is too large when batching, queue each message individually
                     for (IdentityAndUid identityAndMessageUid : identityAndMessageUids) {
-                        queueNewSendMessageCompositeOperation(null, identityAndMessageUid.ownedIdentity, identityAndMessageUid.uid, true, true);
+                        queueNewSendMessageCompositeOperation(null, identityAndMessageUid.identity, identityAndMessageUid.uid, true, true);
                     }
                 }
                 break;
@@ -277,7 +280,7 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
 
         // handle message the operations couldn't because of inactive identity
         for (IdentityAndUid identityAndUid : identityInactiveMessageUids) {
-            waitForIdentityReactivation(identityAndUid.ownedIdentity, identityAndUid.uid);
+            waitForIdentityReactivation(identityAndUid.identity, identityAndUid.uid);
         }
     }
 
@@ -295,7 +298,7 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
                 if (identityAndMessageUids != null) {
                     // if the payload is too large when batching, queue each message individually
                     for (IdentityAndUid identityAndMessageUid : identityAndMessageUids) {
-                        queueNewSendMessageCompositeOperation(null, identityAndMessageUid.ownedIdentity, identityAndMessageUid.uid, true, true);
+                        queueNewSendMessageCompositeOperation(null, identityAndMessageUid.identity, identityAndMessageUid.uid, true, true);
                     }
                 }
                 break;

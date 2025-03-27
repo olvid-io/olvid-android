@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -27,6 +27,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.channel.datatypes.ChannelManagerSession;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
@@ -41,6 +42,9 @@ import io.olvid.engine.encoder.Encoded;
 
 public class ProvisionedKeyMaterial implements ObvDatabase {
     static final String TABLE_NAME = "provisioned_key_material";
+    static final String GET_ALL_INDEX_NAME = "provisioned_key_material_get_all_index";
+    static final String EXPIRE_INDEX_NAME = "provisioned_key_material_expire_index";
+
 
     private final ChannelManagerSession channelManagerSession;
 
@@ -144,7 +148,7 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
             provisionedKeyMaterial.insert();
             return provisionedKeyMaterial;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -171,7 +175,7 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
         try {
             this.authEncKey = (AuthEncKey) new Encoded(res.getBytes(AUTH_ENC_KEY)).decodeSymmetricKey();
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.expirationTimestamp = res.getLong(EXPIRATION_TIMESTAMP);
         this.selfRatchetingCount = res.getInt(SELF_RATCHETING_COUNT);
@@ -201,6 +205,9 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
                     PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + " BLOB NOT NULL, " +
                     "CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + SELF_RATCHETING_COUNT + ", " + PROVISION_FULL_RATCHETING_COUNT + ", " + PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + ", " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID  + ", " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + "), " +
                     "FOREIGN KEY (" + PROVISION_FULL_RATCHETING_COUNT + ", " + PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + ", " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + ", " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + ") REFERENCES " + Provision.TABLE_NAME + "(" + Provision.FULL_RATCHETING_COUNT + ", " + Provision.OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + ", " + Provision.OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + ", " + Provision.OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + ") ON DELETE CASCADE);");
+
+            statement.execute("CREATE INDEX IF NOT EXISTS " + GET_ALL_INDEX_NAME + " ON " + TABLE_NAME + "(" + KEY_ID + "," + PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + ")");
+            statement.execute("CREATE INDEX IF NOT EXISTS " + EXPIRE_INDEX_NAME + " ON " + TABLE_NAME + "(" + EXPIRATION_TIMESTAMP + "," + PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + "," + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + "," + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + ")");
         }
     }
 

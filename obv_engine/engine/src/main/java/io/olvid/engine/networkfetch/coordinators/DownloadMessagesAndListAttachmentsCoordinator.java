@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -20,7 +20,6 @@
 package io.olvid.engine.networkfetch.coordinators;
 
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -32,11 +31,12 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.ExponentialBackoffRepeatingScheduler;
 import io.olvid.engine.datatypes.Identity;
-import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
+import io.olvid.engine.datatypes.NoDuplicatePriorityOperationQueue;
 import io.olvid.engine.datatypes.NotificationListener;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.NetworkReceivedMessage;
+import io.olvid.engine.datatypes.containers.ReceivedAttachment;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.metamanager.NotificationListeningDelegate;
@@ -60,7 +60,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
     private RegisterServerPushNotificationDelegate registerServerPushNotificationDelegate;
 
     private final ExponentialBackoffRepeatingScheduler<Identity> scheduler;
-    private final NoDuplicateOperationQueue downloadMessagesAndListAttachmentsOperationQueue;
+    private final NoDuplicatePriorityOperationQueue downloadMessagesAndListAttachmentsOperationQueue;
 
     private ProcessDownloadedMessageDelegate processDownloadedMessageDelegate;
 
@@ -78,14 +78,17 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
         this.sslSocketFactory = sslSocketFactory;
         this.createServerSessionDelegate = createServerSessionDelegate;
 
-        downloadMessagesAndListAttachmentsOperationQueue = new NoDuplicateOperationQueue();
-        downloadMessagesAndListAttachmentsOperationQueue.execute(1, "Engine-DownloadMessagesAndListAttachmentsCoordinator");
+        downloadMessagesAndListAttachmentsOperationQueue = new NoDuplicatePriorityOperationQueue();
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
         awaitingServerSessionOperations = new HashMap<>();
         awaitingServerSessionOperationsLock = new ReentrantLock();
 
         awaitingNotificationListener = new AwaitingNotificationListener();
+    }
+
+    public void startProcessing() {
+        downloadMessagesAndListAttachmentsOperationQueue.execute(1, "Engine-DownloadMessagesAndListAttachmentsCoordinator");
     }
 
     public void setRegisterServerPushNotificationDelegate(RegisterServerPushNotificationDelegate registerServerPushNotificationDelegate) {
@@ -120,7 +123,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
             // resend notifications for decrypted messages not yet marked for deletion
             InboxMessage[] decryptedInboxMessages = InboxMessage.getDecryptedMessages(fetchManagerSession);
             for (InboxMessage inboxMessage: decryptedInboxMessages) {
-                messageDecrypted(inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
+                messageDecrypted(inboxMessage, inboxMessage.getAttachments());
             }
 
             // check if any message marked for deletion can be deleted
@@ -144,12 +147,12 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
                 fetchManagerSession.session.commit();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
     private void queueNewDownloadMessagesAndListAttachmentsOperation(Identity identity, UID deviceUid) {
-        DownloadMessagesAndListAttachmentsOperation op = new DownloadMessagesAndListAttachmentsOperation(fetchManagerSessionFactory, sslSocketFactory, identity, deviceUid, this, this);
+        DownloadMessagesAndListAttachmentsOperation op = new DownloadMessagesAndListAttachmentsOperation(fetchManagerSessionFactory, sslSocketFactory, identity, deviceUid, 0, this, this);
         downloadMessagesAndListAttachmentsOperationQueue.queue(op);
     }
 
@@ -179,11 +182,23 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
     }
 
     @Override
-    public void messageDecrypted(Identity ownedIdentity, UID uid) {
+    public void messageDecrypted(InboxMessage inboxMessage, InboxAttachment[] attachments) {
         if (notificationPostingDelegate != null) {
             HashMap<String, Object> userInfo = new HashMap<>();
-            userInfo.put(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_OWNED_IDENTITY_KEY, ownedIdentity);
-            userInfo.put(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_UID_KEY, uid);
+            userInfo.put(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_MESSAGE_KEY, inboxMessage.getDecryptedApplicationMessage());
+            ReceivedAttachment[] receivedAttachments = new ReceivedAttachment[attachments.length];
+            for (int i = 0; i < attachments.length; i++) {
+                receivedAttachments[i] =  new ReceivedAttachment(
+                        attachments[i].getOwnedIdentity(),
+                        attachments[i].getMessageUid(),
+                        attachments[i].getAttachmentNumber(),
+                        attachments[i].getMetadata(),
+                        attachments[i].getUrl(),
+                        attachments[i].getPlaintextExpectedLength(),
+                        attachments[i].getPlaintextReceivedLength(),
+                        attachments[i].isDownloadRequested());
+            }
+            userInfo.put(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_ATTACHMENTS_KEY, receivedAttachments);
             notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED, userInfo);
         }
     }
@@ -216,12 +231,14 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
     public void onFinishCallback(Operation operation) {
         Identity ownedIdentity = ((DownloadMessagesAndListAttachmentsOperation) operation).getOwnedIdentity();
         UID deviceUid = ((DownloadMessagesAndListAttachmentsOperation) operation).getDeviceUid();
-        boolean listingTruncated = ((DownloadMessagesAndListAttachmentsOperation) operation).getListingTruncated();
+        Long timestampOfLastMessageBeforeTruncation = ((DownloadMessagesAndListAttachmentsOperation) operation).getTimestampOfLastMessageBeforeTruncation();
         scheduler.clearFailedCount(ownedIdentity);
 
-        if (listingTruncated) {
+        if (timestampOfLastMessageBeforeTruncation != null) {
             // if listing was truncated --> trigger a new list in 10 seconds, once messages are processed and deleted from server
-            scheduler.schedule(ownedIdentity, () -> queueNewDownloadMessagesAndListAttachmentsOperation(ownedIdentity, deviceUid), "DownloadMessagesAndListAttachmentsOperation [relist]", Constants.RELIST_DELAY);
+            downloadMessagesAndListAttachmentsOperationQueue.queue(
+                    new DownloadMessagesAndListAttachmentsOperation(fetchManagerSessionFactory, sslSocketFactory, ownedIdentity, deviceUid, timestampOfLastMessageBeforeTruncation, this, this)
+            );
         } else {
             fetchManagerSessionFactory.markOwnedIdentityAsUpToDate(ownedIdentity);
         }
@@ -229,7 +246,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
         HashMap<String, Object> userInfo = new HashMap<>();
         userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_OWNED_IDENTITY_KEY, ownedIdentity);
         userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_SUCCESS_KEY, true);
-        userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_TRUNCATED_KEY, listingTruncated);
+        userInfo.put(DownloadNotifications.NOTIFICATION_SERVER_POLLED_TRUNCATED_KEY, timestampOfLastMessageBeforeTruncation != null);
         notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_SERVER_POLLED, userInfo);
     }
 
@@ -308,7 +325,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
                     downloadMessagesAndListAttachmentsOperationQueue.queue(op);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
     }

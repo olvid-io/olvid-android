@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@id/send_location_maps_send_location_layout"
         app:layout_constraintEnd_toEndOf="parent"
-        android:src="@drawable/ic_location_current_location_enabled"
+        android:src="@drawable/ic_location_current_location_disabled"
         android:layout_margin="16dp"
         android:backgroundTint="@color/almostWhite"
         app:borderWidth="0dp"

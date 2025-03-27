@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -126,7 +126,7 @@ public class NotificationListenerGroups implements NotificationListener {
                     engineInfo.put(EngineNotifications.GROUP_CREATED_ON_OTHER_DEVICE_KEY, createdOnOtherDevice);
                     engine.postEngineNotification(EngineNotifications.GROUP_CREATED, engineInfo);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             case IdentityNotifications.NOTIFICATION_GROUP_DELETED: {

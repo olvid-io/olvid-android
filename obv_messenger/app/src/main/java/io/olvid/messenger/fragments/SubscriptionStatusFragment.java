@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -224,6 +224,13 @@ public class SubscriptionStatusFragment extends Fragment {
                 } else {
                     apiKeyExpirationTextView.setVisibility(View.VISIBLE);
                     apiKeyExpirationTextView.setText(getString(R.string.text_premium_features_available_until, StringUtils.getPreciseAbsoluteDateString(activity, apiKeyExpirationTimestamp, getString(R.string.text_date_time_separator))));
+                }
+                if (!licenseQuery) {
+                    if (showInAppPurchase) {
+                        subscribeButton.setVisibility(View.VISIBLE);
+                    } else {
+                        subscribeButton.setVisibility(View.GONE);
+                    }
                 }
                 break;
             case AWAITING_PAYMENT_GRACE_PERIOD:

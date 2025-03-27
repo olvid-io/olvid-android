@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -33,8 +34,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.LiveData;
@@ -80,103 +86,118 @@ public class ShareActivity extends LockScreenOrNotActivity {
 
     @Override
     protected void notLockedOnCreate() {
-            Intent intent = getIntent();
-            if (intent == null || intent.getAction() == null) {
-                intentFail();
-                return;
-            }
+        Intent intent = getIntent();
+        if (intent == null || intent.getAction() == null) {
+            intentFail();
+            return;
+        }
 
-            switch (intent.getAction()) {
-                case Intent.ACTION_SEND: {
-                    Uri sharedUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-                    if (sharedUri != null) {
-                        sharedFiles = filterUris(Collections.singletonList(sharedUri));
-                        sharedText = "";
-                    } else {
-                        sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-                        if (sharedText == null) {
-                            intentFail();
-                            return;
-                        }
-                        sharedFiles = new ArrayList<>(0);
-                    }
-                    break;
-                }
-                case Intent.ACTION_SEND_MULTIPLE: {
-                    List<Uri> extraStreamUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-                    if (extraStreamUris == null) {
+        switch (intent.getAction()) {
+            case Intent.ACTION_SEND: {
+                Uri sharedUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                if (sharedUri != null) {
+                    sharedFiles = filterUris(Collections.singletonList(sharedUri));
+                    sharedText = "";
+                } else {
+                    sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                    if (sharedText == null) {
                         intentFail();
                         return;
                     }
-                    sharedFiles = filterUris(extraStreamUris);
-                    sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-                    if (sharedText == null) {
-                        sharedText = "";
-                    }
-                    break;
+                    sharedFiles = new ArrayList<>(0);
                 }
-                default: {
+                break;
+            }
+            case Intent.ACTION_SEND_MULTIPLE: {
+                List<Uri> extraStreamUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                if (extraStreamUris == null) {
                     intentFail();
                     return;
                 }
+                sharedFiles = filterUris(extraStreamUris);
+                sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                if (sharedText == null) {
+                    sharedText = "";
+                }
+                break;
             }
-
-            // From this point, both sharedFiles amd sharedText are non null
-            if (intent.hasExtra(ShortcutManagerCompat.EXTRA_SHORTCUT_ID)) {
-                String shortcutId = intent.getStringExtra(ShortcutManagerCompat.EXTRA_SHORTCUT_ID);
-                if (shortcutId != null && shortcutId.startsWith(DiscussionActivity.SHORTCUT_PREFIX)) {
-                    long discussionId = Long.parseLong(shortcutId.substring(DiscussionActivity.SHORTCUT_PREFIX.length()));
-                    proceed(discussionId);
-                    return;
-                }
+            default: {
+                intentFail();
+                return;
             }
+        }
 
-            getDelegate().setLocalNightMode(AppCompatDelegate.getDefaultNightMode());
-            setContentView(R.layout.activity_share);
+        // From this point, both sharedFiles amd sharedText are non null
+        if (intent.hasExtra(ShortcutManagerCompat.EXTRA_SHORTCUT_ID)) {
+            String shortcutId = intent.getStringExtra(ShortcutManagerCompat.EXTRA_SHORTCUT_ID);
+            if (shortcutId != null && shortcutId.startsWith(DiscussionActivity.SHORTCUT_PREFIX)) {
+                long discussionId = Long.parseLong(shortcutId.substring(DiscussionActivity.SHORTCUT_PREFIX.length()));
+                proceed(discussionId);
+                return;
+            }
+        }
 
-            currentIdentityInitialView = findViewById(R.id.current_identity_initial_view);
-            currentNameTextView = findViewById(R.id.current_identity_name_text_view);
-            currentNameSecondLineTextView = findViewById(R.id.current_identity_name_second_line_text_view);
-            currentIdentityMutedImageView = findViewById(R.id.current_identity_muted_marker_image_view);
-            separator = findViewById(R.id.separator);
+        getDelegate().setLocalNightMode(AppCompatDelegate.getDefaultNightMode());
+        setContentView(R.layout.activity_share);
 
-            final EditText contactNameFilter = findViewById(R.id.discussion_filter);
-            findViewById(R.id.button_cancel).setOnClickListener(v -> finish());
-            TextView switchProfileButton = findViewById(R.id.button_switch_profile);
-            switchProfileButton.setOnClickListener(v -> openSwitchProfilePopup());
-            switchProfileButton.setOnLongClickListener(v -> {
-                new OpenHiddenProfileDialog(this);
-                return true;
+        Window window = getWindow();
+        if (window != null) {
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+            WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightNavigationBars(false);
+        }
+        ConstraintLayout root = findViewById(R.id.root_constraint_layout);
+        if (root != null) {
+
+            ViewCompat.setOnApplyWindowInsetsListener(root, (view, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
+                root.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                return WindowInsetsCompat.CONSUMED;
             });
+        }
 
-            LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
-                bindOwnedIdentity(ownedIdentity);
-                if (ownedIdentity == null) {
-                    return null;
-                } else {
-                    return AppDatabase.getInstance().discussionDao().getAllWritableWithGroupMembersNamesOrderedByActivity(ownedIdentity.bytesOwnedIdentity);
-                }
-            });
+        currentIdentityInitialView = findViewById(R.id.current_identity_initial_view);
+        currentNameTextView = findViewById(R.id.current_identity_name_text_view);
+        currentNameSecondLineTextView = findViewById(R.id.current_identity_name_second_line_text_view);
+        currentIdentityMutedImageView = findViewById(R.id.current_identity_muted_marker_image_view);
+        separator = findViewById(R.id.separator);
 
-            adapter = new OwnedIdentitySelectionDialogFragment.OwnedIdentityListAdapter(getLayoutInflater(), bytesOwnedIdentity -> {
-                if (popupWindow != null) {
-                    popupWindow.dismiss();
-                }
-                AppSingleton.getInstance().selectIdentity(bytesOwnedIdentity, null);
-            });
-            Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? null : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
+        final EditText contactNameFilter = findViewById(R.id.discussion_filter);
+        findViewById(R.id.button_cancel).setOnClickListener(v -> finish());
+        TextView switchProfileButton = findViewById(R.id.button_switch_profile);
+        switchProfileButton.setOnClickListener(v -> openSwitchProfilePopup());
+        switchProfileButton.setOnLongClickListener(v -> {
+            new OpenHiddenProfileDialog(this);
+            return true;
+        });
+
+        LiveData<List<DiscussionDao.DiscussionAndGroupMembersNames>> unfilteredDiscussions = Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> {
+            bindOwnedIdentity(ownedIdentity);
+            if (ownedIdentity == null) {
+                return null;
+            } else {
+                return AppDatabase.getInstance().discussionDao().getAllWritableWithGroupMembersNamesOrderedByActivity(ownedIdentity.bytesOwnedIdentity);
+            }
+        });
+
+        adapter = new OwnedIdentitySelectionDialogFragment.OwnedIdentityListAdapter(getLayoutInflater(), bytesOwnedIdentity -> {
+            if (popupWindow != null) {
+                popupWindow.dismiss();
+            }
+            AppSingleton.getInstance().selectIdentity(bytesOwnedIdentity, null);
+        });
+        Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? new byte[0] : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
 
 
-            FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();
-            filteredDiscussionListFragment.setUseDialogBackground(true);
-            filteredDiscussionListFragment.setShowPinned(true);
-            filteredDiscussionListFragment.setUnfilteredDiscussions(unfilteredDiscussions);
-            filteredDiscussionListFragment.setDiscussionFilterEditText(contactNameFilter);
-            filteredDiscussionListFragment.setOnClickDelegate((View view, FilteredDiscussionListViewModel.SearchableDiscussion searchableDiscussion) -> App.runThread(() -> proceed(searchableDiscussion.discussionId)));
+        FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();
+        filteredDiscussionListFragment.setUseDialogBackground(true);
+        filteredDiscussionListFragment.setShowPinned(true);
+        filteredDiscussionListFragment.setUnfilteredDiscussions(unfilteredDiscussions);
+        filteredDiscussionListFragment.setDiscussionFilterEditText(contactNameFilter);
+        filteredDiscussionListFragment.setOnClickDelegate((View view, FilteredDiscussionListViewModel.SearchableDiscussion searchableDiscussion) -> App.runThread(() -> proceed(searchableDiscussion.discussionId)));
 
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.filtered_discussion_list_placeholder, filteredDiscussionListFragment);
-            transaction.commit();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.filtered_discussion_list_placeholder, filteredDiscussionListFragment);
+        transaction.commit();
     }
 
     private void bindOwnedIdentity(OwnedIdentity ownedIdentity) {

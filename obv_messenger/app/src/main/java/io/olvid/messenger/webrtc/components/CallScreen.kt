@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2023 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -57,6 +57,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -73,6 +74,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetScaffoldState
 import androidx.compose.material.BottomSheetValue.Collapsed
@@ -117,7 +120,9 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -475,7 +480,7 @@ fun CallScreen(
             AppDatabase.getInstance().contactDao()
                 .getAllForOwnedIdentityWithChannelExcludingSome(
                     ownedIdentity.bytesOwnedIdentity,
-                    callParticipants?.value?.map { it.bytesContactIdentity })
+                    callParticipants?.value?.map { it.bytesContactIdentity } ?: emptyList())
         }.observeAsState()
     contactListViewModel.setUnfilteredContacts(unfilteredContacts.value?.filter { it.oneToOne })
     contactListViewModel.setUnfilteredNotOneToOneContacts(unfilteredContacts.value?.filter { it.oneToOne.not() })
@@ -634,8 +639,12 @@ fun CallScreen(
                                     with(webrtcCallService) {
                                         when (discussionType) {
                                             Discussion.TYPE_GROUP -> {
-                                                val group = AppDatabase.getInstance()
-                                                    .groupDao()[bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier]
+                                                val group = bytesOwnedIdentity?.let { ownId ->
+                                                    bytesGroupOwnerAndUidOrIdentifier?.let { groupId ->
+                                                        AppDatabase.getInstance()
+                                                            .groupDao()[ownId, groupId]
+                                                    }
+                                                }
                                                 group?.getCustomPhotoUrl()?.let {
                                                     initialViewSetup = { initialView: InitialView ->
                                                         initialView.setPhotoUrl(
@@ -653,13 +662,17 @@ fun CallScreen(
                                                 name = getString(
                                                     R.string.text_count_contacts_from_group,
                                                     callParticipants?.value.orEmpty().size,
-                                                    group.getCustomName()
+                                                    group?.getCustomName() ?: ""
                                                 )
                                             }
 
                                             Discussion.TYPE_GROUP_V2 -> {
-                                                val group = AppDatabase.getInstance()
-                                                    .group2Dao()[bytesOwnedIdentity, bytesGroupOwnerAndUidOrIdentifier]
+                                                val group =  bytesOwnedIdentity?.let { ownId ->
+                                                    bytesGroupOwnerAndUidOrIdentifier?.let { groupId ->
+                                                        AppDatabase.getInstance()
+                                                            .group2Dao()[ownId, groupId]
+                                                    }
+                                                }
                                                 group?.getCustomPhotoUrl()?.let {
                                                     initialViewSetup = { initialView ->
                                                         initialView.setPhotoUrl(
@@ -677,7 +690,7 @@ fun CallScreen(
                                                 name = getString(
                                                     R.string.text_count_contacts_from_group,
                                                     callParticipants?.value.orEmpty().size,
-                                                    group.getCustomName()
+                                                    group?.getCustomName() ?: ""
                                                 ) // this group has members, so no need to check if getCustomName() returns ""
                                             }
 
@@ -742,7 +755,7 @@ private fun ColumnScope.CallBottomSheetContent(
     webrtcCallService: WebrtcCallService?,
     onCallAction: (CallAction) -> Unit,
     microphoneMuted: State<Boolean?>?,
-    @Suppress("UNUSED_PARAMETER") callState: State<WebrtcCallService.State?>?,
+    @Suppress("unused") callState: State<WebrtcCallService.State?>?,
     contact: Contact?,
     callDuration: State<Int?>?,
     callParticipants: State<List<CallParticipantPojo>?>?,
@@ -820,14 +833,6 @@ private fun ColumnScope.CallBottomSheetContent(
                     style = OlvidTypography.body2,
                     color = Color(0xFF8B8D97),
                 )
-                // TODO: remove if we do not use this
-//                Spacer(modifier = Modifier.weight(1f))
-//                IconButton(onClick = {  }) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.ic_info),
-//                        contentDescription = "info"
-//                    )
-//                }
             }
         }
 
@@ -1188,7 +1193,7 @@ private fun VideoCallContent(
             webrtcCallService.getCallParticipant(participants.firstOrNull()?.bytesContactIdentity)?.peerConnectionHolder?.remoteVideoTrack
         val remoteScreenTrack =
             webrtcCallService.getCallParticipant(participants.firstOrNull()?.bytesContactIdentity)?.peerConnectionHolder?.remoteScreenTrack
-        if (webrtcCallService.selectedParticipant.contentEquals(webrtcCallService.bytesOwnedIdentity!!)
+        if (webrtcCallService.selectedParticipant.contentEquals(webrtcCallService.bytesOwnedIdentity)
                 .not()
         ) {
             CallParticipant(
@@ -1209,7 +1214,7 @@ private fun VideoCallContent(
                         .padding(start = 10.dp, top = 10.dp)
                         .clickable {
                             webrtcCallService.selectedParticipant =
-                                webrtcCallService.bytesOwnedIdentity!!
+                                webrtcCallService.bytesOwnedIdentity
                         }
                         .border(
                             width = 2.dp,
@@ -1402,7 +1407,7 @@ private fun VideoCallContent(
 
 fun VideoTrack?.isEnabledSafe() = try {
     this?.enabled() == true
-} catch (e: Exception) {
+} catch (_: Exception) {
     false
 }
 
@@ -1527,7 +1532,9 @@ fun CallParticipant(
                     initialViewSetup = { view ->
                         if (bytesOwnedIdentity != null) {
                             App.runThread {
-                                view.setOwnedIdentity(AppDatabase.getInstance().ownedIdentityDao().get(bytesOwnedIdentity))
+                                AppDatabase.getInstance().ownedIdentityDao().get(bytesOwnedIdentity)?.let {
+                                    view.setOwnedIdentity(it)
+                                }
                             }
                         } else {
                             callParticipant?.initialViewSetup()?.invoke(view)
@@ -1706,6 +1713,7 @@ private fun AddParticipantScreen(
         fontWeight = FontWeight.Medium,
         color = Color.White,
     )
+    var textFieldValue: TextFieldValue by remember { mutableStateOf(TextFieldValue(contactListViewModel.getFilter().orEmpty())) }
     Box(modifier = Modifier.padding(start = 20.dp, end = 24.dp)) {
         BasicTextField(
             modifier = Modifier
@@ -1717,8 +1725,11 @@ private fun AddParticipantScreen(
                     shape = RoundedCornerShape(size = 16.dp)
                 )
                 .padding(12.dp),
-            value = contactListViewModel.getFilter().orEmpty(),
-            onValueChange = { contactListViewModel.setFilter(it) },
+            value = textFieldValue,
+            onValueChange = {
+                textFieldValue = it
+                contactListViewModel.setFilter(it.text)
+            },
             singleLine = true,
             textStyle = OlvidTypography.body1.copy(
                 color = Color.White,
@@ -1747,13 +1758,16 @@ private fun AddParticipantScreen(
     Spacer(modifier = Modifier.height(8.dp))
     ContactListScreen(
         modifier = Modifier
-            .padding(start = 20.dp, end = 24.dp)
-            .imePadding(),
+            .padding(start = 20.dp, end = 20.dp)
+            .imePadding()
+            .navigationBarsPadding(),
         contactListViewModel = contactListViewModel,
         refreshing = false,
         onRefresh = null,
         selectable = true,
-        onClick = {},
+        onClick = {
+            textFieldValue = textFieldValue.copy(selection = TextRange(0, textFieldValue.text.length))
+        },
         onSelectionDone = {
             keyboard?.hide()
             onSelectionDone()

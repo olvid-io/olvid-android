@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -75,7 +75,6 @@ public class SendAttachmentCoordinator implements OutboxAttachment.OutboxAttachm
         this.refreshOutboxAttachmentSignedUrlDelegate = refreshOutboxAttachmentSignedUrlCoordinator;
 
         sendAttachmentOperationQueue = new PriorityOperationQueue();
-        sendAttachmentOperationQueue.execute(4, "Engine-SendAttachmentCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -87,6 +86,10 @@ public class SendAttachmentCoordinator implements OutboxAttachment.OutboxAttachm
 
         awaitingIdentityReactivationOperations = new HashMap<>();
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
+    }
+
+    public void startProcessing() {
+        sendAttachmentOperationQueue.execute(4, "Engine-SendAttachmentCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
@@ -103,12 +106,13 @@ public class SendAttachmentCoordinator implements OutboxAttachment.OutboxAttachm
                     for (OutboxAttachment attachment : message.getAttachments()) {
                         if (!attachment.isAcknowledged()) {
                             queueNewSendAttachmentCompositeOperation(attachment.getOwnedIdentity(), attachment.getMessageUid(), attachment.getAttachmentNumber(), attachment.getPriority());
+
                         }
                     }
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -59,17 +59,17 @@ public class CopySelectedMessageTask implements Runnable {
             final ClipData clipData;
 
             if (!copyAttachments) {
-                if (message.contentBody != null && message.contentBody.length() > 0) {
+                if (message.contentBody != null && !message.contentBody.isEmpty()) {
                     clipData = ClipData.newPlainText(App.getContext().getString(R.string.label_text_copied_from_olvid), message.contentBody);
                 } else {
                     clipData = null;
                 }
             } else {
                 List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().getCompleteFylesAndStatusForMessageSyncWithoutLinkPreview(selectedMessageId);
-                if (fyleAndStatuses.size() > 0) {
+                if (!fyleAndStatuses.isEmpty()) {
                     List<ClipData.Item> clipItems = new ArrayList<>();
                     List<String> mimeTypes = new ArrayList<>();
-                    if (message.contentBody != null && message.contentBody.length() > 0) {
+                    if (message.contentBody != null && !message.contentBody.isEmpty()) {
                         clipItems.add(new ClipData.Item(message.contentBody));
                         mimeTypes.add("text/plain");
                     }
@@ -83,7 +83,7 @@ public class CopySelectedMessageTask implements Runnable {
                         clipData.addItem(item);
                     }
                 } else {
-                    if (message.contentBody != null && message.contentBody.length() > 0) {
+                    if (message.contentBody != null && !message.contentBody.isEmpty()) {
                         clipData = ClipData.newPlainText(App.getContext().getString(R.string.label_text_copied_from_olvid), message.contentBody);
                     } else {
                         clipData = null;

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -33,13 +35,13 @@ import io.olvid.messenger.databases.entity.Reaction;
 @Dao
 public interface ReactionDao {
     @Insert
-    long insert(Reaction reaction);
+    long insert(@NonNull Reaction reaction);
 
     @Update
-    void update(Reaction reaction);
+    void update(@NonNull Reaction reaction);
 
     @Delete
-    void delete(Reaction reaction);
+    void delete(@NonNull Reaction reaction);
 
     @Query("SELECT * FROM " + Reaction.TABLE_NAME +
             " WHERE " + Reaction.MESSAGE_ID + " = :messageId ")
@@ -55,7 +57,7 @@ public interface ReactionDao {
     @Query("SELECT * FROM " + Reaction.TABLE_NAME +
             " WHERE " + Reaction.MESSAGE_ID + " = :messageId " +
             " AND " + Reaction.BYTES_IDENTITY + " IS NULL")
-    Reaction getMyReactionForMessage(long messageId);
+    @Nullable Reaction getMyReactionForMessage(long messageId);
 
     @Query("DELETE FROM " + Reaction.TABLE_NAME +
             " WHERE " + Reaction.MESSAGE_ID + " = :messageId ")

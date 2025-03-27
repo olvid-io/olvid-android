@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -121,12 +121,15 @@ public class OwnedIdentity {
     public boolean active;
 
     @ColumnInfo(name = CUSTOM_DISPLAY_NAME)
+    @Nullable
     public String customDisplayName;
 
     @ColumnInfo(name = UNLOCK_PASSWORD)
+    @Nullable
     public byte[] unlockPassword;
 
     @ColumnInfo(name = UNLOCK_SALT)
+    @Nullable
     public byte[] unlockSalt;
 
     @ColumnInfo(name = PREF_MUTE_NOTIFICATIONS)
@@ -152,7 +155,7 @@ public class OwnedIdentity {
     public boolean capabilityOneToOneContacts;
 
     // Constructor required by Room
-    public OwnedIdentity(@NonNull byte[] bytesOwnedIdentity, @NonNull String displayName, @Nullable String identityDetails, int apiKeyStatus, int unpublishedDetails, @Nullable String photoUrl, long apiKeyPermissions, @Nullable Long apiKeyExpirationTimestamp, boolean keycloakManaged, boolean active, String customDisplayName, byte[] unlockPassword, byte[] unlockSalt, boolean prefMuteNotifications, boolean prefMuteNotificationsExceptMentioned, @Nullable Long prefMuteNotificationsTimestamp, boolean prefShowNeutralNotificationWhenHidden, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
+    public OwnedIdentity(@NonNull byte[] bytesOwnedIdentity, @NonNull String displayName, @Nullable String identityDetails, int apiKeyStatus, int unpublishedDetails, @Nullable String photoUrl, long apiKeyPermissions, @Nullable Long apiKeyExpirationTimestamp, boolean keycloakManaged, boolean active, @Nullable String customDisplayName, @Nullable byte[] unlockPassword, @Nullable byte[] unlockSalt, boolean prefMuteNotifications, boolean prefMuteNotificationsExceptMentioned, @Nullable Long prefMuteNotificationsTimestamp, boolean prefShowNeutralNotificationWhenHidden, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.displayName = displayName;
         this.identityDetails = identityDetails;

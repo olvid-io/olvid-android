@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -661,7 +661,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             {
                 // post an invitation message to contact A
                 String serializedDetailsB = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentityB);
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentityA, getOwnedIdentity()));
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentityA, getOwnedIdentity()), getProtocolId(), getProtocolInstanceUid(), false, true);
                 ChannelMessageToSend messageToSend = new MediatorInvitationMessage(coreProtocolMessage, receivedMessage.contactIdentityB, serializedDetailsB).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -669,7 +669,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             {
                 // post an invitation message to contact B
                 String serializedDetailsA = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentityA);
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentityB, getOwnedIdentity()));
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentityB, getOwnedIdentity()), getProtocolId(), getProtocolInstanceUid(), false, true);
                 ChannelMessageToSend messageToSend = new MediatorInvitationMessage(coreProtocolMessage, receivedMessage.contactIdentityA, serializedDetailsA).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -1045,8 +1045,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             if (triggerDeviceDiscovery) {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                        new UID(getPrng()),
-                        false);
+                        new UID(getPrng()));
                 ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -1104,8 +1103,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             if (triggerDeviceDiscovery) {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                        new UID(getPrng()),
-                        false);
+                        new UID(getPrng()));
                 ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }

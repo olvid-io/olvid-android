@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -81,6 +81,7 @@ import io.olvid.messenger.openid.jsons.JsonMeRequest;
 import io.olvid.messenger.openid.jsons.JsonMeResponse;
 import io.olvid.messenger.openid.jsons.JsonSearchRequest;
 import io.olvid.messenger.openid.jsons.JsonSearchResponse;
+import io.olvid.messenger.openid.jsons.JsonTransferProofRequest;
 import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff;
 import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff;
 
@@ -91,6 +92,7 @@ public class KeycloakTasks {
     private static final String SEARCH_PATH = "olvid-rest/search";
     private static final String REVOCATION_TEST_PATH = "olvid-rest/revocationTest";
     private static final String GROUPS_PATH = "olvid-rest/groups";
+    private static final String TRANSFER_PROOF = "olvid-rest/transferProof";
 
     public static final int RFC_UNKNOWN_ERROR = 0;
     public static final int RFC_INVALID_AUTH_STATE = 1;
@@ -197,7 +199,12 @@ public class KeycloakTasks {
                                 JsonKeycloakUserDetails userDetails = AppSingleton.getJsonObjectMapper().readValue(detailsJsonStringAndSignatureKey.first, JsonKeycloakUserDetails.class);
                                 callback.success(new Pair<>(
                                         new KeycloakUserDetailsAndStuff(userDetails, response.signature, detailsJsonStringAndSignatureKey.second, response.server, response.apiKey, response.pushTopics, response.selfRevocationTestNonce),
-                                        new KeycloakServerRevocationsAndStuff(response.revocationAllowed, response.currentTimestamp, response.signedRevocations, response.minimumBuildVersions))
+                                        new KeycloakServerRevocationsAndStuff(
+                                                response.revocationAllowed != null && response.revocationAllowed,
+                                                response.transferRestricted != null && response.transferRestricted,
+                                                response.currentTimestamp,
+                                                response.signedRevocations,
+                                                response.minimumBuildVersions))
                                 );
                             } else {
                                 callback.failed(RFC_INVALID_SIGNATURE);
@@ -509,7 +516,38 @@ public class KeycloakTasks {
         });
     }
 
+    public static void getAuthenticationProof(@NonNull String keycloakServerUrl, @NonNull AuthState authState, @NonNull String sas, @NonNull String sessionNumber, @NonNull KeycloakManager.KeycloakCallback<String> callback) {
+        Logger.d("Fetching authentication proof");
 
+        App.runThread(() -> {
+            try {
+                JsonTransferProofRequest request = new JsonTransferProofRequest(sessionNumber, sas);
+                byte[] bytes;
+                try {
+                    bytes = keycloakApiRequest(keycloakServerUrl, TRANSFER_PROOF, authState.getAccessToken(), AppSingleton.getJsonObjectMapper().writeValueAsBytes(request));
+                } catch (IOException e) {
+                    callback.failed(RFC_NETWORK_ERROR);
+                    return;
+                }
+
+                Map<String, Object> output = AppSingleton.getJsonObjectMapper().readValue(bytes, new TypeReference<>() {});
+                Integer error = (Integer) output.get("error");
+                if (error != null) {
+                    callback.failed(RFC_SERVER_ERROR);
+                } else {
+                    String signature = (String) output.get("signature");
+                    if (signature != null) {
+                        callback.success(signature);
+                    } else {
+                        callback.failed(RFC_UNKNOWN_ERROR);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                callback.failed(RFC_UNKNOWN_ERROR);
+            }
+        });
+    }
 
     private static byte[] keycloakApiRequest(@NonNull String keycloakServer, @NonNull String path, @Nullable String accessToken, @Nullable byte[] dataToSend) throws IOException {
         URL requestUrl = new URL(keycloakServer + path);

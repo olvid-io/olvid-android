@@ -94,7 +94,11 @@
     <string name="explanation_new_group_v2_card">Un administrateur a mis à jour les détails du groupe. La nouvelle version est affichée ci-dessous.\n\nUtilisez cette version en appuyant sur «\u00a0mettre à jour\u00a0».</string>
     <string name="explanation_new_olvid_card">Votre contact a mis à jour son Olvid Card. L\'ancienne version et la nouvelle sont affichées ci-dessous.\n\nActualisez les informations de votre contact en cliquant "mettre à jour".</string>
     <string name="explanation_no_channel">Un canal sécurisé est actuellement en cours d\'établissement. Vous ne pouvez pas entamer de discussion avec ce contact tant que cela n\'est pas terminé. Ce processus devrait seulement prendre quelques secondes si vous et votre contact êtes tous deux en ligne.\n\nSi vous pensez que quelque chose s\'est mal passé, vous pouvez redémarrer l\'établissement de canal.</string>
-    <string name="explanation_no_contact_match_filter">Aucun contact trouvé pour cette recherche</string>
+    <string name="explanation_no_contact_match_filter">Aucun contact trouvé</string>
+    <string name="explanation_no_group_match_filter">Aucun groupe trouvé</string>
+    <string name="explanation_no_message_found">Aucun message trouvé</string>
+    <string name="explanation_no_attachment_found">Auncune pièce jointe trouvée</string>
+    <string name="explanation_no_link_found">Auncun lien trouvé</string>
     <string name="format_identity_details_custom_field">%1$s : %2$s</string>
     <string name="hint_company">Société (facultatif)</string>
     <string name="hint_compose_your_message">Écrire un message</string>
@@ -194,6 +198,8 @@
     <string name="menu_action_bookmark">Favori</string>
     <string name="menu_action_unbookmark">Non favori</string>
     <string name="menu_action_bookmarks">Favoris</string>
+    <string name="menu_action_archive">Archiver</string>
+    <string name="menu_action_unarchive">Désarchiver</string>
     <string name="menu_check_update">Vérifier les mises à jour sur Google Play</string>
     <string name="message_discussion_locked">Cette discussion est verrouillée</string>
     <string name="message_discussion_readonly">Cette discussion est en lecture seule</string>
@@ -242,8 +248,7 @@
     <string name="text_joined_the_group">%1$s a rejoint le groupe</string>
     <string name="text_left_the_group">%1$s a quitté le groupe</string>
     <string name="text_nobody">Personne</string>
-    <string name="text_draft_message_prefix">Brouillon\u00a0: %1$s</string>
-    <string name="text_outbound_message_prefix">Vous : %1$s</string>
+    <string name="text_draft_message_prefix">Brouillon\u00a0:\u0020</string>
     <string name="text_inbound_group_message_prefix">%1$s :\u0020</string>
     <string name="text_today">aujourd\'hui</string>
     <string name="text_deleted_contact">Contact supprimé</string>
@@ -273,6 +278,7 @@
     <string name="toast_message_invite_sent">Invitation envoyée</string>
     <string name="toast_message_leaving_group">Vous avez quitté le groupe</string>
     <string name="toast_message_message_text_copied_to_clipboard">Le texte du message a été copié dans le presse-papier</string>
+    <string name="toast_message_text_copied_to_clipboard">Texte copié dans le presse-papier</string>
     <string name="toast_message_no_channel_message_delayed">Votre message est en attente et sera envoyé dès que possible</string>
     <string name="toast_message_sharing_failed">Impossible de partager le contenu sélectionné</string>
     <string name="toast_message_shortcut_creation_failed">Erreur lors de la création de raccourci</string>
@@ -317,11 +323,13 @@
     <string name="label_no_longer_available">Non disponible</string>
     <string name="activity_title_message_details">Détails du message</string>
     <string name="activity_title_bookmarks">Messages favoris</string>
+    <string name="activity_title_archived_discussions">Discussions archivées</string>
     <string name="text_processing">En attente</string>
     <string name="text_sent">Envoyé</string>
     <string name="text_delivered">Reçu</string>
     <string name="text_read">Lu</string>
-    <string name="dialog_message_recipient_details">Déposé sur le serveur\u00a0: %1$s\nReçu\u00a0: %2$s\nLu\u00a0: %3$s</string>
+    <string name="dialog_message_recipient_details_other_device">**Reçu :** %1$s\n**Lu :** %2$s</string>
+    <string name="dialog_message_recipient_details">**Déposé sur le serveur :** %1$s\n**Reçu :** %2$s\n**Lu :** %3$s</string>
     <string name="text_null_timestamp">-</string>
     <string name="text_no_recipient_details">Détails du message indisponibles</string>
     <string name="activity_title_discussion_settings">Paramètres de la discussion</string>
@@ -873,7 +881,7 @@
     <string name="text_option_identity_provider">IdP\u00a0: %1$s</string>
     <string name="explanation_choose_display_name_keycloak">Le nom ci-dessous a été récupéré depuis le fournisseur d\'identités de votre société et ne peut être modifié. Vous pouvez tout de même choisir une photo de profil. Ces informations ne seront jamais envoyées aux serveurs d\'Olvid.</string>
     <string name="dialog_title_keycloak_authentication_required_token_expired">Authentification nécessaire</string>
-    <string name="dialog_message_keycloak_authentication_required_token_expired">Votre ID Olvid est gérée par le fournisseur d\'identités de votre société. Vous devez vous ré-authentifier auprès de ce fournisseur d\'identité pour continuer.</string>
+    <string name="dialog_message_keycloak_authentication_required_token_expired">Votre ID Olvid est gérée par le fournisseur d\'identités de votre société. Vous devez vous ré-authentifier auprès de ce fournisseur d\'identités pour continuer.</string>
     <string name="dialog_title_keycloak_identity_replacement">Remplacer l\'ID Olvid précédent</string>
     <string name="dialog_message_keycloak_identity_replacement">Un autre ID Olvid est associé à votre compte sur le fournisseur d\'identités de votre société. Si vous avez généré un nouvel ID, vous devez remplacer le précédent.</string>
     <string name="button_label_revoke">Remplacer l\'ID précédent</string>
@@ -892,15 +900,17 @@
     <string name="explanation_keycloak_update_change_server">Olvid est déjà configuré pour utiliser un fournisseur d\'identités DIFFÉRENT. Si votre société a effectivement changé de fournisseur d\'identités, vous pouvez continuer et vous authentifier auprès de ce nouveau fournisseur. En cas de doute, vous pouvez annuler.\nVeuillez contacter votre administrateur pour plus de détails.</string>
     <string name="explanation_keycloak_update_same_server">Olvid est déjà configuré pour utiliser le fournisseur d\'identités de votre société.\nVeuillez contacter votre administrateur pour plus de détails.</string>
     <string name="explanation_keycloak_unable_to_contact_server">Échec de connexion au fournisseur d\'identités de votre société. Veuillez vérifier l\'état de votre connexion internet ou contacter votre administrateur pour plus de détails.</string>
-    <string name="explanation_keycloak_update_bad_server">Impossible de configurer le fournisseur d\'identité de votre société avec votre ID Olvid actuel. Votre ID a été généré sur un serveur Olvid différent.\nVeuillez contacter votre administrateur pour plus de détails.</string>
-    <string name="explanation_keycloak_olvid_version_outdated">Impossible de configurer le fournisseur d\'identité de votre société. Votre version d\'Olvid est dépassée et n\'est pas compatible avec le fournisseur d\'identité de votre société.\nVeuillez mettre à jour Olvid et réessayer, ou contacter votre administrateur pour plus de détails.</string>
+    <string name="explanation_keycloak_update_bad_server">Impossible de configurer le fournisseur d\'identités de votre société avec votre ID Olvid actuel. Votre ID a été généré sur un serveur Olvid différent.\nVeuillez contacter votre administrateur pour plus de détails.</string>
+    <string name="explanation_keycloak_olvid_version_outdated">Impossible de configurer le fournisseur d\'identités de votre société. Votre version d\'Olvid est dépassée et n\'est pas compatible avec le fournisseur d\'identités de votre société.\nVeuillez mettre à jour Olvid et réessayer, ou contacter votre administrateur pour plus de détails.</string>
     <string name="explanation_keycloak_bind">Le nom ci-dessous a été récupéré depuis le fournisseur d\'identités de votre société.\nUne fois votre ID Olvid géré par ce fournisseur, c\'est comme cela que vos contacts vous verront dans Olvid.</string>
     <string name="button_label_manage_keycloak">Passer à un ID géré</string>
     <string name="toast_message_keycloak_bind_successful">Passage à un ID géré réussi</string>
     <string name="toast_message_unable_to_keycloak_bind">Échec de passage à un ID géré</string>
     <string name="menu_action_unbind_from_keycloak">Retirer le fournisseur d\'identités</string>
     <string name="dialog_title_unbind_from_keycloak">Retirer le fournisseur d\'identités</string>
+    <string name="dialog_title_unbind_from_keycloak_restricted">Impossible de retirer le fournisseur d\'identités</string>
     <string name="dialog_message_unbind_from_keycloak">Votre ID Olvid est actuellement géré par le fournisseur d\'identités de votre société. Vous êtes sur le point de passer à un ID Olvid normal, non-géré.\n\nSi vous continuez, vous ne pourrez plus ajouter automatiquement d\'autres employés à vos contacts. Veuillez contacter votre administrateur pour plus de détails.\n\nSouhaitez-vous continuer\u00a0?</string>
+    <string name="dialog_message_unbind_from_keycloak_restricted">Votre ID Olvid est actuellement géré par le fournisseur d\'identités de votre société qui restreint les trasnferts. Il ne peut pas être retiré à votre initiative.\n\n Veuillez contacter votre administrateur pour plus de détails.</string>
     <string name="text_explanation_warning_identity_creation_keycloak_revocation_needed">Votre fournisseur d\'identités indique qu\'un ID Olvid est déjà associé à l\'utilisateur sous lequel vous vous êtes connecté. Si vous continuez, cet ID Olvid sera révoqué et votre nouvel ID sera associé à l\'utilisateur.\nVeuillez contacter votre administrateur pour plus de détails.</string>
     <string name="text_explanation_warning_identity_creation_keycloak_revocation_impossible">Votre fournisseur d\'identités indique qu\'un ID Olvid est déjà associé à l\'utilisateur sous lequel vous vous êtes connecté. Vous ne pouvez pas poursuivre la création de votre ID Olvid.\n\nVeuillez contacter votre administrateur pour plus de détails.</string>
     <string name="text_explanation_warning_binding_keycloak_revocation_impossible">Votre fournisseur d\'identités indique qu\'un ID Olvid est déjà associé à l\'utilisateur sous lequel vous vous êtes connecté. Vous ne pouvez pas poursuivre la configuration.\n\nVeuillez contacter votre administrateur pour plus de détails.</string>
@@ -1572,6 +1582,8 @@
     <string name="text_setting_auto_download_size">\u2023 Télécharger automatiquement les pièces jointes :\u0020</string>
     <string name="text_setting_link_preview_inbound">\u2023 Prévisualisation des liens reçus :\u0020</string>
     <string name="text_setting_link_preview_outbound">\u2023 Prévisualisation des liens envoyés :\u0020</string>
+    <string name="text_setting_auto_download_archived">\u2023 Téléchargement automatique des pièces jointes des discussions archivées :\u0020</string>
+    <string name="text_setting_unarchive_on_notification">\u2023 Désarchivage des discussions à la notification d\'un nouveau message :\u0020</string>
     <string name="text_setting_block_unknown_certificate">\u2023 Bloquer les connexions utilisant un certificat inconnu :\u0020</string>
     <string name="text_setting_no_notify_certificate_change_for_previews">\u2023 Désactiver les notifications de changement de certificat pour les aperçus de liens :\u0020</string>
     <string name="text_setting_connectivity_indicator">\u2023 Indicateur de connexion réseau\u00a0:\u0020</string>
@@ -1629,6 +1641,8 @@
     <string name="pref_no_notify_certificate_change_for_previews_summary">Activez cette option pour désactiver la détection de changement de certificat lors du téléchargement d\'aperçus de liens. Certains sites peuvent présenter un certificat différent à chaque connexion, induisant des notifications fréquentes sans cette option.</string>
     <string name="pref_use_legacy_zxing_scanner_title">Utiliser ZXing pour scanner les codes QR</string>
     <string name="pref_use_legacy_zxing_scanner_summary">Par défaut, Olvid utilise ML Kit pour cela. Activez cette option si le scan de codes QR fonctionne mal dans Olvid.</string>
+    <string name="pref_use_internal_pdf_viewer_title">Utiliser la visionneuse PDF interne (expérimental)</string>
+    <string name="pref_use_internal_pdf_viewer_summary">Par défaut, les pièces jointes PDF sont ouvertes dans une visionneuse externe. Activez cette option pour utiliser la visionneuse interne à la place.</string>
     <string name="label_my_devices">Mes appareils</string>
     <string name="text_device_xxxx">Appareil %1$s</string>
     <string name="text_this_device">Cet appareil</string>
@@ -1870,6 +1884,7 @@
     <string name="global_search_result_contacts">Contacts</string>
     <string name="global_search_result_messages">Messages</string>
     <string name="global_search_result_attachments">Pièces jointes</string>
+    <string name="global_search_result_links">Liens</string>
     <string name="button_label_send_read_receipts">Notifier mes contacts</string>
     <string name="button_label_do_not_send">Ne pas les notifier</string>
     <string name="button_label_ask_later">Me redemander plus tard</string>
@@ -1892,6 +1907,7 @@
     <string name="at_least_xxx">Au moins %1$d</string>
     <string name="label_discussion_list_pin_divider">Discussions épinglées</string>
     <string name="explanation_empty_bookmarks">Aucun message favori</string>
+    <string name="explanation_empty_archived_discussion">Aucune discussion archivée</string>
     <string name="button_label_delete_from_my_devices">Supprimer de mes appareils</string>
     <string name="label_delete_from_this_device">Supprimer de cet appareil uniquement</string>
     <string name="label_delete_from_all_my_devices">Supprimer de tous mes appareils</string>
@@ -1920,11 +1936,49 @@
     <string name="button_label_clock_settings">Paramètres d\'horloge</string>
     <string name="activity_title_get_in_contact">Entrer en contact</string>
     <string name="button_label_discuss_with">Discuter avec %1$s</string>
+    <string name="onboarding_transfer_restricted_title">Transfert de profil réglementé</string>
+    <string name="explanation_transfer_restriction_title_1">Important</string>
+    <string name="explanation_transfer_restriction_text_1">Votre société impose de vous authentifier auprès de votre fournisseur d\'identitiés sur votre nouvel appareil avant d\'accéder à votre profil.</string>
+    <string name="explanation_transfer_restriction_title_2">Pourquoi ?</string>
+    <string name="explanation_transfer_restriction_text_2">Cela garantit que seuls des appareils autorisés peuvent accéder à votre profil.</string>
+    <string name="explanation_transfer_restriction_authentication_needed">Votre société impose une authentification supplémentaire : vous devez vous authentifier auprès de votre fournisseur d\'identités directement sur ce nouvel appareil.\n\n**Si votre nouvel appareil ne vous demande pas de vous authentifier, veuillez vérifier qu’il a bien la dernière version d’Olvid.**</string>
+    <string name="onboarding_authentication_required_title">Authentification requise</string>
+    <string name="onboarding_transfer_keycloak_error_message_unreachable">Impossible de contacter le fournisseur d\'idenitité de votre société</string>
+    <string name="onboarding_transfer_keycloak_error_message_authentication_failed">Échec d\'authentification</string>
+    <string name="onboarding_transfer_keycloak_error_message_authentication_proof_error">Échec de récupération de la preuve d\'authentification</string>
+    <string name="onboarding_transfer_authentication_successful_title">Authentification réussie</string>
+    <string name="onboarding_transfer_authentication_successful">Import du profil en cours</string>
+    <string name="onboarding_transfer_keycloak_authentication_required">Veuillez vous authentifier auprès du fournisseur d\'identités de votre société pour poursuivre.</string>
+    <string name="dialog_title_rebind_keycloak_restricted">Impossible de modifier le fournisseur d\'identités</string>
+    <string name="dialog_message_rebind_keycloak_restricted">Votre ID Olvid est actuellement géré par le fournisseur d\'identités de votre société qui restreint les trasnferts. Il ne peut pas être modifié à votre initiative.\n\n Veuillez contacter votre administrateur pour plus de détails.</string>
+    <string name="troubleshooting_storage_db_sync_title">Cohérence des bases de données</string>
+    <string name="troubleshooting_storage_db_sync_description">Après un « crash » de l\'application, les bases de données internes peuvent être incohérentes. Lancez cette vérification pour vous assurer que tout est en ordre 😁</string>
+    <string name="button_label_check_now">Vérifier maintenant</string>
+    <string name="snackbar_action_label_undo">Annuler</string>
+    <string name="dialog_unarchive_setting_title">Configuration du désarchivage</string>
+    <string name="dialog_unarchive_setting_message">Quand souhaitez-vous que vos discussions soient désarchivées ?</string>
+    <string name="dialog_unarchive_setting_button_notified">À la prochaine notification</string>
+    <string name="dialog_unarchive_setting_button_never">Jamais</string>
+    <string name="dialog_unarchive_setting_explain">Vous pouvez modifier le déclenchement des notifications dans les paramètres de chaque discussion</string>
+    <string name="pref_archived_attachments_title">Télécharger automatiquement les pièces jointes des discussions archivées</string>
+    <string name="pref_archived_attachments_summary">Quand cette option est activée, les pieces jointes des discussions archivées seront téléchargées automatiquement selon la configuration ci-dessus.</string>
+    <string name="pref_unarchive_on_notification_title">Désarchiver les discussions lors d\'une notification</string>
+    <string name="pref_unarchive_on_notification_summary">Quand cette option est activée, une discussion archivée sera automatiquement désarchivée lors de la notification d\'un nouveau message.</string>
+    <string name="call_notification_ongoing_call">Appel en cours</string>
+    <string name="call_notification_incoming_call">Appel entrant</string>
+    <string name="menu_action_copy_text_block_from_image">Copier le bloc de texte</string>
 
 
 
 
-
+    <plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Discussion archivée</item>
+        <item quantity="other">%1$d discussions archivées</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Discussion désarchivée</item>
+        <item quantity="other">%1$d discussions désarchivées</item>
+    </plurals>
     <plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Supprimer la discussion sélectionnée ?</item>
         <item quantity="other">Supprimer les discussions sélectionnées ?</item>

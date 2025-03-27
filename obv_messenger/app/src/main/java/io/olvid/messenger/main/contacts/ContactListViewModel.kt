@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -280,8 +280,8 @@ fun ContactOrKeycloakDetails.getAnnotatedName(): AnnotatedString {
                     } else {
                         append(
                             identityDetails.formatFirstAndLastName(
-                                SettingsActivity.getContactDisplayNameFormat(),
-                                SettingsActivity.getUppercaseLastName()
+                                SettingsActivity.contactDisplayNameFormat,
+                                SettingsActivity.uppercaseLastName
                             )
                         )
                     }
@@ -295,8 +295,8 @@ fun ContactOrKeycloakDetails.getAnnotatedName(): AnnotatedString {
                 val identityDetails = keycloakUserDetails.getIdentityDetails(null)
                 append(
                     identityDetails.formatFirstAndLastName(
-                        SettingsActivity.getContactDisplayNameFormat(),
-                        SettingsActivity.getUppercaseLastName()
+                        SettingsActivity.contactDisplayNameFormat,
+                        SettingsActivity.uppercaseLastName
                     )
                 )
             }
@@ -317,12 +317,12 @@ fun ContactOrKeycloakDetails.getAnnotatedDescription(): AnnotatedString? {
                         append(
                             identityDetails.formatDisplayName(
                                 JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
-                                SettingsActivity.getUppercaseLastName()
+                                SettingsActivity.uppercaseLastName
                             )
                         )
                     } else {
                         identityDetails.formatPositionAndCompany(
-                            SettingsActivity.getContactDisplayNameFormat()
+                            SettingsActivity.contactDisplayNameFormat
                         )?.let { append(it) }
                     }
                 }
@@ -330,7 +330,7 @@ fun ContactOrKeycloakDetails.getAnnotatedDescription(): AnnotatedString? {
 
             KEYCLOAK -> {
                 keycloakUserDetails?.getIdentityDetails(null)
-                    ?.formatPositionAndCompany(SettingsActivity.getContactDisplayNameFormat())
+                    ?.formatPositionAndCompany(SettingsActivity.contactDisplayNameFormat)
                     ?.let {
                         append(it)
                     }

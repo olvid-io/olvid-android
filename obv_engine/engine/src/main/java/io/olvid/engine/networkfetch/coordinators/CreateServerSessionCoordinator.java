@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -59,9 +59,12 @@ public class CreateServerSessionCoordinator implements Operation.OnFinishCallbac
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
         createServerSessionOperationQueue = new NoDuplicateOperationQueue();
-        createServerSessionOperationQueue.execute(1, "Engine-CreateServerSessionCoordinator");
 
         queryApiKeyStatusOperationQueue = new OperationQueue(true);
+    }
+
+    public void startProcessing() {
+        createServerSessionOperationQueue.execute(1, "Engine-CreateServerSessionCoordinator");
         queryApiKeyStatusOperationQueue.execute(1, "Engine-CreateServerSessionCoordinator-QueryApiKeyStatus");
     }
 
@@ -91,7 +94,7 @@ public class CreateServerSessionCoordinator implements Operation.OnFinishCallbac
             }
             fetchManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

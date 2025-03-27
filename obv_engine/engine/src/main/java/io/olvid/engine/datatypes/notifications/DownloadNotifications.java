@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,8 +22,8 @@ package io.olvid.engine.datatypes.notifications;
 
 public abstract class DownloadNotifications {
     public static final String NOTIFICATION_MESSAGE_DECRYPTED = "network_fetch_notification_message_payload_set";
-    public static final String NOTIFICATION_MESSAGE_DECRYPTED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
-    public static final String NOTIFICATION_MESSAGE_DECRYPTED_UID_KEY = "uid"; // UID
+    public static final String NOTIFICATION_MESSAGE_DECRYPTED_MESSAGE_KEY = "message"; // DecryptedApplicationMessage
+    public static final String NOTIFICATION_MESSAGE_DECRYPTED_ATTACHMENTS_KEY = "attachments"; // ReceivedAttachment[]
 
     public static final String NOTIFICATION_MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED = "network_fetch_notification_message_extended_payload_downloaded";
     public static final String NOTIFICATION_MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity

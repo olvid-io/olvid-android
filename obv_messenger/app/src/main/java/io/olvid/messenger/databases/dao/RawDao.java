@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
 import androidx.room.Dao;
 import androidx.room.RawQuery;
 import androidx.sqlite.db.SupportSQLiteQuery;
@@ -27,5 +28,5 @@ import androidx.sqlite.db.SupportSQLiteQuery;
 public interface RawDao {
     @SuppressWarnings("UnusedReturnValue")
     @RawQuery
-    int executeRawQuery(SupportSQLiteQuery supportSQLiteQuery);
+    int executeRawQuery(@NonNull SupportSQLiteQuery supportSQLiteQuery);
 }

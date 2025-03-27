@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -37,7 +37,6 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.PreKeyBlobOnServer;
 import io.olvid.engine.datatypes.containers.EncodedOwnedPreKey;
 import io.olvid.engine.datatypes.containers.OwnedDeviceAndPreKey;
-import io.olvid.engine.datatypes.containers.PreKey;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.TrustLevel;
@@ -95,7 +94,8 @@ public interface IdentityDelegate {
     void unCertifyExpiredSignedContactDetails(Session session, Identity ownedIdentity, long latestRevocationListTimestamp);
     List<String> getKeycloakPushTopics(Session session, Identity ownedIdentity) throws SQLException;
     void verifyAndAddRevocationList(Session session, Identity ownedIdentity, List<String> signedRevocations) throws Exception;
-    JsonKeycloakUserDetails verifyKeycloakSignature(Session session, Identity ownedIdentity, String signature);
+    String verifyKeycloakSignature(Session session, Identity ownedIdentity, String signature);
+    JsonKeycloakUserDetails verifyKeycloakIdentitySignature(Session session, Identity ownedIdentity, String signature);
 
     String getOwnedIdentityKeycloakServerUrl(Session session, Identity ownedIdentity) throws SQLException;
     void saveKeycloakAuthState(Session session, Identity ownedIdentity, String serializedAuthState) throws SQLException;
@@ -105,6 +105,7 @@ public interface IdentityDelegate {
     void setOwnedIdentityKeycloakUserId(Session session, Identity ownedIdentity, String userId) throws SQLException;
     void bindOwnedIdentityToKeycloak(Session session, Identity ownedIdentity, String keycloakUserId, ObvKeycloakState keycloakState) throws Exception;
     int unbindOwnedIdentityFromKeycloak(Session session, Identity ownedIdentity) throws Exception; // return the version of the new details to publish
+    void updateKeycloakTransferRestrictedIfNeeded(Session session, Identity ownedIdentity, String serverUrl, boolean transferRestricted) throws SQLException;
     boolean updateKeycloakPushTopicsIfNeeded(Session session, Identity ownedIdentity, String serverUrl, List<String> pushTopics) throws SQLException;
     void setOwnedIdentityKeycloakSelfRevocationTestNonce(Session session, Identity ownedIdentity, String serverUrl, String nonce) throws SQLException;
     String getOwnedIdentityKeycloakSelfRevocationTestNonce(Session session, Identity ownedIdentity, String serverUrl) throws SQLException;

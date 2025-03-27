@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -44,19 +44,27 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
-import io.olvid.messenger.R.color
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 
 @Composable
-fun MainScreenEmptyList(@DrawableRes icon: Int, iconPadding: Dp = 0.dp, @StringRes title: Int, @StringRes subtitle: Int? = null) {
+fun MainScreenEmptyList(
+    modifier: Modifier = Modifier,
+    @DrawableRes icon: Int,
+    iconPadding: Dp = 0.dp,
+    @StringRes title: Int,
+    @StringRes subtitle: Int? = null
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
-            modifier = Modifier.size(60.dp).padding(iconPadding).alpha(.8f),
+            modifier = Modifier
+                .size(60.dp)
+                .padding(iconPadding)
+                .alpha(.8f),
             painter = painterResource(id = icon),
             contentDescription = "",
             colorFilter = ColorFilter.tint(colorResource(id = R.color.greyTint))
@@ -67,14 +75,14 @@ fun MainScreenEmptyList(@DrawableRes icon: Int, iconPadding: Dp = 0.dp, @StringR
             style = OlvidTypography.body1,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            color = colorResource(id = color.almostBlack)
+            color = colorResource(id = R.color.almostBlack)
         )
         subtitle?.let {
             Text(
                 text = stringResource(id = subtitle),
                 style = OlvidTypography.subtitle1,
                 textAlign = TextAlign.Center,
-                color = colorResource(id = color.greyTint)
+                color = colorResource(id = R.color.greyTint)
             )
         }
         Spacer(modifier = Modifier.height(64.dp))

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -188,7 +188,7 @@ public class FilteredDiscussionListViewModel extends ViewModel {
             }
             this.title = discussionAndGroupMembersNames.discussion.title;
             this.groupMemberNameList = discussionAndGroupMembersNames.groupMemberNames == null ? "" : discussionAndGroupMembersNames.groupMemberNames;
-            this.patternMatchingField = StringUtils.unAccent(title + "\n" + groupMemberNameList);
+            this.patternMatchingField = discussionAndGroupMembersNames.patterMatchingField == null ? StringUtils.unAccent(title + "\n" + groupMemberNameList) : discussionAndGroupMembersNames.patterMatchingField;
             this.photoUrl = discussionAndGroupMembersNames.discussion.photoUrl;
             this.keycloakManaged = discussionAndGroupMembersNames.discussion.keycloakManaged;
             this.active = discussionAndGroupMembersNames.discussion.active;

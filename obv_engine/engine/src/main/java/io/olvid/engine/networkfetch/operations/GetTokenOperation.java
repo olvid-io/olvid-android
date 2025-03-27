@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,6 +26,7 @@ import java.util.List;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
@@ -129,7 +130,7 @@ class GetTokenOperation extends Operation {
                         return;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 fetchManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -143,7 +144,7 @@ class GetTokenOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }
@@ -221,7 +222,7 @@ class GetTokenServerMethod extends ServerMethod {
                 this.permissions = receivedData[3].decodeLong();
                 this.apiKeyExpiration = receivedData[4].decodeLong();
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         }

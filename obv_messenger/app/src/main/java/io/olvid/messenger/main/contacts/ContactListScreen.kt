@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -81,9 +82,6 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.R.color
-import io.olvid.messenger.R.drawable
-import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.entity.Contact
@@ -94,13 +92,14 @@ import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDe
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_MORE_RESULTS
+import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-data class ContactFilterTab(val label: String, val filter: (ContactOrKeycloakDetails) -> Boolean)
+data class ContactFilterTab(val labelResId: Int, val filter: (ContactOrKeycloakDetails) -> Boolean)
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ContactListScreen(
     modifier: Modifier = Modifier.fillMaxSize(),
@@ -117,23 +116,24 @@ fun ContactListScreen(
 
     val contacts by contactListViewModel.filteredContacts.observeAsState()
     val refreshState = onRefresh?.let { rememberPullRefreshState(refreshing, onRefresh) }
+
     val tabs = arrayListOf(
         ContactFilterTab(
-            label = stringResource(id = R.string.contact_list_tab_contact),
+            labelResId = R.string.contact_list_tab_contact,
             filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == true }
         ),
         ContactFilterTab(
-            label = stringResource(id = R.string.contact_list_tab_others),
+            labelResId = R.string.contact_list_tab_others,
             filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contact?.oneToOne == false }
         )
-    )
-    if (contactListViewModel.keycloakManaged.value) {
-        tabs.add(ContactFilterTab(
-            label = stringResource(id = R.string.contact_list_tab_directory),
-            filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contactType != CONTACT }
-        ))
+    ).apply {
+        if (contactListViewModel.keycloakManaged.value) {
+            add(ContactFilterTab(
+                labelResId = R.string.contact_list_tab_directory,
+                filter = { contactOrKeycloakDetails -> contactOrKeycloakDetails.contactType != CONTACT }
+            ))
+        }
     }
-
 
     AppCompatTheme {
         Box(
@@ -141,14 +141,13 @@ fun ContactListScreen(
                 .then(refreshState?.let { Modifier.pullRefresh(it) } ?: Modifier)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                val pagerState =
-                    rememberPagerState { if (contactListViewModel.keycloakManaged.value) 3 else 2 }
+                val pagerState = rememberPagerState { tabs.size }
                 LaunchedEffect(pagerState) {
                     snapshotFlow { pagerState.currentPage }.collect { page ->
                         if (page == 2) {
                             if (contactListViewModel.getFilter() == null) {
                                 contactListViewModel.setFilter("")
-                            } else if (contactListViewModel.getFilter() == ""){
+                            } else if (contactListViewModel.getFilter() == "") {
                                 contactListViewModel.refreshKeycloakSearch()
                             }
                         }
@@ -182,9 +181,11 @@ fun ContactListScreen(
                                     }
 
                                     LazyColumn(
-                                        modifier = Modifier.fillMaxSize(),
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .navigationBarsPadding(),
                                         state = lazyListState,
-                                        contentPadding = PaddingValues(bottom = 80.dp),
+                                        contentPadding = PaddingValues(bottom = 32.dp),
                                     ) {
                                         items(items = list) { contactOrKeycloakDetails ->
 
@@ -217,6 +218,7 @@ fun ContactListScreen(
                                                                         )
                                                                     }
                                                                 }
+                                                                onClick(it)
                                                             }
                                                         } else {
                                                             onClick
@@ -251,6 +253,7 @@ fun ContactListScreen(
                                                             when {
                                                                 contactOrKeycloakDetails.contactType == CONTACT
                                                                         && contactOrKeycloakDetails.contact?.oneToOne == false
+                                                                        && contactOrKeycloakDetails.contact.active
                                                                         && contactOrKeycloakDetails.contact.shouldShowChannelCreationSpinner()
                                                                     .not() -> {
                                                                     {
@@ -269,7 +272,9 @@ fun ContactListScreen(
                                                                 }
 
                                                                 contactOrKeycloakDetails.contactType == KEYCLOAK
-                                                                        && AppSingleton.getContactCacheInfo(contactOrKeycloakDetails.keycloakUserDetails?.identity) == null -> {
+                                                                        && AppSingleton.getContactCacheInfo(
+                                                                    contactOrKeycloakDetails.keycloakUserDetails?.identity
+                                                                ) == null -> {
                                                                     {
                                                                         TextButton(onClick = {
                                                                             onClick.invoke(
@@ -304,20 +309,20 @@ fun ContactListScreen(
                                     ) {
                                         if (contactListViewModel.isFiltering())
                                             MainScreenEmptyList(
-                                                icon = drawable.ic_contacts_filter,
-                                                title = string.explanation_no_contact_match_filter,
+                                                icon = R.drawable.ic_contacts_filter,
+                                                title = R.string.explanation_no_contact_match_filter,
                                                 subtitle = null
                                             )
                                         else
                                             MainScreenEmptyList(
-                                                icon = drawable.tab_contacts,
+                                                icon = R.drawable.tab_contacts,
                                                 title = when (page) {
-                                                    0 -> string.explanation_empty_contact_list
+                                                    0 -> R.string.explanation_empty_contact_list
                                                     1 -> R.string.explanation_empty_other_contact_list
                                                     else -> R.string.explanation_empty_directory
                                                 },
                                                 subtitle = when (page) {
-                                                    0 -> string.explanation_empty_contact_list_sub
+                                                    0 -> R.string.explanation_empty_contact_list_sub
                                                     1 -> R.string.explanation_empty_other_contact_list_sub
                                                     else -> null
                                                 }
@@ -371,7 +376,7 @@ private fun Header(
     contacts: List<ContactOrKeycloakDetails>?,
 ) {
     TabRow(
-        selectedTabIndex = pagerState.currentPage,
+        selectedTabIndex = pagerState.currentPage.coerceAtMost(tabs.size - 1),
         backgroundColor = colorResource(id = R.color.almostWhite),
         contentColor = colorResource(id = R.color.almostBlack),
     ) {
@@ -386,19 +391,23 @@ private fun Header(
                 },
                 text = {
                     if (contactListViewModel.getFilter().isNullOrEmpty()) {
-                        Text(text = tab.label, softWrap = false, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            text = stringResource(tab.labelResId),
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     } else if (index == 2 && contactListViewModel.keycloakSearchInProgress) {
                         BadgedBox(badge = {
                             CircularProgressIndicator(
                                 modifier = Modifier
                                     .padding(4.dp)
                                     .size(16.dp),
-                                color = colorResource(id = color.olvid_gradient_light),
+                                color = colorResource(id = R.color.olvid_gradient_light),
                                 strokeWidth = 2.dp
                             )
                         }) {
                             Text(
-                                text = tab.label,
+                                text = stringResource(tab.labelResId),
                                 softWrap = false,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -407,7 +416,7 @@ private fun Header(
                         BadgedBox(badge = {
                             Badge(
                                 modifier = Modifier.padding(4.dp),
-                                backgroundColor = colorResource(id = color.olvid_gradient_light),
+                                backgroundColor = colorResource(id = R.color.olvid_gradient_light),
                             ) {
                                 Text(
                                     color = colorResource(id = R.color.almostWhite),
@@ -423,7 +432,7 @@ private fun Header(
                             }
                         }) {
                             Text(
-                                text = tab.label,
+                                text = stringResource(tab.labelResId),
                                 softWrap = false,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -447,16 +456,16 @@ private fun Contact(
         title = contactOrKeycloakDetails.getAnnotatedName()
             .highlight(
                 SpanStyle(
-                    background = colorResource(id = color.searchHighlightColor),
-                    color = colorResource(id = color.black)
+                    background = colorResource(id = R.color.searchHighlightColor),
+                    color = colorResource(id = R.color.black)
                 ),
                 contactListViewModel.filterPatterns
             ),
         body = contactOrKeycloakDetails.getAnnotatedDescription()
             ?.highlight(
                 SpanStyle(
-                    background = colorResource(id = color.searchHighlightColor),
-                    color = colorResource(id = color.black)
+                    background = colorResource(id = R.color.searchHighlightColor),
+                    color = colorResource(id = R.color.black)
                 ),
                 contactListViewModel.filterPatterns
             ),
@@ -484,13 +493,12 @@ private fun Contact(
                         )
                     val name =
                         identityDetails.formatFirstAndLastName(
-                            SettingsActivity.getContactDisplayNameFormat(),
-                            SettingsActivity.getUppercaseLastName()
+                            SettingsActivity.contactDisplayNameFormat,
+                            SettingsActivity.uppercaseLastName
                         )
                     AppSingleton.getContactPhotoUrl(keycloakUserDetails.identity)?.let {
                         initialView.setPhotoUrl(keycloakUserDetails.identity, it)
-                    } ?:
-                    initialView.setInitial(
+                    } ?: initialView.setInitial(
                         keycloakUserDetails.identity,
                         StringUtils.getInitial(
                             name
@@ -545,14 +553,15 @@ private fun KeycloakSearching() {
                 shape = RoundedCornerShape(8.dp)
             )
             .border(1.dp, colorResource(id = R.color.greyTint), RoundedCornerShape(8.dp))
-            .padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 16.dp),
+            .padding(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 16.dp)
+            .cutoutHorizontalPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CircularProgressIndicator(color = colorResource(id = color.olvid_gradient_light))
+        CircularProgressIndicator(color = colorResource(id = R.color.olvid_gradient_light))
         Text(
-            text = stringResource(id = string.label_searching_company_directory),
+            text = stringResource(id = R.string.label_searching_company_directory),
             color = colorResource(
-                id = color.grey
+                id = R.color.grey
             )
         )
     }
@@ -576,9 +585,10 @@ private fun KeycloakMissingCount(missingResults: Int?) {
             .clip(RoundedCornerShape(8.dp))
             .background(
                 color = colorResource(
-                    id = color.lighterGrey
+                    id = R.color.lighterGrey
                 )
             )
+            .cutoutHorizontalPadding()
 
     ) {
         Text(
@@ -592,8 +602,8 @@ private fun KeycloakMissingCount(missingResults: Int?) {
                     missingResults
                 )
             }
-                ?: stringResource(id = string.text_keycloak_missing_some_search_result),
-            color = colorResource(id = color.grey),
+                ?: stringResource(id = R.string.text_keycloak_missing_some_search_result),
+            color = colorResource(id = R.color.grey),
             textAlign = TextAlign.Center,
             style = OlvidTypography.body2,
             fontStyle = FontStyle.Italic

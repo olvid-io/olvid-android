@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -58,7 +58,7 @@ import io.olvid.messenger.databases.entity.Fyle
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.linkpreview.OpenGraph
-import io.olvid.messenger.discussion.message.constantSp
+import io.olvid.messenger.discussion.message.attachments.constantSp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -104,7 +104,7 @@ fun FyleListItem(
                     else
                         Modifier
                 ),
-            contentScale = ContentScale.Crop,
+            contentScale = if (fyleAndStatus.fyleMessageJoinWithStatus.mimeType == "application/pdf") ContentScale.Fit else ContentScale.Crop,
             painter = rememberAsyncImagePainter(
                 model = PreviewUtils.getBitmapPreview(
                     fyleAndStatus.fyle,
@@ -169,7 +169,6 @@ private fun FyleListItemPreview() {
                         "txt/plain",
                         0,
                         1024,
-                        0f,
                         byteArrayOf(),
                         0,
                         null
@@ -194,7 +193,6 @@ private fun FyleListItemPreview() {
                         "application/pdf",
                         FyleMessageJoinWithStatus.STATUS_DOWNLOADING,
                         1024,
-                        0.5f,
                         byteArrayOf(),
                         0,
                         null

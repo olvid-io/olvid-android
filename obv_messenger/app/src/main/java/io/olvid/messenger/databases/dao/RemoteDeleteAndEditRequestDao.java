@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -31,10 +33,10 @@ import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
 @Dao
 public interface RemoteDeleteAndEditRequestDao {
     @Insert
-    long insert(RemoteDeleteAndEditRequest remoteDeleteAndEditRequest);
+    long insert(@NonNull RemoteDeleteAndEditRequest remoteDeleteAndEditRequest);
 
     @Delete
-    void delete(RemoteDeleteAndEditRequest remoteDeleteAndEditRequest);
+    void delete(@NonNull RemoteDeleteAndEditRequest remoteDeleteAndEditRequest);
 
     @Query("SELECT * FROM " + RemoteDeleteAndEditRequest.TABLE_NAME +
             " WHERE " + RemoteDeleteAndEditRequest.DISCUSSION_ID + " = :discussionId " +
@@ -42,7 +44,7 @@ public interface RemoteDeleteAndEditRequestDao {
             " AND " + RemoteDeleteAndEditRequest.SENDER_THREAD_IDENTIFIER + " = :senderThreadIdentifier " +
             " AND " + RemoteDeleteAndEditRequest.SENDER_SEQUENCE_NUMBER + " = :senderSequenceNumber " +
             " LIMIT 1 ")
-    RemoteDeleteAndEditRequest getBySenderSequenceNumber(long senderSequenceNumber, UUID senderThreadIdentifier, byte[] senderIdentifier, long discussionId);
+    @Nullable RemoteDeleteAndEditRequest getBySenderSequenceNumber(long senderSequenceNumber, @NonNull UUID senderThreadIdentifier, @NonNull byte[] senderIdentifier, long discussionId);
 
     @Query("DELETE FROM " + RemoteDeleteAndEditRequest.TABLE_NAME + " WHERE " + RemoteDeleteAndEditRequest.SERVER_TIMESTAMP + " < :timestamp ")
     void deleteOlderThan(long timestamp);

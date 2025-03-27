@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -68,13 +68,16 @@ public class RefreshInboxAttachmentSignedUrlCoordinator implements Operation.OnF
         this.lastUrlRefreshTimestamps = new HashMap<>();
 
         refreshInboxAttachmentSignedUrlOperationQueue = new NoDuplicateOperationQueue();
-        refreshInboxAttachmentSignedUrlOperationQueue.execute(1, "Engine-RefreshInboxAttachmentSignedUrlCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
         awaitingIdentityReactivationOperations = new HashMap<>();
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
         awaitingIdentityReactivationNotificationListener = new AwaitingIdentityReactivationNotificationListener();
+    }
+
+    public void startProcessing() {
+        refreshInboxAttachmentSignedUrlOperationQueue.execute(1, "Engine-RefreshInboxAttachmentSignedUrlCoordinator");
     }
 
     public void setNotificationPostingDelegate(NotificationPostingDelegate notificationPostingDelegate) {
@@ -157,7 +160,7 @@ public class RefreshInboxAttachmentSignedUrlCoordinator implements Operation.OnF
                         fetchManagerSession.session.commit();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED_OWNED_IDENTITY_KEY, ownedIdentity);
@@ -205,7 +208,7 @@ public class RefreshInboxAttachmentSignedUrlCoordinator implements Operation.OnF
                     }
                     awaitingIdentityReactivationOperationsLock.unlock();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
         }

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -165,7 +165,7 @@ public class ForwardMessagesDialogFragment extends DialogFragment implements Vie
             }
             viewModel.setForwardMessageBytesOwnedIdentity(bytesOwnedIdentity);
         });
-        Transformations.switchMap(viewModel.forwardMessageOwnedIdentityLiveData, (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? null : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
+        Transformations.switchMap(viewModel.forwardMessageOwnedIdentityLiveData, (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? new byte[0] : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
 
 
         FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();

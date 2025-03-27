@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -48,6 +48,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -108,6 +109,7 @@ import io.olvid.messenger.appdialogs.AppDialogShowActivity;
 import io.olvid.messenger.appdialogs.AppDialogTag;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.ConfigurationPojo;
+import io.olvid.messenger.customClasses.PdfViewerDialog;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils2;
@@ -278,6 +280,13 @@ public class App extends Application implements DefaultLifecycleObserver {
         activity.startActivityForResult(intent, requestCode);
     }
 
+    public static void startActivityForResult(AppCompatActivity activity, ActivityResultLauncher<Intent> activityResultLauncher, Intent intent) {
+        killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
+        Intent lockIntent = new Intent(getContext(), LockScreenActivity.class);
+        activity.startActivity(lockIntent);
+        activityResultLauncher.launch(intent);
+    }
+
     public static void startActivityForResult(Fragment fragment, Intent intent, int requestCode) {
         killActivitiesOnLockAndCloseHiddenProfileOnBackground = false;
         Intent lockIntent = new Intent(fragment.getContext(), LockScreenActivity.class);
@@ -319,12 +328,13 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId, boolean ascending) {
+    public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId, boolean ascending, boolean showTextBlocks) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
         intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
         intent.putExtra(GalleryActivity.ASCENDING_INTENT_EXTRA, ascending);
+        intent.putExtra(GalleryActivity.SHOW_TEXT_BLOCKS_INTENT_EXTRA, showTextBlocks);
         activityContext.startActivity(intent);
     }
 
@@ -336,11 +346,12 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openMessageGalleryActivity(Context activityContext, long messageId, long fyleId) {
+    public static void openMessageGalleryActivity(Context activityContext, long messageId, long fyleId, boolean showTextBlocks) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DRAFT_INTENT_EXTRA, false);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
         intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
+        intent.putExtra(GalleryActivity.SHOW_TEXT_BLOCKS_INTENT_EXTRA, showTextBlocks);
         activityContext.startActivity(intent);
     }
 
@@ -455,7 +466,8 @@ public class App extends Application implements DefaultLifecycleObserver {
         context.startActivity(activityIntent);
     }
 
-    public static void handleWebrtcMessage(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, JsonWebrtcMessage jsonWebrtcMessage, long downloadTimestamp, long serverTimestamp) {
+    // TODO: use deviceUid!
+    public static void handleWebrtcMessage(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, byte[] bytesContactDeviceUid, JsonWebrtcMessage jsonWebrtcMessage, long downloadTimestamp, long serverTimestamp) {
         if (jsonWebrtcMessage.getCallIdentifier() == null || jsonWebrtcMessage.getMessageType() == null || jsonWebrtcMessage.getSerializedMessagePayload() == null) {
             return;
         }
@@ -474,7 +486,10 @@ public class App extends Application implements DefaultLifecycleObserver {
                     Discussion discussion = AppDatabase.getInstance().discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
                     if (discussion != null) {
                         Message missedCallMessage = Message.createPhoneCallMessage(AppDatabase.getInstance(), discussion.id, bytesContactIdentity, callLogItem);
-                        AppDatabase.getInstance().messageDao().insert(missedCallMessage);
+                        missedCallMessage.id = AppDatabase.getInstance().messageDao().insert(missedCallMessage);
+                        if (missedCallMessage.status == Message.STATUS_UNREAD) {
+                            UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, missedCallMessage.id, false, missedCallMessage.timestamp);
+                        }
                         if (discussion.updateLastMessageTimestamp(missedCallMessage.timestamp)) {
                             AppDatabase.getInstance().discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                         }
@@ -489,6 +504,9 @@ public class App extends Application implements DefaultLifecycleObserver {
         intent.setAction(WebrtcCallService.ACTION_MESSAGE);
         intent.putExtra(WebrtcCallService.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         intent.putExtra(WebrtcCallService.BYTES_CONTACT_IDENTITY_INTENT_EXTRA, bytesContactIdentity);
+        if (bytesContactIdentity != null) {
+            intent.putExtra(WebrtcCallService.BYTES_CONTACT_DEVICE_UID_INTENT_EXTRA, bytesContactDeviceUid);
+        }
         intent.putExtra(WebrtcCallService.CALL_IDENTIFIER_INTENT_EXTRA, Logger.getUuidString(jsonWebrtcMessage.getCallIdentifier()));
         intent.putExtra(WebrtcCallService.MESSAGE_TYPE_INTENT_EXTRA, messageType);
         intent.putExtra(WebrtcCallService.SERIALIZED_MESSAGE_PAYLOAD_INTENT_EXTRA, jsonWebrtcMessage.getSerializedMessagePayload());
@@ -551,13 +569,13 @@ public class App extends Application implements DefaultLifecycleObserver {
         try {
             Intent geoIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("geo:%s,%s?q=%s,%s&z=17", latitude, longitude, latitude, longitude)));
             geoIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            if (getContext().getPackageManager().queryIntentActivities(geoIntent, PackageManager.MATCH_DEFAULT_ONLY).size() > 0) {
+            if (!getContext().getPackageManager().queryIntentActivities(geoIntent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
                 openLocationIntent(activity, geoIntent, onOpenCallback);
                 return;
             } else {
                 Intent fallbackIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(fallbackUri));
                 fallbackIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                if (getContext().getPackageManager().queryIntentActivities(fallbackIntent, PackageManager.MATCH_DEFAULT_ONLY).size() > 0) {
+                if (!getContext().getPackageManager().queryIntentActivities(fallbackIntent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
                     openLocationIntent(activity, fallbackIntent, onOpenCallback);
                     return;
                 }
@@ -603,6 +621,14 @@ public class App extends Application implements DefaultLifecycleObserver {
                         activity.startActivity(geoIntent);
                     });
             builder.create().show();
+        }
+    }
+
+    public static void openFyleViewer(Context context, FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, Runnable onOpenCallback) {
+        if (SettingsActivity.useInternalPdfViewer() && fyleAndStatus.fyle.isComplete() && fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().equalsIgnoreCase("application/pdf") && context instanceof AppCompatActivity) {
+            new PdfViewerDialog(fyleAndStatus).show(((AppCompatActivity) context).getSupportFragmentManager(), null);
+        } else {
+            openFyleInExternalViewer(context, fyleAndStatus, onOpenCallback);
         }
     }
 

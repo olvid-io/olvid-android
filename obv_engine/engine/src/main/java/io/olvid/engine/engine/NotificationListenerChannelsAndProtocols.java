@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -80,7 +80,7 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
                         UserInterfaceDialog.createOrReplace(engine.wrapSession(session), engine.createDialog(channelDialogMessageToSend));
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -99,7 +99,7 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
 
                     engine.postEngineNotification(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED, engineInfo);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -121,7 +121,7 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
 
                     engine.postEngineNotification(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED, engineInfo);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }

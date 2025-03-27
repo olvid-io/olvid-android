@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -84,6 +84,8 @@ public class SettingsPojo_0 {
     public Boolean lock_wipe_on_fail;
 
     public Long auto_download_size;
+    public Boolean auto_download_archived;
+    public Boolean unarchive_on_notification;
     public Boolean link_preview_inbound;
     public Boolean link_preview_outbound;
     public Boolean send_read_receipt; // sync
@@ -180,6 +182,8 @@ public class SettingsPojo_0 {
         settingsPojo.lock_wipe_on_fail = SettingsActivity.wipeMessagesOnUnlockFails();
 
         settingsPojo.auto_download_size = SettingsActivity.getAutoDownloadSize();
+        settingsPojo.auto_download_archived = SettingsActivity.getAutoDownloadArchivedDiscussion();
+        settingsPojo.unarchive_on_notification = SettingsActivity.getUnarchiveDiscussionOnNotification();
         settingsPojo.link_preview_inbound = SettingsActivity.isLinkPreviewInbound(App.getContext());
         settingsPojo.link_preview_outbound = SettingsActivity.isLinkPreviewOutbound();
         settingsPojo.send_read_receipt = SettingsActivity.getDefaultSendReadReceipt();
@@ -307,6 +311,8 @@ public class SettingsPojo_0 {
         if (lock_wipe_on_fail != null) {SettingsActivity.setWipeMessagesOnUnlockFails(lock_wipe_on_fail); }
 
         if (auto_download_size != null) { SettingsActivity.setAutoDownloadSize(auto_download_size); }
+        if (auto_download_archived != null) { SettingsActivity.setAutoDownloadArchivedDiscussion(auto_download_archived); }
+        if (unarchive_on_notification != null) { SettingsActivity.setUnarchiveDiscussionOnNotification(unarchive_on_notification, false); }
         if (link_preview_inbound != null) { SettingsActivity.setLinkPreviewInbound(link_preview_inbound); }
         if (link_preview_outbound != null) { SettingsActivity.setLinkPreviewOutbound(link_preview_outbound); }
         if (send_read_receipt != null) {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -29,7 +29,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -52,7 +51,6 @@ import io.olvid.messenger.onboarding.flow.OnboardingRoutes
 import io.olvid.messenger.onboarding.flow.OnboardingScreen
 import io.olvid.messenger.onboarding.flow.OnboardingStep
 
-@OptIn(ExperimentalComposeUiApi::class)
 fun NavGraphBuilder.sourceSession(
     onboardingFlowViewModel: OnboardingFlowViewModel,
     onSasValidated: () -> Unit,

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -85,6 +85,7 @@ import sh.calvin.reorderable.ReorderableCollectionItemScope
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DiscussionListItem(
+    modifier: Modifier = Modifier,
     title: AnnotatedString,
     body: AnnotatedString,
     date: AnnotatedString?,
@@ -104,13 +105,10 @@ fun DiscussionListItem(
     selected: Boolean = false,
     reorderableScope: ReorderableCollectionItemScope? = null,
     onDragStopped: () -> Unit,
+    lastOutboundMessageStatus: @Composable (() -> Unit)? = null,
 ) {
     Box(
-        modifier = Modifier.background(
-            if (selected) colorResource(id = R.color.greySubtleOverlay) else colorResource(
-                id = R.color.almostWhite
-            )
-        )
+        modifier = modifier
     ) {
         // custom background
         backgroundImageUrl?.let { model ->
@@ -203,13 +201,16 @@ fun DiscussionListItem(
                     overflow = TextOverflow.Ellipsis,
                 )
                 // Subtitle
-                Text(
-                    text = body,
-                    color = colorResource(id = R.color.greyTint),
-                    style = OlvidTypography.body1,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(verticalAlignment = CenterVertically) {
+                    lastOutboundMessageStatus?.invoke()
+                    Text(
+                        text = body,
+                        color = colorResource(id = R.color.greyTint),
+                        style = OlvidTypography.body1,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
                 // Date
                 date?.let {
                     Text(
@@ -284,7 +285,11 @@ fun DiscussionListItem(
                                 },
                                 onClick = {},
                             ) {
-                                Icon(modifier = Modifier.requiredSize(24.dp), painter = painterResource(id = R.drawable.ic_drag_handle), contentDescription = "Reorder")
+                                Icon(
+                                    modifier = Modifier.requiredSize(24.dp),
+                                    painter = painterResource(id = R.drawable.ic_drag_handle),
+                                    contentDescription = "Reorder"
+                                )
                             }
                         }
                     }
@@ -325,6 +330,7 @@ fun DiscussionListItem(
 private fun DiscussionListItemPreview() {
     AppCompatTheme {
         DiscussionListItem(
+            modifier = Modifier.background(colorResource(R.color.almostWhite)),
             title = AnnotatedString("Discussion Title"),
             body = AnnotatedString("Latest Message"),
             date = AnnotatedString("timestamp"),
@@ -341,6 +347,6 @@ private fun DiscussionListItemPreview() {
             onLongClick = {},
             selected = true,
             onDragStopped = {},
-            )
+        )
     }
 }

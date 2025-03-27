@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,6 +22,7 @@ package io.olvid.engine.networksend.operations;
 import java.io.File;
 import java.sql.SQLException;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.UID;
@@ -100,7 +101,7 @@ public class TryToDeleteMessageAndAttachmentsOperation extends Operation {
                 outboxMessage.delete();
                 finished = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 sendManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -112,7 +113,7 @@ public class TryToDeleteMessageAndAttachmentsOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

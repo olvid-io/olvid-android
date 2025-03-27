@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -89,7 +89,7 @@ public class ContactGroupV2Member implements ObvDatabase {
          contactGroupMember.insert();
          return contactGroupMember;
       } catch (SQLException e) {
-         e.printStackTrace();
+         Logger.x(e);
          return null;
       }
    }
@@ -215,7 +215,7 @@ public class ContactGroupV2Member implements ObvDatabase {
                           GroupV2.Identifier.CATEGORY_KEYCLOAK
                   ));
                } catch (Exception e) {
-                  e.printStackTrace();
+                  Logger.x(e);
                }
             }
             return list;
@@ -376,7 +376,7 @@ public class ContactGroupV2Member implements ObvDatabase {
          try {
             create(identityManagerSession, ownedIdentity, groupIdentifier, Identity.of(pojo.contact_identity), Arrays.asList(pojo.permissions), pojo.invitation_nonce);
          } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
          }
       }
    }

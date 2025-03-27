@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -29,6 +29,7 @@ import java.util.Objects;
 
 import io.olvid.engine.engine.types.sync.ObvSyncDiff;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
@@ -69,13 +70,15 @@ public class GroupV1SyncSnapshot implements ObvSyncSnapshotNode {
         if (group != null) {
             Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid);
             if (domain.contains(CUSTOM_NAME) && custom_name != null) {
-                db.groupDao().updateCustomName(bytesOwnedIdentity, bytesGroupOwnerAndUid, custom_name);
+                group.fullSearchField = group.fullSearchField + " " + StringUtils.unAccent(custom_name);
+                db.groupDao().updateCustomName(bytesOwnedIdentity, bytesGroupOwnerAndUid, custom_name, group.fullSearchField);
                 if (discussion != null) {
                     db.discussionDao().updateTitleAndPhotoUrl(discussion.id, custom_name, discussion.photoUrl);
                 }
             }
             if (domain.contains(PERSONAL_NOTE) && personal_note != null) {
-                db.groupDao().updatePersonalNote(bytesOwnedIdentity, bytesGroupOwnerAndUid, personal_note);
+                group.fullSearchField = group.fullSearchField + " " + StringUtils.unAccent(personal_note);
+                db.groupDao().updatePersonalNote(bytesOwnedIdentity, bytesGroupOwnerAndUid, personal_note, group.fullSearchField);
             }
             if (domain.contains(DISCUSSION_CUSTOMIZATION) && discussion_customization != null) {
                 if (discussion != null) {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -60,6 +61,7 @@ import io.olvid.messenger.R.string
 import io.olvid.messenger.databases.dao.Group2Dao.GroupOrGroup2
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
+import io.olvid.messenger.main.cutoutHorizontalPadding
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -79,15 +81,18 @@ fun GroupListScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .navigationBarsPadding()
                 .pullRefresh(refreshState)
         ) {
             val lazyListState = rememberLazyListState()
             groups?.let { list ->
                 if (list.isEmpty().not()) {
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .navigationBarsPadding(),
                         state = lazyListState,
-                        contentPadding = PaddingValues(bottom = 80.dp),
+                        contentPadding = PaddingValues(bottom = 32.dp),
                     ) {
                         item {
                             NewGroupButton(onNewGroupClick)
@@ -95,6 +100,9 @@ fun GroupListScreen(
                         items(items = list) { group ->
                             Box {
                                 GroupListItem(
+                                    modifier = Modifier
+                                        .background(colorResource(id = R.color.almostWhite))
+                                        .cutoutHorizontalPadding(),
                                     group = group,
                                     title = group.getAnnotatedName(LocalContext.current),
                                     body = group.getAnnotatedMembers(LocalContext.current),

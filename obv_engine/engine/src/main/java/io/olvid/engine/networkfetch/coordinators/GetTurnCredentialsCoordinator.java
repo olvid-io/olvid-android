@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -50,6 +50,9 @@ public class GetTurnCredentialsCoordinator implements Operation.OnFinishCallback
         this.wellKnownCacheDelegate = wellKnownCacheDelegate;
 
         getTurnCredentialsOperationQueue = new OperationQueue(true);
+    }
+
+    public void startProcessing() {
         getTurnCredentialsOperationQueue.execute(1, "Engine-GetTurnCredentialsCoordinator");
     }
 

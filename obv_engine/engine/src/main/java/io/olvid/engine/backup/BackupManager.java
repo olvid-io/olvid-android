@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -124,7 +124,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
             }
             backupManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -136,7 +136,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
             BackupKey.createTable(backupManagerSession.session);
             backupManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new RuntimeException("Unable to create backup databases");
         }
     }
@@ -202,11 +202,11 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
                 userInfo.put(BackupNotifications.NOTIFICATION_NEW_BACKUP_SEED_GENERATED_SEED_KEY, backupSeed.toString());
                 notificationPostingDelegate.postNotification(BackupNotifications.NOTIFICATION_NEW_BACKUP_SEED_GENERATED, userInfo);
             } catch (SQLException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 throw new Exception("Failed to save new BackupKey to database");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             notificationPostingDelegate.postNotification(BackupNotifications.NOTIFICATION_BACKUP_SEED_GENERATION_FAILED, new HashMap<>());
         }
     }
@@ -265,7 +265,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -319,7 +319,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
                 userInfo.put(BackupNotifications.NOTIFICATION_APP_BACKUP_INITIATION_REQUEST_VERSION_KEY, newVersion);
                 notificationPostingDelegate.postNotification(BackupNotifications.NOTIFICATION_APP_BACKUP_INITIATION_REQUEST, userInfo);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 // nothing to do...
             }
         });
@@ -445,7 +445,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
                     notificationPostingDelegate.postNotification(BackupNotifications.NOTIFICATION_BACKUP_FINISHED, userInfo);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 backupFailed(tag, backupKeyUid, version);
             }
         });
@@ -494,7 +494,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
             }
             backupManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -516,7 +516,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
             }
             backupManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -534,7 +534,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
             backup.setFailed();
             Logger.d("Backup discarded.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -636,7 +636,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
 
             return identityDelegate.restoreOwnedIdentitiesFromBackup(backupContentAndDerivedKeys.pojo.engine.identity_manager, deviceDisplayName, prng);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -660,7 +660,7 @@ public class BackupManager implements BackupDelegate, ObvManager, NotificationLi
 
             notificationPostingDelegate.postNotification(BackupNotifications.NOTIFICATION_BACKUP_RESTORATION_FINISHED, new HashMap<>());
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

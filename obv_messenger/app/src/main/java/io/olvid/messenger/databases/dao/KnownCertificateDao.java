@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -30,19 +32,19 @@ import io.olvid.messenger.databases.entity.KnownCertificate;
 @Dao
 public interface KnownCertificateDao {
     @Insert
-    long insert(KnownCertificate knownCertificate);
+    long insert(@NonNull KnownCertificate knownCertificate);
 
     @Query("UPDATE " + KnownCertificate.TABLE_NAME + " SET " + KnownCertificate.TRUST_TIMESTAMP + " = :trustTimestamp WHERE id = :certificateId")
     void updateTrustTimestamp(long certificateId, long trustTimestamp);
 
     @Query("SELECT * FROM " + KnownCertificate.TABLE_NAME + " WHERE id = :certificateId")
-    KnownCertificate get(long certificateId);
+    @Nullable KnownCertificate get(long certificateId);
 
-    @Query("SELECT * FROM " + KnownCertificate.TABLE_NAME + " WHERE " + KnownCertificate.DOMAIN_NAME + " = :domainName ORDER BY " + KnownCertificate.TRUST_TIMESTAMP + " DESC ")
-    List<KnownCertificate> getAllForDomain(String domainName);
+//    @Query("SELECT * FROM " + KnownCertificate.TABLE_NAME + " WHERE " + KnownCertificate.DOMAIN_NAME + " = :domainName ORDER BY " + KnownCertificate.TRUST_TIMESTAMP + " DESC ")
+//    List<KnownCertificate> getAllForDomain(@NonNull String domainName);
 
     @Query("DELETE FROM " + KnownCertificate.TABLE_NAME + " WHERE " + KnownCertificate.DOMAIN_NAME + " = :domainName AND " + KnownCertificate.EXPIRATION_TIMESTAMP + " < :currentTimestamp")
-    void deleteExpired(String domainName, long currentTimestamp);
+    void deleteExpired(@NonNull String domainName, long currentTimestamp);
 
     @Query("SELECT * FROM " + KnownCertificate.TABLE_NAME)
     List<KnownCertificate> getAll();

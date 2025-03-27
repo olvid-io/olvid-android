@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,6 +22,7 @@ package io.olvid.engine.engine.types.identities;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvBase64;
 import io.olvid.engine.encoder.DecodingException;
@@ -73,7 +74,7 @@ public class ObvUrlIdentity {
                 String displayName = list[1].decodeString();
                 return new ObvUrlIdentity(identity, displayName);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 return null;
             }
         }

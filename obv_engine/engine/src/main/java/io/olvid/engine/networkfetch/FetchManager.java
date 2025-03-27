@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -92,7 +92,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     private final DownloadMessagesAndListAttachmentsCoordinator downloadMessagesAndListAttachmentsCoordinator;
     private final DownloadMessageExtendedPayloadCoordinator downloadMessageExtendedPayloadCoordinator;
     private final DeleteMessageAndAttachmentsCoordinator deleteMessageAndAttachmentsCoordinator;
-    private final RegisterServerPushNotificationsCoordinator serverPushNotificationsCoordinator;
+    private final RegisterServerPushNotificationsCoordinator registerServerPushNotificationsCoordinator;
     private final WebsocketCoordinator websocketCoordinator;
     private final ServerQueryCoordinator serverQueryCoordinator;
     private final ServerUserDataCoordinator serverUserDataCoordinator;
@@ -116,8 +116,8 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         this.downloadMessagesAndListAttachmentsCoordinator = new DownloadMessagesAndListAttachmentsCoordinator(this, sslSocketFactory, createServerSessionCoordinator);
         this.downloadMessageExtendedPayloadCoordinator = new DownloadMessageExtendedPayloadCoordinator(this, sslSocketFactory, createServerSessionCoordinator);
         this.deleteMessageAndAttachmentsCoordinator = new DeleteMessageAndAttachmentsCoordinator(this, sslSocketFactory, createServerSessionCoordinator);
-        this.serverPushNotificationsCoordinator = new RegisterServerPushNotificationsCoordinator(this, sslSocketFactory, createServerSessionCoordinator, downloadMessagesAndListAttachmentsCoordinator);
-        this.downloadMessagesAndListAttachmentsCoordinator.setRegisterServerPushNotificationDelegate(this.serverPushNotificationsCoordinator);
+        this.registerServerPushNotificationsCoordinator = new RegisterServerPushNotificationsCoordinator(this, sslSocketFactory, createServerSessionCoordinator, downloadMessagesAndListAttachmentsCoordinator);
+        this.downloadMessagesAndListAttachmentsCoordinator.setRegisterServerPushNotificationDelegate(this.registerServerPushNotificationsCoordinator);
         this.serverUserDataCoordinator = new ServerUserDataCoordinator(this, sslSocketFactory, createServerSessionCoordinator, jsonObjectMapper, prng);
         this.serverQueryCoordinator = new ServerQueryCoordinator(this, sslSocketFactory, prng, createServerSessionCoordinator, serverUserDataCoordinator, jsonObjectMapper);
         this.freeTrialCoordinator = new FreeTrialCoordinator(this, sslSocketFactory);
@@ -144,7 +144,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     @Override
     public void initialisationComplete() {
         wellKnownCoordinator.initialQueueing();
-        serverPushNotificationsCoordinator.initialQueueing();
+        registerServerPushNotificationsCoordinator.initialQueueing();
         downloadAttachmentCoordinator.initialQueueing();
         serverQueryCoordinator.initialQueueing();
         downloadMessagesAndListAttachmentsCoordinator.initialQueueing();
@@ -152,6 +152,23 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         websocketCoordinator.initialQueueing();
         serverUserDataCoordinator.initialQueueing();
         createServerSessionCoordinator.initialQueueing();
+    }
+
+    public void startProcessing() {
+        createServerSessionCoordinator.startProcessing();
+        deleteMessageAndAttachmentsCoordinator.startProcessing();
+        downloadAttachmentCoordinator.startProcessing();
+        downloadMessageExtendedPayloadCoordinator.startProcessing();
+        downloadMessagesAndListAttachmentsCoordinator.startProcessing();
+        freeTrialCoordinator.startProcessing();
+        getTurnCredentialsCoordinator.startProcessing();
+        refreshInboxAttachmentSignedUrlCoordinator.startProcessing();
+        registerServerPushNotificationsCoordinator.startProcessing();
+        serverQueryCoordinator.startProcessing();
+        serverUserDataCoordinator.startProcessing();
+        verifyReceiptCoordinator.startProcessing();
+        websocketCoordinator.startProcessing();
+        wellKnownCoordinator.startProcessing();
     }
 
     @SuppressWarnings("unused")
@@ -167,7 +184,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
             PendingServerQuery.createTable(fetchManagerSession.session);
             fetchManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new RuntimeException("Unable to createCurrentDevice network fetch databases");
         }
     }
@@ -201,7 +218,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
 
     @SuppressWarnings("unused")
     public void setDelegate(NotificationListeningDelegate notificationListeningDelegate) {
-        this.serverPushNotificationsCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
+        this.registerServerPushNotificationsCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
         this.websocketCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
         this.downloadMessagesAndListAttachmentsCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
         this.downloadMessageExtendedPayloadCoordinator.setNotificationListeningDelegate(notificationListeningDelegate);
@@ -216,7 +233,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     @SuppressWarnings("unused")
     public void setDelegate(NotificationPostingDelegate notificationPostingDelegate) {
         this.notificationPostingDelegate = notificationPostingDelegate;
-        this.serverPushNotificationsCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
+        this.registerServerPushNotificationsCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
         this.downloadAttachmentCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
         this.createServerSessionCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
         this.refreshInboxAttachmentSignedUrlCoordinator.setNotificationPostingDelegate(notificationPostingDelegate);
@@ -240,7 +257,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     @SuppressWarnings("unused")
     public void setDelegate(ProtocolStarterDelegate protocolStarterDelegate) {
         this.websocketCoordinator.setProtocolStarterDelegate(protocolStarterDelegate);
-        this.serverPushNotificationsCoordinator.setProtocolStarterDelegate(protocolStarterDelegate);
+        this.registerServerPushNotificationsCoordinator.setProtocolStarterDelegate(protocolStarterDelegate);
     }
 
     // endregion
@@ -281,7 +298,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
                 deleteMessageAndAttachmentsCoordinator,
                 downloadAttachmentCoordinator,
 //                deleteMessageAndAttachmentsCoordinator,
-                serverPushNotificationsCoordinator,
+                registerServerPushNotificationsCoordinator,
                 serverQueryCoordinator,
                 identityDelegate,
                 engineBaseDirectory,
@@ -296,7 +313,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
                 deleteMessageAndAttachmentsCoordinator,
                 downloadAttachmentCoordinator,
 //                deleteMessageAndAttachmentsCoordinator,
-                serverPushNotificationsCoordinator,
+                registerServerPushNotificationsCoordinator,
                 serverQueryCoordinator,
                 identityDelegate,
                 engineBaseDirectory,
@@ -333,20 +350,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     }
 
     @Override
-    public boolean canAllAttachmentsBeDownloaded(Identity ownedIdentity, UID messageUid) throws SQLException {
-        try (FetchManagerSession fetchManagerSession = getSession()) {
-            InboxAttachment[] attachments = InboxAttachment.getAll(fetchManagerSession, ownedIdentity, messageUid);
-            for (InboxAttachment attachment: attachments) {
-                if (attachment.cannotBeFetched()) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
-    @Override
-    public void setAttachmentKeyAndMetadataAndMessagePayload(Session session, Identity ownedIdentity, UID messageUid, Identity remoteIdentity, AttachmentKeyAndMetadata[] attachmentKeyAndMetadata, byte[] messagePayload, AuthEncKey extendedPayloadKey) throws Exception {
+    public void setAttachmentKeyAndMetadataAndMessagePayload(Session session, Identity ownedIdentity, UID messageUid, Identity remoteIdentity, UID remoteDeviceUid, AttachmentKeyAndMetadata[] attachmentKeyAndMetadata, byte[] messagePayload, AuthEncKey extendedPayloadKey) throws Exception {
         if (attachmentKeyAndMetadata == null) {
             Logger.e("FetchManager is trying to setAttachmentKeyAndMetadataAndMessagePayload with a null attachmentKeyAndMetadata.");
             throw new Exception();
@@ -367,7 +371,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
             attachments[i].setKeyAndMetadata(attachmentKeyAndMetadata[i].getKey(),
                     attachmentKeyAndMetadata[i].getMetadata());
         }
-        inboxMessage.setPayloadAndFromIdentity(messagePayload, remoteIdentity, extendedPayloadKey);
+        inboxMessage.setPayloadAndFromIdentity(messagePayload, remoteIdentity, remoteDeviceUid, extendedPayloadKey, attachments);
         // just in case, also mark recentlyOnline as true (otherwise, a contact could remain not recently online until a contact discovery)
         identityDelegate.setContactRecentlyOnline(session, ownedIdentity, remoteIdentity, true);
     }
@@ -445,38 +449,6 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     }
 
     @Override
-    public ReceivedAttachment[] getMessageAttachments(Identity ownedIdentity, UID messageUid) {
-        try (FetchManagerSession fetchManagerSession = getSession()) {
-            InboxAttachment[] inboxAttachments = InboxAttachment.getAll(fetchManagerSession, ownedIdentity, messageUid);
-            if (inboxAttachments == null) {
-                Logger.e("FetchManager received a getAttachment request for an unknown attachment " + messageUid);
-                return null;
-            }
-            ReceivedAttachment[] receivedAttachments = new ReceivedAttachment[inboxAttachments.length];
-            for (int i=0; i<inboxAttachments.length; i++) {
-                InboxAttachment inboxAttachment = inboxAttachments[i];
-                if (inboxAttachment.cannotBeFetched()) {
-                    Logger.e("FetchManager received a getAttachment request for an attachment not yet ready " + messageUid + "-" + i);
-                    return null;
-                }
-                receivedAttachments[i] = new ReceivedAttachment(
-                        inboxAttachment.getOwnedIdentity(),
-                        inboxAttachment.getMessageUid(),
-                        inboxAttachment.getAttachmentNumber(),
-                        inboxAttachment.getMetadata(),
-                        inboxAttachment.getUrl(),
-                        inboxAttachment.getPlaintextExpectedLength(),
-                        inboxAttachment.getPlaintextReceivedLength(),
-                        inboxAttachment.isDownloadRequested());
-            }
-            return  receivedAttachments;
-        } catch (SQLException e) {
-            Logger.e("FetchManager was unable to getAttachments " + messageUid);
-            return null;
-        }
-    }
-
-    @Override
     public boolean isInboxAttachmentReceived(Session session, Identity ownedIdentity, UID messageUid, int attachmentNumber) throws Exception {
         InboxAttachment inboxAttachment = InboxAttachment.get(wrapSession(session), ownedIdentity, messageUid, attachmentNumber);
         return (inboxAttachment == null) || (inboxAttachment.getExpectedLength() == inboxAttachment.getReceivedLength());
@@ -546,7 +518,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         for (InboxAttachment inboxAttachment: inboxMessage.getAttachments()) {
             inboxAttachment.markForDeletion();
         }
-        fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid);
+        session.addSessionCommitListener(() -> fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid));
     }
 
     // This method marks a message for deletion and queues the operation to delete it from server
@@ -559,7 +531,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         }
         inboxMessage.markForDeletion();
         if (inboxMessage.canBeDeleted()) {
-            fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid);
+            session.addSessionCommitListener(() -> fetchManagerSession.markAsListedAndDeleteOnServerListener.messageCanBeDeletedFromServer(ownedIdentity, messageUid));
         }
     }
 
@@ -627,7 +599,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         try (FetchManagerSession fetchManagerSession = getSession()) {
             return ServerSession.getToken(fetchManagerSession, ownedIdentity);
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -640,7 +612,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
         downloadMessagesAndListAttachmentsCoordinator.retryScheduledNetworkTasks();
         downloadMessageExtendedPayloadCoordinator.retryScheduledNetworkTasks();
         refreshInboxAttachmentSignedUrlCoordinator.retryScheduledNetworkTasks();
-        serverPushNotificationsCoordinator.retryScheduledNetworkTasks();
+        registerServerPushNotificationsCoordinator.retryScheduledNetworkTasks();
         serverQueryCoordinator.retryScheduledNetworkTasks();
         websocketCoordinator.retryScheduledNetworkTasks();
     }
@@ -730,17 +702,17 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
 
     @Override
     public void processAndroidPushNotification(String maskingUidString) {
-        serverPushNotificationsCoordinator.processAndroidPushNotification(maskingUidString);
+        registerServerPushNotificationsCoordinator.processAndroidPushNotification(maskingUidString);
     }
 
     @Override
     public void forceRegisterPushNotification(Identity ownedIdentity, boolean triggerAnOwnedDeviceDiscoveryWhenFinished) {
-        serverPushNotificationsCoordinator.registerServerPushNotification(ownedIdentity, triggerAnOwnedDeviceDiscoveryWhenFinished);
+        registerServerPushNotificationsCoordinator.registerServerPushNotification(ownedIdentity, triggerAnOwnedDeviceDiscoveryWhenFinished);
     }
 
     @Override
     public Identity getOwnedIdentityFromMaskingUid(String maskingUidString) {
-        return serverPushNotificationsCoordinator.getOwnedIdentityFromMaskingUid(maskingUidString);
+        return registerServerPushNotificationsCoordinator.getOwnedIdentityFromMaskingUid(maskingUidString);
     }
 
     // endregion

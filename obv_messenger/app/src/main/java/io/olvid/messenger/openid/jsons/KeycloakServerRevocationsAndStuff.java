@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -24,12 +24,14 @@ import java.util.Map;
 
 public class KeycloakServerRevocationsAndStuff {
     public final boolean revocationAllowed;
+    public final boolean transferRestricted;
     public final long currentServerTimestamp;
     public final List<String> signedRevocations;
     public final Map<String, Integer> minimumBuildVersions;
 
-    public KeycloakServerRevocationsAndStuff(boolean revocationAllowed, long currentServerTimestamp, List<String> signedRevocations, Map<String, Integer> minimumBuildVersions) {
+    public KeycloakServerRevocationsAndStuff(boolean revocationAllowed, boolean transferRestricted, long currentServerTimestamp, List<String> signedRevocations, Map<String, Integer> minimumBuildVersions) {
         this.revocationAllowed = revocationAllowed;
+        this.transferRestricted = transferRestricted;
         this.currentServerTimestamp = currentServerTimestamp;
         this.signedRevocations = signedRevocations;
         this.minimumBuildVersions = minimumBuildVersions;

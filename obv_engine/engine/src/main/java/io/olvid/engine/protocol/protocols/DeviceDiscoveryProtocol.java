@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -289,9 +289,7 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                     SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                     DEVICE_DISCOVERY_CHILD_PROTOCOL_ID,
-                    childProtocolInstanceUid,
-                    false
-            );
+                    childProtocolInstanceUid);
             ChannelMessageToSend messageToSend = new DeviceDiscoveryChildProtocol.InitialMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -337,7 +335,7 @@ public class DeviceDiscoveryProtocol extends ConcreteProtocol {
                     }
                 } catch (Exception e) {
                     Logger.i("Malformed server response id device discovery");
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
 

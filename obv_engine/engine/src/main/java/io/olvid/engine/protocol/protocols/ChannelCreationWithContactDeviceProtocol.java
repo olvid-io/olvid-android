@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -888,9 +888,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                             SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID,
-                            childProtocolInstanceUid,
-                            false
-                    );
+                            childProtocolInstanceUid);
                     ChannelMessageToSend messageToSend = new ChannelCreationWithContactDeviceProtocol.InitialMessage(coreProtocolMessage, receivedMessage.contactIdentity, receivedMessage.contactDeviceUid).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -971,8 +969,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid, null, true)) {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                            new UID(getPrng()),
-                            false);
+                            new UID(getPrng()));
                     ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -986,9 +983,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new ChannelCreationWithContactDeviceProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity, startState.contactDeviceUid).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -1046,8 +1041,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 if (protocolManagerSession.identityDelegate.addDeviceForContactIdentity(protocolManagerSession.session, getOwnedIdentity(), startState.contactIdentity, startState.contactDeviceUid, null, true)) {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                            new UID(getPrng()),
-                            false);
+                            new UID(getPrng()));
                     ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -1061,9 +1055,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new ChannelCreationWithContactDeviceProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity, startState.contactDeviceUid).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -1086,7 +1078,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 JsonIdentityDetailsWithVersionAndPhoto ownedDetailsWithVersionAndPhoto = protocolManagerSession.identityDelegate.getOwnedIdentityPublishedAndLatestDetails(protocolManagerSession.session, getOwnedIdentity())[0];
                 serializedDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().writeValueAsString(ownedDetailsWithVersionAndPhoto);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
 
             CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(
@@ -1130,15 +1122,13 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                     SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                     DOWNLOAD_IDENTITY_PHOTO_CHILD_PROTOCOL_ID,
-                                    new UID(getPrng()),
-                                    false
-                            );
+                                    new UID(getPrng()));
                             ChannelMessageToSend messageToSend = new DownloadIdentityPhotoChildProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity, protocol.getJsonObjectMapper().writeValueAsString(newDetails)).generateChannelProtocolMessageToSend();
                             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
 
@@ -1159,9 +1149,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new DeviceCapabilitiesDiscoveryProtocol.InitialSingleContactDeviceMessage(coreProtocolMessage, startState.contactIdentity, startState.contactDeviceUid, false).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -1183,7 +1171,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                     JsonIdentityDetailsWithVersionAndPhoto ownedDetailsWithVersionAndPhoto = protocolManagerSession.identityDelegate.getOwnedIdentityPublishedAndLatestDetails(protocolManagerSession.session, getOwnedIdentity())[0];
                     serializedDetailsWithVersionAndPhoto = protocol.getJsonObjectMapper().writeValueAsString(ownedDetailsWithVersionAndPhoto);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
 
                 CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(
@@ -1202,9 +1190,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new OneToOneContactInvitationProtocol.InitiateOneToOneStatusSyncWithOneContactMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -1241,15 +1227,13 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                     SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                     DOWNLOAD_IDENTITY_PHOTO_CHILD_PROTOCOL_ID,
-                                    new UID(getPrng()),
-                                    false
-                            );
+                                    new UID(getPrng()));
                             ChannelMessageToSend messageToSend = new DownloadIdentityPhotoChildProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity, protocol.getJsonObjectMapper().writeValueAsString(newDetails)).generateChannelProtocolMessageToSend();
                             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
 
@@ -1270,9 +1254,7 @@ public class ChannelCreationWithContactDeviceProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new DeviceCapabilitiesDiscoveryProtocol.InitialSingleContactDeviceMessage(coreProtocolMessage, startState.contactIdentity, startState.contactDeviceUid, false).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }

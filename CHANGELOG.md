@@ -1,3 +1,66 @@
+# Build 263 (3.6)
+2025-02-10
+
+- Greatly improve groups v2 administrator chain verification time for large groups 
+
+# ~~Build 262 (3.6)~~
+2025-02-04
+
+- Add the possibility to archive a discussion
+- Display the reception status of messages sent from your other devices
+- Add an incoming/ongoing call panel inside the app to answer/reject a call if the Android notification is not visible
+- Integrate image text recognition (OCR) into the internal image viewer
+- Performances improvement for the discussion list screen
+- Make the new internal pdf viewer the default when opening a pdf attachment
+
+# Build 261 (3.5.1)
+2025-01-03
+
+- Fix an NPE in user directory search results
+- Improve messages load time in discussion
+
+# Build 260 (3.5)
+2024-12-29
+
+- Fix some issues with internal PDF viewer
+
+# ~~Build 259 (3.5)~~
+2024-12-22
+
+- optimized message download at app startup
+- better GPS management when sharing your location
+- show sent message status in discussion list
+- recognize text content inside images (OCR)
+- avoid some useless messages during phone calls in a multi-device settings
+- (experimental) internal PDF viewer (opt-in in "other settings")
+- several small bug fixes
+
+# Build 258 (3.4.1)
+2024-12-03
+
+- Fix a few occasional crashes
+
+# Build 257 (3.4)
+2024-11-28
+
+- Olvid now targets Android 15 (API 35)
+- Improved global search to also match link title/description
+- Allow contact introduction directly from the discussion screen
+- [optimization] attachment download/upload progresses are no longer written to database
+- several small bug fixes
+
+# Build 256 (3.3.1)
+2024-11-16
+
+- Fix an issue with notification channels not found after a device-wide "reset app preferences" 
+
+# Build 255 (3.3)
+2024-11-14
+
+- Improved global search layout and performance (tabs, search in group member names, search in personal notes, etc.)
+- Support for incoming call notification during a call
+- Improved RTL language support
+
 # Build 254 (3.2.2)
 2024-10-18
 

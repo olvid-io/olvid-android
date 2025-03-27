@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -21,6 +21,7 @@ package io.olvid.engine.engine.types;
 
 import org.jose4j.jwk.JsonWebKey;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -59,6 +60,8 @@ public interface EngineAPI {
         FREE_TRIAL_KEY_EXPIRED,
     }
 
+    void startProcessing();
+
     // Engine notifications
     void addNotificationListener(String notificationName, EngineNotificationListener engineNotificationListener);
     void addNotificationListener(String notificationName, EngineNotificationListener engineNotificationListener, ListenerPriority priority);
@@ -93,6 +96,7 @@ public interface EngineAPI {
     void setOwnedIdentityKeycloakSignatureKey(byte[] bytesOwnedIdentity, JsonWebKey signatureKey) throws Exception;
     ObvIdentity bindOwnedIdentityToKeycloak(byte[] bytesOwnedIdentity, ObvKeycloakState keycloakState, String keycloakUserId);
     void unbindOwnedIdentityFromKeycloak(byte[] bytesOwnedIdentity);
+    void updateKeycloakTransferRestrictedIfNeeded(byte[] bytesOwnedIdentity, String serverUrl, boolean transferRestricted);
     void updateKeycloakPushTopicsIfNeeded(byte[] bytesOwnedIdentity, String serverUrl, List<String> pushTopics);
     void updateKeycloakRevocationList(byte[] bytesOwnedIdentity, long latestRevocationListTimestamp, List<String> signedRevocations);
     void setOwnedIdentityKeycloakSelfRevocationTestNonce(byte[] bytesOwnedIdentity, String serverUrl, String nonce);
@@ -198,6 +202,7 @@ public interface EngineAPI {
     void deleteReturnReceipt(byte[] bytesOwnedIdentity, byte[] serverUid);
     ObvReturnReceipt decryptReturnReceipt(byte[] returnReceiptKey, byte[] encryptedPayload);
     ObvPostMessageOutput post(byte[] messagePayload, byte[] extendedMessagePayload, ObvOutboundAttachment[] attachments, List<byte[]> bytesContactIdentities, byte[] bytesOwnedIdentity, boolean hasUserContent, boolean isVoipMessage);
+    ObvPostMessageOutput postToSpecificDevices(byte[] messagePayload, List<byte[]> bytesContactIdentities, List<byte[]> bytesContactDeviceUids, byte[] bytesOwnedIdentity, boolean hasUserContent, boolean isVoipMessage );
     void sendReturnReceipt(byte[] bytesOwnedIdentity, byte[] senderIdentifier, int status, byte[] returnReceiptNonce, byte[] returnReceiptKey, Integer attachmentNumber);
     boolean isOutboxAttachmentSent(byte[] bytesOwnedIdentity, byte[] engineMessageIdentifier, int engineNumber);
     boolean isOutboxMessageSent(byte[] bytesOwnedIdentity, byte[] engineMessageIdentifier);

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -101,7 +101,7 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
             ObliviousChannel.clean(channelManagerSession);
             channelManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         try (ChannelManagerSession channelManagerSession = getSession()) {
@@ -115,7 +115,7 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
             }
             channelManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         try (ChannelManagerSession channelManagerSession = getSession()) {
@@ -215,7 +215,7 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
 
             channelManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -228,7 +228,7 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
             ProvisionedKeyMaterial.createTable(channelManagerSession.session);
             channelManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new RuntimeException("Unable to create channel databases");
         }
     }

@@ -89,6 +89,13 @@
             android:summary="@string/pref_use_legacy_zxing_scanner_summary"
             android:icon="@drawable/ic_pref_qr_code"
             android:order="32" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_key_use_internal_pdf_viewer"
+            android:title="@string/pref_use_internal_pdf_viewer_title"
+            android:summary="@string/pref_use_internal_pdf_viewer_summary"
+            android:icon="@drawable/ic_pref_pdf"
+            android:order="33" />
         <DropDownPreference
             android:defaultValue="null"
             app:singleLineTitle="false"

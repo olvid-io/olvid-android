@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -39,6 +39,7 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
@@ -72,11 +73,13 @@ public class Discussion {
     public static final String SENDER_THREAD_IDENTIFIER = "sender_thread_identifier";
     public static final String LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER = "last_outbound_message_sequence_number";
     public static final String LAST_MESSAGE_TIMESTAMP = "last_message_timestamp";
+    public static final String LAST_REMOTE_DELETE_TIMESTAMP = "last_remote_delete_timestamp";
     public static final String PHOTO_URL = "photo_url";
     public static final String KEYCLOAK_MANAGED = "keycloak_managed";
     public static final String PINNED = "pinned";
     public static final String UNREAD = "unread"; // specify if discussion as been manually marked as unread
     public static final String ACTIVE = "active";
+    public static final String ARCHIVED = "archived";
     public static final String TRUST_LEVEL = "trust_level";
     public static final String STATUS = "status"; // normal, locked, or pre-discussion
 
@@ -93,6 +96,7 @@ public class Discussion {
     public long id;
 
     @ColumnInfo(name = TITLE)
+    @Nullable
     public String title;
 
     @ColumnInfo(name = BYTES_OWNED_IDENTITY)
@@ -116,6 +120,9 @@ public class Discussion {
     @ColumnInfo(name = LAST_MESSAGE_TIMESTAMP)
     public long lastMessageTimestamp;
 
+    @ColumnInfo(name = LAST_REMOTE_DELETE_TIMESTAMP)
+    public long lastRemoteDeleteTimestamp;
+
     @ColumnInfo(name = PHOTO_URL)
     @Nullable
     public String photoUrl;
@@ -130,6 +137,9 @@ public class Discussion {
     @ColumnInfo(name = PINNED)
     public int pinned;
 
+    @ColumnInfo(name = ARCHIVED)
+    public boolean archived;
+
     @ColumnInfo(name = ACTIVE)
     public boolean active;
 
@@ -141,7 +151,7 @@ public class Discussion {
     public int status;
 
     // default constructor required by Room
-    public Discussion(String title, @NonNull byte[] bytesOwnedIdentity, int discussionType, @NonNull byte[] bytesDiscussionIdentifier, @NonNull UUID senderThreadIdentifier, long lastOutboundMessageSequenceNumber, long lastMessageTimestamp, @Nullable String photoUrl, boolean keycloakManaged, boolean unread, int pinned, boolean active, @Nullable Integer trustLevel, int status) {
+    public Discussion(@Nullable String title, @NonNull byte[] bytesOwnedIdentity, int discussionType, @NonNull byte[] bytesDiscussionIdentifier, @NonNull UUID senderThreadIdentifier, long lastOutboundMessageSequenceNumber, long lastMessageTimestamp, @Nullable String photoUrl, boolean keycloakManaged, boolean unread, int pinned, boolean archived, boolean active, @Nullable Integer trustLevel, int status) {
         this.title = title;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.discussionType = discussionType;
@@ -153,6 +163,7 @@ public class Discussion {
         this.keycloakManaged = keycloakManaged;
         this.unread = unread;
         this.pinned = pinned;
+        this.archived = archived;
         this.active = active;
         this.trustLevel = trustLevel;
         this.status = status;
@@ -183,6 +194,7 @@ public class Discussion {
                     contact.keycloakManaged,
                     false,
                     0,
+                    false,
                     contact.active,
                     contact.trustLevel,
                     STATUS_NORMAL
@@ -304,6 +316,7 @@ public class Discussion {
                     false,
                     false,
                     0,
+                    false,
                     true,
                     null,
                     STATUS_NORMAL
@@ -357,6 +370,7 @@ public class Discussion {
                     group2.keycloakManaged,
                     false,
                     0,
+                    false,
                     true,
                     null,
                     group2.ownPermissionSendMessage ? STATUS_NORMAL : STATUS_READ_ONLY
@@ -534,6 +548,7 @@ public class Discussion {
             // also mark as ended all currently sharing location messages
             for (Message message : db.messageDao().getCurrentlySharingInboundLocationMessagesInDiscussion(id)) {
                 db.messageDao().updateLocationType(message.id, Message.LOCATION_TYPE_SHARE_FINISHED);
+                UnreadCountsSingleton.INSTANCE.removeLocationSharingMessage(message.discussionId, message.id);
             }
 
             ShortcutActivity.updateShortcut(this);

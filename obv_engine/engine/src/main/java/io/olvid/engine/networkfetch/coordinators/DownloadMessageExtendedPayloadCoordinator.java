@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -71,7 +71,6 @@ public class DownloadMessageExtendedPayloadCoordinator implements Operation.OnCa
         this.createServerSessionDelegate = createServerSessionDelegate;
 
         downloadMessagesExtendedPayloadOperationQueue = new NoDuplicateOperationQueue();
-        downloadMessagesExtendedPayloadOperationQueue.execute(1, "Engine-DownloadMessagesExtendedPayloadCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
         awaitingNotificationListener = new AwaitingNotificationListener();
@@ -81,6 +80,10 @@ public class DownloadMessageExtendedPayloadCoordinator implements Operation.OnCa
 
         awaitingIdentityReactivationOperations = new HashMap<>();
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
+    }
+
+    public void startProcessing() {
+        downloadMessagesExtendedPayloadOperationQueue.execute(1, "Engine-DownloadMessagesExtendedPayloadCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
@@ -107,7 +110,7 @@ public class DownloadMessageExtendedPayloadCoordinator implements Operation.OnCa
                 messageHasExtendedPayloadToDownload(inboxMessage.getOwnedIdentity(), inboxMessage.getUid());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,18 +22,20 @@ package io.olvid.engine.networkfetch.operations;
 
 import java.sql.SQLException;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
+import io.olvid.engine.datatypes.PriorityOperation;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.networkfetch.databases.InboxMessage;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSession;
 import io.olvid.engine.networkfetch.datatypes.FetchManagerSessionFactory;
 
-public class ProcessWebsocketReceivedMessageOperation extends Operation {
+public class ProcessWebsocketReceivedMessageOperation extends PriorityOperation {
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
     private final Identity ownedIdentity;
     private final UID deviceUid;
@@ -54,6 +56,11 @@ public class ProcessWebsocketReceivedMessageOperation extends Operation {
         this.ownedIdentity = ownedIdentity;
         this.deviceUid = deviceUid;
         this.messagePayload = messagePayload;
+    }
+
+    @Override
+    public long getPriority() {
+        return 1;
     }
 
     private static UID computeUniqueUid(Identity ownedIdentity, byte[] messagePayload) {
@@ -102,7 +109,7 @@ public class ProcessWebsocketReceivedMessageOperation extends Operation {
                 }
                 finished = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 fetchManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -116,7 +123,7 @@ public class ProcessWebsocketReceivedMessageOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

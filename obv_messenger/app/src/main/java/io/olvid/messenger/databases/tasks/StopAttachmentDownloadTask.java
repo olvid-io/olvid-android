@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -32,9 +32,14 @@ public class StopAttachmentDownloadTask implements Runnable {
 
     @Override
     public void run() {
+        if (fyleMessageJoinWithStatus.engineNumber == null) {
+            return;
+        }
         AppSingleton.getEngine().pauseAttachmentDownload(fyleMessageJoinWithStatus.bytesOwnedIdentity, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
         FyleMessageJoinWithStatus reloadedFyleMessageJoinWithStatus = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().get(fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.messageId);
-        reloadedFyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE;
-        AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(reloadedFyleMessageJoinWithStatus);
+        if (reloadedFyleMessageJoinWithStatus != null) {
+            reloadedFyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE;
+            AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(reloadedFyleMessageJoinWithStatus);
+        }
     }
 }

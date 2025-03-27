@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,6 +22,7 @@ package io.olvid.engine.datatypes.containers;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.UID;
 
 public class ChannelApplicationMessageToSend implements ChannelMessageToSend {
     private final SendChannelInfo sendChannelInfo;
@@ -33,6 +34,21 @@ public class ChannelApplicationMessageToSend implements ChannelMessageToSend {
 
     public ChannelApplicationMessageToSend(Identity[] toIdentities, Identity fromIdentity, byte[] messagePayload, byte[] extendedMessagePayload, Attachment[] attachments, boolean hasUserContent, boolean isVoipMessage) throws Exception {
         SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfoForMultipleIdentities(toIdentities, fromIdentity);
+        if (sendChannelInfos.length != 1) {
+            Logger.e("Error: trying to create a ChannelApplicationMessageToSend for identities on different servers");
+            throw new Exception();
+        }
+        this.sendChannelInfo = sendChannelInfos[0];
+        this.messagePayload = messagePayload;
+        this.extendedMessagePayload = extendedMessagePayload;
+        this.attachments = attachments;
+        this.hasUserContent = hasUserContent;
+        this.isVoipMessage = isVoipMessage;
+    }
+
+    // some toDeviceUids may be null: send to all devices for this contact in that case
+    public ChannelApplicationMessageToSend(Identity[] toIdentities, UID[] toDeviceUids, Identity fromIdentity, byte[] messagePayload, byte[] extendedMessagePayload, Attachment[] attachments, boolean hasUserContent, boolean isVoipMessage) throws Exception {
+        SendChannelInfo[] sendChannelInfos = SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfoForMultipleIdentities(toIdentities, toDeviceUids, fromIdentity);
         if (sendChannelInfos.length != 1) {
             Logger.e("Error: trying to create a ChannelApplicationMessageToSend for identities on different servers");
             throw new Exception();

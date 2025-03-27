@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -21,6 +21,7 @@ package io.olvid.messenger.databases;
 
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,8 +36,10 @@ import io.olvid.engine.engine.types.ObvContactInfo;
 import io.olvid.engine.engine.types.identities.ObvGroup;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
+import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.StringUtils;
@@ -62,15 +65,17 @@ import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class AppDatabaseOpenCallback implements Runnable {
+    public static final long ENGINE_SYNC_MAX_INTERVAL = 2 * 86_400_000L; // 2 days
+
     private final AppDatabase db;
-    private Engine engine;
+
     AppDatabaseOpenCallback(AppDatabase db) {
         this.db = db;
     }
 
     @Override
     public void run() {
-        engine = AppSingleton.getEngine();
+        Engine engine = AppSingleton.getEngine();
         if (engine == null) {
             return;
         }
@@ -83,7 +88,9 @@ public class AppDatabaseOpenCallback implements Runnable {
         }
 
         // Check all owned identities and contacts, and group discussions
-        syncEngineDatabases();
+        if (System.currentTimeMillis() - AppSingleton.getLastEngineSynchronisationTime() > ENGINE_SYNC_MAX_INTERVAL) {
+            syncEngineDatabases(engine, db);
+        }
 
         // Check status of PROCESSING messages
         //  - query engine to update status of PROCESSING messages
@@ -193,6 +200,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                             message.recomputeAttachmentCount(db);
                             if (message.isEmpty()) {
                                 db.messageDao().delete(message);
+                                UnreadCountsSingleton.INSTANCE.messageDeleted(message);
                             } else {
                                 db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, 0, message.imageResolutions);
                             }
@@ -255,7 +263,7 @@ public class AppDatabaseOpenCallback implements Runnable {
 
 
 
-    private void syncEngineDatabases() {
+    public static void syncEngineDatabases(Engine engine, AppDatabase db) {
         Logger.d("🔁 Starting App database synchronisation");
         long timestamp = System.currentTimeMillis();
         try {
@@ -295,7 +303,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                 identitiesHashMap.put(new BytesKey(appOwnedIdentity.bytesOwnedIdentity), appOwnedIdentity);
             }
 
-            Logger.d("🔁 Warmup: " + (System.currentTimeMillis() - timestamp));
+            Logger.d("🔁 Warmup: " + (System.currentTimeMillis() - timestamp) + "ms");
             timestamp = System.currentTimeMillis();
 
             ObvIdentity[] ownedIdentities = engine.getOwnedIdentities();
@@ -355,14 +363,14 @@ public class AppDatabaseOpenCallback implements Runnable {
                 }
                 identitiesHashMap.remove(new BytesKey(ownedIdentity.getBytesIdentity()));
 
-                Logger.d("🔁 Sync owned identity: " + (System.currentTimeMillis() - timestamp));
+                Logger.d("🔁 Sync owned identity: " + (System.currentTimeMillis() - timestamp) + "ms");
                 timestamp = System.currentTimeMillis();
 
                 ////////////////
                 // synchronize OwnedDevices
                 new OwnedDevicesSynchronisationWithEngineTask(ownedIdentity.getBytesIdentity()).run();
 
-                Logger.d("🔁 Sync devices: " + (System.currentTimeMillis() - timestamp));
+                Logger.d("🔁 Sync devices: " + (System.currentTimeMillis() - timestamp) + "ms");
                 timestamp = System.currentTimeMillis();
 
                 ////////////////
@@ -521,7 +529,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                     }
                 }
 
-                Logger.d("🔁 Sync contacts: " + (System.currentTimeMillis() - timestamp));
+                Logger.d("🔁 Sync contacts: " + (System.currentTimeMillis() - timestamp) + "ms");
                 timestamp = System.currentTimeMillis();
 
                 // synchronize Groups for this OwnedIdentity
@@ -580,7 +588,15 @@ public class AppDatabaseOpenCallback implements Runnable {
                                                     :
                                                     db.groupDao().getGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid)
                                     );
-                                    db.groupDao().updateGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid, newGroup.groupMembersNames);
+
+                                    List<String> fullSearchItems = new ArrayList<>();
+                                    for (Contact groupContact : db.contactGroupJoinDao().getGroupContactsSync(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid)) {
+                                        if (groupContact != null) {
+                                            fullSearchItems.add(groupContact.fullSearchDisplayName);
+                                        }
+                                    }
+
+                                    db.groupDao().updateGroupMembersNames(newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid, newGroup.groupMembersNames, newGroup.computeFullSearch(fullSearchItems));
 
                                     HashSet<BytesKey> declinedSet = new HashSet<>();
                                     for (byte[] bytesDeclinedPendingMember : obvGroup.getBytesDeclinedPendingMembers()) {
@@ -646,7 +662,15 @@ public class AppDatabaseOpenCallback implements Runnable {
                                                         :
                                                         db.groupDao().getGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid)
                                         );
-                                        db.groupDao().updateGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid, finalGroup.groupMembersNames);
+
+                                        List<String> fullSearchItems = new ArrayList<>();
+                                        for (Contact groupContact : db.contactGroupJoinDao().getGroupContactsSync(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid)) {
+                                            if (groupContact != null) {
+                                                fullSearchItems.add(groupContact.fullSearchDisplayName);
+                                            }
+                                        }
+
+                                        db.groupDao().updateGroupMembersNames(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid, finalGroup.groupMembersNames, finalGroup.computeFullSearch(fullSearchItems));
 
                                         if (finalGroup.bytesGroupOwnerIdentity == null && !contactToAdd.isEmpty()) { // owned group --> check the customization
                                             DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
@@ -710,7 +734,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                     }
                 }
 
-                Logger.d("🔁 Sync groups v1: " + (System.currentTimeMillis() - timestamp));
+                Logger.d("🔁 Sync groups v1: " + (System.currentTimeMillis() - timestamp) + "ms");
                 timestamp = System.currentTimeMillis();
 
                 // synchronize groups V2
@@ -731,7 +755,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                 }
 
 
-                Logger.d("🔁 Sync groups v2: " + (System.currentTimeMillis() - timestamp));
+                Logger.d("🔁 Sync groups v2: " + (System.currentTimeMillis() - timestamp) + "ms");
                 timestamp = System.currentTimeMillis();
             }
 
@@ -798,6 +822,9 @@ public class AppDatabaseOpenCallback implements Runnable {
             }
 
            AppSingleton.reloadCachedDisplayNamesAndHues();
+
+            // save the last synchronisation completion time
+            AppSingleton.saveLastEngineSynchronisationTime(System.currentTimeMillis());
         } catch (Exception e) {
             e.printStackTrace();
             Logger.w("Error syncing Room database with Engine database");

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,10 +19,13 @@
 package io.olvid.messenger.discussion.settings
 
 import android.os.Bundle
+import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import io.olvid.messenger.App
+import io.olvid.messenger.R
 import io.olvid.messenger.R.string
 import io.olvid.messenger.R.xml
 import io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory
@@ -33,7 +36,9 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.DiscussionCustomization
+import io.olvid.messenger.databases.tasks.ApplySyncAtomTask
 import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask
+import io.olvid.messenger.databases.tasks.propagateMuteSettings
 import io.olvid.messenger.discussion.settings.DiscussionSettingsViewModel.SettingsChangedListener
 
 class DiscussionSettingsHeadersFragment : PreferenceFragmentCompat(), SettingsChangedListener {
@@ -86,6 +91,7 @@ class DiscussionSettingsHeadersFragment : PreferenceFragmentCompat(), SettingsCh
                             DiscussionSettingsActivity.PREF_KEY_DISCUSSION_MUTE_NOTIFICATIONS,
                             false
                         )
+                        discussionSettingsViewModel.discussionLiveData.value?.propagateMuteSettings(discussionCustomization.apply { prefMuteNotifications = false })
                     } else {
                         val context = context
                         val discussionId = discussionSettingsViewModel.discussionId
@@ -113,6 +119,9 @@ class DiscussionSettingsHeadersFragment : PreferenceFragmentCompat(), SettingsCh
                                             AppDatabase.getInstance().discussionCustomizationDao()
                                                 .update(discussionCust)
                                         }
+                                        discussionSettingsViewModel.discussionLiveData.value?.propagateMuteSettings(
+                                            discussionCust
+                                        )
                                     }
                                 },
                                 DISCUSSION,
@@ -128,6 +137,7 @@ class DiscussionSettingsHeadersFragment : PreferenceFragmentCompat(), SettingsCh
             screen.findPreference(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_CATEGORY_SEND_RECEIVE)
         sharedEphemeralSettingsHeaderPreference =
             screen.findPreference(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_CATEGORY_SHARED_EPHEMERAL_SETTINGS)
+
         discussionSettingsViewModel.addSettingsChangedListener(this)
     }
 
@@ -163,5 +173,9 @@ class DiscussionSettingsHeadersFragment : PreferenceFragmentCompat(), SettingsCh
     override fun onDestroy() {
         super.onDestroy()
         discussionSettingsViewModel.removeSettingsChangedListener(this)
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.setBackgroundColor(ContextCompat.getColor(view.context, R.color.dialogBackground))
     }
 }

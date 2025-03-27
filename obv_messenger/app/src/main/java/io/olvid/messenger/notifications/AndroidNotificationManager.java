@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -80,6 +80,7 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
+import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
@@ -87,6 +88,7 @@ import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
+import io.olvid.messenger.services.AvailableSpaceHelper;
 import io.olvid.messenger.settings.SettingsActivity;
 import io.olvid.messenger.webrtc.WebrtcCallActivity;
 
@@ -281,11 +283,7 @@ public class AndroidNotificationManager {
         }
 
         long[] pattern = SettingsActivity.getMessageVibrationPattern();
-        if (pattern == null) {
-            messageChannel.enableVibration(false);
-        } else {
-            messageChannel.setVibrationPattern(pattern);
-        }
+        messageChannel.setVibrationPattern(pattern);
 
         messageChannel.setSound(SettingsActivity.getMessageRingtone(), new AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -647,6 +645,7 @@ public class AndroidNotificationManager {
                 return;
             }
             boolean isMentioned = message != null && ownedIdentity != null && message.isIdentityMentioned(ownedIdentity.bytesOwnedIdentity);
+            boolean unarchiveNeeded = discussion.archived && SettingsActivity.getUnarchiveDiscussionOnNotification();
             DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
             if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications(isMentioned)) {
                 return;
@@ -654,11 +653,17 @@ public class AndroidNotificationManager {
             if (ownedIdentity != null && ownedIdentity.shouldMuteNotifications(isMentioned)) {
                 if (ownedIdentity.shouldShowNeutralNotification(isMentioned)) {
                     displayNeutralNotification();
+                    if (unarchiveNeeded) {
+                        unarchiveDiscussionAndAutoDownloadAttachmentsIfNeeded(discussion, message);
+                    }
                 }
                 return;
             }
             if (SettingsActivity.isNotificationContentHidden()) {
                 displayNeutralNotification();
+                if (unarchiveNeeded) {
+                    unarchiveDiscussionAndAutoDownloadAttachmentsIfNeeded(discussion, message);
+                }
                 return;
             }
 
@@ -671,6 +676,9 @@ public class AndroidNotificationManager {
             if (discussionNotification == null) {
                 clearReceivedMessageAndReactionsNotification(discussion.id);
                 return;
+            }
+            if (unarchiveNeeded) {
+                unarchiveDiscussionAndAutoDownloadAttachmentsIfNeeded(discussion, message);
             }
 
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
@@ -706,6 +714,28 @@ public class AndroidNotificationManager {
                 }
             }
         });
+    }
+
+
+    private static void unarchiveDiscussionAndAutoDownloadAttachmentsIfNeeded(@NonNull Discussion discussion, @Nullable Message message) {
+        discussion.archived = false;
+        AppDatabase.getInstance().discussionDao().updateArchived(discussion.id, false);
+
+        if (message != null && message.totalAttachmentCount != 0) {
+            long downloadSize = SettingsActivity.getAutoDownloadSize();
+
+            for (FyleMessageJoinWithStatus fyleMessageJoinWithStatus : AppDatabase.getInstance().fyleMessageJoinWithStatusDao().getStatusesForMessage(message.id)) {
+                if (fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE
+                        && fyleMessageJoinWithStatus.engineNumber != null
+                        && (downloadSize == -1 || fyleMessageJoinWithStatus.size < downloadSize)
+                        && (AvailableSpaceHelper.getAvailableSpace() == null || AvailableSpaceHelper.getAvailableSpace() > fyleMessageJoinWithStatus.size)
+                ) {
+                    AppSingleton.getEngine().downloadSmallAttachment(discussion.bytesOwnedIdentity, fyleMessageJoinWithStatus.engineMessageIdentifier, fyleMessageJoinWithStatus.engineNumber);
+                    fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DOWNLOADING;
+                    AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
+                }
+            }
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -1621,7 +1651,7 @@ public class AndroidNotificationManager {
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
             switch (errorType) {
                 case LOCATION_DISABLED: {
-                    builder.setSmallIcon(R.drawable.ic_location_current_location_disabled)
+                    builder.setSmallIcon(R.drawable.ic_location_current_location_failed)
                             .setContentTitle(App.getContext().getString(R.string.text_notification_location_disabled_title))
                             .setContentText(App.getContext().getString(R.string.text_notification_location_disabled_message));
 
@@ -1974,9 +2004,7 @@ public class AndroidNotificationManager {
             } else {
                 pattern = SettingsActivity.intToVibrationPattern(Integer.parseInt(discussionCustomization.prefMessageNotificationVibrationPattern));
             }
-            if (pattern != null) {
-                v.vibrate(pattern, -1);
-            }
+            v.vibrate(pattern, -1);
         }
     }
 

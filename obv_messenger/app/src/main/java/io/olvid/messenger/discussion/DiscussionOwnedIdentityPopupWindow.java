@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -150,7 +150,7 @@ public class DiscussionOwnedIdentityPopupWindow {
         separatorAndHeightObserver = (List<OwnedIdentityDao.OwnedIdentityAndDiscussionId> ownedIdentityAndDiscussionIds) -> {
             DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
             int windowHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 66, metrics);
-            if (ownedIdentityAndDiscussionIds == null || ownedIdentityAndDiscussionIds.size() == 0) {
+            if (ownedIdentityAndDiscussionIds == null || ownedIdentityAndDiscussionIds.isEmpty()) {
                 separator.setVisibility(View.GONE);
             } else {
                 separator.setVisibility(View.VISIBLE);

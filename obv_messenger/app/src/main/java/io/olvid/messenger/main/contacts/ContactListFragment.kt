@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -31,7 +31,10 @@ import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -96,6 +99,7 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
             setContent {
                 val refreshing by refreshingViewModel.isRefreshing.collectAsStateWithLifecycle()
                 ContactListScreen(
+                    modifier = Modifier.navigationBarsPadding(),
                     contactListViewModel = contactListViewModel,
                     refreshing = refreshing,
                     onRefresh = ::onRefresh,

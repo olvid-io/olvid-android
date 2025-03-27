@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -79,7 +79,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
     protected TextView emptyViewTextView;
 
     private Observer<List<Contact>> selectedContactsObserver;
-    private Observer<List<FilteredContactListViewModel.SelectableContact>> filteredContactsObserver;
+//    private Observer<List<FilteredContactListViewModel.SelectableContact>> filteredContactsObserver;
     private List<Contact> initiallySelectedContacts;
 
 
@@ -87,7 +87,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
     private boolean selectable = false;
     private boolean disableEmptyView = false;
     private boolean disableAnimations = false;
-    private String emptyViewText = null;
+//    private String emptyViewText = null;
 
     protected FilteredContactListAdapter filteredContactListAdapter;
 
@@ -99,9 +99,9 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         if (unfilteredContacts != null) {
             observeUnfiltered();
         }
-        if (this.filteredContactsObserver != null) {
-            filteredContactListViewModel.getFilteredContacts().observe(this, this.filteredContactsObserver);
-        }
+//        if (this.filteredContactsObserver != null) {
+//            filteredContactListViewModel.getFilteredContacts().observe(this, this.filteredContactsObserver);
+//        }
         if (this.selectedContactsObserver != null) {
             filteredContactListViewModel.getSelectedContacts().observe(this, this.selectedContactsObserver);
         }
@@ -129,9 +129,9 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
             recyclerView.setEmptyView(recyclerEmptyView);
         }
         emptyViewTextView = rootView.findViewById(R.id.widget_list_empty_view_text_view);
-        if (emptyViewText != null) {
-            emptyViewTextView.setText(emptyViewText);
-        }
+//        if (emptyViewText != null) {
+//            emptyViewTextView.setText(emptyViewText);
+//        }
 
         View loadingSpinner = rootView.findViewById(R.id.loading_spinner);
         recyclerView.setLoadingSpinner(loadingSpinner);
@@ -169,6 +169,10 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         }
         this.contactFilterEditText = contactFilterEditText;
         this.contactFilterEditText.addTextChangedListener(this);
+        if (filteredContactListViewModel != null) {
+            Editable editable = this.contactFilterEditText.getText();
+            filteredContactListViewModel.setFilter(editable == null ? "" : editable.toString());
+        }
     }
 
     public void setFilter(String filter) {
@@ -177,17 +181,17 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         }
     }
 
-    public void setFilteredContactObserver(@Nullable Observer<List<FilteredContactListViewModel.SelectableContact>> observer) {
-        if (filteredContactListViewModel != null) {
-            if (this.filteredContactsObserver != null) {
-                filteredContactListViewModel.getFilteredContacts().removeObserver(this.filteredContactsObserver);
-            }
-            if (observer != null) {
-                filteredContactListViewModel.getFilteredContacts().observe(this, observer);
-            }
-        }
-        this.filteredContactsObserver = observer;
-    }
+//    public void setFilteredContactObserver(@Nullable Observer<List<FilteredContactListViewModel.SelectableContact>> observer) {
+//        if (filteredContactListViewModel != null) {
+//            if (this.filteredContactsObserver != null) {
+//                filteredContactListViewModel.getFilteredContacts().removeObserver(this.filteredContactsObserver);
+//            }
+//            if (observer != null) {
+//                filteredContactListViewModel.getFilteredContacts().observe(this, observer);
+//            }
+//        }
+//        this.filteredContactsObserver = observer;
+//    }
 
     public void setOnClickDelegate(FilteredContactListOnClickDelegate onClickDelegate) {
         this.onClickDelegate = onClickDelegate;
@@ -217,13 +221,13 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         this.selectedContactsObserver = observer;
     }
 
-    public void setEmptyViewText(@Nullable String text) {
-        if (emptyViewTextView != null) {
-            emptyViewTextView.setText(text);
-        } else {
-            emptyViewText = text;
-        }
-    }
+//    public void setEmptyViewText(@Nullable String text) {
+//        if (emptyViewTextView != null) {
+//            emptyViewTextView.setText(text);
+//        } else {
+//            emptyViewText = text;
+//        }
+//    }
 
     public void removeBottomPadding() {
         removeBottomPadding = true;
@@ -252,7 +256,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
     }
 
 
-    class FilteredContactListAdapter extends LoadAwareAdapter<FilteredContactListAdapter.ContactViewHolder> implements Observer<List<FilteredContactListViewModel.SelectableContact>> {
+    protected class FilteredContactListAdapter extends LoadAwareAdapter<FilteredContactListAdapter.ContactViewHolder> implements Observer<List<FilteredContactListViewModel.SelectableContact>> {
         private List<FilteredContactListViewModel.SelectableContact> filteredContacts = null;
         private final LayoutInflater inflater;
         private final SearchHighlightSpan[] highlightedSpans;
@@ -530,7 +534,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
             return 0;
         }
 
-        class ContactViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+        public class ContactViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
             final InitialView initialView;
             final TextView contactNameTextView;
             final TextView contactNameSecondLineTextView;
@@ -567,10 +571,11 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
                 int position = this.getLayoutPosition();
                 if (selectable) {
                     filteredContactListViewModel.selectContact(filteredContacts.get(position).contact);
-                } else {
-                    if (FilteredContactListFragment.this.onClickDelegate != null) {
-                        FilteredContactListFragment.this.onClickDelegate.contactClicked(view, filteredContacts.get(position).contact);
+                    if (contactFilterEditText != null) {
+                        contactFilterEditText.selectAll();
                     }
+                } else if (FilteredContactListFragment.this.onClickDelegate != null) {
+                    FilteredContactListFragment.this.onClickDelegate.contactClicked(view, filteredContacts.get(position).contact);
                 }
             }
 

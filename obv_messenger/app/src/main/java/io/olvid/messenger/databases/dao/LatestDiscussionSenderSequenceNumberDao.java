@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -30,20 +32,20 @@ import io.olvid.messenger.databases.entity.LatestDiscussionSenderSequenceNumber;
 @Dao
 public interface LatestDiscussionSenderSequenceNumberDao {
     @Insert
-    void insert(LatestDiscussionSenderSequenceNumber latestDiscussionSenderSequenceNumber);
+    void insert(@NonNull LatestDiscussionSenderSequenceNumber latestDiscussionSenderSequenceNumber);
 
     @Query("UPDATE " + LatestDiscussionSenderSequenceNumber.TABLE_NAME +
             " SET " + LatestDiscussionSenderSequenceNumber.LATEST_SEQUENCE_NUMBER + " = :latestSequenceNumber " +
             " WHERE " + LatestDiscussionSenderSequenceNumber.DISCUSSION_ID + " = :discussionId " +
             " AND " + LatestDiscussionSenderSequenceNumber.SENDER_IDENTIFIER + " = :senderIdentifier " +
             " AND " + LatestDiscussionSenderSequenceNumber.SENDER_THREAD_IDENTIFIER + " = :senderThreadIdentifier " )
-    void updateLatestSequenceNumber(long discussionId, byte[] senderIdentifier, UUID senderThreadIdentifier, long latestSequenceNumber);
+    void updateLatestSequenceNumber(long discussionId, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, long latestSequenceNumber);
 
     @Query("SELECT * FROM " + LatestDiscussionSenderSequenceNumber.TABLE_NAME +
             " WHERE " + LatestDiscussionSenderSequenceNumber.DISCUSSION_ID + " = :discussionId " +
             " AND " + LatestDiscussionSenderSequenceNumber.SENDER_IDENTIFIER + " = :senderIdentifier " +
             " AND " + LatestDiscussionSenderSequenceNumber.SENDER_THREAD_IDENTIFIER + " = :senderThreadIdentifier " )
-    LatestDiscussionSenderSequenceNumber get(long discussionId, byte[] senderIdentifier, UUID senderThreadIdentifier);
+    @Nullable LatestDiscussionSenderSequenceNumber get(long discussionId, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier);
 
     @Query("DELETE FROM " + LatestDiscussionSenderSequenceNumber.TABLE_NAME +
             " WHERE " + LatestDiscussionSenderSequenceNumber.DISCUSSION_ID + " = :discussionId")

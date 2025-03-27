@@ -5,7 +5,7 @@
     android:id="@+id/root_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
+    android:background="@color/almostWhite"
     tools:context=".main.MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -24,7 +24,8 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start" >
+                android:layout_gravity="start"
+                android:id="@+id/toolbar_start">
                 <io.olvid.messenger.customClasses.InitialView
                     android:id="@+id/owned_identity_initial_view"
                     android:layout_width="40dp"
@@ -140,6 +141,7 @@
         android:id="@+id/view_pager_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/lightGrey"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <View
@@ -151,10 +153,12 @@
         android:focusableInTouchMode="true"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:layout_dodgeInsetEdges="bottom">
+
+        >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/bottom_buttons"
@@ -166,7 +170,7 @@
             <ImageView
                 android:id="@+id/tab_discussions_button"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="@dimen/tab_bar_size"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/content_description_discussions_tab"
@@ -179,6 +183,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/tab_contacts_button"
                 app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintVertical_bias="0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -200,7 +205,7 @@
             <ImageView
                 android:id="@+id/tab_contacts_button"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="@dimen/tab_bar_size"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/content_description_contacts_tab"
@@ -213,6 +218,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/spacer"
                 app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintVertical_bias="0"
                 app:layout_constraintStart_toEndOf="@+id/tab_discussions_button"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -244,7 +250,7 @@
             <ImageView
                 android:id="@+id/tab_groups_button"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="@dimen/tab_bar_size"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/content_description_groups_tab"
@@ -257,6 +263,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/tab_calls_button"
                 app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintVertical_bias="0"
                 app:layout_constraintStart_toEndOf="@+id/spacer"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -278,7 +285,7 @@
             <ImageView
                 android:id="@+id/tab_calls_button"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="@dimen/tab_bar_size"
                 android:layout_weight="1"
                 android:background="?attr/selectableItemBackground"
                 android:contentDescription="@string/activity_title_call_log"
@@ -291,6 +298,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintVertical_bias="0"
                 app:layout_constraintStart_toEndOf="@+id/tab_groups_button"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -334,7 +342,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/snackbar_container"
+        android:id="@+id/compose_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

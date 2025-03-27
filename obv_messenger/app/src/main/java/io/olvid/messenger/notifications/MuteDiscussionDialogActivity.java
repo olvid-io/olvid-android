@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -36,6 +36,7 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.tasks.ApplySyncAtomTaskKt;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class MuteDiscussionDialogActivity extends AppCompatActivity {
@@ -99,6 +100,7 @@ public class MuteDiscussionDialogActivity extends AppCompatActivity {
                             } else {
                                 AppDatabase.getInstance().discussionCustomizationDao().update(discussionCustomization);
                             }
+                            ApplySyncAtomTaskKt.propagateMuteSettings(discussion, discussionCustomization);
                         }
                     }), MuteNotificationDialog.MuteType.DISCUSSION_OR_PROFILE, discussionCust == null || discussionCust.prefMuteNotificationsExceptMentioned);
                     muteNotificationDialog.setOnDismissListener(dialog -> finish());

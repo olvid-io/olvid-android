@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -512,7 +512,7 @@ public class ContactGroup implements ObvDatabase {
         try {
             jsonGroupDetailsWithVersionAndPhoto = identityManagerSession.jsonObjectMapper.readValue(serializedGroupDetailsWithVersionAndPhoto, JsonGroupDetailsWithVersionAndPhoto.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
 
@@ -533,7 +533,7 @@ public class ContactGroup implements ObvDatabase {
             }
             return contactGroup;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -120,7 +120,7 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
         contactIdentityObject.insert();
 
         // check for keycloak badge
-        JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakSignature(identityManagerSession.session, ownedIdentity, trustedDetails.getJsonIdentityDetailsWithVersionAndPhoto().getIdentityDetails().getSignedUserDetails());
+        JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakIdentitySignature(identityManagerSession.session, ownedIdentity, trustedDetails.getJsonIdentityDetailsWithVersionAndPhoto().getIdentityDetails().getSignedUserDetails());
         if (jsonKeycloakUserDetails != null) {
             contactIdentityObject.setCertifiedByOwnKeycloak(true, trustedDetails.getSerializedJsonDetails());
         }
@@ -134,7 +134,7 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
                         mediatorOrGroupOwnerIdentity = Identity.of(trustOrigin.mediator_or_group_owner_identity);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 int trustType;
                 switch (TrustOrigin.TrustType.fromIntValue(trustOrigin.trust_type)) {

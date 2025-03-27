@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -47,6 +47,7 @@ import java.util.UUID;
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.FyleProgressSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.JpegUtils;
 import io.olvid.messenger.customClasses.PreviewUtils;
@@ -266,12 +267,12 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                                 long newTimestamp = System.currentTimeMillis();
                                 if (newTimestamp - lastUpdateTimestamp > 100) {
                                     lastUpdateTimestamp = newTimestamp;
-                                    copyingFyleMessageJoinWithStatus.setProgress((float) fileSize / uriFileSize);
-                                    db.fyleMessageJoinWithStatusDao().update(copyingFyleMessageJoinWithStatus);
+                                    FyleProgressSingleton.INSTANCE.updateProgress(copyingFyleMessageJoinWithStatus.fyleId, copyingFyleMessageJoinWithStatus.messageId, (float) fileSize / uriFileSize, null);
                                 }
                             }
                         }
                     }
+                    FyleProgressSingleton.INSTANCE.finishProgress(copyingFyleMessageJoinWithStatus.fyleId, copyingFyleMessageJoinWithStatus.messageId);
                     sizeAndSha256 = new Fyle.SizeAndSha256(fileSize, h.digest());
                 }
             } else {
@@ -391,21 +392,16 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                                 case FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE:
                                 case FyleMessageJoinWithStatus.STATUS_DOWNLOADING:
                                     otherFyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
-                                    otherFyleMessageJoinWithStatus.progress = 1;
+                                    FyleProgressSingleton.INSTANCE.finishProgress(otherFyleMessageJoinWithStatus.fyleId, otherFyleMessageJoinWithStatus.messageId);
                                     //noinspection ConstantConditions
                                     otherFyleMessageJoinWithStatus.filePath = fyle.filePath;
                                     otherFyleMessageJoinWithStatus.size = fileSize;
                                     db.fyleMessageJoinWithStatusDao().update(otherFyleMessageJoinWithStatus);
                                     otherFyleMessageJoinWithStatus.sendReturnReceipt(FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED, null);
-                                    AppSingleton.getEngine().markAttachmentForDeletion(otherFyleMessageJoinWithStatus.bytesOwnedIdentity, otherFyleMessageJoinWithStatus.engineMessageIdentifier, otherFyleMessageJoinWithStatus.engineNumber);
-                                    Fyle finalFyle1 = fyle;
-                                    App.runThread(() -> {
-                                        try {
-                                            otherFyleMessageJoinWithStatus.computeTextContentForFullTextSearch(db, finalFyle1);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    });
+                                    if (otherFyleMessageJoinWithStatus.engineNumber != null) {
+                                        AppSingleton.getEngine().markAttachmentForDeletion(otherFyleMessageJoinWithStatus.bytesOwnedIdentity, otherFyleMessageJoinWithStatus.engineMessageIdentifier, otherFyleMessageJoinWithStatus.engineNumber);
+                                    }
+                                    otherFyleMessageJoinWithStatus.computeTextContentForFullTextSearchOnOtherThread(db, fyle);
                                     break;
                             }
                         }
@@ -433,7 +429,6 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                         fyle.sha256 = sha256;
 
                         copyingFyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_DRAFT;
-                        copyingFyleMessageJoinWithStatus.progress = 0;
                         copyingFyleMessageJoinWithStatus.size = fileSize;
                         AppDatabase.getInstance().fyleMessageJoinWithStatusDao().update(copyingFyleMessageJoinWithStatus);
                     } else {
@@ -457,6 +452,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                     fyle.moveToFyleDirectory(localFile.getPath());
                     db.fyleDao().update(fyle);
                     db.fyleMessageJoinWithStatusDao().updateFilePath(draftMessage.id, fyle.id, fyle.filePath);
+
 
                     // re-post the message if it was put on hold
                     db.runInTransaction(() -> {

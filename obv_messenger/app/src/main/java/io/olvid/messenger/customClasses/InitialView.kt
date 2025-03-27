@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -59,7 +59,6 @@ import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.viewModels.FilteredDiscussionListViewModel.SearchableDiscussion
 import java.io.IOException
-import java.util.Arrays
 import kotlin.math.min
 
 class InitialView : View {
@@ -109,7 +108,7 @@ class InitialView : View {
 
     fun setContact(contact: Contact) {
         var changed = false
-        if (!Arrays.equals(contact.bytesContactIdentity, bytes)) {
+        if (!contact.bytesContactIdentity.contentEquals(bytes)) {
             bytes = contact.bytesContactIdentity
             changed = true
         }
@@ -155,7 +154,7 @@ class InitialView : View {
 
     fun setOwnedIdentity(ownedIdentity: OwnedIdentity) {
         var changed = false
-        if (!Arrays.equals(ownedIdentity.bytesOwnedIdentity, bytes)) {
+        if (!ownedIdentity.bytesOwnedIdentity.contentEquals(bytes)) {
             bytes = ownedIdentity.bytesOwnedIdentity
             changed = true
         }
@@ -201,7 +200,7 @@ class InitialView : View {
 
     fun setGroup(group: Group) {
         var changed = false
-        if (!Arrays.equals(group.bytesGroupOwnerAndUid, bytes)) {
+        if (!group.bytesGroupOwnerAndUid.contentEquals(bytes)) {
             bytes = group.bytesGroupOwnerAndUid
             changed = true
         }
@@ -246,7 +245,7 @@ class InitialView : View {
 
     fun setGroup2(group: Group2) {
         var changed = false
-        if (!Arrays.equals(group.bytesGroupIdentifier, bytes)) {
+        if (!group.bytesGroupIdentifier.contentEquals(bytes)) {
             bytes = group.bytesGroupIdentifier
             changed = true
         }
@@ -343,7 +342,7 @@ class InitialView : View {
                         return
                     }
                 }
-                if (!Arrays.equals(bytes, discussion.bytesDiscussionIdentifier)) {
+                if (!bytes.contentEquals(discussion.bytesDiscussionIdentifier)) {
                     bytes = discussion.bytesDiscussionIdentifier
                     changed = true
                 }
@@ -378,7 +377,7 @@ class InitialView : View {
 
     fun setDiscussion(discussion: SearchableDiscussion) {
         var changed = false
-        if (!Arrays.equals(bytes, discussion.byteIdentifier)) {
+        if (!bytes.contentEquals(discussion.byteIdentifier)) {
             bytes = discussion.byteIdentifier
             changed = true
         }
@@ -445,7 +444,8 @@ class InitialView : View {
 
     fun setFromCache(bytesIdentifier: ByteArray) {
         var changed = false
-        val displayName: String? = if (Arrays.equals(bytesIdentifier, AppSingleton.getBytesCurrentIdentity())) {
+        val displayName: String? =
+            if (bytesIdentifier.contentEquals(AppSingleton.getBytesCurrentIdentity())) {
                 val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
                 if (ownedIdentity != null) {
                     ownedIdentity.getCustomDisplayName()
@@ -464,7 +464,7 @@ class InitialView : View {
             contactInitial = StringUtils.getInitial(displayName)
             bytes = bytesIdentifier
         }
-        if (!Arrays.equals(this.bytes, bytes)) {
+        if (!this.bytes.contentEquals(bytes)) {
             this.bytes = bytes
             changed = true
         }
@@ -478,7 +478,14 @@ class InitialView : View {
             photoUrl = contactPhotoUrl
             changed = true
         }
-        val contactCacheInfo = AppSingleton.getContactCacheInfo(bytesIdentifier) ?: ContactCacheInfo(false, true, true, true, 0)
+        val contactCacheInfo =
+            AppSingleton.getContactCacheInfo(bytesIdentifier) ?: ContactCacheInfo(
+                keycloakManaged = false,
+                active = true,
+                oneToOne = true,
+                recentlyOnline = true,
+                trustLevel = 0
+            )
         if (keycloakCertified != contactCacheInfo.keycloakManaged) {
             keycloakCertified = contactCacheInfo.keycloakManaged
             changed = true

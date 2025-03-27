@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -81,6 +81,7 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
+import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
 import io.olvid.messenger.databases.tasks.backup.RestoreAppDataFromBackupTask;
 import io.olvid.messenger.databases.tasks.migration.SetContactsAndPendingMembersFirstNamesTask;
 import io.olvid.messenger.discussion.compose.ComposeMessageFragment;
@@ -97,6 +98,7 @@ public class AppSingleton {
     private static final String LAST_BUILD_EXECUTED_PREFERENCE_KEY = "last_build";
     private static final String LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY = "last_android_sdk_version";
     private static final String LAST_FTS_GLOBAL_SEARCH_VERSION_PREFERENCE_KEY = "last_fts_global_search_version";
+    private static final String LAST_ENGINE_SYNC_PREFERENCE_KEY = "last_engine_sync";
 
 
     public static final String FYLE_DIRECTORY = "fyles";
@@ -192,6 +194,15 @@ public class AppSingleton {
             }
         }
 
+        if (lastBuildExecuted != 0 && lastBuildExecuted < 257) {
+            // if the user has customized attach icon order, add the send location icon so they see it
+            List<Integer> icons = SettingsActivity.getComposeMessageIconPreferredOrder();
+            if (icons != null && !icons.contains(ComposeMessageFragment.ICON_INTRODUCE)) {
+                icons.add(icons.size(), ComposeMessageFragment.ICON_INTRODUCE);
+                SettingsActivity.setComposeMessageIconPreferredOrder(icons);
+            }
+        }
+
         {
             // generate App directories
             File fylesDirectory = new File(App.getContext().getNoBackupFilesDir(), FYLE_DIRECTORY);
@@ -234,23 +245,28 @@ public class AppSingleton {
             this.engine = new Engine(App.getContext().getNoBackupFilesDir(), new AppBackupAndSyncDelegate(), DatabaseKey.get(DatabaseKey.ENGINE_DATABASE_SECRET), this.sslSocketFactory,
                     new Logger.LogOutputter() {
                         @Override
-                        public void d(String s, String s1) {
-                            Log.d(s, s1);
+                        public void d(String tag, String message) {
+                            Log.d(tag, message);
                         }
 
                         @Override
-                        public void i(String s, String s1) {
-                            Log.i(s, s1);
+                        public void i(String tag, String message) {
+                            Log.i(tag, message);
                         }
 
                         @Override
-                        public void w(String s, String s1) {
-                            Log.w(s, s1);
+                        public void w(String tag, String message) {
+                            Log.w(tag, message);
                         }
 
                         @Override
-                        public void e(String s, String s1) {
-                            Log.e(s, s1);
+                        public void e(String tag, String message) {
+                            Log.e(tag, message);
+                        }
+
+                        @Override
+                        public void x(String tag, Throwable throwable) {
+                            Log.w(tag, "", throwable);
                         }
                     },
                     SettingsActivity.useDebugLogLevel() ? Logger.DEBUG : BuildConfig.LOG_LEVEL);
@@ -259,13 +275,19 @@ public class AppSingleton {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+        this.engine.startProcessing();
+
         this.engineNotificationProcessor = new EngineNotificationProcessor(this.engine);
         this.engineNotificationProcessorForContacts = new EngineNotificationProcessorForContacts(this.engine);
         this.engineNotificationProcessorForGroups = new EngineNotificationProcessorForGroups(this.engine);
         this.engineNotificationProcessorForGroupsV2 = new EngineNotificationProcessorForGroupsV2(this.engine);
         this.engineNotificationProcessorForMessages = new EngineNotificationProcessorForMessages(this.engine);
         this.websocketConnectivityStateLiveData = new MutableLiveData<>(0);
-        this.engine.startSendingNotifications();
+        App.runThread(() -> {
+            // start processing engine notifications once all unread message counts are properly initialized
+            UnreadCountsSingleton.INSTANCE.initialize();
+            this.engine.startSendingNotifications();
+        });
 
         db = AppDatabase.getInstance();
         bytesCurrentIdentityLiveData = new MutableLiveData<>();
@@ -346,17 +368,15 @@ public class AppSingleton {
 
         new Handler(Looper.getMainLooper()).post(() -> currentIdentityLiveData.observeForever(currentIdentityObserverForNameCache));
 
+        // Always re-create all channels in case a user has reset all app preferences as this deletes all notification channels
+        AndroidNotificationManager.createChannels(lastBuildExecuted);
+
         if (lastBuildExecuted != BuildConfig.VERSION_CODE || lastAndroidSdkVersionExecuted != Build.VERSION.SDK_INT) {
-            App.runThread(() -> {
-                AndroidNotificationManager.createChannels(lastBuildExecuted);
-                runBuildUpgrade(lastBuildExecuted, lastAndroidSdkVersionExecuted);
-            });
+            App.runThread(() -> runBuildUpgrade(lastBuildExecuted, lastAndroidSdkVersionExecuted));
         }
 
         if (lastFtsGlobalSearchVersion != AppDatabase.DB_FTS_GLOBAL_SEARCH_VERSION) {
-            App.runThread(() -> {
-                runFtsGlobalSearchRebuild(lastFtsGlobalSearchVersion);
-            });
+            App.runThread(() -> runFtsGlobalSearchRebuild(lastFtsGlobalSearchVersion));
         }
 
         App.runThread(() -> {
@@ -375,6 +395,7 @@ public class AppSingleton {
                                     keycloakState.jwks,
                                     keycloakState.signatureKey,
                                     keycloakState.serializedAuthState,
+                                    keycloakState.transferRestricted,
                                     keycloakState.ownApiKey,
                                     keycloakState.latestRevocationListTimestamp,
                                     keycloakState.latestGroupUpdateTimestamp,
@@ -576,6 +597,7 @@ public class AppSingleton {
                                             keycloakState.jwks,
                                             keycloakState.signatureKey,
                                             keycloakState.serializedAuthState,
+                                            keycloakState.transferRestricted,
                                             keycloakState.ownApiKey,
                                             keycloakState.latestRevocationListTimestamp,
                                             keycloakState.latestGroupUpdateTimestamp,
@@ -614,18 +636,19 @@ public class AppSingleton {
                                  @Nullable final JsonWebKeySet jwks,
                                  @Nullable final JsonWebKey signatureKey,
                                  @Nullable final String serializedKeycloakState,
+                                 final boolean keycloakTransferRestricted,
                                  @Nullable final GenerateIdentitySuccessCallback successCallback,
                                  @Nullable final Runnable failureCallback) {
         App.runThread(() -> {
             ObvKeycloakState keycloakState = null;
             if (keycloakServer != null && serializedKeycloakState != null && jwks != null && clientId != null && signatureKey != null) {
-                keycloakState = new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, null,0, 0);
+                keycloakState = new ObvKeycloakState(keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, keycloakTransferRestricted, null,0, 0);
             }
             ObvIdentity obvOwnedIdentity = engine.generateOwnedIdentity(server, identityDetails, keycloakState, DEFAULT_DEVICE_DISPLAY_NAME);
 
             if (obvOwnedIdentity != null) {
                 if (keycloakState != null) {
-                    KeycloakManager.getInstance().registerKeycloakManagedIdentity(obvOwnedIdentity, keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, null, 0, 0, true);
+                    KeycloakManager.getInstance().registerKeycloakManagedIdentity(obvOwnedIdentity, keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, keycloakTransferRestricted, null, 0, 0, true);
                 }
 
                 OwnedIdentity ownedIdentity;
@@ -636,6 +659,7 @@ public class AppSingleton {
                     ownedIdentity.unlockSalt = unlockSalt;
                     db.ownedIdentityDao().insert(ownedIdentity);
                 } catch (Exception e) {
+                    Logger.x(e);
                     // unable to create ownedIdentity on app side, try delete on engine side
                     try {
                         engine.deleteOwnedIdentity(obvOwnedIdentity.getBytesIdentity());
@@ -767,6 +791,7 @@ public class AppSingleton {
                                                 keycloakState.jwks,
                                                 keycloakState.signatureKey,
                                                 keycloakState.serializedAuthState,
+                                                keycloakState.transferRestricted,
                                                 null,
                                                 0,
                                                 0,
@@ -918,6 +943,16 @@ public class AppSingleton {
         editor.apply();
     }
 
+    public static void saveLastEngineSynchronisationTime(long timestamp) {
+        SharedPreferences.Editor editor = instance.sharedPreferences.edit();
+        editor.putLong(LAST_ENGINE_SYNC_PREFERENCE_KEY, timestamp);
+        editor.apply();
+    }
+
+    public static long getLastEngineSynchronisationTime() {
+        return instance.sharedPreferences.getLong(LAST_ENGINE_SYNC_PREFERENCE_KEY, -1);
+    }
+
     public static AppSingleton getInstance() {
         return instance;
     }
@@ -936,15 +971,11 @@ public class AppSingleton {
 
     // endregion
 
-    // region Contact names and info caches for main thread access
+    // region Contact names and info caches (for main thread access)
 
     @NonNull private final MutableLiveData<HashMap<BytesKey, Pair<String, String>>> contactNamesCache; // the first element of the pair is the full display name, the second the first name (or custom name for both, if set)
     @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactHuesCache;
     @NonNull private final MutableLiveData<HashMap<BytesKey, String>> contactPhotoUrlsCache;
-//    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactKeycloakManagedCache;
-//    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactInactiveCache;
-//    @NonNull private final MutableLiveData<HashSet<BytesKey>> contactOneToOneCache;
-//    @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactTrustLevelCache;
     @NonNull private final MutableLiveData<HashMap<BytesKey, ContactCacheInfo>> contactInfoCache;
 
 
@@ -1207,6 +1238,15 @@ public class AppSingleton {
             }
             if (lastBuildExecuted != 0 && lastBuildExecuted < 220) {
                 App.openAppDialogIntroducingMultiDeviceAndDesktop();
+            }
+            if (lastBuildExecuted != 0 && lastBuildExecuted < 255) {
+                App.runThread(() -> {
+                    new ContactDisplayNameFormatChangedTask().run();
+                    new UpdateAllGroupMembersNames().run();
+                });
+            }
+            if (lastBuildExecuted != 0 && (lastBuildExecuted < 262)) {
+                App.runThread(() -> db.fyleMessageJoinWithStatusDao().clearTextExtractedFromImages());
             }
 
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());

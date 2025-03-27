@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -59,8 +59,8 @@ public class Invitation {
     public static final String DISCUSSION_ID = "discussion_id";
 
     @PrimaryKey
-    @NonNull
     @ColumnInfo(name = DIALOG_UUID)
+    @NonNull
     public UUID dialogUuid;
 
     @ColumnInfo(name = BYTES_OWNED_IDENTITY)

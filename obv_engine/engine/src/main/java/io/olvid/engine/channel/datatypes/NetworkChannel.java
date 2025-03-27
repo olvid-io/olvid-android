@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -164,7 +164,7 @@ public abstract class NetworkChannel extends Channel {
 
 
                 EncryptedBytes encryptedContent = authEnc.encrypt(messageKey, paddedPlaintext, prng);
-                messageToSend = new MessageToSend(message.getSendChannelInfo().getFromIdentity(), messageUid, server, encryptedContent, headers);
+                messageToSend = new MessageToSend(message.getSendChannelInfo().getFromIdentity(), messageUid, server, encryptedContent, headers, channelProtocolMessageToSend.hasUserContent());
                 break;
             }
             default:

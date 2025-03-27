@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -23,6 +23,7 @@ import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.sp
 
 val OlvidTypography = Typography(
@@ -30,31 +31,37 @@ val OlvidTypography = Typography(
     h1 = TextStyle(
         fontWeight = FontWeight.Normal,
         fontSize = 24.sp,
-        lineHeight = 29.sp
+        lineHeight = 29.sp,
+        textDirection = TextDirection.ContentOrLtr
     ),
     h2 = TextStyle(
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
-        lineHeight = 24.sp
+        lineHeight = 24.sp,
+        textDirection = TextDirection.ContentOrLtr
     ),
     h3 = TextStyle(
         fontWeight = FontWeight.Medium,
         fontSize = 16.sp,
         lineHeight = 20.sp,
+        textDirection = TextDirection.ContentOrLtr
     ),
     body1 = TextStyle(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 20.sp,
+        textDirection = TextDirection.ContentOrLtr
     ),
     body2 = TextStyle(
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-        lineHeight = 17.sp
+        lineHeight = 17.sp,
+        textDirection = TextDirection.ContentOrLtr
     ),
     subtitle1 = TextStyle(
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
-        lineHeight = 15.sp
+        lineHeight = 15.sp,
+        textDirection = TextDirection.ContentOrLtr
     )
 )

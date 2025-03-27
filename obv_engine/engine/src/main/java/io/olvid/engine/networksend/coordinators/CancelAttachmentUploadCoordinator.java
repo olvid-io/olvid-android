@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -63,7 +63,6 @@ public class CancelAttachmentUploadCoordinator implements OutboxAttachment.Outbo
         this.sslSocketFactory = sslSocketFactory;
 
         cancelAttachmentUploadOperationQueue = new NoDuplicateOperationQueue();
-        cancelAttachmentUploadOperationQueue.execute(1, "Engine-CancelAttachmentUploadCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -71,6 +70,10 @@ public class CancelAttachmentUploadCoordinator implements OutboxAttachment.Outbo
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
 
         notificationListener = new NotificationListener();
+    }
+
+    public void startProcessing() {
+        cancelAttachmentUploadOperationQueue.execute(1, "Engine-CancelAttachmentUploadCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
@@ -85,7 +88,7 @@ public class CancelAttachmentUploadCoordinator implements OutboxAttachment.Outbo
                 queueNewCancelAttachmentUploadCompositeOperation(attachment.getOwnedIdentity(), attachment.getMessageUid(), attachment.getAttachmentNumber());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

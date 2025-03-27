@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -83,7 +83,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                 byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.CHANNEL_CONFIRMED_OR_DELETED_CONTACT_IDENTITY_KEY);
                 if (bytesOwnedIdentity != null && Arrays.equals(bytesOwnedIdentity, bytesContactIdentity)) {
                     new OwnedDevicesSynchronisationWithEngineTask(bytesOwnedIdentity).run();
-                } else {
+                } else if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
                     Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
                     if (contact != null) {
                         try {
@@ -177,26 +177,30 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                         e.printStackTrace();
                     }
                     contact = db.contactDao().get(bytesOwnedIdentity, contactIdentity.getBytesIdentity());
-                    try {
-                        ObvContactDeviceCount contactDeviceCount = engine.getContactDeviceCounts(bytesOwnedIdentity, contactIdentity.getBytesIdentity());
-                        contact.deviceCount = contactDeviceCount.deviceCount;
-                        contact.establishedChannelCount = contactDeviceCount.establishedChannelCount;
-                        contact.preKeyCount = contactDeviceCount.preKeyCount;
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    if (contact != null) {
+                        try {
+                            ObvContactDeviceCount contactDeviceCount = engine.getContactDeviceCounts(bytesOwnedIdentity, contactIdentity.getBytesIdentity());
+                            contact.deviceCount = contactDeviceCount.deviceCount;
+                            contact.establishedChannelCount = contactDeviceCount.establishedChannelCount;
+                            contact.preKeyCount = contactDeviceCount.preKeyCount;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount, contact.preKeyCount);
                     }
-                    db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount, contact.preKeyCount);
                 }
                 break;
             }
             case EngineNotifications.CONTACT_DELETED: {
                 final byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_DELETED_BYTES_OWNED_IDENTITY_KEY);
                 byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_DELETED_BYTES_CONTACT_IDENTITY_KEY);
-                final Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
-                if (contact != null) {
-                    contact.delete();
-                    if (Arrays.equals(contact.bytesContactIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                        AppSingleton.reloadCachedDisplayNamesAndHues();
+                if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
+                    final Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                    if (contact != null) {
+                        contact.delete();
+                        if (Arrays.equals(contact.bytesContactIdentity, AppSingleton.getBytesCurrentIdentity())) {
+                            AppSingleton.reloadCachedDisplayNamesAndHues();
+                        }
                     }
                 }
                 break;
@@ -204,16 +208,18 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
             case EngineNotifications.CONTACT_DEVICES_UPDATED: {
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_DEVICES_UPDATED_OWNED_IDENTITY_KEY);
                 byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_DEVICES_UPDATED_CONTACT_IDENTITY_KEY);
-                Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
-                if (contact != null) {
-                    try {
-                        ObvContactDeviceCount contactDeviceCount = engine.getContactDeviceCounts(bytesOwnedIdentity, bytesContactIdentity);
-                        contact.deviceCount = contactDeviceCount.deviceCount;
-                        contact.establishedChannelCount = contactDeviceCount.establishedChannelCount;
-                        contact.preKeyCount = contactDeviceCount.preKeyCount;
-                        db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount, contact.preKeyCount);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
+                    Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                    if (contact != null) {
+                        try {
+                            ObvContactDeviceCount contactDeviceCount = engine.getContactDeviceCounts(bytesOwnedIdentity, bytesContactIdentity);
+                            contact.deviceCount = contactDeviceCount.deviceCount;
+                            contact.establishedChannelCount = contactDeviceCount.establishedChannelCount;
+                            contact.preKeyCount = contactDeviceCount.preKeyCount;
+                            db.contactDao().updateCounts(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.deviceCount, contact.establishedChannelCount, contact.preKeyCount);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 break;
@@ -253,29 +259,32 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
             case EngineNotifications.CONTACT_REVOKED: {
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_REVOKED_BYTES_OWNED_IDENTITY_KEY);
                 byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.CONTACT_REVOKED_BYTES_CONTACT_IDENTITY_KEY);
-
-                App.runThread(new InsertContactRevokedMessageTask(bytesOwnedIdentity, bytesContactIdentity));
+                if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
+                    App.runThread(new InsertContactRevokedMessageTask(bytesOwnedIdentity, bytesContactIdentity));
+                }
                 break;
             }
             case EngineNotifications.NEW_CONTACT_PUBLISHED_DETAILS: {
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_CONTACT_PUBLISHED_DETAILS_BYTES_OWNED_IDENTITY_KEY);
                 byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_CONTACT_PUBLISHED_DETAILS_BYTES_CONTACT_IDENTITY_KEY);
-
-                Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
-                if (contact != null) {
-                    try {
-                        contact.newPublishedDetails = Contact.PUBLISHED_DETAILS_NEW_UNSEEN;
-                        db.contactDao().updatePublishedDetailsStatus(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.newPublishedDetails);
-                        Discussion discussion = db.discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
-                        if (discussion != null) {
-                            Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, bytesContactIdentity);
-                            db.messageDao().insert(newDetailsMessage);
-                            if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
-                                db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
+                    Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                    if (contact != null) {
+                        try {
+                            contact.newPublishedDetails = Contact.PUBLISHED_DETAILS_NEW_UNSEEN;
+                            db.contactDao().updatePublishedDetailsStatus(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.newPublishedDetails);
+                            Discussion discussion = db.discussionDao().getByContact(bytesOwnedIdentity, bytesContactIdentity);
+                            if (discussion != null) {
+                                Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, bytesContactIdentity);
+                                newDetailsMessage.id = db.messageDao().insert(newDetailsMessage);
+                                UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
+                                if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
+                                    db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                                }
                             }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
                 break;
@@ -285,7 +294,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                 byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.NEW_CONTACT_PHOTO_BYTES_CONTACT_IDENTITY_KEY);
                 Integer version = (Integer) userInfo.get(EngineNotifications.NEW_CONTACT_PHOTO_VERSION_KEY);
                 Boolean isTrusted = (Boolean) userInfo.get(EngineNotifications.NEW_CONTACT_PHOTO_IS_TRUSTED_KEY);
-                if (version == null || isTrusted == null) {
+                if (bytesOwnedIdentity == null || bytesContactIdentity == null || version == null || isTrusted == null) {
                     break;
                 }
 

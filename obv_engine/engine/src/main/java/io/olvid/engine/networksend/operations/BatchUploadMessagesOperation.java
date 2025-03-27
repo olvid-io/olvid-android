@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -76,10 +76,10 @@ public class BatchUploadMessagesOperation extends Operation {
 
                 HashMap<Identity, List<UID>> messageUidsByIdentity = new HashMap<>();
                 for (IdentityAndUid identityAndUid : messageIdentitiesAndUids) {
-                    List<UID> list = messageUidsByIdentity.get(identityAndUid.ownedIdentity);
+                    List<UID> list = messageUidsByIdentity.get(identityAndUid.identity);
                     if (list == null) {
                         list = new ArrayList<>();
-                        messageUidsByIdentity.put(identityAndUid.ownedIdentity, list);
+                        messageUidsByIdentity.put(identityAndUid.identity, list);
                     }
                     list.add(identityAndUid.uid);
                 }
@@ -137,7 +137,7 @@ public class BatchUploadMessagesOperation extends Operation {
                         cancel(BatchUploadMessagesCompositeOperation.RFC_NETWORK_ERROR);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 sendManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -151,7 +151,7 @@ public class BatchUploadMessagesOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }
@@ -234,7 +234,7 @@ class BatchUploadMessagesServerMethod extends ServerMethod {
                         outboxMessageAndHeaders[i].timestampFromServer = encodeds[2].decodeLong();
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                     returnStatus = ServerMethod.OK_WITH_MALFORMED_SERVER_RESPONSE;
                 }
             }

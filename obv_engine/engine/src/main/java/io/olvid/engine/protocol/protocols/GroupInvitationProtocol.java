@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -747,9 +747,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                             SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             GROUP_MANAGEMENT_PROTOCOL_ID,
-                            childProtocolUid,
-                            false
-                    );
+                            childProtocolUid);
                     ChannelMessageToSend messageToSend = new GroupManagementProtocol.GroupMembersOrDetailsChangedTriggerMessage(coreProtocolMessage, groupInformation).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -766,9 +764,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                             SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(contactIdentity, getOwnedIdentity()),
                             GROUP_MANAGEMENT_PROTOCOL_ID,
-                            groupManagementProtocolUid,
-                            false
-                    );
+                            groupManagementProtocolUid);
                     ChannelMessageToSend messageToSend = new GroupManagementProtocol.KickFromGroupMessage(coreProtocolMessage, new GroupInformation(getOwnedIdentity(), receivedMessage.groupUid, JsonGroupDetailsWithVersionAndPhoto.DUMMY_GROUP_DETAILS)).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 } else if (!receivedMessage.invitationAccepted && group != null && group.isMember(contactIdentity)){
@@ -784,9 +780,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                             SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(contactIdentity, getOwnedIdentity()),
                             GROUP_MANAGEMENT_PROTOCOL_ID,
-                            groupManagementProtocolUid,
-                            false
-                    );
+                            groupManagementProtocolUid);
                     ChannelMessageToSend messageToSend = new GroupManagementProtocol.KickFromGroupMessage(coreProtocolMessage, new GroupInformation(getOwnedIdentity(), receivedMessage.groupUid, JsonGroupDetailsWithVersionAndPhoto.DUMMY_GROUP_DETAILS)).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 } else if (receivedMessage.invitationAccepted && group.isMember(contactIdentity)) {
@@ -796,8 +790,7 @@ public class GroupInvitationProtocol extends ConcreteProtocol {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                             SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             GROUP_MANAGEMENT_PROTOCOL_ID,
-                            groupManagementProtocolUid,
-                            false);
+                            groupManagementProtocolUid);
                     ChannelMessageToSend messageToSend = new GroupManagementProtocol.TriggerUpdateMembersMessage(
                             coreProtocolMessage,
                             protocolManagerSession.identityDelegate.getGroupInformation(protocolManagerSession.session, getOwnedIdentity(), groupOwnerAndUid),

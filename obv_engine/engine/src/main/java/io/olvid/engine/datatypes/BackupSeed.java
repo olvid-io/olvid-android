@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -21,6 +21,7 @@ package io.olvid.engine.datatypes;
 
 import java.util.Arrays;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.MAC;
 import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.Suite;
@@ -94,7 +95,7 @@ public class BackupSeed {
         try {
             return new BackupSeed(prng.bytes(BACKUP_SEED_LENGTH));
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }

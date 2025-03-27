@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -24,6 +24,7 @@ import java.sql.SQLException;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Session;
@@ -84,6 +85,14 @@ public class SendManager implements NetworkSendDelegate, SendManagerSessionFacto
         sendReturnReceiptCoordinator.initialQueueing();
     }
 
+    public void startProcessing() {
+        cancelAttachmentUploadCoordinator.startProcessing();
+        refreshOutboxAttachmentSignedUrlCoordinator.startProcessing();
+        sendAttachmentCoordinator.startProcessing();
+        sendMessageCoordinator.startProcessing();
+        sendReturnReceiptCoordinator.startProcessing();
+    }
+
     public void setDelegate(CreateSessionDelegate createSessionDelegate) {
         this.createSessionDelegate = createSessionDelegate;
 
@@ -94,7 +103,7 @@ public class SendManager implements NetworkSendDelegate, SendManagerSessionFacto
             ReturnReceipt.createTable(sendManagerSession.session);
             sendManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new RuntimeException("Unable to create network fetch databases");
         }
     }

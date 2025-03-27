@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -388,8 +388,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
 
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID,
-                        groupInformation.computeProtocolUid(),
-                        false);
+                        groupInformation.computeProtocolUid());
                 ChannelMessageToSend messageToSend = new GroupManagementProtocol.RemoveGroupMembersMessage(coreProtocolMessage, groupInformation, removedMemberIdentities).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -474,8 +473,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
 
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID,
-                            groupInformation.computeProtocolUid(),
-                            false);
+                            groupInformation.computeProtocolUid());
                     ChannelMessageToSend messageToSend = new GroupManagementProtocol.RemoveGroupMembersMessage(coreProtocolMessage, groupInformation, removedMemberIdentities).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -597,8 +595,7 @@ public class ContactManagementProtocol extends ConcreteProtocol {
 
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                     ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                    new UID(getPrng()),
-                    false);
+                    new UID(getPrng()));
             ChannelMessageToSend message = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, receivedMessage.getReceptionChannelInfo().getRemoteIdentity()).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, getPrng());
 

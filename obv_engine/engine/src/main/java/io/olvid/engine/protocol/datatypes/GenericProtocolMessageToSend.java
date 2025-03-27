@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -31,11 +31,13 @@ public class GenericProtocolMessageToSend {
     private final SendChannelInfo sendChannelInfo;
     private final Encoded encodedElements;
     private final boolean partOfFullRatchetProtocolOfTheSendSeed;
+    private final boolean hasUserContent;
 
-    public GenericProtocolMessageToSend(SendChannelInfo sendChannelInfo, int protocolId, UID protocolInstanceUid, int protocolMessageId, Encoded[] inputs, boolean partOfFullRatchetProtocolOfTheSendSeed) {
+    public GenericProtocolMessageToSend(SendChannelInfo sendChannelInfo, int protocolId, UID protocolInstanceUid, int protocolMessageId, Encoded[] inputs, boolean partOfFullRatchetProtocolOfTheSendSeed, boolean hasUserContent) {
         this.sendChannelInfo = sendChannelInfo;
         this.encodedElements = encode(protocolId, protocolInstanceUid, protocolMessageId, inputs);
         this.partOfFullRatchetProtocolOfTheSendSeed = partOfFullRatchetProtocolOfTheSendSeed;
+        this.hasUserContent = hasUserContent;
     }
 
     private static Encoded encode(int protocolId, UID protocolInstanceUid, int protocolMessageId, Encoded[] inputs) {
@@ -56,7 +58,7 @@ public class GenericProtocolMessageToSend {
             case SendChannelInfo.ASYMMETRIC_BROADCAST_CHANNEL_TYPE:
             case SendChannelInfo.ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_TYPE:
             case SendChannelInfo.OBLIVIOUS_CHANNEL_OR_PRE_KEY_TYPE:
-                return new ChannelProtocolMessageToSend(sendChannelInfo, encodedElements, partOfFullRatchetProtocolOfTheSendSeed);
+                return new ChannelProtocolMessageToSend(sendChannelInfo, encodedElements, partOfFullRatchetProtocolOfTheSendSeed, hasUserContent);
             default:
                 return null;
         }

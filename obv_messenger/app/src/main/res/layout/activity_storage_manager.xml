@@ -5,16 +5,17 @@
     android:id="@+id/root_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
+    android:background="@color/olvid_gradient_dark"
     tools:context=".activities.storage_manager.StorageManagerActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_insetEdge="top"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
@@ -283,15 +284,14 @@
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager_container"
+        android:background="@color/almostWhite"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_dodgeInsetEdges="top"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        app:layout_insetEdge="bottom"
         android:layout_gravity="bottom"
         android:background="@drawable/background_main_activity_buttons">
 

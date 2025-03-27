@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -50,10 +50,11 @@ import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.PreviewUtilsWithDrawables;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
+import io.olvid.messenger.databases.entity.TextBlock;
+import kotlin.Unit;
 
 @UnstableApi public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryImageViewHolder> implements Observer<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> {
     static final int STATUS_CHANGE_MASK = 1;
-    static final int PROGRESS_CHANGE_MASK = 2;
 
     static final int VIEW_TYPE_IMAGE = 1;
     static final int VIEW_TYPE_VIDEO = 2;
@@ -75,8 +76,8 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
     }
 
     public void cleanup() {
-        Logger.e("Closing media player");
         if (mediaPlayer != null) {
+            Logger.d("Closing media player");
             mediaPlayer.release();
         }
     }
@@ -122,7 +123,6 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
         this.recyclerView = recyclerView;
     }
 
-    private PlayerView lastPlayerView;
     @Override
     public void onBindViewHolder(@NonNull GalleryImageViewHolder holder, int position, @NonNull List<Object> payloads) {
         if (fyleAndStatuses == null || fyleAndStatuses.size() <= position || position < 0) {
@@ -151,7 +151,9 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
                                 if (drawable instanceof AnimatedImageDrawable) {
                                     ((AnimatedImageDrawable) drawable).start();
                                 }
-                                holder.imageView.setImageDrawable(drawable);
+                                if (drawable != null) {
+                                    holder.imageView.setImageDrawable(drawable);
+                                }
                             });
                         }
                         return;
@@ -168,7 +170,9 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
                         } else {
                             holder.previewErrorTextView.setVisibility(View.GONE);
                         }
-                        holder.imageView.setImageBitmap(bitmap);
+                        if (bitmap != null) {
+                            holder.imageView.setImageBitmap(bitmap);
+                        }
                     });
                 }
             });
@@ -275,10 +279,6 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
                     changesMask |= STATUS_CHANGE_MASK;
                 }
 
-                if (oldItem.fyleMessageJoinWithStatus.progress != newItem.fyleMessageJoinWithStatus.progress) {
-                    changesMask |= PROGRESS_CHANGE_MASK;
-                }
-
                 payloadCache[newItemPosition] = changesMask;
                 payloadComputed[newItemPosition] = true;
                 return changesMask;
@@ -345,13 +345,17 @@ import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
             attachmentFailedTextView = itemView.findViewById(R.id.attachment_failed_text_view);
             if (imageView != null) {
                 imageView.setParentViewPagerUserInputController(galleryAdapterCallbacks::setViewPagerUserInputEnabled);
-                imageView.setSingleTapUpCallback(galleryAdapterCallbacks::singleTapUp);
+                imageView.setSingleTapUpCallback((textBlocks) -> {
+                    galleryAdapterCallbacks.singleTapUp(textBlocks);
+                    return Unit.INSTANCE;
+                });
+                imageView.setImageResource(R.drawable.mime_type_icon_image);
             }
         }
     }
 
     public interface GalleryAdapterCallbacks {
-        void singleTapUp();
+        void singleTapUp(@Nullable List<TextBlock> textBlocks);
 
         void setCurrentItem(int position);
 

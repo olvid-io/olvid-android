@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -67,7 +67,7 @@ public class MetaManager {
                     manager.initialisationComplete();
                 } catch (Exception e) {
                     Logger.e("Exception in initialisationComplete() for " + manager.getClass());
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
         }).start();
@@ -120,7 +120,7 @@ public class MetaManager {
             Method method = manager.getClass().getMethod("setDelegate", Class.forName(interfaceName));
             method.invoke(manager, delegate);
         } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            Logger.x(e);
         } catch (NoSuchMethodException e) {
             Logger.e("ObvManager " + manager.getClass() + " requests a delegate of type " + interfaceName + " but does not implement the matching setDelegate method.");
             throw new RuntimeException();
@@ -137,7 +137,7 @@ public class MetaManager {
                     throw new RuntimeException();
                 }
             } catch (ClassNotFoundException e ) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
 
@@ -152,7 +152,7 @@ public class MetaManager {
                     managersAwaitingInterfaceImplementations.remove(interfaceName);
                 }
             } catch (ClassNotFoundException e ) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
         lockOnInterfaceImplementations.unlock();

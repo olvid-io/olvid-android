@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -248,7 +248,7 @@ public class GroupV2 {
             return new AdministratorsChain(new UID(firstBlock.computeSha256()), new Block[]{firstBlock}, true);
         }
 
-        public AdministratorsChain withCheckedIntegrity(UID expectedGroupUid, Identity latestUpdateAdministratorIdentity) throws Exception {
+        public AdministratorsChain withCheckedIntegrity(UID expectedGroupUid, Identity latestUpdateAdministratorIdentity, AdministratorsChain alreadyTrustedPrefixAdministratorChain) throws Exception {
             if (latestUpdateAdministratorIdentity != null) {
                 // first check the administrator is indeed part of the last block list of admins
                 boolean found = false;
@@ -272,23 +272,38 @@ public class GroupV2 {
                 return this;
             }
 
-            {
+            if (alreadyTrustedPrefixAdministratorChain != null && alreadyTrustedPrefixAdministratorChain.blocks.length > 0) {
+                // check the prefix is indeed a prefix
+                if (!isPrefixedBy(alreadyTrustedPrefixAdministratorChain)) {
+                    throw new Exception("Trusted prefix is not a prefix");
+                }
+
+                // check the new blocks
+                for (int i = alreadyTrustedPrefixAdministratorChain.blocks.length; i < blocks.length; i++) {
+                    if (!Arrays.equals(blocks[i].innerData.previousBlockHash, blocks[i - 1].computeSha256())) {
+                        throw new Exception("Invalid block hash chaining at block " + i);
+                    }
+                    if (!blocks[i].isSignatureValid(blocks[i - 1].innerData.administratorIdentities, blocks[i].innerData.administratorIdentities[0])) {
+                        throw new Exception("Invalid block signature at block " + i);
+                    }
+                }
+            } else {
                 // verify the groupUID
                 if (!groupUid.equals(new UID(blocks[0].computeSha256()))) {
                     throw new Exception("Invalid groupUid");
                 }
 
                 // check the first block's signature
-                if (!blocks[0].isSignatureValid(blocks[0].innerData.administratorIdentities)) {
+                if (!blocks[0].isSignatureValid(blocks[0].innerData.administratorIdentities, blocks[0].innerData.administratorIdentities[0])) {
                     throw new Exception("Invalid block signature at block 0");
                 }
 
                 // check following blocks
-                for (int i=1; i< blocks.length; i++) {
-                    if (!Arrays.equals(blocks[i].innerData.previousBlockHash, blocks[i-1].computeSha256())) {
+                for (int i = 1; i < blocks.length; i++) {
+                    if (!Arrays.equals(blocks[i].innerData.previousBlockHash, blocks[i - 1].computeSha256())) {
                         throw new Exception("Invalid block hash chaining at block " + i);
                     }
-                    if (!blocks[i].isSignatureValid(blocks[i-1].innerData.administratorIdentities)) {
+                    if (!blocks[i].isSignatureValid(blocks[i - 1].innerData.administratorIdentities, blocks[i].innerData.administratorIdentities[0])) {
                         throw new Exception("Invalid block signature at block " + i);
                     }
                 }
@@ -417,11 +432,25 @@ public class GroupV2 {
             }
 
             @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-            boolean isSignatureValid(Identity[] previousBlockAdministratorIdentities) {
+            boolean isSignatureValid(Identity[] previousBlockAdministratorIdentities, Identity probableSignerIdentity) {
+                // first check the signature from the probableSignerIdentity
+                for (Identity administratorIdentity : previousBlockAdministratorIdentities) {
+                    if (administratorIdentity.equals(probableSignerIdentity)) {
+                        try {
+                            if (Signature.verify(Constants.SignatureContext.GROUP_ADMINISTRATORS_CHAIN, encodedInnerData.getBytes(), administratorIdentity, signature)) {
+                                return true;
+                            }
+                        } catch (Exception ignored) { }
+                        break;
+                    }
+                }
+                // if first check failed, try all other admins
                 for (Identity administratorIdentity : previousBlockAdministratorIdentities) {
                     try {
-                        if (Signature.verify(Constants.SignatureContext.GROUP_ADMINISTRATORS_CHAIN, encodedInnerData.getBytes(), administratorIdentity, signature)) {
-                            return true;
+                        if (!administratorIdentity.equals(probableSignerIdentity)) {
+                            if (Signature.verify(Constants.SignatureContext.GROUP_ADMINISTRATORS_CHAIN, encodedInnerData.getBytes(), administratorIdentity, signature)) {
+                                return true;
+                            }
                         }
                     } catch (Exception ignored) { }
                 }

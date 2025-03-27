@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -37,84 +39,84 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 @Dao
 public interface OwnedIdentityDao {
     @Insert
-    void insert(OwnedIdentity ownedIdentity);
+    void insert(@NonNull OwnedIdentity ownedIdentity);
 
     @Delete
-    void delete(OwnedIdentity ownedIdentity);
+    void delete(@NonNull OwnedIdentity ownedIdentity);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.KEYCLOAK_MANAGED + " = :keycloakManaged " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateKeycloakManaged(byte[] bytesOwnedIdentity, boolean keycloakManaged);
+    void updateKeycloakManaged(@NonNull byte[] bytesOwnedIdentity, boolean keycloakManaged);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.ACTIVE + " = :active " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateActive(byte[] bytesOwnedIdentity, boolean active);
+    void updateActive(@NonNull byte[] bytesOwnedIdentity, boolean active);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.IDENTITY_DETAILS + " = :identityDetails, " +
             OwnedIdentity.DISPLAY_NAME + " = :displayName " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateIdentityDetailsAndDisplayName(byte[] bytesOwnedIdentity, String identityDetails, String displayName);
+    void updateIdentityDetailsAndDisplayName(@NonNull byte[] bytesOwnedIdentity, @Nullable String identityDetails, @NonNull String displayName);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.API_KEY_STATUS + " = :apiKeyStatus, " +
             OwnedIdentity.API_KEY_PERMISSIONS + " = :apiKeyPermissions, " +
             OwnedIdentity.API_KEY_EXPIRATION_TIMESTAMP + " = :apiKeyExpirationTimestamp " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateApiKey(byte[] bytesOwnedIdentity, int apiKeyStatus, long apiKeyPermissions, Long apiKeyExpirationTimestamp);
+    void updateApiKey(@NonNull byte[] bytesOwnedIdentity, int apiKeyStatus, long apiKeyPermissions, @Nullable Long apiKeyExpirationTimestamp);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.IDENTITY_DETAILS + " = :identityDetails, " +
             OwnedIdentity.DISPLAY_NAME + " = :displayName, " +
             OwnedIdentity.PHOTO_URL + " = :photoUrl " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateIdentityDetailsAndPhoto(byte[] bytesOwnedIdentity, String identityDetails, String displayName, String photoUrl);
+    void updateIdentityDetailsAndPhoto(@NonNull byte[] bytesOwnedIdentity, @Nullable String identityDetails, @NonNull String displayName, @Nullable String photoUrl);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.UNPUBLISHED_DETAILS + " = :unpublishedDetails " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateUnpublishedDetails(byte[] bytesOwnedIdentity, int unpublishedDetails);
+    void updateUnpublishedDetails(@NonNull byte[] bytesOwnedIdentity, int unpublishedDetails);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " = :customDisplayName " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateCustomDisplayName(byte[] bytesOwnedIdentity, String customDisplayName);
+    void updateCustomDisplayName(@NonNull byte[] bytesOwnedIdentity, String customDisplayName);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.UNLOCK_PASSWORD + " = :unlockPassword, " +
             OwnedIdentity.UNLOCK_SALT + " = :unlockSalt " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateUnlockPasswordAndSalt(byte[] bytesOwnedIdentity, byte[] unlockPassword, byte[] unlockSalt);
+    void updateUnlockPasswordAndSalt(@NonNull byte[] bytesOwnedIdentity, @Nullable byte[] unlockPassword, @Nullable byte[] unlockSalt);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS + " = :prefMuteNotifications, " +
             OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP + " = :prefMuteNotificationsTimestamp, " +
             OwnedIdentity.PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED + " = :prefMuteNotificationsExceptMentioned " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateMuteNotifications(byte[] bytesOwnedIdentity, boolean prefMuteNotifications, Long prefMuteNotificationsTimestamp, boolean prefMuteNotificationsExceptMentioned);
+    void updateMuteNotifications(@NonNull byte[] bytesOwnedIdentity, boolean prefMuteNotifications, @Nullable Long prefMuteNotificationsTimestamp, boolean prefMuteNotificationsExceptMentioned);
 
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.PREF_SHOW_NEUTRAL_NOTIFICATION_WHEN_HIDDEN + " = :prefShowNeutralNotificationWhenHidden " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateShowNeutralNotificationWhenHidden(byte[] bytesOwnedIdentity, boolean prefShowNeutralNotificationWhenHidden);
+    void updateShowNeutralNotificationWhenHidden(@NonNull byte[] bytesOwnedIdentity, boolean prefShowNeutralNotificationWhenHidden);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.CAPABILITY_WEBRTC_CONTINUOUS_ICE + " = :capable " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateCapabilityWebrtcContinuousIce(byte[] bytesOwnedIdentity, boolean capable);
+    void updateCapabilityWebrtcContinuousIce(@NonNull byte[] bytesOwnedIdentity, boolean capable);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.CAPABILITY_GROUPS_V2 + " = :capable " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateCapabilityGroupsV2(byte[] bytesOwnedIdentity, boolean capable);
+    void updateCapabilityGroupsV2(@NonNull byte[] bytesOwnedIdentity, boolean capable);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.CAPABILITY_ONE_TO_ONE_CONTACTS + " = :capable " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateCapabilityOneToOneContacts(byte[] bytesOwnedIdentity, boolean capable);
+    void updateCapabilityOneToOneContacts(@NonNull byte[] bytesOwnedIdentity, boolean capable);
 
 
 
@@ -152,7 +154,7 @@ public interface OwnedIdentityDao {
             " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
             " AND " + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :byteCurrentIdentity " +
             " ORDER BY CASE WHEN " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " IS NULL THEN " + OwnedIdentity.DISPLAY_NAME + " ELSE " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " END ASC ")
-    LiveData<List<OwnedIdentityAndUnreadMessageCount>> getAllNotHiddenWithUnreadMessageCount(byte[] byteCurrentIdentity);
+    LiveData<List<OwnedIdentityAndUnreadMessageCount>> getAllNotHiddenWithUnreadMessageCount(@NonNull byte[] byteCurrentIdentity);
 
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
             " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL ")
@@ -165,7 +167,7 @@ public interface OwnedIdentityDao {
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
             " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
             " AND " + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :bytesOwnedIdentity ")
-    LiveData<List<OwnedIdentity>> getAllNotHiddenExceptOne(byte[] bytesOwnedIdentity);
+    LiveData<List<OwnedIdentity>> getAllNotHiddenExceptOne(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
             " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
@@ -177,11 +179,11 @@ public interface OwnedIdentityDao {
 
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
             " WHERE " + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    OwnedIdentity get(byte[] bytesOwnedIdentity);
+    @Nullable OwnedIdentity get(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
             " WHERE " + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    LiveData<OwnedIdentity> getLiveData(byte[] bytesOwnedIdentity);
+    LiveData<OwnedIdentity> getLiveData(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT COUNT(*) FROM " + OwnedIdentity.TABLE_NAME)
     int countAll();
@@ -226,7 +228,7 @@ public interface OwnedIdentityDao {
             " AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
             " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :byteCurrentIdentity " +
             " )")
-    LiveData<Boolean> otherNotHiddenOwnedIdentityHasMessageOrInvitation(byte[] byteCurrentIdentity);
+    LiveData<Boolean> otherNotHiddenOwnedIdentityHasMessageOrInvitation(@NonNull byte[] byteCurrentIdentity);
 
     @Query("SELECT oi.*, disc.id AS discussionId FROM " + OwnedIdentity.TABLE_NAME + " AS oi " +
             " JOIN " + Discussion.TABLE_NAME + " AS disc " +
@@ -236,7 +238,7 @@ public interface OwnedIdentityDao {
             " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :bytesOwnedIdentity " +
             " AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
             " ORDER BY CASE WHEN " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " IS NULL THEN " + OwnedIdentity.DISPLAY_NAME + " ELSE " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " END ASC ")
-    LiveData<List<OwnedIdentityAndDiscussionId>> getOtherNonHiddenOwnedIdentitiesForDiscussion(byte[] bytesOwnedIdentity, int discussionType, byte[] bytesDiscussionIdentifier);
+    LiveData<List<OwnedIdentityAndDiscussionId>> getOtherNonHiddenOwnedIdentitiesForDiscussion(@NonNull byte[] bytesOwnedIdentity, int discussionType, @NonNull byte[] bytesDiscussionIdentifier);
 
 
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -32,7 +32,6 @@ import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.PreKeyBlobOnServer;
-import io.olvid.engine.datatypes.containers.PreKey;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
@@ -532,8 +531,8 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
                 return new FinishedProtocolState();
             }
 
-            JsonKeycloakUserDetails ownUserDetails = protocolManagerSession.identityDelegate.verifyKeycloakSignature(protocolManagerSession.session, getOwnedIdentity(), ownedIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
-            JsonKeycloakUserDetails contactUserDetails = protocolManagerSession.identityDelegate.verifyKeycloakSignature(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.signedContactDetails);
+            JsonKeycloakUserDetails ownUserDetails = protocolManagerSession.identityDelegate.verifyKeycloakIdentitySignature(protocolManagerSession.session, getOwnedIdentity(), ownedIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
+            JsonKeycloakUserDetails contactUserDetails = protocolManagerSession.identityDelegate.verifyKeycloakIdentitySignature(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.signedContactDetails);
             if (ownUserDetails == null || contactUserDetails == null) {
                 return new FinishedProtocolState();
             }
@@ -564,9 +563,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                     SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                     DEVICE_DISCOVERY_CHILD_PROTOCOL_ID,
-                    childProtocolInstanceUid,
-                    false
-            );
+                    childProtocolInstanceUid);
             ChannelMessageToSend messageToSend = new DeviceDiscoveryChildProtocol.InitialMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 
@@ -711,8 +708,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
             if (triggerDeviceDiscovery) {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                        new UID(getPrng()),
-                        false);
+                        new UID(getPrng()));
                 ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, receivedMessage.contactIdentity).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -742,7 +738,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
             ////////
             // verify the received contact signature
             ////////
-            JsonKeycloakUserDetails contactUserDetails = protocolManagerSession.identityDelegate.verifyKeycloakSignature(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.signedContactDetails);
+            JsonKeycloakUserDetails contactUserDetails = protocolManagerSession.identityDelegate.verifyKeycloakIdentitySignature(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.signedContactDetails);
 
             if (contactUserDetails == null) {
                 // respond "rejected"
@@ -820,8 +816,7 @@ public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
             if (triggerDeviceDiscovery) {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ConcreteProtocol.DEVICE_DISCOVERY_PROTOCOL_ID,
-                        new UID(getPrng()),
-                        false);
+                        new UID(getPrng()));
                 ChannelMessageToSend messageToSend = new DeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage, startState.contactIdentity).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }

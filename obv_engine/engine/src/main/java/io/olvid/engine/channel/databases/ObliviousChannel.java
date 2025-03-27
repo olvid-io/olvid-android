@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,11 +72,11 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
     private final ChannelManagerSession channelManagerSession;
 
-    private UID currentDeviceUid;
+    private final UID currentDeviceUid;
     static final String CURRENT_DEVICE_UID = "current_device_uid";
-    private UID remoteDeviceUid;
+    private final UID remoteDeviceUid;
     static final String REMOTE_DEVICE_UID = "remote_device_uid";
-    private Identity remoteIdentity;
+    private final Identity remoteIdentity;
     static final String REMOTE_IDENTITY = "contact_identity";
     private boolean confirmed;
     static final String CONFIRMED = "confirmed";
@@ -310,7 +309,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             statement.executeUpdate();
             this.seedForNextSendKey = ratchetingOutput.getRatchetedSeed();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
         return ratchetingOutput;
@@ -338,7 +337,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             }
             return obliviousChannel;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -498,7 +497,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return null;
     }
@@ -600,7 +599,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 channelManagerSession.notificationPostingDelegate.postNotification(ChannelNotifications.NOTIFICATION_OBLIVIOUS_CHANNEL_DELETED, userInfo);
             });
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -641,7 +640,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                         channelManagerSession.fullRatchetProtocolStarterDelegate.startFullRatchetProtocolForObliviousChannel(currentDeviceUid, remoteDeviceUid, remoteIdentity);
                     } catch (Exception e) {
                         // no need to do anything, the next message will try to restart the full ratchet
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 } else {
                     Logger.w("Full ratchet required, but no FullRatchetProtocolStarterDelegate is set.");
@@ -742,7 +741,9 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             case SendChannelInfo.ALL_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_ON_SAME_SERVER_TYPE: {
                 List<NetworkChannel> acceptableChannels = new ArrayList<>();
                 UID currentDeviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
-                for (Identity toIdentity: message.getSendChannelInfo().getToIdentities()) {
+                for (int i = 0; i < message.getSendChannelInfo().getToIdentities().length; i++) {
+                    Identity toIdentity = message.getSendChannelInfo().getToIdentities()[i];
+                    UID toDeviceUid = message.getSendChannelInfo().getRemoteDeviceUids()[i];
                     List<UidAndPreKey> uidsAndPreKeys = new ArrayList<>();
                     if (Objects.equals(message.getSendChannelInfo().getFromIdentity(), toIdentity)) {
                         List<OwnedDeviceAndPreKey> ownedDeviceAndPreKeys = channelManagerSession.identityDelegate.getDevicesAndPreKeysOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
@@ -753,6 +754,20 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                         }
                     } else {
                         uidsAndPreKeys = channelManagerSession.identityDelegate.getDeviceUidsAndPreKeysOfContactIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity(), toIdentity);
+                    }
+                    // if a toDeviceUid is specified, only send to it. If not found, still send to all devices
+                    if (toDeviceUid != null) {
+                        UidAndPreKey uidAndPreKeyFound = null;
+                        for (UidAndPreKey uidAndPreKey : uidsAndPreKeys) {
+                            if (uidAndPreKey.uid.equals(toDeviceUid)) {
+                                uidAndPreKeyFound = uidAndPreKey;
+                                break;
+                            }
+                        }
+                        if (uidAndPreKeyFound != null) {
+                            acceptableChannels.addAll(ObliviousChannel.getAcceptableObliviousOrPreKeyChannels(channelManagerSession, message.getSendChannelInfo().getFromIdentity(), currentDeviceUid, new UidAndPreKey[]{uidAndPreKeyFound}, toIdentity));
+                            continue;
+                        }
                     }
                     acceptableChannels.addAll(ObliviousChannel.getAcceptableObliviousOrPreKeyChannels(channelManagerSession, message.getSendChannelInfo().getFromIdentity(), currentDeviceUid, uidsAndPreKeys.toArray(new UidAndPreKey[0]), toIdentity));
                 }
@@ -848,7 +863,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         try {
             encryptedMessageKey = authEnc.encrypt(ratchetingOutput.getAuthEncKey(), Encoded.of(messageKey).getBytes(), prng);
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
         byte[] headerBytes = new byte[KeyId.KEYID_LENGTH + encryptedMessageKey.length];
@@ -873,7 +888,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 channelManagerSession.session.addSessionCommitListener(this);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
         return header;
@@ -891,7 +906,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             deviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, header.getOwnedIdentity());
         } catch (SQLException e) {
             Logger.e("Error retrieving a currentDeviceUid -> a received message might have been lost...");
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
         ProvisionedKeyMaterial[] provisionedKeys = ProvisionedKeyMaterial.getAll(channelManagerSession, keyId, deviceUid);
@@ -934,7 +949,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                         obliviousChannel.commitHookBits |= HOOK_BIT_MIGHT_NEED_FULL_RATCHET;
                         channelManagerSession.session.addSessionCommitListener(obliviousChannel);
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
                 try {
@@ -943,7 +958,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                         obliviousChannel.confirm();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 ReceptionChannelInfo receptionChannelInfo = obliviousChannel.getReceptionChannelInfo();
                 // add information about GKMV2 in receptionChannelInfo

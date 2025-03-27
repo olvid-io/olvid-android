@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
@@ -171,6 +172,17 @@ public class ObvDialog {
         }
     }
 
+    public void setTransferAuthenticationProof(String signature, String serializedAuthState) throws Exception {
+        if (this.category.id == Category.TRANSFER_DIALOG_CATEGORY && this.category.obvTransferStep.getStep() == ObvTransferStep.Step.TARGET_REQUESTS_KEYCLOAK_AUTHENTICATION_PROOF)  {
+            encodedResponse = Encoded.of(new Encoded[]{
+                    Encoded.of(signature),
+                    Encoded.of(serializedAuthState),
+            });
+        } else {
+            throw new Exception();
+        }
+    }
+
     // endregion
 
 
@@ -179,12 +191,12 @@ public class ObvDialog {
 
 
     public static class Category {
-        public static final int INVITE_SENT_DIALOG_CATEGORY = 0;
-        public static final int ACCEPT_INVITE_DIALOG_CATEGORY = 1;
-        public static final int SAS_EXCHANGE_DIALOG_CATEGORY = 2;
-        public static final int SAS_CONFIRMED_DIALOG_CATEGORY = 3;
+        public static final int INVITE_SENT_DIALOG_CATEGORY = 0; // not found!
+        public static final int ACCEPT_INVITE_DIALOG_CATEGORY = 1; //
+        public static final int SAS_EXCHANGE_DIALOG_CATEGORY = 2; //
+        public static final int SAS_CONFIRMED_DIALOG_CATEGORY = 3; //
         //public static final int MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY = 4;
-        public static final int INVITE_ACCEPTED_DIALOG_CATEGORY = 5;
+        public static final int INVITE_ACCEPTED_DIALOG_CATEGORY = 5; // not found
         public static final int ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY = 6;
         public static final int MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY = 7;
         public static final int ACCEPT_GROUP_INVITE_DIALOG_CATEGORY = 8;
@@ -304,14 +316,13 @@ public class ObvDialog {
 
             Encoded[] vars = list[1].decodeList();
             switch (id) {
-                case SAS_CONFIRMED_DIALOG_CATEGORY: {
-                    if (vars.length != 4) {
+                case ACCEPT_INVITE_DIALOG_CATEGORY: {
+                    if (vars.length != 3) {
                         throw new DecodingException();
                     }
                     bytesContactIdentity = vars[0].decodeBytes();
                     contactDisplayNameOrSerializedDetails = vars[1].decodeString();
-                    sasToDisplay = vars[2].decodeBytes();
-                    sasEntered = vars[3].decodeBytes();
+                    serverTimestamp = vars[2].decodeLong();
                     break;
                 }
                 case SAS_EXCHANGE_DIALOG_CATEGORY: {
@@ -322,6 +333,16 @@ public class ObvDialog {
                     contactDisplayNameOrSerializedDetails = vars[1].decodeString();
                     sasToDisplay = vars[2].decodeBytes();
                     serverTimestamp = vars[3].decodeLong();
+                    break;
+                }
+                case SAS_CONFIRMED_DIALOG_CATEGORY: {
+                    if (vars.length != 4) {
+                        throw new DecodingException();
+                    }
+                    bytesContactIdentity = vars[0].decodeBytes();
+                    contactDisplayNameOrSerializedDetails = vars[1].decodeString();
+                    sasToDisplay = vars[2].decodeBytes();
+                    sasEntered = vars[3].decodeBytes();
                     break;
                 }
                 case ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY:
@@ -359,15 +380,6 @@ public class ObvDialog {
                         pendingGroupMemberIdentities[i] = ObvIdentity.of(pendingEncodeds[i], jsonObjectMapper);
                     }
                     serverTimestamp = vars[4].decodeLong();
-                    break;
-                }
-                case ACCEPT_INVITE_DIALOG_CATEGORY: {
-                    if (vars.length != 3) {
-                        throw new DecodingException();
-                    }
-                    bytesContactIdentity = vars[0].decodeBytes();
-                    contactDisplayNameOrSerializedDetails = vars[1].decodeString();
-                    serverTimestamp = vars[2].decodeLong();
                     break;
                 }
                 case ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY: {
@@ -408,13 +420,19 @@ public class ObvDialog {
                     obvTransferStep = ObvTransferStep.of(vars[0]);
                     break;
                 }
-                default:
+                case INVITE_SENT_DIALOG_CATEGORY:
+                case INVITE_ACCEPTED_DIALOG_CATEGORY: {
                     if (vars.length != 2) {
                         throw new DecodingException();
                     }
                     bytesContactIdentity = vars[0].decodeBytes();
                     contactDisplayNameOrSerializedDetails = vars[1].decodeString();
                     break;
+                }
+                default: {
+                    Logger.w("Found an UI dialog with unknown category");
+                    throw new Exception();
+                }
             }
             return new Category(id, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, sasEntered, bytesMediatorOrGroupOwnerIdentity, serializedGroupDetails, bytesGroupUid, pendingGroupMemberIdentities, serverTimestamp, obvGroupV2, obvSyncAtom, obvTransferStep);
         }
@@ -482,7 +500,7 @@ public class ObvDialog {
                         try {
                             pendingEncodeds[i] = pendingGroupMemberIdentities[i].encode(jsonObjectMapper);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Logger.x(e);
                             break;
                         }
                     }

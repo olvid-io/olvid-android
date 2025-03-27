@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -211,7 +211,7 @@ public class GroupV2SyncSnapshot implements ObvSyncSnapshotNode {
         try {
             protocolStarterDelegate.initiateGroupV2ReDownloadWithinTransaction(identityManagerSession.session, ownedIdentity, groupIdentifier);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         return groupV2;

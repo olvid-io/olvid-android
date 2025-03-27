@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,14 +19,23 @@
 
 package io.olvid.messenger.main.bookmarks
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.core.view.WindowCompat
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
@@ -40,16 +49,25 @@ class BookmarksActivity : LockableActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.elevation = 0f
         setContent {
             val bookmarks by AppDatabase.getInstance().messageDao()
                 .getAllBookmarkedLiveData(AppSingleton.getBytesCurrentIdentity() ?: byteArrayOf())
                 .observeAsState(null)
             AppCompatTheme {
                 GlobalSearchScreen(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = colorResource(R.color.olvid_gradient_dark))
+                        .statusBarsPadding()
+                        .background(color = colorResource(R.color.almostWhite))
+                        .navigationBarsPadding(),
                     globalSearchViewModel = globalSearchViewModel,
                     linkPreviewViewModel = linkPreviewViewModel,
-                    bookmarks
+                    bookmarks = bookmarks
                 )
             }
         }

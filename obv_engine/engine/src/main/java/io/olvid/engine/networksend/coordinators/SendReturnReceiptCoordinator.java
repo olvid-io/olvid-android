@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -70,7 +70,6 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
 
         returnReceiptOwnedIdentityAndIdByServer = new HashMap<>();
         sendReturnReceiptOperationQueue = new NoDuplicateOperationQueue();
-        sendReturnReceiptOperationQueue.execute(1, "Engine-SendReturnReceiptCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -78,6 +77,10 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
 
         notificationListener = new NotificationListener();
+    }
+
+    public void startProcessing() {
+        sendReturnReceiptOperationQueue.execute(1, "Engine-SendReturnReceiptCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
@@ -92,7 +95,7 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
                 queueNewSendReturnReceiptOperation(returnReceipt.getContactIdentity().getServer(), returnReceipt.getOwnedIdentity(), returnReceipt.getId());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

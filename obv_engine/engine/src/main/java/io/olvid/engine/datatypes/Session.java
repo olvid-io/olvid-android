@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -75,7 +75,7 @@ public class Session implements Connection {
         try {
             DriverManager.registerDriver((Driver) Class.forName("org.sqlite.JDBC").getDeclaredConstructor().newInstance());
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -200,7 +200,7 @@ public class Session implements Connection {
                 Logger.e("  - Un-committed entity: " + sessionCommitListener.getClass());
             }
             sessionCommitListeners.clear();
-            new Exception("Trace").printStackTrace();
+            Logger.x(new Exception("Trace"));
         }
         if (!getAutoCommit()) {
             rollback();

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -76,7 +76,6 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         this.downloadMessagesAndListAttachmentsDelegate = downloadMessagesAndListAttachmentsDelegate;
 
         registerPushNotificationOperationQueue = new NoDuplicateOperationQueue();
-        registerPushNotificationOperationQueue.execute(1, "Engine-RegisterServerPushNotificationsCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -84,6 +83,10 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         ownedIdentitiesThatNeedAnOwnedDeviceDiscovery = new HashSet<>();
 
         serverSessionCreatedNotificationListener = new ServerSessionCreatedNotificationListener();
+    }
+
+    public void startProcessing() {
+        registerPushNotificationOperationQueue.execute(1, "Engine-RegisterServerPushNotificationsCoordinator");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
@@ -127,7 +130,7 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -232,11 +235,11 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
             UID androidIdentityMaskingUid = new UID(androidMaskingUidString);
             IdentityAndUid identityAndUid = androidIdentityMaskingUids.get(androidIdentityMaskingUid);
             if (identityAndUid != null) {
-                fetchManagerSessionFactory.markOwnedIdentityAsNotUpToDate(identityAndUid.ownedIdentity, OwnedIdentitySynchronizationStatus.OTHER_SYNC_IN_PROGRESS);
-                downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(identityAndUid.ownedIdentity, identityAndUid.uid);
+                fetchManagerSessionFactory.markOwnedIdentityAsNotUpToDate(identityAndUid.identity, OwnedIdentitySynchronizationStatus.OTHER_SYNC_IN_PROGRESS);
+                downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(identityAndUid.identity, identityAndUid.uid);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -246,10 +249,10 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
                 UID androidIdentityMaskingUid = new UID(androidMaskingUidString);
                 IdentityAndUid identityAndUid = androidIdentityMaskingUids.get(androidIdentityMaskingUid);
                 if (identityAndUid != null) {
-                    return identityAndUid.ownedIdentity;
+                    return identityAndUid.identity;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
         return null;

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -28,6 +28,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
@@ -217,7 +218,7 @@ public class ContactGroupDetails implements ObvDatabase {
             contactGroupDetails.insert();
             return contactGroupDetails;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -250,7 +251,7 @@ public class ContactGroupDetails implements ObvDatabase {
             contactGroupDetails.insert();
             return contactGroupDetails;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -291,7 +292,7 @@ public class ContactGroupDetails implements ObvDatabase {
             try {
                 this.photoServerKey = (AuthEncKey) new Encoded(bytes).decodeSymmetricKey();
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 this.photoServerKey = null;
             }
         }
@@ -432,7 +433,7 @@ public class ContactGroupDetails implements ObvDatabase {
                 photoServerKey = (AuthEncKey) new Encoded(pojo.photo_server_key).decodeSymmetricKey();
             }
         } catch (DecodingException | ClassCastException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         ContactGroupDetails contactGroupDetails = new ContactGroupDetails(identityManagerSession, groupOwnerAndUid, ownedIdentity, pojo.version, pojo.serialized_details, null, photoServerLabel, photoServerKey);
         contactGroupDetails.insert();

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -122,7 +122,7 @@ public class JsonIdentityDetails {
             return null;
         }
         String out = in.trim();
-        if (out.length() == 0) {
+        if (out.isEmpty()) {
             return null;
         }
         return out;

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -35,13 +35,13 @@ class OwnedDevicesSynchronisationWithEngineTask(
     companion object {
         private val transferredOrRestoredOwnedIdentities: HashSet<BytesKey> = HashSet()
 
-        public fun ownedIdentityWasTransferredOrRestored(bytesOwnedIdentity: ByteArray) {
+        fun ownedIdentityWasTransferredOrRestored(bytesOwnedIdentity: ByteArray) {
             transferredOrRestoredOwnedIdentities.add(BytesKey(bytesOwnedIdentity))
         }
     }
 
     override fun run() {
-        val deviceDao = AppDatabase.getInstance().ownedDeviceDao();
+        val deviceDao = AppDatabase.getInstance().ownedDeviceDao()
 
         val obvOwnedDevices: List<ObvOwnedDevice> = AppSingleton.getEngine().getOwnedDevices(bytesOwnedIdentity) ?: return
         val dbOwnedDevices: List<OwnedDevice> = deviceDao.getAllSync(bytesOwnedIdentity)

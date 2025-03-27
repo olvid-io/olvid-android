@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -49,6 +49,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DiffUtil;
@@ -64,10 +65,11 @@ import java.util.Objects;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.FyleProgressSingleton;
+import io.olvid.messenger.ProgressStatus;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding;
 import io.olvid.messenger.customClasses.InitialView;
-import io.olvid.messenger.customClasses.MessageAttachmentAdapter;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.PreviewUtilsWithDrawables;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
@@ -190,7 +192,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                     audioAttachmentServiceBinding.loadAudioAttachment(fyleAndOrigin.fyleAndStatus, holder);
                 }
             } else {
-                holder.attachmentImageView.setImageResource(MessageAttachmentAdapter.getDrawableResourceForMimeType(mimeType));
+                holder.attachmentImageView.setImageResource(PreviewUtils.getDrawableResourceForMimeType(mimeType));
             }
         }
 
@@ -203,7 +205,10 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         } else {
             holder.failedImageView.setVisibility(View.GONE);
             holder.progressBar.setVisibility(View.VISIBLE);
-            holder.progressBar.setProgress((int) (fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.progress * 100));
+            if (holder.progressLiveData == null) {
+                holder.progressLiveData = FyleProgressSingleton.INSTANCE.getProgress(fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId);
+                holder.progressLiveData.observe(activity, holder.progressListener);
+            }
         }
 
         if (Arrays.equals(fyleAndOrigin.message.senderIdentifier, AppSingleton.getBytesCurrentIdentity())) {
@@ -264,6 +269,10 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         holder.fyleAndOrigin = null;
         holder.attachmentImageView.setImageDrawable(null);
         holder.musicFailed = false;
+        if (holder.progressLiveData != null) {
+            holder.progressLiveData.removeObserver(holder.progressListener);
+            holder.progressLiveData = null;
+        }
     }
 
     @Override
@@ -304,7 +313,6 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
 
                 return oldStatus.status == newStatus.status
                         && Objects.equals(oldStatus.filePath, newStatus.filePath)
-                        && oldStatus.progress == newStatus.progress
                         && Objects.equals(oldStatus.imageResolution, newStatus.imageResolution)
                         && (oldStatus.miniPreview == null) == (newStatus.miniPreview == null);
             }
@@ -312,12 +320,12 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         this.fyleAndOrigins = fyleAndOrigins;
         result.dispatchUpdatesTo(this);
 
-        if (latestSortOrder != null && !Objects.equals(latestSortOrder, viewModel.getCurrentSortOrder())) {
+        if (latestSortOrder != null && !Objects.equals(latestSortOrder, viewModel.currentSortOrder)) {
             if (recyclerView != null) {
                 recyclerView.scrollToPosition(0);
             }
         }
-        latestSortOrder = viewModel.getCurrentSortOrder();
+        latestSortOrder = viewModel.currentSortOrder;
     }
 
 
@@ -328,6 +336,8 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         final ImageView attachmentImageView;
         final ImageView attachmentOverlay;
         final ProgressBar progressBar;
+        final Observer<ProgressStatus> progressListener;
+        LiveData<ProgressStatus> progressLiveData;
         final ImageView failedImageView;
         final TextView senderTextView;
         final TextView timestampTextView;
@@ -349,6 +359,16 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
             attachmentImageView.setClipToOutline(true);
             attachmentOverlay = itemView.findViewById(R.id.attachment_overlay);
             progressBar = itemView.findViewById(R.id.attachment_progress);
+            progressListener = progressStatus -> {
+                if (progressStatus instanceof ProgressStatus.InProgress) {
+                    progressBar.setProgress((int) (((ProgressStatus.InProgress) progressStatus).getProgress() * 100));
+                } else if (progressStatus == ProgressStatus.Unknown.INSTANCE) {
+                    progressBar.setProgress(0);
+                }else if (progressStatus == ProgressStatus.Finished.INSTANCE) {
+                    progressBar.setProgress(100);
+                }
+            };
+            progressLiveData = null;
             failedImageView = itemView.findViewById(R.id.attachment_failed);
             senderTextView = itemView.findViewById(R.id.attachment_sender);
             timestampTextView = itemView.findViewById(R.id.attachment_timestamp);
@@ -413,7 +433,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                             && (!fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().startsWith("video/") || !"".equals(fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.imageResolution))) {
                         if (AppSingleton.getBytesCurrentIdentity() != null) {
                             String sortOrder;
-                            switch (viewModel.getCurrentSortOrder().sortKey) {
+                            switch (viewModel.currentSortOrder.sortKey) {
                                 case SIZE:
                                     sortOrder = "size";
                                     break;
@@ -425,10 +445,10 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                                     sortOrder = null;
                                     break;
                             }
-                            App.openOwnedIdentityGalleryActivity(activity, AppSingleton.getBytesCurrentIdentity(), sortOrder, viewModel.getCurrentSortOrder().ascending, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
+                            App.openOwnedIdentityGalleryActivity(activity, AppSingleton.getBytesCurrentIdentity(), sortOrder, viewModel.currentSortOrder.ascending, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
                         }
                     } else {
-                        App.openFyleInExternalViewer(activity, fyleAndOrigin.fyleAndStatus, null);
+                        App.openFyleViewer(activity, fyleAndOrigin.fyleAndStatus, null);
                     }
                 }
             }
@@ -546,7 +566,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                 return;
             }
             if (bitmap == null) {
-                new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageResource(MessageAttachmentAdapter.getDrawableResourceForMimeType(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType())));
+                new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageResource(PreviewUtils.getDrawableResourceForMimeType(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType())));
             } else {
                 new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageBitmap(bitmap));
             }
@@ -573,7 +593,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                 return;
             }
             if (drawable == null) {
-                new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageResource(MessageAttachmentAdapter.getDrawableResourceForMimeType(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType())));
+                new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageResource(PreviewUtils.getDrawableResourceForMimeType(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType())));
             } else {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     if (drawable instanceof AnimatedImageDrawable) {

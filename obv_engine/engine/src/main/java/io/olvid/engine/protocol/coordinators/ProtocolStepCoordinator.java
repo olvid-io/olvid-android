@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -56,8 +56,11 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
         this.jsonObjectMapper = jsonObjectMapper;
 
         protocolOperationQueue = new NoDuplicateOperationQueue();
-        protocolOperationQueue.execute(1, "Engine-ProtocolStepCoordinator");
         stepFailedAttemptCount = new HashMap<>();
+    }
+
+    public void startProcessing() {
+        protocolOperationQueue.execute(1, "Engine-ProtocolStepCoordinator");
     }
 
     private void queueNewProtocolOperation(UID receivedMessageUid) {
@@ -80,7 +83,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
             }
             protocolManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -105,7 +108,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
             }
             protocolManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -136,7 +139,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
                         message.delete();
                         protocolManagerSession.session.commit();
                     } catch (SQLException e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 } else {
                     // retry to execute the step
@@ -155,7 +158,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
                         protocolManagerSession.session.commit();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -165,13 +168,13 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
                     ReceivedMessage message = ReceivedMessage.get(protocolManagerSession, ((ProtocolOperation) operation).getReceivedMessageUid());
                     message.delete();
 
-                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(message.getToIdentity(), DialogType.createDeleteDialog(), message.getUserDialogUuid()), message.getProtocolId(), message.getProtocolInstanceUid(), false);
+                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(message.getToIdentity(), DialogType.createDeleteDialog(), message.getUserDialogUuid()), message.getProtocolId(), message.getProtocolInstanceUid());
                     ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, prng);
 
                     protocolManagerSession.session.commit();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }

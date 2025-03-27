@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -90,7 +90,7 @@ public class KeycloakManager {
     // region public methods
 
 
-    public void registerKeycloakManagedIdentity(@NonNull ObvIdentity obvIdentity, String keycloakServerUrl, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, @Nullable String serializedKeycloakState, @Nullable String ownApiKey, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp, boolean firstKeycloakBinding) {
+    public void registerKeycloakManagedIdentity(@NonNull ObvIdentity obvIdentity, String keycloakServerUrl, String clientId, String clientSecret, JsonWebKeySet jwks, JsonWebKey signatureKey, @Nullable String serializedKeycloakState, boolean transferRestricted, @Nullable String ownApiKey, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp, boolean firstKeycloakBinding) {
         executor.execute(() -> {
             AuthState authState = null;
             if (serializedKeycloakState != null) {
@@ -100,7 +100,7 @@ public class KeycloakManager {
                     Logger.d("Error deserializing AuthState");
                 }
             }
-            KeycloakManagerState keycloakManagerState = new KeycloakManagerState(obvIdentity, keycloakServerUrl, clientId, clientSecret, jwks, signatureKey, authState, ownApiKey, latestRevocationListTimestamp, latestGroupUpdateTimestamp);
+            KeycloakManagerState keycloakManagerState = new KeycloakManagerState(obvIdentity, keycloakServerUrl, clientId, clientSecret, jwks, signatureKey, authState, ownApiKey, transferRestricted, latestRevocationListTimestamp, latestGroupUpdateTimestamp);
 
             BytesKey identityBytesKey = new BytesKey(keycloakManagerState.bytesOwnedIdentity);
             ownedIdentityStates.put(identityBytesKey, keycloakManagerState);
@@ -118,6 +118,14 @@ public class KeycloakManager {
             currentlySyncingOwnedIdentities.remove(identityBytesKey);
             AndroidNotificationManager.clearKeycloakAuthenticationRequiredNotification(bytesOwnedIdentity);
         });
+    }
+
+    public static boolean isOwnedIdentityTransferRestricted(byte[] bytesOwnedIdentity) {
+        if (INSTANCE != null) {
+            KeycloakManagerState kms = INSTANCE.ownedIdentityStates.get(new BytesKey(bytesOwnedIdentity));
+            return kms != null && kms.transferRestricted;
+        }
+        return false;
     }
 
     public static void syncAllManagedIdentities() {
@@ -425,7 +433,7 @@ public class KeycloakManager {
             }
 
 
-            KeycloakTasks.getOwnDetails(App.getContext(), kms.serverUrl, kms.authState, kms.clientSecret, kms.jwks, Math.max(0, kms.latestRevocationListTimestamp - REVOCATION_LIST_LATEST_TIMESTAMP_OVERLAP_MILLIS), new KeycloakCallbackWrapper<>(identityBytesKey, new KeycloakCallback<Pair<KeycloakUserDetailsAndStuff, KeycloakServerRevocationsAndStuff>>() {
+            KeycloakTasks.getOwnDetails(App.getContext(), kms.serverUrl, kms.authState, kms.clientSecret, kms.jwks, Math.max(0, kms.latestRevocationListTimestamp - REVOCATION_LIST_LATEST_TIMESTAMP_OVERLAP_MILLIS), new KeycloakCallbackWrapper<>(identityBytesKey, new KeycloakCallback<>() {
                 @Override
                 public void success(Pair<KeycloakUserDetailsAndStuff, KeycloakServerRevocationsAndStuff> result) {
                     executor.execute(() -> {
@@ -596,6 +604,11 @@ public class KeycloakManager {
                             }
                         }
 
+                        if (kms.transferRestricted != keycloakServerRevocationsAndStuff.transferRestricted) {
+                            AppSingleton.getEngine().updateKeycloakTransferRestrictedIfNeeded(kms.bytesOwnedIdentity, kms.serverUrl, keycloakServerRevocationsAndStuff.transferRestricted);
+                            kms.transferRestricted = keycloakServerRevocationsAndStuff.transferRestricted;
+                        }
+
                         AppSingleton.getEngine().updateKeycloakPushTopicsIfNeeded(kms.bytesOwnedIdentity, kms.serverUrl, keycloakUserDetailsAndStuff.pushTopics);
                         AppSingleton.getEngine().setOwnedIdentityKeycloakSelfRevocationTestNonce(kms.bytesOwnedIdentity, kms.serverUrl, keycloakUserDetailsAndStuff.selfRevocationTestNonce);
 
@@ -607,7 +620,7 @@ public class KeycloakManager {
 
                         ///////////////
                         // now synchronize groups too
-                        KeycloakTasks.getGroups(App.getContext(), kms.serverUrl, kms.authState, kms.clientSecret, kms.bytesOwnedIdentity, Math.max(0, kms.latestGroupUpdateTimestamp - REVOCATION_LIST_LATEST_TIMESTAMP_OVERLAP_MILLIS),  new KeycloakCallbackWrapper<>(identityBytesKey, new KeycloakCallback<Long>() {
+                        KeycloakTasks.getGroups(App.getContext(), kms.serverUrl, kms.authState, kms.clientSecret, kms.bytesOwnedIdentity, Math.max(0, kms.latestGroupUpdateTimestamp - REVOCATION_LIST_LATEST_TIMESTAMP_OVERLAP_MILLIS), new KeycloakCallbackWrapper<>(identityBytesKey, new KeycloakCallback<Long>() {
                             @Override
                             public void success(Long timestamp) {
                                 if (timestamp != null) {
@@ -664,7 +677,7 @@ public class KeycloakManager {
         });
     }
 
-    private static void registerMeApiKeyOnServer(KeycloakManagerState kms, BytesKey identityBytesKey, UUID apiKey) {
+    private static void registerMeApiKeyOnServer(KeycloakManagerState kms, BytesKey identityBytesKey, @NonNull UUID apiKey) {
         // retry at most 10 times
         for (int i=0; i<10; i++) {
             RegisterApiKeyResult registerApiKeyResult = AppSingleton.getEngine().registerOwnedIdentityApiKeyOnServer(identityBytesKey.bytes, apiKey);
@@ -704,12 +717,13 @@ public class KeycloakManager {
         @Nullable JsonWebKey signatureKey;
         @Nullable AuthState authState;
         @Nullable String ownApiKey;
+        boolean transferRestricted;
         long lastSynchronization;
         boolean autoRevokeOnNextSync;
         long latestRevocationListTimestamp;
         long latestGroupUpdateTimestamp;
 
-        public KeycloakManagerState(@NonNull ObvIdentity obvIdentity, @NonNull String serverUrl, @NonNull String clientId, @Nullable String clientSecret, @Nullable JsonWebKeySet jwks, @Nullable JsonWebKey signatureKey, @Nullable AuthState authState, @Nullable String ownApiKey, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp) {
+        public KeycloakManagerState(@NonNull ObvIdentity obvIdentity, @NonNull String serverUrl, @NonNull String clientId, @Nullable String clientSecret, @Nullable JsonWebKeySet jwks, @Nullable JsonWebKey signatureKey, @Nullable AuthState authState, @Nullable String ownApiKey, boolean transferRestricted, long latestRevocationListTimestamp, long latestGroupUpdateTimestamp) {
             this.bytesOwnedIdentity = obvIdentity.getBytesIdentity();
             this.identityDetails = obvIdentity.getIdentityDetails();
 
@@ -737,6 +751,7 @@ public class KeycloakManager {
             this.signatureKey = signatureKey;
             this.authState = authState;
             this.ownApiKey = ownApiKey;
+            this.transferRestricted = transferRestricted;
             this.lastSynchronization = 0;
             this.autoRevokeOnNextSync = false;
             this.latestRevocationListTimestamp = latestRevocationListTimestamp;
@@ -744,7 +759,7 @@ public class KeycloakManager {
         }
     }
 
-    class KeycloakCallbackWrapper<T> implements KeycloakCallback<T> {
+    public class KeycloakCallbackWrapper<T> implements KeycloakCallback<T> {
         private final BytesKey identityBytesKey;
         private final String oldAccessToken;
         private final KeycloakCallback<T> callback;

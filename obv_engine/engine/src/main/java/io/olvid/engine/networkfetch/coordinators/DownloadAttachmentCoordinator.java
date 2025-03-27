@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -77,10 +77,8 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
         this.refreshInboxAttachmentSignedUrlDelegate = refreshInboxAttachmentSignedUrlDelegate;
 
         downloadAttachmentOperationWeightQueue = new PriorityOperationQueue();
-        downloadAttachmentOperationWeightQueue.execute(4, "Engine-DownloadAttachmentCoordinator-weight");
 
         downloadAttachmentOperationTimestampQueue = new PriorityOperationQueue();
-        downloadAttachmentOperationTimestampQueue.execute(4, "Engine-DownloadAttachmentCoordinator-timestamp");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -90,6 +88,11 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
 
         awaitingIdentityReactivationOperations = new HashMap<>();
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
+    }
+
+    public void startProcessing() {
+        downloadAttachmentOperationWeightQueue.execute(4, "Engine-DownloadAttachmentCoordinator-weight");
+        downloadAttachmentOperationTimestampQueue.execute(4, "Engine-DownloadAttachmentCoordinator-timestamp");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
@@ -108,10 +111,17 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
             InboxAttachment[] attachmentsToResume = InboxAttachment.getAllAttachmentsToResume(fetchManagerSession);
             for (InboxAttachment inboxAttachment: attachmentsToResume) {
                 queueNewDownloadAttachmentOperation(inboxAttachment.getOwnedIdentity(), inboxAttachment.getMessageUid(), inboxAttachment.getAttachmentNumber(), inboxAttachment.getPriorityCategory(), inboxAttachment.getPriority());
+                // post an initial progress value so the app directly has a progress to show, even if download does not progress
+                fetchManagerSession.inboxAttachmentListener.attachmentDownloadProgressed(inboxAttachment.getOwnedIdentity(), inboxAttachment.getMessageUid(), inboxAttachment.getAttachmentNumber(), inboxAttachment.getProgress());
             }
-            fetchManagerSession.session.commit();
+
+            InboxAttachment[] attachmentsNotToResume = InboxAttachment.getAllPartialAttachmentsNotToResume(fetchManagerSession);
+            for (InboxAttachment inboxAttachment: attachmentsNotToResume) {
+                // also post a progress value for attachments that won't be downloaded
+                fetchManagerSession.inboxAttachmentListener.attachmentDownloadProgressed(inboxAttachment.getOwnedIdentity(), inboxAttachment.getMessageUid(), inboxAttachment.getAttachmentNumber(), inboxAttachment.getProgress());
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -201,7 +211,7 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
                         fetchManagerSession.session.commit();
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_FAILED_OWNED_IDENTITY_KEY, ownedIdentity);

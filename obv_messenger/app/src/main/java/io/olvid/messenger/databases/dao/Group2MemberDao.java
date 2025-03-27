@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -38,31 +40,31 @@ import io.olvid.messenger.databases.entity.Group2PendingMember;
 @Dao
 public interface Group2MemberDao {
     @Insert
-    void insert(Group2Member groupMember);
+    void insert(@NonNull Group2Member groupMember);
 
     @Delete
-    void delete(Group2Member groupMember);
+    void delete(@NonNull Group2Member groupMember);
 
     @Update
-    void update(Group2Member groupMember);
+    void update(@NonNull Group2Member groupMember);
 
     @Query("SELECT * FROM " + Group2Member.TABLE_NAME +
             " WHERE " + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
             " AND " + Group2Member.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity ")
-    Group2Member get(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, byte[] bytesContactIdentity);
+    @Nullable Group2Member get(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT EXISTS (SELECT * FROM " + Group2Member.TABLE_NAME +
             " WHERE " + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
             " AND " + Group2Member.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity )")
-    boolean isGroupMember(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, byte[] bytesContactIdentity);
+    boolean isGroupMember(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier, @NonNull byte[] bytesContactIdentity);
 
 
     @Query("SELECT * FROM " + Group2Member.TABLE_NAME +
             " WHERE " + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier")
-    List<Group2Member> getGroupMembers(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+    List<Group2Member> getGroupMembers(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier);
 
     @Query("SELECT c.* FROM " + Group2Member.TABLE_NAME + " AS gm " +
             " INNER JOIN " + Contact.TABLE_NAME + " AS c " +
@@ -70,7 +72,7 @@ public interface Group2MemberDao {
             " AND gm." + Group2Member.BYTES_CONTACT_IDENTITY + " = c." + Contact.BYTES_CONTACT_IDENTITY +
             " WHERE gm." + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND gm." + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier")
-    List<Contact> getGroupMemberContactsSync(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+    List<Contact> getGroupMemberContactsSync(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier);
 
     @Query("SELECT c.* FROM " + Group2Member.TABLE_NAME + " AS gm " +
             " INNER JOIN " + Contact.TABLE_NAME + " AS c " +
@@ -78,7 +80,7 @@ public interface Group2MemberDao {
             " AND gm." + Group2Member.BYTES_CONTACT_IDENTITY + " = c." + Contact.BYTES_CONTACT_IDENTITY +
             " WHERE gm." + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND gm." + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier")
-    LiveData<List<Contact>> getGroupMemberContacts(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+    LiveData<List<Contact>> getGroupMemberContacts(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier);
 
     @Query("SELECT * FROM ( " +
             " SELECT c.*, gm." + Group2Member.BYTES_CONTACT_IDENTITY + " AS bytesContactIdentity, " +
@@ -113,7 +115,7 @@ public interface Group2MemberDao {
             " WHERE pm." + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND pm." + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
             " ) ORDER BY sortDisplayName ASC")
-    LiveData<List<Group2MemberOrPending>> getGroupMembersAndPending(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+    LiveData<List<Group2MemberOrPending>> getGroupMembersAndPending(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier);
 
     @Query("SELECT * FROM ( " +
             " SELECT c.*, gm." + Group2Member.BYTES_CONTACT_IDENTITY + " AS bytesContactIdentity, " +
@@ -138,7 +140,7 @@ public interface Group2MemberDao {
             " WHERE pm." + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND pm." + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
             " ) ORDER BY sortDisplayName ASC")
-    LiveData<List<Group2MemberOrPendingForMention>> getGroupMembersAndPendingForMention(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+    LiveData<List<Group2MemberOrPendingForMention>> getGroupMembersAndPendingForMention(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier);
 
     @Query("SELECT * FROM ( " +
             " SELECT c.*, gm." + Group2Member.BYTES_CONTACT_IDENTITY + " AS bytesContactIdentity, " +
@@ -173,7 +175,7 @@ public interface Group2MemberDao {
             " WHERE pm." + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND pm." + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
             " ) ORDER BY sortDisplayName ASC")
-    List<Group2MemberOrPending> getGroupMembersAndPendingSync(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+    List<Group2MemberOrPending> getGroupMembersAndPendingSync(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier);
 
     @Query("SELECT disc.id FROM " + Discussion.TABLE_NAME + " AS disc " +
             " INNER JOIN " + Group2.TABLE_NAME + " AS g " +
@@ -186,7 +188,7 @@ public interface Group2MemberDao {
             " WHERE g." + Group2.OWN_PERMISSION_CHANGE_SETTINGS + " = 1 " +
             " AND gm." + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND gm." + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    List<Long> getGroupV2DiscussionIdsWithSettingsPermissionWithContact(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    List<Long> getGroupV2DiscussionIdsWithSettingsPermissionWithContact(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
 
     @Query("SELECT * FROM (SELECT c.* FROM " + Group2Member.TABLE_NAME + " AS gm " +
@@ -203,17 +205,17 @@ public interface Group2MemberDao {
             " AND (c." + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
             " OR c." + Contact.PRE_KEY_COUNT + " > 0)) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getGroupMemberContactsAndMore(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, List<byte[]> bytesContactIdentities);
+    LiveData<List<Contact>> getGroupMemberContactsAndMore(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier, @NonNull List<byte[]> bytesContactIdentities);
 
     @Query("SELECT COUNT(*) FROM " + Group2Member.TABLE_NAME +
             " WHERE " + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2Member.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    int countContactGroups(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    int countContactGroups(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT EXISTS (SELECT 1 FROM " + Group2Member.TABLE_NAME +
             " WHERE " + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier )")
-    boolean groupHasMembers(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+    boolean groupHasMembers(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier);
 
 
     class Group2MemberOrPending {

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -76,7 +76,7 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
             linkBetweenProtocolInstances.insert();
             return linkBetweenProtocolInstances;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -244,6 +244,7 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
                 parentProtocolInstance.getUid(),
                 linkBetweenProtocolInstances.messageToSendId,
                 inputs,
+                false,
                 false);
     }
 

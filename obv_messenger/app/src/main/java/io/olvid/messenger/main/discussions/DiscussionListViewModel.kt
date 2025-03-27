@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -28,21 +28,25 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R.string
+import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.customClasses.formatSingleLineMarkdown
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.DiscussionDao.DiscussionAndLastMessage
+import io.olvid.messenger.databases.dao.DiscussionDao.SimpleDiscussionAndLastMessage
 import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.databases.tasks.PropagateArchivedDiscussionsChangeTask
 import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +57,8 @@ class DiscussionListViewModel : ViewModel() {
     private val _selection = mutableSetOf<Long>()
     var selection by mutableStateOf<List<DiscussionAndLastMessage>>(emptyList())
         private set
+
+    var cancelableArchivedDiscussions by mutableStateOf<List<Discussion>>(emptyList())
 
     fun isSelected(discussion: Discussion): Boolean = _selection.contains(discussion.id)
 
@@ -80,15 +86,36 @@ class DiscussionListViewModel : ViewModel() {
     }
 
 
-    val discussions: LiveData<List<DiscussionAndLastMessage>> =
+    val discussions: LiveData<List<DiscussionAndLastMessage>?> = DiscussionAndLastMessageLiveData(
         AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
             if (ownedIdentity == null) {
                 return@switchMap null
             } else {
                 return@switchMap AppDatabase.getInstance().discussionDao()
-                    .getNonDeletedDiscussionAndLastMessages(ownedIdentity.bytesOwnedIdentity)
+                    .getNonDeletedDiscussionAndLastMessages(ownedIdentity.bytesOwnedIdentity, false)
             }
-        }
+        },
+        UnreadCountsSingleton.getUnreadMessageCountsByDiscussionLiveData(),
+        UnreadCountsSingleton.getMentionsDiscussionsLiveData(),
+        UnreadCountsSingleton.getLocationsSharedDiscussionsLiveData()
+    )
+    val archivedDiscussions: LiveData<List<DiscussionAndLastMessage>?> =
+        DiscussionAndLastMessageLiveData(
+            AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
+                if (ownedIdentity == null) {
+                    return@switchMap null
+                } else {
+                    return@switchMap AppDatabase.getInstance().discussionDao()
+                        .getNonDeletedDiscussionAndLastMessages(
+                            ownedIdentity.bytesOwnedIdentity,
+                            true
+                        )
+                }
+            },
+            UnreadCountsSingleton.getUnreadMessageCountsByDiscussionLiveData(),
+            UnreadCountsSingleton.getMentionsDiscussionsLiveData(),
+            UnreadCountsSingleton.getLocationsSharedDiscussionsLiveData()
+        )
 
     var reorderList by mutableStateOf<List<DiscussionAndLastMessage>?>(null)
 
@@ -114,7 +141,9 @@ class DiscussionListViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val db = AppDatabase.getInstance()
             val oldPinnedDiscussions =
-                db.discussionDao().getAllPinned(AppSingleton.getBytesCurrentIdentity())
+                AppSingleton.getBytesCurrentIdentity()?.let { bytesOwnedIdentity ->
+                    db.discussionDao().getAllPinned(bytesOwnedIdentity)
+                } ?: emptyList()
             val pinnedDiscussionsMap =
                 HashMap(oldPinnedDiscussions.associateBy { discussion -> discussion.id })
             val pinnedDiscussions =
@@ -141,6 +170,29 @@ class DiscussionListViewModel : ViewModel() {
             AppSingleton.getBytesCurrentIdentity()
                 ?.let { PropagatePinnedDiscussionsChangeTask(it).run() }
         }
+    }
+
+    fun archiveSelectedDiscussions(archived: Boolean) {
+        archiveDiscussion(*selection.map { it.discussion }.toTypedArray(), archived = archived, cancelable = true)
+    }
+
+    fun archiveDiscussion(vararg discussion: Discussion, archived: Boolean, cancelable: Boolean) {
+        if (cancelable) {
+            cancelableArchivedDiscussions = cancelableArchivedDiscussions + discussion
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            discussion.asList().apply {
+                forEach {
+                    AppDatabase.getInstance().discussionDao().updateArchived(it.id, archived)
+                }
+                propagateArchivedDiscussions(this, archived)
+            }
+        }
+    }
+
+    private fun propagateArchivedDiscussions(discussions: List<Discussion>, archived: Boolean) {
+        AppSingleton.getBytesCurrentIdentity()
+            ?.let { PropagateArchivedDiscussionsChangeTask(it, discussions, archived).run() }
     }
 }
 
@@ -178,42 +230,18 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                     val body = message.getStringContent(context)
                     if (message.status == Message.STATUS_DRAFT) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                            append(
-                                context.getString(
-                                    string.text_draft_message_prefix,
-                                    ""
-                                )
-                            )
+                            append(context.getString(string.text_draft_message_prefix))
                             append(body.formatSingleLineMarkdown())
                         }
                     } else if (message.wipeStatus == Message.WIPE_STATUS_WIPED
                         || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
+                        || message.isLocationMessage
                     ) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                             append(AnnotatedString(body).formatMarkdown())
                         }
                     } else {
-                        if (message.isLocationMessage) {
-                            append(
-                                context.getString(
-                                    string.text_outbound_message_prefix,
-                                    body
-                                )
-                            )
-                            addStyle(
-                                SpanStyle(fontStyle = FontStyle.Italic),
-                                0,
-                                length - body.length
-                            )
-                        } else {
-                            append(
-                                context.getString(
-                                    string.text_outbound_message_prefix,
-                                    ""
-                                )
-                            )
-                            append(body.formatSingleLineMarkdown())
-                        }
+                        append(body.formatSingleLineMarkdown())
                     }
                 }
 
@@ -459,7 +487,7 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
 
                 else -> {
                     if (discussionType == Discussion.TYPE_GROUP || discussionType == Discussion.TYPE_GROUP_V2) {
-                        (if (SettingsActivity.getAllowContactFirstName())
+                        (if (SettingsActivity.allowContactFirstName)
                             AppSingleton.getContactFirstName(message.senderIdentifier)
                         else
                             AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
@@ -489,6 +517,51 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
         } ifNull {
             withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                 append(context.getString(string.text_no_messages))
+            }
+        }
+    }
+}
+
+private class DiscussionAndLastMessageLiveData(
+    discussionsLiveData: LiveData<List<SimpleDiscussionAndLastMessage>>,
+    unreadCountsLiveData: LiveData<Map<Long, Int>>,
+    mentionsLiveData: LiveData<Set<Long>>,
+    locationsSharedLiveData: LiveData<Set<Long>>
+) : MediatorLiveData<List<DiscussionAndLastMessage>?>() {
+    private var unreadCounts: Map<Long, Int> = emptyMap()
+    private var mentions: Set<Long> = emptySet()
+    private var locationsShared: Set<Long> = emptySet()
+    private var discussions: List<SimpleDiscussionAndLastMessage>? = null
+
+    init {
+        addSource(discussionsLiveData) {
+            discussions = it
+            merge()
+        }
+        addSource(unreadCountsLiveData) {
+            unreadCounts = it
+            merge()
+        }
+        addSource(mentionsLiveData) {
+            mentions = it
+            merge()
+        }
+        addSource(locationsSharedLiveData) {
+            locationsShared = it
+            merge()
+        }
+    }
+
+    fun merge() {
+        value = discussions?.map {
+            return@map DiscussionAndLastMessage().apply {
+                discussion = it.discussion
+                message = it.message
+                discussionCustomization = it.discussionCustomization
+                unreadCount = unreadCounts[it.discussion.id] ?: 0
+                unreadMention = mentions.contains(it.discussion.id)
+                locationsShared =
+                    this@DiscussionAndLastMessageLiveData.locationsShared.contains(it.discussion.id)
             }
         }
     }

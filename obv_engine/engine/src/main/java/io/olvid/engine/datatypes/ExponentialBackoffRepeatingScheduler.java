@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -112,11 +112,8 @@ public class ExponentialBackoffRepeatingScheduler<T> {
     }
 
     // for polling only
-//    public ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, int i, long delay, TimeUnit timeUnit) {
-//        return scheduler.scheduleAtFixedRate(runnable, i, delay, timeUnit);
-//    }
-
     protected long computeReschedulingDelay(int failedAttemptCount) {
-        return (long) ((Constants.BASE_RESCHEDULING_TIME << failedAttemptCount) * (1 + random.nextFloat()));
+        long base = Constants.BASE_RESCHEDULING_TIME << Math.min(failedAttemptCount, 32);
+        return (long) (base * (1 + random.nextFloat()));
     }
 }

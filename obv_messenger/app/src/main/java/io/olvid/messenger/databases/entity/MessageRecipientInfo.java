@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -75,9 +75,11 @@ public class MessageRecipientInfo {
     public byte[] bytesContactIdentity;
 
     @ColumnInfo(name = RETURN_RECEIPT_NONCE)
+    @Nullable
     public byte[] returnReceiptNonce;
 
     @ColumnInfo(name = RETURN_RECEIPT_KEY)
+    @Nullable
     public byte[] returnReceiptKey;
 
     @ColumnInfo(name = ENGINE_MESSAGE_IDENTIFIER)
@@ -109,7 +111,7 @@ public class MessageRecipientInfo {
     public String unreadAttachmentNumbers;
 
     // default constructor required by Room
-    public MessageRecipientInfo(long messageId, @NonNull byte[] bytesContactIdentity, byte[] returnReceiptNonce, byte[] returnReceiptKey, @Nullable byte[] engineMessageIdentifier, @Nullable String unsentAttachmentNumbers, @Nullable Long timestampSent, @Nullable Long timestampDelivered, @Nullable Long timestampRead, @Nullable String undeliveredAttachmentNumbers, @Nullable String unreadAttachmentNumbers) {
+    public MessageRecipientInfo(long messageId, @NonNull byte[] bytesContactIdentity, @Nullable byte[] returnReceiptNonce, @Nullable byte[] returnReceiptKey, @Nullable byte[] engineMessageIdentifier, @Nullable String unsentAttachmentNumbers, @Nullable Long timestampSent, @Nullable Long timestampDelivered, @Nullable Long timestampRead, @Nullable String undeliveredAttachmentNumbers, @Nullable String unreadAttachmentNumbers) {
         this.messageId = messageId;
         this.bytesContactIdentity = bytesContactIdentity;
         this.returnReceiptNonce = returnReceiptNonce;
@@ -121,21 +123,6 @@ public class MessageRecipientInfo {
         this.timestampRead = timestampRead;
         this.undeliveredAttachmentNumbers = undeliveredAttachmentNumbers;
         this.unreadAttachmentNumbers = unreadAttachmentNumbers;
-    }
-
-    @Ignore
-    public MessageRecipientInfo(long messageId, int attachmentCount, @NonNull byte[] bytesContactIdentity, @Nullable byte[] engineMessageIdentifier, byte[] returnReceiptNonce, byte[] returnReceiptKey) {
-        this.messageId = messageId;
-        this.bytesContactIdentity = bytesContactIdentity;
-        this.engineMessageIdentifier = engineMessageIdentifier;
-        this.unsentAttachmentNumbers = getUnsentAttachmentNumbers(attachmentCount);
-        this.returnReceiptNonce = returnReceiptNonce;
-        this.returnReceiptKey = returnReceiptKey;
-        this.timestampSent = null;
-        this.timestampDelivered = null;
-        this.timestampRead = null;
-        this.undeliveredAttachmentNumbers = this.unsentAttachmentNumbers;
-        this.unreadAttachmentNumbers = this.unsentAttachmentNumbers;
     }
 
     @Ignore
@@ -160,7 +147,7 @@ public class MessageRecipientInfo {
         if (timestampDelivered != null) {
             return 3;
         }
-        if (timestampSent != null && timestampSent > 0) {
+        if (timestampSent != null && (timestampSent > 0 || Arrays.equals(engineMessageIdentifier, new byte[0]))) { // the 0-length engine identifier is only used for messages sent from another device
             return 2;
         }
         if (engineMessageIdentifier != null) {

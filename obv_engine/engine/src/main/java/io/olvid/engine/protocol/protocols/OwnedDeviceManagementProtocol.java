@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -299,8 +299,7 @@ public class OwnedDeviceManagementProtocol extends ConcreteProtocol {
                 UID protocolInstanceUid = new UID(getPrng());
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         ConcreteProtocol.OWNED_DEVICE_DISCOVERY_PROTOCOL_ID,
-                        protocolInstanceUid,
-                        false);
+                        protocolInstanceUid);
                 ChannelMessageToSend message = new OwnedDeviceDiscoveryProtocol.InitialMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, getPrng());
             }
@@ -312,8 +311,7 @@ public class OwnedDeviceManagementProtocol extends ConcreteProtocol {
                     try {
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(sendChannelInfo,
                                 ConcreteProtocol.CONTACT_MANAGEMENT_PROTOCOL_ID,
-                                new UID(getPrng()),
-                                false);
+                                new UID(getPrng()));
                         ChannelMessageToSend message = new ContactManagementProtocol.PerformContactDeviceDiscoveryMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, getPrng());
                     } catch (NoAcceptableChannelException e) {

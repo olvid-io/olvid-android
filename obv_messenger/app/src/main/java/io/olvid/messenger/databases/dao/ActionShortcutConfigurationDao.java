@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -32,14 +32,14 @@ import io.olvid.messenger.databases.entity.ActionShortcutConfiguration;
 @Dao
 public interface ActionShortcutConfigurationDao {
     @Insert
-    void insert(ActionShortcutConfiguration callLogItem);
+    void insert(ActionShortcutConfiguration configuration);
 
     @Query("DELETE FROM " + ActionShortcutConfiguration.TABLE_NAME +
             " WHERE " + ActionShortcutConfiguration.APP_WIDGET_ID + " = :appWidgetId")
     void delete(int appWidgetId);
 
     @Update
-    void update(ActionShortcutConfiguration callLogItem);
+    void update(ActionShortcutConfiguration configuration);
 
     @Query("SELECT COUNT(*) FROM " + ActionShortcutConfiguration.TABLE_NAME)
     long countAll();

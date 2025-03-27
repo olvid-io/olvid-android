@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -32,26 +34,26 @@ import io.olvid.messenger.databases.entity.Group2PendingMember;
 @Dao
 public interface Group2PendingMemberDao {
     @Insert
-    void insert(Group2PendingMember pendingMember);
+    void insert(@NonNull Group2PendingMember pendingMember);
 
     @Delete
-    void delete(Group2PendingMember pendingMember);
+    void delete(@NonNull Group2PendingMember pendingMember);
 
     @Update
-    void update(Group2PendingMember pendingMember);
+    void update(@NonNull Group2PendingMember pendingMember);
 
     @Query("UPDATE " + Group2PendingMember.TABLE_NAME +
             " SET " + Group2PendingMember.FIRST_NAME + " = :firstName " +
             " WHERE " + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
             " AND " + Group2PendingMember.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateFirstName(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, byte[] bytesContactIdentity, String firstName);
+    void updateFirstName(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier, @NonNull byte[] bytesContactIdentity, @Nullable String firstName);
 
     @Query("SELECT * FROM " + Group2PendingMember.TABLE_NAME +
             " WHERE " + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
             " AND " + Group2PendingMember.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity ")
-    Group2PendingMember get(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, byte[] bytesContactIdentity);
+    @Nullable Group2PendingMember get(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT * FROM " + Group2PendingMember.TABLE_NAME)
     List<Group2PendingMember> getAll();
@@ -59,14 +61,14 @@ public interface Group2PendingMemberDao {
     @Query("SELECT * FROM " + Group2PendingMember.TABLE_NAME +
             " WHERE " + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2PendingMember.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier")
-    List<Group2PendingMember> getGroupPendingMembers(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier);
+    List<Group2PendingMember> getGroupPendingMembers(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier);
 
     @Query("SELECT * FROM " + Group2PendingMember.TABLE_NAME +
             " WHERE " + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    List<Group2PendingMember> getAll(byte[] bytesOwnedIdentity);
+    List<Group2PendingMember> getAll(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT COUNT(*) FROM " + Group2PendingMember.TABLE_NAME +
             " WHERE " + Group2PendingMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2PendingMember.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    int countContactGroups(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    int countContactGroups(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 }

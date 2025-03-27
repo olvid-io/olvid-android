@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -28,7 +28,7 @@ import io.olvid.messenger.databases.entity.Message
 class PropagateBookmarkedMessageChangeTask(private val bytesOwnedIdentity : ByteArray, private val message: Message, private val bookmarked : Boolean) : Runnable {
     override fun run() {
         try {
-            val discussionIdentifier = AppDatabase.getInstance().discussionDao().getById(message.discussionId).run {
+            val discussionIdentifier = AppDatabase.getInstance().discussionDao().getById(message.discussionId)?.run {
                 ObvSyncAtom.DiscussionIdentifier(
                     when (discussionType) {
                         Discussion.TYPE_CONTACT -> ObvSyncAtom.DiscussionIdentifier.CONTACT

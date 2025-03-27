@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,7 +22,6 @@ package io.olvid.messenger.main.groups
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -64,6 +63,7 @@ import io.olvid.messenger.main.InitialView
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun GroupListItem(
+    modifier: Modifier = Modifier,
     group: GroupOrGroup2,
     title: AnnotatedString,
     body: AnnotatedString,
@@ -72,7 +72,7 @@ fun GroupListItem(
     publishedDetailsNotification : Boolean = false,
     groupMenu: GroupMenu,
 ) {
-    Box(modifier = Modifier.background(colorResource(id = R.color.almostWhite))) {
+    Box(modifier = modifier) {
         // menu
         var menuOpened by remember { mutableStateOf(false) }
         GroupMenu(

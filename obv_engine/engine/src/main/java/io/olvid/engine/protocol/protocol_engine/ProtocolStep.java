@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -78,7 +78,7 @@ public abstract class ProtocolStep extends Operation {
             setFinished();
         } catch (Exception e) {
             cancel(null);
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -108,7 +108,7 @@ public abstract class ProtocolStep extends Operation {
     public abstract ConcreteProtocolState executeStep() throws Exception;
 
     public CoreProtocolMessage buildCoreProtocolMessage(SendChannelInfo sendChannelInfo) {
-        return new CoreProtocolMessage(sendChannelInfo, getProtocolId(), getProtocolInstanceUid(), false);
+        return new CoreProtocolMessage(sendChannelInfo, getProtocolId(), getProtocolInstanceUid());
     }
 
 }

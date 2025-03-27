@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -111,7 +111,7 @@ public class PushNotificationConfiguration implements ObvDatabase {
             pushNotificationConfiguration.insert();
             return pushNotificationConfiguration;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -132,7 +132,7 @@ public class PushNotificationConfiguration implements ObvDatabase {
         try {
             this.ownedIdentity = Identity.of(res.getBytes(OWNED_IDENTITY));
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.deviceUid = new UID(res.getBytes(DEVICE_UID));
         this.pushNotificationType = res.getByte(PUSH_NOTIFICATION_TYPE);
@@ -221,7 +221,7 @@ public class PushNotificationConfiguration implements ObvDatabase {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -255,7 +255,7 @@ public class PushNotificationConfiguration implements ObvDatabase {
             statement.executeUpdate();
             this.multiDeviceConfiguration = newMultiDeviceConfiguration;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

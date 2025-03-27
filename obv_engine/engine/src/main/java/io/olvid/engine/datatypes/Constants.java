@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -23,8 +23,8 @@ package io.olvid.engine.datatypes;
 import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 41;
-    public static final int SERVER_API_VERSION = 18;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 43;
+    public static final int SERVER_API_VERSION = 19;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
     // files / folders
@@ -55,9 +55,9 @@ public abstract class Constants {
 
     // full ratcheting thresholds
     public static final int THRESHOLD_NUMBER_OF_DECRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE = 20;
-    public static final long THRESHOLD_TIME_INTERVAL_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE = 7_200_000L; // restart the full ratchet after 2 hours without response
-    public static final int THRESHOLD_NUMBER_OF_ENCRYPTED_MESSAGES_PER_FULL_RATCHET = 100; // do a full ratchet after 100 messages
-    public static final long FULL_RATCHET_TIME_INTERVAL_VALIDITY = 86_400_000L * 7; // do a full ratchet every week
+    public static final long THRESHOLD_TIME_INTERVAL_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE = 86_400_000L; // restart the full ratchet after 24 hours without response
+    public static final int THRESHOLD_NUMBER_OF_ENCRYPTED_MESSAGES_PER_FULL_RATCHET = 500; // do a full ratchet after 500 messages
+    public static final long FULL_RATCHET_TIME_INTERVAL_VALIDITY = 86_400_000L * 30; // do a full ratchet every month
 
     public static final int REPROVISIONING_THRESHOLD = 50;
     public static final long PROVISIONED_KEY_MATERIAL_EXPIRATION_DELAY = 86_400_000L * 2; // expire old ProvisionedKeyMaterial after 2 days

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -865,9 +865,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                             SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             GROUP_INVITATION_PROTOCOL_ID,
-                            childProtocolInstanceUid,
-                            false
-                    );
+                            childProtocolInstanceUid);
                     ChannelMessageToSend messageToSend = new GroupInvitationProtocol.InitialMessage(coreProtocolMessage, identityWithSerializedDetails.identity, groupInformation, receivedMessage.groupMemberIdentitiesAndSerializedDetails).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -929,9 +927,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         DOWNLOAD_GROUP_PHOTO_CHILD_PROTOCOL_ID,
-                        new UID(getPrng()),
-                        false
-                );
+                        new UID(getPrng()));
                 ChannelMessageToSend messageToSend = new DownloadGroupPhotoChildProtocol.InitialMessage(coreProtocolMessage, receivedMessage.groupInformation).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -1111,9 +1107,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                                 SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                 DOWNLOAD_GROUP_PHOTO_CHILD_PROTOCOL_ID,
-                                new UID(getPrng()),
-                                false
-                        );
+                                new UID(getPrng()));
                         ChannelMessageToSend messageToSend = new DownloadGroupPhotoChildProtocol.InitialMessage(coreProtocolMessage, receivedMessage.groupInformation).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     }
@@ -1183,9 +1177,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                     CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                             SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                             GROUP_INVITATION_PROTOCOL_ID,
-                            childProtocolInstanceUid,
-                            false
-                    );
+                            childProtocolInstanceUid);
                     ChannelMessageToSend messageToSend = new GroupInvitationProtocol.InitialMessage(coreProtocolMessage, contactIdentity, receivedMessage.groupInformation, allGroupMembers).generateChannelProtocolMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 }
@@ -1340,9 +1332,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         GROUP_INVITATION_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new GroupInvitationProtocol.InitialMessage(coreProtocolMessage, receivedMessage.pendingMemberIdentity, receivedMessage.groupInformation, allGroupMembers).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -1804,9 +1794,7 @@ public class GroupManagementProtocol extends ConcreteProtocol {
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                         SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                         GROUP_INVITATION_PROTOCOL_ID,
-                        childProtocolInstanceUid,
-                        false
-                );
+                        childProtocolInstanceUid);
                 ChannelMessageToSend messageToSend = new GroupInvitationProtocol.InitialMessage(coreProtocolMessage, receivedMessage.memberIdentity, receivedMessage.groupInformation, allGroupMembers).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }

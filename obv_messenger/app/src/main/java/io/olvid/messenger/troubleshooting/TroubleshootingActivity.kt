@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -34,16 +34,20 @@ import android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
 import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 import android.text.format.Formatter
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +61,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle.State.RESUMED
@@ -66,15 +71,20 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
+import io.olvid.messenger.R
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.AppDatabaseOpenCallback
 import io.olvid.messenger.firebase.ObvFirebaseMessagingService
 import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.services.AvailableSpaceHelper
 import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
+import io.olvid.messenger.troubleshooting.TroubleshootingItemType.DB_SYNC
 import io.olvid.messenger.troubleshooting.TroubleshootingItemType.LOCATION
 import io.olvid.messenger.troubleshooting.TroubleshootingItemType.LOCATION_PERMISSIONS
 import kotlinx.coroutines.delay
@@ -82,7 +92,7 @@ import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalPermissionsApi::class)
-class TroubleshootingActivity : ComponentActivity() {
+class TroubleshootingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -106,7 +116,7 @@ class TroubleshootingActivity : ComponentActivity() {
                 CheckState(SOCKET_CHECK_STATE, troubleshootingDataStore) { getPermanentSocketState() }
             }
             val backupState = remember {
-                CheckState(BACKUP_CHECK_STATE, troubleshootingDataStore, statusIsOk = {a -> a == 0}) { getBackupState()}
+                CheckState(BACKUP_CHECK_STATE, troubleshootingDataStore, statusIsOk = { a -> a == 0 }) { getBackupState() }
             }
             val fullScreenIntentState = remember {
                 CheckState(FULL_SCREEN_CHECK_STATE, troubleshootingDataStore) { getFullScreenIntentState() }
@@ -115,7 +125,7 @@ class TroubleshootingActivity : ComponentActivity() {
                 CheckState(LOCATION_CHECK_STATE, troubleshootingDataStore) { getLocationState() }
             }
 
-            val postNotificationsState = rememberPermissionState( permission.POST_NOTIFICATIONS )
+            val postNotificationsState = rememberPermissionState(permission.POST_NOTIFICATIONS)
             val cameraState = rememberPermissionState(permission.CAMERA)
             val microphoneState = rememberPermissionState(permission.RECORD_AUDIO)
             val locationPermissionState = rememberMultiplePermissionsState(listOf(permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION))
@@ -133,12 +143,12 @@ class TroubleshootingActivity : ComponentActivity() {
                 )
             )
 
-            val troubleshootingItems : MutableState<List<TroubleshootingItemType>> = remember {
+            val troubleshootingItems: MutableState<List<TroubleshootingItemType>> = remember {
                 mutableStateOf(mutableListOf())
             }
 
             LaunchedEffect(Unit) {
-                val list : ArrayList<Triple<Boolean, Boolean, TroubleshootingItemType>> = ArrayList() // triple is (valid, critical, TroubleshootItemType)
+                val list: ArrayList<Triple<Boolean, Boolean, TroubleshootingItemType>> = ArrayList() // triple is (valid, critical, TroubleshootItemType)
                 if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
                     list.add(Triple(postNotificationsState.status.isGranted, true, TroubleshootingItemType.NOTIFICATIONS))
                 } else {
@@ -184,6 +194,8 @@ class TroubleshootingActivity : ComponentActivity() {
 
                 list.add(Triple(storageState.valid, true, TroubleshootingItemType.STORAGE))
 
+                list.add(Triple(storageState.valid, true, TroubleshootingItemType.DB_SYNC))
+
                 list.sortBy {
                     when {
                         it.first -> 2
@@ -201,12 +213,13 @@ class TroubleshootingActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
+                        .systemBarsPadding()
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    FaqLinkHeader (
+                    FaqLinkHeader(
                         openFaq = {
                             startActivity(
                                 Intent(
@@ -221,7 +234,7 @@ class TroubleshootingActivity : ComponentActivity() {
                     )
 
                     troubleshootingItems.value.forEach { troubleshootingItem ->
-                        when(troubleshootingItem) {
+                        when (troubleshootingItem) {
 
                             TroubleshootingItemType.NOTIFICATIONS -> {
                                 val notificationsPermissionLauncher = rememberLauncherForActivityResult(
@@ -569,11 +582,47 @@ class TroubleshootingActivity : ComponentActivity() {
                                     }
                                 }
                             }
+
+                            DB_SYNC -> {
+                                TroubleShootItem(
+                                    title = stringResource(id = R.string.troubleshooting_storage_db_sync_title),
+                                    description = stringResource(id = R.string.troubleshooting_storage_db_sync_description),
+                                    valid = true,
+                                    additionalContent = {
+                                        var inProgress by remember { mutableStateOf(false) }
+                                        AnimatedVisibility(visible = !inProgress) {
+                                            TextButton(
+                                                onClick = {
+                                                    inProgress = true
+                                                    App.runThread {
+                                                        try {
+                                                            AppDatabaseOpenCallback.syncEngineDatabases(AppSingleton.getEngine(), AppDatabase.getInstance())
+                                                            Thread.sleep(1000)
+                                                        } catch (_: Exception) { }
+                                                        inProgress = false
+                                                    }
+                                                }
+                                            ) {
+                                                Text(text = stringResource(id = R.string.button_label_check_now))
+                                            }
+                                        }
+                                        AnimatedVisibility(visible = inProgress) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier
+                                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                                                    .size(24.dp),
+                                                color = colorResource(id = R.color.olvid_gradient_light),
+                                                strokeWidth = 2.dp
+                                            )
+                                        }
+                                    }
+                                ) { }
+                            }
                         }
                     }
 
-                    AppVersionHeader(betaEnabled = SettingsActivity.getBetaFeaturesEnabled())
-                    
+                    AppVersionHeader(betaEnabled = SettingsActivity.betaFeaturesEnabled)
+
                     RestartAppButton()
                 }
             }

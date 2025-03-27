@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -33,12 +33,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
 import io.olvid.engine.datatypes.Session;
+import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
 
@@ -75,6 +77,8 @@ public class KeycloakServer implements ObvDatabase {
     static final String LATEST_GROUP_UPDATE_TIMESTAMP = "latest_group_update_timestamp";
     private String ownApiKey; // the api key given to us by keycloak, non null only for the keycloak server of a managed identity
     static final String OWN_API_KEY = "own_api_key";
+    private boolean transferRestricted; // true if transfer requires a re-authentication, may only be true for the keycloak server of a managed identity
+    static final String TRANSFER_RESTRICTED = "transfer_restricted";
 
     public String getServerUrl() {
         return serverUrl;
@@ -127,6 +131,10 @@ public class KeycloakServer implements ObvDatabase {
         return ownApiKey;
     }
 
+    public boolean isTransferRestricted() {
+        return transferRestricted;
+    }
+
     public List<String> getPushTopics() {
         if (serializedPushTopics == null) {
             return new ArrayList<>(0);
@@ -156,23 +164,23 @@ public class KeycloakServer implements ObvDatabase {
 
     // region constructors
 
-    public static KeycloakServer create(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, String serializedJwks, String serializedKey, String clientId, String clientSecret) {
+    public static KeycloakServer create(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, String serializedJwks, String serializedKey, String clientId, String clientSecret, boolean transferRestricted) {
         if (serverUrl == null || ownedIdentity == null || serializedJwks == null) {
             return null;
         }
         try {
-            KeycloakServer keycloakServer = new KeycloakServer(identityManagerSession, serverUrl, ownedIdentity, serializedJwks, serializedKey, clientId, clientSecret);
+            KeycloakServer keycloakServer = new KeycloakServer(identityManagerSession, serverUrl, ownedIdentity, serializedJwks, serializedKey, clientId, clientSecret, transferRestricted);
             keycloakServer.insert();
             return keycloakServer;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
 
 
 
-    public KeycloakServer(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, String serializedJwks, String serializedSignatureKey, String clientId, String clientSecret) {
+    public KeycloakServer(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, String serializedJwks, String serializedSignatureKey, String clientId, String clientSecret, boolean transferRestricted) {
         this.identityManagerSession = identityManagerSession;
         this.serverUrl = serverUrl;
         this.ownedIdentity = ownedIdentity;
@@ -187,6 +195,7 @@ public class KeycloakServer implements ObvDatabase {
         this.latestRevocationListTimestamp = 0;
         this.latestGroupUpdateTimestamp = 0;
         this.ownApiKey = null;
+        this.transferRestricted = transferRestricted;
     }
 
     private KeycloakServer(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -208,6 +217,7 @@ public class KeycloakServer implements ObvDatabase {
         this.latestRevocationListTimestamp = res.getLong(LATEST_REVOCATION_LIST_TIMESTAMP);
         this.latestGroupUpdateTimestamp = res.getLong(LATEST_GROUP_UPDATE_TIMESTAMP);
         this.ownApiKey = res.getString(OWN_API_KEY);
+        this.transferRestricted = res.getBoolean(TRANSFER_RESTRICTED);
     }
 
     // endregion
@@ -231,6 +241,7 @@ public class KeycloakServer implements ObvDatabase {
                     LATEST_REVOCATION_LIST_TIMESTAMP + " BIGINT NOT NULL, " +
                     LATEST_GROUP_UPDATE_TIMESTAMP + " BIGINT NOT NULL, " +
                     OWN_API_KEY + " TEXT, " +
+                    TRANSFER_RESTRICTED + " BIT NOT NULL, " +
                     " CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + SERVER_URL + ", " + OWNED_IDENTITY + "), " +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + " (" + OwnedIdentity.OWNED_IDENTITY + ") ON DELETE CASCADE);");
         }
@@ -280,11 +291,18 @@ public class KeycloakServer implements ObvDatabase {
             }
             oldVersion = 35;
         }
+        if (oldVersion < 42 && newVersion >= 42) {
+            Logger.d("MIGRATING `keycloak_server` DATABASE FROM VERSION " + oldVersion + " TO 42");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE keycloak_server ADD COLUMN `transfer_restricted` BIT NOT NULL DEFAULT 0;");
+            }
+            oldVersion = 35;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?);")) {
             statement.setString(1, serverUrl);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setString(3, serializedJwks);
@@ -300,6 +318,7 @@ public class KeycloakServer implements ObvDatabase {
             statement.setLong(11, latestRevocationListTimestamp);
             statement.setLong(12, latestGroupUpdateTimestamp);
             statement.setString(13, ownApiKey);
+            statement.setBoolean(14, transferRestricted);
             statement.executeUpdate();
         }
     }
@@ -414,22 +433,22 @@ public class KeycloakServer implements ObvDatabase {
         }
     }
 
-    public void setOwnApiKey(String apiKey) throws SQLException {
+    public void setTransferRestricted(boolean transferRestricted) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
-                " SET " + OWN_API_KEY + " = ? " +
+                " SET " + TRANSFER_RESTRICTED + " = ? " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
-            statement.setString(1, apiKey);
+            statement.setBoolean(1, transferRestricted);
             statement.setString(2, this.serverUrl);
             statement.setBytes(3, this.ownedIdentity.getBytes());
             statement.executeUpdate();
-            this.ownApiKey = apiKey;
+            this.transferRestricted = transferRestricted;
         }
     }
 
     public void setPushTopics(List<String> pushTopics) throws SQLException {
         byte[] serializedPushTopics;
-        if (pushTopics == null || pushTopics.size() == 0) {
+        if (pushTopics == null || pushTopics.isEmpty()) {
             serializedPushTopics = null;
         } else {
             try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -544,7 +563,7 @@ public class KeycloakServer implements ObvDatabase {
             return null;
         }
 
-        KeycloakServer keycloakServer = new KeycloakServer(identityManagerSession, pojo.server_url, ownedIdentity, pojo.jwks, pojo.serialized_signature_key, pojo.client_id, pojo.client_secret);
+        KeycloakServer keycloakServer = new KeycloakServer(identityManagerSession, pojo.server_url, ownedIdentity, pojo.jwks, pojo.serialized_signature_key, pojo.client_id, pojo.client_secret, false);
         keycloakServer.keycloakUserId = pojo.keycloak_user_id;
         keycloakServer.selfRevocationTestNonce = pojo.self_revocation_test_nonce;
         keycloakServer.insert();

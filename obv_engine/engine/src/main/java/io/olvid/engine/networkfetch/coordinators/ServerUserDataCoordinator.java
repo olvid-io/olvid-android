@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -86,9 +86,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
         this.prng = prng;
 
         deleteUserDataOperationQueue = new NoDuplicateOperationQueue();
-        deleteUserDataOperationQueue.execute(1, "Engine-ServerUserDataCoordinator-delete");
         refreshUserDataOperationQueue = new NoDuplicateOperationQueue();
-        refreshUserDataOperationQueue.execute(1, "Engine-ServerUserDataCoordinator-refresh");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -98,6 +96,11 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
         awaitingServerSessionRefreshOperationsLock = new ReentrantLock();
 
         notificationListener = new NotificationListener();
+    }
+
+    public void startProcessing() {
+        deleteUserDataOperationQueue.execute(1, "Engine-ServerUserDataCoordinator-delete");
+        refreshUserDataOperationQueue.execute(1, "Engine-ServerUserDataCoordinator-refresh");
     }
 
     public void setNotificationListeningDelegate(NotificationListeningDelegate notificationListeningDelegate) {
@@ -163,7 +166,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         // cleanup downloaded user data dir of orphan files
@@ -185,12 +188,12 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                         //noinspection ResultOfMethodCallIgnored
                         file.delete();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -377,7 +380,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         }
     }

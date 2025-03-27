@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.ObvPostMessageOutput;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageMetadata;
@@ -130,6 +131,7 @@ public class UpdateLocationMessageTask implements Runnable {
             // if end of sharing only update location type (do not erase previous location)
             db.messageDao().updateLocationType(originalMessage.id, Message.LOCATION_TYPE_SHARE_FINISHED);
             db.messageMetadataDao().insert(new MessageMetadata(originalMessage.id, MessageMetadata.KIND_LOCATION_SHARING_END, System.currentTimeMillis()));
+            UnreadCountsSingleton.INSTANCE.removeLocationSharingMessage(originalMessage.discussionId, originalMessage.id);
         }
     }
 }

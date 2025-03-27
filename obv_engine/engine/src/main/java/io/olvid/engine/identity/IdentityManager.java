@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -160,6 +160,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     private ChannelDelegate channelDelegate;
     private final Timer deviceDiscoveryTimer;
 
+    private final HashMap<Identity, UID> currentDeviceUidCache = new HashMap<>();
+
     public IdentityManager(MetaManager metaManager, String engineBaseDirectory, ObjectMapper jsonObjectMapper, PRNGService prng) {
         this.engineBaseDirectory = engineBaseDirectory;
         this.jsonObjectMapper = jsonObjectMapper;
@@ -192,7 +194,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         // search for all inactive contact identities with some deviceUids and delete them
@@ -207,7 +209,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 identityManagerSession.session.commit();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         // prune old revocation list records
@@ -223,7 +225,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             identityManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         // clean old ownedIdentityDetails
@@ -233,7 +235,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             identityManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         // clean old contactIdentityDetails
         try (IdentityManagerSession identityManagerSession = getSession()) {
@@ -242,7 +244,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             identityManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         // clean old contactGroupDetails
         try (IdentityManagerSession identityManagerSession = getSession()) {
@@ -251,7 +253,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             identityManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         // clean old ContactGroupV2Details
         try (IdentityManagerSession identityManagerSession = getSession()) {
@@ -260,7 +262,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             identityManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         // get the set of all owned identity, contact, group profile picture photoUrl and remove all photoUrl not in this set
@@ -288,13 +290,13 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                             //noinspection ResultOfMethodCallIgnored
                             new File(photoDir, listedPhotoUrl).delete();
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Logger.x(e);
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         // check if device capabilities changed for any current owned device
@@ -313,7 +315,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             // commit the session, in case a protocol was indeed started
             identityManagerSession.session.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         // re-notify the app for all Keycloak groups shared settings to make sure it remains synchronized
@@ -327,7 +329,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_KEYCLOAK_GROUP_V2_SHARED_SETTINGS, userInfo);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         deviceDiscoveryTimer.schedule(new TimerTask() {
@@ -342,7 +344,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     }
                     identityManagerSession.session.commit();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
 
                 // search for all contact identities with no deviceUids and run a deviceDiscovery
@@ -357,7 +359,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                         identityManagerSession.session.commit();
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
 
                 // search all active contact identities with devices without a recent device discovery
@@ -372,7 +374,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                         identityManagerSession.session.commit();
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
         }, 0, Constants.OWNED_DEVICE_DISCOVERY_INTERVAL);
@@ -404,7 +406,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             ContactGroupV2PendingMember.createTable(identityManagerSession.session);
             identityManagerSession.session.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new RuntimeException("Unable to create identity databases");
         }
     }
@@ -504,7 +506,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             ServerAuthentication serverAuth = Suite.getServerAuthentication(privateIdentity.getServerAuthenticationPublicKey());
             return serverAuth.solveChallenge(challenge, privateIdentity.getServerAuthenticationPrivateKey(), privateIdentity.getServerAuthenticationPublicKey(), prng);
         } catch (InvalidKeyException | SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -541,11 +543,11 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             protocolStarterDelegate.updateCurrentDeviceCapabilitiesForOwnedIdentity(session, ownedIdentity.getOwnedIdentity(), ObvCapability.currentCapabilities);
         } catch (Exception e) {
             Logger.w("Failed to update generated identity capabilities");
-            e.printStackTrace();
+            Logger.x(e);
         }
 
         if (keycloakState != null) {
-            KeycloakServer keycloakServer = KeycloakServer.create(wrapSession(session), keycloakState.keycloakServer, ownedIdentity.getOwnedIdentity(), keycloakState.jwks.toJson(), keycloakState.signatureKey == null ? null : keycloakState.signatureKey.toJson(), keycloakState.clientId, keycloakState.clientSecret);
+            KeycloakServer keycloakServer = KeycloakServer.create(wrapSession(session), keycloakState.keycloakServer, ownedIdentity.getOwnedIdentity(), keycloakState.jwks.toJson(), keycloakState.signatureKey == null ? null : keycloakState.signatureKey.toJson(), keycloakState.clientId, keycloakState.clientSecret, keycloakState.transferRestricted);
             if (keycloakServer == null) {
                 return null;
             }
@@ -559,6 +561,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public void deleteOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException {
+        currentDeviceUidCache.remove(ownedIdentity);
         OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
         if (ownedIdentityObject != null) {
             // delete all contact groups (and associated details)
@@ -890,7 +893,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public JsonKeycloakUserDetails verifyKeycloakSignature(Session session, Identity ownedIdentity, String signature) {
+    public JsonKeycloakUserDetails verifyKeycloakIdentitySignature(Session session, Identity ownedIdentity, String signature) {
         try {
             OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
             if (ownedIdentityObject == null || !ownedIdentityObject.isKeycloakManaged()) {
@@ -952,6 +955,37 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         return null;
     }
 
+
+    @Override
+    public String verifyKeycloakSignature(Session session, Identity ownedIdentity, String signature) {
+        try {
+            OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
+            if (ownedIdentityObject == null || !ownedIdentityObject.isKeycloakManaged()) {
+                return null;
+            }
+            KeycloakServer keycloakServer = ownedIdentityObject.getKeycloakServer();
+
+            final JwksVerificationKeyResolver jwksResolver;
+            JsonWebKey signatureKey = keycloakServer.getSignatureKey();
+            if (signatureKey != null) {
+                jwksResolver = new JwksVerificationKeyResolver(Collections.singletonList(signatureKey));
+            } else {
+                JsonWebKeySet jwks = keycloakServer.getJwks();
+                jwksResolver = new JwksVerificationKeyResolver(jwks.getJsonWebKeys());
+            }
+            JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+                    .setExpectedAudience(false)
+                    .setVerificationKeyResolver(jwksResolver)
+                    .build();
+
+            JwtContext context = jwtConsumer.process(signature);
+            if (context.getJwtClaims() != null) {
+                // signature is valid
+                return context.getJwtClaims().getRawJson();
+            }
+        } catch (Exception ignored) { }
+        return null;
+    }
 
     @Override
     public String getOwnedIdentityKeycloakServerUrl(Session session, Identity ownedIdentity) throws SQLException {
@@ -1026,7 +1060,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
         session.addSessionCommitListener(backupNeededSessionCommitListener);
 
-        KeycloakServer keycloakServer = KeycloakServer.create(wrapSession(session), keycloakState.keycloakServer, ownedIdentity, keycloakState.jwks.toJson(), keycloakState.signatureKey == null ? null : keycloakState.signatureKey.toJson(), keycloakState.clientId, keycloakState.clientSecret);
+        KeycloakServer keycloakServer = KeycloakServer.create(wrapSession(session), keycloakState.keycloakServer, ownedIdentity, keycloakState.jwks.toJson(), keycloakState.signatureKey == null ? null : keycloakState.signatureKey.toJson(), keycloakState.clientId, keycloakState.clientSecret, keycloakState.transferRestricted);
         if (keycloakServer == null) {
             Logger.e("Unable to create new KeycloakServer db entry");
             throw new Exception();
@@ -1092,6 +1126,16 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         return null;
     }
 
+    @Override
+    public void updateKeycloakTransferRestrictedIfNeeded(Session session, Identity ownedIdentity, String serverUrl, boolean transferRestricted) throws SQLException {
+        KeycloakServer keycloakServer = KeycloakServer.get(wrapSession(session), serverUrl, ownedIdentity);
+
+        if (keycloakServer != null) {
+            if (transferRestricted ^ keycloakServer.isTransferRestricted()) {
+                keycloakServer.setTransferRestricted(transferRestricted);
+            }
+        }
+    }
 
     @Override
     public boolean updateKeycloakPushTopicsIfNeeded(Session session, Identity ownedIdentity, String serverUrl, List<String> pushTopics) throws SQLException {
@@ -1183,7 +1227,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     deleteGroupV2(session, ownedIdentity, groupIdentifier);
                 } catch (InvalidJwtException | JsonProcessingException | IllegalArgumentException e) {
                     // unable to process signed deletion --> ignore it
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
         }
@@ -1216,7 +1260,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     deleteGroupV2(session, ownedIdentity, groupIdentifier);
                 } catch (InvalidJwtException | JsonProcessingException | IllegalArgumentException e) {
                     // unable to process signed deletion --> ignore it
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
         }
@@ -1244,7 +1288,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     protocolStarterDelegate.createOrUpdateKeycloakGroupV2(session, ownedIdentity, groupIdentifier, serializedKeycloakGroupBlob);
                 } catch (InvalidJwtException | JsonProcessingException | IllegalArgumentException e) {
                     // unable to process signed deletion --> ignore it
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
         }
@@ -1268,7 +1312,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     protocolStarterDelegate.startChannelCreationProtocolWithOwnedDevice(session, ownedIdentity, ownedDeviceUid);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
 
             ContactIdentity[] contactIdentities = ContactIdentity.getAll(wrapSession(session), ownedIdentity);
@@ -1276,13 +1320,13 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 try {
                     protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(session, ownedIdentity, contactIdentity.getContactIdentity());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
             try {
                 protocolStarterDelegate.startOwnedDeviceDiscoveryProtocolWithinTransaction(session, ownedIdentity);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
 
         }
@@ -1339,9 +1383,15 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public UID getCurrentDeviceUidOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException {
+        UID cachedUid = currentDeviceUidCache.get(ownedIdentity);
+        if (cachedUid != null) {
+            return cachedUid;
+        }
         OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
         if (ownedIdentityObject != null) {
-            return ownedIdentityObject.getCurrentDeviceUid();
+            UID deviceUid = ownedIdentityObject.getCurrentDeviceUid();
+            currentDeviceUidCache.put(ownedIdentity, deviceUid);
+            return deviceUid;
         }
         return null;
     }
@@ -1544,7 +1594,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             session.addSessionCommitListener(backupNeededSessionCommitListener);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             throw new Exception();
         }
     }
@@ -1576,7 +1626,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 return identities;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return null;
     }
@@ -1720,7 +1770,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             if (publishedDetails != null) {
                 JsonIdentityDetails identityDetails = publishedDetails.getJsonIdentityDetails();
                 if (identityDetails != null && identityDetails.getSignedUserDetails() != null) {
-                    JsonKeycloakUserDetails jsonKeycloakUserDetails = verifyKeycloakSignature(session, ownedIdentity, identityDetails.getSignedUserDetails());
+                    JsonKeycloakUserDetails jsonKeycloakUserDetails = verifyKeycloakIdentitySignature(session, ownedIdentity, identityDetails.getSignedUserDetails());
 
                     if (jsonKeycloakUserDetails != null) {
                         // the contact has some valid signed details
@@ -1730,7 +1780,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                             continue;
                         } catch (Exception e) {
                             // error parsing signed details --> do nothing
-                            e.printStackTrace();
+                            Logger.x(e);
                         }
                     }
                 }
@@ -1866,7 +1916,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             contactIdentityObject.setForcefullyTrustedByUser(false);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -1935,7 +1985,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             return uids;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return new UID[0];
     }
@@ -1950,7 +2000,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             return uids;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return Collections.emptyList();
     }
@@ -2156,7 +2206,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             System.arraycopy(signatureBytes, 0, output, Constants.SIGNATURE_PADDING_LENGTH, signatureBytes.length);
             return output;
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -2192,7 +2242,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             System.arraycopy(signatureBytes, 0, output, Constants.SIGNATURE_PADDING_LENGTH, signatureBytes.length);
             return output;
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -2224,7 +2274,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             System.arraycopy(signatureBytes, 0, output, Constants.SIGNATURE_PADDING_LENGTH, signatureBytes.length);
             return output;
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -2261,7 +2311,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             System.arraycopy(signatureBytes, 0, output, Constants.SIGNATURE_PADDING_LENGTH, signatureBytes.length);
             return output;
         } catch (InvalidKeyException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -2876,11 +2926,11 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 try {
                     protocolStarterDelegate.queryGroupMembers(groupOwnerAndUid, ownedIdentity);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -2898,7 +2948,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     try {
                         protocolStarterDelegate.reinviteAndPushMembersToContact(groupOwnerAndUid, ownedIdentity, contactIdentity);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
             }
@@ -2908,12 +2958,12 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     try {
                         protocolStarterDelegate.reinvitePendingToGroup(groupOwnerAndUid, ownedIdentity, contactIdentity);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -3352,7 +3402,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             return ContactGroupV2.getServerPhotoInfo(wrapSession(session), ownedIdentity, groupIdentifier);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return null;
     }
@@ -3398,7 +3448,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
             return new ObvGroupV2.ObvGroupV2DetailsAndPhotos(serializedGroupDetails, photoUrl, serializedPublishedDetails, publishedPhotoUrl);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -3510,10 +3560,10 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 protocolStarterDelegate.initiateGroupV2BatchKeysResend(identityManagerSession.session, ownedIdentity, contactIdentity, contactDeviceUid);
                 identityManagerSession.session.commit();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -3576,7 +3626,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     AuthEncKey photoKey = (AuthEncKey) new Encoded(keycloakGroupBlob.encodedPhotoKey).decodeSymmetricKey();
                     serverPhotoInfo = new GroupV2.ServerPhotoInfo(null, photoUid, photoKey);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
 
@@ -3628,7 +3678,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     }
                 } catch (InvalidJwtException | JsonProcessingException e) {
                     Logger.w("Unable to process one keycloak group member --> skipping them");
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
 
@@ -3646,7 +3696,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             session.addSessionCommitListener(backupNeededSessionCommitListener);
             return ownInvitationNonce;
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -3684,7 +3734,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     try {
                         protocolStarterDelegate.initiateKeycloakGroupV2TargetedPing(session, ownedIdentity, groupIdentifier, contactIdentity);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
             }
@@ -3695,7 +3745,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     try {
                         moveKeycloakMemberToPendingMember(identityManagerSession, groupIdentifier, ownedIdentity, contactIdentity, lastKnownSerializedCertifiedDetails);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
             }
@@ -3766,7 +3816,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 String jsonString = jsonObjectMapper.writeValueAsString(ownedIdentityPojos);
                 backupDelegate.backupSuccess(tag, backupKeyUid, version, jsonString);
             } catch (SQLException | JsonProcessingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 backupDelegate.backupFailed(tag, backupKeyUid, version);
             }
         }, "Identity Backup").start();
@@ -3796,7 +3846,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
             return restoredIdentities.toArray(new ObvIdentity[0]);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -3829,7 +3879,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
     // endregion
@@ -3893,7 +3943,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -3912,7 +3962,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -3926,7 +3976,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                         trustGroupV2PublishedDetails(session, ownedIdentity, groupIdentifier);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }
@@ -4062,7 +4112,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
             return new EncryptedBytes(outputBytes);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -4108,7 +4158,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             return new AuthEncKeyAndChannelInfo(messageKey, ReceptionChannelInfo.createPreKeyChannelInfo(remoteDeviceUid, remoteIdentity));
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -4133,14 +4183,14 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 identityManagerSession.session.startTransaction();
                 return getSyncSnapshotWithinTransaction(identityManagerSession, ownedIdentity);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 return null;
             } finally {
                 // always rollback as the snapshot creation should never modify the DB.
                 identityManagerSession.session.rollback();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -4171,7 +4221,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 transactionSuccessful = true;
                 return callback;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             } finally {
                 if (transactionSuccessful) {
                     identityManagerSession.session.commit();
@@ -4180,7 +4230,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         return null;
     }
@@ -4220,7 +4270,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 try {
                     return IdentityManager.this.getSyncSnapshotWithinTransaction(identityManagerSession, ownedIdentity);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                     return null;
                 }
             }

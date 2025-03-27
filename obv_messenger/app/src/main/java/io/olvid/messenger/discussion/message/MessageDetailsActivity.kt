@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -21,6 +21,7 @@ package io.olvid.messenger.discussion.message
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.BitmapFactory
@@ -53,6 +54,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -71,11 +76,13 @@ import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.MessageMetadata
 import io.olvid.messenger.databases.entity.MessageRecipientInfo
 import io.olvid.messenger.discussion.message.MessageDetailsActivity.RecipientInfosAdapter.ViewHolder
+import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel
 import io.olvid.messenger.viewModels.MessageDetailsViewModel
 import java.io.IOException
@@ -88,7 +95,7 @@ class MessageDetailsActivity : LockableActivity() {
         runCatching { AudioAttachmentServiceBinding(this) }.onFailure { finish() }
             .getOrNull()
     }
-    private var recipientInfosRecyclerView: RecyclerView? = null
+    private val recipientInfosRecyclerView: RecyclerView by lazy { findViewById(R.id.recipient_infos_recycler_view) }
     var recipientInfosAdapter: RecipientInfosAdapter? = null
     var recipientInfoHeaderAndSeparatorDecoration: RecipientInfoHeaderAndSeparatorDecoration? = null
     private var metadataRecyclerView: EmptyRecyclerView? = null
@@ -103,19 +110,29 @@ class MessageDetailsActivity : LockableActivity() {
     private var discussionBackground: ImageView? = null
     private val messageView by lazy { findViewById<ComposeView>(R.id.compose_message_view) }
 
-    private var statusWidth: Float = 0f
     private var messageIsUndelivered = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         handleIntent(intent)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         setContentView(R.layout.activity_message_details)
 
         messageDetailsActivityRoot = findViewById(R.id.message_details_root)
 
-        val actionBar = supportActionBar
-        actionBar?.setDisplayHomeAsUpEnabled(true)
+        messageDetailsActivityRoot?.let {
+            ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                view.updatePadding(top = insets.top, bottom = insets.bottom)
+                windowInsets
+            }
+        }
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.elevation = 0f
 
         messageView.setContent {
             AppCompatTheme {
@@ -132,6 +149,7 @@ class MessageDetailsActivity : LockableActivity() {
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Message(
+                            modifier = Modifier.cutoutHorizontalPadding(),
                             message = it,
                             scrollToMessage = {},
                             replyAction = { },
@@ -178,14 +196,13 @@ class MessageDetailsActivity : LockableActivity() {
             val recipientsStatusTextView = findViewById<TextView>(R.id.recipient_status_text_view)
             val otherDeviceExplanationTextView =
                 findViewById<TextView>(R.id.sent_from_other_device_text_view)
-            recipientInfosRecyclerView = findViewById(R.id.recipient_infos_recycler_view)
             if (sentFromOtherDevice) {
                 recipientsStatusTextView.visibility = View.GONE
-                recipientInfosRecyclerView!!.setVisibility(View.GONE)
+                recipientInfosRecyclerView.visibility = View.GONE
                 otherDeviceExplanationTextView.visibility = View.VISIBLE
             } else {
                 recipientsStatusTextView.visibility = View.VISIBLE
-                recipientInfosRecyclerView!!.setVisibility(View.VISIBLE)
+                recipientInfosRecyclerView.visibility = View.VISIBLE
                 otherDeviceExplanationTextView.visibility = View.GONE
 
                 recipientInfosAdapter = RecipientInfosAdapter(
@@ -194,9 +211,9 @@ class MessageDetailsActivity : LockableActivity() {
                 recipientInfoHeaderAndSeparatorDecoration =
                     RecipientInfoHeaderAndSeparatorDecoration()
 
-                recipientInfosRecyclerView!!.setAdapter(recipientInfosAdapter)
-                recipientInfosRecyclerView!!.setLayoutManager(LinearLayoutManager(this))
-                recipientInfosRecyclerView!!.addItemDecoration(
+                recipientInfosRecyclerView.setAdapter(recipientInfosAdapter)
+                recipientInfosRecyclerView.setLayoutManager(LinearLayoutManager(this))
+                recipientInfosRecyclerView.addItemDecoration(
                     recipientInfoHeaderAndSeparatorDecoration!!
                 )
                 messageDetailsViewModel.messageRecipientInfos.observe(
@@ -207,7 +224,7 @@ class MessageDetailsActivity : LockableActivity() {
 
             // outbound status
             val statusIndicator = findViewById<View>(R.id.message_details_status_indicator)
-            statusIndicator?.setOnClickListener { view: View -> this.statusClicked(view) }
+            statusIndicator?.setOnClickListener { view: View -> this.statusClicked() }
         }
 
 
@@ -296,7 +313,7 @@ class MessageDetailsActivity : LockableActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun statusClicked(view: View) {
+    private fun statusClicked() {
         val dialogView =
             layoutInflater.inflate(R.layout.dialog_view_message_status_explanation, null)
         val alertDialog = SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
@@ -320,8 +337,8 @@ class MessageDetailsActivity : LockableActivity() {
             setHasStableIds(true)
         }
 
-        override fun onChanged(messageRecipientInfos: List<MessageRecipientInfo>?) {
-            this.messageRecipientInfos = messageRecipientInfos
+        override fun onChanged(value: List<MessageRecipientInfo>?) {
+            this.messageRecipientInfos = value
             recipientInfoHeaderAndSeparatorDecoration!!.clearCache()
             recomputeCounts()
             notifyDataSetChanged()
@@ -423,18 +440,23 @@ class MessageDetailsActivity : LockableActivity() {
                             messageRecipientInfo.timestampRead!!
                         ) as String)
 
-                    val builder = SecureAlertDialogBuilder(
-                        this@MessageDetailsActivity,
-                        R.style.CustomAlertDialog
-                    )
+                    val builder = SecureAlertDialogBuilder(this@MessageDetailsActivity, R.style.CustomAlertDialog)
                         .setTitle(recipientNameTextView.text)
                         .setMessage(
-                            getString(
-                                R.string.dialog_message_recipient_details,
-                                sentTime,
-                                deliveredTime,
-                                readTime
-                            )
+                            if (messageRecipientInfo.engineMessageIdentifier?.size == 0) {
+                                getString(
+                                    R.string.dialog_message_recipient_details_other_device,
+                                    deliveredTime,
+                                    readTime
+                                ).formatMarkdown()
+                            } else {
+                                getString(
+                                    R.string.dialog_message_recipient_details,
+                                    sentTime,
+                                    deliveredTime,
+                                    readTime
+                                ).formatMarkdown()
+                            }
                         )
                         .setPositiveButton(R.string.button_label_ok, null)
                     builder.create().show()
@@ -597,22 +619,16 @@ class MessageDetailsActivity : LockableActivity() {
             setHasStableIds(true)
         }
 
-        fun setSentTimestamp(sentTimestamp: Long?, inbound: Boolean) {
-            this.sentTimestamp = sentTimestamp
-            this.inbound = inbound
-            notifyDataSetChanged()
-        }
-
-        override fun onChanged(messageMetadatas: List<MessageMetadata>) {
+        override fun onChanged(value: List<MessageMetadata>) {
             // check if a messageMetadata is of kind KIND_UPLOADED
             hasUploadedMetadata = false
-            for (messageMetadata in messageMetadatas) {
+            for (messageMetadata in value) {
                 if (messageMetadata.kind == MessageMetadata.KIND_UPLOADED) {
                     hasUploadedMetadata = true
                     break
                 }
             }
-            this.messageMetadatas = messageMetadatas
+            this.messageMetadatas = value
             notifyDataSetChanged()
         }
 
@@ -713,7 +729,7 @@ class MessageDetailsActivity : LockableActivity() {
             }
         }
 
-        internal inner class ViewHolder(rootView: View) : RecyclerView.ViewHolder(rootView) {
+        inner class ViewHolder(rootView: View) : RecyclerView.ViewHolder(rootView) {
             val metadataDescriptionTextView: TextView =
                 rootView.findViewById(R.id.metadata_description_text_view)
             val metadataTimestampDateTextView: TextView =

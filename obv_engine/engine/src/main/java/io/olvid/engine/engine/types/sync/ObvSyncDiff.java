@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -20,9 +20,10 @@
 package io.olvid.engine.engine.types.sync;
 
 public class ObvSyncDiff {
-    // TODO only used to notify the app, needs to be encodable to send to other device
+    // only used to notify the app, needs to be encodable to send to other device
     public static final int TYPE_SETTING_AUTO_JOIN_GROUPS = 0;
     public static final int TYPE_SETTING_SEND_READ_RECEIPT = 1;
+    public static final int TYPE_SETTING_UNARCHIVE_ON_NOTIFICATION = 2;
 
     private final int diffType;
     private boolean resolutionInProgress;
@@ -49,5 +50,8 @@ public class ObvSyncDiff {
     }
     public static ObvSyncDiff createSettingSendReadReceipt(boolean localValue, boolean otherValue) {
         return new ObvSyncDiff(TYPE_SETTING_SEND_READ_RECEIPT, localValue, otherValue, null, null);
+    }
+    public static ObvSyncDiff createUnarchiveOnNotification(boolean localValue, boolean otherValue) {
+        return new ObvSyncDiff(TYPE_SETTING_UNARCHIVE_ON_NOTIFICATION, localValue, otherValue, null, null);
     }
 }

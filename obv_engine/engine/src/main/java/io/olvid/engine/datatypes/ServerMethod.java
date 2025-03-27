@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -180,13 +180,13 @@ public abstract class ServerMethod {
                 connection.disconnect();
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             returnStatus = MALFORMED_URL;
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.x(e);
             returnStatus = SERVER_CONNECTION_ERROR;
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
             returnStatus = MALFORMED_SERVER_RESPONSE;
         }
         return returnStatus;

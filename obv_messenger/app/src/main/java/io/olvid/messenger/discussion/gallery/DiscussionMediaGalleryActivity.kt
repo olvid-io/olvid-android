@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -109,6 +109,7 @@ import androidx.core.content.ContextCompat
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
@@ -478,9 +479,9 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                             fyleAndStatus = it.fyleAndStatus,
                             fileName = AnnotatedString(it.fyleAndStatus.fyleMessageJoinWithStatus.fileName),
                             onClick = {
-                                App.openFyleInExternalViewer(
+                                App.openFyleViewer(
                                     this@DiscussionMediaGalleryActivity,
-                                    it.fyleAndStatus,
+                                    it.fyleAndStatus
                                 ) {
                                     it.fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened()
                                 }
@@ -596,6 +597,30 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                                             )
                                                         )
                                                     })
+
+                                                var imageUri: ImageRequest? by remember {
+                                                    mutableStateOf(null)
+                                                }
+                                                val cacheKey =
+                                                    "${item.fyleAndStatus.fyleMessageJoinWithStatus.fyleId}-${item.fyleAndStatus.fyleMessageJoinWithStatus.messageId}"
+                                                LaunchedEffect(
+                                                    item,
+                                                    item.fyleAndStatus.fyleMessageJoinWithStatus.miniPreview != null,
+                                                ) {
+                                                    imageUri = if (item.fyleAndStatus.fyle.isComplete) {
+                                                        ImageRequest.Builder(context)
+                                                            .data(item.fyleAndStatus.deterministicContentUriForGallery)
+                                                            .placeholderMemoryCacheKey(cacheKey)
+                                                            .build()
+                                                    } else if (item.fyleAndStatus.fyleMessageJoinWithStatus.miniPreview != null) {
+                                                        ImageRequest.Builder(context)
+                                                            .data(item.fyleAndStatus.fyleMessageJoinWithStatus.miniPreview)
+                                                            .memoryCacheKey(cacheKey)
+                                                            .build()
+                                                    } else {
+                                                        null
+                                                    }
+                                                }
                                                 AsyncImage(
                                                     modifier = Modifier
                                                         .requiredHeight(itemSize)
@@ -608,13 +633,14 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                                                         discussionId,
                                                                         item.fyleAndStatus.fyleMessageJoinWithStatus.messageId,
                                                                         item.fyleAndStatus.fyle.id,
+                                                                        false,
                                                                         false
                                                                     )
                                                                 }
                                                             },
                                                             onLongClick = { menuOpened = true }
                                                         ),
-                                                    model = item.fyleAndStatus.deterministicContentUriForGallery,
+                                                    model = imageUri,
                                                     placeholder = ColorPainter(colorResource(id = R.color.grey)),
                                                     imageLoader = imageLoader,
                                                     contentScale = ContentScale.Crop,

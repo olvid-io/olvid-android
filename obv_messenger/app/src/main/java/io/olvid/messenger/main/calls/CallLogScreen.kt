@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,6 +46,7 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
 import io.olvid.messenger.main.MainScreenEmptyList
+import io.olvid.messenger.main.cutoutHorizontalPadding
 
 @Composable
 fun CallLogScreen(
@@ -64,13 +66,17 @@ fun CallLogScreen(
                 if (log.isEmpty().not()) {
                     LazyColumn(
                         modifier = Modifier
-                            .fillMaxSize(),
+                            .fillMaxSize()
+                            .navigationBarsPadding(),
                         state = rememberLazyListState(),
-                        contentPadding = PaddingValues(bottom = 80.dp),
+                        contentPadding = PaddingValues(bottom = 32.dp),
                     ) {
                         itemsIndexed(items = log) { index, call ->
                             Box {
                                 CallLogItemView(
+                                    modifier = Modifier
+                                        .background(colorResource(id = R.color.almostWhite))
+                                        .cutoutHorizontalPadding(),
                                     callLogItemAndContacts = call,
                                     title = call.getAnnotatedTitle(),
                                     date = call.callLogItem.getAnnotatedDate(),
@@ -99,8 +105,10 @@ fun CallLogScreen(
                         }
                     }
                 } else {
-                    Box(modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
                         MainScreenEmptyList(
                             icon = R.drawable.ic_phone_log,
                             iconPadding = 6.dp,
@@ -110,14 +118,18 @@ fun CallLogScreen(
                     }
                 }
             }
-            FloatingActionButton(modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 80.dp, end = 16.dp),
+            FloatingActionButton(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 72.dp, end = 16.dp),
                 onClick = onNewCallClick
             ) {
-                Image(painter = painterResource(id = R.drawable.ic_phone), contentDescription = stringResource(
-                    id = R.string.button_label_call
-                ))
+                Image(
+                    painter = painterResource(id = R.drawable.ic_phone),
+                    contentDescription = stringResource(
+                        id = R.string.button_label_call
+                    )
+                )
             }
         }
     }

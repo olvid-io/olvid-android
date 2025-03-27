@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
@@ -157,7 +158,7 @@ public class GetTurnCredentialsOperation extends Operation {
                 }
                 finished = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 fetchManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -170,7 +171,7 @@ public class GetTurnCredentialsOperation extends Operation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }
@@ -244,7 +245,7 @@ class GetTurnCredentialsServerMethod extends ServerMethod {
                 expiringUsername2 = receivedData[2].decodeString();
                 password2 = receivedData[3].decodeString();
             } catch (DecodingException e) {
-                e.printStackTrace();
+                Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
         }

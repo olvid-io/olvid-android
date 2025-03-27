@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -38,16 +38,19 @@ import io.olvid.messenger.settings.SettingsActivity;
 public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
     public static final String AUTO_JOIN_GROUPS = "auto_join_groups";
     public static final String SEND_READ_RECEIPT = "send_read_receipt";
-    static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(Arrays.asList(AUTO_JOIN_GROUPS, SEND_READ_RECEIPT));
+    public static final String UNARCHIVE_ON_NOTIFICATION = "unarchive_on_notification";
+    static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(Arrays.asList(AUTO_JOIN_GROUPS, SEND_READ_RECEIPT, UNARCHIVE_ON_NOTIFICATION));
 
     public String auto_join_groups;
     public Boolean send_read_receipt;
+    public Boolean unarchive_on_notification;
     public HashSet<String> domain;
 
     public static SettingsSyncSnapshot of(OwnedIdentity ownedIdentity) {
         SettingsSyncSnapshot settingsSyncSnapshot = new SettingsSyncSnapshot();
         settingsSyncSnapshot.auto_join_groups = SettingsActivity.getAutoJoinGroups().getStringValue();
         settingsSyncSnapshot.send_read_receipt = SettingsActivity.getDefaultSendReadReceipt();
+        settingsSyncSnapshot.unarchive_on_notification = SettingsActivity.getUnarchiveDiscussionOnNotification();
         settingsSyncSnapshot.domain = DEFAULT_DOMAIN;
         return settingsSyncSnapshot;
     }
@@ -58,7 +61,10 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
             SettingsActivity.setAutoJoinGroups(SettingsActivity.getAutoJoinGroupsFromString(auto_join_groups));
         }
         if (domain.contains(SEND_READ_RECEIPT)) {
-            SettingsActivity.setDefaultSendReadReceipt(send_read_receipt != null && send_read_receipt);
+            SettingsActivity.setDefaultSendReadReceipt(getSendReadReceipt());
+        }
+        if (domain.contains(UNARCHIVE_ON_NOTIFICATION)) {
+            SettingsActivity.setUnarchiveDiscussionOnNotification(getUnarchiveOnNotification());
         }
     }
 
@@ -71,6 +77,12 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
     public boolean getSendReadReceipt() {
         return send_read_receipt != null && send_read_receipt;
     }
+
+    @JsonIgnore
+    public boolean getUnarchiveOnNotification() {
+        return unarchive_on_notification == null || unarchive_on_notification;
+    }
+
 
     @Override
     @JsonIgnore
@@ -93,6 +105,12 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
                 }
                 case SEND_READ_RECEIPT: {
                     if (getSendReadReceipt() != other.getSendReadReceipt()) {
+                        return false;
+                    }
+                    break;
+                }
+                case UNARCHIVE_ON_NOTIFICATION: {
+                    if (getUnarchiveOnNotification() != other.getUnarchiveOnNotification()) {
                         return false;
                     }
                     break;
@@ -124,6 +142,12 @@ public class SettingsSyncSnapshot implements ObvSyncSnapshotNode {
                 case SEND_READ_RECEIPT: {
                     if (getSendReadReceipt() != other.getSendReadReceipt()) {
                         diffs.add(ObvSyncDiff.createSettingSendReadReceipt(getSendReadReceipt(), other.getSendReadReceipt()));
+                    }
+                    break;
+                }
+                case UNARCHIVE_ON_NOTIFICATION: {
+                    if (getUnarchiveOnNotification() != other.getUnarchiveOnNotification()) {
+                        diffs.add(ObvSyncDiff.createUnarchiveOnNotification(getUnarchiveOnNotification(), other.getUnarchiveOnNotification()));
                     }
                     break;
                 }

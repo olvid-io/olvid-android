@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -24,8 +24,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -57,6 +59,7 @@ import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.ObvDeviceManagementRequest;
 import io.olvid.engine.engine.types.ObvTransferStep;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
+import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshot;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
@@ -92,6 +95,8 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
     public static final int TARGET_WAITING_FOR_DECOMMITMENT_STATE_ID = 6;
     public static final int SOURCE_WAITING_FOR_SAS_INPUT_STATE_ID = 7;
     public static final int TARGET_WAITING_FOR_SNAPSHOT_STATE_ID = 8;
+    public static final int SOURCE_WAIT_FOR_KEYCLOAK_AUTHENTICATION_PROOF_STATE_ID = 9;
+    public static final int TARGET_WAITING_FOR_KEYCLOAK_AUTHENTICATION_PROOF_STATE_ID = 10;
     public static final int FINAL_STATE_ID = 99;
 
     @Override
@@ -120,6 +125,10 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 return SourceWaitingForSasInputState.class;
             case TARGET_WAITING_FOR_SNAPSHOT_STATE_ID:
                 return TargetWaitingForSnapshotState.class;
+            case SOURCE_WAIT_FOR_KEYCLOAK_AUTHENTICATION_PROOF_STATE_ID:
+                return SourceWaitForKeycloakAuthenticationProofState.class;
+            case TARGET_WAITING_FOR_KEYCLOAK_AUTHENTICATION_PROOF_STATE_ID:
+                return TargetWaitingForKeycloakAuthenticationProofState.class;
             case FINAL_STATE_ID:
                 return FinalState.class;
             default:
@@ -156,21 +165,25 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
     public static class SourceWaitingForTargetConnectionState extends ConcreteProtocolState {
         private final UUID dialogUuid;
         private final String ownConnectionIdentifier;
-        protected SourceWaitingForTargetConnectionState(UUID dialogUuid, String ownConnectionIdentifier) {
+        private final long sessionNumber;
+
+        protected SourceWaitingForTargetConnectionState(UUID dialogUuid, String ownConnectionIdentifier, long sessionNumber) {
             super(SOURCE_WAITING_FOR_TARGET_CONNECTION_STATE_ID);
             this.dialogUuid = dialogUuid;
             this.ownConnectionIdentifier = ownConnectionIdentifier;
+            this.sessionNumber = sessionNumber;
         }
 
         @SuppressWarnings("unused")
         public SourceWaitingForTargetConnectionState(Encoded encodedState) throws Exception {
             super(SOURCE_WAITING_FOR_TARGET_CONNECTION_STATE_ID);
             Encoded[] list = encodedState.decodeList();
-            if (list.length != 2) {
+            if (list.length != 3) {
                 throw new Exception();
             }
             this.dialogUuid = list[0].decodeUuid();
             this.ownConnectionIdentifier = list[1].decodeString();
+            this.sessionNumber = list[2].decodeLong();
         }
 
         @Override
@@ -178,6 +191,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
             return Encoded.of(new Encoded[]{
                     Encoded.of(dialogUuid),
                     Encoded.of(ownConnectionIdentifier),
+                    Encoded.of(sessionNumber),
             });
         }
     }
@@ -232,21 +246,23 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
         private final ServerAuthenticationPrivateKey serverAuthenticationPrivateKey;
         private final EncryptionPrivateKey encryptionPrivateKey;
         private final MACKey macKey;
+        private final long sessionNumber;
 
-        protected TargetWaitingForTransferredIdentityState(UUID dialogUuid, String deviceName, ServerAuthenticationPrivateKey serverAuthenticationPrivateKey, EncryptionPrivateKey encryptionPrivateKey, MACKey macKey) {
+        protected TargetWaitingForTransferredIdentityState(UUID dialogUuid, String deviceName, ServerAuthenticationPrivateKey serverAuthenticationPrivateKey, EncryptionPrivateKey encryptionPrivateKey, MACKey macKey, long sessionNumber) {
             super(TARGET_WAITING_FOR_TRANSFERRED_IDENTITY_STATE_ID);
             this.dialogUuid = dialogUuid;
             this.deviceName = deviceName;
             this.serverAuthenticationPrivateKey = serverAuthenticationPrivateKey;
             this.encryptionPrivateKey = encryptionPrivateKey;
             this.macKey = macKey;
+            this.sessionNumber = sessionNumber;
         }
 
         @SuppressWarnings("unused")
         public TargetWaitingForTransferredIdentityState(Encoded encodedState) throws Exception {
             super(TARGET_WAITING_FOR_TRANSFERRED_IDENTITY_STATE_ID);
             Encoded[] list = encodedState.decodeList();
-            if (list.length != 5) {
+            if (list.length != 6) {
                 throw new Exception();
             }
             this.dialogUuid = list[0].decodeUuid();
@@ -254,6 +270,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
             this.serverAuthenticationPrivateKey = (ServerAuthenticationPrivateKey) list[2].decodePrivateKey();
             this.encryptionPrivateKey = (EncryptionPrivateKey) list[3].decodePrivateKey();
             this.macKey = (MACKey) list[4].decodeSymmetricKey();
+            this.sessionNumber = list[5].decodeLong();
         }
 
         @Override
@@ -264,6 +281,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                     Encoded.of(serverAuthenticationPrivateKey),
                     Encoded.of(encryptionPrivateKey),
                     Encoded.of(macKey),
+                    Encoded.of(sessionNumber),
             });
         }
     }
@@ -275,21 +293,23 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
         private final Identity ephemeralIdentity;
         private final Seed seedSourceForSas;
         private final byte[] decommitment;
+        private final long sessionNumber;
 
-        public SourceWaitingForTargetSeedState(UUID dialogUuid, String otherConnectionIdentifier, Identity ephemeralIdentity, Seed seedSourceForSas, byte[] decommitment) {
+        public SourceWaitingForTargetSeedState(UUID dialogUuid, String otherConnectionIdentifier, Identity ephemeralIdentity, Seed seedSourceForSas, byte[] decommitment, long sessionNumber) {
             super(SOURCE_WAITING_FOR_TARGET_SEED_STATE_ID);
             this.dialogUuid = dialogUuid;
             this.otherConnectionIdentifier = otherConnectionIdentifier;
             this.ephemeralIdentity = ephemeralIdentity;
             this.seedSourceForSas = seedSourceForSas;
             this.decommitment = decommitment;
+            this.sessionNumber = sessionNumber;
         }
 
         @SuppressWarnings("unused")
         public SourceWaitingForTargetSeedState(Encoded encodedState) throws Exception {
             super(SOURCE_WAITING_FOR_TARGET_SEED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
-            if (list.length != 5) {
+            if (list.length != 6) {
                 throw new Exception();
             }
             this.dialogUuid = list[0].decodeUuid();
@@ -297,6 +317,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
             this.ephemeralIdentity = list[2].decodeIdentity();
             this.seedSourceForSas = list[3].decodeSeed();
             this.decommitment = list[4].decodeBytes();
+            this.sessionNumber = list[5].decodeLong();
         }
 
         @Override
@@ -307,6 +328,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                     Encoded.of(ephemeralIdentity),
                     Encoded.of(seedSourceForSas),
                     Encoded.of(decommitment),
+                    Encoded.of(sessionNumber),
             });
         }
     }
@@ -322,8 +344,9 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
         private final ServerAuthenticationPrivateKey serverAuthenticationPrivateKey;
         private final EncryptionPrivateKey encryptionPrivateKey;
         private final MACKey macKey;
+        private final long sessionNumber;
 
-        public TargetWaitingForDecommitmentState(UUID dialogUuid, String deviceName, String otherConnectionIdentifier, Identity transferredIdentity, byte[] commitment, Seed seedTargetForSas, ServerAuthenticationPrivateKey serverAuthenticationPrivateKey, EncryptionPrivateKey encryptionPrivateKey, MACKey macKey) {
+        public TargetWaitingForDecommitmentState(UUID dialogUuid, String deviceName, String otherConnectionIdentifier, Identity transferredIdentity, byte[] commitment, Seed seedTargetForSas, ServerAuthenticationPrivateKey serverAuthenticationPrivateKey, EncryptionPrivateKey encryptionPrivateKey, MACKey macKey, long sessionNumber) {
             super(TARGET_WAITING_FOR_DECOMMITMENT_STATE_ID);
             this.dialogUuid = dialogUuid;
             this.deviceName = deviceName;
@@ -334,13 +357,14 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
             this.serverAuthenticationPrivateKey = serverAuthenticationPrivateKey;
             this.encryptionPrivateKey = encryptionPrivateKey;
             this.macKey = macKey;
+            this.sessionNumber = sessionNumber;
         }
 
         @SuppressWarnings("unused")
         public TargetWaitingForDecommitmentState(Encoded encodedState) throws Exception {
             super(TARGET_WAITING_FOR_DECOMMITMENT_STATE_ID);
             Encoded[] list = encodedState.decodeList();
-            if (list.length != 9) {
+            if (list.length != 10) {
                 throw new Exception();
             }
             this.dialogUuid = list[0].decodeUuid();
@@ -352,6 +376,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
             this.serverAuthenticationPrivateKey = (ServerAuthenticationPrivateKey) list[6].decodePrivateKey();
             this.encryptionPrivateKey = (EncryptionPrivateKey) list[7].decodePrivateKey();
             this.macKey = (MACKey) list[8].decodeSymmetricKey();
+            this.sessionNumber = list[9].decodeLong();
         }
 
         @Override
@@ -366,6 +391,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                     Encoded.of(serverAuthenticationPrivateKey),
                     Encoded.of(encryptionPrivateKey),
                     Encoded.of(macKey),
+                    Encoded.of(sessionNumber),
             });
         }
     }
@@ -377,21 +403,23 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
         private final String targetDeviceName;
         private final Identity ephemeralIdentity;
         private final String fullSas;
+        private final long sessionNumber;
 
-        public SourceWaitingForSasInputState(UUID dialogUuid, String otherConnectionIdentifier, String targetDeviceName, Identity ephemeralIdentity, String fullSas) {
+        public SourceWaitingForSasInputState(UUID dialogUuid, String otherConnectionIdentifier, String targetDeviceName, Identity ephemeralIdentity, String fullSas, long sessionNumber) {
             super(SOURCE_WAITING_FOR_SAS_INPUT_STATE_ID);
             this.dialogUuid = dialogUuid;
             this.otherConnectionIdentifier = otherConnectionIdentifier;
             this.targetDeviceName = targetDeviceName;
             this.ephemeralIdentity = ephemeralIdentity;
             this.fullSas = fullSas;
+            this.sessionNumber = sessionNumber;
         }
 
         @SuppressWarnings("unused")
         public SourceWaitingForSasInputState(Encoded encodedState) throws Exception {
             super(SOURCE_WAITING_FOR_SAS_INPUT_STATE_ID);
             Encoded[] list = encodedState.decodeList();
-            if (list.length != 5) {
+            if (list.length != 6) {
                 throw new Exception();
             }
             this.dialogUuid = list[0].decodeUuid();
@@ -399,6 +427,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
             this.targetDeviceName = list[2].decodeString();
             this.ephemeralIdentity = list[3].decodeIdentity();
             this.fullSas = list[4].decodeString();
+            this.sessionNumber = list[5].decodeLong();
         }
 
         @Override
@@ -409,6 +438,125 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                     Encoded.of(targetDeviceName),
                     Encoded.of(ephemeralIdentity),
                     Encoded.of(fullSas),
+                    Encoded.of(sessionNumber),
+            });
+        }
+    }
+
+    public static class SourceWaitForKeycloakAuthenticationProofState extends ConcreteProtocolState {
+        private final UUID dialogUuid;
+        private final String otherConnectionIdentifier;
+        private final Identity ephemeralIdentity;
+        private final String fullSas;
+        private final long sessionNumber;
+        private final UID deviceUidToKeepActive; // may be null
+
+        public SourceWaitForKeycloakAuthenticationProofState(UUID dialogUuid, String otherConnectionIdentifier, Identity ephemeralIdentity, String fullSas, long sessionNumber, UID deviceUidToKeepActive) {
+            super(SOURCE_WAIT_FOR_KEYCLOAK_AUTHENTICATION_PROOF_STATE_ID);
+            this.dialogUuid = dialogUuid;
+            this.otherConnectionIdentifier = otherConnectionIdentifier;
+            this.ephemeralIdentity = ephemeralIdentity;
+            this.fullSas = fullSas;
+            this.sessionNumber = sessionNumber;
+            this.deviceUidToKeepActive = deviceUidToKeepActive;
+        }
+
+        @SuppressWarnings("unused")
+        public SourceWaitForKeycloakAuthenticationProofState(Encoded encodedState) throws Exception {
+            super(SOURCE_WAIT_FOR_KEYCLOAK_AUTHENTICATION_PROOF_STATE_ID);
+            Encoded[] list = encodedState.decodeList();
+            if (list.length != 6 && list.length != 5) {
+                throw new Exception();
+            }
+            this.dialogUuid = list[0].decodeUuid();
+            this.otherConnectionIdentifier = list[1].decodeString();
+            this.ephemeralIdentity = list[2].decodeIdentity();
+            this.fullSas = list[3].decodeString();
+            this.sessionNumber = list[4].decodeLong();
+            if (list.length == 6) {
+                this.deviceUidToKeepActive = list[5].decodeUid();
+            } else {
+                this.deviceUidToKeepActive = null;
+            }
+        }
+
+        @Override
+        public Encoded encode() {
+            if (deviceUidToKeepActive != null) {
+                return Encoded.of(new Encoded[]{
+                        Encoded.of(dialogUuid),
+                        Encoded.of(otherConnectionIdentifier),
+                        Encoded.of(ephemeralIdentity),
+                        Encoded.of(fullSas),
+                        Encoded.of(sessionNumber),
+                        Encoded.of(deviceUidToKeepActive),
+                });
+            } else {
+                return Encoded.of(new Encoded[]{
+                        Encoded.of(dialogUuid),
+                        Encoded.of(otherConnectionIdentifier),
+                        Encoded.of(ephemeralIdentity),
+                        Encoded.of(fullSas),
+                        Encoded.of(sessionNumber),
+                });
+            }
+        }
+    }
+
+    public static class TargetWaitingForKeycloakAuthenticationProofState extends ConcreteProtocolState {
+        private final UUID dialogUuid;
+        private final String deviceName;
+        private final String otherConnectionIdentifier;
+        private final Identity transferredIdentity;
+        private final ServerAuthenticationPrivateKey serverAuthenticationPrivateKey;
+        private final EncryptionPrivateKey encryptionPrivateKey;
+        private final MACKey macKey;
+        private final String fullSas;
+        private final long sessionNumber;
+
+        public TargetWaitingForKeycloakAuthenticationProofState(UUID dialogUuid, String deviceName, String otherConnectionIdentifier, Identity transferredIdentity, ServerAuthenticationPrivateKey serverAuthenticationPrivateKey, EncryptionPrivateKey encryptionPrivateKey, MACKey macKey, String fullSas, long sessionNumber) {
+            super(TARGET_WAITING_FOR_KEYCLOAK_AUTHENTICATION_PROOF_STATE_ID);
+            this.dialogUuid = dialogUuid;
+            this.deviceName = deviceName;
+            this.otherConnectionIdentifier = otherConnectionIdentifier;
+            this.transferredIdentity = transferredIdentity;
+            this.serverAuthenticationPrivateKey = serverAuthenticationPrivateKey;
+            this.encryptionPrivateKey = encryptionPrivateKey;
+            this.macKey = macKey;
+            this.fullSas = fullSas;
+            this.sessionNumber = sessionNumber;
+        }
+
+        @SuppressWarnings("unused")
+        public TargetWaitingForKeycloakAuthenticationProofState(Encoded encodedState) throws Exception {
+            super(TARGET_WAITING_FOR_KEYCLOAK_AUTHENTICATION_PROOF_STATE_ID);
+            Encoded[] list = encodedState.decodeList();
+            if (list.length != 9) {
+                throw new Exception();
+            }
+            this.dialogUuid = list[0].decodeUuid();
+            this.deviceName = list[1].decodeString();
+            this.otherConnectionIdentifier = list[2].decodeString();
+            this.transferredIdentity = list[3].decodeIdentity();
+            this.serverAuthenticationPrivateKey = (ServerAuthenticationPrivateKey) list[4].decodePrivateKey();
+            this.encryptionPrivateKey = (EncryptionPrivateKey) list[5].decodePrivateKey();
+            this.macKey = (MACKey) list[6].decodeSymmetricKey();
+            this.fullSas = list[7].decodeString();
+            this.sessionNumber = list[8].decodeLong();
+        }
+
+        @Override
+        public Encoded encode() {
+            return Encoded.of(new Encoded[]{
+                    Encoded.of(dialogUuid),
+                    Encoded.of(deviceName),
+                    Encoded.of(otherConnectionIdentifier),
+                    Encoded.of(transferredIdentity),
+                    Encoded.of(serverAuthenticationPrivateKey),
+                    Encoded.of(encryptionPrivateKey),
+                    Encoded.of(macKey),
+                    Encoded.of(fullSas),
+                    Encoded.of(sessionNumber),
             });
         }
     }
@@ -422,8 +570,11 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
         private final ServerAuthenticationPrivateKey serverAuthenticationPrivateKey;
         private final EncryptionPrivateKey encryptionPrivateKey;
         private final MACKey macKey;
+        private final String fullSas;
+        private final long sessionNumber;
+        private final String serializedKeycloakAuthState; // non-null only after getting an transfer proof from keycloak
 
-        public TargetWaitingForSnapshotState(UUID dialogUuid, String deviceName, String otherConnectionIdentifier, Identity transferredIdentity, ServerAuthenticationPrivateKey serverAuthenticationPrivateKey, EncryptionPrivateKey encryptionPrivateKey, MACKey macKey) {
+        public TargetWaitingForSnapshotState(UUID dialogUuid, String deviceName, String otherConnectionIdentifier, Identity transferredIdentity, ServerAuthenticationPrivateKey serverAuthenticationPrivateKey, EncryptionPrivateKey encryptionPrivateKey, MACKey macKey, String fullSas, long sessionNumber, String serializedKeycloakAuthState) {
             super(TARGET_WAITING_FOR_SNAPSHOT_STATE_ID);
             this.dialogUuid = dialogUuid;
             this.deviceName = deviceName;
@@ -432,13 +583,16 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
             this.serverAuthenticationPrivateKey = serverAuthenticationPrivateKey;
             this.encryptionPrivateKey = encryptionPrivateKey;
             this.macKey = macKey;
+            this.fullSas = fullSas;
+            this.sessionNumber = sessionNumber;
+            this.serializedKeycloakAuthState = serializedKeycloakAuthState;
         }
 
         @SuppressWarnings("unused")
         public TargetWaitingForSnapshotState(Encoded encodedState) throws Exception {
             super(TARGET_WAITING_FOR_SNAPSHOT_STATE_ID);
             Encoded[] list = encodedState.decodeList();
-            if (list.length != 7) {
+            if (list.length != 10 && list.length != 9) {
                 throw new Exception();
             }
             this.dialogUuid = list[0].decodeUuid();
@@ -448,19 +602,43 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
             this.serverAuthenticationPrivateKey = (ServerAuthenticationPrivateKey) list[4].decodePrivateKey();
             this.encryptionPrivateKey = (EncryptionPrivateKey) list[5].decodePrivateKey();
             this.macKey = (MACKey) list[6].decodeSymmetricKey();
+            this.fullSas = list[7].decodeString();
+            this.sessionNumber = list[8].decodeLong();
+            if (list.length == 10) {
+                this.serializedKeycloakAuthState = list[9].decodeString();
+            } else {
+                this.serializedKeycloakAuthState = null;
+            }
         }
 
         @Override
         public Encoded encode() {
-            return Encoded.of(new Encoded[]{
-                    Encoded.of(dialogUuid),
-                    Encoded.of(deviceName),
-                    Encoded.of(otherConnectionIdentifier),
-                    Encoded.of(transferredIdentity),
-                    Encoded.of(serverAuthenticationPrivateKey),
-                    Encoded.of(encryptionPrivateKey),
-                    Encoded.of(macKey),
-            });
+            if (serializedKeycloakAuthState == null) {
+                return Encoded.of(new Encoded[]{
+                        Encoded.of(dialogUuid),
+                        Encoded.of(deviceName),
+                        Encoded.of(otherConnectionIdentifier),
+                        Encoded.of(transferredIdentity),
+                        Encoded.of(serverAuthenticationPrivateKey),
+                        Encoded.of(encryptionPrivateKey),
+                        Encoded.of(macKey),
+                        Encoded.of(fullSas),
+                        Encoded.of(sessionNumber),
+                });
+            } else {
+                return Encoded.of(new Encoded[]{
+                        Encoded.of(dialogUuid),
+                        Encoded.of(deviceName),
+                        Encoded.of(otherConnectionIdentifier),
+                        Encoded.of(transferredIdentity),
+                        Encoded.of(serverAuthenticationPrivateKey),
+                        Encoded.of(encryptionPrivateKey),
+                        Encoded.of(macKey),
+                        Encoded.of(fullSas),
+                        Encoded.of(sessionNumber),
+                        Encoded.of(serializedKeycloakAuthState),
+                });
+            }
         }
     }
 
@@ -496,8 +674,8 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
     public static final int SOURCE_DECOMMITMENT_MESSAGE_ID = 10;
     public static final int TARGET_WAIT_FOR_SNAPSHOT_MESSAGE_ID = 11;
     public static final int SOURCE_SNAPSHOT_MESSAGE_ID = 12;
-
-
+    public static final int SOURCE_WAIT_FOR_KEYCLOAK_AUTHENTICATION_PROOF_MESSAGE_ID = 13;
+    public static final int TARGET_RETRIEVE_KEYCLOAK_AUTHENTICATION_PROOF_MESSAGE_ID = 14;
 
 
     @Override
@@ -529,6 +707,10 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 return TargetWaitForSnapshotMessage.class;
             case SOURCE_SNAPSHOT_MESSAGE_ID:
                 return SourceSnapshotMessage.class;
+            case SOURCE_WAIT_FOR_KEYCLOAK_AUTHENTICATION_PROOF_MESSAGE_ID:
+                return SourceWaitForKeycloakAuthenticationProofMessage.class;
+            case TARGET_RETRIEVE_KEYCLOAK_AUTHENTICATION_PROOF_MESSAGE_ID:
+                return TargetRetrieveKeycloakAuthenticationProofMessage.class;
             default:
                 return null;
         }
@@ -840,6 +1022,56 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
         }
     }
 
+    public static class SourceWaitForKeycloakAuthenticationProofMessage extends WaitOrRelayMessage {
+        protected SourceWaitForKeycloakAuthenticationProofMessage(CoreProtocolMessage coreProtocolMessage) {
+            super(coreProtocolMessage);
+        }
+
+        @SuppressWarnings("unused")
+        public SourceWaitForKeycloakAuthenticationProofMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(receivedMessage);
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return SOURCE_WAIT_FOR_KEYCLOAK_AUTHENTICATION_PROOF_MESSAGE_ID;
+        }
+    }
+
+    public static class TargetRetrieveKeycloakAuthenticationProofMessage extends EmptyProtocolMessage {
+        private final String signature;
+        private final String serializedKeycloakAuthState;
+
+        public TargetRetrieveKeycloakAuthenticationProofMessage(CoreProtocolMessage coreProtocolMessage) {
+            super(coreProtocolMessage);
+            this.signature = null;
+            this.serializedKeycloakAuthState = null;
+        }
+
+        @SuppressWarnings("unused")
+        public TargetRetrieveKeycloakAuthenticationProofMessage(ReceivedMessage receivedMessage) throws Exception {
+            super(receivedMessage);
+            if (receivedMessage.getEncodedResponse() == null) {
+                this.signature = null;
+                this.serializedKeycloakAuthState = null;
+            } else {
+                Encoded[] list = receivedMessage.getEncodedResponse().decodeList();
+                if (list.length == 2) {
+                    this.signature = list[0].decodeString();
+                    this.serializedKeycloakAuthState = list[1].decodeString();
+                } else {
+                    this.signature = null;
+                    this.serializedKeycloakAuthState = null;
+                }
+            }
+        }
+
+        @Override
+        public int getProtocolMessageId() {
+            return TARGET_RETRIEVE_KEYCLOAK_AUTHENTICATION_PROOF_MESSAGE_ID;
+        }
+    }
+
     // endregion
 
 
@@ -869,6 +1101,10 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 return new Class[]{SourceCheckSasInputAndSendSnapshotStep.class};
             case TARGET_WAITING_FOR_SNAPSHOT_STATE_ID:
                 return new Class[]{TargetProcessesSnapshotStep.class, UserInitiatedAbortProtocolStep.class};
+            case SOURCE_WAIT_FOR_KEYCLOAK_AUTHENTICATION_PROOF_STATE_ID:
+                return new Class[]{SourceCheckTransferProofAndSendSnapshotStep.class};
+            case TARGET_WAITING_FOR_KEYCLOAK_AUTHENTICATION_PROOF_STATE_ID:
+                return new Class[]{TargetSendKeycloakAuthenticationProofStep.class};
             case FINAL_STATE_ID:
             default:
                 return new Class[0];
@@ -961,7 +1197,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
-            return new SourceWaitingForTargetConnectionState(dialogUuid, ownConnectionIdentifier);
+            return new SourceWaitingForTargetConnectionState(dialogUuid, ownConnectionIdentifier, sessionNumber);
         }
     }
 
@@ -1026,7 +1262,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
-            return new TargetWaitingForTransferredIdentityState(startState.dialogUuid, startState.deviceName, startState.serverAuthenticationPrivateKey, startState.encryptionPrivateKey, startState.macKey);
+            return new TargetWaitingForTransferredIdentityState(startState.dialogUuid, startState.deviceName, startState.serverAuthenticationPrivateKey, startState.encryptionPrivateKey, startState.macKey, receivedMessage.sessionNumber);
         }
     }
 
@@ -1106,7 +1342,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
-            return new SourceWaitingForTargetSeedState(startState.dialogUuid, jsonResponse.otherConnectionId, ephemeralIdentity, seedSourceForSas, commitmentOutput.decommitment);
+            return new SourceWaitingForTargetSeedState(startState.dialogUuid, jsonResponse.otherConnectionId, ephemeralIdentity, seedSourceForSas, commitmentOutput.decommitment, startState.sessionNumber);
         }
     }
 
@@ -1203,7 +1439,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
-            return new TargetWaitingForDecommitmentState(startState.dialogUuid, startState.deviceName, otherConnectionIdentifier, transferredIdentity, commitment, seedTargetForSas, startState.serverAuthenticationPrivateKey, startState.encryptionPrivateKey, startState.macKey);
+            return new TargetWaitingForDecommitmentState(startState.dialogUuid, startState.deviceName, otherConnectionIdentifier, transferredIdentity, commitment, seedTargetForSas, startState.serverAuthenticationPrivateKey, startState.encryptionPrivateKey, startState.macKey, startState.sessionNumber);
         }
 
         private static Seed getDeterministicSeed(MACKey macKey, byte[] commitment) throws Exception {
@@ -1293,7 +1529,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
-            return new SourceWaitingForSasInputState(startState.dialogUuid, startState.otherConnectionIdentifier, targetDeviceName, startState.ephemeralIdentity, fullSas);
+            return new SourceWaitingForSasInputState(startState.dialogUuid, startState.otherConnectionIdentifier, targetDeviceName, startState.ephemeralIdentity, fullSas, startState.sessionNumber);
         }
     }
 
@@ -1378,7 +1614,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
-            return new TargetWaitingForSnapshotState(startState.dialogUuid, startState.deviceName, startState.otherConnectionIdentifier, startState.transferredIdentity, startState.serverAuthenticationPrivateKey, startState.encryptionPrivateKey, startState.macKey);
+            return new TargetWaitingForSnapshotState(startState.dialogUuid, startState.deviceName, startState.otherConnectionIdentifier, startState.transferredIdentity, startState.serverAuthenticationPrivateKey, startState.encryptionPrivateKey, startState.macKey, new String(fullSas, StandardCharsets.UTF_8), startState.sessionNumber, null);
         }
     }
 
@@ -1411,42 +1647,159 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 return startState;
             }
 
+            // check if owned identity is keycloak managed and transfer restricted
+            ObvKeycloakState keycloakState = protocolManagerSession.identityDelegate.getOwnedIdentityKeycloakState(protocolManagerSession.session, getOwnedIdentity());
+            if (keycloakState != null && keycloakState.transferRestricted) {
+                // sas is correct --> send keycloak parameters so the target device can authenticate and respond with a transferProof
+                JsonKeycloakConfiguration configuration = new JsonKeycloakConfiguration();
+                configuration.server = keycloakState.keycloakServer;
+                configuration.cid = keycloakState.clientId;
+                configuration.secret = keycloakState.clientSecret;
 
-            {
+                byte[] dataToSend = getJsonObjectMapper().writeValueAsBytes(configuration);
+                EncryptedBytes payload = Suite.getPublicKeyEncryption(startState.ephemeralIdentity.getEncryptionPublicKey()).encrypt(startState.ephemeralIdentity.getEncryptionPublicKey(), dataToSend, getPrng());
+
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.TransferRelayQuery(startState.otherConnectionIdentifier, payload.getBytes(), false)));
+                ChannelMessageToSend messageToSend = new SourceWaitForKeycloakAuthenticationProofMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+
+                return new SourceWaitForKeycloakAuthenticationProofState(startState.dialogUuid, startState.otherConnectionIdentifier, startState.ephemeralIdentity, startState.fullSas, startState.sessionNumber, receivedMessage.deviceUidToKeepActive);
+            } else {
                 // sas is correct --> we can send a snapshot
-                ObvBackupAndSyncDelegate wrappedIdentityDelegate = protocolManagerSession.identityDelegate.getSyncDelegateWithinTransaction(protocolManagerSession.session);
+                sendSnapshotAndCloseWebsocket(
+                        protocolManagerSession,
+                        getProtocolInstanceUid(),
+                        getOwnedIdentity(),
+                        receivedMessage.deviceUidToKeepActive,
+                        startState.otherConnectionIdentifier,
+                        startState.ephemeralIdentity,
+                        startState.dialogUuid,
+                        getPrng());
 
-                ObvSyncSnapshot syncSnapshot = ObvSyncSnapshot.get(getOwnedIdentity(), wrappedIdentityDelegate, protocolManagerSession.appBackupAndSyncDelegate);
-                byte[] cleartext;
-                if (receivedMessage.deviceUidToKeepActive == null) {
-                    cleartext = Encoded.of(new Encoded[]{
-                            Encoded.of(syncSnapshot.toEncodedDictionary(wrappedIdentityDelegate, protocolManagerSession.appBackupAndSyncDelegate)),
-                    }).getBytes();
-                } else {
-                    cleartext = Encoded.of(new Encoded[]{
-                            Encoded.of(syncSnapshot.toEncodedDictionary(wrappedIdentityDelegate, protocolManagerSession.appBackupAndSyncDelegate)),
-                            Encoded.of(receivedMessage.deviceUidToKeepActive),
-                    }).getBytes();
+                return new FinalState();
+            }
+        }
+    }
+
+    private static void sendSnapshotAndCloseWebsocket(
+            ProtocolManagerSession protocolManagerSession,
+            UID protocolInstanceUid,
+            Identity ownedIdentity,
+            UID deviceUidToKeepActive,
+            String otherConnectionIdentifier,
+            Identity ephemeralIdentity,
+            UUID dialogUuid,
+            PRNGService prng) throws Exception {
+
+        {
+            ObvBackupAndSyncDelegate wrappedIdentityDelegate = protocolManagerSession.identityDelegate.getSyncDelegateWithinTransaction(protocolManagerSession.session);
+
+            ObvSyncSnapshot syncSnapshot = ObvSyncSnapshot.get(ownedIdentity, wrappedIdentityDelegate, protocolManagerSession.appBackupAndSyncDelegate);
+            byte[] cleartext;
+            if (deviceUidToKeepActive == null) {
+                cleartext = Encoded.of(new Encoded[]{
+                        Encoded.of(syncSnapshot.toEncodedDictionary(wrappedIdentityDelegate, protocolManagerSession.appBackupAndSyncDelegate)),
+                }).getBytes();
+            } else {
+                cleartext = Encoded.of(new Encoded[]{
+                        Encoded.of(syncSnapshot.toEncodedDictionary(wrappedIdentityDelegate, protocolManagerSession.appBackupAndSyncDelegate)),
+                        Encoded.of(deviceUidToKeepActive),
+                }).getBytes();
+            }
+            EncryptedBytes payload = Suite.getPublicKeyEncryption(ephemeralIdentity.getEncryptionPublicKey()).encrypt(ephemeralIdentity.getEncryptionPublicKey(), cleartext, prng);
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(ownedIdentity, new ServerQuery.TransferRelayQuery(otherConnectionIdentifier, payload.getBytes(), true)), OWNED_IDENTITY_TRANSFER_PROTOCOL_ID, protocolInstanceUid);
+            ChannelMessageToSend messageToSend = new SourceSnapshotMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, prng);
+        }
+
+        {
+            // close the websocket
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(ownedIdentity, new ServerQuery.TransferCloseQuery(false)), OWNED_IDENTITY_TRANSFER_PROTOCOL_ID, protocolInstanceUid);
+            ChannelMessageToSend messageToSend = new CloseWebSocketMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, prng);
+        }
+
+        {
+            // notify the app to end
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(ownedIdentity, DialogType.createTransferDialog(new ObvTransferStep.SourceSnapshotSent()), dialogUuid), OWNED_IDENTITY_TRANSFER_PROTOCOL_ID, protocolInstanceUid);
+            ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, prng);
+        }
+    }
+
+
+    public static class SourceCheckTransferProofAndSendSnapshotStep extends ProtocolStep {
+        private final SourceWaitForKeycloakAuthenticationProofState startState;
+        private final SourceWaitForKeycloakAuthenticationProofMessage receivedMessage;
+
+        public SourceCheckTransferProofAndSendSnapshotStep(SourceWaitForKeycloakAuthenticationProofState startState, SourceWaitForKeycloakAuthenticationProofMessage receivedMessage, OwnedIdentityTransferProtocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.receivedMessage = receivedMessage;
+        }
+
+        private ConcreteProtocolState restartStep(ProtocolManagerSession protocolManagerSession) throws Exception {
+            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.TransferWaitQuery()));
+            ChannelMessageToSend messageToSend = new SourceWaitForKeycloakAuthenticationProofMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
+            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            return startState;
+        }
+
+        @Override
+        public ConcreteProtocolState executeStep() throws Exception {
+            ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
+
+            if (receivedMessage.serializedJsonResponse == null) {
+                return failProtocol(this, startState.dialogUuid, ObvTransferStep.Fail.FAIL_REASON_NETWORK_ERROR);
+            }
+
+            JsonResponse jsonResponse;
+            String signature;
+            try {
+                jsonResponse = getJsonObjectMapper().readValue(receivedMessage.serializedJsonResponse, JsonResponse.class);
+                byte[] cleartextPayload = protocolManagerSession.encryptionForIdentityDelegate.decrypt(protocolManagerSession.session, new EncryptedBytes(jsonResponse.payload), getOwnedIdentity());
+
+                signature = new String(cleartextPayload, StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                // failed to parse the response --> send a Wait message and return to start state
+                Logger.w("OwnedIdentityTransferProtocol.SourceCheckTransferProofAndSendSnapshotStep failed to parse response");
+                return restartStep(protocolManagerSession);
+
+            }
+
+            if (!Objects.equals(jsonResponse.otherConnectionId, startState.otherConnectionIdentifier)) {
+                // invalid response --> send a Wait message and return to start state
+                Logger.w("OwnedIdentityTransferProtocol.SourceCheckTransferProofAndSendSnapshotStep invalid response");
+                return restartStep(protocolManagerSession);
+            }
+
+
+            // validate the received signature
+            try {
+                String signedContent = protocolManagerSession.identityDelegate.verifyKeycloakSignature(protocolManagerSession.session, getOwnedIdentity(), signature);
+                JsonTransferProof transferProof = getJsonObjectMapper().readValue(signedContent, JsonTransferProof.class);
+
+                String keycloakUserId = protocolManagerSession.identityDelegate.getOwnedIdentityKeycloakUserId(protocolManagerSession.session, getOwnedIdentity());
+
+                if (!Objects.equals(transferProof.session_id, String.format(Locale.ENGLISH, "%08d", startState.sessionNumber))
+                        || !Objects.equals(transferProof.sas, startState.fullSas)
+                        || !Arrays.equals(transferProof.identity, getOwnedIdentity().getBytes())
+                        || !Objects.equals(transferProof.keycloak_id, keycloakUserId)) {
+                    return failProtocol(this, startState.dialogUuid, ObvTransferStep.Fail.FAIL_REASON_INVALID_RESPONSE);
                 }
-                EncryptedBytes payload = Suite.getPublicKeyEncryption(startState.ephemeralIdentity.getEncryptionPublicKey()).encrypt(startState.ephemeralIdentity.getEncryptionPublicKey(), cleartext, getPrng());
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.TransferRelayQuery(startState.otherConnectionIdentifier, payload.getBytes(), true)));
-                ChannelMessageToSend messageToSend = new SourceSnapshotMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
-                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            } catch (Exception ignored) {
+                return failProtocol(this, startState.dialogUuid, ObvTransferStep.Fail.FAIL_REASON_INVALID_RESPONSE);
             }
 
-            {
-                // close the websocket
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.TransferCloseQuery(false)));
-                ChannelMessageToSend messageToSend = new CloseWebSocketMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
-                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-            }
-
-            {
-                // notify the app to end
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createTransferDialog(new ObvTransferStep.SourceSnapshotSent()), startState.dialogUuid));
-                ChannelMessageToSend messageToSend = new OneWayDialogProtocolMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
-                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
-            }
+            sendSnapshotAndCloseWebsocket(
+                    protocolManagerSession,
+                    getProtocolInstanceUid(),
+                    getOwnedIdentity(),
+                    startState.deviceUidToKeepActive,
+                    startState.otherConnectionIdentifier,
+                    startState.ephemeralIdentity,
+                    startState.dialogUuid,
+                    getPrng());
 
             return new FinalState();
         }
@@ -1500,11 +1853,15 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
 
             ObvBackupAndSyncDelegate wrappedIdentityDelegate = protocolManagerSession.identityDelegate.getSyncDelegateWithinTransaction(protocolManagerSession.session);
 
+            byte[] plaintext = null;
             ObvSyncSnapshot syncSnapshot;
             UID deviceUidToKeepActive;
             try {
-                // decrypt and parse relayed message
-                Encoded[] list = new Encoded(Suite.getPublicKeyEncryption(startState.encryptionPrivateKey).decrypt(startState.encryptionPrivateKey, new EncryptedBytes(jsonResponse.payload))).decodeList();
+                // decrypt
+                plaintext = Suite.getPublicKeyEncryption(startState.encryptionPrivateKey).decrypt(startState.encryptionPrivateKey, new EncryptedBytes(jsonResponse.payload));
+
+                // parse relayed message
+                Encoded[] list = new Encoded(plaintext).decodeList();
 
                 // make sure we can parse the snapshot, but don't do anything with it, the app will take care of this
                 syncSnapshot = ObvSyncSnapshot.fromEncodedDictionary(list[0].decodeDictionary(), wrappedIdentityDelegate, protocolManagerSession.appBackupAndSyncDelegate);
@@ -1518,6 +1875,35 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                     deviceUidToKeepActive = null;
                 }
             }  catch (Exception e) {
+                // parsing failed, try to parse it as a keycloak configuration
+                if (plaintext != null) {
+                    try {
+                        JsonKeycloakConfiguration jsonKeycloakConfiguration = getJsonObjectMapper().readValue(plaintext, JsonKeycloakConfiguration.class);
+                        if (jsonKeycloakConfiguration != null && jsonKeycloakConfiguration.server != null && jsonKeycloakConfiguration.cid != null) {
+                            // we have received a JsonKeycloakConfiguration that needs to be passed to the app to force authentication
+                            {
+                                // send keycloak config to app
+                                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createTransferDialog(new ObvTransferStep.TargetRequestsKeycloakAuthenticationProof(jsonKeycloakConfiguration.server, jsonKeycloakConfiguration.cid, jsonKeycloakConfiguration.secret, startState.fullSas, startState.sessionNumber)), startState.dialogUuid));
+                                ChannelMessageToSend messageToSend = new TargetRetrieveKeycloakAuthenticationProofMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
+                                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                            }
+
+                            return new TargetWaitingForKeycloakAuthenticationProofState(
+                                    startState.dialogUuid,
+                                    startState.deviceName,
+                                    startState.otherConnectionIdentifier,
+                                    startState.transferredIdentity,
+                                    startState.serverAuthenticationPrivateKey,
+                                    startState.encryptionPrivateKey,
+                                    startState.macKey,
+                                    startState.fullSas,
+                                    startState.sessionNumber
+                            );
+                        }
+                    } catch (Exception ignored) { }
+                }
+
+
                 // invalid response --> send a Wait message and return to start state
                 Logger.w("OwnedIdentityTransferProtocol.TargetProcessesSnapshotStep failed to decrypt and parse response");
                 return restartStep(protocolManagerSession);
@@ -1540,6 +1926,9 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 ObvIdentity obvOwnedIdentity;
                 if (node instanceof IdentityManagerSyncSnapshot) {
                     obvOwnedIdentity = protocolManagerSession.identityDelegate.restoreTransferredOwnedIdentity(protocolManagerSession.session, startState.deviceName, ((IdentityManagerSyncSnapshot) node));
+                    if (startState.serializedKeycloakAuthState != null) {
+                        protocolManagerSession.identityDelegate.saveKeycloakAuthState(protocolManagerSession.session, obvOwnedIdentity.getIdentity(), startState.serializedKeycloakAuthState);
+                    }
                 } else {
                     throw new Exception();
                 }
@@ -1595,7 +1984,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                         // trigger the device keep active request
                         protocolManagerSession.protocolStarterDelegate.processDeviceManagementRequest(startState.transferredIdentity, ObvDeviceManagementRequest.createSetUnexpiringDeviceRequest(deviceUidToKeepActive.getBytes()));
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 };
                 // register it
@@ -1608,7 +1997,6 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 // trigger a download of all user data (including other identities, but we do not really care...)
                 protocolManagerSession.identityDelegate.downloadAllUserData(protocolManagerSession.session);
             } catch (Exception ignored) { }
-
 
 
 
@@ -1638,7 +2026,48 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
     }
 
 
+    public static class TargetSendKeycloakAuthenticationProofStep extends ProtocolStep {
 
+        private final TargetWaitingForKeycloakAuthenticationProofState startState;
+        private final TargetRetrieveKeycloakAuthenticationProofMessage receivedMessage;
+
+        public TargetSendKeycloakAuthenticationProofStep(TargetWaitingForKeycloakAuthenticationProofState startState, TargetRetrieveKeycloakAuthenticationProofMessage receivedMessage, OwnedIdentityTransferProtocol protocol) throws Exception {
+            super(ReceptionChannelInfo.createLocalChannelInfo(), receivedMessage, protocol);
+            this.startState = startState;
+            this.receivedMessage = receivedMessage;
+        }
+
+        @Override
+        public ConcreteProtocolState executeStep() throws Exception {
+            ProtocolManagerSession protocolManagerSession = getProtocolManagerSession();
+
+            if (receivedMessage.signature == null) {
+                return failProtocol(this, startState.dialogUuid, ObvTransferStep.Fail.FAIL_REASON_INVALID_RESPONSE);
+            }
+
+
+            {
+                // send the signature to the source
+                EncryptedBytes payload = Suite.getPublicKeyEncryption(startState.transferredIdentity.getEncryptionPublicKey()).encrypt(startState.transferredIdentity.getEncryptionPublicKey(), receivedMessage.signature.getBytes(StandardCharsets.UTF_8), getPrng());
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.TransferRelayQuery(startState.otherConnectionIdentifier, payload.getBytes(), false)));
+                ChannelMessageToSend messageToSend = new TargetWaitForSnapshotMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            }
+
+            return new TargetWaitingForSnapshotState(
+                    startState.dialogUuid,
+                    startState.deviceName,
+                    startState.otherConnectionIdentifier,
+                    startState.transferredIdentity,
+                    startState.serverAuthenticationPrivateKey,
+                    startState.encryptionPrivateKey,
+                    startState.macKey,
+                    startState.fullSas,
+                    startState.sessionNumber,
+                    receivedMessage.serializedKeycloakAuthState
+            );
+        }
+    }
 
 
 
@@ -1743,4 +2172,20 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
         public String otherConnectionId;
         public byte[] payload;
     }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class JsonKeycloakConfiguration {
+        public String server;
+        public String cid;
+        public String secret;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class JsonTransferProof {
+        public String session_id;
+        public String sas;
+        public byte[] identity;
+        public String keycloak_id;
+    }
+
 }

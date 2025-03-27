@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.discussion.linkpreview
 
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -48,6 +50,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,7 +65,7 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionViewModel
-import io.olvid.messenger.discussion.message.Attachment
+import io.olvid.messenger.discussion.message.attachments.Attachment
 import io.olvid.messenger.settings.SettingsActivity
 import kotlin.math.roundToInt
 
@@ -72,39 +75,42 @@ fun LinkPreview(
     message: Message,
     discussionViewModel: DiscussionViewModel?,
     linkPreviewViewModel: LinkPreviewViewModel?,
+    highlighter: ((Context, AnnotatedString) -> AnnotatedString)? = null,
     onLongClick: () -> Unit = {}
 ) {
     var opengraph by remember {
         mutableStateOf<OpenGraph?>(null)
     }
-    if (message.linkPreviewFyleId != null) {
+    message.linkPreviewFyleId?.let { linkPreviewFyleId ->
         val linkPreviewFyle by AppDatabase.getInstance()
             .fyleMessageJoinWithStatusDao()
-            .getFyleAndStatusObservable(message.id, message.linkPreviewFyleId).map { fyleAndStatus: FyleMessageJoinWithStatusDao.FyleAndStatus? -> fyleAndStatus?.let { Attachment(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus) } }
+            .getFyleAndStatusObservable(message.id, linkPreviewFyleId).map { fyleAndStatus: FyleMessageJoinWithStatusDao.FyleAndStatus? -> fyleAndStatus?.let { Attachment(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus) } }
             .observeAsState()
         linkPreviewFyle?.let { fyleAndStatus ->
             if (fyleAndStatus.fyle.isComplete) {
-                LaunchedEffect(fyleAndStatus.fyle.id) {
-                    linkPreviewViewModel?.linkPreviewLoader(
-                        fyleAndStatus.fyle,
-                        fyleAndStatus.fyleMessageJoinWithStatus.fileName,
-                        fyleAndStatus.fyleMessageJoinWithStatus.messageId
-                    ) {
-                        opengraph = it
-                        it?.getSafeUri()?.let { uri ->
-                            discussionViewModel?.messageLinkPreviewUrlCache?.put(
-                                message.id,
-                                uri.toString()
-                            )
+                LaunchedEffect(fyleAndStatus.fyle.id, message.messageType) {
+                    if (message.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED && message.wipeStatus != Message.WIPE_STATUS_WIPED) {
+                        linkPreviewViewModel?.linkPreviewLoader(
+                            fyleAndStatus.fyle,
+                            fyleAndStatus.fyleMessageJoinWithStatus.fileName,
+                            fyleAndStatus.fyleMessageJoinWithStatus.messageId
+                        ) {
+                            if (message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED && message.wipeStatus != Message.WIPE_STATUS_WIPED) {
+                                opengraph = it
+                                it?.getSafeUri()?.let { uri ->
+                                    discussionViewModel?.messageLinkPreviewUrlCache?.put(
+                                        message.id,
+                                        uri.toString()
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-    } else if (message.messageType == Message.TYPE_INBOUND_MESSAGE && SettingsActivity.isLinkPreviewInbound(
-            LocalContext.current
-        )
-    ) {
+    }
+    if (message.linkPreviewFyleId == null && message.messageType == Message.TYPE_INBOUND_MESSAGE && SettingsActivity.isLinkPreviewInbound(LocalContext.current)) {
         val density = LocalDensity.current
         LaunchedEffect(message.id) {
             val size = with(density) {
@@ -120,12 +126,18 @@ fun LinkPreview(
             }
         }
     }
+    LaunchedEffect(message.wipeStatus) {
+        if (message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED || message.wipeStatus == Message.WIPE_STATUS_WIPED) {
+            opengraph = null
+        }
+    }
     opengraph?.let {
         if (!it.isEmpty()) {
             LinkPreviewContent(
                 modifier = modifier,
                 openGraph = it,
-                onLongClick = onLongClick
+                onLongClick = onLongClick,
+                highlighter = highlighter
             )
         }
     }
@@ -136,7 +148,8 @@ fun LinkPreview(
 private fun LinkPreviewContent(
     modifier: Modifier = Modifier,
     openGraph: OpenGraph,
-    onLongClick: () -> Unit = {}
+    onLongClick: () -> Unit = {},
+    highlighter: ((Context, AnnotatedString) -> AnnotatedString)?
 ) {
     val context = LocalContext.current
     Box(modifier = modifier
@@ -154,19 +167,20 @@ private fun LinkPreviewContent(
         }) {
         Row(
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 4.dp)
                 .background(color = colorResource(id = R.color.almostWhite))
         ) {
             if (openGraph.hasLargeImageToDisplay()) {
                 Column(modifier = Modifier.padding(4.dp)) {
-                    LinkTitleAndDescription(openGraph = openGraph)
+                    LinkTitleAndDescription(openGraph = openGraph, highlighter)
                     LinkImage(openGraph.bitmap, isLarge = true)
                 }
             } else {
                 Row(modifier = Modifier.padding(4.dp)) {
                     LinkImage(openGraph.bitmap)
                     Spacer(modifier = Modifier.width(4.dp))
-                    LinkTitleAndDescription(openGraph = openGraph)
+                    LinkTitleAndDescription(openGraph = openGraph, highlighter)
                 }
             }
         }
@@ -195,12 +209,16 @@ private fun LinkImage(bitmap: Bitmap?, isLarge: Boolean = false) {
 
 @Composable
 private fun LinkTitleAndDescription(
-    openGraph: OpenGraph
+    openGraph: OpenGraph,
+    highlighter: ((Context, AnnotatedString) -> AnnotatedString)?,
 ) {
     Column(modifier = Modifier.padding(top = 2.dp, bottom = 4.dp)) {
         openGraph.title?.let {
             Text(
-                text = it,
+                text = highlighter?.invoke(
+                    LocalContext.current,
+                    AnnotatedString(it)
+                ) ?: AnnotatedString(it),
                 maxLines = if (openGraph.shouldShowCompleteDescription()) 2 else 1,
                 style = OlvidTypography.body2,
                 fontWeight = FontWeight.Medium,
@@ -210,7 +228,10 @@ private fun LinkTitleAndDescription(
             Spacer(modifier = Modifier.height(2.dp))
         }
         Text(
-            text = openGraph.buildDescription(),
+            text = highlighter?.invoke(
+                LocalContext.current,
+                AnnotatedString(openGraph.buildDescription())
+            ) ?: AnnotatedString(openGraph.buildDescription()),
             maxLines = if (openGraph.shouldShowCompleteDescription()) 100 else 5,
             style = OlvidTypography.body2,
             fontWeight = FontWeight.Normal,
@@ -228,8 +249,9 @@ fun LinkPreviewContentPreview() {
             openGraph = OpenGraph(
                 title = "Link title",
                 description = "Link description sufficiently long to span multiple lines",
-                url = "https://olvid.io"
-            )
+                url = "https://olvid.io",
+            ),
+            highlighter = null
         )
     }
 }

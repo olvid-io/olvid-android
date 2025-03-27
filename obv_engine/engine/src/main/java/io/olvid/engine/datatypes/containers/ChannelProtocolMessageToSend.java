@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,11 +26,13 @@ public class ChannelProtocolMessageToSend implements ChannelMessageToSend {
     private final SendChannelInfo sendChannelInfo;
     private final Encoded encodedElements;
     private final boolean partOfFullRatchetProtocolOfTheSendSeed;
+    private final boolean hasUserContent;
 
-    public ChannelProtocolMessageToSend(SendChannelInfo sendChannelInfo, Encoded encodedElements, boolean partOfFullRatchetProtocolOfTheSendSeed) {
+    public ChannelProtocolMessageToSend(SendChannelInfo sendChannelInfo, Encoded encodedElements, boolean partOfFullRatchetProtocolOfTheSendSeed, boolean hasUserContent) {
         this.sendChannelInfo = sendChannelInfo;
         this.encodedElements = encodedElements;
         this.partOfFullRatchetProtocolOfTheSendSeed = partOfFullRatchetProtocolOfTheSendSeed;
+        this.hasUserContent = hasUserContent;
     }
 
     @Override
@@ -49,5 +51,9 @@ public class ChannelProtocolMessageToSend implements ChannelMessageToSend {
 
     public boolean isPartOfFullRatchetProtocolOfTheSendSeed() {
         return partOfFullRatchetProtocolOfTheSendSeed;
+    }
+
+    public boolean hasUserContent() {
+        return hasUserContent;
     }
 }

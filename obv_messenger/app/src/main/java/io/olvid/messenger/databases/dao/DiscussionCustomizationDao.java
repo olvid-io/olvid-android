@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -33,16 +35,16 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 @Dao
 public interface DiscussionCustomizationDao {
     @Insert
-    long insert(DiscussionCustomization discussionCustomization);
+    long insert(@NonNull DiscussionCustomization discussionCustomization);
 
     @Update
-    void update(DiscussionCustomization discussionCustomization);
+    void update(@NonNull DiscussionCustomization discussionCustomization);
 
     @Delete
-    void delete(DiscussionCustomization discussionCustomization);
+    void delete(@NonNull DiscussionCustomization discussionCustomization);
 
     @Query("SELECT * FROM " + DiscussionCustomization.TABLE_NAME + " WHERE " + DiscussionCustomization.DISCUSSION_ID + " = :discussionId;")
-    DiscussionCustomization get(long discussionId);
+    @Nullable DiscussionCustomization get(long discussionId);
 
     @Query("SELECT * FROM " + DiscussionCustomization.TABLE_NAME + " WHERE " + DiscussionCustomization.DISCUSSION_ID + " = :discussionId;")
     LiveData<DiscussionCustomization> getLiveData(long discussionId);

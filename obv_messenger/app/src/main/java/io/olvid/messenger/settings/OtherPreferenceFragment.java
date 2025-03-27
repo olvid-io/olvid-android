@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,10 +26,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.DropDownPreference;
@@ -84,6 +87,7 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_FORWARD_MESSAGE_EXPLANATION);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_OPEN_EXTERNAL_APP_LOCATION);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION);
+                    editor.remove(SettingsActivity.USER_DIALOG_HIDE_UNARCHIVE_SETTINGS);
                     editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED);
                     editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED);
                     editor.apply();
@@ -285,5 +289,10 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
             e.printStackTrace();
             App.toast(R.string.toast_message_error_exporting_db, Toast.LENGTH_SHORT);
         }
+    }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.setBackgroundColor(getResources().getColor(R.color.dialogBackground));
     }
 }

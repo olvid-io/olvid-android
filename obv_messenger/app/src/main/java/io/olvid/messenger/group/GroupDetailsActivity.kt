@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -21,6 +21,7 @@ package io.olvid.messenger.group
 import android.animation.LayoutTransition
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Typeface
 import android.graphics.drawable.Animatable
 import android.graphics.drawable.Drawable
@@ -42,13 +43,21 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.LinearLayout.LayoutParams
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updateMargins
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -122,7 +131,24 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
     private var showEditDetails = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
         setContentView(layout.activity_group_details)
+        findViewById<CoordinatorLayout>(R.id.group_details_coordinatorLayout)?.let {
+            ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
+                view.updatePadding(top = insets.top)
+                findViewById<ScrollView>(R.id.group_details_scroll_view)?.updatePadding(
+                    left = insets.left,
+                    right = insets.right
+                )
+                view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    updateMargins(bottom = insets.bottom)
+                }
+                WindowInsetsCompat.CONSUMED
+            }
+        }
         onBackPressed {
             val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
                 FULL_SCREEN_IMAGE_FRAGMENT_TAG

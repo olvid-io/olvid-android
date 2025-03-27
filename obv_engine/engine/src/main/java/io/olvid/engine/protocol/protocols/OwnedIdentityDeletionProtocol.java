@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -429,8 +429,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                         // trigger a device discovery on other devices
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllOwnedConfirmedObliviousChannelsOrPreKeysInfo(getOwnedIdentity()),
                                 OWNED_DEVICE_DISCOVERY_PROTOCOL_ID,
-                                new UID(getPrng()),
-                                false);
+                                new UID(getPrng()));
                         ChannelMessageToSend messageToSend = new OwnedDeviceDiscoveryProtocol.TriggerOwnedDeviceDiscoveryMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                     } catch (NoAcceptableChannelException ignored) {
@@ -464,8 +463,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                             try {
                                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(sendChannelInfo,
                                         CONTACT_MANAGEMENT_PROTOCOL_ID,
-                                        new UID(getPrng()),
-                                        false);
+                                        new UID(getPrng()));
                                 ChannelMessageToSend messageToSend = new ContactManagementProtocol.PerformContactDeviceDiscoveryMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                             } catch (Exception ignored) {
@@ -499,8 +497,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                                     try {
                                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(sendChannelInfo,
                                                 GROUP_MANAGEMENT_PROTOCOL_ID,
-                                                protocolInstanceUid,
-                                                false);
+                                                protocolInstanceUid);
                                         ChannelMessageToSend messageToSend = new GroupManagementProtocol.KickFromGroupMessage(coreProtocolMessage, groupInformation).generateChannelProtocolMessageToSend();
                                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                                     } catch (Exception ignored) {
@@ -519,8 +516,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                                     try {
                                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(sendChannelInfo,
                                                 GROUP_MANAGEMENT_PROTOCOL_ID,
-                                                protocolInstanceUid,
-                                                false);
+                                                protocolInstanceUid);
                                         ChannelMessageToSend messageToSend = new GroupManagementProtocol.KickFromGroupMessage(coreProtocolMessage, groupInformation).generateChannelProtocolMessageToSend();
                                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                                     } catch (Exception ignored) {
@@ -534,8 +530,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                             try {
                                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(group.getGroupOwner(), getOwnedIdentity()),
                                         GROUP_MANAGEMENT_PROTOCOL_ID,
-                                        protocolInstanceUid,
-                                        false);
+                                        protocolInstanceUid);
                                 ChannelMessageToSend message = new GroupManagementProtocol.NotifyGroupLeftMessage(coreProtocolMessage, groupInformation).generateChannelProtocolMessageToSend();
                                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, message, getPrng());
                             } catch (Exception ignored) {
@@ -572,7 +567,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                                     GroupV2.BlobKeys blobKeys = protocolManagerSession.identityDelegate.getGroupV2BlobKeys(protocolManagerSession.session, getOwnedIdentity(), groupV2.groupIdentifier);
                                     {
                                         byte[] signature = Signature.sign(Constants.SignatureContext.GROUP_DELETE_ON_SERVER, blobKeys.groupAdminServerAuthenticationPrivateKey.getSignaturePrivateKey(), getPrng());
-                                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.DeleteGroupBlobQuery(groupV2.groupIdentifier, signature)), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, new UID(getPrng()), false);
+                                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.DeleteGroupBlobQuery(groupV2.groupIdentifier, signature)), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, new UID(getPrng()));
                                         ChannelMessageToSend messageToSend = new GroupsV2Protocol.DeleteGroupBlobFromServerMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                                     }
@@ -595,7 +590,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
 
                                         byte[] signature = protocolManagerSession.identityDelegate.signBlock(protocolManagerSession.session, Constants.SignatureContext.GROUP_KICK, dataToSign, getOwnedIdentity(), getPrng());
 
-                                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(member.identity, getOwnedIdentity()), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, groupV2.groupIdentifier.computeProtocolInstanceUid(), false);
+                                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAsymmetricBroadcastChannelInfo(member.identity, getOwnedIdentity()), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, groupV2.groupIdentifier.computeProtocolInstanceUid());
                                         ChannelMessageToSend messageToSend = new GroupsV2Protocol.KickMessage(coreProtocolMessage, groupV2.groupIdentifier, encryptedChain, signature).generateChannelProtocolMessageToSend();
                                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                                     }
@@ -613,7 +608,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                                                 getOwnedIdentity(),
                                                 getPrng());
 
-                                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.PutGroupLogQuery(groupV2.groupIdentifier, leaveSignature)), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, new UID(getPrng()), false);
+                                        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.PutGroupLogQuery(groupV2.groupIdentifier, leaveSignature)), ConcreteProtocol.GROUPS_V2_PROTOCOL_ID, new UID(getPrng()));
                                         ChannelMessageToSend messageToSend = new GroupsV2Protocol.PutGroupLogOnServerMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                                     }
@@ -714,7 +709,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
                         GroupInformation groupInformation = protocolManagerSession.identityDelegate.getGroupInformation(protocolManagerSession.session, getOwnedIdentity(), groupOwnerAndUid);
 
                         GroupMembersChangedCallback groupMembersChangedCallback = () -> {
-                            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()), ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID, groupInformation.computeProtocolUid(), false);
+                            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()), ConcreteProtocol.GROUP_MANAGEMENT_PROTOCOL_ID, groupInformation.computeProtocolUid());
                             ChannelMessageToSend messageToSend = new GroupManagementProtocol.GroupMembersOrDetailsChangedTriggerMessage(coreProtocolMessage, groupInformation).generateChannelProtocolMessageToSend();
                             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         };
@@ -744,8 +739,7 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
 
                         CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                                 ConcreteProtocol.GROUPS_V2_PROTOCOL_ID,
-                                identifierAndAdminStatus.groupIdentifier.computeProtocolInstanceUid(),
-                                false);
+                                identifierAndAdminStatus.groupIdentifier.computeProtocolInstanceUid());
 
                         ChannelMessageToSend messageToSend = new GroupsV2Protocol.GroupUpdateInitialMessage(coreProtocolMessage, identifierAndAdminStatus.groupIdentifier, changeSet).generateChannelProtocolMessageToSend();
                         protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());

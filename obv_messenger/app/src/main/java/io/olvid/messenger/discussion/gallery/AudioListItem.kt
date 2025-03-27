@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -80,7 +80,7 @@ import io.olvid.messenger.databases.entity.Fyle
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.gallery.DiscussionMediaGalleryActivity.AudioServiceBindable
-import io.olvid.messenger.discussion.message.constantSp
+import io.olvid.messenger.discussion.message.attachments.constantSp
 import io.olvid.messenger.services.MediaPlayerService.AudioOutput
 import io.olvid.messenger.services.MediaPlayerService.AudioOutput.PHONE
 import kotlin.math.roundToInt
@@ -415,7 +415,6 @@ fun AudioListItemPreview() {
                         "audio/",
                         FyleMessageJoinWithStatus.STATUS_COMPLETE,
                         1024,
-                        0f,
                         byteArrayOf(),
                         0,
                         null
@@ -424,7 +423,7 @@ fun AudioListItemPreview() {
                 activity = null,
                 audioAttachmentServiceBinding = null,
                 discussionId = 0,
-                onLongClick = { /*TODO*/ })
+                onLongClick = { })
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -442,7 +441,6 @@ fun AudioListItemPreview() {
                         "audio/mp3",
                         FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE,
                         1024*1024,
-                        0.5f,
                         byteArrayOf(),
                         0,
                         null,
@@ -454,7 +452,7 @@ fun AudioListItemPreview() {
                 activity = null,
                 audioAttachmentServiceBinding = null,
                 discussionId = 0,
-                onLongClick = { /*TODO*/ })
+                onLongClick = { })
         }
     }
 }

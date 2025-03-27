@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Chunk;
@@ -134,7 +135,7 @@ public class DownloadAttachmentOperation extends PriorityOperation {
                         cancel(RFC_INVALID_SIGNED_URL);
                         return;
                     }
-                    if (attachment.getChunkDownloadPrivateUrls()[attachment.getReceivedChunkCount()].length() == 0) {
+                    if (attachment.getChunkDownloadPrivateUrls()[attachment.getReceivedChunkCount()].isEmpty()) {
                         cancel(RFC_UPLOAD_CANCELLED_BY_SENDER);
                         return;
                     }
@@ -143,7 +144,7 @@ public class DownloadAttachmentOperation extends PriorityOperation {
                             attachment.getChunkDownloadPrivateUrls()[attachment.getReceivedChunkCount()]
                     );
                     serverMethod.setSslSocketFactory(sslSocketFactory);
-                    serverMethod.setProgressListener(200, new ServerMethodForS3.ServerMethodForS3ProgressListener() {
+                    serverMethod.setProgressListener(150, new ServerMethodForS3.ServerMethodForS3ProgressListener() {
                         final HashMap<String, Object> userInfo;
                         {
                             userInfo = new HashMap<>();
@@ -220,7 +221,7 @@ public class DownloadAttachmentOperation extends PriorityOperation {
                 }
                 finished = true;
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
                 fetchManagerSession.session.rollback();
             } finally {
                 if (finished) {
@@ -235,7 +236,7 @@ public class DownloadAttachmentOperation extends PriorityOperation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

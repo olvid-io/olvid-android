@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -60,6 +60,8 @@ public abstract class ObvTransferStep {
                 return new SourceSnapshotSent(encodedParts);
             case TARGET_SNAPSHOT_RECEIVED:
                 return new TargetSnapshotReceived(encodedParts);
+            case TARGET_REQUESTS_KEYCLOAK_AUTHENTICATION_PROOF:
+                return new TargetRequestsKeycloakAuthenticationProof(encodedParts);
             default:
                 throw new DecodingException();
         }
@@ -82,7 +84,8 @@ public abstract class ObvTransferStep {
         SOURCE_SAS_INPUT(4),
         TARGET_SHOW_SAS(5),
         SOURCE_SNAPSHOT_SENT(6),
-        TARGET_SNAPSHOT_RECEIVED(7);
+        TARGET_SNAPSHOT_RECEIVED(7),
+        TARGET_REQUESTS_KEYCLOAK_AUTHENTICATION_PROOF(8);
 
         private static final Map<Integer, Step> valueMap = new HashMap<>();
         static {
@@ -297,6 +300,63 @@ public abstract class ObvTransferStep {
             return new Encoded[0];
         }
     }
+
+    public static class TargetRequestsKeycloakAuthenticationProof extends ObvTransferStep {
+        public final String keycloakServerUrl;
+        public final String clientId;
+        public final String fullSas;
+        public final long sessionNumber;
+        public final String clientSecret; // may be null
+
+        public TargetRequestsKeycloakAuthenticationProof(String keycloakServerUrl, String clientId, String clientSecret, String fullSas, long sessionNumber) {
+            this.keycloakServerUrl = keycloakServerUrl;
+            this.clientId = clientId;
+            this.clientSecret = clientSecret;
+            this.fullSas = fullSas;
+            this.sessionNumber = sessionNumber;
+        }
+
+        public TargetRequestsKeycloakAuthenticationProof(Encoded[] encodedParts) throws DecodingException {
+            if (encodedParts.length != 5 && encodedParts.length != 4) {
+                throw new DecodingException();
+            }
+            this.keycloakServerUrl = encodedParts[0].decodeString();
+            this.clientId = encodedParts[1].decodeString();
+            this.fullSas = encodedParts[2].decodeString();
+            this.sessionNumber = encodedParts[3].decodeLong();
+            if (encodedParts.length == 5) {
+                this.clientSecret = encodedParts[4].decodeString();
+            } else {
+                this.clientSecret = null;
+            }
+        }
+
+        @Override
+        public Step getStep() {
+            return Step.TARGET_REQUESTS_KEYCLOAK_AUTHENTICATION_PROOF;
+        }
+
+        @Override
+        public Encoded[] getEncodedParts() {
+            if (clientSecret == null) {
+                return new Encoded[]{
+                        Encoded.of(keycloakServerUrl),
+                        Encoded.of(clientId),
+                        Encoded.of(fullSas),
+                        Encoded.of(sessionNumber),
+                };
+            } else {
+                return new Encoded[]{
+                        Encoded.of(keycloakServerUrl),
+                        Encoded.of(clientId),
+                        Encoded.of(fullSas),
+                        Encoded.of(sessionNumber),
+                        Encoded.of(clientSecret),
+                };
+            }
+        }
+    }
+
 
     public static class TargetSnapshotReceived extends ObvTransferStep {
         public TargetSnapshotReceived() {

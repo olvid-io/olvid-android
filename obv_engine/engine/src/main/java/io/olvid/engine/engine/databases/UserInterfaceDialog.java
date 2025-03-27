@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -55,7 +55,7 @@ public class UserInterfaceDialog implements ObvDatabase {
         try {
             sendNotification();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -74,7 +74,7 @@ public class UserInterfaceDialog implements ObvDatabase {
             this.commitHookBits |= HOOK_BIT_SHOULD_SEND_NOTIFICATION;
             engineSession.session.addSessionCommitListener(this);
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -96,7 +96,7 @@ public class UserInterfaceDialog implements ObvDatabase {
                 return userInterfaceDialog;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return null;
         }
     }
@@ -216,7 +216,7 @@ public class UserInterfaceDialog implements ObvDatabase {
                 return list.toArray(new UserInterfaceDialog[0]);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             return new UserInterfaceDialog[0];
         }
     }
@@ -242,7 +242,7 @@ public class UserInterfaceDialog implements ObvDatabase {
                 try {
                     sendNotification();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
         }
@@ -251,7 +251,7 @@ public class UserInterfaceDialog implements ObvDatabase {
                 try {
                     engineSession.userInterfaceDialogListener.sendUserInterfaceDialogDeletionNotification(uuid);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
         }

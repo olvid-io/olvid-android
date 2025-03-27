@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -56,7 +56,7 @@ public class PostMessageInDiscussionTask implements Runnable {
     @Override
     public void run() {
         final Discussion discussion = db.discussionDao().getById(discussionId);
-        if (!discussion.isNormal()) {
+        if (discussion == null || !discussion.isNormal()) {
             Logger.w("A message was posted in a locked discussion!!!");
             return;
         }

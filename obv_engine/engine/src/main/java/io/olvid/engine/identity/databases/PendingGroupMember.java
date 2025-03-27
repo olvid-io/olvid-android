@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -389,7 +389,7 @@ public class PendingGroupMember implements ObvDatabase {
             pendingGroupMember.declined = pojo.declined;
             pendingGroupMember.insert();
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

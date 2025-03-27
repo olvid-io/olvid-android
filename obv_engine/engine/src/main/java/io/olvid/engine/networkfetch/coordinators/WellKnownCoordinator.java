@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -69,9 +69,12 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
         this.wellKnownCache = new HashMap<>();
 
         this.wellKnownDownloadOperationQueue = new NoDuplicateOperationQueue();
-        this.wellKnownDownloadOperationQueue.execute(1, "Engine-WellKnownDownloadCoordinator");
 
         this.wellKnownDownloadTimer = new Timer("Engine-WellKnownDownloadTimer");
+    }
+
+    public void startProcessing() {
+        this.wellKnownDownloadOperationQueue.execute(1, "Engine-WellKnownDownloadCoordinator");
     }
 
     public void setNotificationPostingDelegate(NotificationPostingDelegate notificationPostingDelegate) {
@@ -123,12 +126,12 @@ public class WellKnownCoordinator implements Operation.OnFinishCallback, Operati
                             queueNewWellKnownDownloadOperation(server);
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.x(e);
                     }
                 }
             }, Constants.WELL_KNOWN_REFRESH_INTERVAL, Constants.WELL_KNOWN_REFRESH_INTERVAL);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 

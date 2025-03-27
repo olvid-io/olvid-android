@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -53,6 +53,7 @@ public class KnownCertificate {
     public byte[] certificateBytes;
 
     @ColumnInfo(name = TRUST_TIMESTAMP)
+    @Nullable
     public Long trustTimestamp;
 
     @ColumnInfo(name = EXPIRATION_TIMESTAMP)

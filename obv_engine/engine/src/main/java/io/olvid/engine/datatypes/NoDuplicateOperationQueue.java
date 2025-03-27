@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -52,8 +52,6 @@ public class NoDuplicateOperationQueue {
         if (uid != null) {
             lockOnQueuedOperationUids.lock();
             if (queuedOperationUids.contains(uid)) {
-                Logger.d("NoDuplicateOperationQueue already contains an operation of type " + op.getClass() + " with UID " + uid);
-                Logger.d("queue size: " + operations.size() + "  set size: " + queuedOperationUids.size());
                 lockOnQueuedOperationUids.unlock();
                 return;
             }
@@ -124,7 +122,7 @@ public class NoDuplicateOperationQueue {
                             op.execute();
                         } catch (Exception e) {
                             Logger.e("Exception in operation that could have killed a queue!");
-                            e.printStackTrace();
+                            Logger.x(e);
                         }
                     } else {
                         operations.add(op);

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -20,6 +20,7 @@
 package io.olvid.messenger.discussion.location;
 
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -30,7 +31,7 @@ import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 
-import com.mapbox.geojson.constants.GeoJsonConstants;
+import org.maplibre.geojson.constants.GeoJsonConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,10 +68,15 @@ public abstract class MapViewAbstractFragment extends Fragment {
 
     abstract void centerOnMarkers(boolean animate, boolean includeMyLocation); // center on all markers currently shown
     abstract void centerOnMarker(long id, @SuppressWarnings("SameParameterValue") boolean animate); // center on a specific marker use message.id as unique id
+    abstract void onLocationUpdate(Location location); // return true if the update was taken into account
+    abstract Double getLatestLocationAltitude();
+    abstract Float getLatestLocationAccuracy();
+
+    protected MutableLiveData<Boolean> currentlyCenteredOnGpsPosition = new MutableLiveData<>(false);
 
 
     protected final Pair<LatLngWrapper, LatLngWrapper> computeBounds(List<LatLngWrapper> positions) {
-        if (positions == null || positions.size() == 0) {
+        if (positions == null || positions.isEmpty()) {
             return null;
         } else if (positions.size() == 1) {
             return new Pair<>(positions.get(0), null);
@@ -113,5 +119,4 @@ public abstract class MapViewAbstractFragment extends Fragment {
             }
         }
     }
-
 }

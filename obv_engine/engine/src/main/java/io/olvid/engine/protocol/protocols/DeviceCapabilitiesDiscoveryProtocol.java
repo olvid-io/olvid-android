@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -390,9 +390,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                        SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                        ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID,
-                       childProtocolInstanceUid,
-                       false
-               );
+                       childProtocolInstanceUid);
                ChannelMessageToSend messageToSend = new OneToOneContactInvitationProtocol.InitiateOneToOneStatusSyncWithAllContactsMessage(coreProtocolMessage).generateChannelProtocolMessageToSend();
                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -518,9 +516,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                     SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                     DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID,
-                    childProtocolInstanceUid,
-                    false
-            );
+                    childProtocolInstanceUid);
             ChannelMessageToSend messageToSend = new InitialSingleContactDeviceMessage(coreProtocolMessage, receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), receivedMessage.getReceptionChannelInfo().getRemoteDeviceUid(), true).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
          }
@@ -558,9 +554,7 @@ public class DeviceCapabilitiesDiscoveryProtocol extends ConcreteProtocol {
             CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(
                     SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),
                     DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID,
-                    childProtocolInstanceUid,
-                    false
-            );
+                    childProtocolInstanceUid);
             ChannelMessageToSend messageToSend = new InitialSingleOwnedDeviceMessage(coreProtocolMessage, receivedMessage.getReceptionChannelInfo().getRemoteDeviceUid(), true).generateChannelProtocolMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
          }

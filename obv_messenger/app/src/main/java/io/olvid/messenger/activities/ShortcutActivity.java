@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -39,10 +40,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
+import androidx.core.graphics.Insets;
 import androidx.core.graphics.drawable.IconCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.LiveData;
@@ -101,6 +107,21 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
         getDelegate().setLocalNightMode(AppCompatDelegate.getDefaultNightMode());
         setContentView(R.layout.activity_shortcut);
 
+        Window window = getWindow();
+        if (window != null) {
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+            WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightNavigationBars(false);
+        }
+        ConstraintLayout root = findViewById(R.id.root_constraint_layout);
+        if (root != null) {
+
+            ViewCompat.setOnApplyWindowInsetsListener(root, (view, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
+                root.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                return WindowInsetsCompat.CONSUMED;
+            });
+        }
+
         currentIdentityInitialView = findViewById(R.id.current_identity_initial_view);
         currentNameTextView = findViewById(R.id.current_identity_name_text_view);
         currentNameSecondLineTextView = findViewById(R.id.current_identity_name_second_line_text_view);
@@ -131,7 +152,7 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
             }
             AppSingleton.getInstance().selectIdentity(bytesOwnedIdentity, null);
         });
-        Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? null : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
+        Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenExceptOne(ownedIdentity == null ? new byte[0] : ownedIdentity.bytesOwnedIdentity)).observe(this, adapter);
 
 
         FilteredDiscussionListFragment filteredDiscussionListFragment = new FilteredDiscussionListFragment();

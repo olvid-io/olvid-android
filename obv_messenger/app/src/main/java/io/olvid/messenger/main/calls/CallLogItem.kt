@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -67,6 +67,7 @@ import io.olvid.messenger.main.InitialView
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CallLogItemView(
+    modifier: Modifier = Modifier,
     callLogItemAndContacts: CallLogItemAndContacts,
     initialViewSetup: (initialView: InitialView) -> Unit,
     title: AnnotatedString,
@@ -74,7 +75,7 @@ fun CallLogItemView(
     onClick: () -> Unit,
     onDeleteCallLogItem: (callLogItem: CallLogItem) -> Unit,
 ) {
-    Box(modifier = Modifier.background(colorResource(id = R.color.almostWhite))) {
+    Box(modifier = modifier) {
         // menu
         var menuOpened by remember { mutableStateOf(false) }
         CallLogMenu(

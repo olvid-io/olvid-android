@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -155,7 +155,7 @@ public class UploadAttachmentOperation extends PriorityOperation {
                                 authEnc.encrypt(outboxAttachment.getKey(), Encoded.encodeChunk(chunkNumber, buffer, bufferFullness), prng));
                         serverMethod.setSslSocketFactory(sslSocketFactory);
 
-                        serverMethod.setProgressListener(100, new ServerMethodForS3.ServerMethodForS3ProgressListener() {
+                        serverMethod.setProgressListener(150, new ServerMethodForS3.ServerMethodForS3ProgressListener() {
                             final HashMap<String, Object> userInfo;
                             final long totalLength;
                             final long chunkLength;
@@ -217,7 +217,7 @@ public class UploadAttachmentOperation extends PriorityOperation {
                     return;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             } finally {
                 if (finished) {
                     sendManagerSession.session.commit();
@@ -230,7 +230,7 @@ public class UploadAttachmentOperation extends PriorityOperation {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
             cancel(null);
             processCancel();
         }

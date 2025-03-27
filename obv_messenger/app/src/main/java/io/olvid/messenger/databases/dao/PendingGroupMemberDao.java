@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -35,23 +37,23 @@ import io.olvid.messenger.databases.entity.PendingGroupMember;
 @Dao
 public interface PendingGroupMemberDao {
     @Insert
-    void insert(PendingGroupMember pendingGroupMember);
+    void insert(@NonNull PendingGroupMember pendingGroupMember);
 
     @Delete
-    void delete(PendingGroupMember pendingGroupMember);
+    void delete(@NonNull PendingGroupMember pendingGroupMember);
 
     @Update
-    void update(PendingGroupMember pendingGroupMember);
+    void update(@NonNull PendingGroupMember pendingGroupMember);
 
     @Query("SELECT * FROM " + PendingGroupMember.TABLE_NAME + " WHERE " + PendingGroupMember.BYTES_IDENTITY + " = :bytesIdentity AND " +
             PendingGroupMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity AND " +
             PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    PendingGroupMember get(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, byte[] bytesIdentity);
+    @Nullable PendingGroupMember get(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid, @NonNull byte[] bytesIdentity);
 
     @Query("SELECT * FROM " + PendingGroupMember.TABLE_NAME + " WHERE " +
             PendingGroupMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity AND " +
             PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    List<PendingGroupMember> getGroupPendingMembers(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    List<PendingGroupMember> getGroupPendingMembers(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 
     @Query("SELECT " +
             " pending." + PendingGroupMember.BYTES_IDENTITY + " AS pending_" + PendingGroupMember.BYTES_IDENTITY + ", " +
@@ -65,7 +67,7 @@ public interface PendingGroupMemberDao {
             " AND contact." + Contact.BYTES_CONTACT_IDENTITY + " = pending." + PendingGroupMember.BYTES_IDENTITY +
             " WHERE pending." + PendingGroupMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND pending." + PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    LiveData<List<PendingGroupMemberAndContact>> getGroupPendingMemberAndContactsLiveData(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    LiveData<List<PendingGroupMemberAndContact>> getGroupPendingMemberAndContactsLiveData(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 
     @Query("SELECT " +
             " pending." + PendingGroupMember.BYTES_IDENTITY + " AS pending_" + PendingGroupMember.BYTES_IDENTITY + ", " +
@@ -79,7 +81,7 @@ public interface PendingGroupMemberDao {
             " AND contact." + Contact.BYTES_CONTACT_IDENTITY + " = pending." + PendingGroupMember.BYTES_IDENTITY +
             " WHERE pending." + PendingGroupMember.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND pending." + PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid")
-    List<PendingGroupMemberAndContact> getGroupPendingMemberAndContacts(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    List<PendingGroupMemberAndContact> getGroupPendingMemberAndContacts(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 
     class PendingGroupMemberAndContact {
         @Embedded(prefix = "pending_")

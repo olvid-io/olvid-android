@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -92,8 +93,8 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                                     }
 
                                     if (contactPojo.personal_note != null) {
-                                        contact.personalNote = contactPojo.personal_note;
-                                        db.contactDao().updatePersonalNote(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.personalNote);
+                                        contact.setPersonalNote(contactPojo.personal_note);
+                                        db.contactDao().updatePersonalNote(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.personalNote, contact.fullSearchDisplayName);
                                     }
 
                                     if (contactPojo.discussion_customization != null) {
@@ -221,13 +222,15 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                                     } else {
                                         // group is joined
                                         if (groupPojo.custom_name != null) {
+                                            group.fullSearchField = group.fullSearchField + " " + StringUtils.unAccent(groupPojo.custom_name);
                                             group.customName = groupPojo.custom_name;
-                                            db.groupDao().updateCustomName(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.customName);
+                                            db.groupDao().updateCustomName(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.customName, group.fullSearchField);
                                         }
 
                                         if (groupPojo.personal_note != null) {
+                                            group.fullSearchField = group.fullSearchField + " " + StringUtils.unAccent(groupPojo.personal_note);
                                             group.personalNote = groupPojo.personal_note;
-                                            db.groupDao().updatePersonalNote(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.personalNote);
+                                            db.groupDao().updatePersonalNote(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.personalNote, group.fullSearchField);
                                         }
 
                                         if (groupPojo.discussion_customization != null) {
@@ -268,13 +271,15 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                                 Group2 group2 = db.group2Dao().get(ownedIdentityPojo.owned_identity, group2Pojo.group_identifier);
                                 if (group2 != null) {
                                     if (group2Pojo.custom_name != null) {
+                                        group2.fullSearchField = group2.fullSearchField + " " + StringUtils.unAccent(group2Pojo.custom_name);
                                         group2.customName = group2Pojo.custom_name;
-                                        db.group2Dao().updateCustomName(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier, group2.customName);
+                                        db.group2Dao().updateCustomName(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier, group2.customName, group2.fullSearchField);
                                     }
 
                                     if (group2Pojo.personal_note != null) {
+                                        group2.fullSearchField = group2.fullSearchField + " " + StringUtils.unAccent(group2Pojo.personal_note);
                                         group2.personalNote = group2Pojo.personal_note;
-                                        db.group2Dao().updatePersonalNote(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier, group2.personalNote);
+                                        db.group2Dao().updatePersonalNote(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier, group2.personalNote, group2.fullSearchField);
                                     }
 
                                     if (group2Pojo.discussion_customization != null) {

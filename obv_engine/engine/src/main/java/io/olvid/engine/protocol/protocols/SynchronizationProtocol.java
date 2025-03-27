@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -428,7 +428,7 @@ public class SynchronizationProtocol extends ConcreteProtocol {
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                 } catch (NoAcceptableChannelException ignored) { }
 
-//                // send an AtomProcessedMessage to all ongoing instances of the synchronisation protocol
+                // send an AtomProcessedMessage to all ongoing instances of the synchronisation protocol
 //                UID currentDeviceUid = protocolManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
 //                for (UID otherDeviceUid : otherDeviceUids) {
 //                    CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(getOwnedIdentity()),

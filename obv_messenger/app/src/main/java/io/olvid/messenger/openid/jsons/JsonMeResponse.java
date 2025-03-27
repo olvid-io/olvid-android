@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -31,6 +31,7 @@ public class JsonMeResponse {
     public String signature;
     public String server;
     public Boolean revocationAllowed;
+    public Boolean transferRestricted;
     public String apiKey;
     public String selfRevocationTestNonce;
     public List<String> pushTopics;
@@ -57,6 +58,16 @@ public class JsonMeResponse {
     @JsonProperty("revocation-allowed")
     public void setRevocationAllowed(Boolean revocationAllowed) {
         this.revocationAllowed = revocationAllowed;
+    }
+
+    @JsonProperty("transfer-restricted")
+    public Boolean getTransferRestricted() {
+        return transferRestricted;
+    }
+
+    @JsonProperty("transfer-restricted")
+    public void setTransferRestricted(Boolean transferRestricted) {
+        this.transferRestricted = transferRestricted;
     }
 
     @JsonProperty("push-topics")

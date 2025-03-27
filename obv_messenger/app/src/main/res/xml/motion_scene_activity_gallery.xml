@@ -24,11 +24,12 @@
         <Constraint
             android:id="@+id/bottom_bar"
             android:layout_width="0dp"
-            android:layout_height="@dimen/tab_bar_size"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/tab_bar_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginBottom="@dimen/minus_tab_bar_size"/>
+            android:layout_marginBottom="-100dp" />
         <Constraint
             android:id="@+id/message_timer_textview"
             android:layout_width="40dp"
@@ -69,7 +70,8 @@
         <Constraint
             android:id="@+id/bottom_bar"
             android:layout_width="0dp"
-            android:layout_height="@dimen/tab_bar_size"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/tab_bar_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.dao;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -34,10 +36,10 @@ import io.olvid.messenger.databases.entity.PendingGroupMember;
 @Dao
 public interface ContactDao {
     @Insert
-    void insert(Contact contact);
+    void insert(@NonNull Contact contact);
 
     @Delete
-    void delete(Contact contact);
+    void delete(@NonNull Contact contact);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.IDENTITY_DETAILS + " = :identityDetails, " +
@@ -48,73 +50,74 @@ public interface ContactDao {
             Contact.FULL_SEARCH_DISPLAY_NAME + " = :fullSearchDisplayName " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateAllDisplayNames(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String identityDetails, String displayName, String firstName, String customDisplayName, byte[] sortDisplayName, String fullSearchDisplayName);
+    void updateAllDisplayNames(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, @Nullable String identityDetails, @NonNull String displayName, @Nullable String firstName, @Nullable String customDisplayName, @NonNull byte[] sortDisplayName, @NonNull String fullSearchDisplayName);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.FIRST_NAME + " = :firstName " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateFirstName(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String firstName);
+    void updateFirstName(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, @Nullable String firstName);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.KEYCLOAK_MANAGED + " = :keycloakManaged " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateKeycloakManaged(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean keycloakManaged);
+    void updateKeycloakManaged(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, boolean keycloakManaged);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.ACTIVE + " = :active " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateActive(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean active);
+    void updateActive(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, boolean active);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.TRUST_LEVEL + " = :trustLevel " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateTrustLevel(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, int trustLevel);
+    void updateTrustLevel(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, int trustLevel);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.ONE_TO_ONE + " = :oneToOne " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateOneToOne(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean oneToOne);
+    void updateOneToOne(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, boolean oneToOne);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.RECENTLY_ONLINE + " = :recentlyOnline " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateRecentlyOnline(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean recentlyOnline);
+    void updateRecentlyOnline(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, boolean recentlyOnline);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.NEW_PUBLISHED_DETAILS + " = :newPublishedDetails " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updatePublishedDetailsStatus(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, int newPublishedDetails);
+    void updatePublishedDetailsStatus(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, int newPublishedDetails);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.PHOTO_URL + " = :photoUrl " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updatePhotoUrl(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String photoUrl);
+    void updatePhotoUrl(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, @Nullable String photoUrl);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.CUSTOM_NAME_HUE + " = :customNameHue " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateCustomNameHue(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, Integer customNameHue);
+    void updateCustomNameHue(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, @Nullable Integer customNameHue);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
-            " SET " + Contact.PERSONAL_NOTE + " = :personalNote " +
+            " SET " + Contact.PERSONAL_NOTE + " = :personalNote, " +
+            Contact.FULL_SEARCH_DISPLAY_NAME + " = :fullSearchDisplayName " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updatePersonalNote(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String personalNote);
+    void updatePersonalNote(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, @Nullable String personalNote, @NonNull String fullSearchDisplayName);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.CUSTOM_PHOTO_URL + " = :customPhotoUrl " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateCustomPhotoUrl(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, String customPhotoUrl);
+    void updateCustomPhotoUrl(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, @Nullable String customPhotoUrl);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.DEVICE_COUNT + " = :deviceCount, " +
@@ -122,25 +125,25 @@ public interface ContactDao {
             Contact.PRE_KEY_COUNT + " = :preKeyCount " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateCounts(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, int deviceCount, int establishedChannelCount, int preKeyCount);
+    void updateCounts(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, int deviceCount, int establishedChannelCount, int preKeyCount);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.CAPABILITY_WEBRTC_CONTINUOUS_ICE + " = :capable " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateCapabilityWebrtcContinuousIce(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean capable);
+    void updateCapabilityWebrtcContinuousIce(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, boolean capable);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.CAPABILITY_GROUPS_V2 + " = :capable " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateCapabilityGroupsV2(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean capable);
+    void updateCapabilityGroupsV2(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, boolean capable);
 
     @Query("UPDATE " + Contact.TABLE_NAME +
             " SET " + Contact.CAPABILITY_ONE_TO_ONE_CONTACTS + " = :capable " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity")
-    void updateCapabilityOneToOneContacts(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, boolean capable);
+    void updateCapabilityOneToOneContacts(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity, boolean capable);
 
 
 
@@ -150,18 +153,18 @@ public interface ContactDao {
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND " + Contact.ONE_TO_ONE + " = 1 " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getAllOneToOneForOwnedIdentity(byte[] ownedIdentityBytes);
+    LiveData<List<Contact>> getAllOneToOneForOwnedIdentity(@NonNull byte[] ownedIdentityBytes);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " AND " + Contact.ONE_TO_ONE + " = 0 " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getAllNotOneToOneForOwnedIdentity(byte[] ownedIdentityBytes);
+    LiveData<List<Contact>> getAllNotOneToOneForOwnedIdentity(@NonNull byte[] ownedIdentityBytes);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    List<Contact> getAllForOwnedIdentitySync(byte[] ownedIdentityBytes);
+    List<Contact> getAllForOwnedIdentitySync(@NonNull byte[] ownedIdentityBytes);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
@@ -169,7 +172,7 @@ public interface ContactDao {
             " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
             " OR " + Contact.PRE_KEY_COUNT + " > 0) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getAllForOwnedIdentityWithChannel(byte[] ownedIdentityBytes);
+    LiveData<List<Contact>> getAllForOwnedIdentityWithChannel(@NonNull byte[] ownedIdentityBytes);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :ownedIdentityBytes " +
@@ -178,7 +181,7 @@ public interface ContactDao {
             " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
             " OR " + Contact.PRE_KEY_COUNT + " > 0) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getAllForOwnedIdentityWithChannelAndGroupV2Capability(byte[] ownedIdentityBytes);
+    LiveData<List<Contact>> getAllForOwnedIdentityWithChannelAndGroupV2Capability(@NonNull byte[] ownedIdentityBytes);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME + " " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
@@ -188,7 +191,7 @@ public interface ContactDao {
             " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
             " OR " + Contact.PRE_KEY_COUNT + " > 0) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getAllOneToOneForOwnedIdentityWithChannelExcludingOne(byte[] bytesOwnedIdentity, byte[] bytesExcludedContactIdentity);
+    LiveData<List<Contact>> getAllOneToOneForOwnedIdentityWithChannelExcludingOne(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesExcludedContactIdentity);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME + " " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
@@ -197,7 +200,7 @@ public interface ContactDao {
             " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
             " OR " + Contact.PRE_KEY_COUNT + " > 0) " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getAllForOwnedIdentityWithChannelExcludingSome(byte[] bytesOwnedIdentity, List<byte[]> excludedContacts);
+    LiveData<List<Contact>> getAllForOwnedIdentityWithChannelExcludingSome(@NonNull byte[] bytesOwnedIdentity, @NonNull List<byte[]> excludedContacts);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME)
     List<Contact> getAllSync();
@@ -210,23 +213,23 @@ public interface ContactDao {
 
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME + " WHERE " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity AND " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    Contact get(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    @Nullable Contact get(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME + " WHERE " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity AND " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    LiveData<Contact> getAsync(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    LiveData<Contact> getAsync(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
             " AND " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getAsList(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
+    LiveData<List<Contact>> getAsList(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
 
     @Query("SELECT * FROM " + Contact.TABLE_NAME +
             " WHERE " + Contact.BYTES_CONTACT_IDENTITY + " IN ( :bytesContactIdentities )" +
             " AND " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity" +
             " AND (" + Contact.ESTABLISHED_CHANNEL_COUNT + " > 0 " +
             " OR " + Contact.PRE_KEY_COUNT + " > 0) ")
-    LiveData<List<Contact>> getWithChannelAsList(byte[] bytesOwnedIdentity, List<byte[]> bytesContactIdentities);
+    LiveData<List<Contact>> getWithChannelAsList(@NonNull byte[] bytesOwnedIdentity, @NonNull List<byte[]> bytesContactIdentities);
 
     @Query( "SELECT * FROM ( SELECT contact.* FROM " + Contact.TABLE_NAME + " AS contact " +
             " WHERE " + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
@@ -245,7 +248,7 @@ public interface ContactDao {
             " WHERE pendingmember." + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND pendingmember." + PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid )" +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getAllForOwnedIdentityWithChannelExcludingGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    LiveData<List<Contact>> getAllForOwnedIdentityWithChannelExcludingGroup(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 
     @Query( "SELECT * FROM ( SELECT contact.* FROM " + Contact.TABLE_NAME + " AS contact " +
             " INNER JOIN " + ContactGroupJoin.TABLE_NAME + " AS membersjoin " +
@@ -260,7 +263,7 @@ public interface ContactDao {
             " WHERE pendingmember." + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND pendingmember." + PendingGroupMember.BYTES_GROUP_OWNER_AND_UID + " = :bytesGroupOwnerAndUid )" +
             " ORDER BY " + Contact.SORT_DISPLAY_NAME + " ASC")
-    LiveData<List<Contact>> getAllInGroupOrPending(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid);
+    LiveData<List<Contact>> getAllInGroupOrPending(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupOwnerAndUid);
 
     @Query("SELECT " + Contact.CUSTOM_PHOTO_URL + " FROM " + Contact.TABLE_NAME +
      " WHERE " + Contact.CUSTOM_PHOTO_URL + " IS NOT NULL")

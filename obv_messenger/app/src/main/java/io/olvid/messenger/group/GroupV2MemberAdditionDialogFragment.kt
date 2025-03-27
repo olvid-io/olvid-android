@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *  
  *  This file is part of Olvid for Android.
  *  
@@ -112,13 +112,21 @@ class GroupV2MemberAdditionDialogFragment : DialogFragment() {
         val filteredContactListFragment = FilteredContactListFragment()
         filteredContactListFragment.setContactFilterEditText(dialogContactNameFilter)
         filteredContactListFragment.setSelectable(true)
-        val unfilteredContacts = AppDatabase.getInstance().group2Dao()
-            .getAllValidContactsNotInGroup(
-                bytesOwnedIdentity,
-                bytesGroupIdentifier,
-                bytesAddedMemberIdentities,
-                bytesRemovedMemberIdentities
-            )
+        val unfilteredContacts = bytesOwnedIdentity?.let { ownedId ->
+            bytesGroupIdentifier?.let { groupId ->
+                bytesAddedMemberIdentities?.let { addedMembers ->
+                    bytesRemovedMemberIdentities?.let { removedMembers ->
+                        AppDatabase.getInstance().group2Dao()
+                            .getAllValidContactsNotInGroup(
+                                ownedId,
+                                groupId,
+                                addedMembers,
+                                removedMembers
+                            )
+                    }
+                }
+            }
+        }
         filteredContactListFragment.setUnfilteredContacts(unfilteredContacts)
         val selectedContactsObserver =
             Observer<List<Contact>> { contacts: List<Contact>? -> selectedContacts = contacts }

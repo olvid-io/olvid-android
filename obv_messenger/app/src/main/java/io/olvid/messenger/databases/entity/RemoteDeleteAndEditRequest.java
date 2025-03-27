@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -120,7 +120,7 @@ public class RemoteDeleteAndEditRequest {
     public String getSanitizedSerializedMentions() {
         if (mentions != null) {
             try {
-                List<JsonUserMention> jsonUserMentions = AppSingleton.getJsonObjectMapper().readValue(mentions, new TypeReference<List<JsonUserMention>>() {
+                List<JsonUserMention> jsonUserMentions = AppSingleton.getJsonObjectMapper().readValue(mentions, new TypeReference<>() {
                 });
                 List<JsonUserMention> sanitizedMentions = new ArrayList<>();
                 for (JsonUserMention mention : jsonUserMentions) {

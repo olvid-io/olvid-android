@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -221,7 +221,7 @@ public class InboxAttachment implements ObvDatabase {
             commitHookBits |= HOOK_BIT_DOWNLOAD_REQUESTED;
             fetchManagerSession.session.addSessionCommitListener(this);
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -238,7 +238,7 @@ public class InboxAttachment implements ObvDatabase {
             this.downloadRequested = false;
             // No notification needed: the downloadSmallAttachment operation will cancel and the coordinator sends a "paused" notification
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -254,7 +254,7 @@ public class InboxAttachment implements ObvDatabase {
             statement.executeUpdate();
             this.markedForDeletion = true;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 
@@ -369,7 +369,7 @@ public class InboxAttachment implements ObvDatabase {
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             return false;
         }
     }
@@ -425,7 +425,7 @@ public class InboxAttachment implements ObvDatabase {
         try {
             this.ownedIdentity = Identity.of(res.getBytes(OWNED_IDENTITY));
         } catch (DecodingException e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
         this.messageUid = new UID(res.getBytes(MESSAGE_UID));
         this.attachmentNumber = res.getInt(ATTACHMENT_NUMBER);
@@ -523,6 +523,26 @@ public class InboxAttachment implements ObvDatabase {
                         " WHERE " + DOWNLOAD_REQUESTED + " = 1 " +
                         " AND " + KEY + " NOT NULL " +
                         " AND " + RECEIVED_LENGTH + " < " + EXPECTED_LENGTH  +
+                        " AND " + MARKED_FOR_DELETION + " = 0;")) {
+            try (ResultSet res = statement.executeQuery()) {
+                List<InboxAttachment> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new InboxAttachment(fetchManagerSession, res));
+                }
+                return list.toArray(new InboxAttachment[0]);
+            }
+        } catch (SQLException e) {
+            return new InboxAttachment[0];
+        }
+    }
+
+    public static InboxAttachment[] getAllPartialAttachmentsNotToResume(FetchManagerSession fetchManagerSession) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+                "SELECT * FROM " + TABLE_NAME +
+                        " WHERE " + DOWNLOAD_REQUESTED + " = 0 " +
+                        " AND " + KEY + " NOT NULL " +
+                        " AND " + RECEIVED_LENGTH + " < " + EXPECTED_LENGTH  +
+                        " AND " + RECEIVED_LENGTH + " > 0 " +
                         " AND " + MARKED_FOR_DELETION + " = 0;")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<InboxAttachment> list = new ArrayList<>();

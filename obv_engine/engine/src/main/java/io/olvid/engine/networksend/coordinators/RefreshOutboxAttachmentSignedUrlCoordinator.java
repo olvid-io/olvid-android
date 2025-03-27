@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -69,7 +69,6 @@ public class RefreshOutboxAttachmentSignedUrlCoordinator implements Operation.On
         this.lastUrlRefreshTimestamps = new HashMap<>();
 
         refreshOutboxAttachmentSignedUrlOperationQueue = new NoDuplicateOperationQueue();
-        refreshOutboxAttachmentSignedUrlOperationQueue.execute(1, "Engine-RefreshOutboxAttachmentSignedUrlCoordinator");
 
         scheduler = new ExponentialBackoffRepeatingScheduler<>();
 
@@ -77,6 +76,10 @@ public class RefreshOutboxAttachmentSignedUrlCoordinator implements Operation.On
         awaitingIdentityReactivationOperationsLock = new ReentrantLock();
 
         notificationListener = new NotificationListener();
+    }
+
+    public void startProcessing() {
+        refreshOutboxAttachmentSignedUrlOperationQueue.execute(1, "Engine-RefreshOutboxAttachmentSignedUrlCoordinator");
     }
 
     public void setNotificationPostingDelegate(NotificationPostingDelegate notificationPostingDelegate) {
@@ -160,7 +163,7 @@ public class RefreshOutboxAttachmentSignedUrlCoordinator implements Operation.On
                     }
                     sendManagerSession.session.commit();
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
                 break;
             }

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -28,6 +28,7 @@ object OnboardingRoutes {
     const val IDENTITY_CREATION = "identity_creation"
     const val PROFILE_PICTURE = "profile_picture"
 
+    const val TRANSFER_RESTRICTED_WARNING = "transfer_restricted_warning"
     const val TRANSFER_SOURCE_SESSION = "transfer_source_session"
     const val TRANSFER_TARGET_DEVICE_NAME = "transfer_target_device_name"
     const val TRANSFER_TARGET_SESSION_INPUT = "transfer_target_session_input"
@@ -35,6 +36,8 @@ object OnboardingRoutes {
     const val TRANSFER_ACTIVE_DEVICES = "transfer_active_devices"
     const val TRANSFER_SOURCE_CONFIRMATION = "transfer_source_confirmation"
     const val TRANSFER_TARGET_RESTORE_SUCCESSFUL = "transfer_target_restore_successful"
+    const val TRANSFER_TARGET_KEYCLOAK_AUTHENTICATION_PROOF_REQUIRED = "transfer_target_keycloak_authentication_proof_required"
+    const val TRANSFER_TARGET_AUTHENTICATION_SUCCESSFUL = "transfer_target_authentication_successful"
 
     const val BACKUP_CHOOSE_FILE = "backup_choose_file"
     const val BACKUP_FILE_SELECTED = "backup_file_selected"

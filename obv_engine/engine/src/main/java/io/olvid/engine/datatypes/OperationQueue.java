@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -78,7 +78,7 @@ public class OperationQueue {
                 try {
                     notifier.wait(500);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
             lockOnCount.lock();
@@ -126,7 +126,7 @@ public class OperationQueue {
                             try {
                                 notifier.wait(30000);
                             } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                Logger.x(e);
                             }
                         }
                         continue;
@@ -157,7 +157,7 @@ public class OperationQueue {
                             op.execute();
                         } catch (Exception e) {
                             Logger.e("Exception in operation that could have killed a queue!");
-                            e.printStackTrace();
+                            Logger.x(e);
                         }
                 } else {
                         addOperation(op);

@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -289,7 +289,7 @@ public class ContactIdentity implements ObvDatabase {
             identityManagerSession.session.addSessionCommitListener(this);
         }
         if (jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails() != null) {
-            JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakSignature(identityManagerSession.session, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
+            JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakIdentitySignature(identityManagerSession.session, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
             if (jsonKeycloakUserDetails != null) {
                 // the details are properly signed --> the call to markContactAsCertifiedByOwnKeycloak() will auto-trust the new details, so we can return
                 JsonIdentityDetails certifiedJsonIdentityDetails = jsonKeycloakUserDetails.getIdentityDetails(jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
@@ -609,14 +609,14 @@ public class ContactIdentity implements ObvDatabase {
             contactIdentityObject.revokedAsCompromised = revokedAsCompromised;
             contactIdentityObject.insert();
 
-            JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakSignature(identityManagerSession.session, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
+            JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakIdentitySignature(identityManagerSession.session, ownedIdentity, jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
 
             if (jsonKeycloakUserDetails != null) {
                 try {
                     JsonIdentityDetails certifiedJsonIdentityDetails = jsonKeycloakUserDetails.getIdentityDetails(jsonIdentityDetailsWithVersionAndPhoto.getIdentityDetails().getSignedUserDetails());
                     contactIdentityObject.markContactAsCertifiedByOwnKeycloak(certifiedJsonIdentityDetails);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.x(e);
                 }
             }
 
@@ -740,7 +740,7 @@ public class ContactIdentity implements ObvDatabase {
                             try {
                                 preparedStatement.setString(4, objectMapper.writeValueAsString(map));
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Logger.x(e);
                                 // skip the contact
                                 continue;
                             }
@@ -1279,7 +1279,7 @@ public class ContactIdentity implements ObvDatabase {
             contactIdentity = Identity.of(pojo.contact_identity);
         } catch (DecodingException e) {
             Logger.e("Error recreating ContactIdentity from backup!");
-            e.printStackTrace();
+            Logger.x(e);
         }
         if (contactIdentity == null) {
             return;
@@ -1300,7 +1300,7 @@ public class ContactIdentity implements ObvDatabase {
         contactIdentityObject.forcefullyTrustedByUser = pojo.forcefully_trusted;
         contactIdentityObject.insert();
 
-        JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakSignature(identityManagerSession.session, ownedIdentity, trusted_details.getJsonIdentityDetailsWithVersionAndPhoto().getIdentityDetails().getSignedUserDetails());
+        JsonKeycloakUserDetails jsonKeycloakUserDetails = identityManagerSession.identityDelegate.verifyKeycloakIdentitySignature(identityManagerSession.session, ownedIdentity, trusted_details.getJsonIdentityDetailsWithVersionAndPhoto().getIdentityDetails().getSignedUserDetails());
         if (jsonKeycloakUserDetails != null) {
             contactIdentityObject.setCertifiedByOwnKeycloak(true, null);
         }
@@ -1316,7 +1316,7 @@ public class ContactIdentity implements ObvDatabase {
             contactIdentity = Identity.of(pojo.contact_identity);
         } catch (DecodingException e) {
             Logger.e("Error recreating ContactIdentityGroups from backup!");
-            e.printStackTrace();
+            Logger.x(e);
         }
         if (contactIdentity == null) {
             return;

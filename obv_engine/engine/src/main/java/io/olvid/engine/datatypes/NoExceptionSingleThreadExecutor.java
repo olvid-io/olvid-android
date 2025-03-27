@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2024 Olvid SAS
+ *  Copyright © 2019-2025 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -22,6 +22,8 @@ package io.olvid.engine.datatypes;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import io.olvid.engine.Logger;
 
 public class NoExceptionSingleThreadExecutor implements Executor {
     private final String name;
@@ -46,7 +48,7 @@ public class NoExceptionSingleThreadExecutor implements Executor {
         try {
             executor.shutdownNow();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
         }
     }
 }
