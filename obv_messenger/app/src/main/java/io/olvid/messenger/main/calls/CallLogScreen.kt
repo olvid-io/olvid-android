@@ -69,7 +69,7 @@ fun CallLogScreen(
                             .fillMaxSize()
                             .navigationBarsPadding(),
                         state = rememberLazyListState(),
-                        contentPadding = PaddingValues(bottom = 32.dp),
+                        contentPadding = PaddingValues(bottom = 64.dp),
                     ) {
                         itemsIndexed(items = log) { index, call ->
                             Box {

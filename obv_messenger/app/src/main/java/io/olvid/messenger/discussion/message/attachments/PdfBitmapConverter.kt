@@ -24,6 +24,8 @@ import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.ShapeDrawable
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import coil.ImageLoader
@@ -38,6 +40,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.math.roundToInt
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
 
 class PdfBitmapConverter {
     var renderer: PdfRenderer? = null
@@ -67,11 +71,7 @@ class PdfBitmapConverter {
                         }
 
                         RenderablePdfPage(width, height, key = "${filePath}-${index}") {
-                            val bitmap = Bitmap.createBitmap(
-                                width,
-                                height,
-                                ARGB_8888
-                            )
+                            val bitmap = createBitmap(width, height)
 
                             Canvas(bitmap).apply {
                                 drawColor(Color.WHITE)
@@ -107,7 +107,7 @@ class RenderablePdfPageFetcher(
 ): Fetcher {
     override suspend fun fetch(): FetchResult {
         return DrawableResult(
-            drawable = BitmapDrawable(options.context.resources, renderablePdfPage.render()),
+            drawable = renderablePdfPage.render()?.toDrawable(options.context.resources) ?: ShapeDrawable(),
             isSampled = true,
             dataSource = DataSource.MEMORY)
     }

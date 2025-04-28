@@ -307,7 +307,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                 spannableString.length,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            deleteItem.setTitle(spannableString)
+            deleteItem.title = spannableString
         }
         return true
     }
@@ -837,7 +837,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                             builder
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 val textView = textViewWeakReference.get()
                 if (textView != null) {
                     Handler(Looper.getMainLooper()).post { textView.setText(R.string.message_error_trust_origin) }
@@ -1123,7 +1123,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                             contact.bytesOwnedIdentity,
                             contact.bytesContactIdentity
                         )
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         App.toast(
                             R.string.toast_message_channel_restart_failed,
                             Toast.LENGTH_SHORT
@@ -1300,7 +1300,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                     val contactIdentity = Identity.of(contact.bytesContactIdentity)
                     sb.append(getString(R.string.debug_label_server)).append(" ")
                     sb.append(contactIdentity.server).append("\n\n")
-                } catch (ignored: DecodingException) {
+                } catch (_: DecodingException) {
                 }
                 sb.append(getString(R.string.debug_label_identity_link)).append("\n")
                 sb.append(
@@ -1333,7 +1333,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                 val sixteenDp = (16 * resources.displayMetrics.density).toInt()
                 textView.setPadding(sixteenDp, sixteenDp, sixteenDp, sixteenDp)
                 textView.setTextIsSelectable(true)
-                textView.autoLinkMask = Linkify.ALL
+                textView.autoLinkMask = Linkify.WEB_URLS
                 textView.movementMethod = LinkMovementMethod.getInstance()
                 textView.text = sb
 

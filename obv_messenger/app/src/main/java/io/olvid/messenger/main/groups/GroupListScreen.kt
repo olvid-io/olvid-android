@@ -92,7 +92,7 @@ fun GroupListScreen(
                             .fillMaxSize()
                             .navigationBarsPadding(),
                         state = lazyListState,
-                        contentPadding = PaddingValues(bottom = 32.dp),
+                        contentPadding = PaddingValues(bottom = 64.dp),
                     ) {
                         item {
                             NewGroupButton(onNewGroupClick)

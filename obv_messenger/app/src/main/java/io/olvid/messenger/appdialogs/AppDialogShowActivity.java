@@ -136,7 +136,6 @@ public class AppDialogShowActivity extends LockableActivity {
     public static final String DIALOG_AVAILABLE_SPACE_LOW = "available_space_low";
 
     public static final String DIALOG_BACKUP_REQUIRES_SIGN_IN = "backup_requires_sign_in";
-    public static final String DIALOG_KEY_ESCROW_REQUIRED = "key_escrow_required";
 
     public static final String DIALOG_CONFIGURE_HIDDEN_PROFILE_CLOSE_POLICY = "configure_hidden_profile_close_policy";
 
@@ -510,73 +509,40 @@ public class AppDialogShowActivity extends LockableActivity {
                 break;
             }
             case DIALOG_BACKUP_REQUIRES_SIGN_IN: {
-                if (MDMConfigurationSingleton.getAutoBackupConfiguration() != null) {
-                    // special case where the automatic backups are configured via the MDM
-                    AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                            .setTitle(R.string.dialog_title_mdm_backup_failure)
-                            .setMessage(R.string.dialog_message_mdm_backup_failure)
-                            .setPositiveButton(R.string.button_label_ok, null)
-                            .setOnDismissListener(dialog -> continueWithNextDialog());
-
-                    builder.create().show();
-                } else {
-                    AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                            .setTitle(R.string.dialog_title_backup_requires_sign_in)
-                            .setMessage(R.string.dialog_message_backup_requires_sign_in)
-                            .setPositiveButton(R.string.button_label_sign_in, (dialog, which) -> {
-                                CloudProviderSignInDialogFragment cloudProviderSignInDialogFragment = CloudProviderSignInDialogFragment.newInstance();
-                                cloudProviderSignInDialogFragment.setSignInContext(CloudProviderSignInDialogFragment.SignInContext.AUTOMATIC_BACKUP_SIGN_IN_REQUIRED);
-                                cloudProviderSignInDialogFragment.setOnCloudProviderConfigurationCallback(new CloudProviderSignInDialogFragment.OnCloudProviderConfigurationCallback() {
-                                    @Override
-                                    public void onCloudProviderConfigurationSuccess(BackupCloudProviderService.CloudProviderConfiguration configuration) {
-                                        try {
-                                            SettingsActivity.setAutomaticBackupConfiguration(configuration);
-                                            // notify the engine that auto-backup is set to true to initiate an immediate backup/upload
-                                            AppSingleton.getEngine().setAutoBackupEnabled(true, true);
-                                        } catch (Exception ignored) {
-                                            onCloudProviderConfigurationFailed();
-                                        }
+                AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_backup_requires_sign_in)
+                        .setMessage(R.string.dialog_message_backup_requires_sign_in)
+                        .setPositiveButton(R.string.button_label_sign_in, (dialog, which) -> {
+                            CloudProviderSignInDialogFragment cloudProviderSignInDialogFragment = CloudProviderSignInDialogFragment.newInstance();
+                            cloudProviderSignInDialogFragment.setSignInContext(CloudProviderSignInDialogFragment.SignInContext.AUTOMATIC_BACKUP_SIGN_IN_REQUIRED);
+                            cloudProviderSignInDialogFragment.setOnCloudProviderConfigurationCallback(new CloudProviderSignInDialogFragment.OnCloudProviderConfigurationCallback() {
+                                @Override
+                                public void onCloudProviderConfigurationSuccess(BackupCloudProviderService.CloudProviderConfiguration configuration) {
+                                    try {
+                                        SettingsActivity.setAutomaticBackupConfiguration(configuration);
+                                        // notify the engine that auto-backup is set to true to initiate an immediate backup/upload
+                                        AppSingleton.getEngine().setAutoBackupEnabled(true, true);
+                                    } catch (Exception ignored) {
+                                        onCloudProviderConfigurationFailed();
                                     }
+                                }
 
-                                    @Override
-                                    public void onCloudProviderConfigurationFailed() {
-                                        App.toast(R.string.toast_message_error_selecting_automatic_backup_account, Toast.LENGTH_SHORT);
-                                    }
-                                });
-                                cloudProviderSignInDialogFragment.show(getSupportFragmentManager(), "CloudProviderSignInDialogFragment");
-                            })
-                            .setNegativeButton(R.string.button_label_cancel, null)
-                            .setNeutralButton(R.string.button_label_app_settings, (DialogInterface dialog, int which) -> {
-                                Intent intent = new Intent(this, SettingsActivity.class);
-                                intent.putExtra(SettingsActivity.SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA, SettingsActivity.PREF_HEADER_KEY_BACKUP);
-                                startActivity(intent);
-                            })
-                            .setOnDismissListener(dialog -> continueWithNextDialog());
+                                @Override
+                                public void onCloudProviderConfigurationFailed() {
+                                    App.toast(R.string.toast_message_error_selecting_automatic_backup_account, Toast.LENGTH_SHORT);
+                                }
+                            });
+                            cloudProviderSignInDialogFragment.show(getSupportFragmentManager(), "CloudProviderSignInDialogFragment");
+                        })
+                        .setNegativeButton(R.string.button_label_cancel, null)
+                        .setNeutralButton(R.string.button_label_app_settings, (DialogInterface dialog, int which) -> {
+                            Intent intent = new Intent(this, SettingsActivity.class);
+                            intent.putExtra(SettingsActivity.SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA, SettingsActivity.PREF_HEADER_KEY_BACKUP);
+                            startActivity(intent);
+                        })
+                        .setOnDismissListener(dialog -> continueWithNextDialog());
 
-                    builder.create().show();
-                }
-                break;
-            }
-            case DIALOG_KEY_ESCROW_REQUIRED: {
-                if (MDMConfigurationSingleton.getWebdavKeyEscrowPublicKey() != null) {
-                    AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                            .setTitle(R.string.dialog_title_mdm_key_escrow_required)
-                            .setMessage(R.string.dialog_message_mdm_key_escrow_required)
-                            .setPositiveButton(R.string.button_label_open_settings, (DialogInterface dialog, int which) -> {
-                                Intent intent = new Intent(this, SettingsActivity.class);
-                                intent.putExtra(
-                                        SettingsActivity.SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA,
-                                        SettingsActivity.PREF_HEADER_KEY_BACKUP
-                                );
-                                startActivity(intent);
-                            })
-                            .setNegativeButton(R.string.button_label_cancel, null)
-                            .setOnDismissListener(dialog -> continueWithNextDialog());
-
-                    builder.create().show();
-                } else {
-                    continueWithNextDialog();
-                }
+                builder.create().show();
                 break;
             }
             case DIALOG_CONFIGURE_HIDDEN_PROFILE_CLOSE_POLICY: {
@@ -614,6 +580,7 @@ public class AppDialogShowActivity extends LockableActivity {
                     SettingsActivity.setLastReadReceiptPromptAnswerTimestamp(-1);
                     try {
                         AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingDefaultSendReadReceipts(true));
+                        AppSingleton.getEngine().deviceBackupNeeded();
                     } catch (Exception ignored) {}
                     dialog.dismiss();
                 });
@@ -623,6 +590,7 @@ public class AppDialogShowActivity extends LockableActivity {
                     SettingsActivity.setLastReadReceiptPromptAnswerTimestamp(-1);
                     try {
                         AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingDefaultSendReadReceipts(false));
+                        AppSingleton.getEngine().deviceBackupNeeded();
                     } catch (Exception ignored) {}
                     dialog.dismiss();
                 });
@@ -711,6 +679,7 @@ public class AppDialogShowActivity extends LockableActivity {
                         App.runThread(() -> {
                             KnownCertificate untrustedCertificate = AppDatabase.getInstance().knownCertificateDao().get((Long) untrustedCertificateIdObject);
                             if (untrustedCertificate == null || untrustedCertificate.isTrusted()) {
+                                continueWithNextDialog();
                                 return;
                             }
                             KnownCertificate lastTrustedCertificate = lastTrustedCertificateIdObject == null ? null : AppDatabase.getInstance().knownCertificateDao().get((Long) lastTrustedCertificateIdObject);

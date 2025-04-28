@@ -265,10 +265,11 @@ fun Message(
 ) {
     Box {
         val maxWidth = 400.dp
+        var enableSwipe by remember { mutableStateOf(true) }
         SwipeForActionBox(
             modifier = modifier,
-            enabledFromStartToEnd = discussionViewModel?.isSelectingForDeletion != true && replyAction != null,
-            enabledFromEndToStart = discussionViewModel?.isSelectingForDeletion != true,
+            enabledFromStartToEnd = enableSwipe && discussionViewModel?.isSelectingForDeletion != true && replyAction != null,
+            enabledFromEndToStart = enableSwipe && discussionViewModel?.isSelectingForDeletion != true,
             callbackStartToEnd = replyAction,
             callbackEndToStart = menuAction,
             backgroundContentFromStartToEnd = {
@@ -491,6 +492,9 @@ fun Message(
                             BoxWithConstraints {
                                 Attachments(
                                     message = message,
+                                    onEnableMessageSwipe = { enabled ->
+                                        enableSwipe = enabled
+                                    },
                                     audioAttachmentServiceBinding = audioAttachmentServiceBinding,
                                     maxWidth = this.maxWidth,
                                     openOnClick = openOnClick,
@@ -728,8 +732,9 @@ private fun Replied(
                 text = message.jsonMessage?.jsonReply?.senderIdentifier?.let {
                     AppSingleton.getContactCustomDisplayName(it)
                 } ?: stringResource(id = R.string.text_deleted_contact),
-                style = OlvidTypography.body2,
-                fontWeight = FontWeight.Medium,
+                style = OlvidTypography.body2.copy(
+                    fontWeight = FontWeight.Medium
+                ),
                 color = color)
             repliedToMessage?.value?.let { repliedToMessage ->
                 Text(
@@ -782,9 +787,10 @@ private fun AttachmentCount(attachmentCount: Int) {
             count = attachmentCount,
             attachmentCount
         ),
-        style = OlvidTypography.subtitle1,
-        color = colorResource(id = R.color.almostWhite),
-        fontWeight = FontWeight.Medium
+        style = OlvidTypography.subtitle1.copy(
+            fontWeight = FontWeight.Medium
+        ),
+        color = colorResource(id = R.color.almostWhite)
     )
 }
 
@@ -1122,11 +1128,13 @@ fun MessageBody(
                                                                 .getInstance()
                                                                 .contactDao()[bytesOwnedIdentity, userIdentifier] != null
                                                         ) {
-                                                            App.openContactDetailsActivity(
-                                                                context,
-                                                                AppSingleton.getBytesCurrentIdentity(),
-                                                                userIdentifier
-                                                            )
+                                                            AppSingleton.getBytesCurrentIdentity()?.let {
+                                                                App.openContactDetailsActivity(
+                                                                    context,
+                                                                    it,
+                                                                    userIdentifier
+                                                                )
+                                                            }
                                                         }
                                                     }
                                                 }

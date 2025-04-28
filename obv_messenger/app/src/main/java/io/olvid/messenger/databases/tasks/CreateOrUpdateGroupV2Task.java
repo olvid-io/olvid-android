@@ -220,7 +220,9 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     }
                 } else if (groupV2.detailsAndPhotos.serializedPublishedDetails == null) {
                     // delete all group details updated messages from the discussion
-                    db.messageDao().deleteAllDiscussionNewPublishedDetailsMessages(discussion.id);
+                    List<Message> messageList = db.messageDao().getAllDiscussionNewPublishedDetailsMessages(discussion.id);
+                    db.messageDao().delete(messageList.toArray(new Message[0]));
+                    UnreadCountsSingleton.INSTANCE.messageBatchDeleted(messageList);
                 }
 
                 if (insertGainedAdminMessage) {

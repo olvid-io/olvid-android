@@ -29,6 +29,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -63,6 +64,7 @@ public class SendReceiveMessagesPreferenceFragment extends PreferenceFragmentCom
                 if (checked instanceof Boolean) {
                     try {
                         AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingDefaultSendReadReceipts((Boolean) checked));
+                        AppSingleton.getEngine().deviceBackupNeeded();
                     } catch (Exception e) {
                         Logger.w("Failed to propagate default send read receipt setting change to other devices");
                         e.printStackTrace();
@@ -248,6 +250,6 @@ public class SendReceiveMessagesPreferenceFragment extends PreferenceFragmentCom
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.setBackgroundColor(getResources().getColor(R.color.dialogBackground));
+        view.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.almostWhite));
     }
 }

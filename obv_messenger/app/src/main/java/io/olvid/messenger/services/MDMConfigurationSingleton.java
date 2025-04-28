@@ -22,16 +22,10 @@ package io.olvid.messenger.services;
 import android.content.Context;
 import android.content.RestrictionsManager;
 import android.os.Bundle;
-import android.util.Base64;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.net.URI;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Objects;
 import java.util.regex.Matcher;
 
@@ -49,9 +43,6 @@ public class MDMConfigurationSingleton {
     private static final String KEYCLOAK_CONFIGURATION_URI = "keycloak_configuration_uri";
     private static final String DISABLE_NEW_VERSION_NOTIFICATION = "disable_new_version_notification";
     private static final String SETTINGS_CONFIGURATION_URI = "settings_configuration_uri";
-    private static final String WEBDAV_AUTOMATIC_BACKUP_URI = "webdav_automatic_backup_uri";
-    private static final String WEBDAV_AUTOMATIC_BACKUP_WRITE_ONLY = "webdav_automatic_backup_write_only";
-    private static final String WEBDAV_KEY_ESCROW_PUBLIC_KEY = "webdav_key_escrow_public_key";
     private static final String ALTERNATE_TURN_SERVER_URL = "alternate_turn_server_url";
     private static final String ALTERNATE_TURN_SERVER_USERNAME = "alternate_turn_server_username";
     private static final String ALTERNATE_TURN_SERVER_PASSWORD = "alternate_turn_server_password";
@@ -62,9 +53,6 @@ public class MDMConfigurationSingleton {
     private final String keycloakConfigurationUri;
     private final boolean disableNewVersionNotification;
     private final String settingsConfigurationUri;
-    private final BackupCloudProviderService.CloudProviderConfiguration autoBackupConfiguration;
-    private final String webdavKeyEscrowPublicKeyString;
-    private final PublicKey webdavKeyEscrowPublicKey;
     private final String alternateTurnServerUrl;
     private final String alternateTurnServerUsername;
     private final String alternateTurnServerPassword;
@@ -93,63 +81,6 @@ public class MDMConfigurationSingleton {
                 settingsConfigurationUri = null;
             }
 
-            if (restrictions.containsKey(WEBDAV_AUTOMATIC_BACKUP_URI)) {
-                BackupCloudProviderService.CloudProviderConfiguration mdmAutoBackupConfiguration = null;
-
-                String webdavAutomaticBackupUri = restrictions.getString(WEBDAV_AUTOMATIC_BACKUP_URI);
-                if (webdavAutomaticBackupUri != null) {
-                    boolean writeOnly = restrictions.containsKey(WEBDAV_AUTOMATIC_BACKUP_WRITE_ONLY) && restrictions.getBoolean(WEBDAV_AUTOMATIC_BACKUP_WRITE_ONLY, false);
-
-                    // if this identity is configured by keycloak, try to substitute variables
-                    if (keycloakConfigurationUri != null) {
-                        webdavAutomaticBackupUri = replaceWebDavUriVariablesFromKeycloakProfile(webdavAutomaticBackupUri, keycloakConfigurationUri);
-                    }
-
-                    try {
-                        URI mdmUri = new URI(webdavAutomaticBackupUri);
-                        String[] userInfo = (mdmUri.getUserInfo() == null) ? new String[0] : mdmUri.getUserInfo().split(":", 2);
-
-                        if (writeOnly) {
-                            mdmAutoBackupConfiguration = BackupCloudProviderService.CloudProviderConfiguration.buildWriteOnlyWebDAV(
-                                    mdmUri.getScheme() + "://" + mdmUri.getHost() + mdmUri.getPath(),
-                                    userInfo.length == 2 ? userInfo[0] : null,
-                                    userInfo.length == 2 ? userInfo[1] : null
-                            );
-                        } else {
-                            mdmAutoBackupConfiguration = BackupCloudProviderService.CloudProviderConfiguration.buildWebDAV(
-                                    mdmUri.getScheme() + "://" + mdmUri.getHost() + mdmUri.getPath(),
-                                    userInfo.length == 2 ? userInfo[0] : null,
-                                    userInfo.length == 2 ? userInfo[1] : null
-                            );
-                        }
-                    } catch (Exception ignored) { }
-                }
-                autoBackupConfiguration = mdmAutoBackupConfiguration;
-
-                if (autoBackupConfiguration != null && restrictions.containsKey(WEBDAV_KEY_ESCROW_PUBLIC_KEY)) {
-                    String rsaPublicKeyPem = restrictions.getString(WEBDAV_KEY_ESCROW_PUBLIC_KEY);
-                    RSAPublicKey publicKey = null;
-                    try {
-                        //noinspection DataFlowIssue
-                        byte[] encodedPublicKey = Base64.decode(rsaPublicKeyPem.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", ""), Base64.DEFAULT);
-                        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encodedPublicKey);
-                        publicKey = (RSAPublicKey) keyFactory.generatePublic(keySpec);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    webdavKeyEscrowPublicKeyString = publicKey == null ? null : rsaPublicKeyPem;
-                    webdavKeyEscrowPublicKey = publicKey;
-                } else {
-                    webdavKeyEscrowPublicKeyString = null;
-                    webdavKeyEscrowPublicKey = null;
-                }
-            } else {
-                autoBackupConfiguration = null;
-                webdavKeyEscrowPublicKeyString = null;
-                webdavKeyEscrowPublicKey = null;
-            }
-
             if (restrictions.containsKey(ALTERNATE_TURN_SERVER_URL) && restrictions.containsKey(ALTERNATE_TURN_SERVER_USERNAME) && restrictions.containsKey(ALTERNATE_TURN_SERVER_PASSWORD)) {
                 alternateTurnServerUrl = restrictions.getString(ALTERNATE_TURN_SERVER_URL);
                 alternateTurnServerUsername = restrictions.getString(ALTERNATE_TURN_SERVER_USERNAME);
@@ -163,9 +94,6 @@ public class MDMConfigurationSingleton {
             keycloakConfigurationUri = null;
             disableNewVersionNotification = false;
             settingsConfigurationUri = null;
-            autoBackupConfiguration = null;
-            webdavKeyEscrowPublicKeyString = null;
-            webdavKeyEscrowPublicKey = null;
             alternateTurnServerUrl = null;
             alternateTurnServerUsername = null;
             alternateTurnServerPassword = null;
@@ -200,17 +128,6 @@ public class MDMConfigurationSingleton {
 
     public static String getSettingsConfigurationUri() {
         return getInstance().settingsConfigurationUri;
-    }
-
-    public static BackupCloudProviderService.CloudProviderConfiguration getAutoBackupConfiguration() {
-        return getInstance().autoBackupConfiguration;
-    }
-
-    public static String getWebdavKeyEscrowPublicKeyString() {
-        return getInstance().webdavKeyEscrowPublicKeyString;
-    }
-    public static PublicKey getWebdavKeyEscrowPublicKey() {
-        return getInstance().webdavKeyEscrowPublicKey;
     }
 
     public static String getAlternateTurnServerUrl() {

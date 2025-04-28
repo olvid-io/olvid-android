@@ -26,10 +26,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.iharder.Base64;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.security.KeyStore;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -300,7 +302,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             webSocketClients = new ArrayList<>(existingWebsockets.values());
         }
         for (WebSocketClient webSocketClient: webSocketClients) {
-            webSocketClient.close();
+            webSocketClient.close(true);
         }
     }
 
@@ -379,7 +381,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
 
     private class ServerSessionCreatedNotificationListener implements NotificationListener {
         @Override
-        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        public void callback(String notificationName, Map<String, Object> userInfo) {
             if (!notificationName.equals(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED)) {
                 return;
             }
@@ -402,7 +404,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
 
     private class OwnedIdentityListUpdatedNotificationListener implements NotificationListener {
         @Override
-        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        public void callback(String notificationName, Map<String, Object> userInfo) {
             synchronized (ownedIdentityAndUidsLock) {
                 try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
                     ownedIdentityAndUidsByServer.clear();
@@ -432,7 +434,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
 
     private class WellKnownCacheNotificationListener implements NotificationListener {
         @Override
-        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        public void callback(String notificationName, Map<String, Object> userInfo) {
             switch (notificationName) {
                 case DownloadNotifications.NOTIFICATION_WELL_KNOWN_CACHE_INITIALIZED:
                 case DownloadNotifications.NOTIFICATION_WELL_KNOWN_UPDATED: {
@@ -624,6 +626,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
 
         private boolean websocketConnected = false;
         private boolean remotelyInitiatedClosing = false;
+        private boolean reconnectAlreadyTakenCareOf = false;
 
         private final AtomicLong pingCounter = new AtomicLong(0);
         private long lastPingCounter = -1;
@@ -661,7 +664,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                     notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
                 }
                 if (relyOnWebsocketForNetworkDetection) {
-                    notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_DETECTED_SOME_NETWORK, new HashMap<>());
+                    notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_DETECTED_SOME_NETWORK, Collections.emptyMap());
                 }
             }
 
@@ -672,6 +675,9 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                 }
             }
             sendPing();
+
+            // schedule a reconnect after less than 2 hours to avoid dirty disconnections from the server
+            scheduler.schedule(server, new ReconnectTask(new WeakReference<>(this), server), "WebSocket automatic reconnection", Constants.WEBSOCKET_RECONNECT_INTERVAL_MILLIS);
         }
 
         @SuppressWarnings("NullableProblems")
@@ -954,10 +960,10 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                     Logger.d("Websocket locally disconnected from " + wsUrl);
                 }
             }
-            close();
-            if (doConnect) {
+            if (doConnect && !reconnectAlreadyTakenCareOf) {
                 scheduleNewWebsocketCreationQueueing(server);
             }
+            close(false);
         }
 
         @SuppressWarnings("NullableProblems")
@@ -973,20 +979,21 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                 Logger.w("Websocket exception");
                 Logger.x(t);
             }
-            close();
+            close(false);
             if (doConnect) {
                 scheduleNewWebsocketCreationQueueing(server);
             }
         }
 
-        void close() {
+        void close(boolean reconnectAlreadyTakenCareOf) {
             if (notificationPostingDelegate != null && currentConnectionState != 0) {
                 currentConnectionState = 0;
                 HashMap<String, Object> userInfo = new HashMap<>();
                 userInfo.put(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED_STATE_KEY, 0);
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
             }
-            websocketConnected = false;
+            this.reconnectAlreadyTakenCareOf = reconnectAlreadyTakenCareOf;
+
             synchronized (existingWebsockets) {
                 if (existingWebsockets.get(server) == this) {
                     existingWebsockets.remove(server);
@@ -995,6 +1002,39 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
             if (webSocket != null && webSocket.close(INTERNAL_CLOSING_CODE, null)) {
                 // if we initiated a graceful close, also schedule a cancel to make sure resources are properly released
                 scheduler.schedule(server, webSocket::cancel, "Websocket cancel()", 500);
+            }
+        }
+    }
+
+
+
+    class ReconnectTask implements Runnable {
+        private final WeakReference<WebSocketClient> webSocketClientWeakReference;
+        private final String server;
+
+        ReconnectTask(WeakReference<WebSocketClient> webSocketClientWeakReference, String server) {
+            this.webSocketClientWeakReference = webSocketClientWeakReference;
+            this.server = server;
+        }
+
+        @Override
+        public void run() {
+            WebSocketClient webSocketClient = webSocketClientWeakReference.get();
+            if (webSocketClient != null) {
+                boolean doReconnect = false;
+
+                // check if the weak reference is still the current WebSocketClient for this server
+                synchronized (existingWebsockets) {
+                    if (existingWebsockets.get(server) == webSocketClient) {
+                        doReconnect = doConnect; // only do something if we are indeed willing to connect
+                    }
+                }
+
+                if (doReconnect) {
+                    // gracefully close the connection and immediately reconnect
+                    webSocketClient.close(true);
+                    queueWebsocketCreationOperation(server);
+                }
             }
         }
     }

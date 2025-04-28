@@ -91,7 +91,7 @@ public class NotificationListenerDownloads implements NotificationListener {
     }
 
     @Override
-    public void callback(String notificationName, HashMap<String, Object> userInfo) {
+    public void callback(String notificationName, Map<String, Object> userInfo) {
         switch (notificationName) {
             case DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED: {
                 DecryptedApplicationMessage decryptedMessage = (DecryptedApplicationMessage) userInfo.get(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_MESSAGE_KEY);
@@ -386,10 +386,8 @@ public class NotificationListenerDownloads implements NotificationListener {
                 engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_PERMISSIONS_KEY, enginePermissions);
                 if (apiKeyExpirationTimestamp != 0) {
                     engineInfo.put(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_EXPIRATION_TIMESTAMP_KEY, apiKeyExpirationTimestamp);
-                    engine.postEngineNotification(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS, engineInfo);
-                } else {
-                    engine.postEngineNotification(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS, engineInfo);
                 }
+                engine.postEngineNotification(EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS, engineInfo);
                 break;
             }
             case DownloadNotifications.NOTIFICATION_API_KEY_STATUS_QUERY_FAILED: {

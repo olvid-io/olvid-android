@@ -20,10 +20,14 @@
 package io.olvid.messenger.onboarding.flow.screens
 
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import io.olvid.messenger.R.string
 import io.olvid.messenger.onboarding.flow.OnboardingAction
 import io.olvid.messenger.onboarding.flow.OnboardingRoutes
@@ -59,5 +63,16 @@ fun NavGraphBuilder.welcomeScreen(
             ),
             onClose = onClose
         )
+    }
+}
+
+@Preview
+@Composable
+fun WelcomeScreenPreview() {
+    NavHost(
+        navController = rememberNavController(),
+        startDestination = OnboardingRoutes.WELCOME_SCREEN,
+    ) {
+        welcomeScreen({}, {}, {})
     }
 }

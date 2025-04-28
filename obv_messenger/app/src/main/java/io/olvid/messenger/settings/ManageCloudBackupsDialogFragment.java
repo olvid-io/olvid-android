@@ -415,9 +415,4 @@ public class ManageCloudBackupsDialogFragment extends DialogFragment implements 
         }
         backupItemContent = null;
     }
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        view.setBackgroundColor(getResources().getColor(R.color.dialogBackground));
-    }
 }

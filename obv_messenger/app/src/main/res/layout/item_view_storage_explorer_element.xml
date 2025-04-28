@@ -15,7 +15,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_chevron_right" />
+        app:srcCompat="@drawable/pref_widget_chevron_right" />
 
     <TextView
         android:id="@+id/file_size_text_view"

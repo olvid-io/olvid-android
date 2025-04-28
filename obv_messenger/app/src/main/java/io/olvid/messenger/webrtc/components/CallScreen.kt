@@ -1489,8 +1489,9 @@ fun CallParticipant(
                         .padding(vertical = 8.dp, horizontal = 12.dp),
                     text = getPeerStateText(peerState = it, singleContact = false) ?: "",
                     textAlign = TextAlign.Center,
-                    style = OlvidTypography.body2,
-                    fontWeight = FontWeight.Medium,
+                    style = OlvidTypography.body2.copy(
+                        fontWeight = FontWeight.Medium
+                    ),
                     color = Color.White
                 )
             }
@@ -1548,8 +1549,9 @@ fun CallParticipant(
                             .padding(top = 130.dp),
                         text = getPeerStateText(peerState = it, singleContact = false) ?: "",
                         textAlign = TextAlign.Center,
-                        style = OlvidTypography.body2,
-                        fontWeight = FontWeight.Medium,
+                        style = OlvidTypography.body2.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
                         color = Color.White
                     )
                 }
@@ -1612,8 +1614,9 @@ fun CallParticipant(
                             RoundedCornerShape(12.dp)
                         )
                         .padding(vertical = 4.dp, horizontal = 8.dp),
-                    fontWeight = FontWeight.Medium,
-                    style = OlvidTypography.body2,
+                    style = OlvidTypography.body2.copy(
+                        fontWeight = FontWeight.Medium
+                    ),
                     text = name
                 )
             }
@@ -1709,8 +1712,9 @@ private fun AddParticipantScreen(
     Text(
         modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 16.dp),
         text = stringResource(id = R.string.webrtc_add_participants),
-        style = OlvidTypography.h2,
-        fontWeight = FontWeight.Medium,
+        style = OlvidTypography.h2.copy(
+            fontWeight = FontWeight.Medium
+        ),
         color = Color.White,
     )
     var textFieldValue: TextFieldValue by remember { mutableStateOf(TextFieldValue(contactListViewModel.getFilter().orEmpty())) }

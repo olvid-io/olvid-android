@@ -719,7 +719,8 @@ public class AndroidNotificationManager {
 
     private static void unarchiveDiscussionAndAutoDownloadAttachmentsIfNeeded(@NonNull Discussion discussion, @Nullable Message message) {
         discussion.archived = false;
-        AppDatabase.getInstance().discussionDao().updateArchived(discussion.id, false);
+        AppDatabase.getInstance().discussionDao().updateArchived(false, discussion.id);
+        AppSingleton.getEngine().profileBackupNeeded(discussion.bytesOwnedIdentity);
 
         if (message != null && message.totalAttachmentCount != 0) {
             long downloadSize = SettingsActivity.getAutoDownloadSize();

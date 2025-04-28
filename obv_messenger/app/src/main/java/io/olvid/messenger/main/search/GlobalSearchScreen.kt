@@ -78,11 +78,9 @@ import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
-import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.MessageDao.DiscussionAndMessage
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Message
-import io.olvid.messenger.databases.tasks.PropagateBookmarkedMessageChangeTask
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.gallery.FyleListItem
@@ -105,8 +103,7 @@ fun LazyPagingItems<*>?.isLoading() =
 fun GlobalSearchScreen(
     modifier: Modifier = Modifier,
     globalSearchViewModel: GlobalSearchViewModel,
-    linkPreviewViewModel: LinkPreviewViewModel,
-    bookmarks: List<DiscussionAndMessage>? = null
+    linkPreviewViewModel: LinkPreviewViewModel
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -134,364 +131,328 @@ fun GlobalSearchScreen(
         globalSearchViewModel.searching || messages.isLoading() || attachments.isLoading() || links.isLoading()
 
     Column(modifier = modifier) {
-        if (bookmarks != null) {
+        var neverSwitchedTab by remember { mutableStateOf(true) }
+
+        LaunchedEffect(pagerState.isScrollInProgress) {
+            if (pagerState.isScrollInProgress) {
+                neverSwitchedTab = false
+            }
+        }
+
+        LaunchedEffect(loading) {
+            if (!loading && neverSwitchedTab) {
+                if (!globalSearchViewModel.otherDiscussionsFound.isNullOrEmpty() || !globalSearchViewModel.contactsFound.isNullOrEmpty()) {
+                    pagerState.requestScrollToPage(0)
+                } else if (!globalSearchViewModel.groupsFound.isNullOrEmpty()) {
+                    pagerState.requestScrollToPage(1)
+                } else if ((messages?.itemCount ?: 0) > 0) {
+                    pagerState.requestScrollToPage(2)
+                } else if ((attachments?.itemCount ?: 0) > 0) {
+                    pagerState.requestScrollToPage(3)
+                } else if ((links?.itemCount ?: 0) > 0) {
+                    pagerState.requestScrollToPage(4)
+                }
+            }
+        }
+
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopStart) {
+            ScrollableTabRow(
+                selectedTabIndex = pagerState.currentPage,
+                backgroundColor = colorResource(id = R.color.almostWhite),
+                contentColor = colorResource(id = R.color.almostBlack),
+                edgePadding = 0.dp
+            ) {
+                pages.forEachIndexed { index, page ->
+                    CustomTab(
+                        selected = pagerState.currentPage == index,
+                        horizontalTextPadding = 8.dp,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        },
+                        text = {
+                            Text(
+                                modifier = Modifier.alpha(if (page.second()) 1f else .3f),
+                                text = stringResource(id = page.first),
+                                softWrap = false,
+                            )
+                        }
+                    )
+                }
+            }
+            if (loading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState
+        ) { page ->
+            val lazyListState = rememberLazyListState()
+            LaunchedEffect(lazyListState.isScrollInProgress) {
+                if (lazyListState.isScrollInProgress) {
+                    keyboardController?.hide()
+                }
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(colorResource(id = R.color.almostWhite))
-                    .navigationBarsPadding(),
+                    .navigationBarsPadding()
+                    .cutoutHorizontalPadding(),
                 contentAlignment = Alignment.TopStart
             ) {
-                bookmarks.takeIf { it.isNotEmpty() }?.let {
-                    LazyColumn(
-                        contentPadding = PaddingValues(bottom = 32.dp)
-                    ) {
-                        items(it) { message ->
-                            SearchResult(
-                                discussionAndMessage = message,
-                                globalSearchViewModel = globalSearchViewModel,
-                                menuItems = listOf(
-                                    stringResource(id = R.string.menu_action_unbookmark) to {
-                                        App.runThread {
-                                            AppDatabase.getInstance().messageDao()
-                                                .updateBookmarked(message.message.id, false)
-                                            AppSingleton.getBytesCurrentIdentity()
-                                                ?.let { bytesOwnedIdentity ->
-                                                    PropagateBookmarkedMessageChangeTask(
-                                                        bytesOwnedIdentity,
-                                                        message.message,
-                                                        false
-                                                    ).run()
-                                                }
+                when (page) {
+                    0 -> {
+                        if (globalSearchViewModel.otherDiscussionsFound.isNullOrEmpty() && globalSearchViewModel.contactsFound.isNullOrEmpty()) {
+                            if (!loading) {
+                                NoResultsFound(0)
+                            }
+                        } else {
+                            LazyColumn(
+                                state = lazyListState,
+                                contentPadding = PaddingValues(bottom = 64.dp)
+                            ) {
+                                globalSearchViewModel.contactsFound?.takeIf { it.isNotEmpty() }
+                                    ?.let {
+                                        items(it) { contact ->
+                                            SearchResult(
+                                                contact = contact,
+                                                globalSearchViewModel = globalSearchViewModel
+                                            )
+                                        }
+                                        item {
+                                            Spacer(modifier = Modifier.height(8.dp))
                                         }
                                     }
-                                )
-                            )
-                        }
-                    }
-                } ?: run {
-                    NoBookmarksFound()
-                }
-            }
-        } else {
-            var neverSwitchedTab by remember { mutableStateOf(true) }
-
-            LaunchedEffect(pagerState.isScrollInProgress) {
-                if (pagerState.isScrollInProgress) {
-                    neverSwitchedTab = false
-                }
-            }
-
-            LaunchedEffect(loading) {
-                if (!loading && neverSwitchedTab) {
-                    if (!globalSearchViewModel.otherDiscussionsFound.isNullOrEmpty() || !globalSearchViewModel.contactsFound.isNullOrEmpty()) {
-                        pagerState.requestScrollToPage(0)
-                    } else if (!globalSearchViewModel.groupsFound.isNullOrEmpty()) {
-                        pagerState.requestScrollToPage(1)
-                    } else if ((messages?.itemCount ?: 0) > 0) {
-                        pagerState.requestScrollToPage(2)
-                    } else if ((attachments?.itemCount ?: 0) > 0) {
-                        pagerState.requestScrollToPage(3)
-                    } else if ((links?.itemCount ?: 0) > 0) {
-                        pagerState.requestScrollToPage(4)
-                    }
-                }
-            }
-
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopStart) {
-                ScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage,
-                    backgroundColor = colorResource(id = R.color.almostWhite),
-                    contentColor = colorResource(id = R.color.almostBlack),
-                    edgePadding = 0.dp
-                ) {
-                    pages.forEachIndexed { index, page ->
-                        CustomTab(
-                            selected = pagerState.currentPage == index,
-                            horizontalTextPadding = 8.dp,
-                            onClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
-                            text = {
-                                Text(
-                                    modifier = Modifier.alpha(if (page.second()) 1f else .3f),
-                                    text = stringResource(id = page.first),
-                                    softWrap = false,
-                                )
-                            }
-                        )
-                    }
-                }
-                if (loading) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
-            }
-
-            HorizontalPager(
-                state = pagerState
-            ) { page ->
-                val lazyListState = rememberLazyListState()
-                LaunchedEffect(lazyListState.isScrollInProgress) {
-                    if (lazyListState.isScrollInProgress) {
-                        keyboardController?.hide()
-                    }
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(colorResource(id = R.color.almostWhite))
-                        .navigationBarsPadding()
-                        .cutoutHorizontalPadding(),
-                    contentAlignment = Alignment.TopStart
-                ) {
-                    when (page) {
-                        0 -> {
-                            if (globalSearchViewModel.otherDiscussionsFound.isNullOrEmpty() && globalSearchViewModel.contactsFound.isNullOrEmpty()) {
-                                if (!loading) {
-                                    NoResultsFound(0)
-                                }
-                            } else {
-                                LazyColumn(
-                                    state = lazyListState,
-                                    contentPadding = PaddingValues(bottom = 32.dp)
-                                ) {
-                                    globalSearchViewModel.contactsFound?.takeIf { it.isNotEmpty() }
-                                        ?.let {
-                                            items(it) { contact ->
-                                                SearchResult(
-                                                    contact = contact,
-                                                    globalSearchViewModel = globalSearchViewModel
-                                                )
-                                            }
-                                            item {
-                                                Spacer(modifier = Modifier.height(8.dp))
-                                            }
+                                globalSearchViewModel.otherDiscussionsFound?.takeIf { it.isNotEmpty() }
+                                    ?.let {
+                                        item {
+                                            Text(
+                                                modifier = Modifier.padding(8.dp),
+                                                text = stringResource(id = R.string.global_search_result_other_discussions),
+                                                style = OlvidTypography.h2
+                                            )
                                         }
-                                    globalSearchViewModel.otherDiscussionsFound?.takeIf { it.isNotEmpty() }
-                                        ?.let {
-                                            item {
-                                                Text(
-                                                    modifier = Modifier.padding(8.dp),
-                                                    text = stringResource(id = R.string.global_search_result_other_discussions),
-                                                    style = OlvidTypography.h2
-                                                )
-                                            }
-                                            items(it) { searchableDiscussion ->
-                                                SearchResult(
-                                                    searchableDiscussion = searchableDiscussion,
-                                                    globalSearchViewModel = globalSearchViewModel
-                                                )
-                                            }
+                                        items(it) { searchableDiscussion ->
+                                            SearchResult(
+                                                searchableDiscussion = searchableDiscussion,
+                                                globalSearchViewModel = globalSearchViewModel
+                                            )
                                         }
-                                }
+                                    }
                             }
                         }
+                    }
 
-                        1 -> {
-                            globalSearchViewModel.groupsFound?.takeIf { it.isNotEmpty() }?.let {
-                                LazyColumn(
-                                    state = lazyListState,
-                                    contentPadding = PaddingValues(bottom = 32.dp)
-                                ) {
-                                    items(it) { searchableDiscussion ->
+                    1 -> {
+                        globalSearchViewModel.groupsFound?.takeIf { it.isNotEmpty() }?.let {
+                            LazyColumn(
+                                state = lazyListState,
+                                contentPadding = PaddingValues(bottom = 64.dp)
+                            ) {
+                                items(it) { searchableDiscussion ->
+                                    SearchResult(
+                                        searchableDiscussion = searchableDiscussion,
+                                        globalSearchViewModel = globalSearchViewModel
+                                    )
+                                }
+                            }
+                        } ?: run {
+                            if (!loading) {
+                                NoResultsFound(1)
+                            }
+                        }
+                    }
+
+                    2 -> {
+                        messages?.takeIf { it.itemCount > 0 }?.let {
+                            LazyColumn(
+                                state = lazyListState,
+                                contentPadding = PaddingValues(bottom = 64.dp)
+                            ) {
+                                items(
+                                    count = messages.itemCount,
+                                    key = messages.itemKey { it.message.id },
+                                    contentType = messages.itemContentType { it.message.messageType }
+                                ) { index ->
+                                    val discussionAndMessage = messages[index]
+                                    discussionAndMessage?.let {
                                         SearchResult(
-                                            searchableDiscussion = searchableDiscussion,
+                                            discussionAndMessage = it,
                                             globalSearchViewModel = globalSearchViewModel
                                         )
                                     }
                                 }
-                            } ?: run {
-                                if (!loading) {
-                                    NoResultsFound(1)
-                                }
+                            }
+                        } ?: run {
+                            if (!loading) {
+                                NoResultsFound(2)
                             }
                         }
+                    }
 
-                        2 -> {
-                            messages?.takeIf { it.itemCount > 0 }?.let {
-                                LazyColumn(
-                                    state = lazyListState,
-                                    contentPadding = PaddingValues(bottom = 32.dp)
-                                ) {
-                                    items(
-                                        count = messages.itemCount,
-                                        key = messages.itemKey { it.message.id },
-                                        contentType = messages.itemContentType { it.message.messageType }
-                                    ) { index ->
-                                        val discussionAndMessage = messages[index]
-                                        discussionAndMessage?.let {
-                                            SearchResult(
-                                                discussionAndMessage = it,
+                    3 -> {
+                        attachments?.takeIf { it.itemCount > 0 }?.let {
+                            LazyColumn(
+                                state = lazyListState,
+                                contentPadding = PaddingValues(top = 8.dp, bottom = 64.dp)
+                            ) {
+                                items(
+                                    count = attachments.itemCount,
+                                    key = attachments.itemKey { "${it.fyleAndStatus.fyleMessageJoinWithStatus.messageId}-${it.fyleAndStatus.fyleMessageJoinWithStatus.fyleId}" }
+                                ) { index ->
+                                    attachments[index]?.let { fyle ->
+                                        Column(modifier = Modifier.padding(bottom = 4.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                InitialView(
+                                                    modifier = Modifier
+                                                        .padding(end = 8.dp)
+                                                        .requiredSize(20.dp),
+                                                    initialViewSetup = { view ->
+                                                        view.setFromCache(fyle.message.senderIdentifier)
+                                                    },
+                                                )
+                                                Text(
+                                                    modifier = Modifier.weight(1f),
+                                                    text = AppSingleton.getContactCustomDisplayName(
+                                                        fyle.message.senderIdentifier
+                                                    )
+                                                        ?: stringResource(id = R.string.text_deleted_contact),
+                                                    style = OlvidTypography.body2.copy(
+                                                        fontWeight = FontWeight.Medium
+                                                    ),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                                Spacer(Modifier.width(8.dp))
+                                                Text(
+                                                    text = StringUtils.getNiceDateString(
+                                                        context,
+                                                        fyle.message.timestamp
+                                                    ).toString(),
+                                                    style = OlvidTypography.body2.copy(
+                                                        fontWeight = FontWeight.Medium
+                                                    )
+                                                )
+                                            }
+                                            FyleListItem(
+                                                fyleAndStatus = fyle.fyleAndStatus,
+                                                fileName = globalSearchViewModel.highlight(
+                                                    content = fyle.fyleAndStatus.fyleMessageJoinWithStatus.fileName
+                                                ),
+                                                extraHorizontalPadding = 4.dp,
+                                                onClick = {
+                                                    fyle.message.goto(
+                                                        context,
+                                                        globalSearchViewModel.filter
+                                                    )
+                                                },
+                                                onLongClick = {
+                                                    if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(
+                                                            PreviewUtils.getNonNullMimeType(
+                                                                fyle.fyleAndStatus.fyleMessageJoinWithStatus.mimeType,
+                                                                fyle.fyleAndStatus.fyleMessageJoinWithStatus.fileName
+                                                            )
+                                                        ) && SettingsActivity.useInternalImageViewer()
+                                                    ) {
+                                                        App.openMessageGalleryActivity(
+                                                            context,
+                                                            fyle.fyleAndStatus.fyleMessageJoinWithStatus.messageId,
+                                                            fyle.fyleAndStatus.fyleMessageJoinWithStatus.fyleId,
+                                                            true
+                                                        )
+                                                    } else {
+                                                        App.openFyleViewer(
+                                                            context,
+                                                            fyle.fyleAndStatus
+                                                        ) {
+                                                            fyle.fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened()
+                                                        }
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        } ?: run {
+                            if (!loading) {
+                                NoResultsFound(3)
+                            }
+                        }
+                    }
+
+
+                    4 -> {
+                        links?.takeIf { it.itemCount > 0 }?.let {
+                            LazyColumn(
+                                state = lazyListState,
+                                contentPadding = PaddingValues(top = 8.dp, bottom = 64.dp)
+                            ) {
+                                items(
+                                    count = links.itemCount,
+                                    key = links.itemKey { "${it.fyleAndStatus.fyleMessageJoinWithStatus.messageId}-${it.fyleAndStatus.fyleMessageJoinWithStatus.fyleId}" }
+                                ) { index ->
+                                    links[index]?.let { fyle ->
+                                        Column(modifier = Modifier.padding(bottom = 4.dp)) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                InitialView(
+                                                    modifier = Modifier
+                                                        .padding(end = 8.dp)
+                                                        .requiredSize(20.dp),
+                                                    initialViewSetup = { view ->
+                                                        view.setFromCache(fyle.message.senderIdentifier)
+                                                    },
+                                                )
+                                                Text(
+                                                    modifier = Modifier.weight(1f),
+                                                    text = AppSingleton.getContactCustomDisplayName(
+                                                        fyle.message.senderIdentifier
+                                                    )
+                                                        ?: stringResource(id = R.string.text_deleted_contact),
+                                                    style = OlvidTypography.body2.copy(
+                                                        fontWeight = FontWeight.Medium
+                                                    ),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                                Spacer(Modifier.width(8.dp))
+                                                Text(
+                                                    text = StringUtils.getNiceDateString(
+                                                        context,
+                                                        fyle.message.timestamp
+                                                    ).toString(),
+                                                    style = OlvidTypography.body2.copy(
+                                                        fontWeight = FontWeight.Medium
+                                                    ),
+                                                )
+                                            }
+                                            LinkListItem(
+                                                fyleAndStatus = fyle.fyleAndStatus,
+                                                onClick = {
+                                                    fyle.message.goto(
+                                                        context,
+                                                        globalSearchViewModel.filter
+                                                    )
+                                                },
+                                                linkPreviewViewModel = linkPreviewViewModel,
                                                 globalSearchViewModel = globalSearchViewModel
                                             )
                                         }
                                     }
                                 }
-                            } ?: run {
-                                if (!loading) {
-                                    NoResultsFound(2)
-                                }
                             }
-                        }
-
-                        3 -> {
-                            attachments?.takeIf { it.itemCount > 0 }?.let {
-                                LazyColumn(
-                                    state = lazyListState,
-                                    contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
-                                ) {
-                                    items(
-                                        count = attachments.itemCount,
-                                        key = attachments.itemKey { "${it.fyleAndStatus.fyleMessageJoinWithStatus.messageId}-${it.fyleAndStatus.fyleMessageJoinWithStatus.fyleId}" }
-                                    ) { index ->
-                                        attachments[index]?.let { fyle ->
-                                            Column(modifier = Modifier.padding(bottom = 4.dp)) {
-                                                Row(
-                                                    modifier = Modifier.padding(horizontal = 12.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    InitialView(
-                                                        modifier = Modifier
-                                                            .padding(end = 8.dp)
-                                                            .requiredSize(20.dp),
-                                                        initialViewSetup = { view ->
-                                                            view.setFromCache(fyle.message.senderIdentifier)
-                                                        },
-                                                    )
-                                                    Text(
-                                                        modifier = Modifier.weight(1f),
-                                                        text = AppSingleton.getContactCustomDisplayName(
-                                                            fyle.message.senderIdentifier
-                                                        )
-                                                            ?: stringResource(id = R.string.text_deleted_contact),
-                                                        style = OlvidTypography.body2,
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                        fontWeight = FontWeight.Medium
-                                                    )
-                                                    Spacer(Modifier.width(8.dp))
-                                                    Text(
-                                                        text = StringUtils.getNiceDateString(
-                                                            context,
-                                                            fyle.message.timestamp
-                                                        ).toString(),
-                                                        style = OlvidTypography.body2,
-                                                        fontWeight = FontWeight.Medium
-                                                    )
-                                                }
-                                                FyleListItem(fyleAndStatus = fyle.fyleAndStatus,
-                                                    fileName = globalSearchViewModel.highlight(
-                                                        content = fyle.fyleAndStatus.fyleMessageJoinWithStatus.fileName
-                                                    ),
-                                                    extraHorizontalPadding = 4.dp,
-                                                    onClick = {
-                                                        fyle.message.goto(
-                                                            context,
-                                                            globalSearchViewModel.filter
-                                                        )
-                                                    },
-                                                    onLongClick = {
-                                                        if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(
-                                                                PreviewUtils.getNonNullMimeType(
-                                                                    fyle.fyleAndStatus.fyleMessageJoinWithStatus.mimeType,
-                                                                    fyle.fyleAndStatus.fyleMessageJoinWithStatus.fileName
-                                                                )
-                                                            ) && SettingsActivity.useInternalImageViewer()
-                                                        ) {
-                                                            App.openMessageGalleryActivity(
-                                                                context,
-                                                                fyle.fyleAndStatus.fyleMessageJoinWithStatus.messageId,
-                                                                fyle.fyleAndStatus.fyleMessageJoinWithStatus.fyleId,
-                                                                true
-                                                            )
-                                                        } else {
-                                                            App.openFyleViewer(
-                                                                context,
-                                                                fyle.fyleAndStatus
-                                                            ) {
-                                                                fyle.fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened()
-                                                            }
-                                                        }
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            } ?: run {
-                                if (!loading) {
-                                    NoResultsFound(3)
-                                }
-                            }
-                        }
-
-
-                        4 -> {
-                            links?.takeIf { it.itemCount > 0 }?.let {
-                                LazyColumn(
-                                    state = lazyListState,
-                                    contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp)
-                                ) {
-                                    items(
-                                        count = links.itemCount,
-                                        key = links.itemKey { "${it.fyleAndStatus.fyleMessageJoinWithStatus.messageId}-${it.fyleAndStatus.fyleMessageJoinWithStatus.fyleId}" }
-                                    ) { index ->
-                                        links[index]?.let { fyle ->
-                                            Column(modifier = Modifier.padding(bottom = 4.dp)) {
-                                                Row(
-                                                    modifier = Modifier.padding(horizontal = 12.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    InitialView(
-                                                        modifier = Modifier
-                                                            .padding(end = 8.dp)
-                                                            .requiredSize(20.dp),
-                                                        initialViewSetup = { view ->
-                                                            view.setFromCache(fyle.message.senderIdentifier)
-                                                        },
-                                                    )
-                                                    Text(
-                                                        modifier = Modifier.weight(1f),
-                                                        text = AppSingleton.getContactCustomDisplayName(
-                                                            fyle.message.senderIdentifier
-                                                        )
-                                                            ?: stringResource(id = R.string.text_deleted_contact),
-                                                        style = OlvidTypography.body2,
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                        fontWeight = FontWeight.Medium
-                                                    )
-                                                    Spacer(Modifier.width(8.dp))
-                                                    Text(
-                                                        text = StringUtils.getNiceDateString(
-                                                            context,
-                                                            fyle.message.timestamp
-                                                        ).toString(),
-                                                        style = OlvidTypography.body2,
-                                                        fontWeight = FontWeight.Medium
-                                                    )
-                                                }
-                                                LinkListItem(
-                                                    fyleAndStatus = fyle.fyleAndStatus,
-                                                    onClick = {
-                                                        fyle.message.goto(
-                                                            context,
-                                                            globalSearchViewModel.filter
-                                                        )
-                                                    },
-                                                    linkPreviewViewModel = linkPreviewViewModel,
-                                                    globalSearchViewModel = globalSearchViewModel
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            } ?: run {
-                                if (!loading) {
-                                    NoResultsFound(4)
-                                }
+                        } ?: run {
+                            if (!loading) {
+                                NoResultsFound(4)
                             }
                         }
                     }
@@ -525,20 +486,6 @@ private fun NoResultsFound(tabIndex: Int = -1) {
     }
 }
 
-@Composable
-private fun NoBookmarksFound() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        MainScreenEmptyList(
-            icon = R.drawable.ic_star,
-            title = R.string.explanation_empty_bookmarks
-        )
-    }
-}
-
 fun Message.goto(context: Context, searchQuery: String? = null) {
     context.startActivity(Intent(context, DiscussionActivity::class.java).apply {
         putExtra(
@@ -557,13 +504,16 @@ fun Message.goto(context: Context, searchQuery: String? = null) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun SearchResult(
+fun SearchResult(
     modifier: Modifier = Modifier,
     searchableDiscussion: SearchableDiscussion? = null,
     discussionAndMessage: DiscussionAndMessage? = null,
     contact: Contact? = null,
     menuItems: List<Pair<String, () -> Unit>>? = null,
-    globalSearchViewModel: GlobalSearchViewModel
+    selected: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
+    globalSearchViewModel: GlobalSearchViewModel? = null
 ) {
     val context = LocalContext.current
     var menuExpanded by remember { mutableStateOf(false) }
@@ -571,39 +521,48 @@ private fun SearchResult(
         modifier = modifier
             .height(Min)
             .fillMaxWidth()
-            .combinedClickable(onClick = {
-                searchableDiscussion?.let {
-                    App.openDiscussionActivity(context, it.discussionId)
-                } ifNull {
-                    contact?.let {
-                        if (it.oneToOne) {
-                            App.openOneToOneDiscussionActivity(
-                                context,
-                                it.bytesOwnedIdentity,
-                                it.bytesContactIdentity,
-                                false
-                            )
-                        } else {
-                            App.openContactDetailsActivity(
-                                context,
-                                it.bytesOwnedIdentity,
-                                it.bytesContactIdentity
-                            )
-                        }
+            .combinedClickable(
+                onClick = {
+                    onClick?.let {
+                        onClick()
                     } ifNull {
-                        discussionAndMessage?.message?.goto(
-                            context,
-                            globalSearchViewModel.filter
-                        )
+                        searchableDiscussion?.let {
+                            App.openDiscussionActivity(context, it.discussionId)
+                        } ifNull {
+                            contact?.let {
+                                if (it.oneToOne) {
+                                    App.openOneToOneDiscussionActivity(
+                                        context,
+                                        it.bytesOwnedIdentity,
+                                        it.bytesContactIdentity,
+                                        false
+                                    )
+                                } else {
+                                    App.openContactDetailsActivity(
+                                        context,
+                                        it.bytesOwnedIdentity,
+                                        it.bytesContactIdentity
+                                    )
+                                }
+                            } ifNull {
+                                discussionAndMessage?.message?.goto(
+                                    context,
+                                    globalSearchViewModel?.filter
+                                )
+                            }
+                        }
                     }
-                }
-            },
+                },
                 onLongClick = {
-                    if (menuItems
-                            .isNullOrEmpty()
-                            .not()
-                    ) {
-                        menuExpanded = true
+                    onLongClick?.let {
+                        onLongClick()
+                    } ?: run {
+                        if (menuItems
+                                .isNullOrEmpty()
+                                .not()
+                        ) {
+                            menuExpanded = true
+                        }
                     }
                 }
             )
@@ -632,6 +591,7 @@ private fun SearchResult(
                     bottom = 8.dp
                 )
                 .requiredSize(48.dp),
+            selected = selected,
             initialViewSetup = { view ->
                 searchableDiscussion?.let {
                     view.setDiscussion(searchableDiscussion)
@@ -656,7 +616,7 @@ private fun SearchResult(
             // Title
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = searchableDiscussion?.title?.let { globalSearchViewModel.highlight(it) }
+                text = searchableDiscussion?.title?.let { globalSearchViewModel?.highlight(it) }
                     ?: contact?.let {
                         AnnotatedString(
                             contact.customDisplayName ?: contact.getIdentityDetails()
@@ -665,12 +625,13 @@ private fun SearchResult(
                                     SettingsActivity.uppercaseLastName
                                 ) ?: contact.getCustomDisplayName()
                         )
-                    }?.let { globalSearchViewModel.highlight(it) }
+                    }?.let { globalSearchViewModel?.highlight(it) }
                     ?: discussionAndMessage?.discussion?.getAnnotatedTitle(context)
                     ?: AnnotatedString(stringResource(id = R.string.text_deleted_contact)),
                 color = colorResource(id = R.color.primary700),
-                style = OlvidTypography.body1,
-                fontWeight = FontWeight.Medium,
+                style = OlvidTypography.body1.copy(
+                    fontWeight = FontWeight.Medium
+                ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -696,9 +657,9 @@ private fun SearchResult(
                 ?: discussionAndMessage?.discussion?.getAnnotatedBody(
                     context,
                     discussionAndMessage.message.apply {
-                        contentBody = globalSearchViewModel.truncateMessageBody(
-                            body = discussionAndMessage.message.getStringContent(context)
-                        )
+                        contentBody = globalSearchViewModel?.truncateMessageBody(
+                            body = getStringContent(context)
+                        ) ?: getStringContent(context)
                     }))?.let {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     discussionAndMessage?.message?.let { lastMessage ->
@@ -710,7 +671,7 @@ private fun SearchResult(
                     }
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = globalSearchViewModel.highlight(it),
+                        text = globalSearchViewModel?.highlight(it) ?: it,
                         color = colorResource(id = R.color.greyTint),
                         style = OlvidTypography.body2,
                         maxLines = 1,

@@ -324,6 +324,21 @@ public class OwnedIdentityDetails implements ObvDatabase {
             }
         }
     }
+
+    public static List<OwnedIdentityDetails> getAllForOwnedIdentity(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                " WHERE " + OWNED_IDENTITY + " = ?;")) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            try (ResultSet res = statement.executeQuery()) {
+                List<OwnedIdentityDetails> list = new ArrayList<>();
+                while (res.next()) {
+                    list.add(new OwnedIdentityDetails(identityManagerSession, res));
+                }
+                return list;
+            }
+        }
+    }
+
     // endregion
 
     // region setters

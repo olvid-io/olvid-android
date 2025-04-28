@@ -124,7 +124,6 @@ fun NavGraphBuilder.activeDeviceSelection(
         }
 
         OnboardingScreen(
-            scrollable = true,
             step = OnboardingStep(
                 title = if (loading) stringResource(id = R.string.onboarding_transfer_devices_loading_title) else if (onboardingFlowViewModel.transferMultiDevice) stringResource(id = R.string.onboarding_transfer_devices_multi_title) else stringResource(
                     id = R.string.onboarding_transfer_devices_title
@@ -174,20 +173,20 @@ fun NavGraphBuilder.activeDeviceSelection(
                 )
             } else {
                 val devices = arrayListOf<Device>()
-                    deviceList?.deviceUidsAndServerInfo?.let { deviceUidsAndServerInfo ->
-                        devices.addAll(deviceUidsAndServerInfo.map {
-                            Device(
-                                name = it.value.displayName,
-                                uid = it.key.bytes,
-                                lastRegistrationTimestamp = it.value.lastRegistrationTimestamp,
-                                expirationTimestamp = it.value.expirationTimestamp
-                            )
-                        })
+                deviceList?.deviceUidsAndServerInfo?.let { deviceUidsAndServerInfo ->
+                    devices.addAll(deviceUidsAndServerInfo.map {
+                        Device(
+                            name = it.value.displayName,
+                            uid = it.key.bytes,
+                            lastRegistrationTimestamp = it.value.lastRegistrationTimestamp,
+                            expirationTimestamp = it.value.expirationTimestamp
+                        )
+                    })
 
-                        if (onboardingFlowViewModel.transferMultiDevice.not()) {
-                            devices.add(Device(onboardingFlowViewModel.deviceName, null))
-                        }
+                    if (onboardingFlowViewModel.transferMultiDevice.not()) {
+                        devices.add(Device(onboardingFlowViewModel.deviceName, null))
                     }
+                }
 
                 devices.forEach { device ->
                     Row(

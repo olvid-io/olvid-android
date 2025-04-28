@@ -41,6 +41,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.TextChangeListener;
@@ -339,7 +340,10 @@ public class ColorPickerDialogFragment extends DialogFragment implements View.On
                 try {
                     discussionCustomization = new DiscussionCustomization(discussionId);
                     discussionCustomization.setColorJson(colorJson);
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    Logger.x(e);
+                    return;
+                }
                 AppDatabase.getInstance().discussionCustomizationDao().insert(discussionCustomization);
             } else {
                 try {

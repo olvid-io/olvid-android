@@ -282,28 +282,6 @@ public class BackupCloudProviderService {
     }
 
 
-    public static void uploadBackupKeyEscrow(@NonNull CloudProviderConfiguration configuration, PublicKey keyEscrowPublicKey, String backupKey, @NonNull OnKeyEscrowCallback onKeyEscrowCallback) {
-        switch (configuration.provider) {
-            case CloudProviderConfiguration.PROVIDER_WEBDAV:
-            case CloudProviderConfiguration.PROVIDER_WEBDAV_WRITE_ONLY:
-                WebdavProvider.uploadBackupKeyEscrow(configuration.serverUrl, configuration.account, configuration.password, keyEscrowPublicKey, backupKey, onKeyEscrowCallback);
-                break;
-            case CloudProviderConfiguration.PROVIDER_GOOGLE_DRIVE:
-            default:
-                onKeyEscrowCallback.onKeyEscrowFailure(ERROR_BAD_CONFIGURATION);
-                break;
-        }
-    }
-
-    public interface OnKeyEscrowCallback {
-        void onKeyEscrowSuccess();
-        void onKeyEscrowFailure(int error);
-    }
-
-
-
-
-
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static final long BASE_RESCHEDULING_TIME = 10_000L;
     private static CloudProviderConfiguration rescheduledConfiguration = null;
@@ -378,7 +356,6 @@ class WebdavProvider {
     private static final String FILE_NAME_FOR_WRITE_ACCESS_TEST = ".olvidbackup_validation_file";
     private static final String BACKUP_ALT_NAME_SUFFIX = " (backup)";
     private static final String BACKUP_FILE_EXTENSION = ".olvidbackup";
-    private static final String KEY_ESCROW_FILE_EXTENSION = ".keyescrow";
 
 
     static void validateConfiguration(@NonNull String serverUrl, String username, String password, boolean writeOnly, boolean validateWriteAccess, @NonNull BackupCloudProviderService.OnValidateCallback onValidateCallback) {
@@ -620,69 +597,6 @@ class WebdavProvider {
             } catch (Exception e) {
                 e.printStackTrace();
                 onBackupDeleteCallback.onDeleteFailure(BackupCloudProviderService.ERROR_UNKNOWN);
-            }
-        });
-    }
-
-
-    public static void uploadBackupKeyEscrow(String serverUrl, String username, String password, PublicKey keyEscrowPublicKey, String backupKey, BackupCloudProviderService.OnKeyEscrowCallback onKeyEscrowCallback) {
-        Logger.i("Initiating backup key escrow to WebDAV");
-        App.runThread(() -> {
-            try {
-                byte[] encryptedBackupKey;
-                try {
-                    //////////
-                    // Encrypt the backup key
-                    //
-                    // Note: this encrypted content can be decrypted with the following openssl command:
-                    //   openssl pkeyutl -in file.keyescrow -inkey private_key.pem -keyform PEM -decrypt -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256
-                    //
-                    Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPwithSHA-256andMGF1Padding");
-                    cipher.init(Cipher.ENCRYPT_MODE, keyEscrowPublicKey);
-                    encryptedBackupKey = cipher.doFinal(backupKey.getBytes(StandardCharsets.UTF_8));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Logger.w("Key escrow failed! Unable to initialize cipher");
-                    onKeyEscrowCallback.onKeyEscrowFailure(BackupCloudProviderService.ERROR_BAD_CONFIGURATION);
-                    return;
-                }
-
-                // upload the key to the WebDAV server
-                Sardine sardine = new OkHttpSardine(AppSingleton.getSslSocketFactory());
-
-                if (username != null && username.length() > 0 && password != null && password.length() > 0) {
-                    sardine.setCredentials(username, password);
-                }
-
-                String deviceUniqueId = SettingsActivity.getAutomaticBackupDeviceUniqueId();
-                String fileName = deviceUniqueId + "_" + BackupCloudProviderService.BACKUP_FILE_NAME_MODEL_PART + "_" + System.currentTimeMillis() + KEY_ESCROW_FILE_EXTENSION;
-                String url = (serverUrl.endsWith("/") ? serverUrl : serverUrl + "/") + URLEncoder.encode(fileName, StandardCharsets.UTF_8.name());
-
-                sardine.put(url, encryptedBackupKey);
-
-                Logger.i("Key escrow successful");
-                onKeyEscrowCallback.onKeyEscrowSuccess();
-            } catch (SardineException e) {
-                switch (e.getStatusCode()) {
-                    case 401:
-                    case 403:
-                    case 404:
-                        Logger.w("Key escrow failed! WebDAV permission error");
-                        onKeyEscrowCallback.onKeyEscrowFailure(BackupCloudProviderService.ERROR_AUTHENTICATION_ERROR);
-                        break;
-                    default:
-                        Logger.w("Key escrow failed! Unknown WebDAV error");
-                        onKeyEscrowCallback.onKeyEscrowFailure(BackupCloudProviderService.ERROR_UNKNOWN);
-                        break;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                Logger.w("Key escrow failed! Network error");
-                onKeyEscrowCallback.onKeyEscrowFailure(BackupCloudProviderService.ERROR_NETWORK_ERROR);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Logger.w("Key escrow failed! Unknown error");
-                onKeyEscrowCallback.onKeyEscrowFailure(BackupCloudProviderService.ERROR_UNKNOWN);
             }
         });
     }

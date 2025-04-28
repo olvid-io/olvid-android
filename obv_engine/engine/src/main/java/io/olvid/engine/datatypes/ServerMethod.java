@@ -63,7 +63,14 @@ public abstract class ServerMethod {
     public static final byte INVALID_API_KEY = 0x16;
     public static final byte LISTING_TRUNCATED = 0x17;
     public static final byte PAYLOAD_TOO_LARGE = (byte) 0x18;
+    public static final byte BACKUP_UID_ALREADY_USED = (byte) 0x19;
+    public static final byte BACKUP_VERSION_TOO_SMALL = (byte) 0x1a;
+    public static final byte UNKNOWN_BACKUP_UID = (byte) 0x1b;
+    public static final byte UNKNOWN_BACKUP_THREAD_ID = (byte) 0x1c;
+    public static final byte UNKNOWN_BACKUP_VERSION = (byte) 0x1d;
 
+
+    public static final byte PARSING_ERROR = (byte) 0xfe;
     public static final byte GENERAL_ERROR = (byte) 0xff;
 
     public static final byte MALFORMED_URL = (byte) 0x80;

@@ -233,6 +233,11 @@ public class ServerQueryCoordinatorWebSocketModule {
                     case DEVICE_MANAGEMENT_SET_UNEXPIRING_DEVICE_QUERY_ID:
                     case REGISTER_API_KEY_QUERY_ID:
                     case UPLOAD_PRE_KEY_QUERY_ID:
+                    case BACKUPS_V2_CREATE_BACKUP_QUERY_ID:
+                    case BACKUPS_V2_UPLOAD_BACKUP_QUERY_ID:
+                    case BACKUPS_V2_DELETE_BACKUP_QUERY_ID:
+                    case BACKUPS_V2_LIST_BACKUPS_QUERY_ID:
+                    case BACKUPS_V2_DOWNLOAD_PROFILE_PICTURE_QUERY_ID:
                     default: {
                         Logger.e("ServerQueryCoordinatorWebSocketModule.handlePendingServerQuery() received serverQuery with type " + serverQuery.getType().getId());
                         failProtocol(protocolInstanceUid);

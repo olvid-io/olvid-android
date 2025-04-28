@@ -23,7 +23,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.SharedPreferences.Editor
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build.VERSION
@@ -47,6 +46,8 @@ import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat.Type
@@ -55,6 +56,7 @@ import androidx.core.view.updateMargins
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.activityViewModels
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceFragmentCompat.OnPreferenceStartFragmentCallback
@@ -100,6 +102,7 @@ import java.util.UUID
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
+@Suppress("KotlinConstantConditions")
 class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
     enum class AutoJoinGroupsCategory {
         EVERYONE,
@@ -112,7 +115,6 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     NOBODY -> "nobody"
                     EVERYONE -> "everyone"
                     CONTACTS -> "contacts"
-                    else -> "contacts"
                 }
             }
     }
@@ -145,7 +147,6 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     BASIC -> PREF_VALUE_LOCATION_INTEGRATION_BASIC
                     CUSTOM_OSM -> PREF_VALUE_LOCATION_INTEGRATION_CUSTOM_OSM
                     NONE -> null
-                    else -> null
                 }
             }
     }
@@ -291,7 +292,6 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
                 )
             }
-            @Suppress("KotlinConstantConditions")
             if (BuildConfig.USE_FIREBASE_LIB && GoogleServicesUtils.googleServicesAvailable(
                     this
                 ) && !disablePushNotifications()
@@ -318,7 +318,6 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 )
             }
 
-            @Suppress("KotlinConstantConditions")
             if (BuildConfig.USE_GOOGLE_LIBS) {
                 sb.append("\n\n")
 
@@ -358,7 +357,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 startActivity(
                     Intent(
                         Intent.ACTION_VIEW,
-                        Uri.parse("market://details?id=$appPackageName")
+                        "market://details?id=$appPackageName".toUri()
                     )
                 )
             } catch (_: ActivityNotFoundException) {
@@ -366,7 +365,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     startActivity(
                         Intent(
                             Intent.ACTION_VIEW,
-                            Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")
+                            "https://play.google.com/store/apps/details?id=$appPackageName".toUri()
                         )
                     )
                 } catch (ee: Exception) {
@@ -376,7 +375,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             return true
         } else if (itemId == R.id.action_help_faq) {
             try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://olvid.io/faq/")))
+                startActivity(Intent(Intent.ACTION_VIEW, "https://olvid.io/faq/".toUri()))
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -389,29 +388,28 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
     }
 
     class HeadersPreferenceFragment : PreferenceFragmentCompat() {
+        val backupsV2ViewModel: BackupV2ViewModel by activityViewModels()
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.preferences_header, rootKey)
 
             val activity: FragmentActivity = requireActivity()
 
-            @Suppress("KotlinConstantConditions")
             if (BuildConfig.USE_BILLING_LIB) {
                 BillingUtils.loadSubscriptionSettingsHeader(activity, preferenceScreen)
             }
 
-            run {
-                App.runThread {
-                    if (AppDatabase.getInstance().actionShortcutConfigurationDao().countAll() > 0) {
-                        Handler(Looper.getMainLooper()).post {
-                            val actionShortcutPreference =
-                                Preference(activity)
-                            actionShortcutPreference.widgetLayoutResource =
-                                R.layout.preference_widget_header_chevron
-                            actionShortcutPreference.setIcon(R.drawable.ic_pref_widget)
-                            actionShortcutPreference.setTitle(R.string.pref_title_widgets)
-                            actionShortcutPreference.fragment = WidgetListFragment::class.java.name
-                            preferenceScreen.addPreference(actionShortcutPreference)
-                        }
+            App.runThread {
+                if (AppDatabase.getInstance().actionShortcutConfigurationDao().countAll() > 0) {
+                    Handler(Looper.getMainLooper()).post {
+                        val actionShortcutPreference =
+                            Preference(activity)
+                        actionShortcutPreference.widgetLayoutResource =
+                            R.layout.preference_widget_header_chevron
+                        actionShortcutPreference.setIcon(R.drawable.ic_pref_widget)
+                        actionShortcutPreference.setTitle(R.string.pref_title_widgets)
+                        actionShortcutPreference.fragment = WidgetListFragment::class.java.name
+                        preferenceScreen.addPreference(actionShortcutPreference)
                     }
                 }
             }
@@ -419,7 +417,34 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
-            view.setBackgroundColor(ContextCompat.getColor(view.context, R.color.dialogBackground))
+            view.setBackgroundColor(ContextCompat.getColor(view.context, R.color.almostWhite))
+        }
+
+        override fun onResume() {
+            super.onResume()
+            activity?.setTitle(R.string.activity_title_settings)
+            backupsV2ViewModel.resetYourBackups()
+
+            try {
+                val hasLegacyBackup = AppSingleton.getEngine().backupKeyInformation != null
+                val hasDeviceBackupSeed = AppSingleton.getEngine().deviceBackupSeed != null
+                // if there is still some legacy backup key, replace the v2 fragment by the legacy fragment (with a warning)
+                findPreference<Preference>(PREF_HEADER_KEY_BACKUP)?.apply {
+                    fragment = if (hasLegacyBackup) {
+                        BackupPreferenceFragment::class.java.name
+                    } else {
+                        BackupV2PreferenceFragment::class.java.name
+                    }
+
+                    title = if (hasLegacyBackup || hasDeviceBackupSeed) {
+                        getString(R.string.pref_category_backup_title)
+                    } else {
+                        getString(R.string.pref_category_backup_title_configure)
+                    }
+                }
+            } catch (e: Exception) {
+                Logger.x(e)
+            }
         }
     }
 
@@ -428,37 +453,16 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         pref: Preference
     ): Boolean {
         val prefFragmentName: String = pref.fragment ?: return false
-        val fragment: Fragment = supportFragmentManager.fragmentFactory.instantiate(
-            classLoader, prefFragmentName
-        )
+        navigateToSettingsFragment(prefFragmentName)
 
-        try {
-            // Replace the existing Fragment with the new Fragment
-            supportFragmentManager.beginTransaction()
-                .setCustomAnimations(
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_left,
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_right
-                )
-                .replace(R.id.settings_container, fragment)
-                .addToBackStack(null)
-                .commit()
-        } catch (e: Exception) {
-            e.printStackTrace()
+        if (prefFragmentName == BackupV2PreferenceFragment::class.java.name) {
+            title = getString(R.string.pref_category_backup_title)
+        } else {
+            // set the activity title
+            title = pref.title
         }
-
-        // set the activity title
-        title = pref.title
         return true
     }
-
-
-    override fun onBackPressed() {
-        setTitle(R.string.activity_title_settings)
-        super.onBackPressed()
-    }
-
 
     companion object {
         const val SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA: String = "sub_setting"
@@ -486,6 +490,8 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         val PREF_KEY_PREFERRED_REACTIONS_DEFAULT: Array<String> =
             arrayOf("❤️", "👍", "👎", "😂", "😮", "😢")
 
+
+        const val PREF_KEY_MUTE_TROUBLESHOOTING_TIP_UNTIL: String = "pref_key_mute_troubleshooting_tip_until"
 
         // BETA
         const val PREF_KEY_ENABLE_BETA_FEATURES: String = "pref_key_enable_beta_features"
@@ -614,9 +620,8 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_DISABLE_PUSH_NOTIFICATIONS_DEFAULT: Boolean = false
 
         const val PREF_KEY_PERMANENT_WEBSOCKET: String = "pref_key_permanent_websocket"
-
         @Suppress("KotlinConstantConditions")
-        val PREF_KEY_PERMANENT_WEBSOCKET_DEFAULT: Boolean = !BuildConfig.USE_FIREBASE_LIB
+        const val PREF_KEY_PERMANENT_WEBSOCKET_DEFAULT: Boolean = !BuildConfig.USE_FIREBASE_LIB
 
         // CONTACTS & GROUPS
         const val PREF_KEY_AUTO_JOIN_GROUPS: String = "pref_key_auto_join_groups"
@@ -675,11 +680,20 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             "pref_key_automatic_backup_device_unique_id"
         const val PREF_KEY_AUTOMATIC_BACKUP_CONFIGURATION: String =
             "pref_key_automatic_backup_configuration"
-        const val PREF_KEY_MDM_AUTOMATIC_BACKUP: String = "pref_key_mdm_automatic_backup"
-        const val PREF_KEY_MDM_WEBDAV_KEY_ESCROW_PUBLIC_KEY: String =
-            "pref_key_mdm_webdav_key_escrow_public_key"
 
         const val PREF_KEY_MANAGE_CLOUD_BACKUPS: String = "pref_key_manage_cloud_backups"
+
+        // BACKUPS v2
+
+        const val PREF_KEY_USE_CREDENTIALS_MANAGER: String = "pref_key_use_credentials_manager"
+        const val PREF_KEY_USE_CREDENTIALS_MANAGER_DEFAULT: Boolean = true
+
+        const val PREF_KEY_BACKUPS_V2_STATUS: String = "pref_key_backups_v2_status"
+        const val PREF_KEY_BACKUPS_V2_STATUS_NOT_CONFIGURED = 0
+        const val PREF_KEY_BACKUPS_V2_STATUS_CONFIGURED = 1
+        const val PREF_KEY_BACKUPS_V2_STATUS_KEY_REMINDER = 2
+        const val PREF_KEY_BACKUPS_V2_STATUS_DEFAULT: Int = PREF_KEY_BACKUPS_V2_STATUS_NOT_CONFIGURED
+
 
         // CAMERA SETTINGS
         const val PREF_KEY_CAMERA_RESOLUTION: String = "pref_key_camera_resolution"
@@ -941,28 +955,27 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 }
             }
             set(forceDarkMode) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                if (VERSION.SDK_INT >= VERSION_CODES.Q) {
-                    if (forceDarkMode!!) {
-                        editor.putString(
-                            PREF_KEY_DARK_MODE_API29,
-                            "Dark"
-                        )
-                    } else {
-                        editor.putString(
-                            PREF_KEY_DARK_MODE_API29,
-                            "Light"
-                        )
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        if (VERSION.SDK_INT >= VERSION_CODES.Q) {
+                            if (forceDarkMode!!) {
+                                putString(
+                                    PREF_KEY_DARK_MODE_API29,
+                                    "Dark"
+                                )
+                            } else {
+                                putString(
+                                    PREF_KEY_DARK_MODE_API29,
+                                    "Light"
+                                )
+                            }
+                        } else {
+                            putBoolean(
+                                PREF_KEY_DARK_MODE,
+                                forceDarkMode!!
+                            )
+                        }
                     }
-                } else {
-                    editor.putBoolean(
-                        PREF_KEY_DARK_MODE,
-                        forceDarkMode!!
-                    )
-                }
-                editor.apply()
             }
 
         val fontScale: Float
@@ -1032,14 +1045,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(timestamp) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putLong(
-                    PREF_KEY_LAST_AVAILABLE_SPACE_WARNING_TIMESTAMP,
-                    timestamp
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putLong(
+                            PREF_KEY_LAST_AVAILABLE_SPACE_WARNING_TIMESTAMP,
+                            timestamp
+                        )
+                    }
             }
 
 
@@ -1050,10 +1062,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         }
 
         fun setFirstCallAudioPermissionRequested(requested: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED, requested)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED, requested)
+            }
         }
 
         fun wasFirstCallBluetoothPermissionRequested(): Boolean {
@@ -1063,10 +1074,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         }
 
         fun setFirstCallBluetoothPermissionRequested(requested: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED, requested)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED, requested)
+            }
         }
 
         @JvmStatic
@@ -1078,10 +1088,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setUseSystemEmojis(useSystemEmojis: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_USE_SYSTEM_EMOJIS, useSystemEmojis)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_USE_SYSTEM_EMOJIS, useSystemEmojis)
+            }
         }
 
 
@@ -1094,10 +1103,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setUseInternalImageViewer(useInternalImageViewer: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_USE_INTERNAL_IMAGE_VIEWER, useInternalImageViewer)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_USE_INTERNAL_IMAGE_VIEWER, useInternalImageViewer)
+            }
         }
 
         @JvmStatic
@@ -1110,14 +1118,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(sort) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_SORT_CONTACTS_BY_LAST_NAME,
-                    sort
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_SORT_CONTACTS_BY_LAST_NAME,
+                            sort
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1130,14 +1137,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     ) ?: PREF_KEY_CONTACT_DISPLAY_NAME_FORMAT_DEFAULT
             }
             set(format) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putString(
-                    PREF_KEY_CONTACT_DISPLAY_NAME_FORMAT,
-                    format
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putString(
+                            PREF_KEY_CONTACT_DISPLAY_NAME_FORMAT,
+                            format
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1160,14 +1166,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(uppercaseLastName) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_UPPERCASE_LAST_NAME,
-                    uppercaseLastName
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_UPPERCASE_LAST_NAME,
+                            uppercaseLastName
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1182,14 +1187,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return downloadSizeString.toLong()
             }
             set(autoDownloadSize) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putString(
-                    PREF_KEY_AUTODOWNLOAD_SIZE,
-                    autoDownloadSize.toString()
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putString(
+                            PREF_KEY_AUTODOWNLOAD_SIZE,
+                            autoDownloadSize.toString()
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1200,14 +1204,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     PREF_KEY_AUTODOWNLOAD_ARCHIVED_DISCUSSION_DEFAULT
                 )
             set(autoDownloadArchivedDiscussion) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_AUTODOWNLOAD_ARCHIVED_DISCUSSION,
-                    autoDownloadArchivedDiscussion
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_AUTODOWNLOAD_ARCHIVED_DISCUSSION,
+                            autoDownloadArchivedDiscussion
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1218,14 +1221,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     PREF_KEY_UNARCHIVE_DISCUSSION_ON_NOTIFICATION_DEFAULT
                 )
             set(unarchiveDiscussionOnNotification) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_UNARCHIVE_DISCUSSION_ON_NOTIFICATION,
-                    unarchiveDiscussionOnNotification
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_UNARCHIVE_DISCUSSION_ON_NOTIFICATION,
+                            unarchiveDiscussionOnNotification
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1258,14 +1260,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(defaultLinkPreviewOutbound) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_LINK_PREVIEW_OUTBOUND,
-                    defaultLinkPreviewOutbound
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_LINK_PREVIEW_OUTBOUND,
+                            defaultLinkPreviewOutbound
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1279,10 +1280,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setLinkPreviewInbound(defaultLinkPreviewInbound: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_LINK_PREVIEW_INBOUND, defaultLinkPreviewInbound)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_LINK_PREVIEW_INBOUND, defaultLinkPreviewInbound)
+            }
         }
 
         @JvmStatic
@@ -1295,14 +1295,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(timestampOrMinusOne) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putLong(
-                    PREF_KEY_LAST_READ_RECEIPT_PROMPT_ANSWER_TIMESTAMP,
-                    timestampOrMinusOne
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putLong(
+                            PREF_KEY_LAST_READ_RECEIPT_PROMPT_ANSWER_TIMESTAMP,
+                            timestampOrMinusOne
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1315,14 +1314,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(defaultSendReadReceipt) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_READ_RECEIPT,
-                    defaultSendReadReceipt
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_READ_RECEIPT,
+                            defaultSendReadReceipt
+                        )
+                    }
             }
 
         val sendWithHardwareEnter: Boolean
@@ -1343,10 +1341,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setSendingForegroundService(enabled: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_SENDING_FOREGROUND_SERVICE, enabled)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_SENDING_FOREGROUND_SERVICE, enabled)
+            }
         }
 
         @JvmStatic
@@ -1372,17 +1369,16 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 "dot", "line", "full" -> indicatorString
                 else -> null
             }
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            if (pingConnectivityIndicatorString == null) {
-                editor.remove(PREF_KEY_PING_CONNECTIVITY_INDICATOR)
-            } else {
-                editor.putString(
-                    PREF_KEY_PING_CONNECTIVITY_INDICATOR,
-                    pingConnectivityIndicatorString
-                )
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                if (pingConnectivityIndicatorString == null) {
+                    remove(PREF_KEY_PING_CONNECTIVITY_INDICATOR)
+                } else {
+                    putString(
+                        PREF_KEY_PING_CONNECTIVITY_INDICATOR,
+                        pingConnectivityIndicatorString
+                    )
+                }
             }
-            editor.apply()
         }
 
         @JvmStatic
@@ -1395,11 +1391,10 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     ) ?: PREF_KEY_QR_CORRECTION_LEVEL_DEFAULT
             }
             set(level) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putString(PREF_KEY_QR_CORRECTION_LEVEL, level)
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putString(PREF_KEY_QR_CORRECTION_LEVEL, level)
+                    }
             }
 
         @JvmStatic
@@ -1411,10 +1406,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setUseDebugLogLevel(useDebugLogLevel: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_DEBUG_LOG_LEVEL, useDebugLogLevel)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_DEBUG_LOG_LEVEL, useDebugLogLevel)
+            }
         }
 
         @JvmStatic
@@ -1427,14 +1421,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(autoOpen) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_AUTO_OPEN_LIMITED_VISIBILITY_INBOUND,
-                    autoOpen
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_AUTO_OPEN_LIMITED_VISIBILITY_INBOUND,
+                            autoOpen
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1447,14 +1440,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(retain) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_RETAIN_WIPED_OUTBOUND_MESSAGES,
-                    retain
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    putBoolean(
+                        PREF_KEY_RETAIN_WIPED_OUTBOUND_MESSAGES,
+                        retain
+                    )
+                        }
             }
 
         @JvmStatic
@@ -1488,18 +1480,17 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return null
             }
             set(count) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                if (count == 0L) {
-                    editor.remove(PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT)
-                } else {
-                    editor.putString(
-                        PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT,
-                        count.toString()
-                    )
-                }
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    if (count == 0L) {
+                        remove(PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT)
+                    } else {
+                        putString(
+                            PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT,
+                            count.toString()
+                        )
+                    }
+                        }
             }
 
         @JvmStatic
@@ -1522,14 +1513,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return null
             }
             set(duration) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putString(
-                    PREF_KEY_DEFAULT_DISCUSSION_RETENTION_DURATION,
-                    duration.toString()
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    putString(
+                        PREF_KEY_DEFAULT_DISCUSSION_RETENTION_DURATION,
+                        duration.toString()
+                    )
+                        }
             }
 
         @JvmStatic
@@ -1542,11 +1532,10 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(readOnce) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(PREF_KEY_DEFAULT_READ_ONCE, readOnce)
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    putBoolean(PREF_KEY_DEFAULT_READ_ONCE, readOnce)
+                        }
             }
 
         @JvmStatic
@@ -1569,18 +1558,17 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return null
             }
             set(duration) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                if (duration == null) {
-                    editor.remove(PREF_KEY_DEFAULT_VISIBILITY_DURATION)
-                } else {
-                    editor.putString(
-                        PREF_KEY_DEFAULT_VISIBILITY_DURATION,
-                        duration.toString()
-                    )
-                }
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    if (duration == null) {
+                        remove(PREF_KEY_DEFAULT_VISIBILITY_DURATION)
+                    } else {
+                        putString(
+                            PREF_KEY_DEFAULT_VISIBILITY_DURATION,
+                            duration.toString()
+                        )
+                    }
+                        }
             }
 
         @JvmStatic
@@ -1603,18 +1591,17 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return null
             }
             set(duration) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                if (duration == null) {
-                    editor.remove(PREF_KEY_DEFAULT_EXISTENCE_DURATION)
-                } else {
-                    editor.putString(
-                        PREF_KEY_DEFAULT_EXISTENCE_DURATION,
-                        duration.toString()
-                    )
-                }
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    if (duration == null) {
+                        remove(PREF_KEY_DEFAULT_EXISTENCE_DURATION)
+                    } else {
+                        putString(
+                            PREF_KEY_DEFAULT_EXISTENCE_DURATION,
+                            duration.toString()
+                        )
+                    }
+                        }
             }
 
         @JvmStatic
@@ -1627,14 +1614,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(betaFeaturesEnabled) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_ENABLE_BETA_FEATURES,
-                    betaFeaturesEnabled
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    putBoolean(
+                        PREF_KEY_ENABLE_BETA_FEATURES,
+                        betaFeaturesEnabled
+                    )
+                        }
             }
 
         @JvmStatic
@@ -1654,10 +1640,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun resetScaledTurn() {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.remove(PREF_KEY_SCALED_TURN_REGION)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                remove(PREF_KEY_SCALED_TURN_REGION)
+            }
         }
 
 
@@ -1673,13 +1658,12 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return getAutoJoinGroupsFromString(stringValue)
             }
             set(autoJoinGroups) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-                editor.putString(
-                    PREF_KEY_AUTO_JOIN_GROUPS,
-                    autoJoinGroups.stringValue
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                    putString(
+                        PREF_KEY_AUTO_JOIN_GROUPS,
+                        autoJoinGroups.stringValue
+                    )
+                }
             }
 
         @JvmStatic
@@ -1704,14 +1688,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(hide) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_HIDE_GROUP_MEMBER_CHANGES,
-                    hide
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    putBoolean(
+                        PREF_KEY_HIDE_GROUP_MEMBER_CHANGES,
+                        hide
+                    )
+                        }
             }
 
         @JvmStatic
@@ -1723,10 +1706,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setShowTrustLevels(show: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_SHOW_TRUST_LEVELS, show)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_SHOW_TRUST_LEVELS, show)
+            }
         }
 
         @JvmStatic
@@ -1752,10 +1734,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setWipeMessagesOnUnlockFails(wipe: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_UNLOCK_FAILED_WIPE_MESSAGES, wipe)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_UNLOCK_FAILED_WIPE_MESSAGES, wipe)
+            }
         }
 
         @JvmStatic
@@ -1768,14 +1749,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(contentHidden) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_HIDE_NOTIFICATION_CONTENTS,
-                    contentHidden
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_HIDE_NOTIFICATION_CONTENTS,
+                            contentHidden
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1788,14 +1768,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(suggestionsAllowed) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_DISABLE_NOTIFICATION_SUGGESTIONS,
-                    suggestionsAllowed
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_DISABLE_NOTIFICATION_SUGGESTIONS,
+                            suggestionsAllowed
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1807,10 +1786,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setExposeRecentDiscussions(exposeRecentDiscussions: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_EXPOSE_RECENT_DISCUSSIONS, exposeRecentDiscussions)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_EXPOSE_RECENT_DISCUSSIONS, exposeRecentDiscussions)
+            }
         }
 
         @JvmStatic
@@ -1822,10 +1800,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setUseKeyboardIncognitoMode(useKeyboardIncognitoMode: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_KEYBOARD_INCOGNITO_MODE, useKeyboardIncognitoMode)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_KEYBOARD_INCOGNITO_MODE, useKeyboardIncognitoMode)
+            }
         }
 
         @JvmStatic
@@ -1837,10 +1814,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setPreventScreenCapture(preventScreenCapture: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_PREVENT_SCREEN_CAPTURE, preventScreenCapture)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_PREVENT_SCREEN_CAPTURE, preventScreenCapture)
+            }
         }
 
         @JvmStatic
@@ -1880,18 +1856,17 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setHiddenProfileClosePolicy(policy: Int, backgroundGraceDelay: Int) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putInt(PREF_KEY_HIDDEN_PROFILE_CLOSE_POLICY, policy)
-            if (policy == HIDDEN_PROFILE_CLOSE_POLICY_BACKGROUND) {
-                editor.putInt(
-                    PREF_KEY_HIDDEN_PROFILE_CLOSE_POLICY_BACKGROUND_GRACE_DELAY,
-                    backgroundGraceDelay
-                )
-            } else {
-                editor.remove(PREF_KEY_HIDDEN_PROFILE_CLOSE_POLICY_BACKGROUND_GRACE_DELAY)
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putInt(PREF_KEY_HIDDEN_PROFILE_CLOSE_POLICY, policy)
+                if (policy == HIDDEN_PROFILE_CLOSE_POLICY_BACKGROUND) {
+                    putInt(
+                        PREF_KEY_HIDDEN_PROFILE_CLOSE_POLICY_BACKGROUND_GRACE_DELAY,
+                        backgroundGraceDelay
+                    )
+                } else {
+                    remove(PREF_KEY_HIDDEN_PROFILE_CLOSE_POLICY_BACKGROUND_GRACE_DELAY)
+                }
             }
-            editor.apply()
         }
 
         val videoSendResolution: Int
@@ -1929,10 +1904,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setUseLowBandwidthInCalls(useLowBandwidthInCalls: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_LOW_BANDWIDTH_CALLS, useLowBandwidthInCalls)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_LOW_BANDWIDTH_CALLS, useLowBandwidthInCalls)
+            }
         }
 
         @JvmStatic
@@ -1958,10 +1932,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setUsePermanentWebSocket(userPermanentWebSocket: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_PERMANENT_WEBSOCKET, userPermanentWebSocket)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_PERMANENT_WEBSOCKET, userPermanentWebSocket)
+            }
         }
 
         @JvmStatic
@@ -1973,10 +1946,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setShareAppVersion(shareAppVersion: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_SHARE_APP_VERSION, shareAppVersion)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_SHARE_APP_VERSION, shareAppVersion)
+            }
         }
 
         @JvmStatic
@@ -1988,10 +1960,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setNotifyCertificateChange(notifyCertificateChange: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_NOTIFY_CERTIFICATE_CHANGE, notifyCertificateChange)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_NOTIFY_CERTIFICATE_CHANGE, notifyCertificateChange)
+            }
         }
 
         @JvmStatic
@@ -2023,14 +1994,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 "always", "issuer", "never" -> untrustedCertificateCategoryString
                 else -> null
             }
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            if (untrustedCertificateCategory == null) {
-                editor.remove(PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE)
-            } else {
-                editor.putString(PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE, untrustedCertificateCategory)
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                if (untrustedCertificateCategory == null) {
+                    remove(PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE)
+                } else {
+                    putString(PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE, untrustedCertificateCategory)
+                }
             }
-            editor.apply()
         }
 
         @JvmStatic
@@ -2043,14 +2013,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(doNotNotify) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS,
-                    doNotNotify
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    putBoolean(
+                        PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS,
+                        doNotNotify
+                    )
+                        }
             }
 
         @JvmStatic
@@ -2062,10 +2031,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setDisablePushNotifications(disablePushNotifications: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_DISABLE_PUSH_NOTIFICATIONS, disablePushNotifications)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_DISABLE_PUSH_NOTIFICATIONS, disablePushNotifications)
+            }
         }
 
 
@@ -2076,23 +2044,22 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             val salt = ByteArray(PIN_SALT_LENGTH)
             SecureRandom().nextBytes(salt)
             val hash: ByteArray? = computePINHash(pin, salt)
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            if (hash == null) {
-                Logger.w("Error computing PIN hash, storing it in clear...")
-                editor.putString(PREF_KEY_PLAIN_PIN, pin)
-                editor.remove(PREF_KEY_PIN_HASH)
-            } else {
-                editor.remove(PREF_KEY_PLAIN_PIN)
-                val saltAndHash = ByteArray(PIN_SALT_LENGTH + hash.size)
-                System.arraycopy(salt, 0, saltAndHash, 0, PIN_SALT_LENGTH)
-                System.arraycopy(hash, 0, saltAndHash, PIN_SALT_LENGTH, hash.size)
-                val base64SaltAndHash: String =
-                    Base64.encodeToString(saltAndHash, Base64.NO_PADDING or Base64.NO_WRAP)
-                editor.putString(PREF_KEY_PIN_HASH, base64SaltAndHash)
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                if (hash == null) {
+                    Logger.w("Error computing PIN hash, storing it in clear...")
+                    putString(PREF_KEY_PLAIN_PIN, pin)
+                    remove(PREF_KEY_PIN_HASH)
+                } else {
+                    remove(PREF_KEY_PLAIN_PIN)
+                    val saltAndHash = ByteArray(PIN_SALT_LENGTH + hash.size)
+                    System.arraycopy(salt, 0, saltAndHash, 0, PIN_SALT_LENGTH)
+                    System.arraycopy(hash, 0, saltAndHash, PIN_SALT_LENGTH, hash.size)
+                    val base64SaltAndHash: String =
+                        Base64.encodeToString(saltAndHash, Base64.NO_PADDING or Base64.NO_WRAP)
+                    putString(PREF_KEY_PIN_HASH, base64SaltAndHash)
+                }
+                putBoolean(PREF_KEY_PIN_IS_A_PASSWORD, pinIsAPassword)
             }
-            editor.putBoolean(PREF_KEY_PIN_IS_A_PASSWORD, pinIsAPassword)
-            editor.apply()
         }
 
         @JvmStatic
@@ -2100,22 +2067,21 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             val salt = ByteArray(PIN_SALT_LENGTH)
             SecureRandom().nextBytes(salt)
             val hash: ByteArray? = computePINHash(pin, salt)
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            if (hash == null) {
-                Logger.w("Error computing PIN hash, storing it in clear...")
-                editor.putString(PREF_KEY_EMERGENCY_PLAIN_PIN, pin)
-                editor.remove(PREF_KEY_EMERGENCY_PIN_HASH)
-            } else {
-                editor.remove(PREF_KEY_EMERGENCY_PLAIN_PIN)
-                val saltAndHash = ByteArray(PIN_SALT_LENGTH + hash.size)
-                System.arraycopy(salt, 0, saltAndHash, 0, PIN_SALT_LENGTH)
-                System.arraycopy(hash, 0, saltAndHash, PIN_SALT_LENGTH, hash.size)
-                val base64SaltAndHash: String =
-                    Base64.encodeToString(saltAndHash, Base64.NO_PADDING or Base64.NO_WRAP)
-                editor.putString(PREF_KEY_EMERGENCY_PIN_HASH, base64SaltAndHash)
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                if (hash == null) {
+                    Logger.w("Error computing PIN hash, storing it in clear...")
+                    putString(PREF_KEY_EMERGENCY_PLAIN_PIN, pin)
+                    remove(PREF_KEY_EMERGENCY_PIN_HASH)
+                } else {
+                    remove(PREF_KEY_EMERGENCY_PLAIN_PIN)
+                    val saltAndHash = ByteArray(PIN_SALT_LENGTH + hash.size)
+                    System.arraycopy(salt, 0, saltAndHash, 0, PIN_SALT_LENGTH)
+                    System.arraycopy(hash, 0, saltAndHash, PIN_SALT_LENGTH, hash.size)
+                    val base64SaltAndHash: String =
+                        Base64.encodeToString(saltAndHash, Base64.NO_PADDING or Base64.NO_WRAP)
+                    putString(PREF_KEY_EMERGENCY_PIN_HASH, base64SaltAndHash)
+                }
             }
-            editor.apply()
         }
 
         @JvmStatic
@@ -2168,22 +2134,20 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun clearPIN() {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.remove(PREF_KEY_PLAIN_PIN)
-            editor.remove(PREF_KEY_PIN_HASH)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                remove(PREF_KEY_PLAIN_PIN)
+                remove(PREF_KEY_PIN_HASH)
+            }
             clearEmergencyPIN()
         }
 
         @JvmStatic
         fun clearEmergencyPIN() {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_USE_EMERGENCY_PIN, false)
-            editor.remove(PREF_KEY_EMERGENCY_PLAIN_PIN)
-            editor.remove(PREF_KEY_EMERGENCY_PIN_HASH)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_USE_EMERGENCY_PIN, false)
+                remove(PREF_KEY_EMERGENCY_PLAIN_PIN)
+                remove(PREF_KEY_EMERGENCY_PIN_HASH)
+            }
         }
 
         @JvmStatic
@@ -2221,10 +2185,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setUseBiometryToUnlock(useBiometry: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_UNLOCK_BIOMETRY, useBiometry)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_UNLOCK_BIOMETRY, useBiometry)
+            }
         }
 
         @JvmStatic
@@ -2239,14 +2202,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return timeString.toInt()
             }
             set(graceTime) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putString(
-                    PREF_KEY_LOCK_GRACE_TIME,
-                    graceTime.toString()
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putString(
+                            PREF_KEY_LOCK_GRACE_TIME,
+                            graceTime.toString()
+                        )
+                    }
             }
 
         @JvmStatic
@@ -2258,10 +2220,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setKeepLockServiceOpen(keepOpen: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_KEEP_LOCK_SERVICE_OPEN, keepOpen)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_KEEP_LOCK_SERVICE_OPEN, keepOpen)
+            }
         }
 
         @JvmStatic
@@ -2273,10 +2234,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setUseAutomaticBackup(useAutomaticBackup: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_ENABLE_AUTOMATIC_BACKUP, useAutomaticBackup)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_ENABLE_AUTOMATIC_BACKUP, useAutomaticBackup)
+            }
         }
 
         @JvmStatic
@@ -2285,47 +2245,6 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 PREF_KEY_ENABLE_AUTOMATIC_BACKUP, PREF_KEY_ENABLE_AUTOMATIC_BACKUP_DEFAULT
             )
         }
-
-        @JvmStatic
-        var isMdmAutomaticBackup: Boolean
-            get() {
-                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                    .getBoolean(PREF_KEY_MDM_AUTOMATIC_BACKUP, false)
-            }
-            set(mdmAutomaticBackup) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                if (mdmAutomaticBackup) {
-                    editor.putBoolean(
-                        PREF_KEY_MDM_AUTOMATIC_BACKUP,
-                        true
-                    )
-                } else {
-                    editor.remove(PREF_KEY_MDM_AUTOMATIC_BACKUP)
-                }
-                editor.apply()
-            }
-
-        @JvmStatic
-        var mdmWebdavKeyEscrowPublicKey: String?
-            get() {
-                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                    .getString(
-                        PREF_KEY_MDM_WEBDAV_KEY_ESCROW_PUBLIC_KEY,
-                        null
-                    )
-            }
-            set(publicKeyPem) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putString(
-                    PREF_KEY_MDM_WEBDAV_KEY_ESCROW_PUBLIC_KEY,
-                    publicKeyPem
-                )
-                editor.apply()
-            }
 
         @JvmStatic
         val automaticBackupDeviceUniqueId: String
@@ -2338,16 +2257,20 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                         )
                 if (deviceUniqueId == null) {
                     deviceUniqueId = UUID.randomUUID().toString()
-                    val editor: Editor =
-                        PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                            .edit()
-                    editor.putString(
-                        PREF_KEY_AUTOMATIC_BACKUP_DEVICE_UNIQUE_ID,
-                        deviceUniqueId
-                    )
-                    editor.apply()
+                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                            putString(
+                                PREF_KEY_AUTOMATIC_BACKUP_DEVICE_UNIQUE_ID,
+                                deviceUniqueId
+                            )
+                        }
                 }
                 return deviceUniqueId
+            }
+
+        val credentialManagerDeviceId: String
+            get() {
+                return "${AppSingleton.DEFAULT_DEVICE_DISPLAY_NAME} $automaticBackupDeviceUniqueId"
             }
 
         // this method is used when migrating to the new serialized backup configuration
@@ -2355,10 +2278,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         fun migrateAutomaticBackupAccount(): String? {
             val account: String? = PreferenceManager.getDefaultSharedPreferences(App.getContext())
                 .getString("pref_key_automatic_backup_account", null)
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.remove("pref_key_automatic_backup_account")
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                remove("pref_key_automatic_backup_account")
+            }
             return account
         }
 
@@ -2384,39 +2306,77 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return null
             }
             set(configuration) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                if (configuration == null) {
-                    editor.remove(PREF_KEY_AUTOMATIC_BACKUP_CONFIGURATION)
-                } else {
-                    editor.putString(
-                        PREF_KEY_AUTOMATIC_BACKUP_CONFIGURATION,
-                        AppSingleton.getJsonObjectMapper().writeValueAsString(configuration)
-                    )
-                }
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        if (configuration == null) {
+                            remove(PREF_KEY_AUTOMATIC_BACKUP_CONFIGURATION)
+                        } else {
+                            putString(
+                                PREF_KEY_AUTOMATIC_BACKUP_CONFIGURATION,
+                                AppSingleton.getJsonObjectMapper().writeValueAsString(configuration)
+                            )
+                        }
+                    }
             }
+
+        var useCredentialsManagerForBackups: Boolean
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getBoolean(PREF_KEY_USE_CREDENTIALS_MANAGER, PREF_KEY_USE_CREDENTIALS_MANAGER_DEFAULT)
+            }
+            set(useCredentialsManager) {
+                PreferenceManager
+                    .getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(PREF_KEY_USE_CREDENTIALS_MANAGER, useCredentialsManager)
+                    }
+            }
+
+        var backupsV2Status: Int
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getInt(PREF_KEY_BACKUPS_V2_STATUS, PREF_KEY_BACKUPS_V2_STATUS_DEFAULT)
+            }
+            set(status) {
+                if (status == PREF_KEY_BACKUPS_V2_STATUS_NOT_CONFIGURED || status == PREF_KEY_BACKUPS_V2_STATUS_CONFIGURED || status == PREF_KEY_BACKUPS_V2_STATUS_KEY_REMINDER) {
+                    PreferenceManager
+                        .getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                            putInt(PREF_KEY_BACKUPS_V2_STATUS, status)
+                        }
+                }
+            }
+
+        var muteTroubleshootingTipUntil: Long
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getLong(PREF_KEY_MUTE_TROUBLESHOOTING_TIP_UNTIL, 0)
+            }
+            set(timestamp) {
+                PreferenceManager
+                    .getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putLong(PREF_KEY_MUTE_TROUBLESHOOTING_TIP_UNTIL, timestamp)
+                    }
+            }
+
 
         @JvmStatic
         val messageRingtone: Uri
             get() {
-                return Uri.parse(
-                    PreferenceManager.getDefaultSharedPreferences(
-                        App.getContext()
-                    ).getString(
-                        PREF_KEY_MESSAGE_RINGTONE,
-                        PREF_KEY_MESSAGE_RINGTONE_DEFAULT
-                    )
-                )
+                return PreferenceManager.getDefaultSharedPreferences(
+                    App.getContext()
+                ).getString(
+                    PREF_KEY_MESSAGE_RINGTONE,
+                    PREF_KEY_MESSAGE_RINGTONE_DEFAULT
+                )!!.toUri()
             }
 
         @JvmStatic
         fun setMessageRingtone(uri: String?) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putString(PREF_KEY_MESSAGE_RINGTONE, uri)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putString(PREF_KEY_MESSAGE_RINGTONE, uri)
+            }
         }
 
         @JvmStatic
@@ -2449,14 +2409,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     if (intToVibrationPattern(`val`).isEmpty()) {
                         pattern = "0"
                     }
-                    val editor: Editor =
-                        PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                            .edit()
-                    editor.putString(
-                        PREF_KEY_MESSAGE_VIBRATION_PATTERN,
-                        pattern
-                    )
-                    editor.apply()
+                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                            .edit {
+                        putString(
+                            PREF_KEY_MESSAGE_VIBRATION_PATTERN,
+                            pattern
+                        )
+                            }
                 } catch (_: Exception) {
                 }
             }
@@ -2490,36 +2449,32 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return color
             }
             set(color) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                if (color == null) {
-                    editor.putString(PREF_KEY_MESSAGE_LED_COLOR, "")
-                } else {
-                    editor.putString(PREF_KEY_MESSAGE_LED_COLOR, color)
-                }
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        if (color == null) {
+                            putString(PREF_KEY_MESSAGE_LED_COLOR, "")
+                        } else {
+                            putString(PREF_KEY_MESSAGE_LED_COLOR, color)
+                        }
+                    }
             }
 
         @JvmStatic
         val callRingtone: Uri
             get() {
-                return Uri.parse(
-                    PreferenceManager.getDefaultSharedPreferences(
-                        App.getContext()
-                    ).getString(
-                        PREF_KEY_CALL_RINGTONE,
-                        PREF_KEY_CALL_RINGTONE_DEFAULT
-                    )
-                )
+                return PreferenceManager.getDefaultSharedPreferences(
+                    App.getContext()
+                ).getString(
+                    PREF_KEY_CALL_RINGTONE,
+                    PREF_KEY_CALL_RINGTONE_DEFAULT
+                )!!.toUri()
             }
 
         @JvmStatic
         fun setCallRingtone(uri: String?) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putString(PREF_KEY_CALL_RINGTONE, uri)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putString(PREF_KEY_CALL_RINGTONE, uri)
+            }
         }
 
         val callVibrationPattern: LongArray
@@ -2551,14 +2506,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     if (intToVibrationPattern(`val`).isEmpty()) {
                         pattern = "0"
                     }
-                    val editor: Editor =
-                        PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                            .edit()
-                    editor.putString(
-                        PREF_KEY_CALL_VIBRATION_PATTERN,
-                        pattern
-                    )
-                    editor.apply()
+                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                            putString(
+                                PREF_KEY_CALL_VIBRATION_PATTERN,
+                                pattern
+                            )
+                        }
                 } catch (_: Exception) {
                 }
             }
@@ -2572,10 +2526,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setUseFlashOnIncomingCall(useFlash: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_CALL_USE_FLASH, useFlash)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_CALL_USE_FLASH, useFlash)
+            }
         }
 
         @JvmStatic
@@ -2587,10 +2540,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setUsePermanentForegroundService(value: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_PERMANENT_FOREGROUND_SERVICE, value)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_PERMANENT_FOREGROUND_SERVICE, value)
+            }
         }
 
         @JvmStatic
@@ -2605,14 +2557,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return qualityString.toInt()
             }
             set(resolution) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putString(
-                    PREF_KEY_CAMERA_RESOLUTION,
-                    resolution.toString()
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putString(
+                            PREF_KEY_CAMERA_RESOLUTION,
+                            resolution.toString()
+                        )
+                    }
             }
 
         @JvmStatic
@@ -2625,11 +2576,10 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(remove) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(PREF_KEY_REMOVE_METADATA, remove)
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    putBoolean(PREF_KEY_REMOVE_METADATA, remove)
+                }
             }
 
         @JvmStatic
@@ -2647,18 +2597,17 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return language
             }
             set(language) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                if (language == null || "" == language) {
-                    editor.remove(PREF_KEY_LANGUAGE_WEBCLIENT)
-                } else {
-                    editor.putString(
-                        PREF_KEY_LANGUAGE_WEBCLIENT,
-                        language
-                    )
-                }
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                            if (language == null || "" == language) {
+                                remove(PREF_KEY_LANGUAGE_WEBCLIENT)
+                            } else {
+                                putString(
+                                    PREF_KEY_LANGUAGE_WEBCLIENT,
+                                    language
+                                )
+                            }
+                        }
             }
 
         @JvmStatic
@@ -2675,20 +2624,19 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setThemeWebclient(theme: String?) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            if (theme == null) {
-                editor.remove(PREF_KEY_THEME_WEBCLIENT)
-            } else {
-                when (theme) {
-                    "dark", "light", "BrowserDefault", "AppDefault" -> editor.putString(
-                        PREF_KEY_THEME_WEBCLIENT, theme
-                    )
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                if (theme == null) {
+                    remove(PREF_KEY_THEME_WEBCLIENT)
+                } else {
+                    when (theme) {
+                        "dark", "light", "BrowserDefault", "AppDefault" -> putString(
+                            PREF_KEY_THEME_WEBCLIENT, theme
+                        )
 
-                    else -> editor.remove(PREF_KEY_THEME_WEBCLIENT)
+                        else -> remove(PREF_KEY_THEME_WEBCLIENT)
+                    }
                 }
             }
-            editor.apply()
         }
 
         @JvmStatic
@@ -2704,11 +2652,10 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 if (send == null) {
                     return
                 }
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(PREF_KEY_SEND_ON_ENTER_WEBCLIENT, send)
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(PREF_KEY_SEND_ON_ENTER_WEBCLIENT, send)
+                    }
             }
 
         @JvmStatic
@@ -2723,10 +2670,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             if (show == null) {
                 return
             }
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_NOTIFICATION_SHOW_ON_BROWSER, show)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_NOTIFICATION_SHOW_ON_BROWSER, show)
+            }
         }
 
         @JvmStatic
@@ -2742,10 +2688,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             if (notifications == null) {
                 return
             }
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_NOTIFICATION_SOUND_WEBCLIENT, notifications)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_NOTIFICATION_SOUND_WEBCLIENT, notifications)
+            }
         }
 
         @JvmStatic
@@ -2758,10 +2703,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setKeepWebclientAliveAfterClose(keepAlive: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_KEEP_WEBCLIENT_ALIVE_AFTER_CLOSE, keepAlive)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_KEEP_WEBCLIENT_ALIVE_AFTER_CLOSE, keepAlive)
+            }
         }
 
         @JvmStatic
@@ -2773,10 +2717,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setShowWebclientErrorNotifications(show: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_SHOW_ERROR_NOTIFICATIONS, show)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_SHOW_ERROR_NOTIFICATIONS, show)
+            }
         }
 
         @JvmStatic
@@ -2789,10 +2732,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setWebclientNotifyAfterInactivity(notify: Boolean) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            editor.putBoolean(PREF_KEY_NOTIFICATION_FOR_MESSAGES_AFTER_INACTIVITY, notify)
-            editor.apply()
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                putBoolean(PREF_KEY_NOTIFICATION_FOR_MESSAGES_AFTER_INACTIVITY, notify)
+            }
         }
 
         @JvmStatic
@@ -2805,14 +2747,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(unlockRequired) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_REQUIRE_UNLOCK_BEFORE_CONNECTING_TO_WEBCLIENT,
-                    unlockRequired
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_REQUIRE_UNLOCK_BEFORE_CONNECTING_TO_WEBCLIENT,
+                            unlockRequired
+                        )
+                    }
             }
 
 
@@ -2823,18 +2764,17 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     .getString(PREF_KEY_PREFERRED_KEYCLOAK_BROWSER, null)
             }
             set(browser) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                if (browser != null) {
-                    editor.putString(
-                        PREF_KEY_PREFERRED_KEYCLOAK_BROWSER,
-                        browser
-                    )
-                } else {
-                    editor.remove(PREF_KEY_PREFERRED_KEYCLOAK_BROWSER)
-                }
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        if (browser != null) {
+                            putString(
+                                PREF_KEY_PREFERRED_KEYCLOAK_BROWSER,
+                                browser
+                            )
+                        } else {
+                            remove(PREF_KEY_PREFERRED_KEYCLOAK_BROWSER)
+                        }
+                    }
             }
 
         @JvmStatic
@@ -2847,14 +2787,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(useSpeakerOutput) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_USE_SPEAKER_OUTPUT_FOR_MEDIA_PLAYER,
-                    useSpeakerOutput
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_USE_SPEAKER_OUTPUT_FOR_MEDIA_PLAYER,
+                            useSpeakerOutput
+                        )
+                    }
             }
 
         @JvmStatic
@@ -2867,14 +2806,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(playbackSpeed) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putFloat(
-                    PREF_KEY_PLAYBACK_SPEED_FOR_MEDIA_PLAYER,
-                    playbackSpeed
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putFloat(
+                            PREF_KEY_PLAYBACK_SPEED_FOR_MEDIA_PLAYER,
+                            playbackSpeed
+                        )
+                    }
             }
 
         @JvmStatic
@@ -2903,25 +2841,24 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return null
             }
             set(icons) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                if (icons == null) {
-                    editor.remove(PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER)
-                } else {
-                    val iconSb: StringBuilder = StringBuilder()
-                    for (icon: Int in icons) {
-                        if (iconSb.isNotEmpty()) {
-                            iconSb.append(",")
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        if (icons == null) {
+                            remove(PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER)
+                        } else {
+                            val iconSb: StringBuilder = StringBuilder()
+                            for (icon: Int in icons) {
+                                if (iconSb.isNotEmpty()) {
+                                    iconSb.append(",")
+                                }
+                                iconSb.append(icon)
+                            }
+                            putString(
+                                PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER,
+                                iconSb.toString()
+                            )
                         }
-                        iconSb.append(icon)
                     }
-                    editor.putString(
-                        PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER,
-                        iconSb.toString()
-                    )
-                }
-                editor.apply()
             }
 
         @JvmStatic
@@ -2946,21 +2883,20 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return ArrayList(mutableListOf(*PREF_KEY_PREFERRED_REACTIONS_DEFAULT))
             }
             set(reactions) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                val sb: StringBuilder = StringBuilder()
-                for (reaction: String? in reactions) {
-                    if (sb.isNotEmpty()) {
-                        sb.append(",")
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    val sb: StringBuilder = StringBuilder()
+                    for (reaction: String? in reactions) {
+                        if (sb.isNotEmpty()) {
+                            sb.append(",")
+                        }
+                        sb.append(reaction)
                     }
-                    sb.append(reaction)
-                }
-                editor.putString(
-                    PREF_KEY_PREFERRED_REACTIONS,
-                    sb.toString()
-                )
-                editor.apply()
+                            putString(
+                                PREF_KEY_PREFERRED_REACTIONS,
+                                sb.toString()
+                            )
+                        }
             }
 
         @JvmStatic
@@ -3000,32 +2936,31 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun setLocationIntegration(integrationString: String?, customOsmServerUrl: String?) {
-            val editor: Editor =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit()
-            if (integrationString == null) {
-                editor.remove(PREF_KEY_LOCATION_INTEGRATION)
-            } else {
-                when (integrationString) {
-                    PREF_VALUE_LOCATION_INTEGRATION_MAPS, PREF_VALUE_LOCATION_INTEGRATION_BASIC, PREF_VALUE_LOCATION_INTEGRATION_OSM -> {
-                        editor.putString(PREF_KEY_LOCATION_INTEGRATION, integrationString)
-                    }
-
-                    PREF_VALUE_LOCATION_INTEGRATION_CUSTOM_OSM -> {
-                        if (customOsmServerUrl != null) {
-                            editor.putString(PREF_KEY_LOCATION_INTEGRATION, integrationString)
-                            editor.putString(
-                                PREF_KEY_LOCATION_CUSTOM_OSM_SERVER,
-                                customOsmServerUrl
-                            )
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                if (integrationString == null) {
+                    remove(PREF_KEY_LOCATION_INTEGRATION)
+                } else {
+                    when (integrationString) {
+                        PREF_VALUE_LOCATION_INTEGRATION_MAPS, PREF_VALUE_LOCATION_INTEGRATION_BASIC, PREF_VALUE_LOCATION_INTEGRATION_OSM -> {
+                            putString(PREF_KEY_LOCATION_INTEGRATION, integrationString)
                         }
-                    }
 
-                    else -> {
-                        editor.remove(PREF_KEY_LOCATION_INTEGRATION)
+                        PREF_VALUE_LOCATION_INTEGRATION_CUSTOM_OSM -> {
+                            if (customOsmServerUrl != null) {
+                                putString(PREF_KEY_LOCATION_INTEGRATION, integrationString)
+                                putString(
+                                    PREF_KEY_LOCATION_CUSTOM_OSM_SERVER,
+                                    customOsmServerUrl
+                                )
+                            }
+                        }
+
+                        else -> {
+                            remove(PREF_KEY_LOCATION_INTEGRATION)
+                        }
                     }
                 }
             }
-            editor.apply()
         }
 
         @JvmStatic
@@ -3035,11 +2970,10 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     .getString(PREF_KEY_LOCATION_LAST_OSM_STYLE_ID, null)
             }
             set(id) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putString(PREF_KEY_LOCATION_LAST_OSM_STYLE_ID, id)
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putString(PREF_KEY_LOCATION_LAST_OSM_STYLE_ID, id)
+                    }
             }
 
         @JvmStatic
@@ -3052,14 +2986,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     ) // 1 is GoogleMap.TYPE_NORMAL
             }
             set(mapType) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putInt(
-                    PREF_KEY_LOCATION_LAST_GOOGLE_MAP_TYPE,
-                    mapType
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    putInt(
+                        PREF_KEY_LOCATION_LAST_GOOGLE_MAP_TYPE,
+                        mapType
+                    )
+                        }
             }
 
         @JvmStatic
@@ -3087,14 +3020,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION_DEFAULT
             }
             set(duration) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putString(
-                    PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION,
-                    duration.toString()
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                        .edit {
+                    putString(
+                        PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION,
+                        duration.toString()
+                    )
+                        }
             }
 
         @JvmStatic
@@ -3144,14 +3076,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 return PREF_KEY_LOCATION_DEFAULT_SHARE_QUALITY_DEFAULT
             }
             set(quality) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putString(
-                    PREF_KEY_LOCATION_DEFAULT_SHARE_QUALITY,
-                    quality.value.toString()
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putString(
+                            PREF_KEY_LOCATION_DEFAULT_SHARE_QUALITY,
+                            quality.value.toString()
+                        )
+                    }
             }
 
 
@@ -3165,14 +3096,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     )
             }
             set(disabled) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                editor.putBoolean(
-                    PREF_KEY_LOCATION_DISABLE_ADDRESS_LOOKUP,
-                    disabled
-                )
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_LOCATION_DISABLE_ADDRESS_LOOKUP,
+                            disabled
+                        )
+                    }
             }
 
         @JvmStatic
@@ -3194,25 +3124,24 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             // set to null to disable the use of custom server, but do not wipe the previously entered server
             set(serverUrl) {
-                val editor: Editor =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit()
-                if (serverUrl == null) {
-                    editor.putBoolean(
-                        PREF_KEY_LOCATION_USE_CUSTOM_ADDRESS_SERVER,
-                        false
-                    )
-                } else {
-                    editor.putBoolean(
-                        PREF_KEY_LOCATION_USE_CUSTOM_ADDRESS_SERVER,
-                        true
-                    )
-                    editor.putString(
-                        PREF_KEY_LOCATION_CUSTOM_ADDRESS_SERVER,
-                        serverUrl
-                    )
-                }
-                editor.apply()
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        if (serverUrl == null) {
+                            putBoolean(
+                                PREF_KEY_LOCATION_USE_CUSTOM_ADDRESS_SERVER,
+                                false
+                            )
+                        } else {
+                            putBoolean(
+                                PREF_KEY_LOCATION_USE_CUSTOM_ADDRESS_SERVER,
+                                true
+                            )
+                            putString(
+                                PREF_KEY_LOCATION_CUSTOM_ADDRESS_SERVER,
+                                serverUrl
+                            )
+                        }
+                    }
             }
 
         val locationCustomAddressServerEvenIfDisabled: String?
@@ -3231,5 +3160,27 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS_DEFAULT
             )
         }
+    }
+}
+
+fun FragmentActivity.navigateToSettingsFragment(fragmentClassName: String) {
+    val fragment: Fragment = supportFragmentManager.fragmentFactory.instantiate(
+        classLoader, fragmentClassName
+    )
+
+    try {
+        // Replace the existing Fragment with the new Fragment
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.slide_out_left,
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
+            .replace(R.id.settings_container, fragment)
+            .addToBackStack(null)
+            .commit()
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
 }

@@ -31,32 +31,37 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
@@ -64,8 +69,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -88,30 +96,34 @@ import io.olvid.messenger.onboarding.flow.animations.shimmer
 
 @Composable
 fun OnboardingScreen(
-    step: OnboardingStep,
+    step: OnboardingStep?,
     onBack: (() -> Unit)? = null,
     onClose: () -> Unit,
-    scrollable: Boolean = true,
     footer: @Composable (() -> Unit)? = null,
-    content: @Composable (ColumnScope.() -> Unit)? = null
+    contentAfter: @Composable (ColumnScope.() -> Unit)? = null,
+    content: @Composable (ColumnScope.() -> Unit)? = null,
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color = colorResource(id = R.color.almostWhite))
-            .systemBarsPadding()
-            .imePadding()
     ) {
+        var footerHeight by remember { mutableStateOf(0.dp) }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Start + WindowInsetsSides.End))
+                .then(if (footer == null) Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)) else Modifier)
                 .align(BiasAlignment(horizontalBias = 0f, verticalBias = -0.3f))
-                .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
-                .padding(vertical = 16.dp),
+                .padding(vertical = 16.dp)
+                .padding(bottom = footerHeight),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OnboardingHeader(step.title, step.subtitle)
+            step?.let {
+                OnboardingHeader(step.title, step.subtitle)
+            }
             Spacer(modifier = Modifier.height(24.dp))
 
             content?.let {
@@ -123,94 +135,116 @@ fun OnboardingScreen(
                 }
             }
 
-            step.actions.filter { it.type == CHOICE }.forEachIndexed { index, action ->
-                OnboardingButton(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    text = action.label,
-                    description = action.description,
-                    onClick = action.onClick
-                )
-                Spacer(modifier = Modifier.height(16.dp)).takeIf { index != step.actions.lastIndex }
-            }
-
-            step.actions.filter { it.type == TEXT }.forEach { action ->
-                Spacer(modifier = Modifier.height(24.dp))
-                ClickableText(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    text = action.label,
-                    style = OlvidTypography.body2.copy(
-                        color = Color(0xFF8B8D97),
-                        textAlign = TextAlign.Center
-                    )
-                ) {
-                    action.onClick.invoke()
+            step?.let {
+                step.actions.filter { it.type == CHOICE }.forEachIndexed { index, action ->
+                    if (action.customContent == null) {
+                        OnboardingButton(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            text = action.label,
+                            description = action.description,
+                            onClick = action.onClick
+                        )
+                    } else {
+                        action.customContent.invoke()
+                    }
+                    Spacer(modifier = Modifier.height(16.dp)).takeIf { index != step.actions.lastIndex }
                 }
-            }
 
-            step.actions.filter { it.type == BUTTON || it.type == BUTTON_OUTLINED }.takeIf { it.isNotEmpty() }?.run {
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                        .height(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.spacedBy(
-                        16.dp,
-                        Alignment.CenterHorizontally
-                    )
-                ) {
-                    forEach { action ->
-                        if (action.type == BUTTON) {
-                            Button(
-                                modifier = Modifier.weight(weight = 1f, fill = false).fillMaxHeight(),
-                                elevation = null,
-                                onClick = action.onClick,
-                                enabled = action.enabled
-                            ) {
-                                action.icon?.let {
-                                    Icon(
-                                        modifier = Modifier.size(20.dp),
-                                        painter = painterResource(id = it),
-                                        contentDescription = ""
+                step.actions.filter { it.type == TEXT }.forEach { action ->
+                    Spacer(modifier = Modifier.height(24.dp))
+                    ClickableText(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        text = action.label,
+                        style = OlvidTypography.body2.copy(
+                            color = Color(0xFF8B8D97),
+                            textAlign = TextAlign.Center
+                        )
+                    ) {
+                        action.onClick.invoke()
+                    }
+                }
+
+                step.actions.filter { it.type == BUTTON || it.type == BUTTON_OUTLINED }
+                    .takeIf { it.isNotEmpty() }?.run {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp)
+                            .height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            16.dp,
+                            Alignment.CenterHorizontally
+                        )
+                    ) {
+                        forEach { action ->
+                            if (action.type == BUTTON) {
+                                Button(
+                                    modifier = Modifier.weight(weight = 1f, fill = false)
+                                        .fillMaxHeight(),
+                                    elevation = null,
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        contentColor = colorResource(R.color.alwaysWhite),
+                                        containerColor = colorResource(R.color.olvid_gradient_light),
+                                    ),
+                                    onClick = action.onClick,
+                                    enabled = action.enabled
+                                ) {
+                                    action.icon?.let {
+                                        Icon(
+                                            modifier = Modifier.size(20.dp),
+                                            painter = painterResource(id = it),
+                                            contentDescription = ""
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
+                                    Text(
+                                        text = action.label,
+                                        textAlign = if (action.icon == null) TextAlign.Center else TextAlign.Start
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
                                 }
-                                Text(
-                                    text = action.label,
-                                    textAlign = if (action.icon == null) TextAlign.Center else TextAlign.Start
-                                )
-                            }
-                        } else {
-                            OutlinedButton(
-                                modifier = Modifier.weight(weight = 1f, fill = false).fillMaxHeight(),
-                                elevation = null,
-                                onClick = action.onClick,
-                                enabled = action.enabled,
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = colorResource(id = R.color.blueOrWhite),)
-                            ) {
-                                action.icon?.let {
-                                    Icon(
-                                        modifier = Modifier.size(20.dp),
-                                        painter = painterResource(id = it),
-                                        contentDescription = ""
+                            } else {
+                                OutlinedButton(
+                                    modifier = Modifier.weight(weight = 1f, fill = false)
+                                        .fillMaxHeight(),
+                                    elevation = null,
+                                    shape = RoundedCornerShape(6.dp),
+                                    border = BorderStroke(
+                                        1.dp,
+                                        colorResource(R.color.olvid_gradient_light)
+                                    ),
+                                    onClick = action.onClick,
+                                    enabled = action.enabled,
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = colorResource(id = R.color.blueOrWhite),
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                ) {
+                                    action.icon?.let {
+                                        Icon(
+                                            modifier = Modifier.size(20.dp),
+                                            painter = painterResource(id = it),
+                                            contentDescription = ""
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
+                                    Text(
+                                        text = action.label,
+                                        textAlign = if (action.icon == null) TextAlign.Center else TextAlign.Start
+                                    )
                                 }
-                                Text(
-                                    text = action.label,
-                                    textAlign = if (action.icon == null) TextAlign.Center else TextAlign.Start
-                                )
                             }
                         }
                     }
                 }
             }
+            contentAfter?.invoke(this)
         }
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Start + WindowInsetsSides.End))
                 .align(Alignment.TopCenter)
         ) {
             onBack?.let {
@@ -218,7 +252,7 @@ fun OnboardingScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_arrow_back),
                         tint = colorResource(id = R.color.almostBlack),
-                        contentDescription = "back"
+                        contentDescription = stringResource(R.string.content_description_back_button)
                     )
                 }
             }
@@ -227,20 +261,30 @@ fun OnboardingScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_close),
                     tint = colorResource(id = R.color.almostBlack),
-                    contentDescription = "close"
+                    contentDescription = stringResource(R.string.content_description_close_button)
                 )
             }
         }
 
         footer?.let {
-            Row(
+            val density = LocalDensity.current
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .onSizeChanged {
+                        footerHeight = with(density) {
+                            it.height.toDp()
+                        }
+                    }
+                    .background(colorResource(R.color.whiteOverlay))
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Start + WindowInsetsSides.End))
                     .align(Alignment.BottomCenter),
-                horizontalArrangement = Arrangement.Center
+                contentAlignment = Alignment.Center,
             ) {
                 it.invoke()
             }
+        } ?: run {
+            footerHeight = 0.dp
         }
     }
 }
@@ -341,6 +385,9 @@ private fun OnboardingButton(
         modifier = modifier.widthIn(max = 400.dp),
         border = BorderStroke(1.dp, Color(0x6E111111)),
         shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = colorResource(id = R.color.almostBlack),
+        ),
         contentPadding = PaddingValues(
             start = 16.dp,
             top = if (description == null) 24.dp else 16.dp,
@@ -354,7 +401,6 @@ private fun OnboardingButton(
         ) {
             Text(
                 text = text,
-                color = colorResource(id = R.color.almostBlack),
                 style = OlvidTypography.body1,
             )
             description?.let {
@@ -367,7 +413,7 @@ private fun OnboardingButton(
             }
         }
         Icon(
-            painter = painterResource(id = R.drawable.ic_chevron_right),
+            painter = painterResource(id = R.drawable.pref_widget_chevron_right),
             tint = colorResource(id = R.color.almostBlack),
             contentDescription = ""
         )
@@ -529,7 +575,10 @@ fun OnboardingPreview2() {
                 )
             ),
             onBack = {},
-            onClose = {}
+            onClose = {},
+            footer = {
+
+            }
         )
     }
 }

@@ -20,13 +20,7 @@ package io.olvid.messenger.settings
 
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup.MarginLayoutParams
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsCompat.Type
-import androidx.core.view.updateLayoutParams
-import androidx.core.view.updateMargins
-import androidx.core.view.updatePadding
+import androidx.core.content.ContextCompat
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.SummaryProvider
@@ -103,6 +97,6 @@ class WebClientPreferenceFragment : PreferenceFragmentCompat() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.setBackgroundColor(resources.getColor(R.color.dialogBackground))
+        view.setBackgroundColor(ContextCompat.getColor(view.context, R.color.almostWhite))
     }
 }

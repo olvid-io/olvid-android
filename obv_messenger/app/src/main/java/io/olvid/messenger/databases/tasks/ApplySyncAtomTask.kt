@@ -70,6 +70,7 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                     }
                     ObvSyncAtom.TYPE_OWN_PROFILE_NICKNAME_CHANGE -> {
                         db.ownedIdentityDao().updateCustomDisplayName(bytesOwnedIdentity, obvSyncAtom.stringValue)
+                        AppSingleton.getEngine().deviceBackupNeeded()
                     }
                     ObvSyncAtom.TYPE_CONTACT_CUSTOM_HUE_CHANGE -> {
                         db.contactDao()[bytesOwnedIdentity, obvSyncAtom.bytesContactIdentity]?.let { contact ->
@@ -87,6 +88,7 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                                     this.prefSendReadReceipt = obvSyncAtom.booleanValue
                                 })
                             }
+                            AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity)
                         }
                     }
                     ObvSyncAtom.TYPE_GROUP_V1_SEND_READ_RECEIPT_CHANGE -> {
@@ -100,6 +102,7 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                                     this.prefSendReadReceipt = obvSyncAtom.booleanValue
                                 })
                             }
+                            AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity)
                         }
                     }
                     ObvSyncAtom.TYPE_GROUP_V2_SEND_READ_RECEIPT_CHANGE -> {
@@ -113,6 +116,7 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                                     this.prefSendReadReceipt = obvSyncAtom.booleanValue
                                 })
                             }
+                            AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity)
                         }
                     }
                     ObvSyncAtom.TYPE_PINNED_DISCUSSIONS_CHANGE -> {
@@ -160,12 +164,15 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                         pinnedDiscussionsMap.values.forEach {
                             db.discussionDao().updatePinned(it.id, 0)
                         }
+                        AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity)
                     }
                     ObvSyncAtom.TYPE_SETTING_DEFAULT_SEND_READ_RECEIPTS -> {
                         SettingsActivity.defaultSendReadReceipt = obvSyncAtom.booleanValue
+                        AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity)
                     }
                     ObvSyncAtom.TYPE_SETTING_AUTO_JOIN_GROUPS -> {
                         SettingsActivity.autoJoinGroups = SettingsActivity.getAutoJoinGroupsFromString(obvSyncAtom.stringValue)
+                        AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity)
                     }
                     ObvSyncAtom.TYPE_BOOKMARKED_MESSAGE_CHANGE -> {
                         obvSyncAtom.messageIdentifier.discussionIdentifier?.let { discussionIdentifier ->
@@ -184,7 +191,7 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                             discussion?.let {
                                 val message = db.messageDao().getBySenderSequenceNumber(obvSyncAtom.messageIdentifier.senderSequenceNumber, obvSyncAtom.messageIdentifier.senderThreadIdentifier, obvSyncAtom.messageIdentifier.senderIdentifier, discussion.id)
                                 message?.let {
-                                    db.messageDao().updateBookmarked(message.id, obvSyncAtom.booleanValue)
+                                    db.messageDao().updateBookmarked(obvSyncAtom.booleanValue, message.id)
                                 }
                             }
                         }
@@ -219,7 +226,8 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                                 // never archive a pre-discussion
                                 if (it.status != Discussion.STATUS_PRE_DISCUSSION) {
                                     db.discussionDao()
-                                        .updateArchived(it.id, obvSyncAtom.booleanValue)
+                                        .updateArchived(obvSyncAtom.booleanValue, it.id)
+                                    AppSingleton.getEngine().profileBackupNeeded(discussion.bytesOwnedIdentity)
                                 }
                             }
                         }
@@ -281,6 +289,8 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                                             }
                                         })
                                 }
+
+                                AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity)
                             }
                         }
                     }

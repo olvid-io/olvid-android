@@ -205,6 +205,7 @@ class EngineNotificationProcessorForGroupsV2 internal constructor(engine: Engine
                             )?.let { message ->
                                 message.id = db.messageDao().insert(message)
                                 db.discussionCustomizationDao().update(discussionCustomization)
+                                AppSingleton.getEngine().profileBackupNeeded(discussion.bytesOwnedIdentity)
                             }
                         }
                     }

@@ -25,6 +25,7 @@ import java.util.Map;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPublicKey;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
@@ -105,11 +106,18 @@ public class ServerQuery {
         DEVICE_MANAGEMENT_SET_UNEXPIRING_DEVICE_QUERY_ID(14),
         REGISTER_API_KEY_QUERY_ID(15),
         UPLOAD_PRE_KEY_QUERY_ID(16),
+
         TRANSFER_SOURCE_QUERY_ID(1000),
         TRANSFER_TARGET_QUERY_ID(1001),
         TRANSFER_RELAY_QUERY_ID(1002),
         TRANSFER_WAIT_QUERY_ID(1003),
-        TRANSFER_CLOSE_QUERY_ID(1004);
+        TRANSFER_CLOSE_QUERY_ID(1004),
+
+        BACKUPS_V2_CREATE_BACKUP_QUERY_ID(2000),
+        BACKUPS_V2_UPLOAD_BACKUP_QUERY_ID(2001),
+        BACKUPS_V2_DELETE_BACKUP_QUERY_ID(2002),
+        BACKUPS_V2_LIST_BACKUPS_QUERY_ID(2003),
+        BACKUPS_V2_DOWNLOAD_PROFILE_PICTURE_QUERY_ID(2004);
 
         private static final Map<Integer, TypeId> valueMap = new HashMap<>();
         static {
@@ -185,6 +193,7 @@ public class ServerQuery {
                     return new RegisterApiKeyQuery(server, encodedParts);
                 case UPLOAD_PRE_KEY_QUERY_ID:
                     return new UploadPreKeyQuery(server, encodedParts);
+
                 case TRANSFER_SOURCE_QUERY_ID:
                     return new TransferSourceQuery(encodedParts);
                 case TRANSFER_TARGET_QUERY_ID:
@@ -195,6 +204,13 @@ public class ServerQuery {
                     return new TransferWaitQuery(encodedParts);
                 case TRANSFER_CLOSE_QUERY_ID:
                     return new TransferCloseQuery(encodedParts);
+
+                // backups v2 tasks can never be encoded (they lack an ownedIdentity)
+                case BACKUPS_V2_LIST_BACKUPS_QUERY_ID:
+                case BACKUPS_V2_CREATE_BACKUP_QUERY_ID:
+                case BACKUPS_V2_UPLOAD_BACKUP_QUERY_ID:
+                case BACKUPS_V2_DELETE_BACKUP_QUERY_ID:
+                case BACKUPS_V2_DOWNLOAD_PROFILE_PICTURE_QUERY_ID:
                 default:
                     throw new DecodingException();
             }
@@ -1017,6 +1033,8 @@ public class ServerQuery {
         }
     }
 
+    // region transfers
+
     public static class TransferSourceQuery extends Type {
         public TransferSourceQuery() {
         }
@@ -1199,4 +1217,180 @@ public class ServerQuery {
         boolean isWebSocket() {
             return true;
         }
-    }}
+    }
+
+    // endregion
+
+    // region backups v2
+
+    public static class BackupsV2CreateBackupQuery extends Type {
+        public final String server;
+        public final UID backupUid;
+        public final ServerAuthenticationPublicKey serverAuthenticationPublicKey;
+
+        public BackupsV2CreateBackupQuery(String server, UID backupUid, ServerAuthenticationPublicKey serverAuthenticationPublicKey) {
+            this.server = server;
+            this.backupUid = backupUid;
+            this.serverAuthenticationPublicKey = serverAuthenticationPublicKey;
+        }
+
+        @Override
+        public TypeId getId() {
+            return TypeId.BACKUPS_V2_CREATE_BACKUP_QUERY_ID;
+        }
+
+        @Override
+        String getServer() {
+            return server;
+        }
+
+        @Override
+        Encoded[] getEncodedParts() {
+            throw new RuntimeException("BackupsV2 server queries cannot be encoded.");
+        }
+
+        @Override
+        boolean isWebSocket() {
+            return false;
+        }
+    }
+
+    public static class BackupsV2UploadBackupQuery extends Type {
+        public final String server;
+        public final UID backupUid;
+        public final UID threadId;
+        public final long version;
+        public final EncryptedBytes encryptedBackup;
+        public final byte[] signature;
+
+        public BackupsV2UploadBackupQuery(String server, UID backupUid, UID threadId, long version, EncryptedBytes encryptedBackup, byte[] signature) {
+            this.server = server;
+            this.backupUid = backupUid;
+            this.threadId = threadId;
+            this.version = version;
+            this.encryptedBackup = encryptedBackup;
+            this.signature = signature;
+        }
+
+        @Override
+        public TypeId getId() {
+            return TypeId.BACKUPS_V2_UPLOAD_BACKUP_QUERY_ID;
+        }
+
+        @Override
+        String getServer() {
+            return server;
+        }
+
+        @Override
+        Encoded[] getEncodedParts() {
+            throw new RuntimeException("BackupsV2 server queries cannot be encoded.");
+        }
+
+        @Override
+        boolean isWebSocket() {
+            return false;
+        }
+    }
+
+    public static class BackupsV2DeleteBackupQuery extends Type {
+        public final String server;
+        public final UID backupUid;
+        public final UID threadId;
+        public final long version;
+        public final byte[] signature;
+
+        public BackupsV2DeleteBackupQuery(String server, UID backupUid, UID threadId, long version, byte[] signature) {
+            this.server = server;
+            this.backupUid = backupUid;
+            this.threadId = threadId;
+            this.version = version;
+            this.signature = signature;
+        }
+
+        @Override
+        public TypeId getId() {
+            return TypeId.BACKUPS_V2_DELETE_BACKUP_QUERY_ID;
+        }
+
+        @Override
+        String getServer() {
+            return server;
+        }
+
+        @Override
+        Encoded[] getEncodedParts() {
+            throw new RuntimeException("BackupsV2 server queries cannot be encoded.");
+        }
+
+        @Override
+        boolean isWebSocket() {
+            return false;
+        }
+    }
+
+    public static class BackupsV2ListBackupsQuery extends Type {
+        public final String server;
+        public final UID backupUid;
+
+        public BackupsV2ListBackupsQuery(String server, UID backupUid) {
+            this.server = server;
+            this.backupUid = backupUid;
+        }
+
+        @Override
+        public TypeId getId() {
+            return TypeId.BACKUPS_V2_LIST_BACKUPS_QUERY_ID;
+        }
+
+        @Override
+        String getServer() {
+            return server;
+        }
+
+        @Override
+        Encoded[] getEncodedParts() {
+            throw new RuntimeException("BackupsV2 server queries cannot be encoded.");
+        }
+
+        @Override
+        boolean isWebSocket() {
+            return false;
+        }
+    }
+
+    public static class BackupsV2DownloadProfilePictureQuery extends Type {
+        public final Identity identity;
+        public final UID photoLabel;
+        public final AuthEncKey photoKey;
+
+        public BackupsV2DownloadProfilePictureQuery(Identity identity, UID photoLabel, AuthEncKey photoKey) {
+            this.identity = identity;
+            this.photoLabel = photoLabel;
+            this.photoKey = photoKey;
+        }
+
+        @Override
+        public TypeId getId() {
+            return TypeId.BACKUPS_V2_DOWNLOAD_PROFILE_PICTURE_QUERY_ID;
+        }
+
+        @Override
+        String getServer() {
+            return identity.getServer();
+        }
+
+        @Override
+        Encoded[] getEncodedParts() {
+            throw new RuntimeException("BackupsV2 server queries cannot be encoded.");
+        }
+
+        @Override
+        boolean isWebSocket() {
+            return false;
+        }
+    }
+
+    // endregion
+
+}

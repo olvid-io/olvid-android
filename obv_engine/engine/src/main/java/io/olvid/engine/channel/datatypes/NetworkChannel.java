@@ -114,7 +114,7 @@ public abstract class NetworkChannel extends Channel {
                 });
 
                 ////////
-                // Add a padding to message to obfuscate content length. Commented out for now
+                // Add a padding to message to obfuscate content length
                 byte[] paddedPlaintext = new byte[((plaintextContent.getBytes().length - 1) | 511) + 1];
                 System.arraycopy(plaintextContent.getBytes(), 0, paddedPlaintext, 0, plaintextContent.getBytes().length);
 
@@ -151,7 +151,7 @@ public abstract class NetworkChannel extends Channel {
                 });
 
                 ////////
-                // Add a padding to message to obfuscate content length. Commented out for now
+                // Add a padding to message to obfuscate content length
                 byte[] paddedPlaintext = new byte[((plaintextContent.getBytes().length - 1) | 511) + 1];
                 System.arraycopy(plaintextContent.getBytes(), 0, paddedPlaintext, 0, plaintextContent.getBytes().length);
 

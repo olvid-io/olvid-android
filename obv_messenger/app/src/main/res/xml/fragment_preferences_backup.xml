@@ -11,10 +11,8 @@
             android:order="1"
             />
 
-        <Preference
+        <io.olvid.messenger.customClasses.ComposeViewPreference
             android:key="pref_key_generate_new_backup_key"
-            android:title="@string/pref_generate_new_backup_key_title"
-            android:icon="@drawable/ic_pref_generate_new_backup_key"
             android:order="10"
             />
         <Preference

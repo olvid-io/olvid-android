@@ -21,6 +21,7 @@ package io.olvid.engine.engine;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
@@ -61,7 +62,7 @@ public class NotificationListenerGroups implements NotificationListener {
     }
 
     @Override
-    public void callback(String notificationName, HashMap<String, Object> userInfo) {
+    public void callback(String notificationName, Map<String, Object> userInfo) {
         switch (notificationName) {
             case IdentityNotifications.NOTIFICATION_GROUP_CREATED:
                 try (EngineSession engineSession = engine.getSession()) {

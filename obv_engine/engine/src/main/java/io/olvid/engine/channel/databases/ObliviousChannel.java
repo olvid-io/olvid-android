@@ -294,27 +294,6 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         Provision.deleteAllEmpty(channelManagerSession);
     }
 
-    private RatchetingOutput selfRatchet() {
-        RatchetingOutput ratchetingOutput = ObliviousChannel.computeSelfRatchet(seedForNextSendKey, obliviousEngineVersion);
-        if (ratchetingOutput == null) {
-            return null;
-        }
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
-                SEED_FOR_NEXT_SEND_KEY + " = ? " +
-                " WHERE " + CURRENT_DEVICE_UID + " = ? AND " + REMOTE_DEVICE_UID + " = ? AND " + REMOTE_IDENTITY + " = ?;")) {
-            statement.setBytes(1, ratchetingOutput.getRatchetedSeed().getBytes());
-            statement.setBytes(2, currentDeviceUid.getBytes());
-            statement.setBytes(3, remoteDeviceUid.getBytes());
-            statement.setBytes(4, remoteIdentity.getBytes());
-            statement.executeUpdate();
-            this.seedForNextSendKey = ratchetingOutput.getRatchetedSeed();
-        } catch (SQLException e) {
-            Logger.x(e);
-            return null;
-        }
-        return ratchetingOutput;
-    }
-
     public static ObliviousChannel create(ChannelManagerSession channelManagerSession,
                                    UID currentDeviceUid,
                                    UID remoteDeviceUid,
@@ -853,7 +832,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
     @Override
     public MessageToSend.Header wrapMessageKey(AuthEncKey messageKey, PRNGService prng, boolean partOfFullRatchetProtocol) {
-        RatchetingOutput ratchetingOutput = selfRatchet();
+        RatchetingOutput ratchetingOutput = ObliviousChannel.computeSelfRatchet(seedForNextSendKey, obliviousEngineVersion);
         if (ratchetingOutput == null) {
             return null;
         }
@@ -872,15 +851,18 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
         MessageToSend.Header header = new MessageToSend.Header(remoteDeviceUid, remoteIdentity, new EncryptedBytes(headerBytes));
         try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+                SEED_FOR_NEXT_SEND_KEY + " = ?, " +
                 NUMBER_OF_ENCRYPTED_MESSAGES + " = ?, " +
                 NUMBER_OF_ENCRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE + " = ? " +
                 " WHERE " + CURRENT_DEVICE_UID + " = ? AND " + REMOTE_DEVICE_UID + " = ? AND " + REMOTE_IDENTITY + " = ?;")) {
-            statement.setInt(1, numberOfEncryptedMessages + 1);
-            statement.setInt(2, numberOfEncryptedMessagesSinceLastFullRatchetSentMessage + 1);
-            statement.setBytes(3, currentDeviceUid.getBytes());
-            statement.setBytes(4, remoteDeviceUid.getBytes());
-            statement.setBytes(5, remoteIdentity.getBytes());
+            statement.setBytes(1, ratchetingOutput.getRatchetedSeed().getBytes());
+            statement.setInt(2, numberOfEncryptedMessages + 1);
+            statement.setInt(3, numberOfEncryptedMessagesSinceLastFullRatchetSentMessage + 1);
+            statement.setBytes(4, currentDeviceUid.getBytes());
+            statement.setBytes(5, remoteDeviceUid.getBytes());
+            statement.setBytes(6, remoteIdentity.getBytes());
             statement.executeUpdate();
+            this.seedForNextSendKey = ratchetingOutput.getRatchetedSeed();
             this.numberOfEncryptedMessages++;
             this.numberOfEncryptedMessagesSinceLastFullRatchetSentMessage++;
             if (!partOfFullRatchetProtocol) {

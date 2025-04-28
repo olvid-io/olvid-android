@@ -1,3 +1,23 @@
+# Build 266 (3.7)
+2025-04-28
+
+- Fix to hide archived discussions
+
+# ~~Build 265 (3.7)~~
+2025-04-14
+
+- Fix several bugs
+
+# ~~Build 264 (3.7)~~
+2025-03-30
+
+- Complete redesign of the backup system:
+  - no more relying on Google Drive or WebDAV for backups storage,
+  - make saving your backup key to a password manager easier,
+  - possibility to restore each profile of a same device independently. 
+- Better access to bookmarked messages.
+- Several bug fixes and UX improvements.
+
 # Build 263 (3.6)
 2025-02-10
 

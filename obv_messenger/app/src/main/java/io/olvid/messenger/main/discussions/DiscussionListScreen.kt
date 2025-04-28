@@ -21,6 +21,7 @@ package io.olvid.messenger.main.discussions
 
 import android.content.Intent
 import android.content.res.Configuration
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -29,6 +30,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -83,6 +85,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
@@ -95,17 +98,22 @@ import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.message.OutboundMessageStatus
 import io.olvid.messenger.discussion.message.SwipeForActionBox
+import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
 import io.olvid.messenger.main.archived.ArchiveSettingsContent
 import io.olvid.messenger.main.archived.ArchivedDiscussionsActivity
 import io.olvid.messenger.main.archived.SwipeActionBackground
+import io.olvid.messenger.main.bookmarks.BookmarkedMessagesActivity
+import io.olvid.messenger.main.bookmarks.BookmarksViewModel
 import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.main.invitations.getAnnotatedDate
 import io.olvid.messenger.main.invitations.getAnnotatedTitle
 import io.olvid.messenger.main.search.GlobalSearchScreen
 import io.olvid.messenger.main.search.GlobalSearchViewModel
+import io.olvid.messenger.main.tips.TipItem
+import io.olvid.messenger.main.tips.TipsViewModel
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
@@ -118,6 +126,8 @@ fun DiscussionListScreen(
     discussionListViewModel: DiscussionListViewModel,
     invitationListViewModel: InvitationListViewModel,
     linkPreviewViewModel: LinkPreviewViewModel,
+    bookmarksViewModel: BookmarksViewModel,
+    tipsViewModel: TipsViewModel,
     refreshing: Boolean,
     onRefresh: () -> Unit,
     onClick: (discussion: Discussion) -> Unit,
@@ -130,6 +140,7 @@ fun DiscussionListScreen(
     val discussionsAndLastMessages by discussionListViewModel.discussions.observeAsState()
     val invitations by invitationListViewModel.invitations.observeAsState()
     val archivedDiscussions by discussionListViewModel.archivedDiscussions.observeAsState()
+    val bookmarkedMessages by bookmarksViewModel.bookmarkedMessages.observeAsState()
     val refreshState = rememberPullRefreshState(refreshing, onRefresh)
     val hapticFeedback = LocalHapticFeedback.current
 
@@ -173,7 +184,10 @@ fun DiscussionListScreen(
                         .background(color = colorResource(id = R.color.almostWhite))
                         .pullRefresh(refreshState)
                 ) {
-                    val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = 1)
+                    val lazyListState = rememberLazyListState(
+                        initialFirstVisibleItemIndex = 1,
+                        initialFirstVisibleItemScrollOffset = 1,
+                    )
 
                     val reorderableState = rememberReorderableLazyListState(
                         lazyListState = lazyListState
@@ -206,12 +220,12 @@ fun DiscussionListScreen(
                         ) {
                             ArchiveSettingsContent(onOptionChosen = {
                                 PreferenceManager.getDefaultSharedPreferences(context)
-                                    .edit()
-                                    .putBoolean(
-                                        SettingsActivity.USER_DIALOG_HIDE_UNARCHIVE_SETTINGS,
-                                        true
-                                    )
-                                    .apply()
+                                    .edit {
+                                        putBoolean(
+                                            SettingsActivity.USER_DIALOG_HIDE_UNARCHIVE_SETTINGS,
+                                            true
+                                        )
+                                    }
                                 showArchiveSettings = false
                             })
                         }
@@ -220,17 +234,20 @@ fun DiscussionListScreen(
                     LaunchedEffect(discussionListViewModel.cancelableArchivedDiscussions) {
                         if (discussionListViewModel.cancelableArchivedDiscussions.isNotEmpty()) {
                             if (!showArchiveSettings) {
-                                showArchiveSettings = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-                                    SettingsActivity.USER_DIALOG_HIDE_UNARCHIVE_SETTINGS,
-                                    false
-                                ).not()
+                                showArchiveSettings =
+                                    PreferenceManager.getDefaultSharedPreferences(context)
+                                        .getBoolean(
+                                            SettingsActivity.USER_DIALOG_HIDE_UNARCHIVE_SETTINGS,
+                                            false
+                                        ).not()
                             }
 
                             scope.launch {
                                 snackbarHostState.currentSnackbarData?.apply {
                                     dismiss()
                                 }
-                                val count = discussionListViewModel.cancelableArchivedDiscussions.size
+                                val count =
+                                    discussionListViewModel.cancelableArchivedDiscussions.size
                                 val result = snackbarHostState.showSnackbar(
                                     message = context.resources.getQuantityString(
                                         R.plurals.label_discussion_archive_done,
@@ -247,13 +264,15 @@ fun DiscussionListScreen(
                                             archived = false,
                                             cancelable = false
                                         )
-                                        discussionListViewModel.cancelableArchivedDiscussions = emptyList()
+                                        discussionListViewModel.cancelableArchivedDiscussions =
+                                            emptyList()
                                     }
 
                                     Dismissed -> {
                                         // unpin pinned discussion if archiving is not canceled
                                         if (discussionListViewModel.cancelableArchivedDiscussions.size == count) {
-                                            val toUnpin = discussionListViewModel.cancelableArchivedDiscussions
+                                            val toUnpin =
+                                                discussionListViewModel.cancelableArchivedDiscussions
                                             App.runThread {
                                                 toUnpin.forEach { discussion ->
                                                     AppDatabase.getInstance().discussionDao()
@@ -261,7 +280,8 @@ fun DiscussionListScreen(
                                                     PropagatePinnedDiscussionsChangeTask(discussion.bytesOwnedIdentity).run()
                                                 }
                                             }
-                                            discussionListViewModel.cancelableArchivedDiscussions = emptyList()
+                                            discussionListViewModel.cancelableArchivedDiscussions =
+                                                emptyList()
                                         }
                                     }
                                 }
@@ -271,24 +291,23 @@ fun DiscussionListScreen(
 
                     discussionListViewModel.reorderList?.partition { it.discussion.pinned != 0 }
                         ?.toList()?.let { grouped ->
-                            if (grouped.all { it.isEmpty() }
-                                    .not() || archivedDiscussions.isNullOrEmpty().not()) {
+                            if (grouped.all { it.isEmpty() }.not()
+                                || archivedDiscussions.isNullOrEmpty().not()
+                                || bookmarkedMessages.isNullOrEmpty().not()
+                            ) {
                                 LazyColumn(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .navigationBarsPadding(),
                                     state = lazyListState,
-                                    contentPadding = PaddingValues(bottom = 32.dp),
+                                    contentPadding = PaddingValues(bottom = 64.dp),
                                 ) {
-                                    if (archivedDiscussions.isNullOrEmpty()
-                                            .not() && discussionListViewModel.selection.isEmpty()
-                                    ) {
-                                        item(key = -3L) {
-                                            AnimatedVisibility(
-                                                discussionListViewModel.selection.isEmpty(),
-                                                enter = slideInVertically(),
-                                                exit = slideOutVertically()
-                                            ) {
+
+                                    item(key = -5L) {
+                                        if (archivedDiscussions.isNullOrEmpty()
+                                                .not() && discussionListViewModel.selection.isEmpty()
+                                        ) {
+                                            Column {
                                                 Row(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
@@ -330,15 +349,12 @@ fun DiscussionListScreen(
                                                         style = OlvidTypography.h3,
                                                     )
                                                     val unreadCount =
-                                                        archivedDiscussions?.count { it.unreadCount > 0 || it.discussion.unread}
+                                                        archivedDiscussions?.count { it.unreadCount > 0 || it.discussion.unread }
                                                             ?: 0
                                                     AnimatedVisibility(visible = unreadCount > 0) {
                                                         Text(
                                                             modifier = Modifier
-                                                                .padding(
-                                                                    horizontal = 7.dp,
-                                                                    vertical = 2.dp
-                                                                ),
+                                                                .padding(horizontal = 6.dp),
                                                             text = "$unreadCount",
                                                             style = OlvidTypography.body1.copy(
                                                                 fontWeight = FontWeight.Medium
@@ -347,15 +363,139 @@ fun DiscussionListScreen(
                                                         )
                                                     }
                                                 }
+                                                Spacer(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(
+                                                            start = 84.dp,
+                                                            end = 12.dp
+                                                        )
+                                                        .requiredHeight(1.dp)
+                                                        .background(
+                                                            color = colorResource(id = R.color.lightGrey)
+                                                        )
+                                                )
                                             }
+                                        } else {
+                                            Box(
+                                                modifier = Modifier
+                                                    .requiredHeight(1.dp)
+                                                    .fillMaxWidth()
+                                            ) {}
                                         }
                                     }
-                                    item(key = -2L) {
+
+                                    item(key = -4L) {
                                         Box(
                                             modifier = Modifier
                                                 .requiredHeight(1.dp)
                                                 .fillMaxWidth()
                                         ) {}
+                                    }
+
+                                    tipsViewModel.tipToShow?.let { tip ->
+                                        item(key = -3L) {
+                                            val activity = LocalActivity.current
+                                            Column {
+                                                TipItem(
+                                                    refreshTipState = {
+                                                        (activity as? MainActivity)?.let {
+                                                            App.runThread { tipsViewModel.refreshTipToShow(it) }
+                                                        }
+                                                    },
+                                                    tipToShow = tip,
+                                                )
+                                                Spacer(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(
+                                                            start = 84.dp,
+                                                            end = 12.dp
+                                                        )
+                                                        .requiredHeight(1.dp)
+                                                        .background(
+                                                            color = colorResource(id = R.color.lightGrey)
+                                                        )
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    if (bookmarkedMessages.isNullOrEmpty()
+                                            .not() && discussionListViewModel.selection.isEmpty()
+                                    ) {
+                                        item(key = -2L) {
+                                            AnimatedVisibility(
+                                                discussionListViewModel.selection.isEmpty(),
+                                                enter = slideInVertically(),
+                                                exit = slideOutVertically()
+                                            ) {
+                                                Column {
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .clickable {
+                                                                context.startActivity(
+                                                                    Intent(
+                                                                        context,
+                                                                        BookmarkedMessagesActivity::class.java
+                                                                    )
+                                                                )
+                                                            }
+                                                            .background(
+                                                                colorResource(
+                                                                    id = R.color.almostWhite
+                                                                )
+                                                            )
+                                                            .padding(
+                                                                top = 16.dp,
+                                                                bottom = 16.dp,
+                                                                start = 16.dp,
+                                                                end = 4.dp
+                                                            )
+                                                            .cutoutHorizontalPadding(),
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Icon(
+                                                            modifier = Modifier.padding(
+                                                                start = 16.dp,
+                                                                end = 32.dp,
+                                                            ),
+                                                            painter = painterResource(id = R.drawable.ic_star),
+                                                            tint = colorResource(R.color.almostBlack),
+                                                            contentDescription = null
+                                                        )
+                                                        Text(
+                                                            modifier = Modifier.weight(1f),
+                                                            text = stringResource(R.string.activity_title_bookmarks),
+                                                            color = colorResource(id = R.color.almostBlack),
+                                                            style = OlvidTypography.h3,
+                                                        )
+                                                        Text(
+                                                            modifier = Modifier
+                                                                .padding(horizontal = 6.dp),
+                                                            text = "${bookmarkedMessages?.size ?: ""}",
+                                                            style = OlvidTypography.body1.copy(
+                                                                fontWeight = FontWeight.Medium
+                                                            ),
+                                                            color = colorResource(id = R.color.olvid_gradient_light)
+                                                        )
+                                                    }
+                                                    Spacer(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(
+                                                                start = 84.dp,
+                                                                end = 12.dp
+                                                            )
+                                                            .requiredHeight(1.dp)
+                                                            .background(
+                                                                color = colorResource(id = R.color.lightGrey)
+                                                            )
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
 
                                     grouped.forEachIndexed { groupIndex, list ->
@@ -374,7 +514,8 @@ fun DiscussionListScreen(
                                             items = list,
                                             key = { _, item -> item.discussion.id }) { index, discussionAndLastMessage ->
                                             with(discussionAndLastMessage) {
-                                                val unread = unreadCount > 0 || discussion.unread
+                                                val unread =
+                                                    unreadCount > 0 || discussion.unread
                                                 ReorderableItem(
                                                     enabled = reorderable,
                                                     state = reorderableState,
@@ -383,8 +524,8 @@ fun DiscussionListScreen(
                                                     SwipeForActionBox(
                                                         modifier = Modifier.fillMaxWidth(),
                                                         maxOffset = 96.dp,
-                                                        enabledFromStartToEnd = discussionListViewModel.selection.isEmpty(),
-                                                        enabledFromEndToStart = discussionListViewModel.selection.isEmpty(),
+                                                        enabledFromStartToEnd = discussionListViewModel.selection.isEmpty() && discussion.isPreDiscussion.not(),
+                                                        enabledFromEndToStart = discussionListViewModel.selection.isEmpty() && discussion.isPreDiscussion.not(),
                                                         callbackStartToEnd = {
                                                             if (unread) {
                                                                 onMarkAsRead.invoke(discussion.id)
@@ -393,7 +534,11 @@ fun DiscussionListScreen(
                                                             }
                                                         },
                                                         callbackEndToStart = {
-                                                            discussionListViewModel.archiveDiscussion(discussion, archived = true, cancelable = true)
+                                                            discussionListViewModel.archiveDiscussion(
+                                                                discussion,
+                                                                archived = true,
+                                                                cancelable = true
+                                                            )
                                                         },
                                                         backgroundContentFromStartToEnd = { progress ->
                                                             SwipeActionBackground(
@@ -430,16 +575,16 @@ fun DiscussionListScreen(
                                                                 .background(
                                                                     shape = RoundedCornerShape(8.dp),
                                                                     color =
-                                                                    if (discussionListViewModel.isSelected(
-                                                                            discussion
-                                                                        )
-                                                                    ) {
-                                                                        colorResource(id = R.color.greySubtleOverlay)
-                                                                    } else {
-                                                                        colorResource(
-                                                                            id = R.color.almostWhite
-                                                                        )
-                                                                    }
+                                                                        if (discussionListViewModel.isSelected(
+                                                                                discussion
+                                                                            )
+                                                                        ) {
+                                                                            colorResource(id = R.color.greySubtleOverlay)
+                                                                        } else {
+                                                                            colorResource(
+                                                                                id = R.color.almostWhite
+                                                                            )
+                                                                        }
                                                                 )
                                                                 .cutoutHorizontalPadding(),
                                                             title = invitation?.getAnnotatedTitle(
@@ -519,21 +664,19 @@ fun DiscussionListScreen(
                                                                 }
                                                             }
                                                         )
-                                                        if (index < list.size - 1) {
-                                                            Spacer(
-                                                                modifier = Modifier
-                                                                    .fillMaxWidth()
-                                                                    .padding(
-                                                                        start = 84.dp,
-                                                                        end = 12.dp
-                                                                    )
-                                                                    .requiredHeight(1.dp)
-                                                                    .align(Alignment.BottomStart)
-                                                                    .background(
-                                                                        color = colorResource(id = R.color.lightGrey)
-                                                                    )
-                                                            )
-                                                        }
+                                                        Spacer(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(
+                                                                    start = 84.dp,
+                                                                    end = 12.dp
+                                                                )
+                                                                .requiredHeight(1.dp)
+                                                                .align(Alignment.BottomStart)
+                                                                .background(
+                                                                    color = colorResource(id = R.color.lightGrey)
+                                                                )
+                                                        )
                                                     }
                                                 }
                                             }
@@ -541,18 +684,37 @@ fun DiscussionListScreen(
                                     }
                                 }
                             } else {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .verticalScroll(rememberScrollState()),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    MainScreenEmptyList(
-                                        icon = R.drawable.tab_discussions,
-                                        iconPadding = 4.dp,
-                                        title = R.string.explanation_empty_discussion_list,
-                                        subtitle = R.string.explanation_empty_discussion_list_sub
-                                    )
+                                Column{
+                                    tipsViewModel.tipToShow?.let { tip ->
+                                        val activity = LocalActivity.current
+                                        Column {
+                                            TipItem(
+                                                refreshTipState = {
+                                                    (activity as? MainActivity)?.let {
+                                                        App.runThread {
+                                                            tipsViewModel.refreshTipToShow(
+                                                                it
+                                                            )
+                                                        }
+                                                    }
+                                                },
+                                                tipToShow = tip,
+                                            )
+                                        }
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .verticalScroll(rememberScrollState()),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        MainScreenEmptyList(
+                                            icon = R.drawable.tab_discussions,
+                                            iconPadding = 4.dp,
+                                            title = R.string.explanation_empty_discussion_list,
+                                            subtitle = R.string.explanation_empty_discussion_list_sub
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -581,8 +743,9 @@ fun PinDivider() {
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = stringResource(id = R.string.label_discussion_list_pin_divider),
-            fontWeight = FontWeight.Medium,
-            style = OlvidTypography.body2,
+            style = OlvidTypography.body2.copy(
+                fontWeight = FontWeight.Medium
+            ),
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.width(8.dp))

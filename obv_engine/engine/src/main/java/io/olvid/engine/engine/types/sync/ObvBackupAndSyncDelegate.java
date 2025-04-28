@@ -19,6 +19,8 @@
 
 package io.olvid.engine.engine.types.sync;
 
+import java.util.Map;
+
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 
@@ -41,15 +43,26 @@ public interface ObvBackupAndSyncDelegate {
     RestoreFinishedCallback restoreSyncSnapshot(ObvSyncSnapshotNode node) throws Exception;
 
     //////
-    // Method used to deserialize a node that was serialized with ObvSyncSnapshotNode.serialize(ObjectMapper jsonObjectMapper)
-    byte[] serialize(ObvSyncSnapshotNode snapshotNode) throws Exception;
+    // Method used to serialize a snapshot node
+    byte[] serialize(SerializationContext serializationContext, ObvSyncSnapshotNode snapshotNode) throws Exception;
     //////
     // Method used to deserialize a node that was serialized with ObvSyncSnapshotNode.serialize(ObjectMapper jsonObjectMapper)
-    ObvSyncSnapshotNode deserialize(byte[] serializedSnapshotNode) throws Exception;
+    ObvSyncSnapshotNode deserialize(SerializationContext serializationContext, byte[] serializedSnapshotNode) throws Exception;
+
+
+    //////
+    // Method used to obtain a device snapshot, containing info about all profiles
+    ObvSyncSnapshotNode getDeviceSnapshot();
+    Map<String, String> getAdditionalProfileInfo(Identity ownedIdentity);
 
 
     interface RestoreFinishedCallback {
         void onRestoreSuccess();
         void onRestoreFailure();
+    }
+
+    enum SerializationContext {
+        DEVICE,
+        PROFILE,
     }
 }

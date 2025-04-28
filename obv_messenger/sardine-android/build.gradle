@@ -4,7 +4,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.8.0'
+        classpath 'com.android.tools.build:gradle:8.9.1'
     }
 }
 
@@ -35,4 +35,9 @@ dependencies {
     }
 
     testImplementation 'junit:junit:4.13.2'
+}
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }

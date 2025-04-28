@@ -20,7 +20,13 @@
 package io.olvid.engine.datatypes;
 
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 import io.olvid.engine.Logger;
+import io.olvid.engine.crypto.Hash;
+import io.olvid.engine.crypto.MAC;
+import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionPrivateKey;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionPublicKey;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPrivateKey;
@@ -33,6 +39,10 @@ public class PrivateIdentity {
     private final ServerAuthenticationPrivateKey serverAuthenticationPrivateKey;
     private final EncryptionPrivateKey encryptionPrivateKey;
     private final MACKey macKey;
+
+    private static final byte[] DETERMINISTIC_SEED_MAC_PAYLOAD = new byte[]{0x55};
+    private static final byte[] BACKUP_SEED_FOR_LEGACY_IDENTITY_MAC_PAYLOAD = new byte[]{(byte) 0xcc};
+    private static final byte[] BACKUP_SEED_FOR_LEGACY_IDENTITY_HASH_PADDING = "backupKey".getBytes(StandardCharsets.UTF_8);
 
     public PrivateIdentity(Identity publicIdentity, ServerAuthenticationPrivateKey serverAuthenticationPrivateKey, EncryptionPrivateKey encryptionPrivateKey, MACKey macKey) {
         this.publicIdentity = publicIdentity;
@@ -78,7 +88,7 @@ public class PrivateIdentity {
         }).getBytes();
     }
 
-    public static PrivateIdentity deserialize(byte[] bytes) {
+    public static PrivateIdentity of(byte[] bytes) {
         try {
             Encoded[] encodedElements = new Encoded(bytes).decodeList();
             return new PrivateIdentity(encodedElements[0].decodeIdentity(),
@@ -89,5 +99,28 @@ public class PrivateIdentity {
             Logger.w("An error occurred while deserializing a PrivateIdentity.");
             return null;
         }
+    }
+
+
+    public Seed getDeterministicSeedForOwnedIdentity(byte[] diversificationTag) throws Exception {
+        MAC mac = Suite.getMAC(macKey);
+        byte[] digest = mac.digest(macKey, DETERMINISTIC_SEED_MAC_PAYLOAD);
+        byte[] hashInput = new byte[digest.length + diversificationTag.length];
+        System.arraycopy(digest, 0, hashInput, 0, digest.length);
+        System.arraycopy(diversificationTag, 0, hashInput, digest.length, diversificationTag.length);
+        Hash sha256 = Suite.getHash(Hash.SHA256);
+        byte[] hash = sha256.digest(hashInput);
+        return new Seed(hash);
+    }
+
+    public BackupSeed getDeterministicBackupSeedForLegacyIdentity() throws Exception {
+        MAC mac = Suite.getMAC(macKey);
+        byte[] digest = mac.digest(macKey, BACKUP_SEED_FOR_LEGACY_IDENTITY_MAC_PAYLOAD);
+        byte[] hashInput = new byte[digest.length + BACKUP_SEED_FOR_LEGACY_IDENTITY_HASH_PADDING.length];
+        System.arraycopy(digest, 0, hashInput, 0, digest.length);
+        System.arraycopy(BACKUP_SEED_FOR_LEGACY_IDENTITY_HASH_PADDING, 0, hashInput, digest.length, BACKUP_SEED_FOR_LEGACY_IDENTITY_HASH_PADDING.length);
+        Hash sha256 = Suite.getHash(Hash.SHA256);
+        byte[] hash = sha256.digest(hashInput);
+        return new BackupSeed(Arrays.copyOfRange(hash, 0, BackupSeed.BACKUP_SEED_LENGTH));
     }
 }

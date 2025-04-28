@@ -37,6 +37,8 @@ import io.olvid.messenger.customClasses.fullTextSearchEscape
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.GlobalSearchTokenizer
 import io.olvid.messenger.settings.SettingsActivity
+import androidx.core.view.size
+import androidx.core.view.get
 
 class DiscussionSearch(
     private val activity: FragmentActivity,
@@ -52,8 +54,8 @@ class DiscussionSearch(
     val viewModel: DiscussionSearchViewModel by activity.viewModels()
 
     override fun onMenuItemActionExpand(searchItem: MenuItem): Boolean {
-        for (i in 0 until menu.size()) {
-            val item = menu.getItem(i)
+        for (i in 0 until menu.size) {
+            val item = menu[i]
             if (item.itemId == R.id.action_call
                 || item.itemId == R.id.action_unmute
             ) {

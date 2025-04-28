@@ -19,6 +19,9 @@
 package io.olvid.messenger.main.discussions
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import androidx.appcompat.app.AlertDialog.Builder
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,9 +35,15 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.R
 import io.olvid.messenger.R.string
 import io.olvid.messenger.UnreadCountsSingleton
+import io.olvid.messenger.customClasses.MuteNotificationDialog
+import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
+import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder
+import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder.Type.DISCUSSION
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.customClasses.formatSingleLineMarkdown
@@ -44,10 +53,14 @@ import io.olvid.messenger.databases.dao.DiscussionDao.DiscussionAndLastMessage
 import io.olvid.messenger.databases.dao.DiscussionDao.SimpleDiscussionAndLastMessage
 import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.databases.entity.Discussion
+import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.PropagateArchivedDiscussionsChangeTask
 import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask
+import io.olvid.messenger.databases.tasks.propagateMuteSettings
+import io.olvid.messenger.notifications.NotificationActionService
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -82,7 +95,10 @@ class DiscussionListViewModel : ViewModel() {
     }
 
     fun refreshSelection() {
-        selection = discussions.value?.filter { _selection.contains(it.discussion.id) }.orEmpty()
+        selection = discussions.value?.filter { _selection.contains(it.discussion.id) }
+            .orEmpty() +
+                archivedDiscussions.value?.filter { _selection.contains(it.discussion.id) }
+                    .orEmpty()
     }
 
 
@@ -173,7 +189,11 @@ class DiscussionListViewModel : ViewModel() {
     }
 
     fun archiveSelectedDiscussions(archived: Boolean) {
-        archiveDiscussion(*selection.map { it.discussion }.toTypedArray(), archived = archived, cancelable = true)
+        archiveDiscussion(
+            *selection.map { it.discussion }.toTypedArray(),
+            archived = archived,
+            cancelable = true
+        )
     }
 
     fun archiveDiscussion(vararg discussion: Discussion, archived: Boolean, cancelable: Boolean) {
@@ -183,7 +203,8 @@ class DiscussionListViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             discussion.asList().apply {
                 forEach {
-                    AppDatabase.getInstance().discussionDao().updateArchived(it.id, archived)
+                    AppDatabase.getInstance().discussionDao().updateArchived(archived, it.id)
+                    AppSingleton.getEngine().profileBackupNeeded(it.bytesOwnedIdentity)
                 }
                 propagateArchivedDiscussions(this, archived)
             }
@@ -194,8 +215,169 @@ class DiscussionListViewModel : ViewModel() {
         AppSingleton.getBytesCurrentIdentity()
             ?.let { PropagateArchivedDiscussionsChangeTask(it, discussions, archived).run() }
     }
-}
 
+
+    fun markAllDiscussionMessagesRead(discussionId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            NotificationActionService.markAllDiscussionMessagesRead(
+                discussionId
+            )
+        }
+    }
+
+    fun markDiscussionAsUnread(discussionId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(
+                discussionId, true
+            )
+        }
+    }
+
+    fun deleteDiscussions(discussions: List<Discussion>, context: Context, onDelete: () -> Unit) {
+        if (discussions.isEmpty()) {
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            // canRemoteDelete if all discussion are locked, have no members, or groupV2 with correct permission
+            // couldOfferToRemoteDelete if at least one discussion has members (only relevant if canRemoteDelete is true)
+            var canRemoteDelete = true
+            var couldOfferToRemoteDelete = false
+            for (discussion in discussions) {
+                if (discussion.isNormalOrReadOnly) {
+                    if (discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                        val group2 = AppDatabase.getInstance()
+                            .group2Dao()[discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier]
+                        if (group2 != null) {
+                            if (AppDatabase.getInstance().group2MemberDao().groupHasMembers(
+                                    discussion.bytesOwnedIdentity,
+                                    discussion.bytesDiscussionIdentifier
+                                )
+                            ) {
+                                couldOfferToRemoteDelete = true
+                                if (!group2.ownPermissionRemoteDeleteAnything) {
+                                    canRemoteDelete = false
+                                    break
+                                }
+                            }
+                        }
+                    } else if (discussion.discussionType == Discussion.TYPE_GROUP) {
+                        if (AppDatabase.getInstance().contactGroupJoinDao().groupHasMembers(
+                                discussion.bytesOwnedIdentity,
+                                discussion.bytesDiscussionIdentifier
+                            )
+                        ) {
+                            canRemoteDelete = false
+                            break
+                        }
+                    } else {
+                        canRemoteDelete = false
+                        break
+                    }
+                }
+            }
+
+            val builder = SecureDeleteEverywhereDialogBuilder(
+                context,
+                DISCUSSION,
+                discussions.size,
+                canRemoteDelete && couldOfferToRemoteDelete,
+                true
+            )
+                .setDeleteCallback { deletionChoice: SecureDeleteEverywhereDialogBuilder.DeletionChoice ->
+                    onDelete()
+                    App.runThread {
+                        discussions.forEach { discussion ->
+                            DeleteMessagesTask(
+                                discussion.id,
+                                deletionChoice,
+                                false
+                            ).run()
+                        }
+                    }
+                }
+            Handler(Looper.getMainLooper()).post { builder.create().show() }
+        }
+    }
+    fun muteSelectedDiscussions(
+        context: Context,
+        discussionsAndLastMessage: List<DiscussionAndLastMessage>,
+        muted: Boolean,
+        onActionDone: () -> Unit = {}
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (muted) {
+                Handler(Looper.getMainLooper()).post {
+                    val muteNotificationDialog = MuteNotificationDialog(
+                        context,
+                        { muteExpirationTimestamp: Long?, _: Boolean, muteExceptMentioned: Boolean ->
+                            onActionDone()
+                            viewModelScope.launch(Dispatchers.IO) {
+                                discussionsAndLastMessage.forEach { selected ->
+                                    AppDatabase.getInstance()
+                                        .discussionCustomizationDao()[selected.discussion.id]?.let {
+                                        AppDatabase.getInstance().discussionCustomizationDao()
+                                            .update(it.apply {
+                                                prefMuteNotifications = true
+                                                prefMuteNotificationsTimestamp =
+                                                    muteExpirationTimestamp
+                                                prefMuteNotificationsExceptMentioned =
+                                                    muteExceptMentioned
+                                            })
+                                    } ifNull {
+                                        AppDatabase.getInstance().discussionCustomizationDao()
+                                            .insert(DiscussionCustomization(selected.discussion.id).apply {
+                                                prefMuteNotifications = true
+                                                prefMuteNotificationsTimestamp =
+                                                    muteExpirationTimestamp
+                                                prefMuteNotificationsExceptMentioned =
+                                                    muteExceptMentioned
+                                            })
+                                    }
+                                    AppSingleton.getEngine().profileBackupNeeded(selected.discussion.bytesOwnedIdentity)
+                                }
+                                discussionsAndLastMessage.map { it.discussion }
+                                    .propagateMuteSettings(
+                                        true,
+                                        muteExpirationTimestamp,
+                                        muteExceptMentioned
+                                    )
+                            }
+                        },
+                        MuteNotificationDialog.MuteType.DISCUSSIONS,
+                        discussionsAndLastMessage.firstOrNull()?.discussionCustomization?.prefMuteNotificationsExceptMentioned != false
+                    )
+                    muteNotificationDialog.show()
+                }
+            } else {
+                Handler(Looper.getMainLooper()).post {
+                    val builder: Builder =
+                        SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                            .setTitle(string.dialog_title_unmute_notifications)
+                            .setPositiveButton(string.button_label_unmute_notifications) { _, _ ->
+                                onActionDone()
+                                viewModelScope.launch(Dispatchers.IO) {
+                                    discussionsAndLastMessage.forEach { selected ->
+                                        AppDatabase.getInstance()
+                                            .discussionCustomizationDao()[selected.discussion.id]?.let {
+                                            AppDatabase.getInstance().discussionCustomizationDao()
+                                                .update(it.apply {
+                                                    prefMuteNotifications = false
+                                                })
+                                        }
+                                        AppSingleton.getEngine().profileBackupNeeded(selected.discussion.bytesOwnedIdentity)
+                                    }
+                                    discussionsAndLastMessage.map { it.discussion }
+                                    .propagateMuteSettings(false, null, false)
+                                }
+                            }
+                            .setNegativeButton(string.button_label_cancel, null)
+                    builder.setMessage(string.dialog_message_unmute_notifications)
+                    builder.create().show()
+                }
+            }
+        }
+    }
+}
 fun Discussion.getAnnotatedTitle(context: Context): AnnotatedString {
     return buildAnnotatedString {
         if (title.isNullOrEmpty()) {

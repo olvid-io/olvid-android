@@ -784,8 +784,8 @@ class InitialView : View {
                 }
             }
         }
-        val lightColor = getLightColor(bytes!!)
-        val darkColor = getDarkColor(bytes!!)
+        val lightColor = getLightColor(context, bytes!!)
+        val darkColor = getDarkColor(context, bytes!!)
         backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         backgroundPaint!!.style = FILL
         backgroundPaint!!.color = lightColor
@@ -834,39 +834,6 @@ class InitialView : View {
         }
     }
 
-    private fun getLightColor(bytes: ByteArray): Int {
-        val hue = hueFromBytes(bytes)
-        return if (bytes.isEmpty()) {
-            if (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
-                ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0f, 0.5f))
-            } else {
-                ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0f, 0.9f))
-            }
-        } else {
-            if (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
-                ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0.6f, 0.7f))
-            } else {
-                ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0.8f, 0.9f))
-            }
-        }
-    }
-
-    private fun getDarkColor(bytes: ByteArray): Int {
-        val hue = hueFromBytes(bytes)
-        return if (bytes.isEmpty()) {
-            if (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
-                ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0f, 0.4f))
-            } else {
-                ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0f, 0.7f))
-            }
-        } else {
-            if (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
-                ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0.5f, 0.5f))
-            } else {
-                ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0.7f, 0.7f))
-            }
-        }
-    }
 
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
@@ -1102,6 +1069,42 @@ class InitialView : View {
                             0.4f
                         )
                     )
+                }
+            }
+        }
+
+        @JvmStatic
+        fun getLightColor(context: Context, bytes: ByteArray): Int {
+            val hue = hueFromBytes(bytes)
+            return if (bytes.isEmpty()) {
+                if (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
+                    ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0f, 0.5f))
+                } else {
+                    ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0f, 0.9f))
+                }
+            } else {
+                if (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
+                    ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0.6f, 0.7f))
+                } else {
+                    ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0.8f, 0.9f))
+                }
+            }
+        }
+
+        @JvmStatic
+        fun getDarkColor(context: Context, bytes: ByteArray): Int {
+            val hue = hueFromBytes(bytes)
+            return if (bytes.isEmpty()) {
+                if (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
+                    ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0f, 0.4f))
+                } else {
+                    ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0f, 0.7f))
+                }
+            } else {
+                if (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
+                    ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0.5f, 0.5f))
+                } else {
+                    ColorUtils.HSLToColor(floatArrayOf(hue.toFloat(), 0.7f, 0.7f))
                 }
             }
         }

@@ -116,6 +116,7 @@ import io.olvid.messenger.group.GroupTypeModel.GroupType.SIMPLE
 import io.olvid.messenger.group.GroupV2DetailsActivity.GroupMembersAdapter.GroupMemberViewHolder
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.settings.SettingsActivity
+import io.olvid.messenger.webrtc.WebrtcCallService
 
 class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, OnClickListener {
     private val groupDetailsViewModel: GroupV2DetailsViewModel by viewModels()
@@ -651,9 +652,14 @@ class GroupV2DetailsActivity : LockableActivity(), EngineNotificationListener, O
                         group.bytesGroupIdentifier
                     )
                 if (contacts != null) {
-                    val bytesContactIdentities = ArrayList<BytesKey>()
-                    for (contact in contacts) {
-                        bytesContactIdentities.add(BytesKey(contact.bytesContactIdentity))
+                    val bytesContactIdentities: List<BytesKey>?
+                    if (contacts.size > WebrtcCallService.MAX_GROUP_SIZE_TO_SELECT_ALL_BY_DEFAULT) {
+                        bytesContactIdentities = null
+                    } else {
+                        bytesContactIdentities = ArrayList<BytesKey>(contacts.size)
+                        for (contact in contacts) {
+                            bytesContactIdentities.add(BytesKey(contact.bytesContactIdentity))
+                        }
                     }
                     val multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(
                         group.bytesOwnedIdentity,

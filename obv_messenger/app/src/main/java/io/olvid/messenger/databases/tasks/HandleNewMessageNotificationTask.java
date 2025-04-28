@@ -925,6 +925,7 @@ public class HandleNewMessageNotificationTask implements Runnable {
             if (message != null) {
                 message.id = db.messageDao().insert(message);
                 db.discussionCustomizationDao().update(discussionCustomization);
+                AppSingleton.getEngine().profileBackupNeeded(discussion.bytesOwnedIdentity);
             }
         }
     }

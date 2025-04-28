@@ -22,10 +22,13 @@ package io.olvid.engine.datatypes;
 import java.util.Arrays;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.MAC;
 import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionEciesCurve25519KeyPair;
+import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaCurve25519KeyPair;
+import io.olvid.engine.datatypes.key.symmetric.AuthEncAES256ThenSHA256Key;
 import io.olvid.engine.datatypes.key.symmetric.MACKey;
 
 // A Seed used for backup, typically represented as 8x4 characters
@@ -58,7 +61,7 @@ public class BackupSeed {
         return backupSeedBytes;
     }
 
-    private BackupSeed(byte[] backupSeedBytes) throws Exception {
+    public BackupSeed(byte[] backupSeedBytes) throws Exception {
         if (backupSeedBytes.length != BACKUP_SEED_LENGTH) {
             throw new Exception("Bad backupSeedBytes length");
         }
@@ -79,10 +82,10 @@ public class BackupSeed {
             }
             int byteOffset = written & 7;
             if (byteOffset < 4) {
-                backupSeedBytes[written>>3] |= val << (3-byteOffset);
+                backupSeedBytes[written>>3] |= (byte) (val << (3-byteOffset));
             } else {
-                backupSeedBytes[written>>3] |= val >> (byteOffset-3);
-                backupSeedBytes[(written>>3) + 1] |= val << (11-byteOffset);
+                backupSeedBytes[written>>3] |= (byte) (val >> (byteOffset-3));
+                backupSeedBytes[(written>>3) + 1] |= (byte) (val << (11-byteOffset));
             }
             written += 5;
         }
@@ -150,10 +153,37 @@ public class BackupSeed {
         public final EncryptionEciesCurve25519KeyPair encryptionKeyPair;
         public final MACKey macKey;
 
-        public DerivedKeys(UID backupKeyUid, EncryptionEciesCurve25519KeyPair encryptionKeyPair, MACKey macKey) {
+        private DerivedKeys(UID backupKeyUid, EncryptionEciesCurve25519KeyPair encryptionKeyPair, MACKey macKey) {
             this.backupKeyUid = backupKeyUid;
             this.encryptionKeyPair = encryptionKeyPair;
             this.macKey = macKey;
+        }
+    }
+
+    public DerivedKeysV2 deriveKeysV2() {
+        byte[] fullSeedBytes = new byte[32];
+        System.arraycopy(backupSeedBytes, 0, fullSeedBytes, 0, BACKUP_SEED_LENGTH);
+        PRNG prng = Suite.getPRNG(PRNG.PRNG_HMAC_SHA256, new Seed(fullSeedBytes));
+        UID backupKeyUid = new UID(prng);
+        AuthEnc authEnc = Suite.getAuthEnc(AuthEnc.CTR_AES256_THEN_HMAC_SHA256);
+        if (authEnc == null) {
+            return null;
+        }
+        AuthEncAES256ThenSHA256Key encryptionKey = (AuthEncAES256ThenSHA256Key) authEnc.generateKey(prng);
+        ServerAuthenticationECSdsaCurve25519KeyPair authenticationKeyPair = ServerAuthenticationECSdsaCurve25519KeyPair.generate(prng);
+
+        return new DerivedKeysV2(backupKeyUid, encryptionKey, authenticationKeyPair);
+    }
+
+    public static class DerivedKeysV2 {
+        public final UID backupKeyUid;
+        public final AuthEncAES256ThenSHA256Key encryptionKey;
+        public final ServerAuthenticationECSdsaCurve25519KeyPair authenticationKeyPair;
+
+        private DerivedKeysV2(UID backupKeyUid, AuthEncAES256ThenSHA256Key encryptionKey, ServerAuthenticationECSdsaCurve25519KeyPair authenticationKeyPair) {
+            this.backupKeyUid = backupKeyUid;
+            this.encryptionKey = encryptionKey;
+            this.authenticationKeyPair = authenticationKeyPair;
         }
     }
 

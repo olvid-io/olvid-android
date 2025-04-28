@@ -230,10 +230,9 @@ class MessageDetailsActivity : LockableActivity() {
 
         messageDetailsViewModel.discussionCustomization.observe(this) { discussionCustomization: DiscussionCustomization? ->
             if (discussionCustomization != null) {
-                if (discussionCustomization.backgroundImageUrl != null) {
+                val backgroundImageAbsolutePath = App.absolutePathFromRelative(discussionCustomization.backgroundImageUrl)
+                if (backgroundImageAbsolutePath != null) {
                     App.runThread {
-                        val backgroundImageAbsolutePath =
-                            App.absolutePathFromRelative(discussionCustomization.backgroundImageUrl)
                         var bitmap = BitmapFactory.decodeFile(backgroundImageAbsolutePath)
                         if (bitmap.byteCount > SelectDetailsPhotoViewModel.MAX_BITMAP_SIZE) {
                             return@runThread

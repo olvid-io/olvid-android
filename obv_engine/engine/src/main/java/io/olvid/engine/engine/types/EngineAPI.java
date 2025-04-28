@@ -19,9 +19,9 @@
 
 package io.olvid.engine.engine.types;
 
+import org.jetbrains.annotations.NotNull;
 import org.jose4j.jwk.JsonWebKey;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -39,9 +39,12 @@ import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.engine.types.identities.ObvMutualScanUrl;
 import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
 import io.olvid.engine.engine.types.identities.ObvTrustOrigin;
+import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
 import io.olvid.engine.engine.types.sync.ObvSyncAtom;
+import io.olvid.engine.engine.types.sync.ObvSyncSnapshot;
 
 public interface EngineAPI {
+
     enum ApiKeyPermission {
         CALL,
         WEB_CLIENT,
@@ -226,14 +229,26 @@ public interface EngineAPI {
 
     // Backups
     void initiateBackup(boolean forExport);
+    String generateDeviceBackupSeed(String server);
+    String getDeviceBackupSeed() throws Exception;
+    void deleteDeviceBackupSeed(String deviceBackupSeed);
+    boolean backupDeviceAndProfilesNow();
+    void deviceBackupNeeded();
+    void profileBackupNeeded(byte[] bytesOwnedIdentity);
+    ObvDeviceBackupForRestore fetchDeviceBackup(String server, String deviceBackupSeed);
+    ObvProfileBackupsForRestore fetchProfileBackups(byte[] bytesIdentity, String profileBackupSeed);
+    boolean deleteProfileBackupSnapshot(byte[] bytesIdentity, String profileBackupSeed, byte[] threadId, long version);
+    byte[] downloadProfilePicture(byte[] bytesIdentity, byte[] photoLabel, byte[] photoKey) throws Exception;
+    boolean restoreProfile(ObvSyncSnapshot snapshot, String deviceName, String serializedKeycloakAuthState);
+
+
     ObvBackupKeyInformation getBackupKeyInformation() throws Exception;
-    void generateBackupKey();
+    void stopLegacyBackups();
     void setAutoBackupEnabled(boolean enabled, boolean initiateBackupNowIfNeeded);
     void markBackupExported(byte[] backupKeyUid, int version);
     void markBackupUploaded(byte[] backupKeyUid, int version);
     void discardBackup(byte[] backupKeyUid, int version);
     ObvBackupKeyVerificationOutput validateBackupSeed(String backupSeed, byte[] backupContent);
-    ObvBackupKeyVerificationOutput verifyBackupSeed(String backupSeed);
     ObvIdentity[] restoreOwnedIdentitiesFromBackup(String backupSeed, byte[] backupContent, String deviceDisplayName);
     void restoreContactsAndGroupsFromBackup(String backupSeed, byte[] backupContent,  ObvIdentity[] restoredOwnedIdentities);
     String decryptAppDataBackup(String backupSeed, byte[] backupContent);

@@ -27,6 +27,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,6 +39,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -61,14 +63,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingResult
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.theme.OlvidTypography
@@ -151,6 +151,7 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
 
                 if (loading || purchasing) {
                     Column(
+                        modifier = Modifier.padding(bottom = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         CircularProgressIndicator(
@@ -161,15 +162,17 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                             strokeWidth = 5.dp,
                             strokeCap = StrokeCap.Round,
                         )
-                        Spacer(Modifier.height(4.dp))
-                        Text(text = stringResource(id = R.string.text_loading_subscription_plans))
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            color = colorResource(id = R.color.almostBlack),
+                            text = stringResource(id = R.string.text_loading_subscription_plans))
                     }
                 } else {
                     Column(
-                        modifier = Modifier.padding(horizontal = 8.dp),
+                        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        if (subscriptionsOffers == null) {
+                        if (subscriptionsOffers.isNullOrEmpty()) {
                             Icon(
                                 modifier = Modifier.size(48.dp),
                                 painter = painterResource(id = R.drawable.ic_error_outline),
@@ -177,9 +180,14 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                 contentDescription = ""
                             )
                             Spacer(Modifier.height(4.dp))
-                            Text(text = stringResource(id = R.string.label_failed_to_query_subscription))
+                            Text(text = if (subscriptionsOffers == null) stringResource(id = R.string.label_failed_to_query_subscription) else stringResource(id = R.string.label_no_subscription_available),
+                                color = colorResource(id = R.color.almostBlack),
+                            )
                             Spacer(Modifier.height(8.dp))
-                            TextButton(onClick = { fetchSubscriptionOptions() }) {
+                            TextButton(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = { fetchSubscriptionOptions() }
+                            ) {
                                 Text(
                                     text = stringResource(id = R.string.button_label_retry),
                                     color = colorResource(id = R.color.olvid_gradient_light)
@@ -195,11 +203,13 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                             text = offerDetails.title,
                                             style = OlvidTypography.body1,
                                             fontWeight = FontWeight.Bold,
+                                            color = colorResource(id = R.color.almostBlack),
                                         )
                                         offerDetails.description?.let {
                                             Text(
                                                 text = it,
                                                 style = OlvidTypography.body2,
+                                                color = colorResource(id = R.color.almostBlack),
                                             )
                                         }
                                     }
@@ -211,6 +221,7 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                         },
                                         textAlign = TextAlign.Center,
                                         style = OlvidTypography.h2,
+                                        color = colorResource(id = R.color.almostBlack),
                                     )
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -219,6 +230,7 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                     text = stringResource(id = R.string.text_premium_features),
                                     style = OlvidTypography.body1,
                                     fontWeight = FontWeight.Bold,
+                                    color = colorResource(id = R.color.almostBlack),
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Row(
@@ -234,6 +246,7 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                         modifier = Modifier.weight(1f, true),
                                         text = stringResource(id = R.string.text_feature_initiate_secure_calls),
                                         style = OlvidTypography.body2,
+                                        color = colorResource(id = R.color.almostBlack),
                                     )
                                     Image(
                                         modifier = Modifier.size(20.dp),
@@ -254,6 +267,7 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                         modifier = Modifier.weight(1f, true),
                                         text = stringResource(id = R.string.text_feature_multi_device),
                                         style = OlvidTypography.body2,
+                                        color = colorResource(id = R.color.almostBlack),
                                     )
                                     Image(
                                         modifier = Modifier.size(20.dp),
@@ -265,7 +279,13 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
 
                                 Button(
                                     modifier = Modifier.weight(weight = 1f, fill = false),
+                                    colors = ButtonDefaults.buttonColors().copy(
+                                        contentColor = colorResource(R.color.alwaysWhite),
+                                        containerColor = colorResource(R.color.olvid_gradient_light)
+                                    ),
                                     elevation = null,
+                                    shape = RoundedCornerShape(6.dp),
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                                     onClick = {
                                         activity?.let {
                                             purchasing = true
@@ -276,7 +296,8 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                 ) {
                                     Text(
                                         text = stringResource(id = R.string.button_label_subscribe_now),
-                                        textAlign = TextAlign.Center
+                                        textAlign = TextAlign.Center,
+                                        color = colorResource(id = R.color.alwaysWhite),
                                     )
                                 }
                             }
@@ -288,10 +309,8 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
     }
 }
 
-@Preview(device = "spec:width=1080px,height=2340px,dpi=400")
+@Preview
 @Composable
 fun SubPreview() {
-    AppCompatTheme {
-        SubscriptionOfferDialog(activity = null, onDismissCallback = {}, onPurchaseCallback = {})
-    }
+    SubscriptionOfferDialog(activity = null, onDismissCallback = {}, onPurchaseCallback = {})
 }

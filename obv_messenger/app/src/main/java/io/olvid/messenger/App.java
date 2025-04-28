@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
+import android.text.Spannable;
 import android.util.DisplayMetrics;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -44,6 +45,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,6 +66,7 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.media3.common.util.UnstableApi;
 import androidx.preference.PreferenceManager;
 
 import com.google.zxing.BarcodeFormat;
@@ -80,7 +83,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
@@ -96,9 +98,6 @@ import coil.decode.VideoFrameDecoder;
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.ObvBase64;
 import io.olvid.engine.engine.types.EngineAPI;
-import io.olvid.engine.engine.types.EngineNotificationListener;
-import io.olvid.engine.engine.types.EngineNotifications;
-import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.ObvPushNotificationType;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.activities.ContactDetailsActivity;
@@ -109,6 +108,7 @@ import io.olvid.messenger.appdialogs.AppDialogShowActivity;
 import io.olvid.messenger.appdialogs.AppDialogTag;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.ConfigurationPojo;
+import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.PdfViewerDialog;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
@@ -124,15 +124,19 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonWebrtcMessage;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.discussion.message.MessageDetailsActivity;
+import io.olvid.messenger.discussion.message.attachments.RenderablePdfPage;
+import io.olvid.messenger.discussion.message.attachments.RenderablePdfPageFetcher;
+import io.olvid.messenger.discussion.message.attachments.RenderablePdfPageKeyer;
 import io.olvid.messenger.gallery.GalleryActivity;
 import io.olvid.messenger.group.GroupCreationActivity;
 import io.olvid.messenger.group.GroupDetailsActivity;
 import io.olvid.messenger.group.GroupV2DetailsActivity;
 import io.olvid.messenger.main.MainActivity;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
+import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity;
+import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.services.AvailableSpaceHelper;
-import io.olvid.messenger.services.BackupCloudProviderService;
 import io.olvid.messenger.services.MDMConfigurationSingleton;
 import io.olvid.messenger.services.MessageExpirationService;
 import io.olvid.messenger.services.NetworkStateMonitorReceiver;
@@ -141,6 +145,9 @@ import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.AppIcon;
 import io.olvid.messenger.settings.AppIconSettingKt;
 import io.olvid.messenger.settings.SettingsActivity;
+import io.olvid.messenger.settings.composables.ProfilePictureFetcher;
+import io.olvid.messenger.settings.composables.ProfilePictureKeyer;
+import io.olvid.messenger.settings.composables.ProfilePictureLabelAndKey;
 import io.olvid.messenger.webrtc.WebrtcCallActivity;
 import io.olvid.messenger.webrtc.WebrtcCallService;
 
@@ -203,7 +210,11 @@ public class App extends Application implements DefaultLifecycleObserver {
 
         ComponentRegistry.Builder componentRegistryBuilder = new ComponentRegistry().newBuilder()
                 .add(new SvgDecoder.Factory())
-                .add(new VideoFrameDecoder.Factory());
+                .add(new VideoFrameDecoder.Factory())
+                .add(new RenderablePdfPageKeyer(), RenderablePdfPage.class)
+                .add(new RenderablePdfPageFetcher.Factory(), RenderablePdfPage.class)
+                .add(new ProfilePictureKeyer(), ProfilePictureLabelAndKey.class)
+                .add(new ProfilePictureFetcher.Factory(), ProfilePictureLabelAndKey.class);
         if (Build.VERSION.SDK_INT >= 28) {
             componentRegistryBuilder.add(new ImageDecoderDecoder.Factory());
         } else {
@@ -328,6 +339,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
+    @UnstableApi
     public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId, boolean ascending, boolean showTextBlocks) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
@@ -338,6 +350,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
+    @UnstableApi
     public static void openDraftGalleryActivity(Context activityContext, long draftMessageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DRAFT_INTENT_EXTRA, true);
@@ -346,6 +359,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
+    @UnstableApi
     public static void openMessageGalleryActivity(Context activityContext, long messageId, long fyleId, boolean showTextBlocks) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DRAFT_INTENT_EXTRA, false);
@@ -355,6 +369,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
+    @UnstableApi
     public static void openOwnedIdentityGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, @Nullable String sortOrder, boolean ascending, long messageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
@@ -367,6 +382,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
+    @UnstableApi
     public static void openDiscussionMediaGalleryActivity(Context activityContext, long discussionId) {
         Intent intent = new Intent(getContext(), io.olvid.messenger.discussion.gallery.DiscussionMediaGalleryActivity.class);
         intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
@@ -414,21 +430,21 @@ public class App extends Application implements DefaultLifecycleObserver {
         LocalBroadcastManager.getInstance(getContext()).sendBroadcast(newAppDialogIntent);
     }
 
-    public static void openCurrentOwnedIdentityDetails(Context activityContext) {
+    public static void openCurrentOwnedIdentityDetails(@NonNull Context activityContext) {
         Intent intent = new Intent(getContext(), MainActivity.class);
         intent.setAction(MainActivity.FORWARD_ACTION);
         intent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, OwnedIdentityDetailsActivity.class.getName());
         activityContext.startActivity(intent);
     }
 
-    public static void openContactDetailsActivity(Context activityContext, byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) {
+    public static void openContactDetailsActivity(@NonNull Context activityContext, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity) {
         Intent intent = new Intent(getContext(), ContactDetailsActivity.class);
         intent.putExtra(ContactDetailsActivity.CONTACT_BYTES_CONTACT_IDENTITY_INTENT_EXTRA, bytesContactIdentity);
         intent.putExtra(ContactDetailsActivity.CONTACT_BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         activityContext.startActivity(intent);
     }
 
-    public static void startWebrtcCall(Context context, byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) {
+    public static void startWebrtcCall(@NonNull Context context, @NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity) {
         Intent serviceIntent = new Intent(getContext(), WebrtcCallService.class);
         serviceIntent.setAction(WebrtcCallService.ACTION_START_CALL);
         Bundle bytesContactIdentitiesBundle = new Bundle();
@@ -442,7 +458,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         context.startActivity(activityIntent);
     }
 
-    public static void startWebrtcMultiCall(Context context, byte[] bytesOwnedIdentity, List<Contact> contacts, byte[] bytesGroupOwnerAndUid, boolean groupV2) {
+    public static void startWebrtcMultiCall(@NonNull Context context, @NonNull byte[] bytesOwnedIdentity, @NonNull List<Contact> contacts, @Nullable byte[] bytesGroupOwnerAndUid, boolean groupV2) {
         Intent serviceIntent = new Intent(getContext(), WebrtcCallService.class);
         serviceIntent.setAction(WebrtcCallService.ACTION_START_CALL);
         serviceIntent.putExtra(WebrtcCallService.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
@@ -466,7 +482,6 @@ public class App extends Application implements DefaultLifecycleObserver {
         context.startActivity(activityIntent);
     }
 
-    // TODO: use deviceUid!
     public static void handleWebrtcMessage(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity, byte[] bytesContactDeviceUid, JsonWebrtcMessage jsonWebrtcMessage, long downloadTimestamp, long serverTimestamp) {
         if (jsonWebrtcMessage.getCallIdentifier() == null || jsonWebrtcMessage.getMessageType() == null || jsonWebrtcMessage.getSerializedMessagePayload() == null) {
             return;
@@ -686,6 +701,47 @@ public class App extends Application implements DefaultLifecycleObserver {
         }
     }
 
+    public static void startTransferFlowAsSource(Context context) {
+        byte[] bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity();
+        if (bytesOwnedIdentity == null) {
+            return;
+        }
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if (!prefs.getBoolean(SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION, false)) {
+            View dialogView = LayoutInflater.from(context)
+                    .inflate(R.layout.dialog_view_message_and_checkbox, null);
+            TextView message = dialogView.findViewById(R.id.dialog_message);
+            message.setText(Markdown.formatMarkdown(context.getString(R.string.dialog_message_add_device_explanation), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE));
+            CheckBox checkBox = dialogView.findViewById(R.id.checkbox);
+            checkBox.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> {
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean(SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION, isChecked);
+                editor.apply();
+            });
+
+            AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog);
+            builder.setTitle(R.string.dialog_title_add_device_explanation)
+                    .setView(dialogView)
+                    .setNegativeButton(R.string.button_label_cancel, null)
+                    .setPositiveButton(R.string.button_label_proceed, (a, b) -> {
+                        Intent intent = new  Intent(
+                                context,
+                                OnboardingFlowActivity.class);
+                        intent.putExtra(OnboardingFlowActivity.TRANSFER_SOURCE_INTENT_EXTRA, true);
+                        intent.putExtra(OnboardingFlowActivity.TRANSFER_RESTRICTED_INTENT_EXTRA, KeycloakManager.isOwnedIdentityTransferRestricted(bytesOwnedIdentity));
+                        context.startActivity(intent);
+                    });
+            builder.create().show();
+        } else {
+            Intent intent = new  Intent(
+                    context,
+                    OnboardingFlowActivity.class);
+            intent.putExtra(OnboardingFlowActivity.TRANSFER_SOURCE_INTENT_EXTRA, true);
+            intent.putExtra(OnboardingFlowActivity.TRANSFER_RESTRICTED_INTENT_EXTRA, KeycloakManager.isOwnedIdentityTransferRestricted(bytesOwnedIdentity));
+            context.startActivity(intent);
+        }
+    }
+
     public static void openLink(Context context, Uri uri) {
         if (context == null || uri == null) {
             return;
@@ -733,7 +789,8 @@ public class App extends Application implements DefaultLifecycleObserver {
         builder.create().show();
     }
 
-    public static String absolutePathFromRelative(String relativePath) {
+    @Nullable
+    public static String absolutePathFromRelative(@Nullable String relativePath) {
         if (relativePath == null) {
             return null;
         }
@@ -1098,7 +1155,7 @@ public class App extends Application implements DefaultLifecycleObserver {
             try {
                 runnable.run();
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.x(e);
             }
         });
     }
@@ -1195,9 +1252,17 @@ public class App extends Application implements DefaultLifecycleObserver {
 
 
             //////////////////////////
-            // notify Engine whether autobackup is on or not
+            // if we have a backups v2 seed, delete any legacy backup seed
             //////////////////////////
-            AppSingleton.getEngine().setAutoBackupEnabled(SettingsActivity.useAutomaticBackup(), true);
+            try {
+                if (AppSingleton.getEngine().getDeviceBackupSeed() != null) {
+                    AppSingleton.getEngine().stopLegacyBackups();
+                } else {
+                    AppSingleton.getEngine().setAutoBackupEnabled(SettingsActivity.useAutomaticBackup(), true);
+                }
+            } catch (Exception e) {
+                Logger.x(e);
+            }
 
 
             //////////////////////////
@@ -1241,16 +1306,6 @@ public class App extends Application implements DefaultLifecycleObserver {
                 }
             } catch (Exception e) {
                 Logger.e("Error parsing MDM pushed settings configuration");
-                e.printStackTrace();
-            }
-
-            //////////////////////////
-            // check if there is a WebDAV automatic backups configuration pushed from an MDM
-            //////////////////////////
-            try {
-                configureMdmWebDavAutomaticBackups();
-            } catch (Exception e) {
-                Logger.e("Error configuring MDM pushed WebDav automatic backups");
                 e.printStackTrace();
             }
 
@@ -1302,109 +1357,5 @@ public class App extends Application implements DefaultLifecycleObserver {
                 }
             }
         }
-
-
-        private static EngineNotificationListener backupKeyListener = null;
-
-        static void configureMdmWebDavAutomaticBackups() throws Exception {
-            BackupCloudProviderService.CloudProviderConfiguration mdmAutoBackupConfiguration = MDMConfigurationSingleton.getAutoBackupConfiguration();
-            if (mdmAutoBackupConfiguration != null) {
-                BackupCloudProviderService.CloudProviderConfiguration currentAutoBackupConfiguration = SettingsActivity.getAutomaticBackupConfiguration();
-                if (!mdmAutoBackupConfiguration.equals(currentAutoBackupConfiguration) || !SettingsActivity.useAutomaticBackup()) {
-                    SettingsActivity.setAutomaticBackupConfiguration(mdmAutoBackupConfiguration);
-                    SettingsActivity.setMdmAutomaticBackup(true);
-                    if (!SettingsActivity.useAutomaticBackup()) {
-                        SettingsActivity.setUseAutomaticBackup(true);
-                        AppSingleton.getEngine().setAutoBackupEnabled(true, true);
-                    }
-                }
-
-                String keyEscrowPublicKeyString = MDMConfigurationSingleton.getWebdavKeyEscrowPublicKeyString();
-                if (!Objects.equals(keyEscrowPublicKeyString, SettingsActivity.getMdmWebdavKeyEscrowPublicKey())) {
-                    if (keyEscrowPublicKeyString == null) {
-                        // key escrow was deactivated --> clear the setting
-                        SettingsActivity.setMdmWebdavKeyEscrowPublicKey(null);
-                    } else {
-                        // key escrow is active, but backup key is not in escrow yet
-                        try {
-                            ObvBackupKeyInformation backupKeyInformation = AppSingleton.getEngine().getBackupKeyInformation();
-                            if (backupKeyInformation == null) {
-                                // no key generated yet --> generate one and attempt to put it in escrow
-                                backupKeyListener = new EngineNotificationListener() {
-                                    Long registrationNumber = null;
-
-                                    @Override
-                                    public void callback(String notificationName, HashMap<String, Object> userInfo) {
-                                        switch (notificationName) {
-                                            case EngineNotifications.BACKUP_SEED_GENERATION_FAILED: {
-                                                // do nothing, we will try again at next startup!
-                                                break;
-                                            }
-                                            case EngineNotifications.NEW_BACKUP_SEED_GENERATED: {
-                                                String backupKeyString = (String) userInfo.get(EngineNotifications.NEW_BACKUP_SEED_GENERATED_SEED_KEY);
-                                                BackupCloudProviderService.uploadBackupKeyEscrow(mdmAutoBackupConfiguration, MDMConfigurationSingleton.getWebdavKeyEscrowPublicKey(), backupKeyString, new BackupCloudProviderService.OnKeyEscrowCallback() {
-                                                    @Override
-                                                    public void onKeyEscrowSuccess() {
-                                                        // key was successfully put in escrow --> store it in settings
-                                                        SettingsActivity.setMdmWebdavKeyEscrowPublicKey(keyEscrowPublicKeyString);
-                                                    }
-
-                                                    @Override
-                                                    public void onKeyEscrowFailure(int error) {
-                                                        // we generated a key but could not put it in escrow --> fallback to notifying the user a new key generation is required
-                                                        showDialog(null, AppDialogShowActivity.DIALOG_KEY_ESCROW_REQUIRED, new HashMap<>());
-                                                    }
-                                                });
-                                                break;
-                                            }
-                                            default: {
-                                                return;
-                                            }
-                                        }
-
-                                        AppSingleton.getEngine().removeNotificationListener(EngineNotifications.BACKUP_SEED_GENERATION_FAILED, backupKeyListener);
-                                        AppSingleton.getEngine().removeNotificationListener(EngineNotifications.NEW_BACKUP_SEED_GENERATED, backupKeyListener);
-                                        backupKeyListener = null;
-                                    }
-
-                                    @Override
-                                    public void setEngineNotificationListenerRegistrationNumber(long registrationNumber) {
-                                        this.registrationNumber = registrationNumber;
-                                    }
-
-                                    @Override
-                                    public long getEngineNotificationListenerRegistrationNumber() {
-                                        return registrationNumber;
-                                    }
-
-                                    @Override
-                                    public boolean hasEngineNotificationListenerRegistrationNumber() {
-                                        return registrationNumber != null;
-                                    }
-                                };
-                                AppSingleton.getEngine().addNotificationListener(EngineNotifications.BACKUP_SEED_GENERATION_FAILED, backupKeyListener);
-                                AppSingleton.getEngine().addNotificationListener(EngineNotifications.NEW_BACKUP_SEED_GENERATED, backupKeyListener);
-
-                                AppSingleton.getEngine().generateBackupKey();
-                            } else {
-                                // backup key exists and is not in escrow --> prompt user to generate a new key
-                                showDialog(null, AppDialogShowActivity.DIALOG_KEY_ESCROW_REQUIRED, new HashMap<>());
-                            }
-                        } catch (Exception e) {
-                            // do nothing if there is an exception --> we were not able to check if a backup key exists
-                        }
-                    }
-                }
-            } else if (SettingsActivity.isMdmAutomaticBackup()) {
-                // backups used to be configured by MDM but no longer are --> disable automatic backups and clear the previous configuration
-                SettingsActivity.setAutomaticBackupConfiguration(null);
-                SettingsActivity.setUseAutomaticBackup(false);
-                SettingsActivity.setMdmAutomaticBackup(false);
-                SettingsActivity.setMdmWebdavKeyEscrowPublicKey(null);
-                AppSingleton.getEngine().setAutoBackupEnabled(false, false);
-            }
-        }
     }
-
-
 }

@@ -76,6 +76,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -115,14 +116,6 @@ fun PdfViewerScreen(
     }
     var searchResults by remember {
         mutableStateOf(emptyList<SearchResults>())
-    }
-    val imageLoader = remember {
-        ImageLoader.Builder(context)
-            .components {
-                add(RenderablePdfPageKeyer())
-                add(RenderablePdfPageFetcher.Factory())
-            }
-            .build()
     }
     val scope = rememberCoroutineScope()
 
@@ -217,7 +210,7 @@ fun PdfViewerScreen(
                     PdfPage(
                         page = page,
                         searchResults = searchResults.find { it.page == index },
-                        imageLoader = imageLoader
+                        imageLoader = App.imageLoader
                     )
                 }
             }

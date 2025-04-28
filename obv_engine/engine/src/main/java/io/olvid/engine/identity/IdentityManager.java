@@ -53,14 +53,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import io.olvid.engine.Logger;
-import io.olvid.engine.crypto.Hash;
-import io.olvid.engine.crypto.MAC;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.PublicKeyEncryption;
 import io.olvid.engine.crypto.ServerAuthentication;
 import io.olvid.engine.crypto.Signature;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.crypto.exceptions.DecryptionException;
+import io.olvid.engine.datatypes.BackupSeed;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.GroupMembersChangedCallback;
@@ -87,9 +86,11 @@ import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.datatypes.containers.UidAndPreKey;
 import io.olvid.engine.datatypes.containers.UserData;
+import io.olvid.engine.datatypes.key.asymmetric.EncryptionPrivateKey;
 import io.olvid.engine.datatypes.key.asymmetric.SignaturePrivateKey;
 import io.olvid.engine.datatypes.key.asymmetric.SignaturePublicKey;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
+import io.olvid.engine.datatypes.notifications.BackupNotifications;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
@@ -99,15 +100,18 @@ import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonKeycloakRevocation;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
+import io.olvid.engine.engine.types.ObvBytesKey;
 import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.ObvContactDeviceCount;
 import io.olvid.engine.engine.types.ObvContactInfo;
+import io.olvid.engine.engine.types.ObvDeviceBackupForRestore;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
 import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
+import io.olvid.engine.engine.types.sync.ObvProfileBackupSnapshot;
 import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
 import io.olvid.engine.identity.databases.ContactDevice;
@@ -129,6 +133,9 @@ import io.olvid.engine.identity.databases.OwnedIdentityDetails;
 import io.olvid.engine.identity.databases.OwnedPreKey;
 import io.olvid.engine.identity.databases.PendingGroupMember;
 import io.olvid.engine.identity.databases.ServerUserData;
+import io.olvid.engine.identity.databases.backups.IdentityManagerDeviceSnapshot;
+import io.olvid.engine.identity.databases.backups.OwnedIdentityDeviceSnapshot;
+import io.olvid.engine.identity.databases.sync.IdentityDetailsSyncSnapshot;
 import io.olvid.engine.identity.databases.sync.IdentityManagerSyncSnapshot;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
 import io.olvid.engine.identity.datatypes.IdentityManagerSessionFactory;
@@ -168,7 +175,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         this.prng = prng;
         this.backupNeededSessionCommitListener = () -> {
             if (notificationPostingDelegate != null) {
-                notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_DATABASE_CONTENT_CHANGED, new HashMap<>());
+                notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_DATABASE_CONTENT_CHANGED, Collections.emptyMap());
             }
         };
         this.deviceDiscoveryTimer = new Timer("Engine-DeviceDiscoveryTimer");
@@ -180,9 +187,38 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         metaManager.registerImplementedDelegates(this);
     }
 
+    final Map<Identity, SessionCommitListener> profileBackupListeners = new HashMap<>();
+    private SessionCommitListener getSessionCommitListenerForProfileBackup(Identity ownedIdentity) {
+        SessionCommitListener listener = profileBackupListeners.get(ownedIdentity);
+        if (listener == null) {
+            listener = () -> {
+                if (notificationPostingDelegate != null) {
+                    notificationPostingDelegate.postNotification(BackupNotifications.NOTIFICATION_PROFILE_BACKUP_NEEDED, Map.of(
+                            BackupNotifications.NOTIFICATION_PROFILE_BACKUP_NEEDED_OWNED_IDENTITY, ownedIdentity
+                    ));
+                }
+            };
+            profileBackupListeners.put(ownedIdentity, listener);
+        }
+        return listener;
+    }
+
+    SessionCommitListener deviceBackupListener = null;
+    private SessionCommitListener getSessionCommitListenerForDeviceBackup() {
+        if (deviceBackupListener == null) {
+            deviceBackupListener = () -> {
+                if (notificationPostingDelegate != null) {
+                    notificationPostingDelegate.postNotification(BackupNotifications.NOTIFICATION_DEVICE_BACKUP_NEEDED, Collections.emptyMap());
+                }
+            };
+        }
+        return deviceBackupListener;
+    }
+
     @Override
     public void initialisationComplete() {
-        // notify if an ownedIdentity is inactive
+        // - notify if an ownedIdentity is inactive
+        // - also compute a profile backup seed for legacy identities without one
         try (IdentityManagerSession identityManagerSession = getSession()) {
             OwnedIdentity[] ownedIdentities = OwnedIdentity.getAll(identityManagerSession);
             for (OwnedIdentity ownedIdentity : ownedIdentities) {
@@ -191,6 +227,12 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     userInfo.put(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_OWNED_IDENTITY_KEY, ownedIdentity.getOwnedIdentity());
                     userInfo.put(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_ACTIVE_KEY, false);
                     identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS, userInfo);
+                }
+
+                if (ownedIdentity.getBackupSeed() == null) {
+                    BackupSeed backupSeed = ownedIdentity.getPrivateIdentity().getDeterministicBackupSeedForLegacyIdentity();
+                    ownedIdentity.setBackupSeed(backupSeed);
+                    identityManagerSession.session.commit();
                 }
             }
         } catch (Exception e) {
@@ -469,28 +511,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         return jsonObjectMapper;
     }
 
-   @Override
-   public void downloadAllUserData(Session session) throws Exception {
-        List<OwnedIdentityDetails> ownedIdentityDetailsList = OwnedIdentityDetails.getAllWithMissingPhotoUrl(wrapSession(session));
-        for (OwnedIdentityDetails ownedIdentityDetails : ownedIdentityDetailsList) {
-            protocolStarterDelegate.startDownloadIdentityPhotoProtocolWithinTransaction(session, ownedIdentityDetails.getOwnedIdentity(), ownedIdentityDetails.getOwnedIdentity(), ownedIdentityDetails.getJsonIdentityDetailsWithVersionAndPhoto());
-        }
 
-        List<ContactIdentityDetails> contactIdentityDetailsList = ContactIdentityDetails.getAllWithMissingPhotoUrl(wrapSession(session));
-        for (ContactIdentityDetails contactIdentityDetails : contactIdentityDetailsList) {
-            protocolStarterDelegate.startDownloadIdentityPhotoProtocolWithinTransaction(session, contactIdentityDetails.getOwnedIdentity(), contactIdentityDetails.getContactIdentity(), contactIdentityDetails.getJsonIdentityDetailsWithVersionAndPhoto());
-        }
-
-        List<ContactGroupDetails> contactGroupDetailsList = ContactGroupDetails.getAllWithMissingPhotoUrl(wrapSession(session));
-        for (ContactGroupDetails contactGroupDetails : contactGroupDetailsList) {
-            protocolStarterDelegate.startDownloadGroupPhotoProtocolWithinTransaction(session, contactGroupDetails.getOwnedIdentity(), contactGroupDetails.getGroupOwnerAndUid(), contactGroupDetails.getJsonGroupDetailsWithVersionAndPhoto());
-        }
-
-        List<ContactGroupV2Details> contactGroupV2DetailsList = ContactGroupV2Details.getAllWithMissingPhotoUrl(wrapSession(session));
-        for (ContactGroupV2Details contactGroupV2Details : contactGroupV2DetailsList) {
-            protocolStarterDelegate.startDownloadGroupV2PhotoProtocolWithinTransaction(session, contactGroupV2Details.getOwnedIdentity(), contactGroupV2Details.getGroupIdentifier(), contactGroupV2Details.getServerPhotoInfo());
-        }
-    }
 
 
     // region Implement SolveChallengeDelegate
@@ -556,6 +577,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
 
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForDeviceBackup());
         return ownedIdentity.getOwnedIdentity();
     }
 
@@ -595,6 +617,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             //  - this cascade deletes OwnedDevice
             ownedIdentityObject.delete();
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForDeviceBackup());
         }
     }
 
@@ -643,6 +666,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 throw new SQLException();
             }
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForDeviceBackup());
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         }
     }
 
@@ -657,6 +682,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
         if (ownedIdentityObject != null) {
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForDeviceBackup());
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
             return ownedIdentityObject.publishLatestDetails();
         }
         return -1;
@@ -675,6 +702,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     public boolean setOwnedIdentityDetailsFromOtherDevice(Session session, Identity ownedIdentity, JsonIdentityDetailsWithVersionAndPhoto ownDetailsWithVersionAndPhoto) throws SQLException {
         OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
         if (ownedIdentityObject != null) {
+            session.addSessionCommitListener(getSessionCommitListenerForDeviceBackup());
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
             return ownedIdentityObject.setOwnedIdentityDetailsFromOtherDevice(ownDetailsWithVersionAndPhoto);
         }
         return false;
@@ -744,6 +773,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 ContactGroupV2.deleteAllKeycloakGroupsForOwnedIdentity(wrapSession(session), ownedIdentity);
             }
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         }
     }
 
@@ -1035,6 +1065,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (ownedIdentityObject != null && ownedIdentityObject.isKeycloakManaged()) {
             KeycloakServer.setKeycloakUserId(wrapSession(session), ownedIdentityObject.getKeycloakServerUrl(), ownedIdentity, userId);
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         }
     }
 
@@ -1059,6 +1090,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
 
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForDeviceBackup());
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
 
         KeycloakServer keycloakServer = KeycloakServer.create(wrapSession(session), keycloakState.keycloakServer, ownedIdentity, keycloakState.jwks.toJson(), keycloakState.signatureKey == null ? null : keycloakState.signatureKey.toJson(), keycloakState.clientId, keycloakState.clientSecret, keycloakState.transferRestricted);
         if (keycloakServer == null) {
@@ -1091,6 +1124,9 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             if (keycloakServer != null) {
                 keycloakServer.delete();
             }
+
+            session.addSessionCommitListener(getSessionCommitListenerForDeviceBackup());
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
 
             ////////
             // update owned identity details to remove signed part
@@ -1133,6 +1169,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (keycloakServer != null) {
             if (transferRestricted ^ keycloakServer.isTransferRestricted()) {
                 keycloakServer.setTransferRestricted(transferRestricted);
+                session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
             }
         }
     }
@@ -1163,6 +1200,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (keycloakServer != null && !Objects.equals(keycloakServer.getSelfRevocationTestNonce(), nonce)) {
             keycloakServer.setSelfRevocationTestNonce(nonce);
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         }
     }
 
@@ -1302,6 +1340,10 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
         if (ownedIdentityObject != null && !ownedIdentityObject.isActive()) {
             ownedIdentityObject.setActive(true);
+
+            session.addSessionCommitListener(getSessionCommitListenerForDeviceBackup());
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
+
             ////////////
             // After reactivating an identity, we must recreate all channels (that were destroyed after the deactivation)
             //  - restart channel creation for all owned devices (those were not deleted during deactivation)
@@ -1356,6 +1398,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
         if (ownedIdentityObject != null) {
             ownedIdentityObject.markForDeletion();
+
+            session.addSessionCommitListener(getSessionCommitListenerForDeviceBackup());
         }
     }
 
@@ -1429,6 +1473,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (ownedDevice != null && Objects.equals(ownedDevice.getOwnedIdentity(), ownedIdentity)) {
             if (!Objects.equals(displayName, ownedDevice.getDisplayName())) {
                 ownedDevice.setDisplayName(displayName);
+                session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
             }
             if (!Objects.equals(expirationTimestamp, ownedDevice.getExpirationTimestamp())
                     || !Objects.equals(lastRegistrationTimestamp, ownedDevice.getLastRegistrationTimestamp())) {
@@ -1593,6 +1638,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 throw new SQLException();
             }
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         } catch (Exception e) {
             Logger.x(e);
             throw new Exception();
@@ -1611,6 +1657,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             contactIdentityObject.setOneToOne(true);
         }
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
     }
 
     @Override
@@ -1675,6 +1722,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (contactIdentityObject != null) {
             JsonIdentityDetailsWithVersionAndPhoto details = contactIdentityObject.trustPublishedDetails();
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
             return details;
         }
         return null;
@@ -1686,6 +1734,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (contactIdentityObject != null) {
             contactIdentityObject.updatePublishedDetails(jsonIdentityDetailsWithVersionAndPhoto, allowDowngrade);
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         }
     }
 
@@ -1832,6 +1881,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             // delete the contact
             contactIdentityObject.delete();
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         }
     }
 
@@ -1873,6 +1923,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (contactIdentityObject != null
                 && ((oneToOne && !contactIdentityObject.isOneToOne()) || (!oneToOne && !contactIdentityObject.isNotOneToOne()))) {
             contactIdentityObject.setOneToOne(oneToOne);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         }
     }
 
@@ -1899,6 +1950,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             return false;
         }
         contactIdentityObject.setForcefullyTrustedByUser(true);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         return true;
     }
 
@@ -1914,6 +1966,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 removeAllDevicesForContactIdentity(session, ownedIdentity, contactIdentity);
             }
             contactIdentityObject.setForcefullyTrustedByUser(false);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
             return true;
         } catch (Exception e) {
             Logger.x(e);
@@ -2165,14 +2218,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 throw new SQLException("OwnedIdentity not found");
             }
             PrivateIdentity privateIdentity = ownedIdentityObject.getPrivateIdentity();
-            MAC mac = Suite.getMAC(privateIdentity.getMacKey());
-            byte[] digest = mac.digest(privateIdentity.getMacKey(), new byte[]{0x55});
-            byte[] hashInput = new byte[digest.length + diversificationTag.length];
-            System.arraycopy(digest, 0, hashInput, 0, digest.length);
-            System.arraycopy(diversificationTag, 0, hashInput, digest.length, diversificationTag.length);
-            Hash sha256 = Suite.getHash(Hash.SHA256);
-            byte[] hash = sha256.digest(hashInput);
-            return new Seed(hash);
+            return privateIdentity.getDeterministicSeedForOwnedIdentity(diversificationTag);
         }
     }
 
@@ -2347,6 +2393,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             PendingGroupMember.create(identityManagerSession, groupInformation.getGroupOwnerAndUid(), ownedIdentity, pendingGroupMember.identity, pendingGroupMember.serializedDetails);
         }
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
     }
 
     // only for groups you do not own, when you get kicked or you leave
@@ -2364,6 +2411,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
         contactGroup.delete();
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
     }
 
     // only for groups you own, when disbanding
@@ -2381,6 +2429,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
         contactGroup.delete();
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
     }
 
     // only for groups you own
@@ -2423,6 +2472,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         // increment the group members version;
         contactGroup.incrementGroupMembersVersion();
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         if (groupMembersChangedCallback != null) {
             groupMembersChangedCallback.callback();
         }
@@ -2471,6 +2521,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         // increment the group members version;
         contactGroup.incrementGroupMembersVersion();
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         if (groupMembersChangedCallback != null) {
             groupMembersChangedCallback.callback();
         }
@@ -2511,6 +2562,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         // increment the group members version;
         contactGroup.incrementGroupMembersVersion();
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         if (groupMembersChangedCallback != null) {
             groupMembersChangedCallback.callback();
         }
@@ -2553,6 +2605,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         // increment the group members version;
         contactGroup.incrementGroupMembersVersion();
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         if (groupMembersChangedCallback != null) {
             groupMembersChangedCallback.callback();
         }
@@ -2578,6 +2631,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (pendingGroupMember != null) {
             pendingGroupMember.setDeclined(declined);
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         }
     }
 
@@ -2605,12 +2659,14 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 contactGroup.trustPublishedDetails();
             }
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         }
 
 
         // second, update members version number
         if (contactGroup.getGroupMembersVersion() < membersVersion) {
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
             contactGroup.setGroupMembersVersion(membersVersion);
 
             // group members diff
@@ -2710,6 +2766,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         // then, set groupMembersVersion to 0 to make sure the next update is taken into account
         contactGroup.setGroupMembersVersion(0);
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
     }
 
     @Override
@@ -2836,6 +2893,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         if (contactGroup != null) {
             JsonGroupDetailsWithVersionAndPhoto details = contactGroup.trustPublishedDetails();
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
             return details;
         }
         return null;
@@ -2859,6 +2917,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 throw new SQLException();
             }
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         }
     }
 
@@ -2889,6 +2948,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         ContactGroup contactGroup = ContactGroup.get(wrapSession(session), groupOwnerAndUid, ownedIdentity);
         if (contactGroup != null) {
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
             return contactGroup.publishLatestDetails();
         }
         return -1;
@@ -3034,6 +3094,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
 
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
     }
 
     @Override
@@ -3109,6 +3170,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
 
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         return true;
     }
 
@@ -3141,6 +3203,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
 
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
     }
 
     @Override
@@ -3240,6 +3303,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
 
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
 
         return groupV2.updateWithNewBlob(serverBlob, blobKeys, updatedByMe);
     }
@@ -3278,6 +3342,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         groupV2.movePendingMemberToMembers(groupMemberIdentity);
 
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
     }
 
     @Override
@@ -3386,6 +3451,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             ContactGroupV2Details.cleanup(wrapSession(session), ownedIdentity, groupIdentifier, groupV2.getVersion(), groupV2.getVersion());
         }
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         return groupV2.getVersion();
     }
 
@@ -3694,6 +3760,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
 
             session.addSessionCommitListener(backupNeededSessionCommitListener);
+            session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
             return ownInvitationNonce;
         } catch (Exception e) {
             Logger.x(e);
@@ -3717,6 +3784,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
 
         session.addSessionCommitListener(backupNeededSessionCommitListener);
+        session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
         return groupV2.updateWithNewKeycloakBlob(keycloakGroupBlob, jsonObjectMapper);
     }
 
@@ -3986,6 +4054,28 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
     }
 
+    @Override
+    public void downloadAllUserData(Session session) throws Exception {
+        List<OwnedIdentityDetails> ownedIdentityDetailsList = OwnedIdentityDetails.getAllWithMissingPhotoUrl(wrapSession(session));
+        for (OwnedIdentityDetails ownedIdentityDetails : ownedIdentityDetailsList) {
+            protocolStarterDelegate.startDownloadIdentityPhotoProtocolWithinTransaction(session, ownedIdentityDetails.getOwnedIdentity(), ownedIdentityDetails.getOwnedIdentity(), ownedIdentityDetails.getJsonIdentityDetailsWithVersionAndPhoto());
+        }
+
+        List<ContactIdentityDetails> contactIdentityDetailsList = ContactIdentityDetails.getAllWithMissingPhotoUrl(wrapSession(session));
+        for (ContactIdentityDetails contactIdentityDetails : contactIdentityDetailsList) {
+            protocolStarterDelegate.startDownloadIdentityPhotoProtocolWithinTransaction(session, contactIdentityDetails.getOwnedIdentity(), contactIdentityDetails.getContactIdentity(), contactIdentityDetails.getJsonIdentityDetailsWithVersionAndPhoto());
+        }
+
+        List<ContactGroupDetails> contactGroupDetailsList = ContactGroupDetails.getAllWithMissingPhotoUrl(wrapSession(session));
+        for (ContactGroupDetails contactGroupDetails : contactGroupDetailsList) {
+            protocolStarterDelegate.startDownloadGroupPhotoProtocolWithinTransaction(session, contactGroupDetails.getOwnedIdentity(), contactGroupDetails.getGroupOwnerAndUid(), contactGroupDetails.getJsonGroupDetailsWithVersionAndPhoto());
+        }
+
+        List<ContactGroupV2Details> contactGroupV2DetailsList = ContactGroupV2Details.getAllWithMissingPhotoUrl(wrapSession(session));
+        for (ContactGroupV2Details contactGroupV2Details : contactGroupV2DetailsList) {
+            protocolStarterDelegate.startDownloadGroupV2PhotoProtocolWithinTransaction(session, contactGroupV2Details.getOwnedIdentity(), contactGroupV2Details.getGroupIdentifier(), contactGroupV2Details.getServerPhotoInfo());
+        }
+    }
 
     // endregion
     // endregion
@@ -4036,6 +4126,17 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             return null;
         }
     }
+
+    // very risky method, only called from the engine, but this is kind of a bad idea...
+    public EncryptionPrivateKey getOwnedIdentityEncryptionPrivateKey(Session session, Identity toIdentity) throws SQLException {
+        OwnedIdentity ownedIdentity = OwnedIdentity.get(wrapSession(session), toIdentity);
+        if (ownedIdentity == null) {
+            return null;
+        }
+        PrivateIdentity privateIdentity = ownedIdentity.getPrivateIdentity();
+        return privateIdentity.getEncryptionPrivateKey();
+    }
+
 
     // endregion
 
@@ -4244,16 +4345,97 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public byte[] serialize(ObvSyncSnapshotNode snapshotNode) throws Exception {
-        if (!(snapshotNode instanceof IdentityManagerSyncSnapshot)) {
-            throw new Exception("IdentityBackupDelegate can only serialize IdentityManagerSyncSnapshot");
+    public byte[] serialize(SerializationContext serializationContext, ObvSyncSnapshotNode snapshotNode) throws Exception {
+        switch (serializationContext) {
+            case DEVICE:
+                if (!(snapshotNode instanceof IdentityManagerDeviceSnapshot)) {
+                    throw new Exception("IdentityBackupDelegate can only serialize IdentityManagerDeviceSnapshot");
+                }
+                break;
+            case PROFILE:
+                if (!(snapshotNode instanceof IdentityManagerSyncSnapshot)) {
+                    throw new Exception("IdentityBackupDelegate can only serialize IdentityManagerSyncSnapshot");
+                }
+                break;
         }
         return jsonObjectMapper.writeValueAsBytes(snapshotNode);
     }
 
     @Override
-    public ObvSyncSnapshotNode deserialize(byte[] serializedSnapshotNode) throws Exception {
-        return jsonObjectMapper.readValue(serializedSnapshotNode, IdentityManagerSyncSnapshot.class);
+    public ObvSyncSnapshotNode deserialize(SerializationContext serializationContext, byte[] serializedSnapshotNode) throws Exception {
+        switch (serializationContext) {
+            case DEVICE:
+                return jsonObjectMapper.readValue(serializedSnapshotNode, IdentityManagerDeviceSnapshot.class);
+            case PROFILE:
+            default:
+                return jsonObjectMapper.readValue(serializedSnapshotNode, IdentityManagerSyncSnapshot.class);
+        }
+    }
+
+    @Override
+    public ObvSyncSnapshotNode getDeviceSnapshot() {
+        try (IdentityManagerSession identityManagerSession = getSession()) {
+            try {
+                // start a transaction to be sure the db is not modified while the snapshot is being computed!
+                identityManagerSession.session.startTransaction();
+                return getDeviceSnapshotWithinTransaction(identityManagerSession);
+            } catch (Exception e) {
+                Logger.x(e);
+                return null;
+            } finally {
+                // always rollback as the snapshot creation should never modify the DB.
+                identityManagerSession.session.rollback();
+            }
+        } catch (SQLException e) {
+            Logger.x(e);
+            return null;
+        }
+    }
+
+    public ObvSyncSnapshotNode getDeviceSnapshotWithinTransaction(IdentityManagerSession identityManagerSession) throws Exception {
+        if (!identityManagerSession.session.isInTransaction()) {
+            Logger.e("ERROR: called IdentityManager.getDeviceSnapshotWithinTransaction outside a transaction!");
+            throw new Exception();
+        }
+        return IdentityManagerDeviceSnapshot.of(identityManagerSession);
+    }
+
+    @Override
+    public Map<String, String> getAdditionalProfileInfo(Identity ownedIdentity) {
+        try (IdentityManagerSession identityManagerSession = getSession()) {
+            try {
+                // start a transaction to be sure the db is not modified while the snapshot is being computed!
+                identityManagerSession.session.startTransaction();
+                return getAdditionalProfileInfoWithinTransaction(identityManagerSession, ownedIdentity);
+            } catch (Exception e) {
+                Logger.x(e);
+                return null;
+            } finally {
+                // always rollback as the snapshot creation should never modify the DB.
+                identityManagerSession.session.rollback();
+            }
+        } catch (SQLException e) {
+            Logger.x(e);
+            return null;
+        }
+    }
+
+    private Map<String, String> getAdditionalProfileInfoWithinTransaction(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws Exception {
+        if (!identityManagerSession.session.isInTransaction()) {
+            Logger.e("ERROR: called IdentityManager.getAdditionalProfileInfoWithinTransaction outside a transaction!");
+            throw new Exception();
+        }
+        String displayName = getCurrentDeviceDisplayName(identityManagerSession.session, ownedIdentity);
+        if (displayName != null) {
+            return Map.of(ObvProfileBackupSnapshot.INFO_DEVICE_NAME, displayName);
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    @Override
+    public ObvBackupAndSyncDelegate getSyncDelegate() {
+        return this;
     }
 
     @Override
@@ -4286,13 +4468,33 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
 
             @Override
-            public byte[] serialize(ObvSyncSnapshotNode snapshotNode) throws Exception {
-                return IdentityManager.this.serialize(snapshotNode);
+            public byte[] serialize(SerializationContext serializationContext, ObvSyncSnapshotNode snapshotNode) throws Exception {
+                return IdentityManager.this.serialize(serializationContext, snapshotNode);
             }
 
             @Override
-            public ObvSyncSnapshotNode deserialize(byte[] serializedSnapshotNode) throws Exception {
-                return IdentityManager.this.deserialize(serializedSnapshotNode);
+            public ObvSyncSnapshotNode deserialize(SerializationContext serializationContext, byte[] serializedSnapshotNode) throws Exception {
+                return IdentityManager.this.deserialize(serializationContext, serializedSnapshotNode);
+            }
+
+            @Override
+            public ObvSyncSnapshotNode getDeviceSnapshot() {
+                try {
+                    return IdentityManager.this.getDeviceSnapshotWithinTransaction(identityManagerSession);
+                } catch (Exception e) {
+                    Logger.x(e);
+                    return null;
+                }
+            }
+
+            @Override
+            public Map<String, String> getAdditionalProfileInfo(Identity ownedIdentity) {
+                try {
+                    return IdentityManager.this.getAdditionalProfileInfoWithinTransaction(identityManagerSession, ownedIdentity);
+                } catch (Exception e) {
+                    Logger.x(e);
+                    return null;
+                }
             }
         };
     }
@@ -4301,6 +4503,69 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     public ObvIdentity restoreTransferredOwnedIdentity(Session session, String deviceName, IdentityManagerSyncSnapshot node) throws Exception {
         Identity ownedIdentity = Identity.of(node.owned_identity);
         return node.owned_identity_node.restoreOwnedIdentity(wrapSession(session), deviceName, ownedIdentity);
+    }
+
+    @Override
+    public BackupSeed getOwnedIdentityBackupSeed(Session session, Identity ownedIdentity) throws SQLException {
+        OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
+        if (ownedIdentityObject != null) {
+            return ownedIdentityObject.getBackupSeed();
+        }
+        return null;
+    }
+
+    @Override
+    public List<ObvDeviceBackupForRestore.ObvDeviceBackupProfile> getDeviceBackupProfileListFromDeviceBackup(Session session, ObvSyncSnapshotNode snapshotNode) throws Exception {
+        if (!(snapshotNode instanceof IdentityManagerDeviceSnapshot)) {
+            throw new Exception("Bad snapshot type");
+        }
+        List<ObvDeviceBackupForRestore.ObvDeviceBackupProfile> list = new ArrayList<>();
+        IdentityManagerDeviceSnapshot identityManagerDeviceSnapshot = (IdentityManagerDeviceSnapshot) snapshotNode;
+
+        if (!identityManagerDeviceSnapshot.validate()) {
+            throw new Exception("Invalid IdentityManagerDeviceSnapshot");
+        }
+
+        IdentityManagerSession identityManagerSession = wrapSession(session);
+        for (Map.Entry<ObvBytesKey, OwnedIdentityDeviceSnapshot> owned_identity : identityManagerDeviceSnapshot.owned_identities.entrySet()) {
+            if (!owned_identity.getValue().validate()) {
+                continue;
+            }
+
+            ObvDeviceBackupForRestore.ObvDeviceBackupProfile profile = new ObvDeviceBackupForRestore.ObvDeviceBackupProfile();
+            profile.bytesProfileIdentity = owned_identity.getKey().getBytes();
+            IdentityDetailsSyncSnapshot published_details = owned_identity.getValue().published_details;
+            JsonIdentityDetailsWithVersionAndPhoto detailsAndPhoto = new JsonIdentityDetailsWithVersionAndPhoto();
+            detailsAndPhoto.setVersion(published_details.version);
+            detailsAndPhoto.setIdentityDetails(jsonObjectMapper.readValue(published_details.serialized_details, JsonIdentityDetails.class));
+
+            // check if this identity is known and has a local published photo
+            if (published_details.photo_server_label != null && published_details.photo_server_key != null) {
+                detailsAndPhoto.setPhotoServerLabel(published_details.photo_server_label);
+                detailsAndPhoto.setPhotoServerKey(published_details.photo_server_key);
+
+                try {
+                    UID label = new UID(published_details.photo_server_label);
+                    AuthEncKey key = (AuthEncKey) new Encoded(published_details.photo_server_key).decodeSymmetricKey();
+                    List < OwnedIdentityDetails > ownedIdentityDetailsList = OwnedIdentityDetails.getAllForOwnedIdentity(identityManagerSession, Identity.of(profile.bytesProfileIdentity));
+                    for (OwnedIdentityDetails ownedIdentityDetails : ownedIdentityDetailsList) {
+                        if (label.equals(ownedIdentityDetails.getPhotoServerLabel())
+                                && key.equals(ownedIdentityDetails.getPhotoServerKey())) {
+                            detailsAndPhoto.setPhotoUrl(ownedIdentityDetails.getPhotoUrl());
+                            break;
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            profile.identityDetails = detailsAndPhoto;
+            profile.keycloakManaged = owned_identity.getValue().keycloak_managed;
+            profile.profileBackupSeed = new BackupSeed(owned_identity.getValue().backup_seed).toString();
+
+            list.add(profile);
+        }
+
+        return list;
     }
 
     // endregion

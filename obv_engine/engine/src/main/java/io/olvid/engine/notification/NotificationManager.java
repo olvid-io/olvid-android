@@ -21,6 +21,7 @@ package io.olvid.engine.notification;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.olvid.engine.Logger;
@@ -92,7 +93,7 @@ public class NotificationManager implements NotificationListeningDelegate, Notif
     // region implement NotificationPostingDelegate
 
     @Override
-    public void postNotification(String notificationName, HashMap<String, Object> userInfo) {
+    public void postNotification(String notificationName, Map<String, Object> userInfo) {
         Logger.d("Posting notification with name " + notificationName);
         listenersLock.lock();
         HashMap<Long, WeakReference<NotificationListener>> notificationObservers = listeners.get(notificationName);

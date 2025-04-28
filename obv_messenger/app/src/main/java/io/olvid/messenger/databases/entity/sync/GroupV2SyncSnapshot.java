@@ -56,9 +56,7 @@ public class GroupV2SyncSnapshot implements ObvSyncSnapshotNode {
         Discussion discussion = db.discussionDao().getByGroupIdentifier(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier);
         if (discussion != null) {
             DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
-            if (discussionCustomization != null) {
-                groupV2SyncSnapshot.discussion_customization = DiscussionCustomizationSyncSnapshot.of(db, discussionCustomization);
-            }
+            groupV2SyncSnapshot.discussion_customization = DiscussionCustomizationSyncSnapshot.of(db, discussionCustomization, discussion.archived);
         }
 
         groupV2SyncSnapshot.domain = DEFAULT_DOMAIN;

@@ -82,7 +82,7 @@ public interface OwnedIdentityDao {
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " = :customDisplayName " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateCustomDisplayName(@NonNull byte[] bytesOwnedIdentity, String customDisplayName);
+    void updateCustomDisplayName(@NonNull byte[] bytesOwnedIdentity, @Nullable String customDisplayName);
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
             " SET " + OwnedIdentity.UNLOCK_PASSWORD + " = :unlockPassword, " +

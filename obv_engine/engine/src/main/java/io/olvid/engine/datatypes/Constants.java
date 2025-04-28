@@ -23,7 +23,7 @@ package io.olvid.engine.datatypes;
 import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 43;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 44;
     public static final int SERVER_API_VERSION = 19;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
@@ -80,6 +80,12 @@ public abstract class Constants {
     // not used for now
 //    public static final long PERIODIC_OWNED_DEVICE_SYNC_INTERVAL = 86_400_000L; // 1 day
 
+    // backups v2
+    public static final UID DEVICE_BACKUP_THREAD_ID = new UID(new byte[]{(byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe});
+    public static final long DEVICE_BACKUP_INTERVAL =  30 * 86_400_000L; // 30 days
+    public static final long PROFILE_BACKUP_INTERVAL =  86_400_000L; // 1 day
+    public static final long BACKUP_START_DELAY = 5 * 60_000L; // 5 minutes
+
     // pre keys
     public static final long PRE_KEY_VALIDITY_DURATION = 60 * 86_400_000L; // validity duration of newly generated pre-keys: 60 days
     public static final long PRE_KEY_RENEWAL_INTERVAL = 7 * 86_400_000L; // how frequently to refresh pre-keys on the server: 7 days
@@ -109,6 +115,7 @@ public abstract class Constants {
 
     public static final UID BROADCAST_UID = new UID(new byte[]{(byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff});
 
+    
     public static final byte[] ANDROID_STORE_ID = new byte[]{0x01};
 
     public static final int DEFAULT_NUMBER_OF_DIGITS_FOR_SAS = 4;
@@ -119,6 +126,7 @@ public abstract class Constants {
 
     public static final long BASE_RESCHEDULING_TIME = 250L;
     public static final long WEBSOCKET_PING_INTERVAL_MILLIS = 20_000L;
+    public static final long WEBSOCKET_RECONNECT_INTERVAL_MILLIS = 6_000_000L ; // 1h40 (the AWS timeout is 2h)
 
 
     // Keycloak
@@ -145,7 +153,10 @@ public abstract class Constants {
         OWNED_IDENTITY_DELETION,
         DEVICE_PRE_KEY,
         ENCRYPTION_WITH_PRE_KEY,
+        BACKUP_UPLOAD,
+        BACKUP_DELETE,
     }
+
 
     public static final byte[] SERVER_AUTHENTICATION_SIGNATURE_CHALLENGE_PREFIX = "authentChallenge".getBytes(StandardCharsets.UTF_8);
     public static final byte[] MUTUAL_SCAN_SIGNATURE_CHALLENGE_PREFIX = "mutualScan".getBytes(StandardCharsets.UTF_8);
@@ -162,6 +173,8 @@ public abstract class Constants {
     public static final byte[] OWNED_IDENTITY_DELETION_SIGNATURE_CHALLENGE_PREFIX = "ownedIdentityDeletion".getBytes(StandardCharsets.UTF_8);
     public static final byte[] DEVICE_PRE_KEY_SIGNATURE_CHALLENGE_PREFIX = "devicePreKey".getBytes(StandardCharsets.UTF_8);
     public static final byte[] ENCRYPTION_WITH_PRE_KEY_SIGNATURE_CHALLENGE_PREFIX = "encryptionWithPreKey".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] BACKUP_UPLOAD_SIGNATURE_CHALLENGE_PREFIX = "backupUpload".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] BACKUP_DELETE_SIGNATURE_CHALLENGE_PREFIX = "backupDelete".getBytes(StandardCharsets.UTF_8);
 
     public static byte[] getSignatureChallengePrefix(SignatureContext signatureContext) {
         switch (signatureContext) {
@@ -195,6 +208,10 @@ public abstract class Constants {
                 return DEVICE_PRE_KEY_SIGNATURE_CHALLENGE_PREFIX;
             case ENCRYPTION_WITH_PRE_KEY:
                 return ENCRYPTION_WITH_PRE_KEY_SIGNATURE_CHALLENGE_PREFIX;
+            case BACKUP_UPLOAD:
+                return BACKUP_UPLOAD_SIGNATURE_CHALLENGE_PREFIX;
+            case BACKUP_DELETE:
+                return BACKUP_DELETE_SIGNATURE_CHALLENGE_PREFIX;
             default:
                 return null;
         }

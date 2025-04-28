@@ -44,8 +44,9 @@ public class Suite {
     public static AuthEnc getAuthEnc(String authEncName) {
         switch (authEncName) {
             case AuthEnc.CTR_AES256_THEN_HMAC_SHA256:
-            default:
                 return new AuthEncAES256ThenSHA256();
+            default:
+                return null;
         }
     }
 

@@ -32,7 +32,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -118,7 +117,7 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
             when (contactOrKeycloakDetails.contactType) {
                 CONTACT -> if (contactOrKeycloakDetails.contact != null) {
                     App.openContactDetailsActivity(
-                        context,
+                        requireContext(),
                         contactOrKeycloakDetails.contact.bytesOwnedIdentity,
                         contactOrKeycloakDetails.contact.bytesContactIdentity
                     )
@@ -163,14 +162,15 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                                     })
                             }
                         builder.create().show()
-                    } catch (ex: Exception) {
-                    }
+                    } catch (_: Exception) { }
                 } else {
-                    App.openContactDetailsActivity(
-                        context,
-                        ownedIdentity.bytesOwnedIdentity,
-                        contactOrKeycloakDetails.keycloakUserDetails?.identity
-                    )
+                    contactOrKeycloakDetails.keycloakUserDetails?.identity?.let { contactBytes ->
+                        App.openContactDetailsActivity(
+                            requireContext(),
+                            ownedIdentity.bytesOwnedIdentity,
+                            contactBytes
+                        )
+                    }
                 }
 
                 KEYCLOAK_MORE_RESULTS -> {}

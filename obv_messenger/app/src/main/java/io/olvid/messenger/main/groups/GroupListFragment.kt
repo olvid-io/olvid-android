@@ -123,53 +123,6 @@ class GroupListFragment : RefreshingFragment(), OnRefreshListener, EngineNotific
         }
     }
 
-    override fun call(groupOrGroup2: GroupOrGroup2) {
-        if (groupOrGroup2.group != null) {
-            val group = groupOrGroup2.group
-            App.runThread {
-                val groupMembers = AppDatabase.getInstance().contactGroupJoinDao()
-                    .getGroupContactsSync(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
-                val bytesContactIdentities = ArrayList<BytesKey>()
-                for (contact in groupMembers) {
-                    bytesContactIdentities.add(BytesKey(contact.bytesContactIdentity))
-                }
-                val multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(
-                    group.bytesOwnedIdentity,
-                    group.bytesGroupOwnerAndUid,
-                    bytesContactIdentities
-                )
-                Handler(Looper.getMainLooper()).post {
-                    multiCallStartDialogFragment.show(
-                        childFragmentManager, "dialog"
-                    )
-                }
-            }
-        } else if (groupOrGroup2.group2 != null) {
-            val group2 = groupOrGroup2.group2
-            App.runThread {
-                val contacts = AppDatabase.getInstance().group2MemberDao()
-                    .getGroupMemberContactsSync(
-                        group2.bytesOwnedIdentity,
-                        group2.bytesGroupIdentifier
-                    )
-                val bytesContactIdentities = ArrayList<BytesKey>()
-                for (contact in contacts) {
-                    bytesContactIdentities.add(BytesKey(contact.bytesContactIdentity))
-                }
-                val multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(
-                    group2.bytesOwnedIdentity,
-                    group2.bytesGroupIdentifier,
-                    bytesContactIdentities
-                )
-                Handler(Looper.getMainLooper()).post {
-                    multiCallStartDialogFragment.show(
-                        childFragmentManager, "dialog"
-                    )
-                }
-            }
-        }
-    }
-
     override fun clone(groupOrGroup2: GroupOrGroup2) {
             App.runThread {
                 val cloneAbilityOutput = GroupCloningTasks.getClonability(

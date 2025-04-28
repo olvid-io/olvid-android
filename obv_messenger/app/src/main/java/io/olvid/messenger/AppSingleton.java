@@ -696,14 +696,6 @@ public class AppSingleton {
                     }
                 }
 
-                // in case we have an MDM configuration, reload it and reconfigure backups
-                MDMConfigurationSingleton.reloadMDMConfiguration();
-                try {
-                    App.AppStartupTasks.configureMdmWebDavAutomaticBackups();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
                 App.runThread(new OwnedDevicesSynchronisationWithEngineTask(ownedIdentity.bytesOwnedIdentity));
 
                 selectIdentity(ownedIdentity.bytesOwnedIdentity, (OwnedIdentity ignored) -> {

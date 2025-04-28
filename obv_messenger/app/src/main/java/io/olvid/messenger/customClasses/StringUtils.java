@@ -51,7 +51,7 @@ public class StringUtils {
     public static final Pattern unAccentPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
     public static final Pattern positionAndCompanyPattern = Pattern.compile("^([^(]+) \\(.+\\)$");
 
-    public static String getNiceDurationString(Context context, long duration) {
+    public static String getNiceDurationString(@NonNull Context context, long duration) {
         if (duration < 60) {
             return context.getResources().getQuantityString(R.plurals.duration_seconds, (int) duration, duration);
         } else if (duration < 3600) {
@@ -65,7 +65,7 @@ public class StringUtils {
         }
     }
 
-    public static CharSequence getNiceDateString(Context context, long timestamp) {
+    public static CharSequence getNiceDateString(@NonNull Context context, long timestamp) {
         long now = System.currentTimeMillis();
         if (DateUtils.isToday(timestamp)) {
             // same day
@@ -79,7 +79,7 @@ public class StringUtils {
         }
     }
 
-    public static CharSequence getLongNiceDateString(Context context, long timestamp) {
+    public static CharSequence getLongNiceDateString(@NonNull Context context, long timestamp) {
         long now = System.currentTimeMillis();
         if (DateUtils.isToday(timestamp)) {
             // same day
@@ -93,7 +93,7 @@ public class StringUtils {
         }
     }
 
-    public static CharSequence getDayOfDateString(Context context, long timestamp) {
+    public static CharSequence getDayOfDateString(@NonNull Context context, long timestamp) {
         long now = System.currentTimeMillis();
         if (DateUtils.isToday(timestamp)) {
             // same day
@@ -111,13 +111,27 @@ public class StringUtils {
         }
     }
 
-    public static CharSequence getPreciseAbsoluteDateString(Context context, long timestamp) {
+    public static String getDateString(@NonNull Context context, long timestamp) {
+        long now = System.currentTimeMillis();
+        if (DateUtils.isToday(timestamp)) {
+            // same day
+            return context.getString(R.string.text_today);
+        } else if ((timestamp < now && timestamp + 86_400_000 > now) ||
+                DateUtils.isToday(timestamp + 86_400_000)) {
+            // yesterday
+            return context.getString(R.string.text_yesterday);
+        } else {
+            return DateUtils.formatDateTime(context, timestamp, DateUtils.FORMAT_SHOW_DATE);
+        }
+    }
+
+    public static CharSequence getPreciseAbsoluteDateString(@NonNull Context context, long timestamp) {
         return getPreciseAbsoluteDateString(context, timestamp, "\n");
     }
 
     private static final HashMap<String, SimpleDateFormat> bestTimeFormatterCache = new HashMap<>();
 
-    public static CharSequence getPreciseAbsoluteDateString(Context context, long timestamp, String separator) {
+    public static CharSequence getPreciseAbsoluteDateString(@NonNull Context context, long timestamp, String separator) {
         Locale locale = context.getResources().getConfiguration().locale;
         SimpleDateFormat formatter = bestTimeFormatterCache.get(locale.toString());
         if (formatter == null) {

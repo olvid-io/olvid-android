@@ -50,6 +50,7 @@ import io.olvid.engine.engine.types.ObvPostMessageOutput;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.FyleProgressSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.customClasses.BytesKey;
@@ -1011,6 +1012,8 @@ public class Message {
                         App.toast(R.string.toast_message_attachment_being_copied, Toast.LENGTH_LONG);
                     }
                     return;
+                } else {
+                    FyleProgressSingleton.INSTANCE.updateProgress(fyleAndStatus.fyle.id, fyleAndStatus.fyleMessageJoinWithStatus.messageId, 0, null);
                 }
             }
 

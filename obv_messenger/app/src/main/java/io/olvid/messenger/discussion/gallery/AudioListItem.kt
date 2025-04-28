@@ -91,6 +91,7 @@ fun AudioListItem(
     modifier: Modifier = Modifier,
     fyleAndStatus: FyleAndStatus,
     activity: Activity?,
+    onEnableMessageSwipe: ((Boolean) -> Unit)? = null,
     audioAttachmentServiceBinding: AudioAttachmentServiceBinding?,
     discussionId: Long,
     onLongClick: () -> Unit,
@@ -359,10 +360,14 @@ fun AudioListItem(
                         value = playtime / (duration.takeIf { it > 0 }
                             ?: 1).toFloat(),
                         onValueChange = { progress ->
+                            onEnableMessageSwipe?.invoke(false)
                             audioAttachmentServiceBinding?.seekAudioAttachment(
                                 fyleAndStatus,
                                 (progress * 1000).roundToInt()
                             )
+                        },
+                        onValueChangeFinished = {
+                            onEnableMessageSwipe?.invoke(true)
                         },
                         colors = SliderDefaults.colors(
                             thumbColor = colorResource(id = R.color.olvid_gradient_light),

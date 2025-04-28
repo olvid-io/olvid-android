@@ -194,7 +194,7 @@ public interface MessageDao {
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.BOOKMARKED + " = :bookmarked " +
             " WHERE id = :messageId")
-    void updateBookmarked(long messageId, boolean bookmarked);
+    void updateBookmarked(boolean bookmarked, long... messageId);
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.EXPIRATION_START_TIMESTAMP + " = :expirationStartTimestamp " +
@@ -439,16 +439,6 @@ public interface MessageDao {
             " )")
     LiveData<Boolean> hasUnreadMessagesOrDiscussionsOrInvitations(@NonNull byte[] bytesOwnedIdentity);
 
-    @Query("SELECT EXISTS " +
-            " ( SELECT 1 FROM " + Message.TABLE_NAME + " AS message " +
-            " INNER JOIN " + Discussion.TABLE_NAME + " AS discussion " +
-            " ON discussion.id = message." + Message.DISCUSSION_ID +
-            " WHERE discussion." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND message." + Message.BOOKMARKED + " = 1 " +
-            ")")
-    LiveData<Boolean> hasBookmarkedMessages(@NonNull byte[] bytesOwnedIdentity);
-
-
     @Query("SELECT COUNT(*) as unread_count, id as message_id, min(" + Message.SORT_INDEX + ") as min_sort_index FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.STATUS + " = " + Message.STATUS_UNREAD)
@@ -459,10 +449,10 @@ public interface MessageDao {
             " AND " + Message.STATUS + " = " + Message.STATUS_DRAFT)
     void deleteDiscussionDraftMessage(long discussionId);
 
-    @Query("DELETE FROM " + Message.TABLE_NAME +
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.MESSAGE_TYPE + " = " + Message.TYPE_NEW_PUBLISHED_DETAILS)
-    void deleteAllDiscussionNewPublishedDetailsMessages(long discussionId);
+    List<Message> getAllDiscussionNewPublishedDetailsMessages(long discussionId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +

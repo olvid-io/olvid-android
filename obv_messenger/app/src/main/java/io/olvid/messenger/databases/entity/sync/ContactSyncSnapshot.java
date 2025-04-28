@@ -60,9 +60,7 @@ public class ContactSyncSnapshot implements ObvSyncSnapshotNode {
             Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
             if (discussion != null) {
                 DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
-                if (discussionCustomization != null) {
-                    contactSyncSnapshot.discussion_customization = DiscussionCustomizationSyncSnapshot.of(db, discussionCustomization);
-                }
+                contactSyncSnapshot.discussion_customization = DiscussionCustomizationSyncSnapshot.of(db, discussionCustomization, discussion.archived);
             }
         }
 

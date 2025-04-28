@@ -79,7 +79,6 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
     protected TextView emptyViewTextView;
 
     private Observer<List<Contact>> selectedContactsObserver;
-//    private Observer<List<FilteredContactListViewModel.SelectableContact>> filteredContactsObserver;
     private List<Contact> initiallySelectedContacts;
 
 
@@ -87,7 +86,6 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
     private boolean selectable = false;
     private boolean disableEmptyView = false;
     private boolean disableAnimations = false;
-//    private String emptyViewText = null;
 
     protected FilteredContactListAdapter filteredContactListAdapter;
 
@@ -99,9 +97,6 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         if (unfilteredContacts != null) {
             observeUnfiltered();
         }
-//        if (this.filteredContactsObserver != null) {
-//            filteredContactListViewModel.getFilteredContacts().observe(this, this.filteredContactsObserver);
-//        }
         if (this.selectedContactsObserver != null) {
             filteredContactListViewModel.getSelectedContacts().observe(this, this.selectedContactsObserver);
         }
@@ -129,9 +124,6 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
             recyclerView.setEmptyView(recyclerEmptyView);
         }
         emptyViewTextView = rootView.findViewById(R.id.widget_list_empty_view_text_view);
-//        if (emptyViewText != null) {
-//            emptyViewTextView.setText(emptyViewText);
-//        }
 
         View loadingSpinner = rootView.findViewById(R.id.loading_spinner);
         recyclerView.setLoadingSpinner(loadingSpinner);
@@ -181,18 +173,6 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         }
     }
 
-//    public void setFilteredContactObserver(@Nullable Observer<List<FilteredContactListViewModel.SelectableContact>> observer) {
-//        if (filteredContactListViewModel != null) {
-//            if (this.filteredContactsObserver != null) {
-//                filteredContactListViewModel.getFilteredContacts().removeObserver(this.filteredContactsObserver);
-//            }
-//            if (observer != null) {
-//                filteredContactListViewModel.getFilteredContacts().observe(this, observer);
-//            }
-//        }
-//        this.filteredContactsObserver = observer;
-//    }
-
     public void setOnClickDelegate(FilteredContactListOnClickDelegate onClickDelegate) {
         this.onClickDelegate = onClickDelegate;
     }
@@ -220,14 +200,6 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         }
         this.selectedContactsObserver = observer;
     }
-
-//    public void setEmptyViewText(@Nullable String text) {
-//        if (emptyViewTextView != null) {
-//            emptyViewTextView.setText(text);
-//        } else {
-//            emptyViewText = text;
-//        }
-//    }
 
     public void removeBottomPadding() {
         removeBottomPadding = true;

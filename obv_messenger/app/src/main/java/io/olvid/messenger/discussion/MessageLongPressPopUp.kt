@@ -153,7 +153,6 @@ class MessageLongPressPopUp(
     private var fontSizeDp = 0
     private var plusButton: ImageView? = null
     private var plusOpen = false
-    private var additionalBottomPadding = 0
 
     private var separatorTextView: TextView? = null
     private var emojiPickerView: View? = null
@@ -415,8 +414,8 @@ class MessageLongPressPopUp(
                 App.runThread {
                     AppDatabase.getInstance().messageDao()
                         .updateBookmarked(
-                            messageId,
-                            !message.bookmarked
+                            !message.bookmarked,
+                            messageId
                         )
                     PropagateBookmarkedMessageChangeTask(
                         discussion.bytesOwnedIdentity,
@@ -963,9 +962,8 @@ class MessageLongPressPopUp(
             panelHeightPx = constraintLayoutHeightPx
         }
 
-        var fingerOffset =
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 8f, metrics).toInt()
-        fingerOffset += additionalBottomPadding
+        var fingerOffset = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 8f, metrics).toInt()
+        var additionalBottomPadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, metrics).toInt()
         val x = max(
             sixteenDpInPx.toDouble(),
             min(
@@ -978,8 +976,8 @@ class MessageLongPressPopUp(
         // adjust fingerOffset so the popup remains on screen
         if (clickY - constraintLayoutHeightPx - fingerOffset < 0) {
             fingerOffset = clickY - constraintLayoutHeightPx
-        } else if (clickY - constraintLayoutHeightPx - fingerOffset + panelHeightPx > parentView.height) {
-            fingerOffset = clickY - constraintLayoutHeightPx + panelHeightPx - parentView.height
+        } else if (popupWindow.height != 0 && (clickY - constraintLayoutHeightPx - fingerOffset + panelHeightPx + additionalBottomPadding > popupWindow.height)) {
+            fingerOffset = clickY - constraintLayoutHeightPx + panelHeightPx + additionalBottomPadding - popupWindow.height
         }
 
 

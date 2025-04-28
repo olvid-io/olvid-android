@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -344,7 +345,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
 
     class NotificationListener implements io.olvid.engine.datatypes.NotificationListener {
         @Override
-        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        public void callback(String notificationName, Map<String, Object> userInfo) {
             try {
                 switch (notificationName) {
                     case DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED: {

@@ -198,7 +198,6 @@
     <string name="menu_action_share">Share</string>
     <string name="menu_action_bookmark">Bookmark</string>
     <string name="menu_action_unbookmark">Unbookmark</string>
-    <string name="menu_action_bookmarks">Bookmarks</string>
     <string name="menu_action_archive">Archive</string>
     <string name="menu_action_unarchive">Unarchive</string>
     <string name="menu_check_update">Check Google Play for update</string>
@@ -343,7 +342,7 @@
     <string name="pref_discussion_background_image_click_to_remove_summary">Click to remove image</string>
     <string name="pref_discussion_background_image_click_to_choose_summary">Click to choose an image</string>
     <string name="pref_read_receipt_title">Send read receipts</string>
-    <string name="pref_read_receipt_summary">When this is on, people are notified when you have read their messages. This can be overridden in each discussion.</string>
+    <string name="pref_read_receipt_summary">When this is on, your contacts know when you have read their messages. This can be overridden in each discussion.</string>
     <string name="pref_link_preview_outbound_title">Attach a preview of links you send</string>
     <string name="pref_link_preview_summary_outbound">Once activated, Olvid will fetch a preview of links you send and attach it to the message.</string>
     <string name="pref_link_preview_inbound_title">Fetch previews of received links</string>
@@ -352,8 +351,8 @@
     <string name="pref_text_app_default">Use your default setting</string>
     <string name="pref_text_app_default_true">Use your default setting (on)</string>
     <string name="pref_text_app_default_false">Use your default setting (off)</string>
-    <string name="pref_text_discussion_read_receipt_off">Off, people are not notified</string>
-    <string name="pref_text_discussion_read_receipt_on">On, people are notified</string>
+    <string name="pref_text_discussion_read_receipt_off">Off, contacts are not informed</string>
+    <string name="pref_text_discussion_read_receipt_on">On, contacts are informed</string>
     <string name="pref_use_lock_screen_title">Use application lock screen</string>
     <string name="pref_use_lock_screen_summary">Turn this on to protect Olvid with a lock screen at startup.</string>
      <string name="pref_category_notifications_title">Notifications</string>
@@ -406,7 +405,8 @@
     <string name="pref_keep_lock_service_open_summary_off">Only show a notification when Olvid is unlocked.</string>
     <string name="pref_keep_lock_service_open_summary_on">Always show Olvid\'s lock status in a notification.</string>
     <string name="notification_title_olvid_is_locked">Olvid is locked</string>
-    <string name="pref_category_backup_title">Keys and contacts backup</string>
+    <string name="pref_category_backup_title">Backups</string>
+    <string name="pref_category_backup_title_configure">Configure backups</string>
     <string name="pref_generate_new_backup_key_title">Generate a backup key</string>
     <string name="pref_generate_new_backup_key_title_or_verify">Verify or re-generate a backup key</string>
     <string name="pref_manual_backup_title">Initiate a manual backup</string>
@@ -1078,22 +1078,14 @@
     <string name="dialog_message_keycloak_identity_was_revoked">It seems that your account was removed from your company\'s identity provider. If you left your company, this is normal and you may continue using Olvid as a free user.\n\nIf you believe this is an error, please contact your administrator to re-register this identity provider with Olvid.</string>
     <string name="button_label_backup_settings">Setup backups</string>
     <string name="snackbar_message_setup_backup">It\'s time to setup backups!</string>
-    <string name="dialog_message_setup_backup_explanation">If you were to lose your device, or to uninstall Olvid by mistake, you would lose your Olvid ID, all your contacts, and all your groups 😱. Luckily for you, it is possible to setup secure backups 😅.\n\nPress \"Setup backups\" to begin.</string>
+    <string name="dialog_message_setup_backup_explanation">If you were to lose your device, or to uninstall Olvid by mistake, you would lose your profiles, all your contacts, and all your groups 😱. Luckily for you, it is possible to setup secure backups 😅.\n\nPress \"Setup backups\" to begin.</string>
     <string name="snackbar_message_remember_to_backup">It\'s backup time!</string>
-    <string name="dialog_message_remember_to_backup_explanation">In order not to lose any contact, we recommend you activate automatic backups to Google Drive. Don\'t worry, these backups are encrypted 🤓!\nOtherwise, you may also perform manual backups on a regular basis.\n\nPress \"Setup backups\" to begin.</string>
-    <string name="dialog_message_remember_to_backup_explanation_no_google">It\'s been more than a week since your last backup. Now is probably a good time for a new one. Keep in mind that an old backup might not contain your latest contacts.\n\nPress \"Setup backups\" to begin.</string>
     <string name="restriction_keycloak_configuration_uri_title" translatable="false">Keycloak configuration</string>
     <string name="restriction_keycloak_configuration_uri_description" translatable="false">Configuration link provided in the keycloak Olvid Management Console.</string>
     <string name="restriction_disable_new_version_notification_title" translatable="false">Disable new version notification</string>
     <string name="restriction_disable_new_version_notification_description" translatable="false">Set to \"true\" to prevent users from receiving a notification when a new version of Olvid is available on the store. This is especially useful if the application can only be updated through the MDM.</string>
     <string name="restriction_settings_configuration_uri_title" translatable="false">Settings configuration link</string>
     <string name="restriction_settings_configuration_uri_description" translatable="false">Pre-defined application settings configuration link. May be generated at https://olvid.io/settings</string>
-    <string name="restriction_webdav_automatic_backup_uri_title" translatable="false">Automatic backup WebDAV uri</string>
-    <string name="restriction_webdav_automatic_backup_uri_description" translatable="false">Setting this will enable automatic backups to a WebDAV server. This uri should be of the form https://username:password@webdavserver/path/</string>
-    <string name="restriction_webdav_automatic_backup_write_only_title" translatable="false">Write-only WebDAV</string>
-    <string name="restriction_webdav_automatic_backup_write_only_description" translatable="false">Set this to \"true\" if the automatic backup WebDAV only supports writing (no listing, downloading or deleting).</string>
-    <string name="restriction_webdav_key_escrow_public_key_title" translatable="false">Encryption public key for backup key escrow on WebDAV</string>
-    <string name="restriction_webdav_key_escrow_public_key_description" translatable="false">Set this to an RSA public key in PEM format. The backup key generated in Olvid will then be kept in escrow on the WebDAV server.</string>
     <string name="dialog_title_open_external_app_warning">Open with external app</string>
     <string name="dialog_message_open_external_app_warning">You are about to open a file with an external application. The content of this file will be exposed outside of Olvid.\nDo you wish to proceed?</string>
     <string name="menu_action_unblock_discussion">Unblock discussion</string>
@@ -1185,7 +1177,7 @@
     <string name="content_description_remove_message_reply_to">Clear message reply</string>
     <string name="content_description_remove_link_preview">Clear link preview</string>
     <string name="content_description_notification_muted_indicator">Indicator that notifications are muted for this profile</string>
-    <string name="button_label_create_new_profile">Create a profile</string>
+    <string name="button_label_create_a_profile">Create a profile</string>
     <string name="text_explanation_onboarding_keycloak_parsed_configuration">The identity provider of your company was successfully configured. Press the \"authenticate\" button below to authenticate with it and retrieve your personal information.</string>
     <string name="text_explanation_onboarding_keycloak_mdm">Welcome to Olvid.\n\nThis installation is managed by your company and was configured to use an identity provider. Press the \"authenticate\" button below to authenticate with it and retrieve your personal information.\n\nIf you already used Olvid and want to restore your keys and contacts from a backup, press \"restore a backup\".</string>
     <string name="button_label_see_details">See details</string>
@@ -1289,13 +1281,14 @@
     <string name="menu_action_debug_information">Debug information</string>
     <string name="debug_label_number_of_channels_and_devices">Number of channels/devices:</string>
     <string name="debug_label_server">Server:</string>
+    <string name="debug_label_identity_provider">Identity provider:</string>
     <string name="debug_label_identity_link">ID link:</string>
     <string name="debug_label_capabilities">Capabilities:</string>
     <string name="debug_label_capability_continuous_gathering">VoIP v2: %1$b</string>
     <string name="debug_label_capability_groups_v2">Groups v2: %1$b</string>
     <string name="bullet">-</string>
     <string name="pref_use_system_emojis_title">Use system emoji font (when available)</string>
-    <string name="pref_use_system_emojis_summary">When activated, the system font will be used for supported emoji caracters. Otherwise, the embedded font will be used.</string>
+    <string name="pref_use_system_emojis_summary">When activated, the system font will be used for supported emoji characters. Otherwise, the embedded font will be used.</string>
     <string name="label_profile_storage_usage">Profile storage usage</string>
     <string name="label_photos">Photos</string>
     <string name="label_videos">Videos</string>
@@ -1604,7 +1597,7 @@
     <string name="text_setting_map_integration">\u2023 Map provider integration:\u0020</string>
     <string name="text_setting_address_lookup_server">\u2023 Custom address server:\u0020</string>
     <string name="text_setting_disable_address_lookup">\u2023 Disable address lookup:\u0020</string>
-    <string name="text_setting_notify_certificate_change">\u2023 Notify when a server certifcate changes:\u0020</string>
+    <string name="text_setting_notify_certificate_change">\u2023 Notify when a server certificate changes:\u0020</string>
     <string name="text_setting_sending_foreground_service">\u2023 Enable the \"message being sent\" notification:\u0020</string>
     <string name="text_setting_auto_join_groups">\u2023 Automatically accept group invitations from:\u0020</string>
     <string name="text_setting_lock_delay">\u2023 Lock screen delay:\u0020</string>
@@ -1714,7 +1707,7 @@
     <string name="onboarding_welcome_subtitle">Have we met before?</string>
     <string name="onboarding_action_existing_profile_label">I already have an Olvid profile</string>
     <string name="onboarding_action_new_profile_label">I am a new Olvid user</string>
-    <string name="onboarding_existing_profile_title">What would you like to do?</string>
+    <string name="onboarding_existing_profile_title">Do you regularly use your profile on another device?</string>
     <string name="onboarding_backup_source_title">Where is your backup file located?</string>
     <string name="onboarding_managed_profile_question">Profile managed by your organization?</string>
     <string name="onboarding_managed_profile_hyperlink">This way</string>
@@ -1737,11 +1730,9 @@
     <string name="button_label_a_file">A file</string>
     <string name="button_label_the_cloud">The cloud</string>
     <string name="label_backup_key">Backup key</string>
-    <string name="button_label_activate_profile">Import a profile from another device</string>
-    <string name="button_description_activate_profile">Choose this if you have access to another device where your profile is currently active</string>
-    <string name="button_description_restore_backup">Requires a backup file and the corresponding backup key</string>
+    <string name="button_label_activate_profile">Add an existing profile</string>
     <string name="onboarding_new_profile_title">Add a new profile on this device</string>
-    <string name="onboarding_action_create_new_profile">Create a new profile</string>
+    <string name="button_label_create_new_profile">Create a new profile</string>
     <string name="label_device_name">Device name</string>
     <string name="toast_message_profile_activation_failed">Profile import failed</string>
     <string name="button_label_add_device_xxx">Add device \"%1$s\"</string>
@@ -1769,7 +1760,7 @@
     <string name="onboarding_transfer_source_confirmation_other_device_remain_active">The device below will remain active:</string>
     <string name="button_label_restore_this_backup">Restore this backup</string>
     <string name="button_label_maybe_later">Maybe later</string>
-    <string name="dialog_permissions_change_title">Groupe type modification</string>
+    <string name="dialog_permissions_change_title">Group type modification</string>
     <string name="dialog_permissions_change_message">Changing the group type will significantly change the permissions of the members below.</string>
     <string name="dialog_permissions_change_admin">**Gain admin:**</string>
     <string name="dialog_permissions_change_not_admin">**Lose admin:**</string>
@@ -1777,16 +1768,6 @@
     <string name="dialog_permissions_change_cannot_send_messages">**Can no longer send messages:**</string>
     <string name="label_write_only_webdav_explanation">This is a write-only WebDAV. Listing is not possible.</string>
     <string name="label_write_only_webdav">Write-only WebDAV server</string>
-    <string name="dialog_title_mdm_backup_failure">Automatic backup failure</string>
-    <string name="dialog_message_mdm_backup_failure">Automatic backups are currently configured by your device administrator. An error occurred while uploading your latest backup, which could mean this configuration is no longer valid.\n\nIf this problem persists, please contact your administrator.</string>
-    <string name="dialog_title_backup_configured_by_mdm">Backups configured by your device administrator</string>
-    <string name="dialog_message_backup_configured_by_mdm">Automatic backups are currently configured by your device administrator and cannot be disabled. If you believe this is an error, please contact your administrator.</string>
-    <string name="dialog_title_mdm_key_escrow_required">Your backup key is not safely stored in escrow</string>
-    <string name="dialog_message_mdm_key_escrow_required">Your device administrator has configured automatic key escrow for your Olvid backup key. However your current key is not safely stored yet.\n\nPlease press \"open settings\" and generate a new backup key. If not sure about what to do, please contact your administrator.</string>
-    <string name="pref_generate_new_backup_key_summary_key_escrow_status_ok">\nKey escrow status: OK</string>
-    <string name="pref_generate_new_backup_key_summary_key_escrow_status_bad">\nKey escrow status: ⚠️ Missing ⚠️</string>
-    <string name="label_key_escrow_successful">Key escrow successful</string>
-    <string name="label_key_escrow_failed">Key escrow failed</string>
 
     <string name="troubleshooting_notifications_valid_title">Notifications</string>
     <string name="troubleshooting_notifications_valid_description">To be notified when a contact sends you a message, you need to allow Olvid to display notifications.</string>
@@ -1815,7 +1796,7 @@
     <string name="troubleshooting_alarm_invalid_description">Olvid relies on alarms to precisely schedule screen lock and ephemeral messages deletion.\nThe permission to set such alarms has been revoked, which may cause these security features to misbehave.\n\nWe strongly encourage you to allow setting alarms and reminders by pressing \"App settings\".</string>
     <string name="troubleshooting_incoming_call_valid_title">Incoming call notifications</string>
     <string name="troubleshooting_incoming_call_valid_description">Incoming calls need to display a full screen \"answer call\" notification. This permission is set correctly.</string>
-    <string name="troubleshooting_incoming_call_invalid_description">Incoming calls need to display a full screen \"answer call\" notification. Olvid currently does not have permission to open such full screen notifications. Press \"App settings\" to allow full scrren notifications.</string>
+    <string name="troubleshooting_incoming_call_invalid_description">Incoming calls need to display a full screen \"answer call\" notification. Olvid currently does not have permission to open such full screen notifications. Press \"App settings\" to allow full screen notifications.</string>
     <string name="troubleshooting_google_valid_title">Google Play Services unavailable</string>
     <string name="troubleshooting_google_valid_description">Permanent WebSocket connection to Olvid\'s servers is properly configured.</string>
     <string name="troubleshooting_google_invalid_description">Google Play Services are not available on your device. Olvid relies on these services to be notified of incoming messages. Without them, you will only receive new messages when Olvid is in the foreground.\n\nYou may instead enable a permanent WebSocket connection to Olvid\'s servers that can serve the same purpose (but may slightly drain your battery).</string>
@@ -1828,7 +1809,7 @@
     <string name="troubleshooting_faq_description">Need help with Olvid? Please read our FAQ:</string>
     <string name="troubleshooting_faq_link">https://olvid.io/faq</string>
     <string name="troubleshooting_request_permission">Request permission</string>
-    <string name="troubleshooting_backup_valid_description">Olvid backups are properly setup. Please make sure you know where your backup key is and check that you have access to up to date backup files.\n\nIt is a good idea to verify your backup key from time to time, just to be sure you\'ll know what to do if you lose your device 😅.</string>
+    <string name="troubleshooting_backup_valid_description">Olvid backups are properly setup. Please make sure you have access to your backup key, just to be sure you\'ll know what to do if you lose your device 😅.</string>
     <string name="snackbar_go_to_troubleshooting_message">Want to improve your Olvid experience?</string>
     <string name="snackbar_go_to_troubleshooting_button">Let\'s go</string>
     <string name="troubleshooting_ignored">Ignored</string>
@@ -1920,8 +1901,8 @@
     <string name="global_search_result_attachments">Attachments</string>
     <string name="global_search_result_links">Links</string>
     <string name="preference_filename_database" translatable="false">io.olvid.messenger.DATABASE_PREFERENCE_FILE</string>
-    <string name="button_label_send_read_receipts">Notify my contacts</string>
-    <string name="button_label_do_not_send">Do not notify them</string>
+    <string name="button_label_send_read_receipts">Inform my contacts</string>
+    <string name="button_label_do_not_send">Do not inform them</string>
     <string name="button_label_ask_later">Ask me later</string>
     <string name="dialog_message_prompt_user_for_read_receipts">Would you like your contacts to know when you read their messages?</string>
     <string name="dialog_title_prompt_user_for_read_receipts">Read receipts</string>
@@ -1995,6 +1976,42 @@
     <string name="troubleshooting_storage_db_sync_title">Database consistency check</string>
     <string name="troubleshooting_storage_db_sync_description">After an application crash, internal databases might have consistency issues. Run this check to ensure everything is fine 😁</string>
     <string name="button_label_check_now">Check now</string>
+    <string name="pref_your_backup_key_title">Your key</string>
+    <string name="pref_your_backups_title">Your backups</string>
+    <string name="backup_tip_message_multi_device">Use Olvid on multiple devices. You may then restore your account, without a key, from your other devices.</string>
+    <string name="backup_tip_title">Tip</string>
+    <string name="button_label_subscribe_olvid_plus">Subscribe to Olvid+</string>
+    <string name="label_no_subscription_available">No subscription offer available</string>
+    <string name="pref_show_your_backup_key_title">Show my key</string>
+    <string name="pref_compromised_key_title">Stolen or compromised key?</string>
+    <string name="button_label_show_my_backup_key">Show my backup key</string>
+    <string name="label_choose_backup_mode">Choose your backup mode</string>
+    <string name="pref_use_credentials_manager_title">Save my key to my password manager (recommended)</string>
+    <string name="label_choose_default_password_manager">Choose the default password manager</string>
+    <string name="button_label_i_wrote_my_key">Well noted</string>
+    <string name="label_your_key">Your key</string>
+    <string name="explanation_write_your_key">Write down your key. You will need to enter it to restore your Olvid account on your future devices.</string>
+    <string name="label_failed_to_generate_backup_seed">An error occurred while generating your backup key, please try again.</string>
+    <string name="label_failed_to_save_backup_seed">An error occurred while saving your backup key to your default password manager.\n**You will need to write it down.**</string>
+    <string name="label_saved_to_password_manager">Your key was successfully saved to your password manager.</string>
+    <string name="button_label_copy_key">Copy the key</string>
+    <string name="toast_message_key_copied_to_clipboard">Key copied to clipboard</string>
+    <string name="dialog_message_credentials_not_deleted">Disabling this setting **does not remove** your key from your password manager.\nYou will need to manually open it and delete the credentials associated to Olvid.</string>
+    <string name="button_label_reset_my_key">Reset my key</string>
+    <string name="dialog_message_reset_backup_key">If your backup key was lost or compromised you may reset it to **delete any backup of your account associated to this key**. This key will no longer be usable to restore your account.\n\nIf you believe someone could already have used this key to maliciously gain access to your account, you should **check your device list** in your profile\'s details for any unexpected device.</string>
+    <string name="pref_manage_backups_title">Manage my Olvid backups</string>
+    <string name="pref_initiate_backup_now_title">Initiate a backup now</string>
+    <string name="pref_backups_faq_title">FAQ: Understanding backups</string>
+    <string name="backup_faq_link">https://olvid.io/faq/backup-your-profiles/</string>
+    <string name="content_description_close_button">Close button</string>
+    <string name="dialog_title_your_online_backups">Your online backups</string>
+    <string name="explanation_online_backup">When backed up on olvid.io, your profile is always encrypted and only you have the key.</string>
+    <string name="button_label_reset">Reset</string>
+    <string name="explanation_reset_backups">Resetting will delete all your backups.</string>
+    <string name="dialog_message_reset_backups">Resetting your backup will **discard your backup key**, **erase any online backup** of your device, and **stop backing it up**.\n\nUnless your profile is active on another device, you will no longer be able to restore it if you were to lose this device.</string>
+    <string name="toast_message_backups_reset">Backups successfully reset</string>
+    <string name="label_manage_backups_for_another_key">Your profile is not listed?\u0020</string>
+    <string name="label_manage_backups_for_another_key_blue_part">Manually enter another key</string>
     <string name="snackbar_action_label_undo">Undo</string>
     <string name="dialog_unarchive_setting_title">Unarchive setting</string>
     <string name="dialog_unarchive_setting_message">When do you want your discussions to be unarchived?</string>
@@ -2009,9 +2026,113 @@
     <string name="call_notification_incoming_call">Incoming call</string>
     <string name="menu_action_copy_text_from_image">Copy this word</string>
     <string name="menu_action_copy_text_block_from_image">Copy whole block</string>
+    <string name="error_text_backup_network_error">Unable to retrieve your backup.\n\nPlease check your network connection and try again.</string>
+    <string name="error_text_backup_retriable_error">An error occurred while retrieving your backup.\n\nPlease try again.</string>
+    <string name="error_text_backup_permanent_error">Unable to retrieve your backup.\n\nEither the backup key is incorrect, or no backup was found.</string>
+    <string name="button_label_enable_backups">Enable backups</string>
+    <string name="button_label_switch_to_new_backups">Switch to new backups</string>
+    <string name="enable_backups_title">Backup your profile</string>
+    <string name="enable_backups_message_with_legacy">You currently have legacy Olvid backups enabled, which will stop being supported soon.\nSwitch to the new Olvid backup system to make sure you can restore your profiles and contacts if you lose your device.</string>
+    <string name="enable_backups_message">Enabling backups allows you to restore your profile and contacts, even if you lose your device.</string>
+    <string name="content_description_contextual_actions">Contextual actions button</string>
+    <string name="label_backup_from">From %1$s</string>
+    <string name="label_backup_groups_and_contacts">%1$s, %2$s</string>
+    <string name="label_this_device">This device</string>
+    <string name="menu_action_restore">Restore</string>
+    <string name="dialog_message_backup_snapshot_delete_confirmation">Are you sure you want to **delete this backup**?\nThis action **cannot be undone**.</string>
+    <string name="dialog_message_backup_snapshot_delete_confirmation_current_device">Are you sure you want to **delete this backup**?\n\nThis backup was uploaded from your current device and **a new version will be uploaded soon**.</string>
+    <string name="dialog_message_confirm_restore_profile">Are you sure you want to restore your profile **%1$s** on the current device?</string>
+    <string name="button_label_restore_snapshot">Restore this backup</string>
+    <string name="dialog_message_failed_to_backup">An error occurred during your backup. This could be due to a network error.\n\nOlvid will continue trying to perform this backup in the background.</string>
+    <string name="label_already_active">Already active</string>
+    <string name="explanation_backup_seed_format">A backup key is composed of 32 letters or numbers, usually displayed as eight 4-character groups.</string>
+    <string name="button_label_load_from_password_manager">Load from password manager</string>
+    <string name="label_backups_encrypted">Backups of your profiles on Olvid are always encrypted.</string>
+    <string name="pref_security_title">Security</string>
+    <string name="explanation_backups">Backups allow to restore your profiles and contacts if you lose access to your device.\n\nPlease note that messages and attachments are **not backed up** and will **not be restored**.</string>
+    <string name="label_learn_more">Learn more.</string>
+    <string name="dialog_message_reset_backup_key_failed">An unexpected error occurred while generating your new backup key. Right now, **your profiles are no longer backed up**.\n\nPlease try generating a backup key again.</string>
+    <string name="troubleshooting_backup_legacy_title">Switch to the new Olvid backups</string>
+    <string name="troubleshooting_olvid_backups_title">Olvid backups</string>
+    <string name="button_label_no">No</string>
+    <string name="button_label_yes_and_with_me">Yes, and I have it with me</string>
+    <string name="explanation_import_profile">Please note that if you will soon have access to your profile on another device, we recommend you wait for this before proceeding with the activation.</string>
+    <string name="onboarding_backup_v2_load_or_input_title">Let\'s restore one of your backups</string>
+    <string name="button_label_enter_my_key">Enter my key</string>
+    <string name="button_label_i_dont_have_a_key">I don\'t have a key</string>
+    <string name="dialog_message_backup_restore_needs_a_key">Unfortunately, if you do not have access to a backup key, it will not be possible to restore your profile and its contacts.</string>
+    <string name="onboarding_backup_v2_enter_key_title">Enter your backup key</string>
+    <string name="explanation_unable_to_check_backup_key">Unable to search for available backups. Please check your network connection and try again.</string>
+    <string name="explanation_no_backup_found_try_legacy">**No backups were found for this key.** Please check you entered it correctly and try again.\n\nIf this is a legacy backup key, you may try restoring a legacy backup file.</string>
+    <string name="explanation_no_backup_found_try_legacy_add_profile">**No backups were found for this key.** Please check you entered it correctly and try again.</string>
+    <string name="button_label_restore_legacy_file">Restore a legacy backup file</string>
+    <string name="onboarding_backup_v2_select_profile_title">Which profile would you like to restore?</string>
+    <string name="onboarding_backup_v2_select_snapshot_title">Which backup would you like to restore?</string>
+    <string name="button_label_restore">Restore</string>
+    <string name="explanation_unable_to_fetch_snapshots">Unable to list backups. Please check your network connection and try again.</string>
+    <string name="button_label_choose_another_profile">Choose another profile</string>
+    <string name="explanation_no_snapshots_for_profile">Unfortunately, no backups are available for this profile. You will not be able to restore it.</string>
+    <string name="label_backups_truncated">Some backups could not be retrieved because of a network issue. Only proceed if you are confident you have an up-to-date backup.</string>
+    <string name="label_recommended">Recommended</string>
+    <string name="button_label_open_profile">Open profile</string>
+    <string name="button_label_restore_other_profile">Restore another profile</string>
+    <string name="button_label_go_back">Go back</string>
+    <string name="explanation_failed_to_restore_backup">Failed to restore your profile. Please try again.</string>
+    <string name="button_label_restore_my_profile">Restore my profile</string>
+    <string name="button_label_keep_all_with_olvid_plus">Keep them all with Olvid+</string>
+    <string name="explanation_backup_v2_choose_device_after_restore">Once your profile is restored, you may choose which device to keep active from your profile\'s settings</string>
+    <string name="explanation_backup_v2_device_expiration_start">By restoring your profile \"</string>
+    <string name="explanation_backup_v2_device_expiration_nickname">" (%1$s)"</string>
+    <string name="toast_message_no_key_found">No backup key was found</string>
+    <string name="label_backup_headers_title">Your backups</string>
+    <string name="label_advanced">Advanced</string>
+    <string name="button_label_confirm">Confirm</string>
+    <string name="button_label_enable_automatic_backups">Enable automatic backups</string>
+    <string name="explanation_backup_v2_default_to_password_manager">By default, your backup key will be saved to your password manager (recommended). You may also write it down manually.</string>
+    <string name="label_backup_mode_title_keychain">Automatic backups and key management</string>
+    <string name="label_backup_mode_title_manual">Automatic backups, manual key management</string>
+    <string name="label_backup_mode_title_no_backup">No backups</string>
+    <string name="label_backup_mode_body_keychain">Your profiles on this device are automatically backed up. Backups are encrypted and then stored on Olvid\'s servers. The encryption key is saved in your password manager.</string>
+    <string name="label_backup_mode_body_manual">Your profiles on this device are automatically backed up. Backups are encrypted and then stored on Olvid\'s servers. You will have to write down the encryption key and keep it in a safe place.</string>
+    <string name="label_backup_mode_body_no_backup">Your profiles on this device are never backed up. Consequently, losing access to this device may result in the definitive loss of the profiles.</string>
+    <string name="explanation_backup_key_password_manager">This key will be required if you wish to restore your profiles on a new device without access to your password manager.</string>
+    <string name="explanation_backup_key_no_password_manager">This key will be required if you wish to restore your profiles on a new device.</string>
+    <string name="explanation_backup_key_found_in_settings">This key can also be found later in your settings.</string>
+    <string name="tip_setup_new_backups_title">Don\'t loose access to your profiles!</string>
+    <string name="tip_setup_new_backups_message">Backups allow to restore your profiles if you lose access to this device. The new experience is easier than ever 😉, and can be setup in a few seconds.</string>
+    <string name="button_label_configure_backups">Configure backups</string>
+    <string name="tip_write_backup_key_title">Don\'t forget to write down your backup key 😇</string>
+    <string name="tip_write_backup_key_message">Your backup key is essential for restoring your profiles if you lose access to this device.</string>
+    <string name="tip_troubleshooting_title">Improve your Olvid experience 🚀</string>
+    <string name="tip_troubleshooting_message">Some parameters are not properly configured on your device and may impact your experience with Olvid.</string>
+    <string name="button_label_this_way">This way</string>
+    <string name="toast_code_copied">Code copied</string>
+    <string name="dialog_title_call_blocked">Call blocked</string>
+    <string name="dialog_message_call_blocked">Olvid does not allow starting a call with more than %1d persons.</string>
 
 
-
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">\" on this device, your previous device below will be deactivated:</item>
+        <item quantity="other">\" on this device, your devices below will be deactivated:</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d backup found</item>
+        <item quantity="other">%1$d backups found</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d profile found</item>
+        <item quantity="other">%1$d profiles found</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">No group</item>
+        <item quantity="one">%1$d group</item>
+        <item quantity="other">%1$d groups</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">No contact</item>
+        <item quantity="one">%1$d contact</item>
+        <item quantity="other">%1$d contacts</item>
+    </plurals>
     <plurals name="label_discussion_archive_done">
         <item quantity="one">Discussion archived</item>
         <item quantity="other">%1$d discussions archived</item>
@@ -2019,6 +2140,10 @@
     <plurals name="label_discussion_unarchive_done">
         <item quantity="one">Discussion unarchived</item>
         <item quantity="other">%1$d discussions unarchived</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Message unbookmarked</item>
+        <item quantity="other">%1$d messages unbookmarked</item>
     </plurals>
     <plurals name="dialog_title_delete_discussions">
         <item quantity="one">Delete selected discussion?</item>

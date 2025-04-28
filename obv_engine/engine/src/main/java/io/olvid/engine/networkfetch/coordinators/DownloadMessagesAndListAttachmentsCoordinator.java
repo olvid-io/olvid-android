@@ -22,6 +22,7 @@ package io.olvid.engine.networkfetch.coordinators;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -207,7 +208,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
 
     class AwaitingNotificationListener implements NotificationListener {
         @Override
-        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        public void callback(String notificationName, Map<String, Object> userInfo) {
             switch (notificationName) {
                 case DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED: {
                     Object identityObject = userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_IDENTITY_KEY);
@@ -313,7 +314,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
 
 
     @Override
-    public void callback(String notificationName, HashMap<String, Object> userInfo) {
+    public void callback(String notificationName, Map<String, Object> userInfo) {
         if (IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY.equals(notificationName)) {
             try {
                 Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_NEW_CONTACT_IDENTITY_OWNED_IDENTITY_KEY);

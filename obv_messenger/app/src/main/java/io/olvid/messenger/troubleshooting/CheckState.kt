@@ -20,6 +20,7 @@
 package io.olvid.messenger.troubleshooting
 
 import android.Manifest
+import android.app.Activity
 import android.app.ActivityManager
 import android.app.AlarmManager
 import android.app.NotificationManager
@@ -43,7 +44,6 @@ import androidx.core.location.LocationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import io.olvid.engine.Logger
-import io.olvid.engine.engine.types.ObvBackupKeyInformation
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
@@ -150,20 +150,24 @@ fun Context.getLocationState() : Boolean {
 }
 
 fun getBackupState(): Int {
-    val info: ObvBackupKeyInformation? = try {
-        AppSingleton.getEngine().backupKeyInformation
-    } catch (e: Exception) {
+    val info: String? = try {
+        AppSingleton.getEngine().deviceBackupSeed
+    } catch (_: Exception) {
         // this will be retried the next time MainActivity is started
-        Logger.e("Unable to retrieve backup info")
+        Logger.e("Unable to retrieve device backup seed")
         return -1
     }
     if (info == null) {
-        // no backup key generated
-        return 2
-    } else {
-        if (!SettingsActivity.useAutomaticBackup() && info.lastBackupExport + 7 * 86400000L <= System.currentTimeMillis()) {
-            return 1
+        // no device seed
+        try {
+            // still using legacy backups
+            if (AppSingleton.getEngine().backupKeyInformation != null) {
+                return 2
+            }
+        } catch (_: Exception) {
+            Logger.e("Unable to retrieve legacy backup info")
         }
+        return 1
     }
     return 0
 }
@@ -175,33 +179,30 @@ fun Context.getBackupStateInfo(): BackupStateInfo? {
     var description: Int = -1
     var critical = false
     try {
-        val info: ObvBackupKeyInformation? = try {
-            AppSingleton.getEngine().backupKeyInformation
+        val info: String? = try {
+            AppSingleton.getEngine().deviceBackupSeed
         } catch (e: Exception) {
             // this will be retried the next time MainActivity is started
-            Logger.e("Unable to retrieve backup info")
+            Logger.x(e)
             return null
         }
         if (info == null) {
-            // no backup key generated
-            critical = true
+            // no device seed
+            critical = SettingsActivity.backupsV2Status == SettingsActivity.PREF_KEY_BACKUPS_V2_STATUS_NOT_CONFIGURED
             title = R.string.snackbar_message_setup_backup
             description = R.string.dialog_message_setup_backup_explanation
-        } else {
-            if (!SettingsActivity.useAutomaticBackup() && info.lastBackupExport + 7 * 86400000L < System.currentTimeMillis()
-            ) {
-                // no automatic backups, and no backups since more that a week
-                title = R.string.snackbar_message_remember_to_backup
-                description =
-                    if (BuildConfig.USE_GOOGLE_LIBS && GoogleServicesUtils.googleServicesAvailable(this)) {
-                        R.string.dialog_message_remember_to_backup_explanation
-                    } else {
-                        R.string.dialog_message_remember_to_backup_explanation_no_google
-                    }
+            try {
+                // still using legacy backups
+                if (AppSingleton.getEngine().backupKeyInformation != null) {
+                    title = R.string.troubleshooting_backup_legacy_title
+                    description = R.string.enable_backups_message_with_legacy
+                }
+            } catch (e: Exception) {
+                Logger.x(e)
             }
         }
     } catch (e: Exception) {
-        e.printStackTrace()
+        Logger.x(e)
     }
 
     return title?.let {
@@ -209,7 +210,7 @@ fun Context.getBackupStateInfo(): BackupStateInfo? {
     }
 }
 
-fun ComponentActivity.shouldShowTroubleshootingSnackbar(): Boolean {
+fun ComponentActivity.shouldShowTroubleshootingTip(): Boolean {
     val troubleshootingDataStore = TroubleshootingDataStore(this)
     return listOf(
         CheckState(BATTERY_CHECK_STATE, troubleshootingDataStore) { getBatteryOptimizationsState() },
@@ -218,7 +219,6 @@ fun ComponentActivity.shouldShowTroubleshootingSnackbar(): Boolean {
         CheckState(STORAGE_CHECK_STATE, troubleshootingDataStore) { getStorageState() },
         CheckState(SOCKET_CHECK_STATE, troubleshootingDataStore) { getPermanentSocketState() },
         CheckState(FULL_SCREEN_CHECK_STATE, troubleshootingDataStore) { getFullScreenIntentState() },
-        CheckState(BACKUP_CHECK_STATE, troubleshootingDataStore) { getBackupState() == 0 },
     ).any { checkState -> checkState.valid.not() && runBlocking { checkState.isMute.first() }.not() }
     .or(
         if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {

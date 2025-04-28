@@ -34,6 +34,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.DropDownPreference;
 import androidx.preference.Preference;
@@ -293,6 +294,6 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.setBackgroundColor(getResources().getColor(R.color.dialogBackground));
+        view.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.almostWhite));
     }
 }

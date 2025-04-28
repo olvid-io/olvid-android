@@ -33,6 +33,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -254,6 +255,6 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.setBackgroundColor(getResources().getColor(R.color.dialogBackground));
+        view.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.almostWhite));
     }
 }

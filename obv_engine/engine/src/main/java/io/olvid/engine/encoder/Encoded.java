@@ -46,14 +46,14 @@ public class Encoded {
     protected final byte[] data;
 
     private static final byte BYTE_IDS_BYTE_ARRAY = (byte) 0x00;
-    private static final byte BYTE_IDS_INT        = (byte) 0x01;
-    private static final byte BYTE_IDS_BOOLEAN    = (byte) 0x02;
-    private static final byte BYTE_IDS_LIST       = (byte) 0x03;
+    private static final byte BYTE_IDS_INT = (byte) 0x01;
+    private static final byte BYTE_IDS_BOOLEAN = (byte) 0x02;
+    private static final byte BYTE_IDS_LIST = (byte) 0x03;
     private static final byte BYTE_IDS_DICTIONARY = (byte) 0x04;
-    private static final byte BYTE_IDS_BIG_UINT   = (byte) 0x80;
-    private static final byte BYTE_IDS_SYM_KEY    = (byte) 0x90;
-    private static final byte BYTE_IDS_PUB_KEY    = (byte) 0x91;
-    private static final byte BYTE_IDS_PRV_KEY    = (byte) 0x92;
+    private static final byte BYTE_IDS_BIG_UINT = (byte) 0x80;
+    private static final byte BYTE_IDS_SYM_KEY = (byte) 0x90;
+    private static final byte BYTE_IDS_PUB_KEY = (byte) 0x91;
+    private static final byte BYTE_IDS_PRV_KEY = (byte) 0x92;
 
 
     public Encoded(byte[] bytes) {
@@ -69,11 +69,11 @@ public class Encoded {
         output[7] = 0;
         output[8] = 0;
         output[9] = INT_ENCODING_LENGTH;
-        for (int j=0; j<INT_ENCODING_LENGTH; j++) {
-            output[9+INT_ENCODING_LENGTH-j] = (byte)(chunkNumber & 0xff);
+        for (int j = 0; j < INT_ENCODING_LENGTH; j++) {
+            output[9 + INT_ENCODING_LENGTH - j] = (byte) (chunkNumber & 0xff);
             chunkNumber = chunkNumber >>> 8;
         }
-        output[10+INT_ENCODING_LENGTH] = BYTE_IDS_BYTE_ARRAY;
+        output[10 + INT_ENCODING_LENGTH] = BYTE_IDS_BYTE_ARRAY;
         System.arraycopy(bytesFromUInt32(bufferFullness), 0, output, 11 + INT_ENCODING_LENGTH, 4);
         System.arraycopy(buffer, 0, output, 15 + INT_ENCODING_LENGTH, bufferFullness);
         return output;
@@ -98,7 +98,7 @@ public class Encoded {
         if (bytes.length < len + 5) {
             throw new DecodingException();
         }
-        return new Encoded(Arrays.copyOfRange(bytes, 0, 5+len));
+        return new Encoded(Arrays.copyOfRange(bytes, 0, 5 + len));
     }
 
     public static Encoded of(byte[] bytes) {
@@ -116,7 +116,7 @@ public class Encoded {
 
     public static Encoded of(UID[] uids) {
         Encoded[] encodedUids = new Encoded[uids.length];
-        for (int i=0; i<uids.length; i++) {
+        for (int i = 0; i < uids.length; i++) {
             encodedUids[i] = Encoded.of(uids[i]);
         }
         return Encoded.of(encodedUids);
@@ -133,7 +133,7 @@ public class Encoded {
 
     public static Encoded of(Identity[] identities) {
         Encoded[] encodedIdentities = new Encoded[identities.length];
-        for (int i=0; i<identities.length; i++) {
+        for (int i = 0; i < identities.length; i++) {
             encodedIdentities[i] = Encoded.of(identities[i]);
         }
         return Encoded.of(encodedIdentities);
@@ -149,7 +149,7 @@ public class Encoded {
 
     public static Encoded of(String[] strings) {
         Encoded[] encodedStrings = new Encoded[strings.length];
-        for (int i=0; i<strings.length; i++) {
+        for (int i = 0; i < strings.length; i++) {
             encodedStrings[i] = Encoded.of(strings[i]);
         }
         return Encoded.of(encodedStrings);
@@ -166,8 +166,8 @@ public class Encoded {
         data[2] = 0;
         data[3] = 0;
         data[4] = INT_ENCODING_LENGTH;
-        for (int j=0; j<INT_ENCODING_LENGTH; j++) {
-            data[4+INT_ENCODING_LENGTH-j] = (byte)(i & 0xff);
+        for (int j = 0; j < INT_ENCODING_LENGTH; j++) {
+            data[4 + INT_ENCODING_LENGTH - j] = (byte) (i & 0xff);
             i = i >>> 8;
         }
         return new Encoded(data);
@@ -190,26 +190,26 @@ public class Encoded {
     }
 
     public static Encoded of(PublicKey publicKey) {
-        Encoded keyType = Encoded.of(new byte[] {publicKey.getAlgorithmClass(), publicKey.getAlgorithmImplementation()});
+        Encoded keyType = Encoded.of(new byte[]{publicKey.getAlgorithmClass(), publicKey.getAlgorithmImplementation()});
         Encoded encodedDict = Encoded.of(publicKey.getKey());
         return pack(BYTE_IDS_PUB_KEY, new Encoded[]{keyType, encodedDict});
     }
 
     public static Encoded of(PrivateKey privateKey) {
-        Encoded keyType = Encoded.of(new byte[] {privateKey.getAlgorithmClass(), privateKey.getAlgorithmImplementation()});
+        Encoded keyType = Encoded.of(new byte[]{privateKey.getAlgorithmClass(), privateKey.getAlgorithmImplementation()});
         Encoded encodedDict = Encoded.of(privateKey.getKey());
         return pack(BYTE_IDS_PRV_KEY, new Encoded[]{keyType, encodedDict});
     }
 
     public static Encoded of(SymmetricKey symmetricKey) {
-        Encoded keyType = Encoded.of(new byte[] {symmetricKey.getAlgorithmClass(), symmetricKey.getAlgorithmImplementation()});
+        Encoded keyType = Encoded.of(new byte[]{symmetricKey.getAlgorithmClass(), symmetricKey.getAlgorithmImplementation()});
         Encoded encodedDict = Encoded.of(symmetricKey.getKey());
         return pack(BYTE_IDS_SYM_KEY, new Encoded[]{keyType, encodedDict});
     }
 
     public static Encoded of(BigInteger bigInt, int len) throws EncodingException {
         if ((bigInt.signum() < 0)
-                || (bigInt.bitLength() > 8*len)) {
+                || (bigInt.bitLength() > 8 * len)) {
             throw new EncodingException();
         }
         byte[] data = new byte[len + 5];
@@ -221,14 +221,14 @@ public class Encoded {
         if (offset == -1) {
             System.arraycopy(bytes, 1, data, 5, len);
         } else {
-            System.arraycopy(bytes, 0, data, 5+offset, bytes.length);
+            System.arraycopy(bytes, 0, data, 5 + offset, bytes.length);
         }
         return new Encoded(data);
     }
 
     public static byte[] bytesFromBigUInt(BigInteger bigInt, int len) throws EncodingException {
         if ((bigInt.signum() < 0)
-                || (bigInt.bitLength() > 8*len)) {
+                || (bigInt.bitLength() > 8 * len)) {
             throw new EncodingException();
         }
         byte[] data = new byte[len];
@@ -248,7 +248,7 @@ public class Encoded {
 
     private static Encoded pack(byte byteId, Encoded[] list) {
         int len = 0;
-        for (Encoded encoded: list) {
+        for (Encoded encoded : list) {
             len += encoded.data.length;
         }
         byte[] data = new byte[len + 5];
@@ -256,7 +256,7 @@ public class Encoded {
         byte[] encodedLength = bytesFromUInt32(len);
         System.arraycopy(encodedLength, 0, data, 1, 4);
         int offset = 5;
-        for (Encoded encoded: list) {
+        for (Encoded encoded : list) {
             System.arraycopy(encoded.data, 0, data, offset, encoded.data.length);
             offset += encoded.data.length;
         }
@@ -287,15 +287,23 @@ public class Encoded {
 
     public static Encoded of(HashMap<DictionaryKey, Encoded>[] dictionaryArray) {
         Encoded[] encodeds = new Encoded[dictionaryArray.length];
-        for (int i=0; i<dictionaryArray.length; i++) {
+        for (int i = 0; i < dictionaryArray.length; i++) {
             encodeds[i] = Encoded.of(dictionaryArray[i]);
         }
         return Encoded.of(encodeds);
     }
 
+    public static Encoded of(Map<String, String> stringMap) {
+        HashMap<DictionaryKey, Encoded> dict = new HashMap<>();
+        for (Map.Entry<String, String> entry : stringMap.entrySet()) {
+            dict.put(new DictionaryKey(entry.getKey()), Encoded.of(entry.getValue()));
+        }
+        return Encoded.of(dict);
+    }
+
     public boolean isEncodedValue() {
         int len = uint32FromBytes(data, 1);
-        if (len+5 != data.length) {
+        if (len + 5 != data.length) {
             return false;
         }
         switch (data[0]) {
@@ -359,9 +367,9 @@ public class Encoded {
             throw new DecodingException();
         }
         long res = 0;
-        for (int i=0; i<INT_ENCODING_LENGTH; i++) {
+        for (int i = 0; i < INT_ENCODING_LENGTH; i++) {
             res = res << 8;
-            res += data[i+5] & 0xff;
+            res += data[i + 5] & 0xff;
         }
         return res;
     }
@@ -384,31 +392,49 @@ public class Encoded {
     }
 
     public PublicKey decodePublicKey() throws DecodingException {
-        if (data[0] != BYTE_IDS_PUB_KEY || !isEncodedValue()) { throw new DecodingException(); }
+        if (data[0] != BYTE_IDS_PUB_KEY || !isEncodedValue()) {
+            throw new DecodingException();
+        }
         Encoded[] list = unpack();
-        if (list.length != 2) { throw new DecodingException(); }
+        if (list.length != 2) {
+            throw new DecodingException();
+        }
         byte[] algoBytes = list[0].decodeBytes();
-        if (algoBytes.length != 2) { throw new DecodingException(); }
+        if (algoBytes.length != 2) {
+            throw new DecodingException();
+        }
         HashMap<DictionaryKey, Encoded> key = list[1].decodeDictionary();
         return PublicKey.of(algoBytes[0], algoBytes[1], key);
     }
 
     public PrivateKey decodePrivateKey() throws DecodingException {
-        if (data[0] != BYTE_IDS_PRV_KEY || !isEncodedValue()) { throw new DecodingException(); }
+        if (data[0] != BYTE_IDS_PRV_KEY || !isEncodedValue()) {
+            throw new DecodingException();
+        }
         Encoded[] list = unpack();
-        if (list.length != 2) { throw new DecodingException(); }
+        if (list.length != 2) {
+            throw new DecodingException();
+        }
         byte[] algoBytes = list[0].decodeBytes();
-        if (algoBytes.length != 2) { throw new DecodingException(); }
+        if (algoBytes.length != 2) {
+            throw new DecodingException();
+        }
         HashMap<DictionaryKey, Encoded> key = list[1].decodeDictionary();
         return PrivateKey.of(algoBytes[0], algoBytes[1], key);
     }
 
     public SymmetricKey decodeSymmetricKey() throws DecodingException {
-        if (data[0] != BYTE_IDS_SYM_KEY || !isEncodedValue()) { throw new DecodingException(); }
+        if (data[0] != BYTE_IDS_SYM_KEY || !isEncodedValue()) {
+            throw new DecodingException();
+        }
         Encoded[] list = unpack();
-        if (list.length != 2) { throw new DecodingException(); }
+        if (list.length != 2) {
+            throw new DecodingException();
+        }
         byte[] algoBytes = list[0].decodeBytes();
-        if (algoBytes.length != 2) { throw new DecodingException(); }
+        if (algoBytes.length != 2) {
+            throw new DecodingException();
+        }
         HashMap<DictionaryKey, Encoded> key = list[1].decodeDictionary();
         return SymmetricKey.of(algoBytes[0], algoBytes[1], key);
     }
@@ -432,18 +458,18 @@ public class Encoded {
             throw new DecodingException();
         }
         int totalLen = uint32FromBytes(data, 1);
-        if (totalLen+5 > data.length) {
+        if (totalLen + 5 > data.length) {
             throw new DecodingException();
         }
 
         List<Encoded> list = new ArrayList<>();
         int offset = 5;
-        while (offset  + 4 < totalLen+5) {
-            int len = uint32FromBytes(data, offset+1);
-            if (offset + 5 + len > totalLen+5) {
+        while (offset + 4 < totalLen + 5) {
+            int len = uint32FromBytes(data, offset + 1);
+            if (offset + 5 + len > totalLen + 5) {
                 throw new DecodingException();
             }
-            Encoded elem = new Encoded(Arrays.copyOfRange(data, offset, offset+5+len));
+            Encoded elem = new Encoded(Arrays.copyOfRange(data, offset, offset + 5 + len));
             list.add(elem);
             offset += 5 + len;
         }
@@ -460,12 +486,12 @@ public class Encoded {
     private Encoded[] unpack() throws DecodingException {
         List<Encoded> list = new ArrayList<>();
         int offset = 5;
-        while (offset  + 4 < data.length) {
-            int len = uint32FromBytes(data, offset+1);
+        while (offset + 4 < data.length) {
+            int len = uint32FromBytes(data, offset + 1);
             if (offset + 5 + len > data.length) {
                 throw new DecodingException();
             }
-            Encoded elem = new Encoded(Arrays.copyOfRange(data, offset, offset+5+len));
+            Encoded elem = new Encoded(Arrays.copyOfRange(data, offset, offset + 5 + len));
             list.add(elem);
             offset += 5 + len;
         }
@@ -479,22 +505,57 @@ public class Encoded {
         HashMap<DictionaryKey, Encoded> dict = new HashMap<>();
         int offset = 5;
         while (offset + 4 < data.length) {
-            int len = uint32FromBytes(data, offset +1);
+            int len = uint32FromBytes(data, offset + 1);
             if (offset + 5 + len > data.length) {
                 throw new DecodingException();
             }
             // Here we do two copyOfRange -> this could be optimized to a single one, assuming we reimplement the decodeBytes checks
-            DictionaryKey key = new DictionaryKey(new Encoded(Arrays.copyOfRange(data, offset, offset+5+len)).decodeBytes());
+            DictionaryKey key = new DictionaryKey(new Encoded(Arrays.copyOfRange(data, offset, offset + 5 + len)).decodeBytes());
             offset += 5 + len;
 
             if (offset + 5 > data.length) {
                 throw new DecodingException();
             }
-            len = uint32FromBytes(data, offset +1);
+            len = uint32FromBytes(data, offset + 1);
             if (offset + 5 + len > data.length) {
                 throw new DecodingException();
             }
-            Encoded value = new Encoded(Arrays.copyOfRange(data, offset, offset+5+len));
+            Encoded value = new Encoded(Arrays.copyOfRange(data, offset, offset + 5 + len));
+            offset += 5 + len;
+            dict.put(key, value);
+        }
+        return dict;
+    }
+
+    // used to decode a dictionary with some additional bytes at the end
+    public HashMap<DictionaryKey, Encoded> decodeDictionaryWithPadding() throws DecodingException {
+        if (data[0] != BYTE_IDS_DICTIONARY) {
+            throw new DecodingException();
+        }
+        int totalLen = uint32FromBytes(data, 1);
+        if (totalLen + 5 > data.length) {
+            throw new DecodingException();
+        }
+
+        HashMap<DictionaryKey, Encoded> dict = new HashMap<>();
+        int offset = 5;
+        while (offset + 4 < totalLen + 5) {
+            int len = uint32FromBytes(data, offset + 1);
+            if (offset + 5 + len > totalLen + 5) {
+                throw new DecodingException();
+            }
+            // Here we do two copyOfRange -> this could be optimized to a single one, assuming we reimplement the decodeBytes checks
+            DictionaryKey key = new DictionaryKey(new Encoded(Arrays.copyOfRange(data, offset, offset + 5 + len)).decodeBytes());
+            offset += 5 + len;
+
+            if (offset + 5 > totalLen + 5) {
+                throw new DecodingException();
+            }
+            len = uint32FromBytes(data, offset + 1);
+            if (offset + 5 + len > totalLen + 5) {
+                throw new DecodingException();
+            }
+            Encoded value = new Encoded(Arrays.copyOfRange(data, offset, offset + 5 + len));
             offset += 5 + len;
             dict.put(key, value);
         }
@@ -504,7 +565,7 @@ public class Encoded {
     public UID[] decodeUidArray() throws DecodingException {
         Encoded[] encodedUids = decodeList();
         UID[] uids = new UID[encodedUids.length];
-        for (int i=0; i<uids.length; i++) {
+        for (int i = 0; i < uids.length; i++) {
             uids[i] = encodedUids[i].decodeUid();
         }
         return uids;
@@ -513,7 +574,7 @@ public class Encoded {
     public Identity[] decodeIdentityArray() throws DecodingException {
         Encoded[] encodedIdentities = decodeList();
         Identity[] identities = new Identity[encodedIdentities.length];
-        for (int i=0; i<identities.length; i++) {
+        for (int i = 0; i < identities.length; i++) {
             identities[i] = encodedIdentities[i].decodeIdentity();
         }
         return identities;
@@ -522,10 +583,19 @@ public class Encoded {
     public String[] decodeStringArray() throws DecodingException {
         Encoded[] encodedStrings = decodeList();
         String[] strings = new String[encodedStrings.length];
-        for (int i=0; i<strings.length; i++) {
+        for (int i = 0; i < strings.length; i++) {
             strings[i] = encodedStrings[i].decodeString();
         }
         return strings;
+    }
+
+    public Map<String, String> decodeStringMap() throws DecodingException {
+        Map<String, String> map = new HashMap<>();
+        HashMap<DictionaryKey, Encoded> dict = decodeDictionary();
+        for (Map.Entry<DictionaryKey, Encoded> entry: dict.entrySet()) {
+            map.put(entry.getKey().getString(), entry.getValue().decodeString());
+        }
+        return map;
     }
     // endregion
 
@@ -533,8 +603,8 @@ public class Encoded {
 
     static byte[] bytesFromUInt32(int length) {
         byte[] res = new byte[4];
-        for (int i=0; i<4; i++) {
-            res[3-i] = (byte)(length & 0xff);
+        for (int i = 0; i < 4; i++) {
+            res[3 - i] = (byte) (length & 0xff);
             length = length >>> 8;
         }
         return res;
@@ -546,9 +616,9 @@ public class Encoded {
 
     static int uint32FromBytes(byte[] bytes, int offset) {
         int res = 0;
-        for (int i=0; i<4; i++) {
+        for (int i = 0; i < 4; i++) {
             res = res << 8;
-            res += bytes[i+offset] & 0xff;
+            res += bytes[i + offset] & 0xff;
         }
         return res;
     }
@@ -557,7 +627,7 @@ public class Encoded {
         Encoded[] encodeds = decodeList();
         //noinspection unchecked
         HashMap<DictionaryKey, Encoded>[] dictionaries = new HashMap[encodeds.length];
-        for (int i = 0; i< encodeds.length; i++) {
+        for (int i = 0; i < encodeds.length; i++) {
             dictionaries[i] = encodeds[i].decodeDictionary();
         }
         return dictionaries;

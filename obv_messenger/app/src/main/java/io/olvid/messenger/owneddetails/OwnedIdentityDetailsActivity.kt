@@ -134,7 +134,6 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
     private var publishedDetailsInitialView: InitialView? = null
     private var inactiveCardView: CardView? = null
     private var keycloakManaged = false
-    private var keycloakTransferRestricted = false
 
     private var deviceChangedEngineListener: EngineNotificationListener? = null
 
@@ -521,6 +520,12 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                         sb.append(ownIdentity.server).append("\n\n")
                     } catch (_: DecodingException) {
                     }
+                    if (ownedIdentity.keycloakManaged) {
+                        AppSingleton.getEngine().getOwnedIdentityKeycloakState(ownedIdentity.bytesOwnedIdentity)?.keycloakServer?.let {
+                            sb.append(getString(R.string.debug_label_identity_provider)).append(" ")
+                            sb.append(it).append("\n\n")
+                        }
+                    }
                     sb.append(getString(R.string.debug_label_identity_link)).append("\n")
                     sb.append(
                         ObvUrlIdentity(
@@ -676,8 +681,6 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         }
 
         keycloakManaged = ownedIdentity.keycloakManaged
-        keycloakTransferRestricted =
-            KeycloakManager.isOwnedIdentityTransferRestricted(ownedIdentity.bytesOwnedIdentity)
         invalidateOptionsMenu()
 
         myIdInitialView!!.setOwnedIdentity(ownedIdentity)
@@ -933,57 +936,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                 App.openAppDialogIdentityDeactivated(ownedIdentity)
             }
         } else if (id == R.id.add_device_button) {
-            val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())
-            if (!prefs.getBoolean(
-                    SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION,
-                    false
-                )
-            ) {
-                val dialogView = LayoutInflater.from(this)
-                    .inflate(R.layout.dialog_view_message_and_checkbox, null)
-                val message = dialogView.findViewById<TextView>(R.id.dialog_message)
-                message.text =
-                    getString(R.string.dialog_message_add_device_explanation).formatMarkdown(
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                val checkBox = dialogView.findViewById<CheckBox>(R.id.checkbox)
-                checkBox.setOnCheckedChangeListener { _: CompoundButton?, isChecked: Boolean ->
-                    val editor = prefs.edit()
-                    editor.putBoolean(
-                        SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION,
-                        isChecked
-                    )
-                    editor.apply()
-                }
-
-                val builder: Builder = SecureAlertDialogBuilder(
-                    this, R.style.CustomAlertDialog
-                )
-                builder.setTitle(R.string.dialog_title_add_device_explanation)
-                    .setView(dialogView)
-                    .setNegativeButton(R.string.button_label_cancel, null)
-                    .setPositiveButton(R.string.button_label_proceed) { _, _ ->
-                        val intent = Intent(
-                            this,
-                            OnboardingFlowActivity::class.java
-                        )
-                        intent.putExtra(OnboardingFlowActivity.TRANSFER_SOURCE_INTENT_EXTRA, true)
-                        intent.putExtra(
-                            OnboardingFlowActivity.TRANSFER_RESTRICTED_INTENT_EXTRA,
-                            keycloakTransferRestricted
-                        )
-                        startActivity(intent)
-                    }
-                builder.create().show()
-            } else {
-                val intent = Intent(this, OnboardingFlowActivity::class.java)
-                intent.putExtra(OnboardingFlowActivity.TRANSFER_SOURCE_INTENT_EXTRA, true)
-                intent.putExtra(
-                    OnboardingFlowActivity.TRANSFER_RESTRICTED_INTENT_EXTRA,
-                    keycloakTransferRestricted
-                )
-                startActivity(intent)
-            }
+            App.startTransferFlowAsSource(this)
         } else if (view is InitialView) {
             val photoUrl = view.photoUrl
             if (photoUrl != null) {

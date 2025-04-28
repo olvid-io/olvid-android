@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Objects;
 
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.Group2Dao;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -325,6 +326,8 @@ public class DiscussionSettingsViewModel extends ViewModel {
                 db.discussionCustomizationDao().update(discussionCustomization); // only update the discussion if we could successfully build the message
                 message.id = db.messageDao().insert(message);
                 message.postSettingsMessage(false, null);
+
+                AppSingleton.getEngine().profileBackupNeeded(discussion.bytesOwnedIdentity);
             }
         });
     }

@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.datatypes.BackupSeed;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.GroupMembersChangedCallback;
 import io.olvid.engine.datatypes.Identity;
@@ -58,6 +59,7 @@ import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails;
 import io.olvid.engine.engine.types.ObvCapability;
+import io.olvid.engine.engine.types.ObvDeviceBackupForRestore;
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
@@ -65,6 +67,7 @@ import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
 import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
 import io.olvid.engine.engine.types.sync.ObvSyncAtom;
+import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
 import io.olvid.engine.identity.databases.sync.IdentityManagerSyncSnapshot;
 import io.olvid.engine.identity.datatypes.KeycloakGroupBlob;
 
@@ -265,6 +268,9 @@ public interface IdentityDelegate {
     void initiateBackup(final BackupDelegate backupDelegate, final String tag, final UID backupKeyUid, final int version);
     ObvIdentity[] restoreOwnedIdentitiesFromBackup(String serializedJsonPojo, String deviceDisplayName, PRNGService prng);
     void restoreContactsAndGroupsFromBackup(String serializedJsonPojo, ObvIdentity[] restoredOwnedIdentities, long backupTimestamp);
+    ObvIdentity restoreTransferredOwnedIdentity(Session session, String deviceName, IdentityManagerSyncSnapshot node) throws Exception;
+    BackupSeed getOwnedIdentityBackupSeed(Session session, Identity ownedIdentity) throws SQLException;
+    List<ObvDeviceBackupForRestore.ObvDeviceBackupProfile> getDeviceBackupProfileListFromDeviceBackup(Session session, ObvSyncSnapshotNode snapshotNode) throws Exception;
 
     // userData
     UserData[] getAllUserData(Session session) throws Exception;
@@ -275,9 +281,10 @@ public interface IdentityDelegate {
     // device sync
     void processSyncItem(Session session, Identity ownedIdentity, ObvSyncAtom obvSyncAtom) throws Exception;
 
+    ObvBackupAndSyncDelegate getSyncDelegate();
     ObvBackupAndSyncDelegate getSyncDelegateWithinTransaction(Session session);
 
-    ObvIdentity restoreTransferredOwnedIdentity(Session session, String deviceName, IdentityManagerSyncSnapshot node) throws Exception;
 
     void downloadAllUserData(Session session) throws Exception;
+
 }

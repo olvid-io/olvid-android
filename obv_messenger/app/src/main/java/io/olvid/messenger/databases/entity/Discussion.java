@@ -33,6 +33,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 import io.olvid.engine.Logger;
@@ -446,7 +447,9 @@ public class Discussion {
 
         // delete draft messages
         db.messageDao().deleteDiscussionDraftMessage(id);
-        db.messageDao().deleteAllDiscussionNewPublishedDetailsMessages(id);
+        List<Message> messageList = db.messageDao().getAllDiscussionNewPublishedDetailsMessages(id);
+        db.messageDao().delete(messageList.toArray(new Message[0]));
+        UnreadCountsSingleton.INSTANCE.messageBatchDeleted(messageList);
 
         HashSet<Long> messageIdsAlreadyMarkedUndelivered = new HashSet<>();
 

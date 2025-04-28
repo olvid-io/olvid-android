@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.entity.sync;
 
+import androidx.annotation.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.HashSet;
@@ -37,29 +39,48 @@ import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 public class DiscussionCustomizationSyncSnapshot implements ObvSyncSnapshotNode {
     public static final String LOCAL_SETTINGS = "local_settings";
     public static final String SHARED_SETTINGS = "shared_settings";
-    static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(List.of(LOCAL_SETTINGS, SHARED_SETTINGS));
+    public static final String ARCHIVED = "archived";
+    static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(List.of(LOCAL_SETTINGS, SHARED_SETTINGS, ARCHIVED));
 
     public LocalSettings local_settings;
     public SharedSettings shared_settings;
+    public Boolean archived;
     public HashSet<String> domain;
 
-    public static DiscussionCustomizationSyncSnapshot of(AppDatabase db, DiscussionCustomization discussionCustomization) {
+    @Nullable public static DiscussionCustomizationSyncSnapshot of(AppDatabase db, @Nullable DiscussionCustomization discussionCustomization, boolean archived) {
         DiscussionCustomizationSyncSnapshot discussionCustomizationSyncSnapshot = new DiscussionCustomizationSyncSnapshot();
+        boolean nonNull = false;
+        if (discussionCustomization != null) {
+            nonNull = true;
+            LocalSettings localSettings = new LocalSettings();
+            localSettings.send_read_receipt = discussionCustomization.prefSendReadReceipt;
+            if (discussionCustomization.shouldMuteNotifications()) {
+                localSettings.mute = true;
+                localSettings.mute_timestamp = discussionCustomization.prefMuteNotificationsTimestamp;
+            }
+            discussionCustomizationSyncSnapshot.local_settings = localSettings;
 
-        LocalSettings localSettings = new LocalSettings();
-        localSettings.send_read_receipt = discussionCustomization.prefSendReadReceipt;
-        discussionCustomizationSyncSnapshot.local_settings = localSettings;
-
-        if (discussionCustomization.sharedSettingsVersion != null) {
-            SharedSettings sharedSettings = new SharedSettings();
-            sharedSettings.version = discussionCustomization.sharedSettingsVersion;
-            sharedSettings.existence_duration = discussionCustomization.settingExistenceDuration;
-            sharedSettings.visibility_duration = discussionCustomization.settingVisibilityDuration;
-            sharedSettings.read_once = discussionCustomization.settingReadOnce ? true : null;
-            discussionCustomizationSyncSnapshot.shared_settings = sharedSettings;
+            if (discussionCustomization.sharedSettingsVersion != null) {
+                SharedSettings sharedSettings = new SharedSettings();
+                sharedSettings.version = discussionCustomization.sharedSettingsVersion;
+                sharedSettings.existence_duration = discussionCustomization.settingExistenceDuration;
+                sharedSettings.visibility_duration = discussionCustomization.settingVisibilityDuration;
+                sharedSettings.read_once = discussionCustomization.settingReadOnce ? true : null;
+                discussionCustomizationSyncSnapshot.shared_settings = sharedSettings;
+            }
         }
-        discussionCustomizationSyncSnapshot.domain = DEFAULT_DOMAIN;
-        return discussionCustomizationSyncSnapshot;
+
+        if (archived) {
+            nonNull = true;
+            discussionCustomizationSyncSnapshot.archived = true;
+        }
+
+        if (nonNull) {
+            discussionCustomizationSyncSnapshot.domain = DEFAULT_DOMAIN;
+            return discussionCustomizationSyncSnapshot;
+        } else {
+            return null;
+        }
     }
 
     public void restore(AppDatabase db, long discussionId) {
@@ -71,9 +92,17 @@ public class DiscussionCustomizationSyncSnapshot implements ObvSyncSnapshotNode 
             insertionNeeded = true;
         }
         if (domain.contains(LOCAL_SETTINGS) && local_settings != null) {
-            if (local_settings.send_read_receipt != null) {
-                changed = true;
+            if (local_settings.send_read_receipt != discussionCustomization.prefSendReadReceipt) {
                 discussionCustomization.prefSendReadReceipt = local_settings.send_read_receipt;
+                changed = true;
+            }
+
+            boolean newMute = local_settings.mute != null && local_settings.mute;
+            if (newMute != discussionCustomization.shouldMuteNotifications()
+                    || (newMute && !Objects.equals(local_settings.mute_timestamp, discussionCustomization.prefMuteNotificationsTimestamp))) {
+                discussionCustomization.prefMuteNotifications = newMute;
+                discussionCustomization.prefMuteNotificationsTimestamp = local_settings.mute_timestamp;
+                changed = true;
             }
         }
 
@@ -106,6 +135,10 @@ public class DiscussionCustomizationSyncSnapshot implements ObvSyncSnapshotNode 
             discussionCustomization.settingExistenceDuration = null;
             discussionCustomization.settingReadOnce = false;
             changed = true;
+        }
+
+        if (domain.contains(ARCHIVED)) {
+            db.discussionDao().updateArchived(archived != null && archived, discussionId);
         }
 
         if (changed) {
@@ -155,6 +188,7 @@ public class DiscussionCustomizationSyncSnapshot implements ObvSyncSnapshotNode 
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SharedSettings {
+        // TODO when implementing sync, add a domain
         public Integer version;
         public Long existence_duration;
         public Long visibility_duration;
@@ -170,10 +204,15 @@ public class DiscussionCustomizationSyncSnapshot implements ObvSyncSnapshotNode 
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class LocalSettings {
+        // TODO when implementing sync, add a domain
         public Boolean send_read_receipt;
+        public Boolean mute;
+        public Long mute_timestamp;
 
         public boolean areContentsTheSame(LocalSettings other) {
-            return Objects.equals(send_read_receipt, other.send_read_receipt);
+            return Objects.equals(send_read_receipt, other.send_read_receipt)
+                    && Objects.equals(mute, other.mute)
+                    && Objects.equals(mute_timestamp, other.mute_timestamp);
         }
     }
 }

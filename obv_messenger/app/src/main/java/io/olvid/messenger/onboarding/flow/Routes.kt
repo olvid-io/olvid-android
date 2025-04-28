@@ -42,4 +42,12 @@ object OnboardingRoutes {
     const val BACKUP_CHOOSE_FILE = "backup_choose_file"
     const val BACKUP_FILE_SELECTED = "backup_file_selected"
     const val BACKUP_KEY_VALIDATION = "backup_key_validation"
+
+    const val BACKUP_V2_LOAD_OR_INPUT = "backup_v2_load_or_input"
+    const val BACKUP_V2_ENTER_KEY = "backup_v2_enter_key"
+    const val BACKUP_V2_SELECT_PROFILE = "backup_v2_select_profile"
+    const val BACKUP_V2_SELECT_SNAPSHOT = "backup_v2_select_snapshot"
+    const val BACKUP_V2_KEYCLOAK_AUTHENTICATION_REQUIRED = "backup_v2_keycloak_authentication_required"
+    const val BACKUP_V2_EXPIRING_DEVICES_EXPLANATION = "backup_v2_expiring_devices_explanation"
+    const val BACKUP_V2_RESTORE_RESULT = "backup_v2_restore_result"
 }

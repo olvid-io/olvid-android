@@ -24,8 +24,9 @@ import io.olvid.engine.engine.types.ObvBackupKeyInformation;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 
 public interface BackupDelegate {
-    void generateNewBackupKey();
-    int verifyBackupKey(String seedString);
+    //    void generateNewBackupKey();
+    //    int verifyBackupKey(String seedString);
+    void stopLegacyBackups();
     void setAutoBackupEnabled(boolean enabled, boolean doNotInitiateBackupNow);
     void initiateBackup(boolean forExpert);
 

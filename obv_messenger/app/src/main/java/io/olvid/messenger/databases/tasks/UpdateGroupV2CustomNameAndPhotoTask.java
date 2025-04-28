@@ -81,6 +81,7 @@ public class UpdateGroupV2CustomNameAndPhotoTask implements Runnable {
                 group.customName = customName;
                 db.group2Dao().updateCustomName(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.customName, group.computeFullSearch(fullSearchItems));
 
+                AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity);
                 if (!propagated) {
                     try {
                         AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createGroupV2NicknameChange(group.bytesGroupIdentifier, customName));
@@ -158,6 +159,7 @@ public class UpdateGroupV2CustomNameAndPhotoTask implements Runnable {
                 group.personalNote = personalNote;
                 db.group2Dao().updatePersonalNote(group.bytesOwnedIdentity, group.bytesGroupIdentifier, group.personalNote, group.computeFullSearch(fullSearchItems));
 
+                AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity);
                 if (!propagated) {
                     try {
                         AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createGroupV2PersonalNoteChange(group.bytesGroupIdentifier, personalNote));

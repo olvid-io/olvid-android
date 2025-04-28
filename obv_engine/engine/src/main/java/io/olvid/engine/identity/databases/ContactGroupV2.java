@@ -1607,7 +1607,6 @@ public class ContactGroupV2 implements ObvDatabase {
     private static final long HOOK_BIT_CREATED_ON_OTHER_DEVICE = 0x100;
     @Override
     public void wasCommitted() {
-        // nothing to do here
         if ((commitHookBits & HOOK_BIT_INSERTED) != 0) {
             HashMap<String, Object> userInfo = new HashMap<>();
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_OWNED_IDENTITY_KEY, ownedIdentity);

@@ -60,6 +60,7 @@ import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.compose.EphemeralViewModel.Companion.existenceSetting
 import io.olvid.messenger.discussion.compose.EphemeralViewModel.Companion.visibilitySetting
+import io.olvid.messenger.discussion.message.attachments.constantSp
 import kotlinx.coroutines.delay
 
 @Composable
@@ -125,7 +126,7 @@ fun EphemeralTimer(modifier: Modifier = Modifier, expiration: MessageExpiration?
     var ephemeralState: EphemeralState? by remember {
         mutableStateOf(null)
     }
-    LaunchedEffect(expiration, readOnce) {
+    LaunchedEffect(expiration, readOnce, bookmarked) {
         expiration?.let {
             while (expiration.expirationTimestamp > System.currentTimeMillis()) {
                 ephemeralState =
@@ -162,7 +163,9 @@ private fun EphemeralTimerContent(modifier: Modifier = Modifier, text: String?, 
         text?.let {
             Text(
                 text = text,
-                style = OlvidTypography.subtitle1,
+                style = OlvidTypography.subtitle1.copy(
+                    fontSize = constantSp(12)
+                ),
                 color = colorResource(id = color)
             )
         }
@@ -228,7 +231,7 @@ private fun EphemeralTimerPreview() {
             expiration = MessageExpiration(
                 id = 0,
                 messageId = 0,
-                expirationTimestamp = System.currentTimeMillis() + 10_000,
+                expirationTimestamp = System.currentTimeMillis() + 60_000,
                 wipeOnly = false
             ),
             readOnce = true,

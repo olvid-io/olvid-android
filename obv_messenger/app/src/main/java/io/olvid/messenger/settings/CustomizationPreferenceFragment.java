@@ -31,6 +31,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 import androidx.emoji2.bundled.BundledEmojiCompatConfig;
 import androidx.emoji2.text.EmojiCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -202,6 +203,6 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.setBackgroundColor(getResources().getColor(R.color.dialogBackground));
+        view.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.almostWhite));
     }
 }

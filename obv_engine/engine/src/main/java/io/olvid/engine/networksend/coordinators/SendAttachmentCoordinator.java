@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -216,7 +217,7 @@ public class SendAttachmentCoordinator implements OutboxAttachment.OutboxAttachm
 
     class NotificationListener implements io.olvid.engine.datatypes.NotificationListener {
         @Override
-        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        public void callback(String notificationName, Map<String, Object> userInfo) {
             switch (notificationName) {
                 case UploadNotifications.NOTIFICATION_OUTBOX_ATTACHMENT_SIGNED_URL_REFRESHED: {
                     Identity ownedIdentity = (Identity) userInfo.get(UploadNotifications.NOTIFICATION_OUTBOX_ATTACHMENT_SIGNED_URL_REFRESHED_OWNED_IDENTITY_KEY);

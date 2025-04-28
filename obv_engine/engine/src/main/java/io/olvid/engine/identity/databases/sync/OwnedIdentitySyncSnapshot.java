@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.BackupSeed;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionPrivateKey;
@@ -54,20 +55,24 @@ import io.olvid.engine.identity.databases.OwnedIdentityDetails;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
 import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
     public static final String PRIVATE_IDENTITY = "private_identity";
     public static final String PUBLISHED_DETAILS = "published_details";
     public static final String KEYCLOAK = "keycloak";
+    public static final String BACKUP_SEED = "backup_seed";
     public static final String CONTACTS = "contacts";
     public static final String GROUPS = "groups";
     public static final String GROUPS2 = "groups2";
-    static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(Arrays.asList(PRIVATE_IDENTITY, PUBLISHED_DETAILS, KEYCLOAK, CONTACTS, GROUPS, GROUPS2));
+    static HashSet<String> DEFAULT_DOMAIN = new HashSet<>(Arrays.asList(PRIVATE_IDENTITY, PUBLISHED_DETAILS, KEYCLOAK, BACKUP_SEED, CONTACTS, GROUPS, GROUPS2));
 
 
     public PrivateIdentity private_identity;
     public IdentityDetailsSyncSnapshot published_details;
     public KeycloakSyncSnapshot keycloak;
+    public byte[] backup_seed;
+
     @JsonSerialize(keyUsing = ObvBytesKey.KeySerializer.class)
     @JsonDeserialize(keyUsing = ObvBytesKey.KeyDeserializer.class)
     public HashMap<ObvBytesKey, ContactSyncSnapshot> contacts;
@@ -99,6 +104,8 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
                 ownedIdentitySyncSnapshot.keycloak = KeycloakSyncSnapshot.of(identityManagerSession, keycloakServer);
             }
         }
+
+        ownedIdentitySyncSnapshot.backup_seed = ownedIdentity.getBackupSeed().getBackupSeedBytes();
 
         ownedIdentitySyncSnapshot.contacts = new HashMap<>();
         for (ContactIdentity contact : ContactIdentity.getAll(identityManagerSession, ownedIdentity.getOwnedIdentity())) {
@@ -136,8 +143,20 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
         // restore published details
         OwnedIdentityDetails ownedIdentityDetails = published_details.restoreOwned(identityManagerSession, ownedIdentity);
 
+        // restore a backup_seed if present
+        BackupSeed backupSeed;
+        if (domain.contains(BACKUP_SEED) && backup_seed != null) {
+            try {
+                backupSeed = new BackupSeed(backup_seed);
+            } catch (Exception e) {
+                backupSeed = null;
+            }
+        } else {
+            backupSeed = null;
+        }
+
         // create the owned identity in DB
-        OwnedIdentity ownedIdentityObject = new OwnedIdentity(identityManagerSession, privateIdentity, ownedIdentityDetails.getVersion());
+        OwnedIdentity ownedIdentityObject = new OwnedIdentity(identityManagerSession, privateIdentity, backupSeed, ownedIdentityDetails.getVersion());
         ownedIdentityObject.insert();
 
         // restore keycloak data (if any)
@@ -205,7 +224,7 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
         public byte[] encryption_private_key;
         public byte[] mac_key;
 
-        private static PrivateIdentity of (io.olvid.engine.datatypes.PrivateIdentity privateIdentity) {
+        private static PrivateIdentity of(io.olvid.engine.datatypes.PrivateIdentity privateIdentity) {
             PrivateIdentity pi = new PrivateIdentity();
             pi.server_authentication_private_key = Encoded.of(privateIdentity.getServerAuthenticationPrivateKey()).getBytes();
             pi.encryption_private_key = Encoded.of(privateIdentity.getEncryptionPrivateKey()).getBytes();

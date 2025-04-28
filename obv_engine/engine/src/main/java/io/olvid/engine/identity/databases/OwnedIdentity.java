@@ -36,15 +36,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
 import io.olvid.engine.Logger;
-import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
+import io.olvid.engine.datatypes.BackupSeed;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.ObvDatabase;
@@ -58,6 +60,7 @@ import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPrivateKey;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPublicKey;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.datatypes.key.symmetric.MACKey;
+import io.olvid.engine.datatypes.notifications.BackupNotifications;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
@@ -69,15 +72,14 @@ import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
 
 
-@SuppressWarnings("FieldMayBeFinal")
 public class OwnedIdentity implements ObvDatabase {
     static final String TABLE_NAME = "owned_identity";
 
     private final IdentityManagerSession identityManagerSession;
 
-    private Identity ownedIdentity;
+    private final Identity ownedIdentity;
     static final String OWNED_IDENTITY = "identity";
-    private PrivateIdentity privateIdentity;
+    private final byte[] privateIdentityBytes;
     static final String PRIVATE_IDENTITY = "private_identity";
     private int publishedDetailsVersion;
     static final String PUBLISHED_DETAILS_VERSION = "published_details_version";
@@ -89,12 +91,21 @@ public class OwnedIdentity implements ObvDatabase {
     static final String KEYCLOAK_SERVER_URL = "keycloak_server_url";
     private boolean markedForDeletion;
     static final String MARKED_FOR_DELETION = "marked_for_deletion";
+    private byte[] backupSeed;
+    static final String BACKUP_SEED = "backup_seed";
+
+    // keep the deserialized version in cache locally
+    private PrivateIdentity privateIdentity = null;
+
 
     public Identity getOwnedIdentity() {
         return ownedIdentity;
     }
 
     public PrivateIdentity getPrivateIdentity() {
+        if (privateIdentity == null) {
+            privateIdentity = PrivateIdentity.of(privateIdentityBytes);
+        }
         return privateIdentity;
     }
 
@@ -120,6 +131,17 @@ public class OwnedIdentity implements ObvDatabase {
 
     public boolean isMarkedForDeletion() {
         return markedForDeletion;
+    }
+
+    public BackupSeed getBackupSeed() {
+        if (backupSeed != null) {
+            try {
+                return new BackupSeed(backupSeed);
+            } catch (Exception e) {
+                Logger.x(e);
+            }
+        }
+        return null;
     }
 
     // region computed properties
@@ -495,6 +517,17 @@ public class OwnedIdentity implements ObvDatabase {
         }
     }
 
+    public void setBackupSeed(BackupSeed backupSeed) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + BACKUP_SEED + " = ? " +
+                " WHERE " + OWNED_IDENTITY + " = ?;")) {
+            statement.setBytes(1, backupSeed.getBackupSeedBytes());
+            statement.setBytes(2, ownedIdentity.getBytes());
+            statement.executeUpdate();
+            this.backupSeed = backupSeed.getBackupSeedBytes();
+        }
+    }
+
     // endregion
 
     // region constructors
@@ -509,11 +542,12 @@ public class OwnedIdentity implements ObvDatabase {
             return null;
         }
         MACKey macKey = Suite.getDefaultMAC(0).generateKey(prng);
+        BackupSeed backupSeed = BackupSeed.generate(prng);
         try {
             Identity identity = new Identity(server, (ServerAuthenticationPublicKey) serverAuthKeyPair.getPublicKey(), (EncryptionPublicKey) encryptionKeyPair.getPublicKey());
             PrivateIdentity privateIdentity = new PrivateIdentity(identity, (ServerAuthenticationPrivateKey) serverAuthKeyPair.getPrivateKey(), (EncryptionPrivateKey) encryptionKeyPair.getPrivateKey(), macKey);
             OwnedIdentityDetails ownedIdentityDetails = OwnedIdentityDetails.create(identityManagerSession, identity, identityManagerSession.jsonObjectMapper.writeValueAsString(identityDetails));
-            OwnedIdentity ownedIdentity = new OwnedIdentity(identityManagerSession, privateIdentity, ownedIdentityDetails.getVersion());
+            OwnedIdentity ownedIdentity = new OwnedIdentity(identityManagerSession, privateIdentity, backupSeed, ownedIdentityDetails.getVersion());
             ownedIdentity.insert();
             OwnedDevice.createCurrentDevice(identityManagerSession, identity, deviceDisplayName, prng);
             return ownedIdentity;
@@ -523,15 +557,17 @@ public class OwnedIdentity implements ObvDatabase {
         }
     }
 
-    public OwnedIdentity(IdentityManagerSession identityManagerSession, PrivateIdentity privateIdentity, int detailsVersion) {
+    public OwnedIdentity(IdentityManagerSession identityManagerSession, PrivateIdentity privateIdentity, BackupSeed backupSeed, int detailsVersion) {
         this.identityManagerSession = identityManagerSession;
         this.ownedIdentity = privateIdentity.getPublicIdentity();
         this.privateIdentity = privateIdentity;
+        this.privateIdentityBytes = privateIdentity.serialize();
         this.publishedDetailsVersion = detailsVersion;
         this.latestDetailsVersion = detailsVersion;
         this.active = true;
         this.keycloakServerUrl = null;
         this.markedForDeletion = false;
+        this.backupSeed = backupSeed == null ? null : backupSeed.getBackupSeedBytes();
     }
 
     private OwnedIdentity(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -541,12 +577,13 @@ public class OwnedIdentity implements ObvDatabase {
         } catch (DecodingException e) {
             throw new SQLException();
         }
-        this.privateIdentity = PrivateIdentity.deserialize(res.getBytes(PRIVATE_IDENTITY));
+        this.privateIdentityBytes = res.getBytes(PRIVATE_IDENTITY);
         this.publishedDetailsVersion = res.getInt(PUBLISHED_DETAILS_VERSION);
         this.latestDetailsVersion = res.getInt(LATEST_DETAILS_VERSION);
         this.active = res.getBoolean(ACTIVE);
         this.keycloakServerUrl = res.getString(KEYCLOAK_SERVER_URL);
         this.markedForDeletion = res.getBoolean(MARKED_FOR_DELETION);
+        this.backupSeed = res.getBytes(BACKUP_SEED);
     }
 
 
@@ -564,6 +601,7 @@ public class OwnedIdentity implements ObvDatabase {
                     ACTIVE + " BIT NOT NULL, " +
                     KEYCLOAK_SERVER_URL + " TEXT, " +
                     MARKED_FOR_DELETION + " BIT NOT NULL, " +
+                    BACKUP_SEED + " BLOB, " +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ", " + PUBLISHED_DETAILS_VERSION + ") REFERENCES " + OwnedIdentityDetails.TABLE_NAME + "(" + OwnedIdentityDetails.OWNED_IDENTITY + ", " + OwnedIdentityDetails.VERSION + ")," +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ", " + LATEST_DETAILS_VERSION + ") REFERENCES " + OwnedIdentityDetails.TABLE_NAME + "(" + OwnedIdentityDetails.OWNED_IDENTITY + ", " + OwnedIdentityDetails.VERSION + ")," +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ", " + KEYCLOAK_SERVER_URL + ") REFERENCES " + KeycloakServer.TABLE_NAME + "(" + KeycloakServer.OWNED_IDENTITY + ", " + KeycloakServer.SERVER_URL + "));");
@@ -612,7 +650,7 @@ public class OwnedIdentity implements ObvDatabase {
                                 preparedStatement.setString(3, objectMapper.writeValueAsString(map));
                             } catch (Exception e) {
                                 Logger.x(e);
-                                // skip the contact
+                                // skip the owned identity!
                                 continue;
                             }
                             preparedStatement.setString(4, null);
@@ -665,7 +703,6 @@ public class OwnedIdentity implements ObvDatabase {
             oldVersion = 20;
         }
         if (oldVersion < 35 && newVersion >= 35) {
-            PRNG prng = Suite.getDefaultPRNGService(Suite.LATEST_VERSION);
             try (Statement statement = session.createStatement()) {
                 Logger.d("MIGRATING `owned_identity` DATABASE FROM VERSION " + oldVersion + " TO 35");
                 // No need to save the api_key, it has already been saved on server side
@@ -674,18 +711,27 @@ public class OwnedIdentity implements ObvDatabase {
             }
             oldVersion = 35;
         }
+        if (oldVersion < 44 && newVersion >= 44) {
+            try (Statement statement = session.createStatement()) {
+                Logger.d("MIGRATING `owned_identity` DATABASE FROM VERSION " + oldVersion + " TO 44");
+                // No need to save the api_key, it has already been saved on server side
+                statement.execute("ALTER TABLE owned_identity ADD COLUMN backup_seed BLOB");
+            }
+            oldVersion = 44;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
-            statement.setBytes(2, privateIdentity.serialize());
+            statement.setBytes(2, privateIdentityBytes);
             statement.setInt(3, publishedDetailsVersion);
             statement.setInt(4, latestDetailsVersion);
             statement.setBoolean(5, active);
             statement.setString(6, keycloakServerUrl);
             statement.setBoolean(7, markedForDeletion);
+            statement.setBytes(8, backupSeed);
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_IDENTITY_LIST_CHANGED;
             identityManagerSession.session.addSessionCommitListener(this);
@@ -799,7 +845,7 @@ public class OwnedIdentity implements ObvDatabase {
     @Override
     public void wasCommitted() {
         if ((commitHookBits & HOOK_BIT_IDENTITY_LIST_CHANGED) != 0) {
-            identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_LIST_UPDATED, new HashMap<>());
+            identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_LIST_UPDATED, Collections.emptyMap());
         }
         if ((commitHookBits & HOOK_BIT_IDENTITY_DETAILS_PUBLISHED) != 0) {
             // trigger an update of the App ownedIdentity
@@ -825,6 +871,11 @@ public class OwnedIdentity implements ObvDatabase {
             userInfo.put(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_OWNED_IDENTITY_KEY, ownedIdentity);
             userInfo.put(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS_ACTIVE_KEY, active);
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_OWNED_IDENTITY_CHANGED_ACTIVE_STATUS, userInfo);
+            if (active) {
+                identityManagerSession.notificationPostingDelegate.postNotification(BackupNotifications.NOTIFICATION_PROFILE_BACKUP_NEEDED, Map.of(
+                        BackupNotifications.NOTIFICATION_PROFILE_BACKUP_NEEDED_OWNED_IDENTITY, ownedIdentity
+                ));
+            }
         }
         commitHookBits = 0;
     }
@@ -881,7 +932,7 @@ public class OwnedIdentity implements ObvDatabase {
         if (pojo.latest_details != null && pojo.latest_details.version != pojo.published_details.version) {
             latest_details = OwnedIdentityDetails.restore(identityManagerSession, ownedIdentity, pojo.latest_details);
         }
-        OwnedIdentity ownedIdentityObject = new OwnedIdentity(identityManagerSession, privateIdentity, published_details.getVersion());
+        OwnedIdentity ownedIdentityObject = new OwnedIdentity(identityManagerSession, privateIdentity, null, published_details.getVersion());
         if (latest_details != null) {
             ownedIdentityObject.latestDetailsVersion = latest_details.getVersion();
         }
@@ -907,10 +958,11 @@ public class OwnedIdentity implements ObvDatabase {
     }
 
     private PrivateIdentityPojo_0 backupPrivateIdentity() {
+        PrivateIdentity privateId = getPrivateIdentity();
         PrivateIdentityPojo_0 privateIdentityPojo = new PrivateIdentityPojo_0();
-        privateIdentityPojo.server_authentication_private_key = Encoded.of(privateIdentity.getServerAuthenticationPrivateKey()).getBytes();
-        privateIdentityPojo.encryption_private_key = Encoded.of(privateIdentity.getEncryptionPrivateKey()).getBytes();
-        privateIdentityPojo.mac_key = Encoded.of(privateIdentity.getMacKey()).getBytes();
+        privateIdentityPojo.server_authentication_private_key = Encoded.of(privateId.getServerAuthenticationPrivateKey()).getBytes();
+        privateIdentityPojo.encryption_private_key = Encoded.of(privateId.getEncryptionPrivateKey()).getBytes();
+        privateIdentityPojo.mac_key = Encoded.of(privateId.getMacKey()).getBytes();
         return privateIdentityPojo;
     }
 

@@ -19,7 +19,6 @@
 
 package io.olvid.messenger.main.archived
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
@@ -37,9 +36,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.Text
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration.Short
@@ -48,13 +44,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult.ActionPerformed
 import androidx.compose.material3.SnackbarResult.Dismissed
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -69,6 +62,7 @@ import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.designsystem.components.SimpleTopAppBar
 import io.olvid.messenger.discussion.message.SwipeForActionBox
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.cutoutHorizontalPadding
@@ -84,14 +78,10 @@ class ArchivedDiscussionsActivity : LockableActivity() {
 
     private val discussionListViewModel: DiscussionListViewModel by viewModels()
 
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
             (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.elevation = 0f
         setContent {
             val context = LocalContext.current
             val hapticFeedback = LocalHapticFeedback.current
@@ -100,7 +90,74 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                 val scope = rememberCoroutineScope()
                 val snackbarHostState = remember { SnackbarHostState() }
                 Scaffold(
-                    modifier = Modifier.background(color = colorResource(id = R.color.almostWhite)),
+                    containerColor = colorResource(R.color.almostWhite),
+                    contentColor = colorResource(R.color.almostBlack),
+                    topBar = {
+                        SimpleTopAppBar(
+                            title = stringResource(R.string.activity_title_archived_discussions),
+                            selection = discussionListViewModel.selection,
+                            actions = buildList {
+                                add(R.drawable.ic_delete to {
+                                    discussionListViewModel.deleteDiscussions(
+                                        discussions = discussionListViewModel.selection.map { it.discussion },
+                                        context = context,
+                                        onDelete = { discussionListViewModel.clearSelection() })
+                                })
+                                if (discussionListViewModel.selection.any { it.discussionCustomization?.shouldMuteNotifications() == true }) {
+                                    add(R.drawable.ic_action_unmute to {
+                                        discussionListViewModel.muteSelectedDiscussions(
+                                            context = context,
+                                            discussionsAndLastMessage = discussionListViewModel.selection,
+                                            muted = false,
+                                            onActionDone = { discussionListViewModel.clearSelection() })
+                                    })
+                                } else {
+                                    add(R.drawable.ic_action_mute to {
+                                        discussionListViewModel.muteSelectedDiscussions(
+                                            context = context,
+                                            discussionsAndLastMessage = discussionListViewModel.selection,
+                                            muted = true,
+                                            onActionDone = { discussionListViewModel.clearSelection() })
+                                    })
+                                }
+                                if (discussionListViewModel.selection.any { it.discussion.unread || it.unreadCount > 0 }) {
+                                    add(R.drawable.ic_action_mark_read to {
+                                        discussionListViewModel.selection.forEach {
+                                            discussionListViewModel.markAllDiscussionMessagesRead(
+                                                it.discussion.id
+                                            )
+                                        }
+                                        discussionListViewModel.clearSelection()
+                                    })
+                                } else {
+                                    add(R.drawable.ic_action_mark_unread to {
+                                        discussionListViewModel.selection.forEach {
+                                            discussionListViewModel.markDiscussionAsUnread(
+                                                it.discussion.id
+                                            )
+                                        }
+                                        discussionListViewModel.clearSelection()
+                                    })
+                                }
+                                add(R.drawable.ic_unarchive to {
+                                    discussionListViewModel.archiveDiscussion(
+                                        *discussionListViewModel.selection.map { it.discussion }
+                                            .toTypedArray(),
+                                        archived = false,
+                                        cancelable = true
+                                    )
+                                    discussionListViewModel.clearSelection()
+                                })
+                            },
+                            onBackPressed = {
+                                if (discussionListViewModel.selection.isEmpty()) {
+                                    onBackPressedDispatcher.onBackPressed()
+                                } else {
+                                    discussionListViewModel.clearSelection()
+                                }
+                            }
+                        )
+                    },
                     snackbarHost = {
                         SnackbarHost(hostState = snackbarHostState) { snackbarData ->
                             Snackbar(
@@ -110,14 +167,11 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                             )
                         }
                     },
-                ) {
+                ) { contentPadding ->
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(color = colorResource(R.color.olvid_gradient_dark))
-                            .statusBarsPadding()
-                            .background(color = colorResource(R.color.almostWhite))
-                            .navigationBarsPadding()
+                            .padding(contentPadding)
                     ) {
                         LaunchedEffect(discussionListViewModel.cancelableArchivedDiscussions) {
                             if (discussionListViewModel.cancelableArchivedDiscussions.isNotEmpty()) {
@@ -125,7 +179,8 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                     snackbarHostState.currentSnackbarData?.apply {
                                         dismiss()
                                     }
-                                    val count = discussionListViewModel.cancelableArchivedDiscussions.size
+                                    val count =
+                                        discussionListViewModel.cancelableArchivedDiscussions.size
                                     val result = snackbarHostState.showSnackbar(
                                         message = context.resources.getQuantityString(
                                             R.plurals.label_discussion_unarchive_done,
@@ -142,12 +197,14 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                                 archived = true,
                                                 cancelable = false
                                             )
-                                            discussionListViewModel.cancelableArchivedDiscussions = emptyList()
+                                            discussionListViewModel.cancelableArchivedDiscussions =
+                                                emptyList()
                                         }
 
                                         Dismissed -> {
                                             if (discussionListViewModel.cancelableArchivedDiscussions.size == count) {
-                                                discussionListViewModel.cancelableArchivedDiscussions = emptyList()
+                                                discussionListViewModel.cancelableArchivedDiscussions =
+                                                    emptyList()
                                             }
                                         }
                                     }
@@ -155,33 +212,46 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                             }
                         }
 
-
                         archivedDiscussions?.filter { it.discussion.archived }
                             ?.takeIf { it.isNotEmpty() }?.let { list ->
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize()
                                 ) {
-                                    itemsIndexed(list, key = {_, item -> item.discussion.id }) { index, discussionAndMessage ->
-                                        var menuExpanded by remember { mutableStateOf(false) }
-                                        val unread = discussionAndMessage.unreadCount > 0 || discussionAndMessage.discussion.unread
+                                    itemsIndexed(
+                                        list,
+                                        key = { _, item -> item.discussion.id }) { index, discussionAndMessage ->
+                                        val unread =
+                                            discussionAndMessage.unreadCount > 0 || discussionAndMessage.discussion.unread
                                         SwipeForActionBox(
-                                            modifier = Modifier.fillMaxWidth().animateItem(),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .animateItem(),
                                             maxOffset = 96.dp,
-                                            enabledFromStartToEnd = true,
-                                            enabledFromEndToStart = true,
+                                            enabledFromStartToEnd = discussionListViewModel.selection.isEmpty(),
+                                            enabledFromEndToStart = discussionListViewModel.selection.isEmpty(),
                                             callbackStartToEnd = {
                                                 if (unread) {
                                                     App.runThread {
-                                                        NotificationActionService.markAllDiscussionMessagesRead(discussionAndMessage.discussion.id)
+                                                        NotificationActionService.markAllDiscussionMessagesRead(
+                                                            discussionAndMessage.discussion.id
+                                                        )
                                                     }
                                                 } else {
                                                     App.runThread {
-                                                        AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(discussionAndMessage.discussion.id, true)
+                                                        AppDatabase.getInstance().discussionDao()
+                                                            .updateDiscussionUnreadStatus(
+                                                                discussionAndMessage.discussion.id,
+                                                                true
+                                                            )
                                                     }
                                                 }
                                             },
                                             callbackEndToStart = {
-                                                discussionListViewModel.archiveDiscussion(discussionAndMessage.discussion, archived = false, cancelable = true)
+                                                discussionListViewModel.archiveDiscussion(
+                                                    discussionAndMessage.discussion,
+                                                    archived = false,
+                                                    cancelable = true
+                                                )
                                             },
                                             backgroundContentFromStartToEnd = { progress ->
                                                 SwipeActionBackground(
@@ -206,17 +276,6 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                                 )
                                             }
                                         ) {
-                                            DropdownMenu(
-                                                expanded = menuExpanded,
-                                                onDismissRequest = { menuExpanded = false }) {
-                                                DropdownMenuItem(
-                                                    text = { Text(text = stringResource(R.string.menu_action_unarchive)) },
-                                                    onClick = {
-                                                        discussionListViewModel.archiveDiscussion(discussionAndMessage.discussion, archived = false, cancelable = true)
-                                                        menuExpanded = false
-                                                    }
-                                                )
-                                            }
                                             DiscussionListItem(
                                                 modifier = Modifier
                                                     .background(
@@ -255,35 +314,49 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                                 attachmentCount = if (discussionAndMessage.message?.isLocationMessage == true) 0 else discussionAndMessage.message?.totalAttachmentCount
                                                     ?: 0,
                                                 onClick = {
-                                                    App.openDiscussionActivity(
-                                                        context,
-                                                        discussionAndMessage.discussion.id
-                                                    )
+                                                    if (discussionListViewModel.selection.isEmpty()) {
+                                                        App.openDiscussionActivity(
+                                                            context,
+                                                            discussionAndMessage.discussion.id
+                                                        )
+                                                    } else {
+                                                        discussionListViewModel.toggleSelection(
+                                                            discussionAndMessage.discussion
+                                                        )
+                                                    }
                                                 },
-                                                selected = false,
+                                                selected = discussionListViewModel.selection.contains(
+                                                    discussionAndMessage
+                                                ),
                                                 onLongClick = {
                                                     hapticFeedback.performHapticFeedback(
                                                         HapticFeedbackType.LongPress
                                                     )
-                                                    menuExpanded = true
+                                                    if (discussionListViewModel.selection.isEmpty()) {
+                                                        discussionListViewModel.enableSelection(
+                                                            discussionAndMessage.discussion
+                                                        )
+                                                    } else {
+                                                        discussionListViewModel.toggleSelection(
+                                                            discussionAndMessage.discussion
+                                                        )
+                                                    }
                                                 },
                                                 onDragStopped = {}
                                             )
-                                            if (index < list.size - 1) {
-                                                Spacer(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(
-                                                            start = 84.dp,
-                                                            end = 12.dp
-                                                        )
-                                                        .requiredHeight(1.dp)
-                                                        .align(Alignment.BottomStart)
-                                                        .background(
-                                                            color = colorResource(id = R.color.lightGrey)
-                                                        )
-                                                )
-                                            }
+                                            Spacer(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(
+                                                        start = 84.dp,
+                                                        end = 12.dp
+                                                    )
+                                                    .requiredHeight(1.dp)
+                                                    .align(Alignment.BottomStart)
+                                                    .background(
+                                                        color = colorResource(id = R.color.lightGrey)
+                                                    )
+                                            )
                                         }
                                     }
                                 }

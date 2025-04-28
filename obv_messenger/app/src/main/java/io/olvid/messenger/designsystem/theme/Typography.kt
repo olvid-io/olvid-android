@@ -20,11 +20,14 @@
 package io.olvid.messenger.designsystem.theme
 
 import androidx.compose.material.Typography
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.sp
+import io.olvid.messenger.discussion.message.attachments.constantSp
 
 val OlvidTypography = Typography(
     defaultFontFamily = FontFamily.Default,
@@ -65,3 +68,15 @@ val OlvidTypography = Typography(
         textDirection = TextDirection.ContentOrLtr
     )
 )
+
+@Composable
+fun backupKeyStyle(): TextStyle {
+    return TextStyle(
+        fontWeight = FontWeight.Bold,
+        fontSize = constantSp(20),
+        lineHeight = constantSp(28),
+        fontFamily = FontFamily.Monospace,
+        textDirection = TextDirection.ContentOrLtr,
+        textAlign = TextAlign.Center,
+    )
+}

@@ -20,7 +20,8 @@
 package io.olvid.engine.metamanager;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public interface NotificationPostingDelegate {
-    void postNotification(String notificationName, HashMap<String, Object> userInfo);
+    void postNotification(String notificationName, Map<String, Object> userInfo);
 }

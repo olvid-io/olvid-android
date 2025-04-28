@@ -1024,6 +1024,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         composeMessageViewModel.getRecordingLiveData()
             .observe(viewLifecycleOwner) { recording: Boolean ->
                 this.recording = recording
+                newMessageEditText?.isEnabled = !recording
                 if (recording) {
                     setShowAttachIcons(
                         show = false,

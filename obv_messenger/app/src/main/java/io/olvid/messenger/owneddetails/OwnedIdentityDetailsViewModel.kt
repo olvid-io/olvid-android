@@ -130,8 +130,7 @@ class OwnedIdentityDetailsViewModel : ViewModel() {
         }
     var nickname: String? = null
         get() = nullOrTrim(field)
-        set(value) {
-            field = value
+        set(value) { field = value
             if (this.absolutePhotoUrl == null) {
                 val name =
                     nickname?.trim().orEmpty() + firstName?.trim().orEmpty() + lastName?.trim()

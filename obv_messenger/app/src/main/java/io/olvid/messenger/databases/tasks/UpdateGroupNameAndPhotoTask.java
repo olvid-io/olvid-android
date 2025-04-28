@@ -19,10 +19,14 @@
 
 package io.olvid.messenger.databases.tasks;
 
+import java.util.List;
+
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Group;
+import io.olvid.messenger.databases.entity.Message;
 
 public class UpdateGroupNameAndPhotoTask implements Runnable {
     private final byte[] bytesGroupUid;
@@ -62,7 +66,9 @@ public class UpdateGroupNameAndPhotoTask implements Runnable {
                 ShortcutActivity.updateShortcut(discussion);
 
                 // delete all group details updated messages from the discussion
-                db.messageDao().deleteAllDiscussionNewPublishedDetailsMessages(discussion.id);
+                List<Message> messageList = db.messageDao().getAllDiscussionNewPublishedDetailsMessages(discussion.id);
+                db.messageDao().delete(messageList.toArray(new Message[0]));
+                UnreadCountsSingleton.INSTANCE.messageBatchDeleted(messageList);
             }
         }
     }

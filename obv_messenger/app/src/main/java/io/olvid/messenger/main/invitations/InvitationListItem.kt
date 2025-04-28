@@ -19,16 +19,22 @@
 
 package io.olvid.messenger.main.invitations
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.util.Base64
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -62,7 +68,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -126,7 +131,7 @@ fun InvitationListItem(
         Column(
             modifier = Modifier
                 .background(colorResource(id = R.color.almostWhite))
-                .padding(8.dp, 0.dp)
+                .padding(horizontal = 8.dp, vertical = 0.dp)
         ) {
 
             Row(
@@ -230,9 +235,24 @@ fun InvitationListItem(
                 ) {
 
                     val accentColor = colorResource(id = R.color.accent)
+                    val context = LocalContext.current
+
+                    val myCode = String(invitation?.associatedDialog?.category?.sasToDisplay ?: byteArrayOf(), StandardCharsets.UTF_8)
 
                     // your code
                     Column(
+                        modifier = Modifier
+                            .clickable(
+                                interactionSource = null,
+                                indication = null,
+                            ) {
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                                val clip = ClipData.newPlainText(context.getString(R.string.label_text_copied_from_olvid), myCode)
+                                if (clipboard != null) {
+                                    clipboard.setPrimaryClip(clip)
+                                    App.toast(R.string.toast_code_copied, Toast.LENGTH_SHORT)
+                                }
+                            },
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
@@ -240,15 +260,14 @@ fun InvitationListItem(
                             text = stringResource(id = R.string.invitation_label_your_code),
                             maxLines = 1,
                             textAlign = TextAlign.Center,
-                            style = OlvidTypography.body2,
-                            fontWeight = FontWeight.Medium,
+                            style = OlvidTypography.body2.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
                             color = colorResource(
                                 id = R.color.grey
                             )
                         )
                         Spacer(modifier = Modifier.requiredHeight(4.dp))
-
-                        val myCode = String(invitation?.associatedDialog?.category?.sasToDisplay ?: byteArrayOf(), StandardCharsets.UTF_8)
 
                         BasicTextField(
                             modifier = Modifier.requiredWidth(with(LocalDensity.current) { 128.sp.toDp() } ),
@@ -277,7 +296,7 @@ fun InvitationListItem(
                     }
 
                     // their code
-                    Column {
+                    Box {
                         if (invitation?.associatedDialog?.category?.id == Category.SAS_EXCHANGE_DIALOG_CATEGORY) {
 
                             val customTextSelectionColors = TextSelectionColors(
@@ -313,7 +332,7 @@ fun InvitationListItem(
                                     singleLine = true,
                                     keyboardOptions = KeyboardOptions(
                                         keyboardType = KeyboardType.Number,
-                                        autoCorrect = false,
+                                        autoCorrectEnabled = false,
                                         imeAction = ImeAction.Done
                                     ),
                                     keyboardActions = KeyboardActions(
@@ -340,8 +359,9 @@ fun InvitationListItem(
                                                 text = stringResource(id = R.string.invitation_label_their_code),
                                                 maxLines = 1,
                                                 textAlign = TextAlign.Center,
-                                                style = OlvidTypography.body2,
-                                                fontWeight = FontWeight.Medium,
+                                                style = OlvidTypography.body2.copy(
+                                                    fontWeight = FontWeight.Medium
+                                                ),
                                                 color = colorResource(
                                                     id = R.color.grey
                                                 )
@@ -369,27 +389,30 @@ fun InvitationListItem(
                                 )
                             }
                         } else { //Category.SAS_CONFIRMED_DIALOG_CATEGORY
-                            Text(
-                                modifier = Modifier.requiredWidth(with(LocalDensity.current) { 128.sp.toDp() }),
-                                text = stringResource(id = R.string.invitation_label_their_code),
-                                maxLines = 1,
-                                textAlign = TextAlign.Center,
-                                style = OlvidTypography.body2,
-                                fontWeight = FontWeight.Medium,
-                                color = colorResource(
-                                    id = R.color.grey
+                            Column {
+                                Text(
+                                    modifier = Modifier.requiredWidth(with(LocalDensity.current) { 128.sp.toDp() }),
+                                    text = stringResource(id = R.string.invitation_label_their_code),
+                                    maxLines = 1,
+                                    textAlign = TextAlign.Center,
+                                    style = OlvidTypography.body2.copy(
+                                        fontWeight = FontWeight.Medium
+                                    ),
+                                    color = colorResource(
+                                        id = R.color.grey
+                                    )
                                 )
-                            )
-                            Spacer(modifier = Modifier.requiredHeight(2.dp))
-                            Image(
-                                modifier = Modifier
-                                    .align(CenterHorizontally)
-                                    .size(40.dp),
-                                painter = painterResource(id = R.drawable.ic_ok_outline),
-                                contentDescription = stringResource(
-                                    id = R.string.content_description_code_valid
+                                Spacer(modifier = Modifier.requiredHeight(2.dp))
+                                Image(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterHorizontally)
+                                        .size(40.dp),
+                                    painter = painterResource(id = R.drawable.ic_ok_outline),
+                                    contentDescription = stringResource(
+                                        id = R.string.content_description_code_valid
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }
@@ -462,7 +485,10 @@ fun InvitationListItem(
             // bottom buttons
             Row(modifier = Modifier
                 .padding(vertical = 4.dp)
-                .focusProperties { canFocus = false }) {
+                .fillMaxWidth()
+                .focusProperties { canFocus = false },
+                horizontalArrangement = Arrangement.Start
+            ) {
                 AnimatedVisibility(
                     visible = listOf(
                         Category.INVITE_SENT_DIALOG_CATEGORY,
@@ -470,18 +496,14 @@ fun InvitationListItem(
                         Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY,
                         Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY,
                         Category.SAS_CONFIRMED_DIALOG_CATEGORY,
+                        Category.SAS_EXCHANGE_DIALOG_CATEGORY,
                     ).contains(invitation?.associatedDialog?.category?.id)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        TextButton(onClick = { onClick(ABORT, invitation!!, null) }) {
-                            Text(
-                                stringResource(id = R.string.button_label_abort),
-                                color = colorResource(id = R.color.blueOrWhite)
-                            )
-                        }
+                    TextButton(onClick = { onClick(ABORT, invitation!!, null) }) {
+                        Text(
+                            stringResource(id = R.string.button_label_abort),
+                            color = colorResource(id = R.color.blueOrWhite)
+                        )
                     }
                 }
                 AnimatedVisibility(
@@ -491,16 +513,15 @@ fun InvitationListItem(
                         Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY,
                     ).contains(invitation?.associatedDialog?.category?.id)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
-                    ) {
+                    Row {
+                        Spacer(Modifier.weight(1f, true))
                         TextButton(onClick = { onClick(IGNORE, invitation!!, null) }) {
                             Text(
                                 stringResource(id = R.string.button_label_ignore),
                                 color = colorResource(id = R.color.blueOrWhite)
                             )
                         }
+                        Spacer(Modifier.width(8.dp))
                         TextButton(
                             onClick = { onClick(ACCEPT, invitation!!, null) }) {
                             Text(
@@ -515,16 +536,15 @@ fun InvitationListItem(
                         Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY,
                     ).contains(invitation?.associatedDialog?.category?.id)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
-                    ) {
+                    Row {
+                        Spacer(Modifier.weight(1f, true))
                         TextButton(onClick = { onClick(REJECT, invitation!!, null) }) {
                             Text(
                                 stringResource(id = R.string.button_label_reject),
                                 color = colorResource(id = R.color.blueOrWhite)
                             )
                         }
+                        Spacer(Modifier.width(8.dp))
                         TextButton(
                             onClick = { onClick(ACCEPT, invitation!!, null) }) {
                             Text(
@@ -539,16 +559,8 @@ fun InvitationListItem(
                         Category.SAS_EXCHANGE_DIALOG_CATEGORY,
                     ).contains(invitation?.associatedDialog?.category?.id)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        TextButton(onClick = { onClick(ABORT, invitation!!, null) }) {
-                            Text(
-                                stringResource(id = R.string.button_label_abort),
-                                color = colorResource(id = R.color.blueOrWhite)
-                            )
-                        }
+                    Row {
+                        Spacer(Modifier.weight(1f, true))
                         val enabled = sas.text.length == Constants.DEFAULT_NUMBER_OF_DIGITS_FOR_SAS
                         TextButton(
                             onClick = { validateSas() },
@@ -568,18 +580,17 @@ fun InvitationListItem(
                         Category.GROUP_V2_FROZEN_INVITATION_DIALOG_CATEGORY,
                     ).contains(invitation?.associatedDialog?.category?.id)
                 ) {
-                    val enabled =
-                        invitation?.associatedDialog?.category?.id == Category.GROUP_V2_INVITATION_DIALOG_CATEGORY
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
-                    ) {
+                    Row {
+                        val enabled =
+                            invitation?.associatedDialog?.category?.id == Category.GROUP_V2_INVITATION_DIALOG_CATEGORY
+                        Spacer(Modifier.weight(1f, true))
                         TextButton(onClick = { onClick(REJECT, invitation!!, null) }) {
                             Text(
                                 stringResource(id = R.string.button_label_reject),
                                 color = colorResource(id = R.color.blueOrWhite)
                             )
                         }
+                        Spacer(Modifier.width(8.dp))
                         TextButton(
                             onClick = { onClick(ACCEPT, invitation!!, null) },
                             enabled = enabled

@@ -25,6 +25,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import io.olvid.messenger.App
+import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.R.string
 import io.olvid.messenger.R.xml
@@ -91,7 +92,10 @@ class DiscussionSettingsHeadersFragment : PreferenceFragmentCompat(), SettingsCh
                             DiscussionSettingsActivity.PREF_KEY_DISCUSSION_MUTE_NOTIFICATIONS,
                             false
                         )
-                        discussionSettingsViewModel.discussionLiveData.value?.propagateMuteSettings(discussionCustomization.apply { prefMuteNotifications = false })
+                        discussionSettingsViewModel.discussionLiveData.value?.let {
+                            it.propagateMuteSettings(discussionCustomization.apply { prefMuteNotifications = false })
+                            AppSingleton.getEngine().profileBackupNeeded(it.bytesOwnedIdentity)
+                        }
                     } else {
                         val context = context
                         val discussionId = discussionSettingsViewModel.discussionId
@@ -119,9 +123,10 @@ class DiscussionSettingsHeadersFragment : PreferenceFragmentCompat(), SettingsCh
                                             AppDatabase.getInstance().discussionCustomizationDao()
                                                 .update(discussionCust)
                                         }
-                                        discussionSettingsViewModel.discussionLiveData.value?.propagateMuteSettings(
-                                            discussionCust
-                                        )
+                                        discussionSettingsViewModel.discussionLiveData.value?.let {
+                                            it.propagateMuteSettings(discussionCust)
+                                            AppSingleton.getEngine().profileBackupNeeded(it.bytesOwnedIdentity)
+                                        }
                                     }
                                 },
                                 DISCUSSION,

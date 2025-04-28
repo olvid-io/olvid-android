@@ -24,5 +24,5 @@ import androidx.compose.runtime.Composable
 
 
 @Composable
-fun SubscriptionOfferDialog(activity: Activity, onDismissCallback: () -> Unit, onPurchaseCallback: () -> Unit) {
+fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, onPurchaseCallback: () -> Unit) {
 }

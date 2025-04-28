@@ -125,6 +125,7 @@ public class DiscussionSettingsDataStore extends PreferenceDataStore {
                                 AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(discussion.bytesOwnedIdentity, ObvSyncAtom.createGroupV2SendReadReceiptChange(discussion.bytesDiscussionIdentifier, targetSendReadReceipt));
                                 break;
                         }
+                        AppSingleton.getEngine().profileBackupNeeded(discussion.bytesOwnedIdentity);
                     }
                 } catch (Exception e) {
                     Logger.w("Failed to propagate send read receipt change to other devices");

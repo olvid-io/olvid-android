@@ -20,6 +20,7 @@ package io.olvid.messenger.settings
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceFragmentCompat
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
@@ -41,6 +42,6 @@ class AppIconSettingsPreferenceFragment : PreferenceFragmentCompat() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.setBackgroundColor(resources.getColor(R.color.dialogBackground))
+        view.setBackgroundColor(ContextCompat.getColor(view.context, R.color.almostWhite))
     }
 }

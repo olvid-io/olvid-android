@@ -20,7 +20,9 @@
 package io.olvid.messenger;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
@@ -32,9 +34,11 @@ import io.olvid.engine.engine.types.SimpleEngineNotificationListener;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
+import io.olvid.engine.engine.types.sync.ObvProfileBackupSnapshot;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
+import io.olvid.messenger.databases.entity.backups.AppDeviceSnapshot;
 import io.olvid.messenger.databases.entity.sync.AppSyncSnapshot;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.openid.KeycloakManager;
@@ -178,16 +182,41 @@ public class AppBackupAndSyncDelegate implements ObvBackupAndSyncDelegate {
     }
 
     @Override
-    public byte[] serialize(ObvSyncSnapshotNode snapshotNode) throws Exception {
-        if (!(snapshotNode instanceof AppSyncSnapshot)) {
-            throw new Exception("AppBackupDelegate can only serialize AppSyncSnapshot");
+    public byte[] serialize(SerializationContext serializationContext, ObvSyncSnapshotNode snapshotNode) throws Exception {
+        switch (serializationContext) {
+            case DEVICE:
+                if (!(snapshotNode instanceof AppDeviceSnapshot)) {
+                    throw new Exception("AppBackupDelegate can only serialize AppDeviceSnapshot");
+                }
+                break;
+            case PROFILE:
+                if (!(snapshotNode instanceof AppSyncSnapshot)) {
+                    throw new Exception("AppBackupDelegate can only serialize AppSyncSnapshot");
+                }
+                break;
         }
 
         return AppSingleton.getJsonObjectMapper().writeValueAsBytes(snapshotNode);
     }
 
     @Override
-    public ObvSyncSnapshotNode deserialize(byte[] serializedSnapshotNode) throws Exception {
-        return AppSingleton.getJsonObjectMapper().readValue(serializedSnapshotNode, AppSyncSnapshot.class);
+    public ObvSyncSnapshotNode deserialize(SerializationContext serializationContext, byte[] serializedSnapshotNode) throws Exception {
+        switch (serializationContext) {
+            case DEVICE:
+                return AppSingleton.getJsonObjectMapper().readValue(serializedSnapshotNode, AppDeviceSnapshot.class);
+            case PROFILE:
+            default:
+                return AppSingleton.getJsonObjectMapper().readValue(serializedSnapshotNode, AppSyncSnapshot.class);
+        }
+    }
+
+    @Override
+    public ObvSyncSnapshotNode getDeviceSnapshot() {
+        return AppDeviceSnapshot.of(AppDatabase.getInstance());
+    }
+
+    @Override
+    public Map<String, String> getAdditionalProfileInfo(Identity ownedIdentity) {
+        return Map.of(ObvProfileBackupSnapshot.INFO_PLATFORM, "android");
     }
 }

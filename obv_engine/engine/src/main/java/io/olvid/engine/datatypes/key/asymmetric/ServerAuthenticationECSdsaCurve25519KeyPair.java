@@ -24,7 +24,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 
 import io.olvid.engine.crypto.EdwardCurve;
-import io.olvid.engine.crypto.PRNGService;
+import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.EdwardCurvePoint;
@@ -46,7 +46,7 @@ public class ServerAuthenticationECSdsaCurve25519KeyPair extends KeyPair {
         super(publicKey, privateKey);
     }
 
-    public static ServerAuthenticationECSdsaCurve25519KeyPair generate(PRNGService prng) {
+    public static ServerAuthenticationECSdsaCurve25519KeyPair generate(PRNG prng) {
         EdwardCurve curve25519 = Suite.getCurve(EdwardCurve.CURVE_25519);
         BigInteger a;
         EdwardCurvePoint A;

@@ -221,6 +221,7 @@ import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.MAPS
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.NONE
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.OSM
 import io.olvid.messenger.webrtc.CallNotificationManager
+import io.olvid.messenger.webrtc.WebrtcCallService
 import io.olvid.messenger.webrtc.components.CallNotification
 import kotlinx.coroutines.delay
 import java.io.FileInputStream
@@ -234,6 +235,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
     OnMenuItemClickListener {
 
     private val discussionViewModel: DiscussionViewModel by viewModels()
+    private var optionsMenuHash = -1
     private val composeMessageViewModel: ComposeMessageViewModel by viewModels { FACTORY }
     private val linkPreviewViewModel: LinkPreviewViewModel by viewModels()
     private val mentionViewModel: MentionViewModel by viewModels()
@@ -250,6 +252,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
     private val composeView: ComposeView by lazy { findViewById(R.id.composeView) }
     private var scrollToMessageRequest by mutableStateOf(ScrollRequest.None)
     private var scrollToFirstUnread by mutableStateOf(true)
+    private var startCollectingMessagesToMarkAsRead by mutableStateOf(false)
 
     private var composeAreaBottomPadding: Int? by mutableStateOf(null)
     private var lockGroupBottomPadding by mutableIntStateOf(0)
@@ -490,6 +493,9 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                             ?: 0))
                                     )
                                 } else {
+                                    Handler(mainLooper).postDelayed({
+                                        startCollectingMessagesToMarkAsRead = true
+                                    }, 300)
                                     lazyListState.scrollToItem(
                                         index = 2 + pos,
                                         scrollOffset = -2 * context.resources.displayMetrics.heightPixels / 3
@@ -558,12 +564,14 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     }
                     LaunchedEffect(scrollToFirstUnread, unreadCountAndFirstMessage?.messageId) {
                         if (scrollToFirstUnread) {
-                            unreadCountAndFirstMessage?.messageId?.takeIf { it > 0 }
-                                ?.let { firstUnreadMessageId ->
-                                    scrollToMessageRequest =
-                                        ScrollRequest(firstUnreadMessageId, false)
+                            unreadCountAndFirstMessage?.messageId?.let {
+                                if (it > 0) {
+                                    scrollToMessageRequest = ScrollRequest(messageId = it, highlight = false)
                                     scrollToFirstUnread = false
+                                } else {
+                                    startCollectingMessagesToMarkAsRead = true
                                 }
+                            }
                         }
                     }
                     val showScrollDownButton by remember {
@@ -683,32 +691,34 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                     val message = messages[index]
                                     message?.let {
                                         LaunchedEffect(
+                                            startCollectingMessagesToMarkAsRead,
                                             message.id,
                                             message.status,
                                             message.messageType
                                         ) {
-                                            // here we do everything that only needs to be set once for a message
-                                            if (message.status == Message.STATUS_UNREAD
-                                                || message.wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ
-                                            ) {
-                                                messageIdsToMarkAsRead.add(message.id)
-                                                if (latestServerTimestampOfMessageToMarkAsRead < message.timestamp) {
-                                                    latestServerTimestampOfMessageToMarkAsRead =
-                                                        message.timestamp
-                                                }
-
-                                                if ((message.isInbound && message.wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ)
-                                                    || message.messageType == Message.TYPE_INBOUND_MESSAGE && message.status == Message.STATUS_UNREAD
+                                            if (startCollectingMessagesToMarkAsRead) {
+                                                if (message.status == Message.STATUS_UNREAD
+                                                    || message.wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ
                                                 ) {
-                                                    // only send the read receipt if the content of the message was actually displayed
-                                                    App.runThread {
-                                                        if (sendReadReceipt) {
-                                                            message.sendMessageReturnReceipt(
-                                                                discussionViewModel.discussion.value,
-                                                                Message.RETURN_RECEIPT_STATUS_READ
-                                                            )
+                                                    messageIdsToMarkAsRead.add(message.id)
+                                                    if (latestServerTimestampOfMessageToMarkAsRead < message.timestamp) {
+                                                        latestServerTimestampOfMessageToMarkAsRead =
+                                                            message.timestamp
+                                                    }
+
+                                                    if ((message.isInbound && message.wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ)
+                                                        || message.messageType == Message.TYPE_INBOUND_MESSAGE && message.status == Message.STATUS_UNREAD
+                                                    ) {
+                                                        // only send the read receipt if the content of the message was actually displayed
+                                                        App.runThread {
+                                                            if (sendReadReceipt) {
+                                                                message.sendMessageReturnReceipt(
+                                                                    discussionViewModel.discussion.value,
+                                                                    Message.RETURN_RECEIPT_STATUS_READ
+                                                                )
+                                                            }
+                                                            CreateReadMessageMetadata(message.id).run()
                                                         }
-                                                        CreateReadMessageMetadata(message.id).run()
                                                     }
                                                 }
                                             }
@@ -1255,7 +1265,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                         App.runThread {
                             for (messageId in selectedMessageIds) {
                                 AppDatabase.getInstance().messageDao()
-                                    .updateBookmarked(messageId, true)
+                                    .updateBookmarked(true, messageId)
                                 val message = AppDatabase.getInstance().messageDao()[messageId]
                                 val bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity()
                                 if (message != null && bytesOwnedIdentity != null) {
@@ -1276,7 +1286,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                         App.runThread {
                             for (messageId in selectedMessageIds) {
                                 AppDatabase.getInstance().messageDao()
-                                    .updateBookmarked(messageId, false)
+                                    .updateBookmarked(false, messageId)
                                 val message = AppDatabase.getInstance().messageDao()[messageId]
                                 val bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity()
                                 if (message != null && bytesOwnedIdentity != null) {
@@ -1304,6 +1314,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
         discussionViewModel.discussion.observe(this) { discussion: Discussion? ->
             if (discussion == null) {
+                optionsMenuHash = -1
                 toolBarTitle.text = null
                 toolBarSubtitle.visibility = View.GONE
                 toolBarInitialView.setUnknown()
@@ -1311,8 +1322,9 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                 finishAndClearViewModel()
                 return@observe
             }
-            invalidateOptionsMenu()
-
+            if (optionsMenuHash != computeOptionsMenuHash(discussionViewModel.discussion.value, discussionViewModel.discussionCustomization.value)) {
+                invalidateOptionsMenu()
+            }
 
             if (discussion.isLocked) {
                 if (discussion.title.isNullOrEmpty()) {
@@ -1536,10 +1548,9 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
             // background color and image
             if (discussionCustomization != null) {
-                if (discussionCustomization.backgroundImageUrl != null) {
+                val backgroundImageAbsolutePath = App.absolutePathFromRelative(discussionCustomization.backgroundImageUrl)
+                if (backgroundImageAbsolutePath != null) {
                     App.runThread {
-                        val backgroundImageAbsolutePath =
-                            App.absolutePathFromRelative(discussionCustomization.backgroundImageUrl)
                         var bitmap = BitmapFactory.decodeFile(backgroundImageAbsolutePath)
                         if (bitmap.byteCount > SelectDetailsPhotoViewModel.MAX_BITMAP_SIZE) {
                             return@runThread
@@ -2144,7 +2155,34 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         return super.dispatchTouchEvent(event)
     }
 
+    fun computeOptionsMenuHash(discussion: Discussion?, discussionCustomization: DiscussionCustomization?) : Int {
+        if (discussion == null) {
+            return -1
+        }
+        if (discussion.isPreDiscussion) {
+            return 0
+        }
+        var hash = 1
+        if (discussion.isNormalOrReadOnly) {
+            if (discussion.discussionType == Discussion.TYPE_CONTACT) {
+                hash += 2
+            } else {
+                hash += 4
+            }
+            discussionCustomization?.let {
+                if (it.shouldMuteNotifications()) {
+                    hash += 8
+                }
+            }
+        }
+        if (discussion.active) {
+            hash += 16
+        }
+        return hash
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        optionsMenuHash = computeOptionsMenuHash(discussionViewModel.discussion.value, discussionViewModel.discussionCustomization.value)
         val discussion = discussionViewModel.discussion.value
         if (discussion != null) {
             if (discussion.isPreDiscussion) {
@@ -2230,16 +2268,20 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                         Discussion.TYPE_GROUP, Discussion.TYPE_GROUP_V2 -> {
                             val contacts = discussionViewModel.discussionContacts.value
                             if (contacts != null) {
-                                val bytesContactIdentities = ArrayList<BytesKey>(contacts.size)
-                                for (contact in contacts) {
-                                    bytesContactIdentities.add(BytesKey(contact.bytesContactIdentity))
+                                val bytesContactIdentities: List<BytesKey>?
+                                if (contacts.size > WebrtcCallService.MAX_GROUP_SIZE_TO_SELECT_ALL_BY_DEFAULT) {
+                                    bytesContactIdentities = null
+                                } else {
+                                    bytesContactIdentities = ArrayList<BytesKey>(contacts.size)
+                                    for (contact in contacts) {
+                                        bytesContactIdentities.add(BytesKey(contact.bytesContactIdentity))
+                                    }
                                 }
-                                val multiCallStartDialogFragment =
-                                    MultiCallStartDialogFragment.newInstance(
-                                        discussion.bytesOwnedIdentity,
-                                        discussion.bytesDiscussionIdentifier,
-                                        bytesContactIdentities
-                                    )
+                                val multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(
+                                    discussion.bytesOwnedIdentity,
+                                    discussion.bytesDiscussionIdentifier,
+                                    bytesContactIdentities
+                                )
                                 multiCallStartDialogFragment.show(supportFragmentManager, "dialog")
                             }
                         }
@@ -2361,9 +2403,10 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                         reDiscussionCustomization.prefMuteNotifications = false
                                         AppDatabase.getInstance().discussionCustomizationDao()
                                             .update(reDiscussionCustomization)
-                                        discussionViewModel.discussion.value?.propagateMuteSettings(
-                                            reDiscussionCustomization
-                                        )
+                                        discussionViewModel.discussion.value?.let {
+                                            it.propagateMuteSettings(reDiscussionCustomization)
+                                            AppSingleton.getEngine().profileBackupNeeded(it.bytesOwnedIdentity)
+                                        }
                                     }
                                 }
                             }

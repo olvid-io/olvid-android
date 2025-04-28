@@ -34,8 +34,10 @@ import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,6 +58,7 @@ import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Signature;
 import io.olvid.engine.crypto.Suite;
+import io.olvid.engine.datatypes.BackupSeed;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.EncryptedBytes;
@@ -77,6 +80,8 @@ import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionEciesMDCKeyPair;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationECSdsaMDCKeyPair;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
+import io.olvid.engine.datatypes.notifications.BackupNotifications;
+import io.olvid.engine.datatypes.notifications.ProtocolNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.databases.EngineDbSchemaVersion;
@@ -99,11 +104,13 @@ import io.olvid.engine.engine.types.ObvBytesKey;
 import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.ObvContactDeviceCount;
 import io.olvid.engine.engine.types.ObvContactInfo;
+import io.olvid.engine.engine.types.ObvDeviceBackupForRestore;
 import io.olvid.engine.engine.types.ObvDeviceList;
 import io.olvid.engine.engine.types.ObvDeviceManagementRequest;
 import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.engine.engine.types.ObvOutboundAttachment;
 import io.olvid.engine.engine.types.ObvPostMessageOutput;
+import io.olvid.engine.engine.types.ObvProfileBackupsForRestore;
 import io.olvid.engine.engine.types.ObvPushNotificationType;
 import io.olvid.engine.engine.types.ObvReturnReceipt;
 import io.olvid.engine.engine.types.RegisterApiKeyResult;
@@ -117,7 +124,10 @@ import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
 import io.olvid.engine.engine.types.identities.ObvTrustOrigin;
 import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
 import io.olvid.engine.engine.types.sync.ObvSyncAtom;
+import io.olvid.engine.engine.types.sync.ObvSyncSnapshot;
+import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
 import io.olvid.engine.identity.IdentityManager;
+import io.olvid.engine.identity.databases.sync.IdentityManagerSyncSnapshot;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
 import io.olvid.engine.metamanager.EngineOwnedIdentityCleanupDelegate;
 import io.olvid.engine.metamanager.MetaManager;
@@ -143,7 +153,9 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     private final String dbPath;
     @SuppressWarnings({"FieldCanBeLocal", "unused"})
     private final String dbKey;
+    private final SSLSocketFactory sslSocketFactory;
     private final CreateSessionDelegate createSessionDelegate;
+    private final ObvBackupAndSyncDelegate appBackupAndSyncDelegate;
 
     final ChannelManager channelManager;
     final IdentityManager identityManager;
@@ -178,6 +190,8 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
         this.dbPath = new File(baseDirectory, Constants.ENGINE_DB_FILENAME).getPath();
         this.dbKey = dbKey;
+        this.sslSocketFactory = sslSocketFactory;
+        this.appBackupAndSyncDelegate = appBackupAndSyncDelegate;
 
         File inboundAttachmentDirectory = new File(baseDirectory, Constants.INBOUND_ATTACHMENTS_DIRECTORY);
         //noinspection ResultOfMethodCallIgnored
@@ -290,7 +304,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         this.sendManager = new SendManager(metaManager, sslSocketFactory, baseDirectoryPath, prng);
         this.notificationManager = new NotificationManager(metaManager);
         this.protocolManager = new ProtocolManager(metaManager, appBackupAndSyncDelegate, baseDirectoryPath, prng, jsonObjectMapper);
-        this.backupManager = new BackupManager(metaManager, prng, jsonObjectMapper);
+        this.backupManager = new BackupManager(metaManager, appBackupAndSyncDelegate, sslSocketFactory, prng, jsonObjectMapper);
 
         registerToInternalNotifications();
         initializationComplete();
@@ -778,7 +792,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 return RegisterApiKeyResult.WAIT_FOR_SERVER_SESSION;
             }
 
-            StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, new ServerQuery.RegisterApiKeyQuery(ownedIdentity, serverSessionToken, Logger.getUuidString(apiKey))));
+            StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, new ServerQuery.RegisterApiKeyQuery(ownedIdentity, serverSessionToken, Logger.getUuidString(apiKey))), sslSocketFactory);
 
             OperationQueue queue = new OperationQueue();
             queue.queue(standaloneServerQueryOperation);
@@ -857,6 +871,9 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
 
     @Override
     public void setOwnedIdentityKeycloakSelfRevocationTestNonce(byte[] bytesOwnedIdentity, String serverUrl, String nonce) {
+        if (nonce == null) {
+            return;
+        }
         try (EngineSession engineSession = getSession()) {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
             identityManager.setOwnedIdentityKeycloakSelfRevocationTestNonce(engineSession.session, ownedIdentity, serverUrl, nonce);
@@ -1195,7 +1212,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         try (EngineSession engineSession = getSession()) {
             Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
 
-            StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, new ServerQuery.OwnedDeviceDiscoveryQuery(ownedIdentity)));
+            StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, new ServerQuery.OwnedDeviceDiscoveryQuery(ownedIdentity)), sslSocketFactory);
 
             OperationQueue queue = new OperationQueue();
             queue.queue(standaloneServerQueryOperation);
@@ -1203,51 +1220,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             queue.join();
 
             if (standaloneServerQueryOperation.isFinished() && standaloneServerQueryOperation.getServerResponse() != null) {
-                // decrypt the received device list
-                byte[] decryptedPayload = identityManager.decrypt(engineSession.session, standaloneServerQueryOperation.getServerResponse().decodeEncryptedData(), ownedIdentity);
-
-                HashMap<DictionaryKey, Encoded> map = new Encoded(decryptedPayload).decodeDictionary();
-
-                // check for multi-device (is null if server could not determine if multi-device is available)
-                Encoded encodedMulti = map.get(new DictionaryKey("multi"));
-                Boolean multiDevice;
-                if (encodedMulti != null) {
-                    multiDevice = encodedMulti.decodeBoolean();
-                } else {
-                    multiDevice = null;
-                }
-
-                // now get the actual device list
-                HashMap<ObvBytesKey, ObvOwnedDevice.ServerDeviceInfo> deviceUidsAndServerInfo = new HashMap<>();
-
-                Encoded[] encodedDevices = map.get(new DictionaryKey("dev")).decodeList();
-                for (Encoded encodedDevice : encodedDevices) {
-                    HashMap<DictionaryKey, Encoded> deviceMap = encodedDevice.decodeDictionary();
-                    UID deviceUid = deviceMap.get(new DictionaryKey("uid")).decodeUid();
-
-                    Encoded encodedExpiration = deviceMap.get(new DictionaryKey("exp"));
-                    Long expirationTimestamp = encodedExpiration == null ? null : encodedExpiration.decodeLong();
-
-                    Encoded encodedRegistration = deviceMap.get(new DictionaryKey("reg"));
-                    Long lastRegistrationTimestamp = encodedRegistration == null ? null : encodedRegistration.decodeLong();
-
-                    Encoded encodedName = deviceMap.get(new DictionaryKey("name"));
-                    String deviceName = null;
-                    if (encodedName != null) {
-                        try {
-                            byte[] plaintext = identityManager.decrypt(engineSession.session, encodedName.decodeEncryptedData(), ownedIdentity);
-                            byte[] bytesDeviceName = new Encoded(plaintext).decodeListWithPadding()[0].decodeBytes();
-                            if (bytesDeviceName.length != 0) {
-                                deviceName = new String(bytesDeviceName, StandardCharsets.UTF_8);
-                            }
-                        } catch (Exception ignored) {
-                        }
-                    }
-
-                    deviceUidsAndServerInfo.put(new ObvBytesKey(deviceUid.getBytes()), new ObvOwnedDevice.ServerDeviceInfo(deviceName, expirationTimestamp, lastRegistrationTimestamp));
-                }
-
-                return new ObvDeviceList(multiDevice, deviceUidsAndServerInfo);
+                return ObvDeviceList.of(
+                        standaloneServerQueryOperation.getServerResponse().decodeEncryptedData(),
+                        identityManager.getOwnedIdentityEncryptionPrivateKey(engineSession.session, ownedIdentity)
+                );
             }
         } catch (Exception e) {
             Logger.x(e);
@@ -2456,6 +2432,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     public void retryScheduledNetworkTasks() {
         fetchManager.retryScheduledNetworkTasks();
         sendManager.retryScheduledNetworkTasks();
+        backupManager.retryScheduledNetworkTasks();
     }
 
     // endregion
@@ -2466,14 +2443,198 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         backupManager.initiateBackup(forExport);
     }
 
+
+    @Override
+    public String generateDeviceBackupSeed(String server) {
+        try {
+            return backupManager.generateDeviceBackupSeed(server);
+        } catch (Exception e) {
+            Logger.x(e);
+            return null;
+        }
+    }
+
+    @Override
+    public String getDeviceBackupSeed() throws Exception {
+        return backupManager.getCurrentDeviceBackupSeed();
+    }
+
+    @Override
+    public void deleteDeviceBackupSeed(String deviceBackupSeed) {
+        try {
+            BackupSeed backupSeed = new BackupSeed(deviceBackupSeed);
+            backupManager.deleteDeviceBackupSeed(backupSeed);
+        } catch (Exception e) {
+            Logger.x(e);
+        }
+    }
+
+    @Override
+    public boolean backupDeviceAndProfilesNow() {
+        try {
+            return backupManager.backupDeviceAndProfilesNow();
+        } catch (Exception e) {
+            Logger.x(e);
+            return false;
+        }
+    }
+
+    @Override
+    public void deviceBackupNeeded() {
+        notificationManager.postNotification(BackupNotifications.NOTIFICATION_DEVICE_BACKUP_NEEDED, Collections.emptyMap());
+    }
+
+    @Override
+    public void profileBackupNeeded(byte[] bytesOwnedIdentity) {
+        try {
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            notificationManager.postNotification(BackupNotifications.NOTIFICATION_PROFILE_BACKUP_NEEDED, Map.of(
+                    BackupNotifications.NOTIFICATION_PROFILE_BACKUP_NEEDED_OWNED_IDENTITY, ownedIdentity
+            ));
+        } catch (Exception e) {
+            Logger.x(e);
+        }
+    }
+
+    @Override
+    public ObvDeviceBackupForRestore fetchDeviceBackup(String server, String deviceBackupSeed) {
+        try {
+            BackupSeed backupSeed = new BackupSeed(deviceBackupSeed);
+            return backupManager.fetchDeviceBackup(server, backupSeed);
+        } catch (Exception e) {
+            Logger.x(e);
+            return new ObvDeviceBackupForRestore(ObvDeviceBackupForRestore.Status.PERMANENT_ERROR, null, null);
+        }
+    }
+
+    @Override
+    public ObvProfileBackupsForRestore fetchProfileBackups(byte[] bytesIdentity, String profileBackupSeed) {
+        try {
+            BackupSeed backupSeed = new BackupSeed(profileBackupSeed);
+            Identity identity = Identity.of(bytesIdentity);
+            return backupManager.fetchProfileBackups(identity.getServer(), backupSeed);
+        } catch (Exception e) {
+            Logger.x(e);
+            return new ObvProfileBackupsForRestore(ObvProfileBackupsForRestore.Status.PERMANENT_ERROR, null, null);
+        }
+    }
+
+    @Override
+    public boolean deleteProfileBackupSnapshot(byte[] bytesIdentity, String profileBackupSeed, byte[] threadId, long version) {
+        try {
+            BackupSeed backupSeed = new BackupSeed(profileBackupSeed);
+            Identity identity = Identity.of(bytesIdentity);
+            UID backupThreadId = new UID(threadId);
+            return backupManager.deleteProfileBackupSnapshot(identity.getServer(), backupSeed, backupThreadId, version);
+        } catch (Exception e) {
+            Logger.x(e);
+            return false;
+        }
+    }
+
+    @Override
+    public byte[] downloadProfilePicture(byte[] bytesIdentity, byte[] photoLabel, byte[] photoKey) throws Exception {
+        Identity identity = Identity.of(bytesIdentity);
+        UID label = new UID(photoLabel);
+        AuthEncKey authEncKey = (AuthEncKey) new Encoded(photoKey).decodeSymmetricKey();
+
+        StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, null, new ServerQuery.BackupsV2DownloadProfilePictureQuery(identity, label, authEncKey)), sslSocketFactory);
+
+        OperationQueue queue = new OperationQueue();
+        queue.queue(standaloneServerQueryOperation);
+        queue.execute(1, "Engine-downloadProfilePicture");
+        queue.join();
+
+        if (standaloneServerQueryOperation.isFinished()) {
+            return standaloneServerQueryOperation.getServerResponse().decodeBytes();
+        }
+
+        return null;
+    }
+
+    @Override
+    public boolean restoreProfile(ObvSyncSnapshot snapshot, String deviceName, String serializedKeycloakAuthState) {
+        boolean success = false;
+        try (EngineSession engineSession = getSession()) {
+            engineSession.session.startTransaction();
+
+            try {
+                ObvBackupAndSyncDelegate wrappedIdentityDelegate = identityManager.getSyncDelegateWithinTransaction(engineSession.session);
+
+                final List<ObvBackupAndSyncDelegate.RestoreFinishedCallback> commitCallbackList = new ArrayList<>();
+                engineSession.session.addSessionCommitListener(() -> {
+                    for (ObvBackupAndSyncDelegate.RestoreFinishedCallback callback : commitCallbackList) {
+                        callback.onRestoreSuccess();
+                    }
+                });
+
+                try {
+                    // create the owned identity (and associated stuff) at engine level
+                    ObvSyncSnapshotNode node = snapshot.getSnapshotNode(wrappedIdentityDelegate.getTag());
+                    ObvIdentity obvOwnedIdentity;
+                    if (node instanceof IdentityManagerSyncSnapshot) {
+                        obvOwnedIdentity = identityManager.restoreTransferredOwnedIdentity(engineSession.session, deviceName, ((IdentityManagerSyncSnapshot) node));
+                        if (serializedKeycloakAuthState != null) {
+                            identityManager.saveKeycloakAuthState(engineSession.session, obvOwnedIdentity.getIdentity(), serializedKeycloakAuthState);
+                        }
+                    } else {
+                        throw new Exception();
+                    }
+
+                    // give a chance for all delegates to create an owned identity based on what the engine just created
+                    List<ObvBackupAndSyncDelegate.RestoreFinishedCallback> callbacksOwnedIdentity = snapshot.restoreOwnedIdentity(obvOwnedIdentity, wrappedIdentityDelegate, appBackupAndSyncDelegate);
+                    if (callbacksOwnedIdentity != null && !callbacksOwnedIdentity.isEmpty()) {
+                        commitCallbackList.addAll(callbacksOwnedIdentity);
+                    }
+
+
+                    // actually restore the snapshot
+                    List<ObvBackupAndSyncDelegate.RestoreFinishedCallback> callbacks = snapshot.restore(wrappedIdentityDelegate, appBackupAndSyncDelegate);
+
+                    if (callbacks != null && !callbacks.isEmpty()) {
+                        commitCallbackList.addAll(callbacks);
+                    }
+                } catch (Exception e) {
+                    // if an exception occurs, always call the failure of any already added callback
+                    for (ObvBackupAndSyncDelegate.RestoreFinishedCallback callback : commitCallbackList) {
+                        callback.onRestoreFailure();
+                    }
+                    throw e;
+                }
+
+                try {
+                    // trigger a download of all user data (including other identities, but we do not really care...)
+                    identityManager.downloadAllUserData(engineSession.session);
+                } catch (Exception ignored) { }
+
+                // at the very end, add a final session commit listener that will be called after all engine notifications are sent
+                engineSession.session.addSessionCommitListener(() -> notificationManager.postNotification(ProtocolNotifications.NOTIFICATION_SNAPSHOT_RESTORATION_FINISHED, Collections.emptyMap()));
+
+                success = true;
+            } catch (Exception e) {
+                Logger.x(e);
+            } finally {
+                if (success) {
+                    engineSession.session.commit();
+                } else {
+                    engineSession.session.rollback();
+                }
+            }
+        } catch (SQLException e) {
+            Logger.x(e);
+        }
+        return success;
+    }
+
+    // legacy methods
     @Override
     public ObvBackupKeyInformation getBackupKeyInformation() throws Exception {
         return backupManager.getBackupKeyInformation();
     }
 
     @Override
-    public void generateBackupKey() {
-        backupManager.generateNewBackupKey();
+    public void stopLegacyBackups() {
+        backupManager.stopLegacyBackups();
     }
 
     @Override
@@ -2499,22 +2660,6 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     @Override
     public ObvBackupKeyVerificationOutput validateBackupSeed(String backupSeedString, byte[] backupContent) {
         int status = backupManager.validateBackupSeed(backupSeedString, backupContent);
-        switch (status) {
-            case BackupManager.BACKUP_SEED_VERIFICATION_STATUS_SUCCESS:
-                return new ObvBackupKeyVerificationOutput(ObvBackupKeyVerificationOutput.STATUS_SUCCESS);
-            case BackupManager.BACKUP_SEED_VERIFICATION_STATUS_TOO_SHORT:
-                return new ObvBackupKeyVerificationOutput(ObvBackupKeyVerificationOutput.STATUS_TOO_SHORT);
-            case BackupManager.BACKUP_SEED_VERIFICATION_STATUS_TOO_LONG:
-                return new ObvBackupKeyVerificationOutput(ObvBackupKeyVerificationOutput.STATUS_TOO_LONG);
-            case BackupManager.BACKUP_SEED_VERIFICATION_STATUS_BAD_KEY:
-            default:
-                return new ObvBackupKeyVerificationOutput(ObvBackupKeyVerificationOutput.STATUS_BAD_KEY);
-        }
-    }
-
-    @Override
-    public ObvBackupKeyVerificationOutput verifyBackupSeed(String backupSeedString) {
-        int status = backupManager.verifyBackupKey(backupSeedString);
         switch (status) {
             case BackupManager.BACKUP_SEED_VERIFICATION_STATUS_SUCCESS:
                 return new ObvBackupKeyVerificationOutput(ObvBackupKeyVerificationOutput.STATUS_SUCCESS);

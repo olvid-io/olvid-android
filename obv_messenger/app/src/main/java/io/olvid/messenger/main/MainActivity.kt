@@ -53,12 +53,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.SnackbarResult.ActionPerformed
-import androidx.compose.material.SnackbarResult.Dismissed
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -114,12 +108,12 @@ import io.olvid.messenger.discussion.DiscussionActivity.Companion.FULL_SCREEN_MA
 import io.olvid.messenger.discussion.location.FullscreenMapDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment.OnOwnedIdentitySelectedListener
-import io.olvid.messenger.main.bookmarks.BookmarksActivity
 import io.olvid.messenger.main.calls.CallLogFragment
 import io.olvid.messenger.main.contacts.ContactListFragment
 import io.olvid.messenger.main.discussions.DiscussionListFragment
 import io.olvid.messenger.main.groups.GroupListFragment
 import io.olvid.messenger.main.search.GlobalSearchViewModel
+import io.olvid.messenger.main.tips.TipsViewModel
 import io.olvid.messenger.notifications.AndroidNotificationManager
 import io.olvid.messenger.onboarding.OnboardingActivity
 import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity
@@ -135,16 +129,16 @@ import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.FU
 import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.LINE
 import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.NONE
 import io.olvid.messenger.troubleshooting.TroubleshootingActivity
-import io.olvid.messenger.troubleshooting.TroubleshootingDataStore
-import io.olvid.messenger.troubleshooting.shouldShowTroubleshootingSnackbar
 import io.olvid.messenger.webrtc.CallNotificationManager
 import io.olvid.messenger.webrtc.components.CallNotification
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
 class MainActivity : LockableActivity(), OnClickListener {
     private val globalSearchViewModel by viewModels<GlobalSearchViewModel>()
+    private val tipsViewModel by viewModels<TipsViewModel>()
     private var root: CoordinatorLayout? = null
     private val ownInitialView: InitialView by lazy { findViewById(R.id.owned_identity_initial_view) }
     private var pingConnectivityDot: View? = null
@@ -161,7 +155,6 @@ class MainActivity : LockableActivity(), OnClickListener {
     private var pingGreen = 0
     internal var contactListFragment: ContactListFragment? = null
     private lateinit var tabImageViews: Array<ImageView?>
-    private var showBookmarks: Boolean = false
     private var showLocationSharing: Boolean = false
 
     @JvmField
@@ -171,11 +164,10 @@ class MainActivity : LockableActivity(), OnClickListener {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
-        lifecycleScope.launch { TroubleshootingDataStore(this@MainActivity).load() }
         App.runThread {
             val identityCount: Int = try {
                 AppSingleton.getEngine().ownedIdentities.size
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // if we fail to query ownIdentity count from Engine, fallback to querying on App side
                 AppDatabase.getInstance().ownedIdentityDao().countAll()
             }
@@ -188,7 +180,7 @@ class MainActivity : LockableActivity(), OnClickListener {
         }
         try {
             installSplashScreen()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             setTheme(R.style.AppTheme_NoActionBar)
         }
 
@@ -231,30 +223,6 @@ class MainActivity : LockableActivity(), OnClickListener {
 
         val composeOverlay = findViewById<ComposeView>(R.id.compose_overlay)
         composeOverlay?.setContent {
-            val snackbarState = remember {
-                SnackbarHostState()
-            }
-            LaunchedEffect(Unit) {
-                if (savedInstanceState == null && shouldShowTroubleshootingSnackbar()) {
-                    snackbarState.showSnackbar(
-                        message = getString(R.string.snackbar_go_to_troubleshooting_message),
-                        actionLabel = getString(R.string.snackbar_go_to_troubleshooting_button),
-                        duration = SnackbarDuration.Long
-                    ).let { snackbarResult ->
-                        when (snackbarResult) {
-                            Dismissed -> {}
-                            ActionPerformed -> {
-                                startActivity(
-                                    Intent(
-                                        this@MainActivity,
-                                        TroubleshootingActivity::class.java
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            }
             AppCompatTheme {
                 Column(
                     modifier = Modifier
@@ -263,12 +231,6 @@ class MainActivity : LockableActivity(), OnClickListener {
                     verticalArrangement = Arrangement.Bottom,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    SnackbarHost(
-                        hostState = snackbarState, modifier = Modifier
-                            .widthIn(max = 400.dp)
-                            .padding(bottom = 32.dp)
-                    )
-
                     var cachedCallData by remember { mutableStateOf(CallNotificationManager.currentCallData) }
                     LaunchedEffect(CallNotificationManager.currentCallData) {
                         if (CallNotificationManager.currentCallData != null) {
@@ -392,22 +354,6 @@ class MainActivity : LockableActivity(), OnClickListener {
             BillingUtils.initializeBillingClient(baseContext)
         }
 
-        // observe bookmarked messages
-        AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
-            if (ownedIdentity == null) {
-                return@switchMap null
-            }
-            AppDatabase.getInstance().messageDao()
-                .hasBookmarkedMessages(ownedIdentity.bytesOwnedIdentity)
-        }.observe(this) { bookmarkedMessages: Boolean? ->
-            if (showBookmarks != (bookmarkedMessages == true)) {
-                showBookmarks = bookmarkedMessages == true
-                if (viewPager.currentItem == DISCUSSIONS_TAB && globalSearchViewModel.filter.isNullOrEmpty()) {
-                    invalidateOptionsMenu()
-                }
-            }
-        }
-
         // observe location sharing
         AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
             if (ownedIdentity == null) {
@@ -495,7 +441,7 @@ class MainActivity : LockableActivity(), OnClickListener {
         bytesOwnedIdentityToSelect = if (hexBytesOwnedIdentityToSelect != null) {
             try {
                 Logger.fromHexString(hexBytesOwnedIdentityToSelect)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         } else {
@@ -556,6 +502,7 @@ class MainActivity : LockableActivity(), OnClickListener {
         }
         if (intent.hasExtra(BLOCKED_CERTIFICATE_ID_EXTRA)) {
             val blockedCertificateId = intent.getLongExtra(BLOCKED_CERTIFICATE_ID_EXTRA, -1)
+            intent.removeExtra(BLOCKED_CERTIFICATE_ID_EXTRA)
             val lastTrustedCertificateId =
                 intent.getLongExtra(LAST_TRUSTED_CERTIFICATE_ID_EXTRA, -1)
             if (blockedCertificateId != -1L) {
@@ -851,6 +798,7 @@ class MainActivity : LockableActivity(), OnClickListener {
 
     override fun onResume() {
         super.onResume()
+        App.runThread { tipsViewModel.refreshTipToShow(this@MainActivity) }
         mainActivityPageChangeListener!!.onPageSelected(viewPager.currentItem)
         val pingSetting = SettingsActivity.pingConnectivityIndicator
         if (previousPingConnectivityIndicator != NONE || pingSetting != NONE) {
@@ -895,13 +843,9 @@ class MainActivity : LockableActivity(), OnClickListener {
 
             DISCUSSIONS_TAB -> {
                 menuInflater.inflate(R.menu.menu_main_discussion_list, menu)
-                if (showBookmarks) {
-                    menuInflater.inflate(R.menu.menu_main_bookmarks, menu)
-                }
                 if (showLocationSharing && SettingsActivity.locationIntegration != LocationIntegrationEnum.BASIC) {
                     menuInflater.inflate(R.menu.menu_main_location, menu)
                 }
-                val bookmarkAction = menu.findItem(R.id.menu_action_bookmarks)
                 val searchView = menu.findItem(R.id.action_search).actionView as SearchView?
                 if (searchView != null) {
                     searchView.queryHint = getString(R.string.hint_search_anything)
@@ -936,12 +880,10 @@ class MainActivity : LockableActivity(), OnClickListener {
                 menu.findItem(R.id.action_search)
                     ?.setOnActionExpandListener(object : OnActionExpandListener {
                         override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                            bookmarkAction?.isVisible = false
                             return true
                         }
 
                         override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                            bookmarkAction?.isVisible = true
                             globalSearchViewModel.clear()
                             return true
                         }
@@ -967,18 +909,6 @@ class MainActivity : LockableActivity(), OnClickListener {
             startActivity(Intent(this, StorageManagerActivity::class.java))
         } else if (itemId == R.id.action_troubleshooting) {
             startActivity(Intent(this, TroubleshootingActivity::class.java))
-        } else if (itemId == R.id.action_backup_settings) {
-            val intent = Intent(this, SettingsActivity::class.java)
-            intent.putExtra(
-                SettingsActivity.SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA,
-                SettingsActivity.PREF_HEADER_KEY_BACKUP
-            )
-            startActivity(intent)
-            return true
-        } else if (itemId == R.id.menu_action_bookmarks) {
-            if (viewPager.currentItem == DISCUSSIONS_TAB) {
-                startActivity(Intent(this, BookmarksActivity::class.java))
-            }
         } else if (itemId == R.id.menu_action_location) {
             if (viewPager.currentItem == DISCUSSIONS_TAB) {
                 when (SettingsActivity.locationIntegration) {
@@ -1002,10 +932,10 @@ class MainActivity : LockableActivity(), OnClickListener {
                                         SettingsActivity.locationIntegration
                                     )?.show(
                                         supportFragmentManager,
-                                        DiscussionActivity.FULL_SCREEN_MAP_FRAGMENT_TAG
+                                        FULL_SCREEN_MAP_FRAGMENT_TAG
                                     )
                                 } else {
-                                    invalidateOptionsMenu();
+                                    invalidateOptionsMenu()
                                 }
                             }
                         }).show()

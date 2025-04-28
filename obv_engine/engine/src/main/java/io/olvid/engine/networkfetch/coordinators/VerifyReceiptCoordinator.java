@@ -21,6 +21,7 @@ package io.olvid.engine.networkfetch.coordinators;
 
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -106,7 +107,7 @@ public class VerifyReceiptCoordinator implements Operation.OnCancelCallback {
 
     class ServerSessionCreatedNotificationListener implements NotificationListener {
         @Override
-        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        public void callback(String notificationName, Map<String, Object> userInfo) {
             if (!notificationName.equals(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED)) {
                 return;
             }

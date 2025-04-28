@@ -20,13 +20,16 @@
 package io.olvid.messenger.databases.tasks;
 
 import java.util.Arrays;
+import java.util.List;
 
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
+import io.olvid.messenger.databases.entity.Message;
 
 public class UpdateContactDisplayNameAndPhotoTask implements Runnable {
     private final byte[] bytesIdentity;
@@ -75,7 +78,9 @@ public class UpdateContactDisplayNameAndPhotoTask implements Runnable {
                 ShortcutActivity.updateShortcut(discussion);
 
                 // delete all contact details updated messages from the discussion
-                db.messageDao().deleteAllDiscussionNewPublishedDetailsMessages(discussion.id);
+                List<Message> messageList = db.messageDao().getAllDiscussionNewPublishedDetailsMessages(discussion.id);
+                db.messageDao().delete(messageList.toArray(new Message[0]));
+                UnreadCountsSingleton.INSTANCE.messageBatchDeleted(messageList);
             }
         }
     }

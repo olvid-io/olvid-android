@@ -73,6 +73,7 @@ public class UpdateGroupCustomNameAndPhotoTask implements Runnable {
                 group.customName = customName;
                 db.groupDao().updateCustomName(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.customName, group.computeFullSearch(fullSearchItems));
 
+                AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity);
                 if (!propagated) {
                     try {
                         AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createGroupV1NicknameChange(group.bytesGroupOwnerAndUid, customName));
@@ -146,6 +147,7 @@ public class UpdateGroupCustomNameAndPhotoTask implements Runnable {
                 group.personalNote = personalNote;
                 db.groupDao().updatePersonalNote(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.personalNote, group.computeFullSearch(fullSearchItems));
 
+                AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity);
                 if (!propagated) {
                     try {
                         AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createGroupV1PersonalNoteChange(group.bytesGroupOwnerAndUid, personalNote));

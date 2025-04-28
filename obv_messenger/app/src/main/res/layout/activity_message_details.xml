@@ -8,6 +8,15 @@
     android:background="@drawable/background_activity_split_blue_white"
     android:orientation="vertical">
 
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/almostWhite"
+        app:layout_constraintBottom_toBottomOf="@+id/message_scrollview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/discussion_background"
         android:layout_width="0dp"

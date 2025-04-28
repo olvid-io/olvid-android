@@ -44,4 +44,9 @@ public abstract class BackupNotifications {
     public static final String NOTIFICATION_APP_BACKUP_INITIATION_REQUEST_VERSION_KEY = "version";
 
     public static final String NOTIFICATION_BACKUP_RESTORATION_FINISHED = "backup_notification_backup_restoration_finished";
+
+    public static final String NOTIFICATION_DEVICE_BACKUP_NEEDED = "backup_notification_device_backup_needed";
+
+    public static final String NOTIFICATION_PROFILE_BACKUP_NEEDED = "backup_notification_profile_backup_needed";
+    public static final String NOTIFICATION_PROFILE_BACKUP_NEEDED_OWNED_IDENTITY = "owned_identity"; // Identity
 }

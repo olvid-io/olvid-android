@@ -171,6 +171,7 @@ data class SelectedImage(
 fun Attachments(
     modifier: Modifier = Modifier,
     message: Message,
+    onEnableMessageSwipe: ((Boolean) -> Unit)? = null,
     showStatuses: Boolean = true,
     audioAttachmentServiceBinding: AudioAttachmentServiceBinding?,
     onAttachmentLongClick: (FyleAndStatus) -> Unit,
@@ -734,6 +735,7 @@ fun Attachments(
                                     .background(color = colorResource(id = R.color.almostWhite)),
                                 fyleAndStatus = attachment.fyleAndStatus,
                                 activity = context as AppCompatActivity,
+                                onEnableMessageSwipe = onEnableMessageSwipe,
                                 audioAttachmentServiceBinding = audioAttachmentServiceBinding,
                                 discussionId = message.discussionId,
                                 onLongClick = {

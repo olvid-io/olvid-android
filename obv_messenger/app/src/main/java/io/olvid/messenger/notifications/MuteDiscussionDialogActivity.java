@@ -31,6 +31,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.MuteNotificationDialog;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -101,6 +102,7 @@ public class MuteDiscussionDialogActivity extends AppCompatActivity {
                                 AppDatabase.getInstance().discussionCustomizationDao().update(discussionCustomization);
                             }
                             ApplySyncAtomTaskKt.propagateMuteSettings(discussion, discussionCustomization);
+                            AppSingleton.getEngine().profileBackupNeeded(discussion.bytesOwnedIdentity);
                         }
                     }), MuteNotificationDialog.MuteType.DISCUSSION_OR_PROFILE, discussionCust == null || discussionCust.prefMuteNotificationsExceptMentioned);
                     muteNotificationDialog.setOnDismissListener(dialog -> finish());

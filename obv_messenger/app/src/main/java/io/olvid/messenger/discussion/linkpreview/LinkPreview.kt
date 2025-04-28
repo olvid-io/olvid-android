@@ -19,8 +19,10 @@
 
 package io.olvid.messenger.discussion.linkpreview
 
+import android.content.ClipData
 import android.content.Context
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -47,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
@@ -60,6 +63,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao
 import io.olvid.messenger.databases.entity.Message
@@ -152,6 +156,7 @@ private fun LinkPreviewContent(
     highlighter: ((Context, AnnotatedString) -> AnnotatedString)?
 ) {
     val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
     Box(modifier = modifier
         .border(
             width = 1.dp,
@@ -162,7 +167,22 @@ private fun LinkPreviewContent(
             color = colorResource(id = R.color.greyTint),
             shape = RoundedCornerShape(4.dp)
         )
-        .combinedClickable(onLongClick = onLongClick) {
+        .combinedClickable(onLongClick = {
+            openGraph.getSafeUri()?.toString()?.let {
+                clipboardManager.nativeClipboard.setPrimaryClip(
+                    ClipData.newPlainText(
+                        it,
+                        it
+                    )
+                )
+                App.toast(
+                    R.string.toast_message_link_copied,
+                    Toast.LENGTH_SHORT
+                )
+            } ifNull {
+                onLongClick()
+            }
+        }) {
             App.openLink(context, openGraph.getSafeUri())
         }) {
         Row(
@@ -220,8 +240,9 @@ private fun LinkTitleAndDescription(
                     AnnotatedString(it)
                 ) ?: AnnotatedString(it),
                 maxLines = if (openGraph.shouldShowCompleteDescription()) 2 else 1,
-                style = OlvidTypography.body2,
-                fontWeight = FontWeight.Medium,
+                style = OlvidTypography.body2.copy(
+                    fontWeight = FontWeight.Medium
+                ),
                 color = colorResource(id = R.color.darkGrey),
                 overflow = TextOverflow.Ellipsis
             )

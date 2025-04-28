@@ -20,6 +20,7 @@
 package io.olvid.engine.engine;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
@@ -49,7 +50,7 @@ public class NotificationListenerUploads implements NotificationListener {
     }
 
     @Override
-    public void callback(String notificationName, HashMap<String, Object> userInfo) {
+    public void callback(String notificationName, Map<String, Object> userInfo) {
         switch (notificationName) {
             case UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS: {
                 Identity ownedIdentity = (Identity) userInfo.get(UploadNotifications.NOTIFICATION_ATTACHMENT_UPLOAD_PROGRESS_OWNED_IDENTITY_KEY);

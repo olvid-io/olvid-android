@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -41,8 +42,10 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.BackupsV2ListItem;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPublicKey;
+import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.networkfetch.databases.PendingServerQuery;
@@ -242,6 +245,11 @@ public class ServerQueryOperation extends Operation {
                     case TRANSFER_RELAY_QUERY_ID:
                     case TRANSFER_WAIT_QUERY_ID:
                     case TRANSFER_CLOSE_QUERY_ID:
+                    case BACKUPS_V2_CREATE_BACKUP_QUERY_ID:
+                    case BACKUPS_V2_UPLOAD_BACKUP_QUERY_ID:
+                    case BACKUPS_V2_DELETE_BACKUP_QUERY_ID:
+                    case BACKUPS_V2_LIST_BACKUPS_QUERY_ID:
+                    case BACKUPS_V2_DOWNLOAD_PROFILE_PICTURE_QUERY_ID:
                     default:
                         cancel(RFC_BAD_ENCODED_SERVER_QUERY);
                         return;
@@ -324,6 +332,11 @@ public class ServerQueryOperation extends Operation {
                                 case TRANSFER_RELAY_QUERY_ID:
                                 case TRANSFER_WAIT_QUERY_ID:
                                 case TRANSFER_CLOSE_QUERY_ID:
+                                case BACKUPS_V2_CREATE_BACKUP_QUERY_ID:
+                                case BACKUPS_V2_UPLOAD_BACKUP_QUERY_ID:
+                                case BACKUPS_V2_DELETE_BACKUP_QUERY_ID:
+                                case BACKUPS_V2_LIST_BACKUPS_QUERY_ID:
+                                case BACKUPS_V2_DOWNLOAD_PROFILE_PICTURE_QUERY_ID:
                                 default:
                                     // do nothing for these
                                     break;
@@ -537,12 +550,12 @@ class PutUserDataServerMethod extends ServerQueryServerMethod {
 class GetUserDataServerMethod extends ServerQueryServerMethod {
     private static final String SERVER_METHOD_PATH = "/getUserData";
 
-    private final String server;
-    private final Identity identity;
-    private final UID serverLabel;
-    private final String engineBaseDirectory;
+    protected final String server;
+    protected final Identity identity;
+    protected final UID serverLabel;
+    protected final String engineBaseDirectory;
 
-    private Encoded serverResponse;
+    protected Encoded serverResponse;
 
     public GetUserDataServerMethod(Identity identity, UID serverLabel, String engineBaseDirectory) {
         this.server = identity.getServer();
@@ -1270,3 +1283,207 @@ class UploadPreKeyServerMethod extends ServerQueryServerMethod {
         return null;
     }
 }
+
+
+// region backups v2
+
+class BackupsV2CreateBackupServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "/backupCreate";
+
+    private final String server;
+    private final UID backupUid;
+    private final ServerAuthenticationPublicKey serverAuthenticationPublicKey;
+
+    public BackupsV2CreateBackupServerMethod(String server, UID backupUid, ServerAuthenticationPublicKey serverAuthenticationPublicKey) {
+        this.server = server;
+        this.backupUid = backupUid;
+        this.serverAuthenticationPublicKey = serverAuthenticationPublicKey;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(backupUid),
+                Encoded.of(serverAuthenticationPublicKey),
+        }).getBytes();
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return null;
+    }
+}
+
+class BackupsV2UploadBackupsServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "/backupUpload";
+
+    private final String server;
+    private final UID backupUid;
+    private final UID threadId;
+    private final long version;
+    private final EncryptedBytes encryptedBackup;
+    private final byte[] signature;
+
+    public BackupsV2UploadBackupsServerMethod(String server, UID backupUid, UID threadId, long version, EncryptedBytes encryptedBackup, byte[] signature) {
+        this.server = server;
+        this.backupUid = backupUid;
+        this.threadId = threadId;
+        this.version = version;
+        this.encryptedBackup = encryptedBackup;
+        this.signature = signature;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(backupUid),
+                Encoded.of(threadId),
+                Encoded.of(version),
+                Encoded.of(encryptedBackup),
+                Encoded.of(signature),
+        }).getBytes();
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return null;
+    }
+}
+
+class BackupsV2DeleteBackupServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "/backupDelete";
+
+    private final String server;
+    private final UID backupUid;
+    private final UID threadId;
+    private final long version;
+    private final byte[] signature;
+
+    public BackupsV2DeleteBackupServerMethod(String server, UID backupUid, UID threadId, long version, byte[] signature) {
+        this.server = server;
+        this.backupUid = backupUid;
+        this.threadId = threadId;
+        this.version = version;
+        this.signature = signature;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(backupUid),
+                Encoded.of(threadId),
+                Encoded.of(version),
+                Encoded.of(signature),
+        }).getBytes();
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return null;
+    }
+}
+
+
+class BackupsV2ListBackupsServerMethod extends ServerQueryServerMethod {
+    private static final String SERVER_METHOD_PATH = "/backupList";
+
+    private final String server;
+    private final UID backupUid;
+    private Encoded serverResponse;
+
+    public BackupsV2ListBackupsServerMethod(String server, UID backupUid) {
+        this.server = server;
+        this.backupUid = backupUid;
+    }
+
+    @Override
+    protected String getServer() {
+        return server;
+    }
+
+    @Override
+    protected String getServerMethod() {
+        return SERVER_METHOD_PATH;
+    }
+
+    @Override
+    protected byte[] getDataToSend() {
+        return Encoded.of(new Encoded[]{
+                Encoded.of(backupUid),
+        }).getBytes();
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        super.parseReceivedData(receivedData);
+        if (returnStatus == ServerMethod.OK) {
+            if (receivedData.length == 1) {
+                serverResponse = receivedData[0];
+            } else {
+                returnStatus = ServerMethod.MALFORMED_SERVER_RESPONSE;
+            }
+        }
+    }
+
+    @Override
+    public Encoded getServerResponse() {
+        return serverResponse;
+    }
+}
+
+
+class BackupsV2DownloadProfilePictureServerMethod extends GetUserDataServerMethod {
+    private final AuthEncKey photoKey;
+
+    public BackupsV2DownloadProfilePictureServerMethod(Identity identity, UID photoLabel, AuthEncKey photoKey) {
+        super(identity, photoLabel, null);
+        this.photoKey = photoKey;
+    }
+
+    @Override
+    protected void parseReceivedData(Encoded[] receivedData) {
+        if (returnStatus == ServerMethod.OK) {
+            try {
+                // decrypt the result
+                EncryptedBytes encryptedData = receivedData[0].decodeEncryptedData();
+                AuthEnc authEnc = Suite.getAuthEnc(photoKey);
+                serverResponse = Encoded.of(authEnc.decrypt(photoKey, encryptedData));
+            } catch (Exception e) {
+                Logger.x(e);
+                returnStatus = ServerMethod.GENERAL_ERROR;
+            }
+        }
+    }
+}
+
+// endregion

@@ -105,7 +105,7 @@ public class ObvSyncSnapshot {
                 if (node == null) {
                     return null;
                 }
-                map.put(new DictionaryKey(delegate.getTag()), Encoded.of(delegate.serialize(node)));
+                map.put(new DictionaryKey(delegate.getTag()), Encoded.of(delegate.serialize(ObvBackupAndSyncDelegate.SerializationContext.PROFILE, node)));
             }
             return map;
         } catch (Exception e) {
@@ -123,7 +123,7 @@ public class ObvSyncSnapshot {
                 if (encodedNode == null) {
                     return null;
                 }
-                snapshotMap.put(delegate.getTag(), delegate.deserialize(encodedNode.decodeBytes()));
+                snapshotMap.put(delegate.getTag(), delegate.deserialize(ObvBackupAndSyncDelegate.SerializationContext.PROFILE, encodedNode.decodeBytes()));
             }
             return new ObvSyncSnapshot(snapshotMap);
         } catch (Exception e) {

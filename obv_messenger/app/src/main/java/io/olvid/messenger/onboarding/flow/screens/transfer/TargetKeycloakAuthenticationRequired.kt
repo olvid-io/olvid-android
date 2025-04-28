@@ -53,7 +53,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.flow.OnboardingFlowViewModel
@@ -237,17 +236,14 @@ fun NavGraphBuilder.targetKeycloakAuthenticationRequired(
 @Composable
 private fun Preview() {
     val navController = rememberNavController()
-
-    AppCompatTheme {
-        NavHost(
-            navController = navController,
-            startDestination = OnboardingRoutes.TRANSFER_TARGET_KEYCLOAK_AUTHENTICATION_PROOF_REQUIRED
-        ) {
-            targetKeycloakAuthenticationRequired(
-                onboardingFlowViewModel = OnboardingFlowViewModel(),
-                onAuthenticated = {a, b -> },
-                onClose = {}
-            )
-        }
+    NavHost(
+        navController = navController,
+        startDestination = OnboardingRoutes.TRANSFER_TARGET_KEYCLOAK_AUTHENTICATION_PROOF_REQUIRED
+    ) {
+        targetKeycloakAuthenticationRequired(
+            onboardingFlowViewModel = OnboardingFlowViewModel(),
+            onAuthenticated = { a, b -> },
+            onClose = {}
+        )
     }
 }

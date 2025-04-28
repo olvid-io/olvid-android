@@ -29,6 +29,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.ListPreference;
@@ -104,6 +105,7 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
                                 || newCategory == SettingsActivity.AutoJoinGroupsCategory.CONTACTS && previousCategory == SettingsActivity.AutoJoinGroupsCategory.EVERYONE) {
                             try {
                                 AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingAutoJoinGroups(newCategory.getStringValue()));
+                                AppSingleton.getEngine().deviceBackupNeeded();
                             } catch (Exception e) {
                                 Logger.w("Failed to propagate auto join group setting change to other devices");
                                 e.printStackTrace();
@@ -136,6 +138,7 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
                                 SettingsActivity.setAutoJoinGroups(newCategory);
                                 try {
                                     AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingAutoJoinGroups(newCategory.getStringValue()));
+                                    AppSingleton.getEngine().deviceBackupNeeded();
                                 } catch (Exception e) {
                                     Logger.w("Failed to propagate auto join group setting change to other devices");
                                     e.printStackTrace();
@@ -157,6 +160,7 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
                                             SettingsActivity.setAutoJoinGroups(newCategory);
                                             try {
                                                 AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingAutoJoinGroups(newCategory.getStringValue()));
+                                                AppSingleton.getEngine().deviceBackupNeeded();
                                             } catch (Exception e) {
                                                 Logger.w("Failed to propagate auto join group setting change to other devices");
                                                 e.printStackTrace();
@@ -230,6 +234,6 @@ public class ContactsAndGroupsPreferenceFragment extends PreferenceFragmentCompa
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.setBackgroundColor(getResources().getColor(R.color.dialogBackground));
+        view.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.almostWhite));
     }
 }

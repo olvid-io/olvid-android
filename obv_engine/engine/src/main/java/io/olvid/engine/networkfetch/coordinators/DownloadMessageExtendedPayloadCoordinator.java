@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -217,7 +218,7 @@ public class DownloadMessageExtendedPayloadCoordinator implements Operation.OnCa
 
     class AwaitingNotificationListener implements NotificationListener {
         @Override
-        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        public void callback(String notificationName, Map<String, Object> userInfo) {
             switch (notificationName) {
                 case DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED: {
                     Object identityObject = userInfo.get(DownloadNotifications.NOTIFICATION_SERVER_SESSION_CREATED_IDENTITY_KEY);

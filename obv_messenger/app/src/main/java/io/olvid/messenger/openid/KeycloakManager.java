@@ -120,7 +120,7 @@ public class KeycloakManager {
         });
     }
 
-    public static boolean isOwnedIdentityTransferRestricted(byte[] bytesOwnedIdentity) {
+    public static boolean isOwnedIdentityTransferRestricted(@NonNull byte[] bytesOwnedIdentity) {
         if (INSTANCE != null) {
             KeycloakManagerState kms = INSTANCE.ownedIdentityStates.get(new BytesKey(bytesOwnedIdentity));
             return kms != null && kms.transferRestricted;

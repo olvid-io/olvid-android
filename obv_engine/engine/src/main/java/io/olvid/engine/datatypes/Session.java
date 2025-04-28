@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -134,6 +135,11 @@ public class Session implements Connection {
     }
 
     public void startTransaction() throws SQLException {
+        if (isInTransaction()) {
+            Logger.e("Starting transaction from within a transaction!");
+            Logger.x(new Exception("Trace"));
+            return;
+        }
         globalWriteLock.lock();
         connection.setAutoCommit(false);
     }
@@ -156,7 +162,7 @@ public class Session implements Connection {
             connection.setAutoCommit(true);
             globalWriteLock.unlock();
         }
-        for (SessionCommitListener sessionCommitListener: sessionCommitListeners) {
+        for (SessionCommitListener sessionCommitListener: sessionCommitListeners.toArray(new SessionCommitListener[0])) {
             sessionCommitListener.wasCommitted();
         }
         sessionCommitListeners.clear();

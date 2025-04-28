@@ -372,7 +372,7 @@ public class KeycloakTasks {
                 App.runThread(() -> {
                     try {
                         JsonSearchRequest query = new JsonSearchRequest();
-                        if (searchQuery == null) {
+                        if (searchQuery == null || searchQuery.isBlank()) {
                             query.filter = null;
                         } else {
                             query.filter = searchQuery.trim().split("\\s+");

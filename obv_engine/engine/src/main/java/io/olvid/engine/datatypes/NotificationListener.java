@@ -20,7 +20,8 @@
 package io.olvid.engine.datatypes;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public interface NotificationListener {
-    void callback(String notificationName, HashMap<String, Object> userInfo);
+    void callback(String notificationName, Map<String, Object> userInfo);
 }

@@ -233,6 +233,8 @@ class EditOwnedIdentityDetailsDialogFragment :
                                 viewModel.nickname
                             )
                         )
+                    AppSingleton.getEngine().deviceBackupNeeded()
+                    AppSingleton.getEngine().profileBackupNeeded(viewModel.bytesOwnedIdentity)
                 } catch (e: Exception) {
                     Logger.w("Failed to propagate own profile nickname change to other devices")
                     e.printStackTrace()

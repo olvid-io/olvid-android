@@ -20,6 +20,7 @@
 package io.olvid.engine.engine;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.NotificationListener;
@@ -51,7 +52,7 @@ public class NotificationListenerBackups implements NotificationListener {
     }
 
     @Override
-    public void callback(String notificationName, HashMap<String, Object> userInfo) {
+    public void callback(String notificationName, Map<String, Object> userInfo) {
         switch (notificationName) {
             case BackupNotifications.NOTIFICATION_NEW_BACKUP_SEED_GENERATED: {
                 String seed = (String) userInfo.get(BackupNotifications.NOTIFICATION_NEW_BACKUP_SEED_GENERATED_SEED_KEY);

@@ -25,9 +25,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -1964,7 +1966,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                     protocolManagerSession.notificationListeningDelegate.removeListener(DownloadNotifications.NOTIFICATION_PUSH_NOTIFICATION_REGISTERED, deviceRegisteredNotificationListenerNumber);
                 }
                 // create the new listener
-                deviceRegisteredNotificationListener = (String notificationName, HashMap<String, Object> userInfo) -> {
+                deviceRegisteredNotificationListener = (String notificationName, Map<String, Object> userInfo) -> {
                     try {
                         if (!Objects.equals(notificationName, DownloadNotifications.NOTIFICATION_PUSH_NOTIFICATION_REGISTERED) || userInfo == null) {
                             return;
@@ -2018,7 +2020,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
 
             {
                 // at the very end, add a final session commit listener that will be called after all engine notifications are sent
-                protocolManagerSession.session.addSessionCommitListener(() -> protocolManagerSession.notificationPostingDelegate.postNotification(ProtocolNotifications.NOTIFICATION_SNAPSHOT_RESTORATION_FINISHED, new HashMap<>()));
+                protocolManagerSession.session.addSessionCommitListener(() -> protocolManagerSession.notificationPostingDelegate.postNotification(ProtocolNotifications.NOTIFICATION_SNAPSHOT_RESTORATION_FINISHED, Collections.emptyMap()));
             }
 
             return new FinalState();

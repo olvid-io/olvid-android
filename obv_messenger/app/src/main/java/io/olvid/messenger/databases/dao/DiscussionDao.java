@@ -99,7 +99,7 @@ public abstract class DiscussionDao {
     @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.ARCHIVED + " = :archived " +
             " WHERE id = :discussionId ")
-    public abstract void updateArchived(long discussionId, boolean archived);
+    public abstract void updateArchived(boolean archived, long... discussionId);
 
     @Query("UPDATE " + Discussion.TABLE_NAME +
             " SET " + Discussion.LAST_OUTBOUND_MESSAGE_SEQUENCE_NUMBER + " = :lastOutboundMessageSequenceNumber " +

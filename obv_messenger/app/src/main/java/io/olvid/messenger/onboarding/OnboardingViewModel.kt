@@ -182,6 +182,7 @@ class OnboardingViewModel : ViewModel() {
             )
             if (configurationPojo != null) {
                 if (configurationPojo.server != null) {
+                    unvalidatedServer = configurationPojo.server
                     server = configurationPojo.server
                 }
                 if (configurationPojo.apikey != null) {

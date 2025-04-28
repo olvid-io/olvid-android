@@ -437,9 +437,11 @@
             android:label="@string/activity_title_message_details" />
         <activity
             android:name=".main.archived.ArchivedDiscussionsActivity"
+            android:theme="@style/AppTheme.NoActionBar"
             android:label="@string/activity_title_archived_discussions" />
         <activity
-            android:name=".main.bookmarks.BookmarksActivity"
+            android:name=".main.bookmarks.BookmarkedMessagesActivity"
+            android:theme="@style/AppTheme.NoActionBar"
             android:label="@string/activity_title_bookmarks" />
         <activity
             android:name=".discussion.settings.DiscussionSettingsActivity"

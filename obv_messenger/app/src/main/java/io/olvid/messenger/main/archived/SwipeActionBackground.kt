@@ -49,7 +49,7 @@ fun SwipeActionBackground(
     modifier: Modifier = Modifier.fillMaxSize(),
     label: String,
     @DrawableRes icon: Int,
-    @ColorRes backgroundColor: Int,
+    @ColorRes backgroundColor: Int = R.color.olvid_gradient_dark,
     progress: Float,
     fromStartToEnd: Boolean = true
 ) {

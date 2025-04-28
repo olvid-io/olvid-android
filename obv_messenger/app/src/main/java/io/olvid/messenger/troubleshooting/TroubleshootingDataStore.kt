@@ -52,7 +52,7 @@ class TroubleshootingDataStore(private val context: Context) {
         }
         emit(emptyPreferences())
     }.map { preferences ->
-        preferences[booleanPreferencesKey(item)] ?: false
+        preferences[booleanPreferencesKey(item)] == true
     }
 
     suspend fun updateMute(item: String, value: Boolean) {
@@ -60,7 +60,6 @@ class TroubleshootingDataStore(private val context: Context) {
             context.troubleshootingDataStore.edit { preferences ->
                 preferences[booleanPreferencesKey(item)] = value
             }
-        } catch (exception: Exception) {
-        }
+        } catch (_: Exception) { }
     }
 }

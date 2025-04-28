@@ -39,6 +39,10 @@ public class DictionaryKey {
         this.data = data.getBytes(StandardCharsets.UTF_8);
     }
 
+    public String getString() {
+        return new String(data, StandardCharsets.UTF_8);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof DictionaryKey)) {

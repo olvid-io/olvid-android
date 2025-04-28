@@ -102,6 +102,7 @@ import io.olvid.messenger.group.EditOwnedGroupDetailsDialogFragment.Companion.ne
 import io.olvid.messenger.group.GroupDetailsActivity.GroupMembersAdapter.GroupMemberViewHolder
 import io.olvid.messenger.group.GroupDetailsActivity.PendingGroupMembersAdapter.PendingGroupMemberViewHolder
 import io.olvid.messenger.main.MainActivity
+import io.olvid.messenger.webrtc.WebrtcCallService
 
 class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotificationListener {
     private val groupDetailsViewModel: GroupDetailsViewModel by viewModels()
@@ -747,9 +748,14 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 val group = groupDetailsViewModel.group?.value ?: return true
                 val contactAndTimestamps = groupDetailsViewModel.groupMembers?.value
                 if (contactAndTimestamps != null) {
-                    val bytesContactIdentities = ArrayList<BytesKey>(contactAndTimestamps.size)
-                    for (contactAndTimestamp in contactAndTimestamps) {
-                        bytesContactIdentities.add(BytesKey(contactAndTimestamp.contact.bytesContactIdentity))
+                    val bytesContactIdentities: List<BytesKey>?
+                    if (contactAndTimestamps.size > WebrtcCallService.MAX_GROUP_SIZE_TO_SELECT_ALL_BY_DEFAULT) {
+                        bytesContactIdentities = null
+                    } else {
+                        bytesContactIdentities = ArrayList<BytesKey>(contactAndTimestamps.size)
+                        for (contactAndTimestamp in contactAndTimestamps) {
+                            bytesContactIdentities.add(BytesKey(contactAndTimestamp.contact.bytesContactIdentity))
+                        }
                     }
                     val multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(
                         group.bytesOwnedIdentity,

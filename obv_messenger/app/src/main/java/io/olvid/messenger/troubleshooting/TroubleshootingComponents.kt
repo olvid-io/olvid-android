@@ -19,7 +19,6 @@
 
 package io.olvid.messenger.troubleshooting
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
@@ -34,7 +33,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement.spacedBy
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -47,15 +49,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.ripple
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,8 +69,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -77,19 +79,18 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import androidx.compose.ui.window.Dialog
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
-import io.olvid.messenger.R.color
-import io.olvid.messenger.R.drawable
-import io.olvid.messenger.R.string
-import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.Utils
@@ -112,18 +113,19 @@ fun AppVersionHeader(betaEnabled: Boolean) {
     Column {
         Text(
             modifier = Modifier
+                .padding(horizontal = 16.dp)
                 .widthIn(max = 400.dp)
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp),
             text = AnnotatedString(stringResource(
-                string.troubleshooting_header,
+                R.string.troubleshooting_header,
                 BuildConfig.VERSION_NAME + if (betaEnabled) " beta" else "",
                 BuildConfig.VERSION_CODE,
                 "${Build.BRAND} ${Build.MODEL}",
                 VERSION.SDK_INT,
                 uptime
             )).formatMarkdown(),
-            color = colorResource(id = color.almostBlack),
+            color = colorResource(id = R.color.almostBlack),
             style = OlvidTypography.body1,
         )
     }
@@ -132,20 +134,92 @@ fun AppVersionHeader(betaEnabled: Boolean) {
 @Composable
 fun RestartAppButton() {
     val context = LocalContext.current
+    var showConfirmationDialog by remember { mutableStateOf(false) }
+
     Row (
-        modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth(),
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
+            .widthIn(max = 400.dp)
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.End
     ) {
         OutlinedButton(
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = colorResource(id = R.color.red)),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = colorResource(id = R.color.red)
+            ),
             border = BorderStroke(1.dp, colorResource(id = R.color.red)),
+            shape = RoundedCornerShape(6.dp),
             onClick = {
-                SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
-                    .setTitle(R.string.dialog_title_restart_app)
-                    .setMessage(R.string.dialog_message_restart_app)
-                    .setNegativeButton(R.string.button_label_cancel, null)
-                    .setPositiveButton(R.string.button_label_force_restart, object : DialogInterface.OnClickListener {
-                        override fun onClick(dialog: DialogInterface?, which: Int) {
+                showConfirmationDialog = true
+            }
+        ) {
+            Text(
+                text = stringResource(id = R.string.button_label_force_restart)
+            )
+        }
+    }
+
+    if (showConfirmationDialog) {
+        Dialog(
+            onDismissRequest = {
+                showConfirmationDialog = false
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(colorResource(R.color.dialogBackground))
+                    .padding(vertical = 16.dp, horizontal = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = spacedBy(8.dp),
+                ) {
+                    Image(
+                        modifier = Modifier.size(32.dp),
+                        painter = painterResource(R.drawable.ic_restart),
+                        contentDescription = null
+                    )
+                    Text(
+                        modifier = Modifier.padding(end = 4.dp),
+                        text = stringResource(R.string.dialog_message_restart_app),
+                        style = OlvidTypography.body1,
+                        color = colorResource(R.color.greyTint),
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(
+                        modifier = Modifier.height(40.dp),
+                        elevation = null,
+                        shape = RoundedCornerShape(6.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        onClick = {
+                            showConfirmationDialog = false
+                        },
+                    ) {
+                        Text(
+                            text = stringResource(R.string.button_label_cancel),
+                            color = colorResource(R.color.greyTint),
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Button(
+                        modifier = Modifier.height(40.dp),
+                        elevation = null,
+                        shape = RoundedCornerShape(6.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        colors = ButtonDefaults.buttonColors().copy(
+                            containerColor = colorResource(R.color.red),
+                            contentColor = colorResource(R.color.alwaysWhite)
+                        ),
+                        onClick = {
                             try {
                                 val packageManager = context.packageManager
                                 val intent = packageManager.getLaunchIntentForPackage(context.packageName)
@@ -153,12 +227,15 @@ fun RestartAppButton() {
                                 mainIntent.setPackage(context.packageName)
                                 context.startActivity(mainIntent)
                                 Runtime.getRuntime().exit(0)
-                            } catch (_: Exception) {}
-                        }
-                    })
-                    .create().show()
-            }) {
-            Text(text = stringResource(id = R.string.button_label_force_restart))
+                            } catch (_: Exception) { }
+                        },
+                    ) {
+                        Text(
+                            text = stringResource(R.string.button_label_force_restart),
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -166,45 +243,49 @@ fun RestartAppButton() {
 
 @Composable
 fun FaqLinkHeader(openFaq: () -> Unit, onBack: () -> Unit) {
-    Column(
+    Box(
         modifier = Modifier
-            .widthIn(max = 400.dp)
             .fillMaxWidth()
             .padding(end = 16.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    modifier = Modifier.size(28.dp),
-                    painter = painterResource(id = drawable.ic_arrow_back),
-                    tint = colorResource(id = color.almostBlack),
-                    contentDescription = "back"
-                )
-            }
-            Spacer(Modifier.width(8.dp))
-            Text(
-                modifier = Modifier.weight(1f, true),
-                text = stringResource(id = string.troubleshooting_faq_description),
-                color = colorResource(id = color.almostBlack),
-                style = OlvidTypography.body1,
+        IconButton(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(start = 6.dp, top = 8.dp)
+                .size(40.dp),
+            onClick = onBack
+        ) {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                painter = painterResource(id = R.drawable.ic_arrow_back),
+                tint = colorResource(id = R.color.almostBlack),
+                contentDescription = stringResource(R.string.content_description_back_button)
             )
         }
 
-        ClickableText(
+        Text(
             modifier = Modifier
-                .align(CenterHorizontally)
-                .padding(8.dp),
-            text = AnnotatedString(
-                text = stringResource(id = R.string.troubleshooting_faq_link),
-                spanStyle = SpanStyle(color = colorResource(id = color.olvid_gradient_light))
-            ),
-            style = OlvidTypography.body2.copy(
-                color = Color(0xFF8B8D97),
-                textAlign = TextAlign.Center
-            )
-        ) {
-            openFaq()
-        }
+                .align(Alignment.TopCenter)
+                .padding(horizontal = 54.dp)
+                .padding(top = 14.dp)
+                .widthIn(max = 400.dp),
+            text = buildAnnotatedString {
+                append(stringResource(id = R.string.troubleshooting_faq_description))
+                append("\n\n")
+                withLink(
+                    LinkAnnotation.Clickable(
+                        tag = "",
+                        styles = TextLinkStyles(SpanStyle(color = colorResource(id = R.color.olvid_gradient_light))),
+                        linkInteractionListener = { openFaq() }
+                    ),
+                ) {
+                    append(stringResource(id = R.string.troubleshooting_faq_link))
+                }
+            },
+            textAlign = TextAlign.Center,
+            color = colorResource(id = R.color.almostBlack),
+            style = OlvidTypography.body1,
+        )
     }
 }
 
@@ -225,11 +306,12 @@ fun TroubleShootItem(
     var expanded by rememberSaveable {
         mutableStateOf(valid.not())
     }
-    val mute: Boolean by checkState?.let{ it.isMute.collectAsState(true) } ?: remember { mutableStateOf(false) }
+    val mute: Boolean by checkState?.isMute?.collectAsState(true) ?: remember { mutableStateOf(false) }
     val borderWidth: Float by animateFloatAsState(targetValue = if (critical && valid.not() && mute == false) 2f else 1f)
     val borderColor: Color by animateColorAsState(targetValue = if (critical && valid.not() && mute == false) colorResource(id = R.color.red) else Color(0x6E111111))
     Column(
         modifier = Modifier
+            .padding(horizontal = 16.dp)
             .widthIn(max = 400.dp)
             .border(
                 border = BorderStroke(borderWidth.dp, borderColor),
@@ -239,7 +321,7 @@ fun TroubleShootItem(
                 shape = RoundedCornerShape(12.dp)
             )
             .background(
-                color = colorResource(id = color.itemBackground),
+                color = colorResource(id = R.color.itemBackground),
                 shape = RoundedCornerShape(12.dp)
             )
             .clickable(
@@ -267,22 +349,23 @@ fun TroubleShootItem(
                             .padding(top = 1.dp)
                             .size(12.dp)
                             .rotate(degrees = rotation)
-                            .align(CenterVertically),
+                            .align(Alignment.CenterVertically),
                         painter = painterResource(id = R.drawable.ic_chevron_right_compact),
-                        contentDescription = "")
+                        contentDescription = ""
+                    )
                     Text(
                         modifier = Modifier
                             .padding(start = 8.dp)
                             .weight(1f, true)
-                            .align(CenterVertically),
+                            .align(Alignment.CenterVertically),
                         text = if (valid) title else titleInvalid ?: title,
-                        color = colorResource(id = color.almostBlack),
+                        color = colorResource(id = R.color.almostBlack),
                         style = OlvidTypography.body1,
                     )
                     Image(
                         modifier = Modifier
                             .size(32.dp),
-                        painter = painterResource(id = if (valid) drawable.ic_ok_green else drawable.ic_error_outline),
+                        painter = painterResource(id = if (valid) R.drawable.ic_ok_green else R.drawable.ic_error_outline),
                         colorFilter = ColorFilter.tint(color = colorResource(id = R.color.golden))
                             .takeIf { valid.not() && critical.not() },
                         contentDescription = ""
@@ -293,10 +376,8 @@ fun TroubleShootItem(
                         Text(
                             modifier = Modifier.padding(top = 4.dp, bottom = if (valid && additionalContent == null) 4.dp else 0.dp),
                             text = if (valid) description else descriptionInvalid ?: description,
-                            color = colorResource(id = color.greyTint),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Normal,
-                            lineHeight = 18.sp,
+                            color = colorResource(id = R.color.greyTint),
+                            style = OlvidTypography.body2,
                         )
                         additionalContent?.let {
                             Row(
@@ -325,12 +406,12 @@ fun TroubleShootItem(
                     val interactionSource = remember { MutableInteractionSource() }
                     Image(
                         modifier = Modifier
-                            .align(CenterVertically)
+                            .align(Alignment.CenterVertically)
                             .clickable(
                                 interactionSource = interactionSource,
                                 indication = ripple(bounded = false)
                             ) { coroutineScope.launch { checkState.updateMute(mute.not()) } },
-                        painter = painterResource(id = drawable.ic_notification_muted),
+                        painter = painterResource(id = R.drawable.ic_notification_muted),
                         colorFilter = ColorFilter.tint(colorResource(id = R.color.almostBlack)),
                         contentDescription = "mute",
                         alpha = if (mute) 1f else 0.3f
@@ -344,7 +425,8 @@ fun TroubleShootItem(
                                 ) { coroutineScope.launch { checkState.updateMute(mute.not()) } }
                                 .padding(start = 4.dp),
                             text = stringResource(id = R.string.troubleshooting_ignored),
-                            fontSize = 12.sp,
+                            color = colorResource(R.color.almostBlack),
+                            style = OlvidTypography.subtitle1,
                         )
                     }
                 }
@@ -378,38 +460,34 @@ enum class TroubleshootingItemType {
 @Preview
 @Composable
 fun AppVersionHeaderPreview() {
-    AppCompatTheme {
-        AppVersionHeader(true)
-    }
+    AppVersionHeader(true)
 }
 
 @Preview(locale = "fr-rFR")
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun TroubleShootItemPreview() {
-    AppCompatTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(16.dp)
+    ) {
+        TroubleShootItem(
+            title = "Title",
+            description = "description",
+            valid = false,
+            critical = true,
+            checkState = CheckState(
+                "test",
+                TroubleshootingDataStore(LocalContext.current),
+            ) { true }
         ) {
-            TroubleShootItem(
-                title = "Title",
-                description = "description",
-                valid = false,
-                critical = true,
-                checkState = CheckState(
-                    "test",
-                    TroubleshootingDataStore(LocalContext.current),
-                    ) { true }
+            TextButton(
+                shape = RoundedCornerShape(size = 6.dp),
+                onClick = {}
             ) {
-                TextButton(
-                    shape = RoundedCornerShape(size = 8.dp),
-                    onClick = {}
-                ) {
-                    Text(text = stringResource(id = string.troubleshooting_request_permission))
-                }
+                Text(text = stringResource(id = R.string.troubleshooting_request_permission))
             }
         }
     }
@@ -418,7 +496,16 @@ fun TroubleShootItemPreview() {
 @Preview
 @Composable
 fun FaqLinkPreview() {
-    AppCompatTheme {
-        FaqLinkHeader({}, {})
+    FaqLinkHeader({}, {})
+}
+
+
+@Preview
+@Composable
+fun RestartButtonPreview() {
+    Box(
+        modifier = Modifier.background(colorResource(R.color.almostWhite))
+    ) {
+        RestartAppButton()
     }
 }

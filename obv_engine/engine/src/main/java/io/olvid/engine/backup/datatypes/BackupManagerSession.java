@@ -23,18 +23,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
 
+import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Session;
+import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
+import io.olvid.engine.metamanager.IdentityDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 
 public class BackupManagerSession implements AutoCloseable {
     public final Session session;
     public final NotificationPostingDelegate notificationPostingDelegate;
+    public final IdentityDelegate identityDelegate;
+    public final ObvBackupAndSyncDelegate appBackupAndSyncDelegate;
     public final ObjectMapper jsonObjectMapper;
+    public final PRNGService prng;
 
-    public BackupManagerSession(Session session, NotificationPostingDelegate notificationPostingDelegate, ObjectMapper jsonObjectMapper) {
+    public BackupManagerSession(Session session, NotificationPostingDelegate notificationPostingDelegate, IdentityDelegate identityDelegate, ObvBackupAndSyncDelegate appBackupAndSyncDelegate, ObjectMapper jsonObjectMapper, PRNGService prng) {
         this.session = session;
         this.notificationPostingDelegate = notificationPostingDelegate;
+        this.identityDelegate = identityDelegate;
+        this.appBackupAndSyncDelegate = appBackupAndSyncDelegate;
         this.jsonObjectMapper = jsonObjectMapper;
+        this.prng = prng;
     }
 
     @Override

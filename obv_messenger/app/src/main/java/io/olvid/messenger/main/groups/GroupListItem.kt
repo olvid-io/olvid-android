@@ -180,13 +180,6 @@ fun GroupMenu(
         }) {
             Text(text = stringResource(id = R.string.menu_action_rename_group))
         }
-        // call
-        DropdownMenuItem(onClick = {
-            groupMenu.call(group)
-            onDismissRequest()
-        }) {
-            Text(text = stringResource(id = R.string.menu_action_group_call))
-        }
         // clone
         DropdownMenuItem(onClick = {
             groupMenu.clone(group)
@@ -242,8 +235,6 @@ private fun GroupListItemPreview() {
             onClick = {},
             groupMenu = object : GroupMenu {
                 override fun rename(groupOrGroup2: GroupOrGroup2) {}
-
-                override fun call(groupOrGroup2: GroupOrGroup2) {}
 
                 override fun clone(groupOrGroup2: GroupOrGroup2) {}
 

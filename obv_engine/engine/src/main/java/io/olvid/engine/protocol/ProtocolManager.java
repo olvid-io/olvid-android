@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import io.olvid.engine.Logger;
@@ -308,7 +309,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     class NewDeviceListener implements NotificationListener {
         @Override
-        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        public void callback(String notificationName, Map<String, Object> userInfo) {
             switch (notificationName) {
                 case IdentityNotifications.NOTIFICATION_NEW_CONTACT_DEVICE: {
                     try {
@@ -343,7 +344,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     class ContactDeletedListener implements NotificationListener {
         @Override
-        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        public void callback(String notificationName, Map<String, Object> userInfo) {
             //noinspection SwitchStatementWithTooFewBranches
             switch (notificationName) {
                 case IdentityNotifications.NOTIFICATION_CONTACT_IDENTITY_DELETED:
@@ -371,7 +372,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     class ContactTrustLevelListener implements NotificationListener {
         @Override
-        public void callback(String notificationName, HashMap<String, Object> userInfo) {
+        public void callback(String notificationName, Map<String, Object> userInfo) {
             //noinspection SwitchStatementWithTooFewBranches
             switch (notificationName) {
                 case IdentityNotifications.NOTIFICATION_CONTACT_ONE_TO_ONE_CHANGED:

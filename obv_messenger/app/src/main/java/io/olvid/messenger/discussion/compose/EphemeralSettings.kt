@@ -25,6 +25,7 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize.Min
@@ -692,6 +693,7 @@ fun EphemeralSettingsPreferenceLayout(
             }
             Spacer(modifier = Modifier.width(8.dp))
             Switch(
+                enabled = !locked,
                 checked = ephemeralViewModel.getReadOnce(),
                 onCheckedChange = { ephemeralViewModel.setReadOnce(it) },
                 colors = SwitchDefaults.colors(
@@ -821,9 +823,18 @@ fun EphemeralSettingsPreferenceLayout(
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
-fun EphemeralSettingsPreview() {
-    AppCompatTheme {
+private fun EphemeralSettingsPreview() {
+    Column (
+        verticalArrangement = spacedBy(32.dp)
+    ) {
         EphemeralSettingsPopupLayout(modifier = Modifier.fillMaxWidth(), EphemeralViewModel(), {}, {}, false)
+        
+        EphemeralSettingsGroup(
+            ephemeralViewModel = EphemeralViewModel(),
+            expanded = null,
+            locked = true,
+            dismiss = {}
+        )
     }
 }
 

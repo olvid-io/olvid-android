@@ -57,6 +57,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
@@ -68,7 +69,7 @@ import io.olvid.messenger.main.contacts.ContactListItem
 
 data class ReactionItem(val emoji: String = "", val isMine: Boolean = false, val count: Int = 0)
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun Reactions(modifier: Modifier = Modifier, message: Message) {
 
@@ -194,14 +195,14 @@ private fun ReactionsDetail(reactions: List<Reaction>) {
         val context = LocalContext.current
         LazyColumn(modifier = Modifier.height((24 + 48 * reactions.size).coerceAtMost(300).dp)) {
             items(items = reactions.filter { if (selectedTab != null) it.emoji == selectedTab else true }) { reaction ->
+                val contactName = remember { AppSingleton.getContactCustomDisplayName(
+                    reaction.bytesIdentity
+                        ?: AppSingleton.getBytesCurrentIdentity()
+                ).orEmpty() }
+
                 ContactListItem(
                     useDialogBackgroundColor = true,
-                    title = AnnotatedString(
-                        AppSingleton.getContactCustomDisplayName(
-                            reaction.bytesIdentity
-                                ?: AppSingleton.getBytesCurrentIdentity()
-                        ).orEmpty()
-                    ),
+                    title = AnnotatedString(contactName),
                     body = AnnotatedString(
                         StringUtils.getNiceDateString(
                             context,
@@ -211,7 +212,16 @@ private fun ReactionsDetail(reactions: List<Reaction>) {
                     endContent = reaction.emoji?.let {
                         { Text(text = it, fontSize = 32.sp) }
                     },
-                    onClick = { },
+                    onClick = {
+                        // only make the item clickable if a contact actually exists
+                        if (contactName.isNotEmpty()) {
+                            reaction.bytesIdentity?.let { contactBytes ->
+                                AppSingleton.getBytesCurrentIdentity()?.let { ownBytes ->
+                                    App.openContactDetailsActivity(context, ownBytes, contactBytes)
+                                }
+                            }
+                        }
+                    },
                     initialViewSetup = {
                         it.setFromCache(
                             reaction.bytesIdentity

@@ -21,12 +21,6 @@ package io.olvid.messenger.main.discussions
 
 import androidx.annotation.ColorInt
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -47,20 +41,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.ripple
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -144,11 +135,6 @@ fun DiscussionListItem(
             )
 
             // InitialView
-            Box {
-                val alpha: Float by animateFloatAsState(
-                    targetValue = if (selected) 0f else 1f,
-                    animationSpec = tween(), label = "alpha"
-                )
                 InitialView(
                     modifier = Modifier
                         .padding(
@@ -157,34 +143,13 @@ fun DiscussionListItem(
                             end = 16.dp,
                             bottom = 16.dp
                         )
-                        .alpha(alpha)
                         .requiredSize(56.dp),
                     initialViewSetup = initialViewSetup,
+                    selected = selected,
                     unreadMessages = unreadCount > 0 || unread,
                     muted = muted,
                     locked = locked,
                 )
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = selected,
-                    enter = fadeIn() + scaleIn(),
-                    exit = fadeOut() + scaleOut()
-                ) {
-                    Image(
-                        modifier = Modifier
-                            .padding(
-                                top = 16.dp,
-                                start = 8.dp,
-                                end = 16.dp,
-                                bottom = 16.dp
-                            )
-                            .background(Color.Gray, CircleShape)
-                            .padding(8.dp)
-                            .requiredSize(40.dp),
-                        painter = painterResource(id = R.drawable.ic_check),
-                        contentDescription = "selected"
-                    )
-                }
-            }
 
             // content
             Column(

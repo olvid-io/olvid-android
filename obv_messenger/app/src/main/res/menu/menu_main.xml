@@ -8,11 +8,6 @@
         android:title="@string/menu_action_settings"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/action_backup_settings"
-        android:orderInCategory="110"
-        android:title="@string/menu_action_backup_settings"
-        app:showAsAction="never"/>
-    <item
         android:id="@+id/action_storage_management"
         android:orderInCategory="200"
         android:title="@string/menu_action_storage_management"

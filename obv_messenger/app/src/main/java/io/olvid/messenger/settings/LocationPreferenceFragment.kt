@@ -23,6 +23,7 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -109,6 +110,6 @@ class LocationPreferenceFragment : PreferenceFragmentCompat() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.setBackgroundColor(resources.getColor(R.color.dialogBackground))
+        view.setBackgroundColor(ContextCompat.getColor(view.context, R.color.almostWhite))
     }
 }

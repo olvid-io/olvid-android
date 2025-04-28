@@ -1679,6 +1679,10 @@ class WebrtcCallService : Service() {
         waitForAudioPermission: Boolean
     ) {
         executor.execute {
+            if (this.callIdentifier == null && queuedIncomingCalls.isEmpty()) {
+                CallNotificationManager.currentCallData = null
+                return@execute
+            }
             queuedIncomingCalls.find {
                 it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(
                     bytesOwnedIdentity
@@ -1752,6 +1756,10 @@ class WebrtcCallService : Service() {
 
     fun recipientRejectCall(bytesOwnedIdentity: ByteArray, callIdentifier: UUID) {
         executor.execute {
+            if (this.callIdentifier == null && queuedIncomingCalls.isEmpty()) {
+                CallNotificationManager.currentCallData = null
+                return@execute
+            }
             queuedIncomingCalls.find {
                 it.callIdentifier == callIdentifier && it.bytesOwnedIdentity.contentEquals(
                     bytesOwnedIdentity
@@ -4503,6 +4511,9 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         const val CALL_TIMEOUT_MILLIS: Long = 30_000
         const val RINGING_TIMEOUT_MILLIS: Long = 50_000
         const val PEER_CALL_ENDED_WAIT_MILLIS: Long = 3_000
+
+        const val MAX_PEERS_TO_START_A_CALL = 20
+        const val MAX_GROUP_SIZE_TO_SELECT_ALL_BY_DEFAULT = 5
 
         // Map containing ICE candidates received while outside a call: callIdentifier -> (bytesContactIdentity -> candidate)
         // with continuous gathering, we may send/receive candidates before actually sending/receiving the startCall message

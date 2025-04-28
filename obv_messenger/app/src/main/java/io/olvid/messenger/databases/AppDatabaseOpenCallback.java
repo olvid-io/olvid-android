@@ -389,7 +389,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                                 db.runInTransaction(() -> {
                                     Contact newContact;
                                     try {
-                                        newContact = new Contact(contactInfo.bytesContactIdentity, contactInfo.bytesContactIdentity, contactInfo.identityDetails, false, contactInfo.photoUrl, contactInfo.keycloakManaged, contactInfo.active, contactInfo.oneToOne, contactInfo.trustLevel, contactInfo.recentlyOnline);
+                                        newContact = new Contact(contactInfo.bytesContactIdentity, contactInfo.bytesOwnedIdentity, contactInfo.identityDetails, false, contactInfo.photoUrl, contactInfo.keycloakManaged, contactInfo.active, contactInfo.oneToOne, contactInfo.trustLevel, contactInfo.recentlyOnline);
                                         db.contactDao().insert(newContact);
                                     } catch (Exception e) {
                                         throw new RuntimeException(e);

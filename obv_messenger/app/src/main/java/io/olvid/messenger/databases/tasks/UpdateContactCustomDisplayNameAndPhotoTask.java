@@ -65,6 +65,7 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                 db.contactDao().updateCustomNameHue(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.customNameHue);
                 AppSingleton.updateCachedCustomHue(contact.bytesContactIdentity, contact.customNameHue);
 
+                AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity);
                 if (!propagated) {
                     try {
                         AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createContactCustomHueChange(contact.bytesContactIdentity, customNameHue));
@@ -80,6 +81,7 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                 contact.setPersonalNote(personalNote);
                 db.contactDao().updatePersonalNote(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.personalNote, contact.fullSearchDisplayName);
 
+                AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity);
                 if (!propagated) {
                     try {
                         AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createContactPersonalNoteChange(contact.bytesContactIdentity, personalNote));
@@ -99,6 +101,7 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                     AppSingleton.updateCachedCustomDisplayName(contact.bytesContactIdentity, contact.getCustomDisplayName(), contact.getFirstNameOrCustom());
                 }
 
+                AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity);
                 if (!propagated) {
                     try {
                         AppSingleton.getEngine().propagateAppSyncAtomToOtherDevicesIfNeeded(bytesOwnedIdentity, ObvSyncAtom.createContactNicknameChange(contact.bytesContactIdentity, customDisplayName));
