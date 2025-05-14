@@ -1,3 +1,31 @@
+# Build 271 (3.7.1)
+2025-05-14
+
+- Fix image viewer that was broken by a removed id
+
+
+# ~~Build 270 (3.7.1)~~
+2025-05-12
+
+- Fix tip dismiss icon color in dark mode
+- Clean up unused resources and strings
+
+# ~~Build 269 (3.7.1)~~
+2025-05-11
+
+- Remove "use system emojis" preference
+
+# ~~Build 268 (3.7.1)~~
+2025-05-10
+
+- Added 4 new custom app icons
+
+# ~~Build 267 (3.7.1)~~
+2025-05-09
+
+- Added 27 new translations (with the help of AI)
+- Added emoji animations
+
 # Build 266 (3.7)
 2025-04-28
 

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">"במכשיר זה, המכשיר הקודם שלך למטה יושבתק:"</item>
+        <item quantity="other">"במכשיר זה, המכשירים שלך למטה יושבתו:"</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">גיבוי אחד נמצא</item>
+        <item quantity="other">%1$d גיבויים נמצאו</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">פרופיל אחד נמצא</item>
+        <item quantity="other">%1$d פרופילים נמצאו</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">אין קבוצות</item>
+        <item quantity="one">קבוצה אחת</item>
+        <item quantity="other">%1$d קבוצות</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">אין אנשי קשר</item>
+        <item quantity="one">איש קשר אחד</item>
+        <item quantity="other">%1$d אנשי קשר</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">שיחה אוחסנה</item>
+        <item quantity="other">%1$d שיחות אוחסנו</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">שיחה שוחררה מהארכיון</item>
+        <item quantity="other">%1$d שיחות שוחררו מהארכיון</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">ההודעה הוסרה מהסימניות</item>
+        <item quantity="other">%1$d הודעות הוסרו מהסימניות</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">למחוק את השיחה הנבחרת?</item>
+        <item quantity="other">למחוק את השיחות הנבחרות?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">למחוק את ההודעה הנבחרת?</item>
+        <item quantity="other">למחוק את ההודעות הנבחרות?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">האם אתה בטוח שברצונך למחוק את השיחה הנבחרת ואת כל ההודעות שהיא מכילה?\nפעולה זו אינה ניתנת לביטול.</item>
+        <item quantity="other">האם אתה בטוח שברצונך למחוק את %1$d השיחות הנבחרות ואת כל ההודעות שהן מכילות?\nפעולה זו אינה ניתנת לביטול.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">כיצד ברצונך למחוק את השיחה הנבחרת ואת כל ההודעות שהיא מכילה?\nפעולה זו אינה ניתנת לביטול.</item>
+        <item quantity="other">כיצד ברצונך למחוק את %1$d השיחות הנבחרות ואת כל ההודעות שהן מכילות?\nפעולה זו אינה ניתנת לביטול.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">האם אתה בטוח שברצונך למחוק את ההודעה הנבחרת?\nפעולה זו אינה ניתנת לביטול.</item>
+        <item quantity="other">האם אתה בטוח שברצונך למחוק את %1$d ההודעות הנבחרות?\nפעולה זו אינה ניתנת לביטול.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">כיצד ברצונך למחוק את ההודעה הנבחרת?\nפעולה זו אינה ניתנת לביטול.</item>
+        <item quantity="other">כיצד ברצונך למחוק את %1$d ההודעות הנבחרות?\nפעולה זו אינה ניתנת לביטול.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">אתה עומד **למחוק לצמיתות** הודעה זו **לכל המשתתפים** בשיחה זו. אנא ודא שזה מה שאתה רוצה לעשות.</item>
+        <item quantity="other">אתה עומד **למחוק לצמיתות** %1$d הודעות **לכל המשתתפים** בשיחה זו. אנא ודא שזה מה שאתה רוצה לעשות.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">אתה עומד **למחוק לצמיתות** שיחה זו ואת ההודעות שהיא מכילה **לכל המשתתפים** בשיחה זו. אנא ודא שזה מה שאתה רוצה לעשות.</item>
+        <item quantity="other">אתה עומד **למחוק לצמיתות** %1$d שיחות ואת ההודעות שהן מכילות **לכל המשתתפים** בשיחות אלו. אנא ודא שזה מה שאתה רוצה לעשות.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">אתה עומד להזמין כל חבר קבוצה שאיתו יש לך ערוץ (כעת חבר אחד) לשיחה פרטית.\nהאם ברצונך להמשיך?</item>
+        <item quantity="other">אתה עומד להזמין כל חבר קבוצה שאיתו יש לך ערוץ (כעת %1$d חברים) לשיחה פרטית.\nהאם ברצונך להמשיך?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">קבוצה משותפת אחת</item>
+        <item quantity="other">%1$d קבוצות משותפות</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. תצטרך לעזוב קבוצה זו כדי להמשיך.</item>
+        <item quantity="other">. תצטרך לעזוב קבוצות אלו כדי להמשיך.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">אתה עומד להסיר את %1$s מרשימת המשתמשים האחרים שלך.\n\nשים לב ש-%1$s הוזמן לקבוצה אחת שאליה אתה שייך. הוא יתווסף בחזרה לרשימה זו אם יצטרף אליה. ייתכן שתרצה לעזוב קבוצה זו כדי להימנע מכך.\n\nהאם באמת ברצונך למחוק משתמש זה?</item>
+        <item quantity="other">אתה עומד להסיר את %1$s מרשימת המשתמשים האחרים שלך.\n\nשים לב ש-%1$s הוזמן ל-%2$d קבוצות שאליהן אתה שייך. הוא יתווסף בחזרה לרשימה זו אם יצטרף לאחת מהן. ייתכן שתרצה לעזוב קבוצות אלו כדי להימנע מכך.\n\nהאם באמת ברצונך למחוק משתמש זה?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">שינוי הגדרה זו יאשר אוטומטית הזמנה אחת לקבוצה ממתינה.\nלחץ על אישור כדי לאשר את בחירתך ולהצטרף לקבוצה זו.</item>
+        <item quantity="other">שינוי הגדרה זו יאשר אוטומטית %1$d הזמנות לקבוצות ממתינות.\nלחץ על אישור כדי לאשר את בחירתך ולהצטרף לקבוצות אלו.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">כשתתבקש, בחר את התיקייה שבה ברצונך לשמור את הקובץ המצורף הנבחר.\nשים לב שגישה לתיקיות מסוימות עשויה להיות מוגבלת.</item>
+        <item quantity="other">כשתתבקש, בחר את התיקייה שבה ברצונך לשמור את %1$d הקבצים המצורפים הנבחרים.\nשים לב שגישה לתיקיות מסוימות עשויה להיות מוגבלת.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d נבחר</item>
+        <item quantity="other">%1$d נבחרו</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">האם אתה בטוח שברצונך למחוק את הקובץ המצורף הנבחר?</item>
+        <item quantity="other">האם אתה בטוח שברצונך למחוק את %1$d הקבצים המצורפים הנבחרים?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d יום, %2$02d שעות %3$02d דקות %4$02d שניות</item>
+        <item quantity="other">%1$d ימים, %2$02d שעות %3$02d דקות %4$02d שניות</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d הודעה חסרה…</item>
+        <item quantity="other">%1$d הודעות חסרות…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">שיחת קבוצה עם %2$s ועוד אחד</item>
+        <item quantity="other">שיחת קבוצה עם %2$s ועוד %1$d</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">שיחת קבוצה שלא נענתה עם %2$s ועוד אחד</item>
+        <item quantity="other">שיחת קבוצה שלא נענתה עם %2$s ועוד %1$d</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">שיחת קבוצה שנכשלה עם %2$s ועוד אחד</item>
+        <item quantity="other">שיחת קבוצה שנכשלה עם %2$s ועוד %1$d</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">שיחת קבוצה בזמן ש-%2$s ועוד אחד היו עסוקים</item>
+        <item quantity="other">שיחת קבוצה בזמן ש-%2$s ועוד %1$d היו עסוקים</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">שיחת קבוצה שנדחתה עם %2$s ועוד אחד</item>
+        <item quantity="other">שיחת קבוצה שנדחתה עם %2$s ועוד %1$d</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">שיחת קבוצה מ-%2$s ועוד אחד</item>
+        <item quantity="other">שיחת קבוצה מ-%2$s ועוד %1$d</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d נבחר</item>
+        <item quantity="other">%1$d נבחרו</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d נבחר</item>
+        <item quantity="other">%1$d נבחרו</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d הודעה חדשה</item>
+        <item quantity="other">%1$d הודעות חדשות</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s יוזמן להצטרף לקבוצה %2$s.</item>
+        <item quantity="other">ה-%1$d אנשי הקשר הבאים יוזמנו להצטרף לקבוצה %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s יוסר מהקבוצה %2$s.</item>
+        <item quantity="other">ה-%1$d חברי הקבוצה הבאים יוסרו מהקבוצה %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d הודעה חדשה</item>
+        <item quantity="other">%1$d הודעות חדשות</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d קובץ מצורף</item>
+        <item quantity="other">%1$d קבצים מצורפים</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">ועוד %1$d</item>
+        <item quantity="other">ועוד %1$d</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d</item>
+        <item quantity="other"> &amp; %1$d</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">החלת מדיניות השימור שבחרת תמחק הודעה אחת.\nהאם אתה בטוח שברצונך להמשיך?</item>
+        <item quantity="other">החלת מדיניות השימור שבחרת תמחק %1$d הודעות.\nהאם אתה בטוח שברצונך להמשיך?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">…ועוד תוצאת חיפוש אחת\אנא חדד את החיפוש שלך</item>
+        <item quantity="other">…ועוד %1$d תוצאות חיפוש\אנא חדד את החיפוש שלך</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">שנייה אחת</item>
+        <item quantity="other">%1$d שניות</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">דקה אחת</item>
+        <item quantity="other">%1$d דקות</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">שעה אחת</item>
+        <item quantity="other">%1$d שעות</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">יום אחד</item>
+        <item quantity="other">%1$d ימים</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">שנה אחת</item>
+        <item quantity="other">%1$d שנים</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">חבר אחד</item>
+        <item quantity="other">%1$d חברים</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">יש לך כרגע הודעה אחת שנמחקה מרחוק בשיחות שלך. האם ברצונך למחוק אותה?</item>
+        <item quantity="other">יש לך כרגע %1$d הודעות שנמחקו מרחוק בשיחות שלך. האם ברצונך למחוק את כל הסימונים האלה?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">איש קשר אחד משתף את המיקום שלו</item>
+        <item quantity="other">%1$d אנשי קשר משתפים את המיקום שלהם</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">אתה ואדם אחד נוסף משתפים את המיקום שלכם</item>
+        <item quantity="other">אתה ו-%1$d נוספים משתפים את המיקום שלכם</item>
+    </plurals>
+</resources>

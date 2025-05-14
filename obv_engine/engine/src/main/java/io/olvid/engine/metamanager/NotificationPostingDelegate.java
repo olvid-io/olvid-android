@@ -19,7 +19,6 @@
 
 package io.olvid.engine.metamanager;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public interface NotificationPostingDelegate {

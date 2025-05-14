@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">" pe acest dispozitiv, dispozitivul tău anterior de mai jos va fi dezactivat:</item>
+        <item quantity="other">" pe acest dispozitiv, dispozitivele tale de mai jos vor fi dezactivate:</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d copie de rezervă găsită</item>
+        <item quantity="other">%1$d copii de rezervă găsite</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d profil găsit</item>
+        <item quantity="other">%1$d profiluri găsite</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Niciun grup</item>
+        <item quantity="one">%1$d grup</item>
+        <item quantity="other">%1$d grupuri</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Niciun contact</item>
+        <item quantity="one">%1$d contact</item>
+        <item quantity="other">%1$d contacte</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Discuție arhivat</item>
+        <item quantity="other">%1$d discuții arhivate</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Discuție dezarhivat</item>
+        <item quantity="other">%1$d discuții dezarhivate</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Mesaj eliminat din favorite</item>
+        <item quantity="other">%1$d mesaje eliminate din favorite</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Ștergi această discuție selectată?</item>
+        <item quantity="other">Ștergi aceste discuții selectate?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Ștergi acest mesaj selectat?</item>
+        <item quantity="other">Ștergi aceste mesaje selectate?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Ești sigur că vrei să ștergi această discuție selectată și toate mesajele pe care le conține?\nAceastă acțiune nu poate fi anulată.</item>
+        <item quantity="other">Ești sigur că vrei să ștergi cele %1$d discuții selectate și toate mesajele pe care le conțin?\nAceastă acțiune nu poate fi anulată.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Cum vrei să ștergi această discuție selectată și toate mesajele pe care le conține?\nAceastă acțiune nu poate fi anulată.</item>
+        <item quantity="other">Cum vrei să ștergi cele %1$d discuții selectate și toate mesajele pe care le conțin?\nAceastă acțiune nu poate fi anulată.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Ești sigur că vrei să ștergi acest mesaj selectat?\nAceastă acțiune nu poate fi anulată.</item>
+        <item quantity="other">Ești sigur că vrei să ștergi cele %1$d mesaje selectate?\nAceastă acțiune nu poate fi anulată.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Cum vrei să ștergi acest mesaj selectat?\nAceastă acțiune nu poate fi anulată.</item>
+        <item quantity="other">Cum vrei să ștergi cele %1$d mesaje selectate?\nAceastă acțiune nu poate fi anulată.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Vei șterge **definitiv** un mesaj pentru **toți** din această discuție. Asigură-te că acesta este ceea ce vrei să faci.</item>
+        <item quantity="other">Vei șterge **definitiv** %1$d mesaje pentru **toți** din această discuție. Asigură-te că acesta este ceea ce vrei să faci.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Vei șterge **definitiv** o discuție și mesajele pe care le conține pentru **toți** din această discuție. Asigură-te că acesta este ceea ce vrei să faci.</item>
+        <item quantity="other">Vei șterge **definitiv** %1$d discuții și mesajele pe care le conțin pentru **toți** din aceste discuții. Asigură-te că acesta este ceea ce vrei să faci.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Vei invita fiecare membru al grupului cu care ai un canal (în prezent 1 membru) într-o discuție privată.\nVrei să continui?</item>
+        <item quantity="other">Vei invita fiecare membru al grupului cu care ai un canal (în prezent %1$d membri) într-o discuție privată.\nVrei să continui?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 grup comun</item>
+        <item quantity="other">%1$d grupuri comune</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Va trebui să părăsești acest grup pentru a continua.</item>
+        <item quantity="other">. Va trebui să părăsești aceste grupuri pentru a continua.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Vei elimina %1$s din lista ta de alți utilizatori.\n\nReține că %1$s a fost invitat în %2$d grupuri în care aparții. Va fi adăugat înapoi în această listă dacă se va alătura unuia dintre ele. Poate vrei să părăsești aceste grupuri pentru a evita acest lucru.\n\nȘtergi cu adevărat acest utilizator?</item>
+        <item quantity="other">Vei elimina %1$s din lista ta de alți utilizatori.\n\nReține că %1$s a fost invitat în %2$d grupuri în care aparții. Va fi adăugat înapoi în această listă dacă se va alătura unuia dintre ele. Poate vrei să părăsești aceste grupuri pentru a evita acest lucru.\n\nȘtergi cu adevărat acest utilizator?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Modificarea acestei setări va accepta automat o invitație în așteptare într-un grup.\nApăsați OK pentru a confirma alegerea și a te alătura acestui grup.</item>
+        <item quantity="other">Modificarea acestei setări va accepta automat %1$d invitații în așteptare în grupuri.\nApăsați OK pentru a confirma alegerea și a te alătura acestor grupuri.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Când ți se solicită, selectează folderul în care să salvezi atașamentul selectat.\nReține că accesul la unele foldere poate fi restricționat.</item>
+        <item quantity="other">Când ți se solicită, selectează folderul în care să salvezi cele %1$d atașamente selectate.\nReține că accesul la unele foldere poate fi restricționat.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d selectat</item>
+        <item quantity="other">%1$d selectate</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Ștergi acest atașament selectat?</item>
+        <item quantity="other">Ștergi aceste atașamente selectate?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d\u00a0zi,\u00a0%2$02do,\u00a0%3$02dm,\u00a0%4$02ds</item>
+        <item quantity="other">%1$d\u00a0zile,\u00a0%2$02do,\u00a0%3$02dm,\u00a0%4$02ds</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d mesaj lipsă…</item>
+        <item quantity="other">%1$d mesaje lipsă…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Apel de grup cu %2$s și încă o persoană</item>
+        <item quantity="other">Apel de grup cu %2$s și %1$d alte persoane</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Apel de grup nepreluat cu %2$s și încă o persoană</item>
+        <item quantity="other">Apel de grup nepreluat cu %2$s și %1$d alte persoane</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Apel de grup eșuat cu %2$s și încă o persoană</item>
+        <item quantity="other">Apel de grup eșuat cu %2$s și %1$d alte persoane</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Apel de grup în timp ce %2$s și încă o persoană erau ocupate</item>
+        <item quantity="other">Apel de grup în timp ce %2$s și %1$d alte persoane erau ocupate</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Apel de grup respins cu %2$s și încă o persoană</item>
+        <item quantity="other">Apel de grup respins cu %2$s și %1$d alte persoane</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Apel de grup de la %2$s și încă o persoană</item>
+        <item quantity="other">Apel de grup de la %2$s și %1$d alte persoane</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d selectat</item>
+        <item quantity="other">%1$d selectate</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d selectat</item>
+        <item quantity="other">%1$d selectate</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d mesaj nou</item>
+        <item quantity="other">%1$d mesaje noi</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s va fi invitat să se alăture grupului %2$s.</item>
+        <item quantity="other">Următorii %1$d contacte vor fi invitate să se alăture grupului %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s va fi eliminat din grupul %2$s.</item>
+        <item quantity="other">Următorii %1$d membri ai grupului vor fi eliminați din %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d mesaj nou</item>
+        <item quantity="other">%1$d mesaje noi</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d atașament</item>
+        <item quantity="other">%1$d atașamente</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">Și %1$d altul</item>
+        <item quantity="other">Și %1$d alții</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d altul</item>
+        <item quantity="other"> &amp; %1$d alții</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Aplicarea politicii de retenție pe care tocmai ai selectat-o ar șterge un singur mesaj.\nEști sigur că vrei să continui?</item>
+        <item quantity="other">Aplicarea politicii de retenție pe care tocmai ai selectat-o ar șterge %1$d mesaje.\nEști sigur că vrei să continui?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… și încă un rezultat suplimentar al căutării\nTe rugăm să rafinezi căutarea</item>
+        <item quantity="other">… și %1$d rezultate suplimentare ale căutării\nTe rugăm să rafinezi căutarea</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1\u00a0secundă</item>
+        <item quantity="other">%1$d\u00a0secunde</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1\u00a0minut</item>
+        <item quantity="other">%1$d\u00a0minute</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1\u00a0oră</item>
+        <item quantity="other">%1$d\u00a0ore</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1\u00a0zi</item>
+        <item quantity="other">%1$d\u00a0zile</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1\u00a0an</item>
+        <item quantity="other">%1$d\u00a0ani</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1\u00a0membru</item>
+        <item quantity="other">%1$d\u00a0membri</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Ai în prezent 1 mesaj șters de la distanță în discuțiile tale. Vrei să îl ștergi?</item>
+        <item quantity="other">Ai în prezent %1$d mesaje șterse de la distanță în discuțiile tale. Vrei să ștergi toate aceste marcaje?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 contact partajează locația</item>
+        <item quantity="other">%1$d contacte partajează locația</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Tu și 1 altă persoană partajați locația</item>
+        <item quantity="other">Tu și %1$d alte persoane partajați locația</item>
+    </plurals>
+</resources>

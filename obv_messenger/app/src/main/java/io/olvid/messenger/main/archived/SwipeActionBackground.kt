@@ -25,6 +25,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,7 +47,6 @@ import io.olvid.messenger.R
 
 @Composable
 fun SwipeActionBackground(
-    modifier: Modifier = Modifier.fillMaxSize(),
     label: String,
     @DrawableRes icon: Int,
     @ColorRes backgroundColor: Int = R.color.olvid_gradient_dark,
@@ -54,7 +54,8 @@ fun SwipeActionBackground(
     fromStartToEnd: Boolean = true
 ) {
     Row(
-        modifier = modifier
+        modifier = Modifier
+            .fillMaxSize()
             .background(
                 colorResource(backgroundColor).copy(
                     alpha = progress
@@ -86,27 +87,32 @@ private fun ArchiveSwipeActionBackgroundPreview() {
     Column(
         verticalArrangement = spacedBy(8.dp)
     ) {
-        SwipeActionBackground(
+        Box(
             modifier = Modifier
                 .height(64.dp)
                 .fillMaxWidth(),
-            label = "Archive",
-            icon = R.drawable.ic_archive,
-            backgroundColor = R.color.olvid_gradient_dark,
-            progress = 0.5f
-        )
+        ) {
+            SwipeActionBackground(
+                label = "Archive",
+                icon = R.drawable.ic_archive,
+                backgroundColor = R.color.olvid_gradient_dark,
+                progress = 0.5f
+            )
+        }
 
-
-        SwipeActionBackground(
+        Box(
             modifier = Modifier
                 .height(64.dp)
                 .fillMaxWidth(),
-            label = "Archive",
-            icon = R.drawable.ic_action_mark_unread,
-            backgroundColor = R.color.golden,
-            progress = .5f,
-            fromStartToEnd = true
-        )
+        ) {
+            SwipeActionBackground(
+                label = "Archive",
+                icon = R.drawable.ic_action_mark_unread,
+                backgroundColor = R.color.golden,
+                progress = .5f,
+                fromStartToEnd = true
+            )
+        }
     }
 }
 
@@ -116,26 +122,32 @@ private fun ArchiveSwipeActionBackgroundNightPreview() {
     Column(
         verticalArrangement = spacedBy(8.dp)
     ) {
-        SwipeActionBackground(
+        Box(
             modifier = Modifier
                 .height(64.dp)
                 .fillMaxWidth(),
-            label = "Archive",
-            icon = R.drawable.ic_archive,
-            backgroundColor = R.color.olvid_gradient_dark,
-            progress = 1f,
-            fromStartToEnd = false
-        )
+        ) {
+            SwipeActionBackground(
+                label = "Archive",
+                icon = R.drawable.ic_archive,
+                backgroundColor = R.color.olvid_gradient_dark,
+                progress = 1f,
+                fromStartToEnd = false
+            )
+        }
 
-        SwipeActionBackground(
+        Box(
             modifier = Modifier
                 .height(64.dp)
                 .fillMaxWidth(),
-            label = "Archive",
-            icon = R.drawable.ic_action_mark_read,
-            backgroundColor = R.color.green,
-            progress = 1f,
-            fromStartToEnd = true
-        )
+        ) {
+            SwipeActionBackground(
+                label = "Archive",
+                icon = R.drawable.ic_action_mark_read,
+                backgroundColor = R.color.green,
+                progress = 1f,
+                fromStartToEnd = true
+            )
+        }
     }
 }

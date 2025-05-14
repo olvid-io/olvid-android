@@ -1961,7 +1961,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         popupAttachList.clipToOutline = true
         val attachConfigure = popupAttachList.findViewById<TextView>(R.id.attach_configure)
         attachConfigure.setOnClickListener(onClickListener)
-        if (iconsOverflow.size == 0) {
+        if (iconsOverflow.isEmpty()) {
             popupAttachList.findViewById<View>(R.id.separator).visibility = View.GONE
         } else {
             val greyColor = ContextCompat.getColor(popupView.context, R.color.grey)

@@ -29,7 +29,6 @@ import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.PreKeyBlobOnServer;
-import io.olvid.engine.datatypes.containers.PreKey;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;

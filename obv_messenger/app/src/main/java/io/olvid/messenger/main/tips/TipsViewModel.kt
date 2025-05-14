@@ -53,6 +53,10 @@ class TipsViewModel : ViewModel() {
             tipToShow = Tip.TROUBLESHOOTING
             return
         }
+        if (!SettingsActivity.muteNewTranslationsTip) {
+            tipToShow = Tip.NEW_TRANSLATIONS
+            return
+        }
         tipToShow = null
     }
 
@@ -61,5 +65,6 @@ class TipsViewModel : ViewModel() {
         CONFIGURE_BACKUPS,
         WRITE_BACKUP_KEY,
         TROUBLESHOOTING,
+        NEW_TRANSLATIONS,
     }
 }

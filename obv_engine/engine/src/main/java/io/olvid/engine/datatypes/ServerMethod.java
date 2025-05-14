@@ -108,6 +108,17 @@ public abstract class ServerMethod {
         } else {
             server = parts[0];
         }
+        String pathPrefix = null;
+        int pathPos = server.indexOf('/');
+        if (pathPos != -1) {
+            pathPrefix = server.substring(pathPos + 1);
+            server = server.substring(0, pathPos);
+
+            // remove any trailing / from pathPrefix
+            while (pathPrefix.endsWith("/")) {
+                pathPrefix = pathPrefix.substring(0, pathPrefix.length() - 1);
+            }
+        }
         int port = -1;
         int portPos = server.indexOf(':');
         if (portPos != -1) {
@@ -115,6 +126,9 @@ public abstract class ServerMethod {
             server = server.substring(0, portPos);
         }
         String path = getServerMethod();
+        if (pathPrefix != null && !pathPrefix.isEmpty()) {
+            path = pathPrefix + path;
+        }
         byte[] dataToSend = getDataToSend();
 
         try {

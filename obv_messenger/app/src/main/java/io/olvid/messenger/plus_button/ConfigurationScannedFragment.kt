@@ -18,10 +18,6 @@
  */
 package io.olvid.messenger.plus_button
 
-import android.animation.ObjectAnimator
-import android.content.res.Configuration
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper

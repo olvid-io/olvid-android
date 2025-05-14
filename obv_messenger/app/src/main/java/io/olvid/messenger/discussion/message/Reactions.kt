@@ -64,6 +64,7 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.Reaction
+import io.olvid.messenger.designsystem.components.AnimatedEmoji
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.contacts.ContactListItem
 
@@ -71,7 +72,7 @@ data class ReactionItem(val emoji: String = "", val isMine: Boolean = false, val
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun Reactions(modifier: Modifier = Modifier, message: Message) {
+fun Reactions(modifier: Modifier = Modifier, message: Message, useAnimatedEmojis : Boolean = true, loopAnimatedEmojis : Boolean = true) {
 
     message.reactions?.takeIf { it.isNotEmpty() }?.let { reactions ->
 
@@ -103,7 +104,7 @@ fun Reactions(modifier: Modifier = Modifier, message: Message) {
                     layout(
                         placeable.width,
                         placeable.height - 4.dp.roundToPx()
-                    ) { placeable.place(0, - 4.dp.roundToPx()) }
+                    ) { placeable.place(0, -4.dp.roundToPx()) }
                 }
         ) {
             if (openReactionPopup) {
@@ -115,7 +116,7 @@ fun Reactions(modifier: Modifier = Modifier, message: Message) {
                         modifier = Modifier.padding(horizontal = 8.dp),
                         containerColor = colorResource(id = R.color.dialogBackground),
                         onDismissRequest = { openReactionPopup = false }) {
-                        ReactionsDetail(it)
+                        ReactionsDetail(it, useAnimatedEmojis = useAnimatedEmojis, loopAnimatedEmojis = loopAnimatedEmojis)
                     }
                 }
             }
@@ -153,15 +154,25 @@ fun Reactions(modifier: Modifier = Modifier, message: Message) {
                         else Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            modifier = Modifier.widthIn(max = 40.dp),
-                            text = it.emoji,
-                            maxLines = 1,
-                            fontSize = 14.sp,
-                            color = colorResource(
-                                id = R.color.greyTint
+                        if (useAnimatedEmojis) {
+                            AnimatedEmoji(
+                                modifier = Modifier.widthIn(max = 40.dp),
+                                shortEmoji = it.emoji,
+                                loop = loopAnimatedEmojis,
+                                onClick = { openReactionPopup = true },
+                                size = 14f
                             )
-                        )
+                        } else {
+                            Text(
+                                modifier = Modifier.widthIn(max = 40.dp),
+                                text = it.emoji,
+                                maxLines = 1,
+                                fontSize = 14.sp,
+                                color = colorResource(
+                                    id = R.color.greyTint
+                                )
+                            )
+                        }
                         if (it.count > 1) {
                             Text(
                                 text = it.count.toString(),
@@ -179,7 +190,7 @@ fun Reactions(modifier: Modifier = Modifier, message: Message) {
 }
 
 @Composable
-private fun ReactionsDetail(reactions: List<Reaction>) {
+private fun ReactionsDetail(reactions: List<Reaction>, useAnimatedEmojis: Boolean = true, loopAnimatedEmojis: Boolean = true) {
     val reactionTabs = remember {
         reactions.groupBy(keySelector = { it.emoji }).map {
             ReactionItem(
@@ -195,10 +206,12 @@ private fun ReactionsDetail(reactions: List<Reaction>) {
         val context = LocalContext.current
         LazyColumn(modifier = Modifier.height((24 + 48 * reactions.size).coerceAtMost(300).dp)) {
             items(items = reactions.filter { if (selectedTab != null) it.emoji == selectedTab else true }) { reaction ->
-                val contactName = remember { AppSingleton.getContactCustomDisplayName(
-                    reaction.bytesIdentity
-                        ?: AppSingleton.getBytesCurrentIdentity()
-                ).orEmpty() }
+                val contactName = remember {
+                    AppSingleton.getContactCustomDisplayName(
+                        reaction.bytesIdentity
+                            ?: AppSingleton.getBytesCurrentIdentity()
+                    ).orEmpty()
+                }
 
                 ContactListItem(
                     useDialogBackgroundColor = true,
@@ -210,7 +223,15 @@ private fun ReactionsDetail(reactions: List<Reaction>) {
                         ).toString()
                     ),
                     endContent = reaction.emoji?.let {
-                        { Text(text = it, fontSize = 32.sp) }
+                        {
+                            if (useAnimatedEmojis) {
+                                AnimatedEmoji(shortEmoji = it,
+                                    loop = loopAnimatedEmojis,
+                                    size = 32f)
+                            } else {
+                                Text(text = it, fontSize = 32.sp)
+                            }
+                        }
                     },
                     onClick = {
                         // only make the item clickable if a contact actually exists
@@ -239,27 +260,35 @@ private fun ReactionsDetail(reactions: List<Reaction>) {
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items(reactionTabs) { reactionTab ->
-                Row(modifier = Modifier
-                    .background(
-                        color = colorResource(
-                            id =
-                            if (selectedTab == reactionTab.emoji)
-                                R.color.greyOverlay
-                            else
-                                R.color.dialogBackground
-                        ),
-                        shape = RoundedCornerShape(40.dp)
-                    )
-                    .clip(RoundedCornerShape(40.dp))
-                    .clickable {
-                        selectedTab =
-                            reactionTab.emoji.takeUnless { selectedTab == reactionTab.emoji }
+                Row(
+                    modifier = Modifier
+                        .background(
+                            color = colorResource(
+                                id =
+                                    if (selectedTab == reactionTab.emoji)
+                                        R.color.greyOverlay
+                                    else
+                                        R.color.dialogBackground
+                            ),
+                            shape = RoundedCornerShape(40.dp)
+                        )
+                        .clip(RoundedCornerShape(40.dp))
+                        .clickable {
+                            selectedTab =
+                                reactionTab.emoji.takeUnless { selectedTab == reactionTab.emoji }
+                        }
+                        .padding(horizontal = 8.dp, vertical = 2.dp)) {
+                    if (useAnimatedEmojis) {
+                        AnimatedEmoji(shortEmoji = reactionTab.emoji,
+                            loop = loopAnimatedEmojis,
+                            size = 24f,
+                            ignoreClicks = true)
+                    } else {
+                        Text(
+                            text = reactionTab.emoji,
+                            style = OlvidTypography.h2
+                        )
                     }
-                    .padding(horizontal = 8.dp, vertical = 2.dp)) {
-                    Text(
-                        text = reactionTab.emoji,
-                        style = OlvidTypography.h2
-                    )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = reactionTab.count.toString(),

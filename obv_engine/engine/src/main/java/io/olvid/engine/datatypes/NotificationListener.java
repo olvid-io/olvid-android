@@ -19,7 +19,6 @@
 
 package io.olvid.engine.datatypes;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public interface NotificationListener {

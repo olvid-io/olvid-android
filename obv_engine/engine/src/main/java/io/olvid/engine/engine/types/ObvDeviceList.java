@@ -28,7 +28,6 @@ import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionPrivateKey;
-import io.olvid.engine.datatypes.key.asymmetric.PrivateKey;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
 

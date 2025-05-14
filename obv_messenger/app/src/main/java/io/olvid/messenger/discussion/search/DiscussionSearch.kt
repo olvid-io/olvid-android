@@ -27,9 +27,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.core.view.get
 import androidx.core.view.inputmethod.EditorInfoCompat
+import androidx.core.view.size
 import androidx.fragment.app.FragmentActivity
-import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
@@ -37,8 +38,6 @@ import io.olvid.messenger.customClasses.fullTextSearchEscape
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.GlobalSearchTokenizer
 import io.olvid.messenger.settings.SettingsActivity
-import androidx.core.view.size
-import androidx.core.view.get
 
 class DiscussionSearch(
     private val activity: FragmentActivity,

@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.activities;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +37,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
@@ -132,6 +134,11 @@ public class LockScreenActivity extends AppCompatActivity {
 
         boolean isNeutral = SettingsActivity.lockScreenNeutral();
 
+        Window window = getWindow();
+        if (window != null) {
+            window.setStatusBarColor(ContextCompat.getColor(this, isNeutral ? R.color.black : R.color.olvid_gradient_light));
+        }
+
         pinInput = findViewById(R.id.pin_input);
         pinInput.setEnabled(false);
         fingerprintButton = findViewById(R.id.fingerprint_icon);
@@ -176,7 +183,12 @@ public class LockScreenActivity extends AppCompatActivity {
         int customMessageResourceId = getIntent().getIntExtra(CUSTOM_MESSAGE_RESOURCE_ID_INTENT_EXTRA, -1);
         if (isNeutral) {
             ConstraintLayout container = findViewById(R.id.lock_screen_container);
-            customMessageTextView.setVisibility(View.GONE);
+            if (customMessageResourceId != -1) {
+                customMessageTextView.setVisibility(View.VISIBLE);
+                customMessageTextView.setText(customMessageResourceId);
+            } else {
+                customMessageTextView.setVisibility(View.GONE);
+            }
             olvidLogo.setVisibility(View.GONE);
             container.setBackgroundColor(ContextCompat.getColor(this, R.color.black));
         } else {
@@ -455,6 +467,7 @@ public class LockScreenActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);

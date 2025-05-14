@@ -88,7 +88,6 @@ import io.olvid.messenger.discussion.compose.ComposeMessageFragment;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.services.BackupCloudProviderService;
-import io.olvid.messenger.services.MDMConfigurationSingleton;
 import io.olvid.messenger.services.PeriodicTasksScheduler;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -138,14 +137,14 @@ public class AppSingleton {
         int lastAndroidSdkVersionExecuted = sharedPreferences.getInt(LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY, 0);
         int lastFtsGlobalSearchVersion = sharedPreferences.getInt(LAST_FTS_GLOBAL_SEARCH_VERSION_PREFERENCE_KEY, 0);
 
-        if (lastBuildExecuted != 0 && lastBuildExecuted < 89) {
+        if (lastBuildExecuted < 89) {
             runNoBackupFolderMigration();
         }
-        if (lastBuildExecuted != 0 && lastBuildExecuted < 120) {
+        if (lastBuildExecuted < 120) {
             SettingsActivity.setContactDisplayNameFormat(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY);
         }
 
-        if (lastBuildExecuted != 0 && lastBuildExecuted < 136) {
+        if (lastBuildExecuted < 136) {
             // clear deprecated scaled_turn preference
             final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
             SharedPreferences.Editor editor = prefs.edit();
@@ -153,7 +152,7 @@ public class AppSingleton {
             editor.apply();
         }
 
-        if (lastBuildExecuted != 0 && lastBuildExecuted < 153) {
+        if (lastBuildExecuted < 153) {
             // if the user has customized attach icon order, add the emoji icon so they see it
             List<Integer> icons = SettingsActivity.getComposeMessageIconPreferredOrder();
             if (icons != null && !icons.contains(ComposeMessageFragment.ICON_EMOJI)) {
@@ -162,12 +161,12 @@ public class AppSingleton {
             }
         }
 
-        if (lastBuildExecuted != 0 && lastBuildExecuted < 205) {
+        if (lastBuildExecuted < 205) {
             // we fixed the rename task, run it again to fix all user display names
             App.runThread(new ContactDisplayNameFormatChangedTask());
         }
 
-        if (lastBuildExecuted != 0 && lastBuildExecuted < 219) {
+        if (lastBuildExecuted < 219) {
             // clear removed dialog hide preference
             final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext());
             SharedPreferences.Editor editor = prefs.edit();
@@ -180,12 +179,12 @@ public class AppSingleton {
             editor.apply();
         }
 
-        if (lastBuildExecuted != 0 && lastBuildExecuted < 226) {
+        if (lastBuildExecuted < 226) {
             // we added a first name to contacts and group v2 pending members
             App.runThread(new SetContactsAndPendingMembersFirstNamesTask());
         }
 
-        if (lastBuildExecuted != 0 && lastBuildExecuted < 229) {
+        if (lastBuildExecuted < 229) {
             // if the user has customized attach icon order, add the send location icon so they see it
             List<Integer> icons = SettingsActivity.getComposeMessageIconPreferredOrder();
             if (icons != null && !icons.contains(ComposeMessageFragment.ICON_SEND_LOCATION)) {
@@ -194,13 +193,22 @@ public class AppSingleton {
             }
         }
 
-        if (lastBuildExecuted != 0 && lastBuildExecuted < 257) {
-            // if the user has customized attach icon order, add the send location icon so they see it
+        if (lastBuildExecuted < 257) {
+            // if the user has customized attach icon order, add the introduce icon so they see it
             List<Integer> icons = SettingsActivity.getComposeMessageIconPreferredOrder();
             if (icons != null && !icons.contains(ComposeMessageFragment.ICON_INTRODUCE)) {
                 icons.add(icons.size(), ComposeMessageFragment.ICON_INTRODUCE);
                 SettingsActivity.setComposeMessageIconPreferredOrder(icons);
             }
+        }
+
+        if (lastBuildExecuted < 269) {
+            // if this is an upgrade. show the new translations tooltip
+            SettingsActivity.setMuteNewTranslationsTip(false);
+
+            SharedPreferences.Editor editor =  PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit();
+            editor.remove("pref_key_use_system_emojis");
+            editor.apply();
         }
 
         {

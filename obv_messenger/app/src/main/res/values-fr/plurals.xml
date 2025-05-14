@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity"> » sur cet appareil, vous allez désactiver votre ancien appareil :</item>
+        <item quantity="other"> » sur cet appareil, vous allez désactiver vos anciens appareils :</item>
+    </plurals>
+    <plurals name="label_backups_found" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d sauvegarde trouvée</item>
+        <item quantity="other">%1$d sauvegardes retrouvées</item>
+    </plurals>
+    <plurals name="label_profiles_found" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d profil trouvé</item>
+        <item quantity="other">%1$d profils trouvés</item>
+    </plurals>
+    <plurals name="label_backup_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+        <item quantity="zero">Aucun groupe</item>
+        <item quantity="one">%1$d groupe</item>
+        <item quantity="other">%1$d groupes</item>
+    </plurals>
+    <plurals name="label_backup_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+        <item quantity="zero">Aucun contact</item>
+        <item quantity="one">%1$d contact</item>
+        <item quantity="other">%1$d contacts</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Discussion archivée</item>
+        <item quantity="other">%1$d discussions archivées</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Discussion désarchivée</item>
+        <item quantity="other">%1$d discussions désarchivées</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Message retiré des favoris</item>
+        <item quantity="other">%1$d messages retirés des favoris</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Supprimer la discussion sélectionnée ?</item>
+        <item quantity="other">Supprimer les discussions sélectionnées ?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Supprimer le message sélectionné ?</item>
+        <item quantity="other">Supprimer les messages sélectionnés ?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Souhaitez-vous supprimer définitivement la discussion sélectionnée et tous les messages qu\'elle contient ?\nCette action est irréversible.</item>
+        <item quantity="other">Souhaitez-vous supprimer définitivement les %1$d discussions sélectionnées et tous les messages qu\'elles contiennent ?\nCette action est irréversible.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Comment souhaitez-vous supprimer la discussion sélectionnée et les messages qu\'elle contient ?\nCette action est irréversible.</item>
+        <item quantity="other">Comment souhaitez-vous supprimer les %1$d discussions sélectionnées et les messages qu\'elles contiennent ?\nCette action est irréversible.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Souhaitez-vous supprimer définitivement le message sélectionné ?\nCette action est irréversible.</item>
+        <item quantity="other">Souhaitez-vous supprimer définitivement les %1$d messages sélectionnés ?\nCette action est irréversible.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Comment souhaitez-vous supprimer le message sélectionné ?\nCette action est irréversible.</item>
+        <item quantity="other">Comment souhaitez-vous supprimer les %1$d messages sélectionnés ?\nCette action est irréversible.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Vous êtes sur le point de supprimer **définitivement** un message pour **tout le monde** dans cette discussion. Vérifiez que c\'est effectivement ce que vous voulez faire.</item>
+        <item quantity="other">Vous êtes sur le point de supprimer **définitivement** %1$d messages pour **tout le monde** dans cette discussion. Vérifiez que c\'est effectivement ce que vous voulez faire.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Vous êtes sur le point de supprimer **définitivement** une discussion et tous les messages qu\'elle contient pour **tous ses participants**. Vérifiez que c\'est effectivement ce que vous voulez faire.</item>
+        <item quantity="other">Vous êtes sur le point de supprimer **définitivement** %1$d discussions et tous les messages qu\'elles contiennent pour **tous leurs participants**. Vérifiez que c\'est effectivement ce que vous voulez faire.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Vous êtes sur le point d\'inviter chaque membre de ce groupe avec lequel vous avez un canal (actuellement 1 membre) à une discussion privée.\nSouhaitez-vous poursuivre ?</item>
+        <item quantity="other">Vous êtes sur le point d\'inviter chaque membre de ce groupe avec lequel vous avez un canal (actuellement %1$d membres) à une discussion privée.\nSouhaitez-vous poursuivre ?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d groupe commun</item>
+        <item quantity="other">%1$d groupes communs</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">. Vous devez quitter ce groupe pour continuer.</item>
+        <item quantity="other">. Vous devez quitter ces groupes pour continuer.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups" tools:ignore="MissingQuantity">
+        <item quantity="one">Vous êtes sur le point de retirer %1$s de votre liste d\'autres utilisateurs.\n\nNotez que %1$s a été invité à %2$d groupe auxquel vous appartenez. S\'il rejoint ce groupes, il sera à nouveau ajouté à cette liste. Vous pouvez vous prémunir de cela en quittant ce groupe.\n\nSouhaitez-vous supprimer cet utlisateur\u00a0?</item>
+        <item quantity="other">Vous êtes sur le point de retirer %1$s de votre liste d\'autres utilisateurs.\n\nNotez que %1$s a été invité à %2$d groupes auxquels vous appartenez. S\'il rejoint l\'un de ces groupes, il sera à nouveau ajouté à cette liste. Vous pouvez vous prémunir de cela en quittant ces groupes.\n\nSouhaitez-vous supprimer cet utlisateur\u00a0?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Modifier ce réglage entraînera l\'acceptation automatique d\'une invitation de groupe en attente.\nAppuyez sur OK pour confirmer votre choix et rejoindre ce groupe.</item>
+        <item quantity="other">Modifier ce réglage entraînera l\'acceptation automatique de %1$d invitations de groupe en attente.\nAppuyez sur OK pour confirmer votre choix et rejoindre ces groupes.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Dans l\'écran suivant, choisissez le répertoire dans lequel enregistrer la pièce jointe sélectionnée.\nNotez que l\'accès à certains répertoires peut être restreint.</item>
+        <item quantity="other">Dans l\'écran suivant, choisissez le répertoire dans lequel enregistrer les %1$d pièces jointes sélectionnées.\nNotez que l\'accès à certains répertoires peut être restreint.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d sélectionnée</item>
+        <item quantity="other">%1$d sélectionnées</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Souhaitez-vous supprimer la pièce jointe sélectionnée\u00a0?</item>
+        <item quantity="other">Souhaitez-vous supprimer les %1$d pièces jointes sélectionnées\u00a0?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d\u00a0jour,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
+        <item quantity="other">%1$d\u00a0jours,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d message manquant…</item>
+        <item quantity="other">%1$d messages manquants…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
+        <item quantity="one">Appel de groupe avec %2$s et un autre</item>
+        <item quantity="other">Appel de groupe avec %2$s et %1$d autres</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
+        <item quantity="one">Appel de groupe sans réponse avec %2$s et un autre</item>
+        <item quantity="other">Appel de groupe sans réponse avec %2$s et %1$d autres</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
+        <item quantity="one">Appel de groupe échoué avec %2$s et un autre</item>
+        <item quantity="other">Appel de groupe échoué avec %2$s et %1$d autres</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
+        <item quantity="one">Appel quand %2$s et un autre étaient occupés</item>
+        <item quantity="other">Appel quand %2$s et %1$d autres étaient occupés</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity">
+        <item quantity="one">Appel de groupe décliné par %2$s et un autre</item>
+        <item quantity="other">Appel de groupe décliné par %2$s et %1$d autres</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity">
+        <item quantity="one">Appel de groupe de %2$s et un autre</item>
+        <item quantity="other">Appel de groupe de %2$s et %1$d autres</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d sélectionné</item>
+        <item quantity="other">%1$d sélectionnés</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d sélectionnée</item>
+        <item quantity="other">%1$d sélectionnées</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d nouveau message</item>
+        <item quantity="other">%1$d nouveaux messages</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">%3$s va être invité à rejoindre le groupe %2$s.</item>
+        <item quantity="other">Vos %1$d contacts suivants vont être invités à rejoindre le groupe %2$s\u0020: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">%3$s sera exclus du groupe %2$s.</item>
+        <item quantity="other">Les %1$d membres suivants seront exclus du groupe %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d nouveau message</item>
+        <item quantity="other">%1$d nouveaux messages</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d pièce jointe</item>
+        <item quantity="other">%1$d pièces jointes</item>
+    </plurals>
+    <plurals name="text_and_x_other" tools:ignore="MissingQuantity">
+        <item quantity="one">Et %1$d autre</item>
+        <item quantity="other">Et %1$d autres</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity">
+        <item quantity="one"> &amp; %1$d autre</item>
+        <item quantity="other"> &amp; %1$d autres</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Le stratégie de rétention des messages que vous avez choisie conduirait à la suppression d\'un message.\nSouhaitez vous continuer\u00a0?</item>
+        <item quantity="other">Le stratégie de rétention des messages que vous avez choisie conduirait à la suppression de %1$d messages.\nSouhaitez vous continuer\u00a0?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">… et un autre résultat\nVeuillez affiner votre recherche</item>
+        <item quantity="other">… et %1$d autres résultats\nVeuillez affiner votre recherche</item>
+    </plurals>
+    <plurals name="duration_seconds" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0seconde</item>
+        <item quantity="other">%1$d\u00a0secondes</item>
+    </plurals>
+    <plurals name="duration_minutes" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0minute</item>
+        <item quantity="other">%1$d\u00a0minutes</item>
+    </plurals>
+    <plurals name="duration_hours" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0heure</item>
+        <item quantity="other">%1$d\u00a0heures</item>
+    </plurals>
+    <plurals name="duration_days" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0jour</item>
+        <item quantity="other">%1$d\u00a0jours</item>
+    </plurals>
+    <plurals name="duration_years" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0an</item>
+        <item quantity="other">%1$d\u00a0ans</item>
+    </plurals>
+    <plurals name="other_members_count" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1\u00a0membre</item>
+        <item quantity="other">%1$d\u00a0membres</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Vous avez actuellement un message supprimé à distance dans vos discussions. Souhaitez-vous le supprimer ?</item>
+        <item quantity="other">Vous avez actuellement %1$d messages supprimés à distance dans vos discussions. Souhaitez-vous tous les supprimer ?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d contact partage sa position</item>
+        <item quantity="other">%1$d contacts partagent leur position</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity">
+        <item quantity="one">Vous et %1$d autre partagez votre position</item>
+        <item quantity="other">Vous et %1$d autres partagez votre position</item>
+    </plurals>
+</resources>

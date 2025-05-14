@@ -23,33 +23,14 @@ import androidx.annotation.NonNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
-import io.olvid.engine.encoder.Encoded;
-import io.olvid.engine.engine.types.ObvBytesKey;
-import io.olvid.engine.engine.types.ObvGroupOwnerAndUidKey;
-import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.engine.types.sync.ObvSyncDiff;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
 import io.olvid.messenger.databases.AppDatabase;
-import io.olvid.messenger.databases.entity.Contact;
-import io.olvid.messenger.databases.entity.Discussion;
-import io.olvid.messenger.databases.entity.Group;
-import io.olvid.messenger.databases.entity.Group2;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
-import io.olvid.messenger.databases.entity.sync.ContactSyncSnapshot;
-import io.olvid.messenger.databases.entity.sync.GroupV1SyncSnapshot;
-import io.olvid.messenger.databases.entity.sync.GroupV2SyncSnapshot;
-import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OwnedIdentityDeviceSnapshot implements ObvSyncSnapshotNode {

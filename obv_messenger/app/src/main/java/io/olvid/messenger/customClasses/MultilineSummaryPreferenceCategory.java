@@ -24,6 +24,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -47,9 +48,12 @@ public class MultilineSummaryPreferenceCategory extends PreferenceCategory {
         super(context);
     }
 
+    public View.OnClickListener clickListener = null;
+
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
+        holder.itemView.setOnClickListener(clickListener);
         try {
             TextView summary = (TextView) holder.findViewById(android.R.id.summary);
             if (summary != null) {
@@ -61,5 +65,9 @@ public class MultilineSummaryPreferenceCategory extends PreferenceCategory {
         } catch (Exception e) {
             // nothing to do, summary will be on one line...
         }
+    }
+
+    public void setOnClickListener(View.OnClickListener onClickListener) {
+        clickListener = onClickListener;
     }
 }

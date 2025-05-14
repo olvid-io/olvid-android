@@ -38,8 +38,6 @@ import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.ObvAttachment;
 import io.olvid.engine.engine.types.ObvMessage;
 import io.olvid.engine.engine.types.ObvTurnCredentialsFailedReason;
-import io.olvid.engine.networkfetch.databases.InboxAttachment;
-import io.olvid.engine.networkfetch.databases.InboxMessage;
 import io.olvid.engine.networkfetch.databases.ServerSession;
 import io.olvid.engine.notification.NotificationManager;
 

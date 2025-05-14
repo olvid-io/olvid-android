@@ -3107,9 +3107,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     }
 
                     byte[][] nonces = new byte[((DownloadingGroupBlobState) startState).ownInvitationNoncesAcceptedOnOtherDevices.length + 1][];
-                    for (int i = 0; i < nonces.length - 1; i++) {
-                        nonces[i] = ((DownloadingGroupBlobState) startState).ownInvitationNoncesAcceptedOnOtherDevices[i];
-                    }
+                    System.arraycopy(((DownloadingGroupBlobState) startState).ownInvitationNoncesAcceptedOnOtherDevices, 0, nonces, 0, nonces.length - 1);
                     nonces[nonces.length - 1] = propagatedOwnGroupInvitationNonce;
 
                     return new DownloadingGroupBlobState(
@@ -3129,9 +3127,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     }
 
                     byte[][] nonces = new byte[((INeedMoreSeedsState) startState).ownInvitationNoncesAcceptedOnOtherDevices.length + 1][];
-                    for (int i = 0; i < nonces.length - 1; i++) {
-                        nonces[i] = ((INeedMoreSeedsState) startState).ownInvitationNoncesAcceptedOnOtherDevices[i];
-                    }
+                    System.arraycopy(((INeedMoreSeedsState) startState).ownInvitationNoncesAcceptedOnOtherDevices, 0, nonces, 0, nonces.length - 1);
                     nonces[nonces.length - 1] = propagatedOwnGroupInvitationNonce;
 
                     return new INeedMoreSeedsState(

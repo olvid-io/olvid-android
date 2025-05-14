@@ -114,6 +114,7 @@
     <!-- Custom color for license -->
     <style name="AppTheme.WhiteBackground.Licenses">
         <item name="colorAccent">@color/olvid_gradient_dark</item>
+        <item name="android:statusBarColor">@color/olvid_gradient_dark</item>
         <item name="android:textColorPrimary">@color/grey</item>
         <item name="android:textColorLink">@color/primary700</item>
         <item name="titleTextColor">@color/alwaysWhite</item>

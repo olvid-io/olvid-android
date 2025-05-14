@@ -19,12 +19,7 @@
 
 package io.olvid.engine.datatypes.containers;
 
-import java.util.Objects;
-
-import io.olvid.engine.Logger;
-import io.olvid.engine.crypto.Signature;
 import io.olvid.engine.datatypes.KeyId;
-import io.olvid.engine.datatypes.key.asymmetric.EncryptionPublicKey;
 import io.olvid.engine.encoder.Encoded;
 
 public class EncodedOwnedPreKey {

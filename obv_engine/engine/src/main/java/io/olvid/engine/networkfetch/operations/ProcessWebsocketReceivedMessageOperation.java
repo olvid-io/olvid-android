@@ -27,7 +27,6 @@ import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
-import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.PriorityOperation;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.encoder.Encoded;

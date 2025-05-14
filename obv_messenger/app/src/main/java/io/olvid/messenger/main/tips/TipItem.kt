@@ -23,6 +23,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
+import android.net.Uri
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -55,14 +57,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.main.tips.TipsViewModel.Tip
@@ -166,6 +171,31 @@ fun TipItem(
                 },
             )
         }
+
+        Tip.NEW_TRANSLATIONS -> {
+            val subject = stringResource(R.string.mail_subject_olvid_translation)
+            TipBubble(
+                icon = R.drawable.ic_tip_translate,
+                title = R.string.tip_new_translations_title,
+                message = R.string.tip_new_translations_message,
+                action = R.string.button_label_send_us_a_mail,
+                onAction = {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.setData(
+                            Uri.parse("mailto:lang@olvid.io?subject=${subject}")
+                        )
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Logger.x(e)
+                    }
+                },
+                onDismiss = {
+                    SettingsActivity.muteNewTranslationsTip = true
+                    refreshTipState.invoke()
+                },
+            )
+        }
     }
 }
 
@@ -227,6 +257,7 @@ private fun TipBubble(
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_close),
+                                tint = colorResource(R.color.almostBlack),
                                 contentDescription = stringResource(R.string.content_description_close_button)
                             )
                         }
@@ -234,7 +265,7 @@ private fun TipBubble(
                 }
 
                 Text(
-                    text = stringResource(message),
+                    text = AnnotatedString(stringResource(message)).formatMarkdown(),
                     style = OlvidTypography.body2,
                     color = colorResource(R.color.greyTint),
                 )
@@ -260,12 +291,14 @@ private fun TipBubble(
     }
 }
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun TipPreview() {
     Column {
         TipItem(refreshTipState = {}, tipToShow = Tip.TROUBLESHOOTING)
         TipItem(refreshTipState = {}, tipToShow = Tip.CONFIGURE_BACKUPS)
-        TipItem(refreshTipState = {}, tipToShow = Tip.WRITE_BACKUP_KEY)
+//        TipItem(refreshTipState = {}, tipToShow = Tip.WRITE_BACKUP_KEY)
+        TipItem(refreshTipState = {}, tipToShow = Tip.NEW_TRANSLATIONS)
     }
 }

@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -42,7 +41,6 @@ import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.datatypes.UID;
-import io.olvid.engine.datatypes.containers.BackupsV2ListItem;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPublicKey;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;

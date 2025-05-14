@@ -23,7 +23,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Rect
@@ -46,14 +45,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.withSave
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -65,7 +68,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import androidx.recyclerview.widget.RecyclerView.State
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
@@ -79,11 +81,13 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.DiscussionCustomization
+import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.MessageMetadata
 import io.olvid.messenger.databases.entity.MessageRecipientInfo
 import io.olvid.messenger.discussion.message.MessageDetailsActivity.RecipientInfosAdapter.ViewHolder
 import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel
+import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.viewModels.MessageDetailsViewModel
 import java.io.IOException
 import java.util.Arrays
@@ -103,6 +107,7 @@ class MessageDetailsActivity : LockableActivity() {
     private var messageDetailsActivityRoot: View? = null
     var hasAttachments: Boolean = false
     private var isInbound: Boolean = false
+    private val messageStatusTextView by lazy { findViewById<TextView>(R.id.message_status) }
     private var sentFromOtherDevice: Boolean = false
 
     // message views
@@ -135,35 +140,42 @@ class MessageDetailsActivity : LockableActivity() {
         supportActionBar?.elevation = 0f
 
         messageView.setContent {
-            AppCompatTheme {
-                val message by messageDetailsViewModel.message.observeAsState()
-                message?.let {
-                    val messageExpiration by AppDatabase.getInstance()
-                        .messageExpirationDao().getLive(it.id)
-                        .observeAsState()
-                    Column(modifier = Modifier
+            val message by messageDetailsViewModel.message.observeAsState()
+            LaunchedEffect(message) {
+                if (message?.isInbound == false) {
+                    updateMessageStatus(message)
+                }
+            }
+            message?.let {
+                val messageExpiration by AppDatabase.getInstance()
+                    .messageExpirationDao().getLive(it.id)
+                    .observeAsState()
+                Column(
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)) {
-                        DateHeader(
-                            date = StringUtils.getDayOfDateString(LocalContext.current, it.timestamp).toString()
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Message(
-                            modifier = Modifier.cutoutHorizontalPadding(),
-                            message = it,
-                            scrollToMessage = {},
-                            replyAction = { },
-                            menuAction = { },
-                            editedSeen = { },
-                            showSender = false,
-                            lastFromSender = false,
-                            scale = 1f,
-                            audioAttachmentServiceBinding = audioAttachmentServiceBinding,
-                            messageExpiration = messageExpiration,
-                            openOnClick = false,
-                        )
-                    }
-
+                        .padding(8.dp)
+                ) {
+                    DateHeader(
+                        date = StringUtils.getDayOfDateString(LocalContext.current, it.timestamp).toString()
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Message(
+                        modifier = Modifier.cutoutHorizontalPadding(),
+                        message = it,
+                        scrollToMessage = { },
+                        replyAction = { },
+                        menuAction = { },
+                        editedSeen = { },
+                        showSender = it.isInbound,
+                        lastFromSender = true,
+                        scale = 1f,
+                        useAnimatedEmojis = remember { SettingsActivity.useAnimatedEmojis() },
+                        loopAnimatedEmojis = remember { SettingsActivity.loopAnimatedEmojis() },
+                        audioAttachmentServiceBinding = audioAttachmentServiceBinding,
+                        messageExpiration = messageExpiration,
+                        openOnClick = false,
+                        blockSwipe = true,
+                    )
                 }
             }
         }
@@ -225,6 +237,8 @@ class MessageDetailsActivity : LockableActivity() {
             // outbound status
             val statusIndicator = findViewById<View>(R.id.message_details_status_indicator)
             statusIndicator?.setOnClickListener { view: View -> this.statusClicked() }
+        } else {
+            findViewById<View>(R.id.message_details_status_indicator)?.visibility = View.GONE
         }
 
 
@@ -244,7 +258,7 @@ class MessageDetailsActivity : LockableActivity() {
                                 ExifInterface.ORIENTATION_NORMAL
                             )
                             bitmap = PreviewUtils.rotateBitmap(bitmap, orientation)
-                        } catch (e: IOException) {
+                        } catch (_: IOException) {
                             Logger.d("Error creating ExifInterface for file $backgroundImageAbsolutePath")
                         }
                         val finalBitmap = bitmap
@@ -312,6 +326,49 @@ class MessageDetailsActivity : LockableActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    private fun updateMessageStatus(message: Message?) {
+        messageStatusTextView?.apply {
+            when(message?.status) {
+                Message.STATUS_SENT -> {
+                    setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_sent, 0, R.drawable.ic_info, 0)
+                    setText(R.string.explanation_message_status_sent)
+                }
+                Message.STATUS_DELIVERED -> {
+                    setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_delivered_one, 0, R.drawable.ic_info, 0)
+                    setText(R.string.explanation_message_status_delivered)
+                }
+                Message.STATUS_DELIVERED_AND_READ -> {
+                    messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_delivered_and_read_one, 0, R.drawable.ic_info, 0)
+                    messageStatusTextView.setText(R.string.explanation_message_status_delivered_and_read)
+                }
+                Message.STATUS_DELIVERED_ALL -> {
+                    messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_delivered_all, 0, R.drawable.ic_info, 0)
+                    messageStatusTextView.setText(R.string.explanation_message_status_delivered_all)
+                }
+                Message.STATUS_DELIVERED_ALL_READ_ONE -> {
+                    messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_delivered_all_read_one, 0, R.drawable.ic_info, 0)
+                    messageStatusTextView.setText(R.string.explanation_message_status_delivered_all_read_one)
+                }
+                Message.STATUS_DELIVERED_ALL_READ_ALL -> {
+                    messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_delivered_all_read_all, 0, R.drawable.ic_info, 0)
+                    messageStatusTextView.setText(R.string.explanation_message_status_delivered_all_read_all)
+                }
+                Message.STATUS_UNDELIVERED -> {
+                    messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_undelivered, 0, R.drawable.ic_info, 0)
+                    messageStatusTextView.setText(R.string.explanation_message_status_undelivered)
+                }
+                Message.STATUS_SENT_FROM_ANOTHER_DEVICE -> {
+                    messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_sent_from_other_device, 0, R.drawable.ic_info, 0)
+                    messageStatusTextView.setText(R.string.explanation_message_status_sent_from_another_device)
+                }
+                else -> {
+                    messageStatusTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_message_status_processing, 0, R.drawable.ic_info, 0)
+                    messageStatusTextView.setText(R.string.explanation_message_status_processing)
+                }
+            }
+        }
+    }
+
     private fun statusClicked() {
         val dialogView =
             layoutInflater.inflate(R.layout.dialog_view_message_status_explanation, null)
@@ -336,6 +393,7 @@ class MessageDetailsActivity : LockableActivity() {
             setHasStableIds(true)
         }
 
+        @SuppressLint("NotifyDataSetChanged")
         override fun onChanged(value: List<MessageRecipientInfo>?) {
             this.messageRecipientInfos = value
             recipientInfoHeaderAndSeparatorDecoration!!.clearCache()
@@ -567,23 +625,22 @@ class MessageDetailsActivity : LockableActivity() {
                             MeasureSpec.makeMeasureSpec(headerHeight, MeasureSpec.EXACTLY)
                         )
                         headerView.layout(0, 0, headerView.measuredWidth, headerHeight)
-                        val headerBitmap =
-                            Bitmap.createBitmap(headerView.measuredWidth, headerHeight, ARGB_8888)
+                        val headerBitmap = createBitmap(headerView.measuredWidth, headerHeight)
                         val bitmapCanvas = Canvas(headerBitmap)
                         headerView.draw(bitmapCanvas)
                         bitmapCache[status] = headerBitmap
                     }
-                    canvas.save()
-                    parent.getDecoratedBoundsWithMargins(child, itemRect)
-                    itemRect.top = (itemRect.top + child.translationY).toInt()
-                    itemRect.bottom = (itemRect.bottom + child.translationY).toInt()
-                    canvas.drawBitmap(
-                        bitmapCache[status]!!,
-                        itemRect.left.toFloat(),
-                        itemRect.top.toFloat(),
-                        null
-                    )
-                    canvas.restore()
+                    canvas.withSave {
+                        parent.getDecoratedBoundsWithMargins(child, itemRect)
+                        itemRect.top = (itemRect.top + child.translationY).toInt()
+                        itemRect.bottom = (itemRect.bottom + child.translationY).toInt()
+                        drawBitmap(
+                            bitmapCache[status]!!,
+                            itemRect.left.toFloat(),
+                            itemRect.top.toFloat(),
+                            null
+                        )
+                    }
                 }
             }
         }
@@ -618,6 +675,7 @@ class MessageDetailsActivity : LockableActivity() {
             setHasStableIds(true)
         }
 
+        @SuppressLint("NotifyDataSetChanged")
         override fun onChanged(value: List<MessageMetadata>) {
             // check if a messageMetadata is of kind KIND_UPLOADED
             hasUploadedMetadata = false
@@ -777,23 +835,22 @@ class MessageDetailsActivity : LockableActivity() {
                             MeasureSpec.makeMeasureSpec(headerHeight, MeasureSpec.EXACTLY)
                         )
                         headerView.layout(0, 0, headerView.measuredWidth, headerHeight)
-                        val headerBitmap =
-                            Bitmap.createBitmap(headerView.measuredWidth, headerHeight, ARGB_8888)
+                        val headerBitmap = createBitmap(headerView.measuredWidth, headerHeight)
                         val bitmapCanvas = Canvas(headerBitmap)
                         headerView.draw(bitmapCanvas)
                         bitmapCache = headerBitmap
                     }
-                    canvas.save()
-                    parent.getDecoratedBoundsWithMargins(child, itemRect)
-                    itemRect.top = (itemRect.top + child.translationY).toInt()
-                    itemRect.bottom = (itemRect.bottom + child.translationY).toInt()
-                    canvas.drawBitmap(
-                        bitmapCache!!,
-                        itemRect.left.toFloat(),
-                        itemRect.top.toFloat(),
-                        null
-                    )
-                    canvas.restore()
+                    canvas.withSave {
+                        parent.getDecoratedBoundsWithMargins(child, itemRect)
+                        itemRect.top = (itemRect.top + child.translationY).toInt()
+                        itemRect.bottom = (itemRect.bottom + child.translationY).toInt()
+                        drawBitmap(
+                            bitmapCache!!,
+                            itemRect.left.toFloat(),
+                            itemRect.top.toFloat(),
+                            null
+                        )
+                    }
                 }
             }
         }

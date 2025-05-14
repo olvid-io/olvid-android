@@ -22,10 +22,14 @@ package io.olvid.messenger.customClasses
 import android.icu.lang.UCharacter
 import android.os.Build
 import android.text.SpannableString
+import android.text.Spanned
 import android.text.style.URLSpan
 import android.text.util.Linkify
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.util.PatternsCompat
+import androidx.emoji2.text.EmojiCompat
+import androidx.emoji2.text.EmojiSpan
+import io.olvid.messenger.customClasses.StringUtils.isEmojiCodepoint
 import io.olvid.messenger.customClasses.StringUtils.unAccentPattern
 import java.text.Normalizer
 import java.util.BitSet
@@ -73,9 +77,9 @@ class StringUtils2 {
 
         fun normalize(source: CharSequence?): String {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                UCharacter.toLowerCase(unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFKD)).replaceAll(""));
+                UCharacter.toLowerCase(unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFKD)).replaceAll(""))
             } else {
-                unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFKD)).replaceAll("").lowercase(Locale.getDefault());
+                unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFKD)).replaceAll("").lowercase(Locale.getDefault())
             }
         }
 
@@ -191,4 +195,61 @@ data class PositionsMapping(val input: String) {
             cur += normalized.length
         }
     }
+}
+
+fun String.getCodePoints(): IntArray {
+    /**
+     * Returns an array of code points from this string.
+     *
+     * This function is equivalent to the `codePoints()` method in Java's String class.
+     * It iterates through the string and extracts each Unicode code point,
+     * handling surrogate pairs correctly.
+     *
+     * @return An IntArray containing the Unicode code points of the string.
+     */
+    val codePoints = mutableListOf<Int>()
+    var i = 0
+    while (i < length) {
+        val codePoint = codePointAt(i)
+        codePoints.add(codePoint)
+        i += Character.charCount(codePoint)
+    }
+    return codePoints.toIntArray()
+}
+
+fun String.isStringOnlyEmojis(): Boolean {
+    if (isEmpty()) {
+        return false
+    }
+
+    for (codePoint in getCodePoints()) {
+        if (!isEmojiCodepoint(codePoint)) {
+            return false
+        }
+    }
+    return true
+}
+
+
+fun String.getShortEmojis(maxLength: Int): List<String> {
+    val emojiSequence = EmojiCompat.get().process(this, 0, length)
+    if (emojiSequence is Spanned) {
+        var regionEnd: Int
+        var regionStart = 0
+        return buildList {
+            val spans = emojiSequence.getSpans(
+                regionStart, emojiSequence.length,
+                EmojiSpan::class.java
+            ).asList()
+            if (spans.isEmpty() || spans.size > maxLength || isStringOnlyEmojis().not()) {
+                return emptyList()
+            }
+            spans.forEach {
+                regionEnd = emojiSequence.getSpanEnd(it)
+                add(emojiSequence.subSequence(regionStart, regionEnd).toString())
+                regionStart = regionEnd
+            }
+        }
+    }
+    return emptyList()
 }

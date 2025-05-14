@@ -1239,10 +1239,8 @@ public class App extends Application implements DefaultLifecycleObserver {
             //////////////////////////
             // initialize emoji2
             //////////////////////////
-            EmojiCompat.Config emojiConfig = new BundledEmojiCompatConfig(getContext());
-            if (!SettingsActivity.useSystemEmojis()) {
-                emojiConfig.setReplaceAll(true);
-            }
+            EmojiCompat.Config emojiConfig = new BundledEmojiCompatConfig(getContext(), App::runThread);
+            emojiConfig.setReplaceAll(true);
             EmojiCompat.init(emojiConfig);
 
             //////////////////////////

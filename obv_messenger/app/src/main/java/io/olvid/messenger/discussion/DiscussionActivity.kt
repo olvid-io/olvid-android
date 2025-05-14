@@ -59,14 +59,11 @@ import androidx.appcompat.view.ActionMode.Callback
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -128,6 +125,7 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updateMargins
 import androidx.core.view.updatePadding
@@ -886,6 +884,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                         ScrollRequest(messageId)
                                                 },
                                                 scale = scale,
+                                                useAnimatedEmojis = discussionViewModel.useAnimatedEmojis,
+                                                loopAnimatedEmojis = discussionViewModel.loopAnimatedEmojis,
                                                 replyAction = {
                                                     discussionDelegate.replyToMessage(
                                                         message.discussionId,
@@ -921,10 +921,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                 )?.let {
                                                     !it.senderIdentifier.contentEquals(message.senderIdentifier)
                                                             || (it.messageType != Message.TYPE_INBOUND_MESSAGE && it.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE)
-                                                            || Utils.notTheSameDay(
-                                                        message.timestamp,
-                                                        it.timestamp
-                                                    )
+                                                            || Utils.notTheSameDay(message.timestamp, it.timestamp)
                                                             || !message.isTextOnly
                                                             || (message.status == Message.STATUS_UNREAD && it.status != Message.STATUS_UNREAD)
                                                 } != false,
@@ -1925,7 +1922,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                 animated.start()
             }
             recomputeLockedGroupHeight()
-        } else if (!showDiscussionNoChannelGroup && discussionNoChannelGroup.visibility == View.VISIBLE) {
+        } else if (!showDiscussionNoChannelGroup && discussionNoChannelGroup.isVisible) {
             discussionNoChannelGroup.visibility = View.GONE
             discussionNoChannelImageView.setImageDrawable(null)
             recomputeLockedGroupHeight()
@@ -2717,10 +2714,10 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
     private fun recomputeLockedGroupHeight() {
         var h = 0
-        if (discussionLockedGroup.visibility == View.VISIBLE) {
+        if (discussionLockedGroup.isVisible) {
             h += discussionLockedGroup.height
         }
-        if (discussionNoChannelGroup.visibility == View.VISIBLE) {
+        if (discussionNoChannelGroup.isVisible) {
             h += discussionNoChannelGroup.height
         }
         lockGroupBottomPadding = h

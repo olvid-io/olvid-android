@@ -21,11 +21,11 @@
 
 package io.olvid.messenger.discussion.gallery
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -264,7 +264,7 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
         discussionId: Long
     ) {
         if (audioItems.isEmpty().not()) {
-            val activity = LocalContext.current as? Activity
+            val activity = LocalActivity.current
             LazyColumn(
                 Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -819,8 +819,8 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
     private fun goToMessage(context: Context, discussionId: Long, messageId: Long) {
         val intent = Intent(context, DiscussionActivity::class.java)
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        intent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
-        intent.putExtra(DiscussionActivity.MESSAGE_ID_INTENT_EXTRA, messageId);
+        intent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId)
+        intent.putExtra(DiscussionActivity.MESSAGE_ID_INTENT_EXTRA, messageId)
         context.startActivity(intent)
     }
 

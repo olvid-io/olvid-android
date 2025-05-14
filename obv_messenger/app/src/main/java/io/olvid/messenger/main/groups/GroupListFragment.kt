@@ -36,14 +36,12 @@ import io.olvid.engine.engine.types.EngineNotificationListener
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.Group2Dao.GroupOrGroup2
 import io.olvid.messenger.databases.entity.Group2
 import io.olvid.messenger.databases.tasks.GroupCloningTasks
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment
-import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment
 import io.olvid.messenger.main.RefreshingFragment
 
 class GroupListFragment : RefreshingFragment(), OnRefreshListener, EngineNotificationListener, GroupMenu {

@@ -173,7 +173,6 @@
             tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
     <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/admin_selection_dialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

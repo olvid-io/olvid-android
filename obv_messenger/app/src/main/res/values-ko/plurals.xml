@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">"이 기기에서 이전 기기가 비활성화됩니다:"</item>
+        <item quantity="other">"이 기기에서 기기들이 비활성화됩니다:"</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d개의 백업이 발견되었습니다</item>
+        <item quantity="other">%1$d개의 백업이 발견되었습니다</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d개의 프로필이 발견되었습니다</item>
+        <item quantity="other">%1$d개의 프로필이 발견되었습니다</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">그룹 없음</item>
+        <item quantity="one">%1$d개의 그룹</item>
+        <item quantity="other">%1$d개의 그룹</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">연락처 없음</item>
+        <item quantity="one">%1$d명의 연락처</item>
+        <item quantity="other">%1$d명의 연락처</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">대화 내용이 보관됨</item>
+        <item quantity="other">%1$d개의 대화 내용이 보관됨</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">대화 내용이 보관 해제됨</item>
+        <item quantity="other">%1$d개의 대화 내용이 보관 해제됨</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">메시지가 북마크 해제됨</item>
+        <item quantity="other">%1$d개의 메시지가 북마크 해제됨</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">선택한 대화 내용을 삭제하시겠습니까?</item>
+        <item quantity="other">선택한 대화 내용들을 삭제하시겠습니까?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">선택한 메시지를 삭제하시겠습니까?</item>
+        <item quantity="other">선택한 메시지들을 삭제하시겠습니까?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">선택한 대화 내용과 모든 메시지를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.</item>
+        <item quantity="other">선택한 %1$d개의 대화 내용과 모든 메시지를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">선택한 대화 내용과 모든 메시지를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.</item>
+        <item quantity="other">선택한 %1$d개의 대화 내용과 모든 메시지를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">선택한 메시지를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.</item>
+        <item quantity="other">선택한 %1$d개의 메시지를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">선택한 메시지를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.</item>
+        <item quantity="other">선택한 %1$d개의 메시지를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">이 대화 내용의 메시지를 **영구적으로** 삭제하려고 합니다. 정말로 삭제하시겠습니까?</item>
+        <item quantity="other">이 대화 내용의 %1$d개의 메시지를 **영구적으로** 삭제하려고 합니다. 정말로 삭제하시겠습니까?</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">이 대화 내용과 메시지를 **영구적으로** 삭제하려고 합니다. 정말로 삭제하시겠습니까?</item>
+        <item quantity="other">이 %1$d개의 대화 내용과 메시지를 **영구적으로** 삭제하려고 합니다. 정말로 삭제하시겠습니까?</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">채널을 가진 그룹 멤버 %1$d명을 개인 대화에 초대하려고 합니다. 진행하시겠습니까?</item>
+        <item quantity="other">채널을 가진 그룹 멤버 %1$d명을 개인 대화에 초대하려고 합니다. 진행하시겠습니까?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">공통 그룹 1개</item>
+        <item quantity="other">%1$d개의 공통 그룹</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. 이 그룹을 나가야 진행할 수 있습니다.</item>
+        <item quantity="other">. 이 그룹들을 나가야 진행할 수 있습니다.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">%1$s를 다른 사용자 목록에서 제거하려고 합니다.\n\n%1$s는 %2$d개의 그룹에 초대되었습니다. 그룹에 참여하면 목록에 다시 추가됩니다. 이 그룹을 나가면 이를 방지할 수 있습니다.\n\n정말로 이 사용자를 삭제하시겠습니까?</item>
+        <item quantity="other">%1$s를 다른 사용자 목록에서 제거하려고 합니다.\n\n%1$s는 %2$d개의 그룹에 초대되었습니다. 그룹 중 하나에 참여하면 목록에 다시 추가됩니다. 이 그룹들을 나가면 이를 방지할 수 있습니다.\n\n정말로 이 사용자를 삭제하시겠습니까?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">이 설정을 변경하면 보류 중인 그룹 초대 1개를 자동으로 수락합니다.\n확인을 눌러 선택을 확인하고 이 그룹에 참여하십시오.</item>
+        <item quantity="other">이 설정을 변경하면 보류 중인 그룹 초대 %1$d개를 자동으로 수락합니다.\n확인을 눌러 선택을 확인하고 이 그룹들에 참여하십시오.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">선택한 첨부 파일을 저장할 폴더를 선택하십시오. 일부 폴더에 대한 액세스는 제한될 수 있습니다.</item>
+        <item quantity="other">선택한 %1$d개의 첨부 파일을 저장할 폴더를 선택하십시오. 일부 폴더에 대한 액세스는 제한될 수 있습니다.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d개 선택됨</item>
+        <item quantity="other">%1$d개 선택됨</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">선택한 첨부 파일을 삭제하시겠습니까?</item>
+        <item quantity="other">선택한 %1$d개의 첨부 파일을 삭제하시겠습니까?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d일 %2$02d시간 %3$02d분 %4$02d초</item>
+        <item quantity="other">%1$d일 %2$02d시간 %3$02d분 %4$02d초</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d개의 메시지가 누락됨…</item>
+        <item quantity="other">%1$d개의 메시지가 누락됨…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$s 및 1명의 다른 사람과의 그룹 통화</item>
+        <item quantity="other">%2$s 및 %1$d명의 다른 사람과의 그룹 통화</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$s 및 1명의 다른 사람과의 부재중 그룹 통화</item>
+        <item quantity="other">%2$s 및 %1$d명의 다른 사람과의 부재중 그룹 통화</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$s 및 1명의 다른 사람과의 실패한 그룹 통화</item>
+        <item quantity="other">%2$s 및 %1$d명의 다른 사람과의 실패한 그룹 통화</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$s 및 1명의 다른 사람이 통화 중</item>
+        <item quantity="other">%2$s 및 %1$d명이 통화 중</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$s 및 1명의 다른 사람과의 거부된 그룹 통화</item>
+        <item quantity="other">%2$s 및 %1$d명의 다른 사람과의 거부된 그룹 통화</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">%2$s 및 1명의 다른 사람으로부터의 그룹 통화</item>
+        <item quantity="other">%2$s 및 %1$d명의 다른 사람으로부터의 그룹 통화</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d개 선택됨</item>
+        <item quantity="other">%1$d개 선택됨</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d개 선택됨</item>
+        <item quantity="other">%1$d개 선택됨</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d개의 새 메시지</item>
+        <item quantity="other">%1$d개의 새 메시지</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s를 그룹 %2$s에 초대합니다.</item>
+        <item quantity="other">%3$s를 포함한 %1$d명의 연락처를 그룹 %2$s에 초대합니다.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s를 그룹 %2$s에서 제거합니다.</item>
+        <item quantity="other">%3$s를 포함한 %1$d명의 그룹 멤버를 %2$s에서 제거합니다.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d개의 새 메시지</item>
+        <item quantity="other">%1$d개의 새 메시지</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d개의 첨부 파일</item>
+        <item quantity="other">%1$d개의 첨부 파일</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">그리고 %1$d명</item>
+        <item quantity="other">그리고 %1$d명</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d명</item>
+        <item quantity="other"> &amp; %1$d명</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">선택한 보존 정책을 적용하면 메시지 1개가 삭제됩니다.\n정말로 진행하시겠습니까?</item>
+        <item quantity="other">선택한 보존 정책을 적용하면 %1$d개의 메시지가 삭제됩니다.\n정말로 진행하시겠습니까?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… 그리고 추가 검색 결과 1개\n검색어를 구체화하십시오</item>
+        <item quantity="other">… 그리고 추가 검색 결과 %1$d개\n검색어를 구체화하십시오</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1초</item>
+        <item quantity="other">%1$d초</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1분</item>
+        <item quantity="other">%1$d분</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1시간</item>
+        <item quantity="other">%1$d시간</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1일</item>
+        <item quantity="other">%1$d일</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1년</item>
+        <item quantity="other">%1$d년</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1명</item>
+        <item quantity="other">%1$d명</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">대화에 삭제된 메시지 1개가 있습니다. 삭제하시겠습니까?</item>
+        <item quantity="other">대화에 삭제된 메시지 %1$d개가 있습니다. 모든 마커를 삭제하시겠습니까?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">위치 공유 중인 연락처 1명</item>
+        <item quantity="other">위치 공유 중인 연락처 %1$d명</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">나와 다른 1명이 위치 공유 중</item>
+        <item quantity="other">나와 %1$d명이 위치 공유 중</item>
+    </plurals>
+</resources>

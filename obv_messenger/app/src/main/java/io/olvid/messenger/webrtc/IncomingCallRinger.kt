@@ -39,10 +39,8 @@ import android.os.Vibrator
 import android.view.KeyEvent
 import androidx.annotation.RequiresApi
 import io.olvid.engine.Logger
-import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.settings.SettingsActivity
 import java.io.IOException
-import java.util.UUID
 
 class IncomingCallRinger(private val context: Context) {
     private val vibrator: Vibrator? = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator

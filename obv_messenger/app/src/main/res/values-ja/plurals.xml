@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">「このデバイスでは、以下の以前のデバイスが無効になります：」</item>
+        <item quantity="other">「このデバイスでは、以下のデバイスが無効になります：」</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d個のバックアップが見つかりました</item>
+        <item quantity="other">%1$d個のバックアップが見つかりました</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d個のプロファイルが見つかりました</item>
+        <item quantity="other">%1$d個のプロファイルが見つかりました</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">グループはありません</item>
+        <item quantity="one">%1$d個のグループ</item>
+        <item quantity="other">%1$d個のグループ</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">連絡先はありません</item>
+        <item quantity="one">%1$d人の連絡先</item>
+        <item quantity="other">%1$d人の連絡先</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">ダイアログがアーカイブされました</item>
+        <item quantity="other">%1$d個のダイアログがアーカイブされました</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">ダイアログがアーカイブ解除されました</item>
+        <item quantity="other">%1$d個のダイアログがアーカイブ解除されました</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">メッセージのブックマークが解除されました</item>
+        <item quantity="other">%1$d個のメッセージのブックマークが解除されました</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">選択したダイアログを削除しますか？</item>
+        <item quantity="other">選択したダイアログを削除しますか？</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">選択したメッセージを削除しますか？</item>
+        <item quantity="other">選択したメッセージを削除しますか？</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">選択したダイアログとすべてのメッセージを削除しますか？\nこの操作は元に戻せません。</item>
+        <item quantity="other">選択した%1$d個のダイアログとすべてのメッセージを削除しますか？\nこの操作は元に戻せません。</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">選択したダイアログとすべてのメッセージを削除する方法を選択してください。\nこの操作は元に戻せません。</item>
+        <item quantity="other">選択した%1$d個のダイアログとすべてのメッセージを削除する方法を選択してください。\nこの操作は元に戻せません。</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">選択したメッセージを削除しますか？\nこの操作は元に戻せません。</item>
+        <item quantity="other">選択した%1$d個のメッセージを削除しますか？\nこの操作は元に戻せません。</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">選択したメッセージを削除する方法を選択してください。\nこの操作は元に戻せません。</item>
+        <item quantity="other">選択した%1$d個のメッセージを削除する方法を選択してください。\nこの操作は元に戻せません。</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">このダイアログのすべての相手に対して、メッセージを**完全に**削除します。本当に実行してよろしいですか？</item>
+        <item quantity="other">このダイアログのすべての相手に対して、%1$d個のメッセージを**完全に**削除します。本当に実行してよろしいですか？</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">このダイアログとメッセージを、すべての相手に対して**完全に**削除します。本当に実行してよろしいですか？</item>
+        <item quantity="other">この%1$d個のダイアログとメッセージを、すべての相手に対して**完全に**削除します。本当に実行してよろしいですか？</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">グループのメンバー全員（現在1人）をプライベートなダイアログに招待します。\nよろしいですか？</item>
+        <item quantity="other">グループのメンバー全員（現在%1$d人）をプライベートなダイアログに招待します。\nよろしいですか？</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">共通のグループが1つあります</item>
+        <item quantity="other">共通のグループが%1$d個あります</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">。このグループから離脱しないと、削除できません。</item>
+        <item quantity="other">。これらのグループから離脱しないと、削除できません。</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">%1$sを他のユーザーリストから削除します。\n\n%1$sは、あなたが所属する%2$d個のグループに招待されています。グループに参加すると、リストに再追加されます。このことを避けるために、グループから離脱することを検討してください。\n\n本当にこのユーザーを削除しますか？</item>
+        <item quantity="other">%1$sを他のユーザーリストから削除します。\n\n%1$sは、あなたが所属する%2$d個のグループに招待されています。いずれかのグループに参加すると、リストに再追加されます。このことを避けるために、これらのグループから離脱することを検討してください。\n\n本当にこのユーザーを削除しますか？</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">この設定を変更すると、保留中のグループ招待を1件自動的に承認します。\n確認して、このグループに参加しますか？</item>
+        <item quantity="other">この設定を変更すると、保留中のグループ招待を%1$d件自動的に承認します。\n確認して、これらのグループに参加しますか？</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">選択した添付ファイルを保存するフォルダーを選択してください。\n一部のフォルダーへのアクセスが制限されている場合があります。</item>
+        <item quantity="other">選択した%1$d個の添付ファイルを保存するフォルダーを選択してください。\n一部のフォルダーへのアクセスが制限されている場合があります。</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d個選択しました</item>
+        <item quantity="other">%1$d個選択しました</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">選択した添付ファイルを削除しますか？</item>
+        <item quantity="other">選択した%1$d個の添付ファイルを削除しますか？</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d日、%2$02d時間%3$02d分%4$02d秒</item>
+        <item quantity="other">%1$d日、%2$02d時間%3$02d分%4$02d秒</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d件のメッセージがありません…</item>
+        <item quantity="other">%1$d件のメッセージがありません…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$sと1人とのグループ通話</item>
+        <item quantity="other">%2$sと%1$d人とのグループ通話</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$sと1人とのグループ通話（応答なし）</item>
+        <item quantity="other">%2$sと%1$d人とのグループ通話（応答なし）</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$sと1人とのグループ通話（失敗）</item>
+        <item quantity="other">%2$sと%1$d人とのグループ通話（失敗）</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$sと1人が忙しい</item>
+        <item quantity="other">%2$sと%1$d人が忙しい</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$sと1人とのグループ通話（拒否）</item>
+        <item quantity="other">%2$sと%1$d人とのグループ通話（拒否）</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">%2$sと1人からのグループ通話</item>
+        <item quantity="other">%2$sと%1$d人からのグループ通話</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d個選択しました</item>
+        <item quantity="other">%1$d個選択しました</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d個選択しました</item>
+        <item quantity="other">%1$d個選択しました</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d件の新しいメッセージ</item>
+        <item quantity="other">%1$d件の新しいメッセージ</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$sをグループ%2$sに招待します。</item>
+        <item quantity="other">%1$d人の連絡先をグループ%2$sに招待します： %3$s。</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$sをグループ%2$sから削除します。</item>
+        <item quantity="other">%1$d人のグループメンバーを%2$sから削除します： %3$s。</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d件の未読メッセージ</item>
+        <item quantity="other">%1$d件の未読メッセージ</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d個の添付ファイル</item>
+        <item quantity="other">%1$d個の添付ファイル</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">その他1人</item>
+        <item quantity="other">その他%1$d人</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; その他1人</item>
+        <item quantity="other"> &amp; その他%1$d人</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">選択した保持ポリシーを適用すると、1件のメッセージが削除されます。\nよろしいですか？</item>
+        <item quantity="other">選択した保持ポリシーを適用すると、%1$d件のメッセージが削除されます。\nよろしいですか？</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">…その他1件の検索結果があります\n検索条件を絞り込んでください</item>
+        <item quantity="other">…その他%1$d件の検索結果があります\n検索条件を絞り込んでください</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1秒</item>
+        <item quantity="other">%1$d秒</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1分</item>
+        <item quantity="other">%1$d分</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1時間</item>
+        <item quantity="other">%1$d時間</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1日</item>
+        <item quantity="other">%1$d日</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1年</item>
+        <item quantity="other">%1$d年</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1人</item>
+        <item quantity="other">%1$d人</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">1件の削除されたメッセージが残っています。削除しますか？</item>
+        <item quantity="other">%1$d件の削除されたメッセージが残っています。すべてのマーカーを削除しますか？</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1人の連絡先が位置情報を共有しています</item>
+        <item quantity="other">%1$d人の連絡先が位置情報を共有しています</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">あなたと1人が位置情報を共有しています</item>
+        <item quantity="other">あなたと%1$d人が位置情報を共有しています</item>
+    </plurals>
+</resources>

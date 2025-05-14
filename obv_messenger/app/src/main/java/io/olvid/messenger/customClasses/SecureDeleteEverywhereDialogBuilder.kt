@@ -31,8 +31,8 @@ import io.olvid.messenger.R
 import io.olvid.messenger.databases.AppDatabase
 
 
-class SecureDeleteEverywhereDialogBuilder(private val context: Context, private val type: Type, private val count: Int, private val offerToDeleteEverywhere: Boolean, private val remoteDeletingMakesSense: Boolean) : SecureAlertDialogBuilder(context, R.style.CustomAlertDialog) {
-    private val actuallyOfferToDeleteOnOwnedDevices: Boolean;
+class SecureDeleteEverywhereDialogBuilder(private val context: Context, private val type: Type, private val count: Int, private val offerToDeleteEverywhere: Boolean, remoteDeletingMakesSense: Boolean) : SecureAlertDialogBuilder(context, R.style.CustomAlertDialog) {
+    private val actuallyOfferToDeleteOnOwnedDevices: Boolean
     private var deleteCallback: DeleteCallback? = null
 
     private var deletionChoice: DeletionChoice = DeletionChoice.LOCAL

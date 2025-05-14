@@ -39,7 +39,6 @@
         tools:text="ABCD 1244 TYP0 LKR8 LKFD 9019 MTV5 CVCE" />
 
     <TextView
-        android:id="@+id/one_time_warning_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"

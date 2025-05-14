@@ -143,16 +143,16 @@ public class OwnedIdentitySyncSnapshot implements ObvSyncSnapshotNode {
         // restore published details
         OwnedIdentityDetails ownedIdentityDetails = published_details.restoreOwned(identityManagerSession, ownedIdentity);
 
-        // restore a backup_seed if present
+        // restore a backup_seed if present, otherwise fallback to the deterministic seed for legacy identity
         BackupSeed backupSeed;
         if (domain.contains(BACKUP_SEED) && backup_seed != null) {
             try {
                 backupSeed = new BackupSeed(backup_seed);
             } catch (Exception e) {
-                backupSeed = null;
+                backupSeed = privateIdentity.getDeterministicBackupSeedForLegacyIdentity();
             }
         } else {
-            backupSeed = null;
+            backupSeed = privateIdentity.getDeterministicBackupSeedForLegacyIdentity();
         }
 
         // create the owned identity in DB

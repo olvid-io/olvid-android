@@ -18,13 +18,9 @@
  */
 package io.olvid.messenger.plus_button
 
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
-import android.content.res.Configuration
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -46,7 +42,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -169,20 +164,20 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                 NONE -> {
                     explanationTextView?.setGravity(Gravity.START)
                     explanationTextView?.setText(R.string.explanation_keycloak_search_not_started)
-                    spinner?.setVisibility(View.GONE)
+                    spinner?.visibility = View.GONE
                     keycloakSearchEditText?.requestFocus()
                 }
 
                 SEARCHING -> {
                     explanationTextView?.setGravity(Gravity.CENTER_HORIZONTAL)
                     explanationTextView?.setText(R.string.explanation_keycloak_searching)
-                    spinner?.setVisibility(View.VISIBLE)
+                    spinner?.visibility = View.VISIBLE
                 }
 
                 DONE -> {
                     explanationTextView?.setGravity(Gravity.CENTER_HORIZONTAL)
                     explanationTextView?.setText(R.string.explanation_empty_keycloak_search)
-                    spinner?.setVisibility(View.GONE)
+                    spinner?.visibility = View.GONE
                 }
             }
         }
@@ -244,7 +239,7 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
             name += userDetails.firstName
         }
         if (userDetails.lastName != null) {
-            if (name.length > 0) {
+            if (name.isNotEmpty()) {
                 name += " "
             }
             name += userDetails.lastName
@@ -346,7 +341,7 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                 } else {
                     holder.initialView?.reset()
                     holder.initialView?.setInitial(
-                        if (userDetails.identity == null) ByteArray(0) else userDetails.identity,
+                        userDetails.identity ?: ByteArray(0),
                         StringUtils.getInitial(name)
                     )
                 }

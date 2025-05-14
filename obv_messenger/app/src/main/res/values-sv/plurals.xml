@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">" på den här enheten kommer din tidigare enhet nedan att inaktiveras:</item>
+        <item quantity="other">" på den här enheten kommer dina enheter nedan att inaktiveras:</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d säkerhetskopia hittades</item>
+        <item quantity="other">%1$d säkerhetskopior hittades</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d profil hittades</item>
+        <item quantity="other">%1$d profiler hittades</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Ingen grupp</item>
+        <item quantity="one">%1$d grupp</item>
+        <item quantity="other">%1$d grupper</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Ingen kontakt</item>
+        <item quantity="one">%1$d kontakt</item>
+        <item quantity="other">%1$d kontakter</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Diskussionen arkiverades</item>
+        <item quantity="other">%1$d diskussioner arkiverades</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Diskussionen återställdes</item>
+        <item quantity="other">%1$d diskussioner återställdes</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Meddelandet togs bort från bokmärken</item>
+        <item quantity="other">%1$d meddelanden togs bort från bokmärken</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Radera vald diskussion?</item>
+        <item quantity="other">Radera valda diskussioner?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Radera valt meddelande?</item>
+        <item quantity="other">Radera valda meddelanden?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Vill du verkligen radera den valda diskussionen och alla meddelanden den innehåller?\nDenna åtgärd kan inte ångras.</item>
+        <item quantity="other">Vill du verkligen radera de %1$d valda diskussionerna och alla meddelanden de innehåller?\nDenna åtgärd kan inte ångras.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Hur vill du radera den valda diskussionen och alla meddelanden den innehåller?\nDenna åtgärd kan inte ångras.</item>
+        <item quantity="other">Hur vill du radera de %1$d valda diskussionerna och alla meddelanden de innehåller?\nDenna åtgärd kan inte ångras.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Vill du verkligen radera det valda meddelandet?\nDenna åtgärd kan inte ångras.</item>
+        <item quantity="other">Vill du verkligen radera de %1$d valda meddelandena?\nDenna åtgärd kan inte ångras.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Hur vill du radera det valda meddelandet?\nDenna åtgärd kan inte ångras.</item>
+        <item quantity="other">Hur vill du radera de %1$d valda meddelandena?\nDenna åtgärd kan inte ångras.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Du är på väg att **permanent** radera ett meddelande för **alla** i denna diskussion. Var noga med att detta är vad du vill göra.</item>
+        <item quantity="other">Du är på väg att **permanent** radera %1$d meddelanden för **alla** i denna diskussion. Var noga med att detta är vad du vill göra.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Du är på väg att **permanent** radera en diskussion och de meddelanden den innehåller för **alla** i denna diskussion. Var noga med att detta är vad du vill göra.</item>
+        <item quantity="other">Du är på väg att **permanent** radera %1$d diskussioner och de meddelanden de innehåller för **alla** i dessa diskussioner. Var noga med att detta är vad du vill göra.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Du är på väg att bjuda in varje gruppmedlem som du har en kanal med (för närvarande 1 medlem) till en privat diskussion.\nVill du fortsätta?</item>
+        <item quantity="other">Du är på väg att bjuda in varje gruppmedlem som du har en kanal med (för närvarande %1$d medlemmar) till en privat diskussion.\nVill du fortsätta?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 gemensam grupp</item>
+        <item quantity="other">%1$d gemensamma grupper</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Du måste lämna den här gruppen för att fortsätta.</item>
+        <item quantity="other">. Du måste lämna dessa grupper för att fortsätta.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Du är på väg att ta bort %1$s från din lista över andra användare.\n\nObservera att %1$s har bjudits in till %2$d grupp som du tillhör. De kommer att läggas till i den här listan igen om de går med i den. Du kanske vill lämna den här gruppen för att undvika detta.\n\nRadera den här användaren?</item>
+        <item quantity="other">Du är på väg att ta bort %1$s från din lista över andra användare.\n\nObservera att %1$s har bjudits in till %2$d grupper som du tillhör. De kommer att läggas till i den här listan igen om de går med i någon av dem. Du kanske vill lämna dessa grupper för att undvika detta.\n\nRadera den här användaren?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Att ändra den här inställningen kommer automatiskt att acceptera en väntande gruppinbjudan.\nTryck på OK för att bekräfta ditt val och gå med i den här gruppen.</item>
+        <item quantity="other">Att ändra den här inställningen kommer automatiskt att acceptera %1$d väntande gruppinbjudningar.\nTryck på OK för att bekräfta ditt val och gå med i dessa grupper.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">När du blir uppmanad, välj mappen där du vill spara det valda bilaget.\nObservera att åtkomst till vissa mappar kan vara begränsad.</item>
+        <item quantity="other">När du blir uppmanad, välj mappen där du vill spara de %1$d valda bilagen.\nObservera att åtkomst till vissa mappar kan vara begränsad.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d vald</item>
+        <item quantity="other">%1$d valda</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Vill du verkligen radera det valda bilaget?</item>
+        <item quantity="other">Vill du verkligen radera de %1$d valda bilagen?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d\u00a0dag,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
+        <item quantity="other">%1$d\u00a0dagar,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d saknat meddelande…</item>
+        <item quantity="other">%1$d saknade meddelanden…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Gruppsamtal med %2$s och en annan</item>
+        <item quantity="other">Gruppsamtal med %2$s och %1$d andra</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Obevarat gruppsamtal med %2$s och en annan</item>
+        <item quantity="other">Obevarat gruppsamtal med %2$s och %1$d andra</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Misslyckat gruppsamtal med %2$s och en annan</item>
+        <item quantity="other">Misslyckat gruppsamtal med %2$s och %1$d andra</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Gruppsamtal medan %2$s och en annan var upptagna</item>
+        <item quantity="other">Gruppsamtal medan %2$s och %1$d andra var upptagna</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Avvisat gruppsamtal med %2$s och en annan</item>
+        <item quantity="other">Avvisat gruppsamtal med %2$s och %1$d andra</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Gruppsamtal från %2$s och en annan</item>
+        <item quantity="other">Gruppsamtal från %2$s och %1$d andra</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d vald</item>
+        <item quantity="other">%1$d valda</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d vald</item>
+        <item quantity="other">%1$d valda</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d nytt meddelande</item>
+        <item quantity="other">%1$d nya meddelanden</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s kommer att bjudas in att gå med i gruppen %2$s.</item>
+        <item quantity="other">Följande %1$d kontakter kommer att bjudas in att gå med i gruppen %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s kommer att tas bort från gruppen %2$s.</item>
+        <item quantity="other">Följande %1$d gruppmedlemmar kommer att tas bort från %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d nytt meddelande</item>
+        <item quantity="other">%1$d nya meddelanden</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d bilaga</item>
+        <item quantity="other">%1$d bilagor</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">Och %1$d annan</item>
+        <item quantity="other">Och %1$d andra</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one">&amp; %1$d annan</item>
+        <item quantity="other">&amp; %1$d andra</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Att tillämpa den retention policy du just valde skulle radera ett meddelande.\nÄr du säker på att du vill fortsätta?</item>
+        <item quantity="other">Att tillämpa den retention policy du just valde skulle radera %1$d meddelanden.\nÄr du säker på att du vill fortsätta?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… och ett ytterligare sökresultat\nVänligen förfina din sökning</item>
+        <item quantity="other">… och %1$d ytterligare sökresultat\nVänligen förfina din sökning</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1\u00a0sekund</item>
+        <item quantity="other">%1$d\u00a0sekunder</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1\u00a0minut</item>
+        <item quantity="other">%1$d\u00a0minuter</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1\u00a0timme</item>
+        <item quantity="other">%1$d\u00a0timmar</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1\u00a0dag</item>
+        <item quantity="other">%1$d\u00a0dagar</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1\u00a0år</item>
+        <item quantity="other">%1$d\u00a0år</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1\u00a0medlem</item>
+        <item quantity="other">%1$d\u00a0medlemmar</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Du har för närvarande 1 fjärraderat meddelande i dina diskussioner. Vill du radera det?</item>
+        <item quantity="other">Du har för närvarande %1$d fjärraderade meddelanden i dina diskussioner. Vill du radera alla sådana markörer?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 kontakt delar sin plats</item>
+        <item quantity="other">%1$d kontakter delar sin plats</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Du och 1 annan delar sin plats</item>
+        <item quantity="other">Du och %1$d andra delar sin plats</item>
+    </plurals>
+</resources>

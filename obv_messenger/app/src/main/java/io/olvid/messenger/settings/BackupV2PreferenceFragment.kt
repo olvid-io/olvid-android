@@ -20,7 +20,6 @@
 package io.olvid.messenger.settings
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -86,6 +85,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.credentials.CreateCredentialResponse
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CredentialManager
@@ -114,12 +114,12 @@ import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity
+import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.BackupV2ViewModel.BackupNowState
 import io.olvid.messenger.settings.composables.BackupFailedDialog
 import io.olvid.messenger.settings.composables.CredentialsNotErasedDialog
 import io.olvid.messenger.settings.composables.ManageBackupsDialog
 import java.util.concurrent.Executor
-import androidx.core.net.toUri
 
 
 class BackupV2PreferenceFragment : Fragment() {
@@ -348,7 +348,12 @@ class BackupV2PreferenceFragment : Fragment() {
                             .clip(RoundedCornerShape(10.dp))
                             .background(colorResource(R.color.lighterGrey)),
                         onClick = {
-                            activity?.navigateToSettingsFragment(BackupV2SecurityPreferenceFragment::class.java.name)
+                            activity?.let {
+                                it.navigateToSettingsFragment(BackupV2SecurityPreferenceFragment::class.java.name)
+                                if (SettingsActivity.useApplicationLockScreen()) {
+                                    UnifiedForegroundService.lockApplication(it, R.string.message_unlock_before_showing_backup_key)
+                                }
+                            }
                         },
                         shape = RectangleShape,
                         colors = ButtonDefaults.textButtonColors(

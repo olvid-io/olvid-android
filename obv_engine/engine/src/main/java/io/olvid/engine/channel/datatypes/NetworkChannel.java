@@ -20,8 +20,6 @@
 package io.olvid.engine.channel.datatypes;
 
 
-import java.sql.SQLException;
-
 import io.olvid.engine.Logger;
 import io.olvid.engine.channel.databases.ObliviousChannel;
 import io.olvid.engine.crypto.AuthEnc;
@@ -37,7 +35,6 @@ import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ChannelProtocolMessageToSend;
 import io.olvid.engine.datatypes.containers.MessageToSend;
 import io.olvid.engine.datatypes.containers.MessageType;
-import io.olvid.engine.datatypes.containers.NetworkReceivedMessage;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.encoder.Encoded;

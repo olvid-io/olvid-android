@@ -37,7 +37,6 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.DiscussionCustomization
-import io.olvid.messenger.databases.tasks.ApplySyncAtomTask
 import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask
 import io.olvid.messenger.databases.tasks.propagateMuteSettings
 import io.olvid.messenger.discussion.settings.DiscussionSettingsViewModel.SettingsChangedListener

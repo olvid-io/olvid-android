@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">"Auf diesem Gerät werden die Geräte unten deaktiviert:</item>
+        <item quantity="other">"Auf diesem Gerät werden die Geräte unten deaktiviert:"</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d Backup gefunden</item>
+        <item quantity="other">%1$d Backups gefunden</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d Profil gefunden</item>
+        <item quantity="other">%1$d Profile gefunden</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Keine Gruppe</item>
+        <item quantity="one">%1$d Gruppe</item>
+        <item quantity="other">%1$d Gruppen</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Kein Kontakt</item>
+        <item quantity="one">%1$d Kontakt</item>
+        <item quantity="other">%1$d Kontakte</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Konversation archiviert</item>
+        <item quantity="other">%1$d Konversationen archiviert</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Konversation dearchiviert</item>
+        <item quantity="other">%1$d Konversationen dearchiviert</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Nachricht aus Favoriten entfernt</item>
+        <item quantity="other">%1$d Nachrichten aus Favoriten entfernt</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Ausgewählte Konversation löschen?</item>
+        <item quantity="other">Ausgewählte Konversationen löschen?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Ausgewählte Nachricht löschen?</item>
+        <item quantity="other">Ausgewählte Nachrichten löschen?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Möchten Sie die ausgewählte Konversation und alle darin enthaltenen Nachrichten wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.</item>
+        <item quantity="other">Möchten Sie die %1$d ausgewählten Konversationen und alle darin enthaltenen Nachrichten wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Wie möchten Sie die ausgewählte Konversation und alle darin enthaltenen Nachrichten löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.</item>
+        <item quantity="other">Wie möchten Sie die %1$d ausgewählten Konversationen und alle darin enthaltenen Nachrichten löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Möchten Sie die ausgewählte Nachricht wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.</item>
+        <item quantity="other">Möchten Sie die %1$d ausgewählten Nachrichten wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Wie möchten Sie die ausgewählte Nachricht löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.</item>
+        <item quantity="other">Wie möchten Sie die %1$d ausgewählten Nachrichten löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Sie werden gerade eine Nachricht für **alle** Teilnehmer dieser Konversation **dauerhaft** löschen. Bitte stellen Sie sicher, dass dies wirklich das ist, was Sie tun möchten.</item>
+        <item quantity="other">Sie werden gerade %1$d Nachrichten für **alle** Teilnehmer dieser Konversation **dauerhaft** löschen. Bitte stellen Sie sicher, dass dies wirklich das ist, was Sie tun möchten.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Sie werden gerade eine Konversation und die darin enthaltenen Nachrichten für **alle** Teilnehmer dieser Konversation **dauerhaft** löschen. Bitte stellen Sie sicher, dass dies wirklich das ist, was Sie tun möchten.</item>
+        <item quantity="other">Sie werden gerade %1$d Konversationen und die darin enthaltenen Nachrichten für **alle** Teilnehmer dieser Konversationen **dauerhaft** löschen. Bitte stellen Sie sicher, dass dies wirklich das ist, was Sie tun möchten.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Sie werden gerade jedes Mitglied der Gruppe einladen, mit dem Sie einen Kanal haben (derzeit 1 Mitglied), zu einer privaten Konversation.\nMöchten Sie fortfahren?</item>
+        <item quantity="other">Sie werden gerade jedes Mitglied der Gruppe einladen, mit dem Sie einen Kanal haben (derzeit %1$d Mitglieder), zu einer privaten Konversation.\nMöchten Sie fortfahren?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 gemeinsame Gruppe</item>
+        <item quantity="other">%1$d gemeinsame Gruppen</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Sie müssen diese Gruppe verlassen, um fortzufahren.</item>
+        <item quantity="other">. Sie müssen diese Gruppen verlassen, um fortzufahren.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Sie werden gerade %1$s aus Ihrer Liste anderer Benutzer entfernen.\n\nBeachten Sie, dass %1$s zu %2$d Gruppe(n) eingeladen wurde, der Sie angehören. Er/Sie wird wieder zu dieser Liste hinzugefügt, wenn er/sie ihr beitritt. Möglicherweise möchten Sie diese Gruppe verlassen, um dies zu vermeiden.\n\nMöchten Sie diesen Benutzer wirklich löschen?</item>
+        <item quantity="other">Sie werden gerade %1$s aus Ihrer Liste anderer Benutzer entfernen.\n\nBeachten Sie, dass %1$s zu %2$d Gruppen eingeladen wurde, der Sie angehören. Er/Sie wird wieder zu dieser Liste hinzugefügt, wenn er/sie einer von ihnen beitritt. Möglicherweise möchten Sie diese Gruppen verlassen, um dies zu vermeiden.\n\nMöchten Sie diesen Benutzer wirklich löschen?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Durch Ändern dieser Einstellung wird automatisch eine ausstehende Gruppeneinladung akzeptiert.\nBestätigen Sie Ihre Auswahl und treten Sie dieser Gruppe bei.</item>
+        <item quantity="other">Durch Ändern dieser Einstellung werden automatisch %1$d ausstehende Gruppeneinladungen akzeptiert.\nBestätigen Sie Ihre Auswahl und treten Sie diesen Gruppen bei.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Bitte wählen Sie beim nächsten Mal den Ordner aus, in dem die ausgewählte Anlage gespeichert werden soll.\nDer Zugriff auf einige Ordner kann eingeschränkt sein.</item>
+        <item quantity="other">Bitte wählen Sie beim nächsten Mal den Ordner aus, in dem die %1$d ausgewählten Anlagen gespeichert werden sollen.\nDer Zugriff auf einige Ordner kann eingeschränkt sein.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d ausgewählt</item>
+        <item quantity="other">%1$d ausgewählt</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Möchten Sie die ausgewählte Anlage wirklich löschen?</item>
+        <item quantity="other">Möchten Sie die %1$d ausgewählten Anlagen wirklich löschen?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d\u00a0Tag, %2$02d\u00a0h %3$02d\u00a0m %4$02d\u00a0s</item>
+        <item quantity="other">%1$d\u00a0Tage, %2$02d\u00a0h %3$02d\u00a0m %4$02d\u00a0s</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d fehlende Nachricht…</item>
+        <item quantity="other">%1$d fehlende Nachrichten…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Gruppenanruf mit %2$s und 1 anderen</item>
+        <item quantity="other">Gruppenanruf mit %2$s und %1$d anderen</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Unbeantworteter Gruppenanruf mit %2$s und 1 anderen</item>
+        <item quantity="other">Unbeantworteter Gruppenanruf mit %2$s und %1$d anderen</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Fehlgeschlagener Gruppenanruf mit %2$s und 1 anderen</item>
+        <item quantity="other">Fehlgeschlagener Gruppenanruf mit %2$s und %1$d anderen</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Gruppenanruf, während %2$s und 1 andere beschäftigt waren</item>
+        <item quantity="other">Gruppenanruf, während %2$s und %1$d andere beschäftigt waren</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Abgelehnter Gruppenanruf mit %2$s und 1 anderen</item>
+        <item quantity="other">Abgelehnter Gruppenanruf mit %2$s und %1$d anderen</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Gruppenanruf von %2$s und 1 anderen</item>
+        <item quantity="other">Gruppenanruf von %2$s und %1$d anderen</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d ausgewählt</item>
+        <item quantity="other">%1$d ausgewählt</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d ausgewählt</item>
+        <item quantity="other">%1$d ausgewählt</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d neue Nachricht</item>
+        <item quantity="other">%1$d neue Nachrichten</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s wird eingeladen, der Gruppe %2$s beizutreten.</item>
+        <item quantity="other">Die folgenden %1$d Kontakte werden eingeladen, der Gruppe %2$s beizutreten: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s wird aus der Gruppe %2$s entfernt.</item>
+        <item quantity="other">Die folgenden %1$d Gruppenmitglieder werden aus %2$s entfernt: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d neue Nachricht</item>
+        <item quantity="other">%1$d neue Nachrichten</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d Anlage</item>
+        <item quantity="other">%1$d Anlagen</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">und %1$d andere</item>
+        <item quantity="other">und %1$d andere</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one">&amp; %1$d andere</item>
+        <item quantity="other">&amp; %1$d andere</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Durch Anwenden der von Ihnen ausgewählten Aufbewahrungsrichtlinie wird eine einzelne Nachricht gelöscht.\nMöchten Sie wirklich fortfahren?</item>
+        <item quantity="other">Durch Anwenden der von Ihnen ausgewählten Aufbewahrungsrichtlinie werden %1$d Nachrichten gelöscht.\nMöchten Sie wirklich fortfahren?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… und 1 zusätzliches Suchergebnis\nBitte verfeinern Sie Ihre Suche</item>
+        <item quantity="other">… und %1$d zusätzliche Suchergebnisse\nBitte verfeinern Sie Ihre Suche</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1\u00a0Sekunde</item>
+        <item quantity="other">%1$d\u00a0Sekunden</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1\u00a0Minute</item>
+        <item quantity="other">%1$d\u00a0Minuten</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1\u00a0Stunde</item>
+        <item quantity="other">%1$d\u00a0Stunden</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1\u00a0Tag</item>
+        <item quantity="other">%1$d\u00a0Tage</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1\u00a0Jahr</item>
+        <item quantity="other">%1$d\u00a0Jahre</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1\u00a0Mitglied</item>
+        <item quantity="other">%1$d\u00a0Mitglieder</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Sie haben derzeit 1 remote gelöschte Nachricht in Ihren Konversationen. Möchten Sie sie löschen?</item>
+        <item quantity="other">Sie haben derzeit %1$d remote gelöschte Nachrichten in Ihren Konversationen. Möchten Sie alle diese Markierungen löschen?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 Kontakt teilt seinen Standort</item>
+        <item quantity="other">%1$d Kontakte teilen ihren Standort</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Sie und 1 andere teilen ihren Standort</item>
+        <item quantity="other">Sie und %1$d andere teilen ihren Standort</item>
+    </plurals>
+</resources>

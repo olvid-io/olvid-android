@@ -45,7 +45,6 @@
 </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/mutual_scan_success_card"
         android:layout_width="0dp"
         app:layout_constraintWidth_max="400dp"
         android:layout_height="wrap_content"

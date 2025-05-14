@@ -199,7 +199,7 @@ fun EditText.insertMarkdown(markdownSpan: MarkdownSpan?) {
             )
         } else if (markdownSpan.inline) {
             var index = selectionStart
-            text.subSequence(selectionStart, selectionEnd).lines().forEach() {
+            text.subSequence(selectionStart, selectionEnd).lines().forEach {
                 if (it.indexOfFirstNonAsciiWhitespace() < it.indexOfLastNonAsciiWhitespace()) {
                     text.insert(index + it.indexOfFirstNonAsciiWhitespace(), markdownSpan.delimiter)
                     index += markdownSpan.delimiter.length

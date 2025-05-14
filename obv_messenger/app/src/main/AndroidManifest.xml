@@ -77,7 +77,8 @@
         android:theme="@style/AppTheme"
         android:localeConfig="@xml/locales_config"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:manageSpaceActivity="io.olvid.messenger.activities.storage_manager.StorageManagerActivity">
+        android:manageSpaceActivity="io.olvid.messenger.activities.storage_manager.StorageManagerActivity"
+        tools:ignore="CredManMissingDal">
 
         <meta-data android:name="android.content.APP_RESTRICTIONS"
             android:resource="@xml/app_restrictions" />
@@ -269,6 +270,67 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity-alias>
+        <activity-alias
+            android:name=".main.MainActivityBricks"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_bricks"
+            android:label="@string/app_name_bricks"
+            android:targetActivity=".main.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity-alias>
+        <activity-alias
+            android:name=".main.MainActivityBlackClock"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_black_clock"
+            android:label="@string/app_name_clock"
+            android:targetActivity=".main.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity-alias>
+        <activity-alias
+        android:name=".main.MainActivityWhiteClock"
+        android:enabled="false"
+        android:exported="true"
+        android:icon="@mipmap/ic_launcher_white_clock"
+        android:label="@string/app_name_clock"
+        android:targetActivity=".main.MainActivity">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        <meta-data
+            android:name="android.app.shortcuts"
+            android:resource="@xml/shortcuts" />
+    </activity-alias>
+        <activity-alias
+        android:name=".main.MainActivityCalculator"
+        android:enabled="false"
+        android:exported="true"
+        android:icon="@mipmap/ic_launcher_calculator"
+        android:label="@string/app_name_calculator"
+        android:targetActivity=".main.MainActivity">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        <meta-data
+            android:name="android.app.shortcuts"
+            android:resource="@xml/shortcuts" />
+    </activity-alias>
+
         <activity
             android:name=".activities.ObvLinkActivity"
             android:launchMode="singleInstance"
@@ -449,7 +511,7 @@
         <activity
             android:name=".activities.LockScreenActivity"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar"
+            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateAlwaysVisible" />
         <activity
             android:name=".onboarding.OnboardingActivity"

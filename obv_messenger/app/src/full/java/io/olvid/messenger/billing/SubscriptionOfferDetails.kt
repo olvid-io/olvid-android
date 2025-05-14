@@ -29,5 +29,4 @@ data class SubscriptionOfferDetails(
     val offerToken: String,
     val pricingPhase: String,
     val price: String
-    ) {
-}
+    )

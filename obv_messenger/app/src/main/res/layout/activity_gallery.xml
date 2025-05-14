@@ -8,6 +8,13 @@
     android:background="@color/black"
     android:id="@+id/gallery_motion_layout">
 
+    <View
+        android:id="@+id/popup_menu_anchor_view"
+        android:layout_width="1px"
+        android:layout_height="1px"
+        android:visibility="invisible"
+        />
+
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/gallery_pager"
         android:layout_width="0dp"

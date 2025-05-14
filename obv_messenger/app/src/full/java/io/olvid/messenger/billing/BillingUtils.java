@@ -320,7 +320,7 @@ public class BillingUtils {
         });
     }
 
-    interface SubscriptionProductsCallback {
+    public interface SubscriptionProductsCallback {
         void callback(List<SubscriptionOfferDetails> subscriptionOfferDetails);
     }
 

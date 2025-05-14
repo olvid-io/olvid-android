@@ -24,6 +24,7 @@ import android.util.AttributeSet
 import androidx.preference.ListPreference
 
 
+@Suppress("unused")
 class NoClickListPreference : ListPreference {
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context!!, attrs, defStyleAttr, defStyleRes)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context!!, attrs, defStyleAttr)

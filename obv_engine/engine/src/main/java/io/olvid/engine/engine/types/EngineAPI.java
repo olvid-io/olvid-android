@@ -19,7 +19,6 @@
 
 package io.olvid.engine.engine.types;
 
-import org.jetbrains.annotations.NotNull;
 import org.jose4j.jwk.JsonWebKey;
 
 import java.util.Collection;
@@ -39,7 +38,6 @@ import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.engine.engine.types.identities.ObvMutualScanUrl;
 import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
 import io.olvid.engine.engine.types.identities.ObvTrustOrigin;
-import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
 import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshot;
 

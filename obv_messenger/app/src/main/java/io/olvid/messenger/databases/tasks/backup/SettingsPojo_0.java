@@ -60,6 +60,7 @@ public class SettingsPojo_0 {
 
     public Boolean dark_mode;
     public Boolean system_emojis;
+    public String animated_emojis;
     public Boolean internal_viewer;
 
     public Boolean hide_notification_contents;
@@ -145,7 +146,7 @@ public class SettingsPojo_0 {
         settingsPojo.permanent_foreground_service = SettingsActivity.usePermanentForegroundService();
 
         settingsPojo.dark_mode = SettingsActivity.getForcedDarkMode();
-        settingsPojo.system_emojis = SettingsActivity.useSystemEmojis();
+        settingsPojo.animated_emojis = SettingsActivity.animatedEmojisSetting();
         settingsPojo.internal_viewer = SettingsActivity.useInternalImageViewer();
 
         settingsPojo.hide_notification_contents = SettingsActivity.isNotificationContentHidden();
@@ -272,7 +273,7 @@ public class SettingsPojo_0 {
         if (permanent_foreground_service != null) { SettingsActivity.setUsePermanentForegroundService(permanent_foreground_service); }
 
         if (dark_mode != null) { SettingsActivity.setForcedDarkMode(dark_mode); }
-        if (system_emojis != null) { SettingsActivity.setUseSystemEmojis(system_emojis); }
+        if (animated_emojis != null) { SettingsActivity.setUseAnimatedEmojis(animated_emojis); }
         if (internal_viewer != null) { SettingsActivity.setUseInternalImageViewer(internal_viewer); }
 
         if (hide_notification_contents != null) { SettingsActivity.setNotificationContentHidden(hide_notification_contents); }

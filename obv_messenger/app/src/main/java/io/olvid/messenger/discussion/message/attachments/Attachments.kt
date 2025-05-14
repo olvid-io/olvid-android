@@ -100,7 +100,6 @@ import androidx.lifecycle.map
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
-import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.App.imageLoader
 import io.olvid.messenger.FyleProgressSingleton
@@ -134,6 +133,7 @@ import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
+import kotlin.math.roundToInt
 
 enum class Visibility {
     VISIBLE,
@@ -300,7 +300,7 @@ fun Attachments(
                                 String.format(
                                     Locale.ENGLISH,
                                     "%d",
-                                    Math.round(it)
+                                    it.roundToInt()
                                 )
                             )
                         }

@@ -454,6 +454,7 @@ class SelectDetailsPhotoActivity : LockableActivity(), OnTouchListener, OnClickL
         }
     }
 
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         val returnIntent = Intent()
         setResult(RESULT_CANCELED, returnIntent)

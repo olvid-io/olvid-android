@@ -40,7 +40,7 @@ import java.util.concurrent.CountDownLatch
  */
 class VideoTextureViewRenderer @JvmOverloads constructor(
   context: Context,
-  val scaleAndOffsetControl: ScaleAndOffsetControl? = null,
+  scaleAndOffsetControl: ScaleAndOffsetControl? = null,
   attrs: AttributeSet? = null
 ) : TextureView(context, attrs), VideoSink, SurfaceTextureListener {
 

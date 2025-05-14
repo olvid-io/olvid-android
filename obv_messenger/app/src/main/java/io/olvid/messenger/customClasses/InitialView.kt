@@ -624,26 +624,26 @@ class InitialView : View {
         }
     }
 
-    fun setNotOneToOne() {
-        if (notOneToOne) {
-            notOneToOne = false
-            init()
-        }
-    }
-
-    fun setRecentlyOnline(recentlyOnline: Boolean) {
-        if (this.recentlyOnline != recentlyOnline) {
-            this.recentlyOnline = recentlyOnline
-            init()
-        }
-    }
-
-    fun setNullTrustLevel() {
-        if (contactTrustLevel != null) {
-            contactTrustLevel = null
-            init()
-        }
-    }
+//    fun setNotOneToOne() {
+//        if (notOneToOne) {
+//            notOneToOne = false
+//            init()
+//        }
+//    }
+//
+//    fun setRecentlyOnline(recentlyOnline: Boolean) {
+//        if (this.recentlyOnline != recentlyOnline) {
+//            this.recentlyOnline = recentlyOnline
+//            init()
+//        }
+//    }
+//
+//    fun setNullTrustLevel() {
+//        if (contactTrustLevel != null) {
+//            contactTrustLevel = null
+//            init()
+//        }
+//    }
 
     private fun init() {
         if (bytes == null || size == 0) {

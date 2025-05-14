@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">"Tällä laitteella aiempi laitteesi alla deaktivoidaan:"</item>
+        <item quantity="other">"Tällä laitteella laitteesi alla deaktivoidaan:"</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d varmuuskopio löytyi</item>
+        <item quantity="other">%1$d varmuuskopiota löytyi</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d profiili löytyi</item>
+        <item quantity="other">%1$d profiilia löytyi</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Ei ryhmiä</item>
+        <item quantity="one">%1$d ryhmä</item>
+        <item quantity="other">%1$d ryhmää</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Ei yhteyshenkilöitä</item>
+        <item quantity="one">%1$d yhteyshenkilö</item>
+        <item quantity="other">%1$d yhteyshenkilöä</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Keskustelu arkistoitu</item>
+        <item quantity="other">%1$d keskustelua arkistoitu</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Keskustelu poistettu arkistosta</item>
+        <item quantity="other">%1$d keskustelua poistettu arkistosta</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Viesti poistettu kirjanmerkeistä</item>
+        <item quantity="other">%1$d viestiä poistettu kirjanmerkeistä</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Poistetaanko valittu keskustelu?</item>
+        <item quantity="other">Poistetaanko valitut keskustelut?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Poistetaanko valittu viesti?</item>
+        <item quantity="other">Poistetaanko valitut viestit?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Haluatko todella poistaa valitun keskustelun ja kaikki sen sisältämät viestit?\nTätä toimintoa ei voi peruuttaa.</item>
+        <item quantity="other">Haluatko todella poistaa %1$d valittua keskustelua ja kaikki niiden sisältämät viestit?\nTätä toimintoa ei voi peruuttaa.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Miten haluat poistaa valitun keskustelun ja kaikki sen sisältämät viestit?\nTätä toimintoa ei voi peruuttaa.</item>
+        <item quantity="other">Miten haluat poistaa %1$d valittua keskustelua ja kaikki niiden sisältämät viestit?\nTätä toimintoa ei voi peruuttaa.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Haluatko todella poistaa valitun viestin?\nTätä toimintoa ei voi peruuttaa.</item>
+        <item quantity="other">Haluatko todella poistaa %1$d valittua viestiä?\nTätä toimintoa ei voi peruuttaa.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Miten haluat poistaa valitun viestin?\nTätä toimintoa ei voi peruuttaa.</item>
+        <item quantity="other">Miten haluat poistaa %1$d valittua viestiä?\nTätä toimintoa ei voi peruuttaa.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Olet poistamassa viestin **pysyvästi** kaikilta tässä keskustelussa. Varmista, että tämä on todella mitä haluat tehdä.</item>
+        <item quantity="other">Olet poistamassa %1$d viestiä **pysyvästi** kaikilta tässä keskustelussa. Varmista, että tämä on todella mitä haluat tehdä.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Olet poistamassa keskustelun ja sen sisältämät viestit **pysyvästi** kaikilta tässä keskustelussa. Varmista, että tämä on todella mitä haluat tehdä.</item>
+        <item quantity="other">Olet poistamassa %1$d keskustelua ja niiden sisältämät viestit **pysyvästi** näistä keskusteluista. Varmista, että tämä on todella mitä haluat tehdä.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Olet kutsumassa jokaista ryhmän jäsentä, jolla on kanava (tällä hetkellä 1 jäsen), yksityiseen keskusteluun.\nJatkaako?</item>
+        <item quantity="other">Olet kutsumassa jokaista ryhmän jäsentä, jolla on kanava (tällä hetkellä %1$d jäsentä), yksityiseen keskusteluun.\nJatkaako?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 yhteinen ryhmä</item>
+        <item quantity="other">%1$d yhteistä ryhmää</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Sinun täytyy poistua tästä ryhmästä jatkaaksesi.</item>
+        <item quantity="other">. Sinun täytyy poistua näistä ryhmistä jatkaaksesi.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Olet poistamassa %1$s muista käyttäjistäsi.\n\nHuomaa, että %1$s on kutsuttu %2$d ryhmään, johon kuulut. Hän lisätään takaisin tähän luetteloon, jos hän liittyy siihen. Voit halutessasi poistua tästä ryhmästä välttääksesi tämän.\nPoistetaanko tämä käyttäjä todella?</item>
+        <item quantity="other">Olet poistamassa %1$s muista käyttäjistäsi.\n\nHuomaa, että %1$s on kutsuttu %2$d ryhmään, johon kuulut. Hän lisätään takaisin tähän luetteloon, jos hän liittyy johonkin niistä. Voit halutessasi poistua näistä ryhmistä välttääksesi tämän.\nPoistetaanko tämä käyttäjä todella?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Tämän asetuksen muuttaminen hyväksyy automaattisesti yhden odottavan ryhmäkutsun.\nPaina OK vahvistaaksesi valintasi ja liittyäksesi tähän ryhmään.</item>
+        <item quantity="other">Tämän asetuksen muuttaminen hyväksyy automaattisesti %1$d odottavaa ryhmäkutsun.\nPaina OK vahvistaaksesi valintasi ja liittyäksesi näihin ryhmiin.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Kun sinua pyydetään, valitse kansio, johon haluat tallentaa valitun liitteen.\nJoihinkin kansioihin pääsy voi olla rajoitettua.</item>
+        <item quantity="other">Kun sinua pyydetään, valitse kansio, johon haluat tallentaa %1$d valittua liitettä.\nJoihinkin kansioihin pääsy voi olla rajoitettua.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d valittu</item>
+        <item quantity="other">%1$d valittua</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Haluatko todella poistaa valitun liitteen?</item>
+        <item quantity="other">Haluatko todella poistaa %1$d valittua liitettä?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d\u00a0päivää,\u00a0%2$02dt\u00a0%3$02dm\u00a0%4$02ds</item>
+        <item quantity="other">%1$d\u00a0päivää,\u00a0%2$02dt\u00a0%3$02dm\u00a0%4$02ds</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d puuttuva viesti…</item>
+        <item quantity="other">%1$d puuttuvaa viestiä…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Ryhmäpuhelu %2$s:n ja yhden muun kanssa</item>
+        <item quantity="other">Ryhmäpuhelu %2$s:n ja %1$d muun kanssa</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Vastaamaton ryhmäpuhelu %2$s:n ja yhden muun kanssa</item>
+        <item quantity="other">Vastaamaton ryhmäpuhelu %2$s:n ja %1$d muun kanssa</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Epäonnistunut ryhmäpuhelu %2$s:n ja yhden muun kanssa</item>
+        <item quantity="other">Epäonnistunut ryhmäpuhelu %2$s:n ja %1$d muun kanssa</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Ryhmäpuhelu, kun %2$s ja yksi muu olivat varattuja</item>
+        <item quantity="other">Ryhmäpuhelu, kun %2$s ja %1$d muuta olivat varattuja</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Hylätty ryhmäpuhelu %2$s:n ja yhden muun kanssa</item>
+        <item quantity="other">Hylätty ryhmäpuhelu %2$s:n ja %1$d muun kanssa</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Ryhmäpuhelu %2$s:ltä ja yhdeltä muulta</item>
+        <item quantity="other">Ryhmäpuhelu %2$s:ltä ja %1$d muulta</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d valittu</item>
+        <item quantity="other">%1$d valittua</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d valittu</item>
+        <item quantity="other">%1$d valittua</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d uusi viesti</item>
+        <item quantity="other">%1$d uutta viestiä</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s kutsutaan liittymään ryhmään %2$s.</item>
+        <item quantity="other">Seuraavat %1$d kontaktia kutsutaan liittymään ryhmään %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s poistetaan ryhmästä %2$s.</item>
+        <item quantity="other">Seuraavat %1$d ryhmän jäsentä poistetaan ryhmästä %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d uutta viestiä</item>
+        <item quantity="other">%1$d uutta viestiä</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d liite</item>
+        <item quantity="other">%1$d liitettä</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">Ja %1$d muu</item>
+        <item quantity="other">Ja %1$d muuta</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d muu</item>
+        <item quantity="other"> &amp; %1$d muuta</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Tämän säilytyskäytännön soveltaminen poistaisi yhden viestin.\nOletko varma, että haluat jatkaa?</item>
+        <item quantity="other">Tämän säilytyskäytännön soveltaminen poistaisi %1$d viestiä.\nOletko varma, että haluat jatkaa?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… ja yksi lisätulos\nPuhdista hakusi</item>
+        <item quantity="other">… ja %1$d lisätulosta\nPuhdista hakusi</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1\u00a0sekunti</item>
+        <item quantity="other">%1$d\u00a0sekuntia</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1\u00a0minuutti</item>
+        <item quantity="other">%1$d\u00a0minuuttia</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1\u00a0tunti</item>
+        <item quantity="other">%1$d\u00a0tuntia</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1\u00a0päivä</item>
+        <item quantity="other">%1$d\u00a0päivää</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1\u00a0vuosi</item>
+        <item quantity="other">%1$d\u00a0vuotta</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1\u00a0jäsen</item>
+        <item quantity="other">%1$d\u00a0jäsentä</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Sinulla on tällä hetkellä 1 etänä poistettu viesti keskusteluissasi. Haluatko poistaa sen?</item>
+        <item quantity="other">Sinulla on tällä hetkellä %1$d etänä poistettua viestiä keskusteluissasi. Haluatko poistaa kaikki tällaiset merkinnät?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 yhteyshenkilö jakaa sijaintinsa</item>
+        <item quantity="other">%1$d yhteyshenkilöä jakaa sijaintinsa</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Sinä ja 1 muu jakavat sijaintinsa</item>
+        <item quantity="other">Sinä ja %1$d muuta jakavat sijaintinsa</item>
+    </plurals>
+</resources>

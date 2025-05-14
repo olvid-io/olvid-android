@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">"На цьому пристрої ваш попередній пристрій нижче буде деактивовано:</item>
+        <item quantity="other">"На цьому пристрої ваші пристрої нижче будуть деактивовані:</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d резервна копія знайдена</item>
+        <item quantity="other">%1$d резервних копій знайдено</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d профіль знайдено</item>
+        <item quantity="other">%1$d профілів знайдено</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Немає груп</item>
+        <item quantity="one">%1$d група</item>
+        <item quantity="other">%1$d групи</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Немає контактів</item>
+        <item quantity="one">%1$d контакт</item>
+        <item quantity="other">%1$d контактів</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Розмову заархівовано</item>
+        <item quantity="other">%1$d розмов заархівовано</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Розмову відновлено з архіву</item>
+        <item quantity="other">%1$d розмов відновлено з архіву</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Повідомлення видалено з закладок</item>
+        <item quantity="other">%1$d повідомлень видалено з закладок</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Видалити вибрану розмову?</item>
+        <item quantity="other">Видалити вибрані розмови?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Видалити вибране повідомлення?</item>
+        <item quantity="other">Видалити вибрані повідомлення?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Ви дійсно хочете видалити вибрану розмову та всі повідомлення в ній?\nЦю дію неможливо скасувати.</item>
+        <item quantity="other">Ви дійсно хочете видалити %1$d вибраних розмов та всі повідомлення в них?\nЦю дію неможливо скасувати.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Як ви хочете видалити вибрану розмову та всі повідомлення в ній?\nЦю дію неможливо скасувати.</item>
+        <item quantity="other">Як ви хочете видалити %1$d вибраних розмов та всі повідомлення в них?\nЦю дію неможливо скасувати.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Ви дійсно хочете видалити вибране повідомлення?\nЦю дію неможливо скасувати.</item>
+        <item quantity="other">Ви дійсно хочете видалити %1$d вибраних повідомлень?\nЦю дію неможливо скасувати.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Як ви хочете видалити вибране повідомлення?\nЦю дію неможливо скасувати.</item>
+        <item quantity="other">Як ви хочете видалити %1$d вибраних повідомлень?\nЦю дію неможливо скасувати.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Ви збираєтеся **назавжди** видалити повідомлення для **всіх** учасників цієї розмови. Будь ласка, переконайтеся, що це те, що ви хочете зробити.</item>
+        <item quantity="other">Ви збираєтеся **назавжди** видалити %1$d повідомлень для **всіх** учасників цієї розмови. Будь ласка, переконайтеся, що це те, що ви хочете зробити.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Ви збираєтеся **назавжди** видалити розмову та всі повідомлення в ній для **всіх** учасників цієї розмови. Будь ласка, переконайтеся, що це те, що ви хочете зробити.</item>
+        <item quantity="other">Ви збираєтеся **назавжди** видалити %1$d розмов та всі повідомлення в них для **всіх** учасників цих розмов. Будь ласка, переконайтеся, що це те, що ви хочете зробити.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Ви збираєтеся запросити кожного учасника групи, з яким у вас є канал (зараз 1 учасник), у приватну розмову.\nЧи хочете ви продовжити?</item>
+        <item quantity="other">Ви збираєтеся запросити кожного учасника групи, з яким у вас є канал (зараз %1$d учасників), у приватну розмову.\nЧи хочете ви продовжити?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 спільна група</item>
+        <item quantity="other">%1$d спільних груп</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Вам потрібно буде покинути цю групу, щоб продовжити.</item>
+        <item quantity="other">. Вам потрібно буде покинути ці групи, щоб продовжити.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Ви збираєтеся видалити %1$s зі списку інших користувачів.\n\nЗверніть увагу, що %1$s було запрошено до %2$d групи, в якій ви перебуваєте. Його буде додано назад до цього списку, якщо він приєднається до неї. Можливо, вам доведеться покинути цю групу, щоб цього уникнути.\n\nДійсно видалити цього користувача?</item>
+        <item quantity="other">Ви збираєтеся видалити %1$s зі списку інших користувачів.\n\nЗверніть увагу, що %1$s було запрошено до %2$d груп, в яких ви перебуваєте. Його буде додано назад до цього списку, якщо він приєднається до однієї з них. Можливо, вам доведеться покинути ці групи, щоб цього уникнути.\n\nДійсно видалити цього користувача?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Зміна цього параметра автоматично прийме одне запрошення до групи в очікуванні.\nНатисніть OK, щоб підтвердити свій вибір і приєднатися до цієї групи.</item>
+        <item quantity="other">Зміна цього параметра автоматично прийме %1$d запрошень до груп в очікуванні.\nНатисніть OK, щоб підтвердити свій вибір і приєднатися до цих груп.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Будь ласка, виберіть папку, в якій потрібно зберегти вибраний файл.\nЗверніть увагу, що доступ до деяких папок може бути обмежений.</item>
+        <item quantity="other">Будь ласка, виберіть папку, в якій потрібно зберегти %1$d вибраних файлів.\nЗверніть увагу, що доступ до деяких папок може бути обмежений.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d вибрано</item>
+        <item quantity="other">%1$d вибрано</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Ви дійсно хочете видалити вибраний файл?</item>
+        <item quantity="other">Ви дійсно хочете видалити %1$d вибраних файлів?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d\u00a0день,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
+        <item quantity="other">%1$d\u00a0днів,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d відсутнє повідомлення…</item>
+        <item quantity="other">%1$d відсутніх повідомлень…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Груповий дзвінок з %2$s та ще одним учасником</item>
+        <item quantity="other">Груповий дзвінок з %2$s та %1$d іншими учасниками</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Неприйнятий груповий дзвінок з %2$s та ще одним учасником</item>
+        <item quantity="other">Неприйнятий груповий дзвінок з %2$s та %1$d іншими учасниками</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Невдалий груповий дзвінок з %2$s та ще одним учасником</item>
+        <item quantity="other">Невдалий груповий дзвінок з %2$s та %1$d іншими учасниками</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Груповий дзвінок, коли %2$s та ще один учасник були зайняті</item>
+        <item quantity="other">Груповий дзвінок, коли %2$s та %1$d інших учасників були зайняті</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Відхилений груповий дзвінок з %2$s та ще одним учасником</item>
+        <item quantity="other">Відхилений груповий дзвінок з %2$s та %1$d іншими учасниками</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Груповий дзвінок від %2$s та ще одного учасника</item>
+        <item quantity="other">Груповий дзвінок від %2$s та %1$d інших учасників</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d вибрано</item>
+        <item quantity="other">%1$d вибрано</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d вибрано</item>
+        <item quantity="other">%1$d вибрано</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d нове повідомлення</item>
+        <item quantity="other">%1$d нових повідомлень</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s буде запрошено до групи %2$s.</item>
+        <item quantity="other">Наступні %1$d учасники будуть запрошені до групи %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s буде видалено з групи %2$s.</item>
+        <item quantity="other">Наступні %1$d учасники будуть видалені з %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d нове повідомлення</item>
+        <item quantity="other">%1$d нових повідомлень</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d файл</item>
+        <item quantity="other">%1$d файлів</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">і %1$d інший</item>
+        <item quantity="other">і %1$d інших</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d інший</item>
+        <item quantity="other"> &amp; %1$d інших</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Застосування політики зберігання, яку ви щойно вибрали, видалить одне повідомлення.\nВи дійсно хочете продовжити?</item>
+        <item quantity="other">Застосування політики зберігання, яку ви щойно вибрали, видалить %1$d повідомлень.\nВи дійсно хочете продовжити?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… і ще один результат пошуку\nБудь ласка, уточніть свій пошук</item>
+        <item quantity="other">… і %1$d додаткових результатів пошуку\nБудь ласка, уточніть свій пошук</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1\u00a0секунда</item>
+        <item quantity="other">%1$d\u00a0секунд</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1\u00a0хвилина</item>
+        <item quantity="other">%1$d\u00a0хвилин</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1\u00a0година</item>
+        <item quantity="other">%1$d\u00a0годин</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1\u00a0день</item>
+        <item quantity="other">%1$d\u00a0днів</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1\u00a0рік</item>
+        <item quantity="other">%1$d\u00a0років</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1\u00a0учасник</item>
+        <item quantity="other">%1$d\u00a0учасників</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">У вас є 1 віддалено видалене повідомлення у ваших розмовах. Ви хочете його видалити?</item>
+        <item quantity="other">У вас є %1$d віддалено видалених повідомлень у ваших розмовах. Ви хочете видалити всі такі маркери?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 контакт ділиться своїм місцезнаходженням</item>
+        <item quantity="other">%1$d контактів діляться своїм місцезнаходженням</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Ви та 1 інший ділитеся своїм місцезнаходженням</item>
+        <item quantity="other">Ви та %1$d інших ділитеся своїм місцезнаходженням</item>
+    </plurals>
+</resources>

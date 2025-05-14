@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">" σε αυτή τη συσκευή, η προηγούμενη συσκευή σας παρακάτω θα απενεργοποιηθεί:</item>
+        <item quantity="other">" σε αυτή τη συσκευή, οι συσκευές σας παρακάτω θα απενεργοποιηθούν:</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d αντίγραφο ασφαλείας βρέθηκε</item>
+        <item quantity="other">%1$d αντίγραφα ασφαλείας βρέθηκαν</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d προφίλ βρέθηκε</item>
+        <item quantity="other">%1$d προφίλ βρέθηκαν</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Καμία ομάδα</item>
+        <item quantity="one">%1$d ομάδα</item>
+        <item quantity="other">%1$d ομάδες</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Καμία επαφή</item>
+        <item quantity="one">%1$d επαφή</item>
+        <item quantity="other">%1$d επαφές</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Συζήτηση αρχειοθετήθηκε</item>
+        <item quantity="other">%1$d συζητήσεις αρχειοθετήθηκαν</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Συζήτηση αποαρχειοθετήθηκε</item>
+        <item quantity="other">%1$d συζητήσεις αποαρχειοθετήθηκαν</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Μήνυμα αφαιρέθηκε από τα αγαπημένα</item>
+        <item quantity="other">%1$d μηνύματα αφαιρέθηκαν από τα αγαπημένα</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Διαγραφή επιλεγμένης συζήτησης;</item>
+        <item quantity="other">Διαγραφή επιλεγμένων συζητήσεων;</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Διαγραφή επιλεγμένου μηνύματος;</item>
+        <item quantity="other">Διαγραφή επιλεγμένων μηνυμάτων;</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Είστε σίγουροι ότι θέλετε να διαγράψετε την επιλεγμένη συζήτηση και όλα τα μηνύματα που περιέχει; \nΑυτή η ενέργεια δεν μπορεί να αναιρεθεί.</item>
+        <item quantity="other">Είστε σίγουροι ότι θέλετε να διαγράψετε τις %1$d επιλεγμένες συζητήσεις και όλα τα μηνύματα που περιέχουν; \nΑυτή η ενέργεια δεν μπορεί να αναιρεθεί.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Πώς θέλετε να διαγράψετε την επιλεγμένη συζήτηση και όλα τα μηνύματα που περιέχει; \nΑυτή η ενέργεια δεν μπορεί να αναιρεθεί.</item>
+        <item quantity="other">Πώς θέλετε να διαγράψετε τις %1$d επιλεγμένες συζητήσεις και όλα τα μηνύματα που περιέχουν; \nΑυτή η ενέργεια δεν μπορεί να αναιρεθεί.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Είστε σίγουροι ότι θέλετε να διαγράψετε το επιλεγμένο μήνυμα; \nΑυτή η ενέργεια δεν μπορεί να αναιρεθεί.</item>
+        <item quantity="other">Είστε σίγουροι ότι θέλετε να διαγράψετε τα %1$d επιλεγμένα μηνύματα; \nΑυτή η ενέργεια δεν μπορεί να αναιρεθεί.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Πώς θέλετε να διαγράψετε το επιλεγμένο μήνυμα; \nΑυτή η ενέργεια δεν μπορεί να αναιρεθεί.</item>
+        <item quantity="other">Πώς θέλετε να διαγράψετε τα %1$d επιλεγμένα μηνύματα; \nΑυτή η ενέργεια δεν μπορεί να αναιρεθεί.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Ετοιμαστείτε να διαγράψετε **μόνιμα** ένα μήνυμα για **όλους** σε αυτή τη συζήτηση. Βεβαιωθείτε ότι αυτό είναι που θέλετε να κάνετε.</item>
+        <item quantity="other">Ετοιμαστείτε να διαγράψετε **μόνιμα** %1$d μηνύματα για **όλους** σε αυτή τη συζήτηση. Βεβαιωθείτε ότι αυτό είναι που θέλετε να κάνετε.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Ετοιμαστείτε να διαγράψετε **μόνιμα** μια συζήτηση και τα μηνύματα που περιέχει για **όλους** σε αυτή τη συζήτηση. Βεβαιωθείτε ότι αυτό είναι που θέλετε να κάνετε.</item>
+        <item quantity="other">Ετοιμαστείτε να διαγράψετε **μόνιμα** %1$d συζητήσεις και τα μηνύματα που περιέχουν για **όλους** σε αυτές τις συζητήσεις. Βεβαιωθείτε ότι αυτό είναι που θέλετε να κάνετε.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Ετοιμαστείτε να προσκαλέσετε κάθε μέλος της ομάδας με το οποίο έχετε κανάλι (προς το παρόν 1 μέλος) σε μια ιδιωτική συζήτηση.\nΘέλετε να συνεχίσετε;</item>
+        <item quantity="other">Ετοιμαστείτε να προσκαλέσετε κάθε μέλος της ομάδας με το οποίο έχετε κανάλι (προς το παρόν %1$d μέλη) σε μια ιδιωτική συζήτηση.\nΘέλετε να συνεχίσετε;</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 κοινή ομάδα</item>
+        <item quantity="other">%1$d κοινές ομάδες</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Θα πρέπει να αποχωρήσετε από αυτήν την ομάδα για να συνεχίσετε.</item>
+        <item quantity="other">. Θα πρέπει να αποχωρήσετε από αυτές τις ομάδες για να συνεχίσετε.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Ετοιμαστείτε να αφαιρέσετε τον %1$s από τη λίστα των άλλων χρηστών.\n\nΣημειώστε ότι ο %1$s προσκλήθηκε σε %2$d ομάδα στην οποία ανήκετε. Θα προστεθεί ξανά σε αυτήν τη λίστα εάν συμμετάσχει σε αυτήν. Ίσως θελήσετε να αποχωρήσετε από αυτήν την ομάδα για να αποφύγετε αυτό.\n\nΔιαγράψετε πραγματικά αυτόν τον χρήστη;</item>
+        <item quantity="other">Ετοιμαστείτε να αφαιρέσετε τον %1$s από τη λίστα των άλλων χρηστών.\n\nΣημειώστε ότι ο %1$s προσκλήθηκε σε %2$d ομάδες στις οποίες ανήκετε. Θα προστεθεί ξανά σε αυτήν τη λίστα εάν συμμετάσχει σε μία από αυτές. Ίσως θελήσετε να αποχωρήσετε από αυτές τις ομάδες για να αποφύγετε αυτό.\n\nΔιαγράψετε πραγματικά αυτόν τον χρήστη;</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Η τροποποίηση αυτής της ρύθμισης θα αποδεχτεί αυτόματα μία εκκρεμή πρόσκληση σε ομάδα.\nΠατήστε OK για να επιβεβαιώσετε την επιλογή σας και να συμμετάσχετε σε αυτήν την ομάδα.</item>
+        <item quantity="other">Η τροποποίηση αυτής της ρύθμισης θα αποδεχτεί αυτόματα %1$d εκκρεμείς προσκλήσεις σε ομάδες.\nΠατήστε OK για να επιβεβαιώσετε την επιλογή σας και να συμμετάσχετε σε αυτές τις ομάδες.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Όταν σας ζητηθεί, επιλέξτε τον φάκελο στον οποίο θα αποθηκεύσετε το επιλεγμένο συνημμένο.\nΣημειώστε ότι η πρόσβαση σε ορισμένους φακέλους ενδέχεται να είναι περιορισμένη.</item>
+        <item quantity="other">Όταν σας ζητηθεί, επιλέξτε τον φάκελο στον οποίο θα αποθηκεύσετε τα %1$d επιλεγμένα συνημμένα.\nΣημειώστε ότι η πρόσβαση σε ορισμένους φακέλους ενδέχεται να είναι περιορισμένη.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d επιλεγμένο</item>
+        <item quantity="other">%1$d επιλεγμένα</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Είστε σίγουροι ότι θέλετε να διαγράψετε το επιλεγμένο συνημμένο;</item>
+        <item quantity="other">Είστε σίγουροι ότι θέλετε να διαγράψετε τα %1$d επιλεγμένα συνημμένα;</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d ημέρα, %2$02dω %3$02dλ %4$02dδ</item>
+        <item quantity="other">%1$d ημέρες, %2$02dω %3$02dλ %4$02dδ</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d χαμένο μήνυμα…</item>
+        <item quantity="other">%1$d χαμένα μηνύματα…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Ομαδική κλήση με τον %2$s και 1 ακόμη</item>
+        <item quantity="other">Ομαδική κλήση με τον %2$s και %1$d ακόμη</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Αναπάντητη ομαδική κλήση με τον %2$s και 1 ακόμη</item>
+        <item quantity="other">Αναπάντητη ομαδική κλήση με τον %2$s και %1$d ακόμη</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Αποτυχημένη ομαδική κλήση με τον %2$s και 1 ακόμη</item>
+        <item quantity="other">Αποτυχημένη ομαδική κλήση με τον %2$s και %1$d ακόμη</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Ομαδική κλήση ενώ ο %2$s και 1 ακόμη ήταν απασχολημένοι</item>
+        <item quantity="other">Ομαδική κλήση ενώ ο %2$s και %1$d ακόμη ήταν απασχολημένοι</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Απορριφθείσα ομαδική κλήση με τον %2$s και 1 ακόμη</item>
+        <item quantity="other">Απορριφθείσα ομαδική κλήση με τον %2$s και %1$d ακόμη</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Ομαδική κλήση από τον %2$s και 1 ακόμη</item>
+        <item quantity="other">Ομαδική κλήση από τον %2$s και %1$d ακόμη</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d επιλεγμένο</item>
+        <item quantity="other">%1$d επιλεγμένα</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d επιλεγμένο</item>
+        <item quantity="other">%1$d επιλεγμένα</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d νέο μήνυμα</item>
+        <item quantity="other">%1$d νέα μηνύματα</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">Ο %3$s θα προσκληθεί να συμμετάσχει στην ομάδα %2$s.</item>
+        <item quantity="other">Οι ακόλουθοι %1$d επαφές θα προσκληθούν να συμμετάσχουν στην ομάδα %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">Ο %3$s θα αφαιρεθεί από την ομάδα %2$s.</item>
+        <item quantity="other">Οι ακόλουθοι %1$d συμμετέχοντες θα αφαιρεθούν από την %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d νέο μήνυμα</item>
+        <item quantity="other">%1$d νέα μηνύματα</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d συνημμένο</item>
+        <item quantity="other">%1$d συνημμένα</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">Και %1$d άλλο</item>
+        <item quantity="other">Και %1$d άλλα</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d άλλο</item>
+        <item quantity="other"> &amp; %1$d άλλα</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Η εφαρμογή της πολιτικής διατήρησης που μόλις επιλέξατε θα διαγράψει ένα μήνυμα.\nΕίστε σίγουροι ότι θέλετε να συνεχίσετε;</item>
+        <item quantity="other">Η εφαρμογή της πολιτικής διατήρησης που μόλις επιλέξατε θα διαγράψει %1$d μηνύματα.\nΕίστε σίγουροι ότι θέλετε να συνεχίσετε;</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… και 1 επιπλέον αποτέλεσμα αναζήτησης\nΠαρακαλώ βελτιώστε την αναζήτησή σας</item>
+        <item quantity="other">… και %1$d επιπλέον αποτελέσματα αναζήτησης\nΠαρακαλώ βελτιώστε την αναζήτησή σας</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1 δευτερόλεπτο</item>
+        <item quantity="other">%1$d δευτερόλεπτα</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1 λεπτό</item>
+        <item quantity="other">%1$d λεπτά</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1 ώρα</item>
+        <item quantity="other">%1$d ώρες</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1 ημέρα</item>
+        <item quantity="other">%1$d ημέρες</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1 έτος</item>
+        <item quantity="other">%1$d έτη</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1 μέλος</item>
+        <item quantity="other">%1$d μέλη</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Έχετε 1 απομακρυσμένο διαγραμμένο μήνυμα στις συζητήσεις σας. Θέλετε να το διαγράψετε;</item>
+        <item quantity="other">Έχετε %1$d απομακρυσμένα διαγραμμένα μηνύματα στις συζητήσεις σας. Θέλετε να διαγράψετε όλους αυτούς τους δείκτες;</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 επαφή μοιράζεται την τοποθεσία της</item>
+        <item quantity="other">%1$d επαφές μοιράζονται την τοποθεσία τους</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Εσείς και 1 άλλος μοιράζεστε την τοποθεσία σας</item>
+        <item quantity="other">Εσείς και %1$d άλλοι μοιράζεστε την τοποθεσία σας</item>
+    </plurals>
+</resources>

@@ -89,34 +89,22 @@ class ComposeMessageViewModel(
 
     init {
         draftMessageEditMode.addSource(draftMessage) { draft: Message? ->
-            draftMessageEditMode.setValue(
-                if (draftMessageEdit.value != null) null else draft
-            )
+            draftMessageEditMode.value = if (draftMessageEdit.value != null) null else draft
         }
         draftMessageEditMode.addSource(draftMessageEdit) { edit: Message? ->
-            draftMessageEditMode.setValue(
-                if (edit != null) null else draftMessage.value
-            )
+            draftMessageEditMode.value = if (edit != null) null else draftMessage.value
         }
         draftMessageFylesEditMode.addSource(draftMessageFyles) { draftFyles: List<FyleAndStatus>? ->
-            draftMessageFylesEditMode.setValue(
-                if (draftMessageEdit.value != null) null else draftFyles
-            )
+            draftMessageFylesEditMode.value = if (draftMessageEdit.value != null) null else draftFyles
         }
         draftMessageFylesEditMode.addSource(draftMessageEdit) { edit: Message? ->
-            draftMessageFylesEditMode.setValue(
-                if (edit != null) null else draftMessageFyles.value
-            )
+            draftMessageFylesEditMode.value = if (edit != null) null else draftMessageFyles.value
         }
         draftMessageReplyEditMode.addSource(draftMessageReply) { message: Message? ->
-            draftMessageReplyEditMode.setValue(
-                if (draftMessageEdit.value != null) null else message
-            )
+            draftMessageReplyEditMode.value = if (draftMessageEdit.value != null) null else message
         }
         draftMessageReplyEditMode.addSource(draftMessageEdit) { edit: Message? ->
-            draftMessageReplyEditMode.setValue(
-                if (edit != null) null else draftMessageReply.value
-            )
+            draftMessageReplyEditMode.value = if (edit != null) null else draftMessageReply.value
         }
         ephemeralSettingsChanged = EphemeralSettingsChangedLiveData(
             draftMessage,

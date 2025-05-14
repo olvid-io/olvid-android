@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/popup_action_copy_message_text"
-        android:title="@string/menu_action_copy_message_text"/>
-    <item
-        android:id="@+id/popup_action_copy_text_and_attachments"
-        android:title="@string/menu_action_copy_text_and_attachments"/>
-</menu>

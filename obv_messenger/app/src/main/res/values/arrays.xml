@@ -380,17 +380,6 @@
         <item>@string/location_sharing_quality_power_save_full_string</item>
     </string-array>
 
-    <string-array name="app_language_choice">
-        <item>@string/pref_text_default_device_language</item>
-        <item>@string/pref_text_english</item>
-        <item>@string/pref_text_francais</item>
-    </string-array>
-    <string-array name="app_language_choice_values">
-        <item>default</item>
-        <item>en</item>
-        <item>fr</item>
-    </string-array>
-
     <string-array name="block_untrusted_certificate">
         <item>@string/pref_text_never</item>
         <item>@string/pref_text_issuer_changed</item>
@@ -413,5 +402,15 @@
         <item>480</item>
         <item>720</item>
         <item>1080</item>
+    </string-array>
+    <string-array name="emoji_animation">
+        <item>@string/pref_emoji_animation_loop</item>
+        <item>@string/pref_emoji_animation_once</item>
+        <item>@string/pref_emoji_animation_never</item>
+    </string-array>
+    <string-array name="emoji_animation_values">
+        <item>loop</item>
+        <item>once</item>
+        <item>never</item>
     </string-array>
 </resources>

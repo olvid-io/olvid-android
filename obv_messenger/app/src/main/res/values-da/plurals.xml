@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">" på denne enhed vil din tidligere enhed nedenfor blive deaktiveret:</item>
+        <item quantity="other">" på denne enhed vil dine enheder nedenfor blive deaktiveret:</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d backup fundet</item>
+        <item quantity="other">%1$d backups fundet</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d profil fundet</item>
+        <item quantity="other">%1$d profiler fundet</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Ingen gruppe</item>
+        <item quantity="one">%1$d gruppe</item>
+        <item quantity="other">%1$d grupper</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Ingen kontakt</item>
+        <item quantity="one">%1$d kontakt</item>
+        <item quantity="other">%1$d kontakter</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Samtale arkiveret</item>
+        <item quantity="other">%1$d samtaler arkiveret</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Samtale fjernet fra arkiv</item>
+        <item quantity="other">%1$d samtaler fjernet fra arkiv</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Besked fjernet fra bogmærker</item>
+        <item quantity="other">%1$d beskeder fjernet fra bogmærker</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Slet valgt samtale?</item>
+        <item quantity="other">Slet valgte samtaler?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Slet valgt besked?</item>
+        <item quantity="other">Slet valgte beskeder?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Vil du virkelig slette den valgte samtale og alle dens beskeder?\nDenne handling kan ikke fortrydes.</item>
+        <item quantity="other">Vil du virkelig slette de %1$d valgte samtaler og alle deres beskeder?\nDenne handling kan ikke fortrydes.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Hvordan vil du slette den valgte samtale og alle dens beskeder?\nDenne handling kan ikke fortrydes.</item>
+        <item quantity="other">Hvordan vil du slette de %1$d valgte samtaler og alle deres beskeder?\nDenne handling kan ikke fortrydes.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Vil du virkelig slette den valgte besked?\nDenne handling kan ikke fortrydes.</item>
+        <item quantity="other">Vil du virkelig slette de %1$d valgte beskeder?\nDenne handling kan ikke fortrydes.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Hvordan vil du slette den valgte besked?\nDenne handling kan ikke fortrydes.</item>
+        <item quantity="other">Hvordan vil du slette de %1$d valgte beskeder?\nDenne handling kan ikke fortrydes.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Du er ved at **permanent** slette en besked for **alle** i denne samtale. Sørg for, at dette er, hvad du vil.</item>
+        <item quantity="other">Du er ved at **permanent** slette %1$d beskeder for **alle** i denne samtale. Sørg for, at dette er, hvad du vil.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Du er ved at **permanent** slette en samtale og dens beskeder for **alle** i denne samtale. Sørg for, at dette er, hvad du vil.</item>
+        <item quantity="other">Du er ved at **permanent** slette %1$d samtaler og deres beskeder for **alle** i disse samtaler. Sørg for, at dette er, hvad du vil.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Du er ved at invitere hvert gruppemedlem, som du har en kanal med (i øjeblikket 1 medlem) til en privat samtale.\nVil du fortsætte?</item>
+        <item quantity="other">Du er ved at invitere hvert gruppemedlem, som du har en kanal med (i øjeblikket %1$d medlemmer) til en privat samtale.\nVil du fortsætte?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 fælles gruppe</item>
+        <item quantity="other">%1$d fælles grupper</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Du skal forlade denne gruppe for at fortsætte.</item>
+        <item quantity="other">. Du skal forlade disse grupper for at fortsætte.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Du er ved at fjerne %1$s fra din liste over andre brugere.\n\nBemærk, at %1$s er blevet inviteret til %2$d gruppe, du er medlem af. De vil blive tilføjet tilbage til denne liste, hvis de tilslutter sig den. Du vil måske forlade denne gruppe for at undgå dette.\n\nVil du virkelig slette denne bruger?</item>
+        <item quantity="other">Du er ved at fjerne %1$s fra din liste over andre brugere.\n\nBemærk, at %1$s er blevet inviteret til %2$d grupper, du er medlem af. De vil blive tilføjet tilbage til denne liste, hvis de tilslutter sig en af dem. Du vil måske forlade disse grupper for at undgå dette.\n\nVil du virkelig slette denne bruger?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Ændring af denne indstilling vil automatisk acceptere en afventende gruppeinvitation.\nTryk OK for at bekræfte dit valg og tilslutte dig denne gruppe.</item>
+        <item quantity="other">Ændring af denne indstilling vil automatisk acceptere %1$d afventende gruppeinvitationer.\nTryk OK for at bekræfte dit valg og tilslutte dig disse grupper.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Når du bliver bedt om det, skal du vælge den mappe, hvor du vil gemme det valgte vedhæftede fil.\nBemærk, at adgangen til nogle mapper kan være begrænset.</item>
+        <item quantity="other">Når du bliver bedt om det, skal du vælge den mappe, hvor du vil gemme de %1$d valgte vedhæftede filer.\nBemærk, at adgangen til nogle mapper kan være begrænset.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d valgt</item>
+        <item quantity="other">%1$d valgt</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Vil du virkelig slette det valgte vedhæftede fil?</item>
+        <item quantity="other">Vil du virkelig slette de %1$d valgte vedhæftede filer?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d dag, %2$02dt %3$02dm %4$02ds</item>
+        <item quantity="other">%1$d dage, %2$02dt %3$02dm %4$02ds</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d manglende besked…</item>
+        <item quantity="other">%1$d manglende beskeder…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Gruppeopkald med %2$s og 1 anden</item>
+        <item quantity="other">Gruppeopkald med %2$s og %1$d andre</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Ubesvaret gruppeopkald med %2$s og 1 anden</item>
+        <item quantity="other">Ubesvaret gruppeopkald med %2$s og %1$d andre</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Mislykket gruppeopkald med %2$s og 1 anden</item>
+        <item quantity="other">Mislykket gruppeopkald med %2$s og %1$d andre</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Gruppeopkald mens %2$s og 1 anden var optaget</item>
+        <item quantity="other">Gruppeopkald mens %2$s og %1$d andre var optaget</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Afvist gruppeopkald med %2$s og 1 anden</item>
+        <item quantity="other">Afvist gruppeopkald med %2$s og %1$d andre</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Gruppeopkald fra %2$s og 1 anden</item>
+        <item quantity="other">Gruppeopkald fra %2$s og %1$d andre</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d valgt</item>
+        <item quantity="other">%1$d valgt</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d valgt</item>
+        <item quantity="other">%1$d valgt</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d ny besked</item>
+        <item quantity="other">%1$d nye beskeder</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s vil blive inviteret til at deltage i gruppen %2$s.</item>
+        <item quantity="other">De %1$d følgende kontakter vil blive inviteret til at deltage i gruppen %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s vil blive fjernet fra gruppen %2$s.</item>
+        <item quantity="other">De %1$d følgende gruppemedlemmer vil blive fjernet fra %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d ny besked</item>
+        <item quantity="other">%1$d nye beskeder</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d vedhæftet fil</item>
+        <item quantity="other">%1$d vedhæftede filer</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">Og %1$d anden</item>
+        <item quantity="other">Og %1$d andre</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d anden</item>
+        <item quantity="other"> &amp; %1$d andre</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Anvendelse af den retentionspolitik, du lige har valgt, vil slette en enkelt besked.\nEr du sikker på, at du vil fortsætte?</item>
+        <item quantity="other">Anvendelse af den retentionspolitik, du lige har valgt, vil slette %1$d beskeder.\nEr du sikker på, at du vil fortsætte?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… og 1 yderligere søgeresultat\nVenligst forfin din søgning</item>
+        <item quantity="other">… og %1$d yderligere søgeresultater\nVenligst forfin din søgning</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1 sekund</item>
+        <item quantity="other">%1$d sekunder</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1 minut</item>
+        <item quantity="other">%1$d minutter</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1 time</item>
+        <item quantity="other">%1$d timer</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1 dag</item>
+        <item quantity="other">%1$d dage</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1 år</item>
+        <item quantity="other">%1$d år</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1 medlem</item>
+        <item quantity="other">%1$d medlemmer</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Du har i øjeblikket 1 fjern-slettet besked i dine samtaler. Vil du slette den?</item>
+        <item quantity="other">Du har i øjeblikket %1$d fjern-slettede beskeder i dine samtaler. Vil du slette alle disse markeringer?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 kontakt deler deres placering</item>
+        <item quantity="other">%1$d kontakter deler deres placering</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Du og 1 anden deler deres placering</item>
+        <item quantity="other">Du og %1$d andre deler deres placering</item>
+    </plurals>
+</resources>

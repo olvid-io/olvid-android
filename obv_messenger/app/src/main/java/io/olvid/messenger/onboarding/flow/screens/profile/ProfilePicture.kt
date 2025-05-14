@@ -20,12 +20,12 @@
 package io.olvid.messenger.onboarding.flow.screens.profile
 
 import android.Manifest.permission
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
@@ -57,7 +57,6 @@ import androidx.compose.material.TextButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -94,10 +93,10 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
         popEnterTransition = { slideIntoContainer(SlideDirection.End) },
         popExitTransition = { slideOutOfContainer(SlideDirection.End) }
     ) {
-        val activity = LocalContext.current as? Activity
+        val activity = LocalActivity.current
         fun finishAndOpenDiscussionsTab() {
             activity?.finish()
-            App.showMainActivityTab(context, MainActivity.DISCUSSIONS_TAB);
+            App.showMainActivityTab(context, MainActivity.DISCUSSIONS_TAB)
         }
         BackHandler {
             finishAndOpenDiscussionsTab()
@@ -227,7 +226,7 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
                             permissionLauncher.launch(permission.CAMERA)
                         }
                     },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorResource(id = color.blueOrWhite),)
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorResource(id = color.blueOrWhite))
                 ) {
                     Icon(
                         modifier = Modifier.size(20.dp),

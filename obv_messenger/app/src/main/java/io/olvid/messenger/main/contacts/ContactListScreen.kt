@@ -102,7 +102,7 @@ data class ContactFilterTab(val labelResId: Int, val filter: (ContactOrKeycloakD
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ContactListScreen(
-    modifier: Modifier = Modifier.fillMaxSize(),
+    modifier: Modifier = Modifier,
     contactListViewModel: ContactListViewModel,
     refreshing: Boolean,
     onRefresh: (() -> Unit)?,

@@ -66,8 +66,8 @@ import java.util.UUID
 
 class OnboardingFlowViewModel : ViewModel() {
     companion object {
-        val BACKUP_TYPE_FILE = 1
-        val BACKUP_TYPE_CLOUD = 2
+        const val BACKUP_TYPE_FILE = 1
+        const val BACKUP_TYPE_CLOUD = 2
     }
 
     var firstName by mutableStateOf("")

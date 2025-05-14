@@ -70,7 +70,7 @@ fun SwipeForActionBox(
 
     LaunchedEffect(resetOffset) {
         if (resetOffset) {
-            val durationMs = 150L;
+            val durationMs = 150L
             val initialOffset = offset
 
             var playTime = 0L

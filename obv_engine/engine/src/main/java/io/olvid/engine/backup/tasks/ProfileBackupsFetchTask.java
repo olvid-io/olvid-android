@@ -23,7 +23,6 @@ package io.olvid.engine.backup.tasks;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,7 +45,6 @@ import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.BackupsV2ListItem;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.key.asymmetric.EncryptionPrivateKey;
-import io.olvid.engine.datatypes.key.asymmetric.PrivateKey;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.ObvDeviceList;
 import io.olvid.engine.engine.types.ObvProfileBackupsForRestore;

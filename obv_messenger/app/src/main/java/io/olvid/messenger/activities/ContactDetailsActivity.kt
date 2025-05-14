@@ -19,6 +19,7 @@
 package io.olvid.messenger.activities
 
 import android.animation.LayoutTransition
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -1216,6 +1217,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
     }
 
 
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
             FULL_SCREEN_IMAGE_FRAGMENT_TAG

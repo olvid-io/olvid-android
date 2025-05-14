@@ -18,10 +18,6 @@
  */
 package io.olvid.messenger.plus_button
 
-import android.animation.ObjectAnimator
-import android.content.res.Configuration
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -32,7 +28,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -201,15 +196,13 @@ class MutualScanInvitationScannedFragment : Fragment(), OnClickListener,
                         if (!timeOutFired) {
                             timeOutFired = true
                             viewModel.isDismissOnMutualScanFinished = false
-                            spinner?.setVisibility(View.GONE)
-                            message?.setText(
-                                getString(
-                                    R.string.text_explanation_mutual_scan_pending,
-                                    contactShortDisplayName
-                                )
+                            spinner?.visibility = View.GONE
+                            message?.text = getString(
+                                R.string.text_explanation_mutual_scan_pending,
+                                contactShortDisplayName
                             )
-                            message?.setVisibility(View.VISIBLE)
-                            dismissButton?.setVisibility(View.VISIBLE)
+                            message?.visibility = View.VISIBLE
+                            dismissButton?.visibility = View.VISIBLE
                         }
                     }, 5000)
                 }

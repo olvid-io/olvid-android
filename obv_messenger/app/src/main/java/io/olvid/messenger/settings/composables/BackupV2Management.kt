@@ -173,12 +173,12 @@ fun ManageBackupsDialog(
 
                 Text(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 16.dp)
+                        .weight(1f, true),
                     text = stringResource(R.string.dialog_title_your_online_backups),
                     style = OlvidTypography.h2,
                     color = colorResource(R.color.almostBlack),
                     textAlign = TextAlign.Center,
-                    maxLines = 1,
                 )
 
                 IconButton(

@@ -30,7 +30,6 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -51,12 +50,9 @@ import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.services.BackupCloudProviderService.CloudProviderConfiguration
 import io.olvid.messenger.settings.SettingsActivity.Companion.automaticBackupConfiguration
 import io.olvid.messenger.settings.SettingsActivity.Companion.useAutomaticBackup
-import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.HashMap
 import java.util.Locale
-import kotlin.getValue
 
 class BackupPreferenceFragment : PreferenceFragmentCompat(), EngineNotificationListener {
     private val viewModel: BackupPreferenceViewModel by activityViewModels()

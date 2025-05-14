@@ -208,7 +208,6 @@
     <string name="message_error_trust_origin">Error retrieving contact trust origin</string>
     <string name="message_user_invitation">%1$s wants to discuss with you on Olvid. To accept, use the link below:\n\n%2$s</string>
     <string name="message_user_invitation_subject">Join %1$s on Olvid</string>
-    <string name="message_wrong_code">Wrong code</string>
     <string name="notification_action_accept">Accept</string>
     <string name="notification_action_mark_as_read">Mark as read</string>
     <string name="notification_action_reject">Reject</string>
@@ -241,9 +240,9 @@
     <string name="pref_text_QR_correction_veryhigh">Very High</string>
     <string name="subtitle_choose_group_name">Choose Group Name</string>
     <string name="subtitle_select_group_members">Select Group Members</string>
-    <string name="text_contact_names_separator">,\u0020</string>
-    <string name="text_contact_names_last_separator">\u0020\u0026\u0020</string>
-    <string name="text_date_time_separator">\u00a0\u2022\u00a0</string>
+    <string name="text_contact_names_separator" translatable="false">", "</string>
+    <string name="text_contact_names_last_separator" translatable="false">" \u0026 "</string>
+    <string name="text_date_time_separator" translatable="false">" \u2022 "</string>
     <string name="text_group_left">You left the group</string>
     <string name="text_group_re_joined">You re-joined the group</string>
     <string name="text_group_joined">You joined the group</string>
@@ -252,8 +251,8 @@
     <string name="text_joined_the_group">%1$s joined the group</string>
     <string name="text_left_the_group">%1$s left the group</string>
     <string name="text_nobody">Nobody</string>
-    <string name="text_draft_message_prefix">Draft:\u0020</string>
-    <string name="text_inbound_group_message_prefix">%1$s:\u0020</string>
+    <string name="text_draft_message_prefix">"Draft: "</string>
+    <string name="text_inbound_group_message_prefix">"%1$s: "</string>
     <string name="text_today">Today</string>
     <string name="text_deleted_contact">Deleted contact</string>
     <string name="text_deleted_group">Deleted group</string>
@@ -290,7 +289,7 @@
     <string name="toast_message_unable_to_open_file">Unable to find a suitable application to open this file type</string>
     <string name="toast_message_unparsable_url">Unable to parse URL properly</string>
     <string name="trust_origin_direct_type">%1$s - One-to-one verification</string>
-    <string name="trust_origin_group_type">%1$s - Accepted group invitation from\u0020</string>
+    <string name="trust_origin_group_type">"%1$s - Accepted group invitation from "</string>
     <string name="trust_origin_group_v2_type">%1$s - Accepted invitation to group\u0020</string>
     <string name="trust_origin_introduction_type">%1$s - Introduction from\u0020</string>
     <string name="trust_origin_keycloak_type">%2$s - Validation by the identity provider at %1$s</string>
@@ -427,21 +426,13 @@
     <string name="button_label_key_copied_close_window">I have copied the key</string>
     <string name="toast_message_backup_saved">Backup successfully saved</string>
     <string name="toast_message_failed_to_save_backup">Failed to save backup. Please try again.</string>
-    <string name="button_label_restore_backup">Restore a backup</string>
     <string name="button_label_continue_as_new_user">Continue as a new user</string>
     <string name="text_title_backup_file_selected">Selected backup file</string>
     <string name="text_title_backup_cloud_account_selected">Selected cloud backup</string>
     <string name="toast_message_error_opening_backup_file">Unable to open selected backup file. Please try again.</string>
     <string name="hint_backup_key" translatable="false">XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX</string>
     <string name="text_backup_key_verification_failed">Backup key verification failed.\nPlease check that you entered the correct key.</string>
-    <string name="text_backup_key_verification_failed_short">Backup key verification failed.\nThe key you entered is too short.</string>
-    <string name="text_backup_key_verification_failed_long">Backup key verification failed.\nThe key you entered is too long.</string>
-    <string name="button_label_verify">Verify</string>
-    <string name="dialog_title_verify_backup_key">Verify current backup key</string>
     <string name="button_label_generate_new_backup_key">Generate a new key</string>
-    <string name="text_backup_key_verification_success">Backup key successfully verified.</string>
-    <string name="dialog_title_confirm_backup_key_generation">Generate a new backup key</string>
-    <string name="dialog_message_confirm_backup_key_generation">Are you sure you want to generate a new backup key?\n\nIf so, please make sure you are ready to write down this new key as it will be used for all future backups.</string>
     <string name="toast_message_backup_failed">Failed to create backup file. Please try again.</string>
     <string name="dialog_title_identity_deactivated">Profile deactivated on this device</string>
     <string name="dialog_message_identity_deactivated">Your profile has been deactivated on this device.\n\nOlvid was not able to retrieve the list of devices on which it is currently active. Reactivating your profile on this device could deactivate it on another one.\n\nIf you wish to proceed, press \"reactivate my profile on this device\" below. Keep in mind that using Olvid to receive and send messages on two devices simultaneously requires a license.\n\nPress \"cancel\" to dismiss this dialog and keep this device inactive: you will not be able to send or receive messages on this device, but may still browse your old discussions.</string>
@@ -532,7 +523,6 @@
     <string name="menu_action_delete_log_entry">Delete</string>
     <string name="toast_message_audio_permission_denied">Permission to record audio was denied</string>
     <string name="pref_call_use_flash_title">Blink flash</string>
-    <string name="dialog_title_select_audio_output">Select audio output</string>
     <string name="text_audio_output_phone">Phone</string>
     <string name="text_audio_output_headset">Headset</string>
     <string name="text_audio_output_loudspeaker">Builtin speaker</string>
@@ -542,7 +532,7 @@
     <string name="notification_action_call_back">Call back</string>
     <string name="hint_notification_message">Message</string>
     <string name="notification_action_send_message">Send message</string>
-    <string name="text_name_and_message_separator">:\u0020</string>
+    <string name="text_name_and_message_separator">": "</string>
     <string name="webrtc_status_initializing_call">Initializing call</string>
     <string name="webrtc_status_waiting_for_permission">Waiting for audio permission</string>
     <string name="webrtc_status_verifying_credentials">Verifying credentials</string>
@@ -561,7 +551,6 @@
     <string name="message_biometric_enrollment_detected_password">New biometric enrollment detected\nPlease authenticate with your password</string>
     <string name="pref_debug_log_level_title">Output debug logs</string>
     <string name="pref_debug_log_level_summary">When enabled, logcat will include debug level logs for Olvid.</string>
-    <string name="dialog_title_invite_call_participants">Add participants to this call</string>
     <string name="webrtc_status_contact_hanged_up">Contact hung up</string>
     <string name="webrtc_status_contact_kicked">Contact left the call</string>
     <string name="webrtc_status_contact_failed">Call failed</string>
@@ -573,15 +562,7 @@
     <string name="webrtc_speaking_while_muted_action">Unmute</string>
     <string name="content_description_reject_call_button">Reject call button</string>
     <string name="content_description_accept_call_button">Accept call button</string>
-    <string name="content_description_toggle_audio_output_button">Toggle audio output button</string>
-    <string name="content_description_toggle_mute_microphone_button">Toggle mute microphone button</string>
-    <string name="content_description_peer_muted_indicator">Peer muted indicator</string>
-    <string name="content_description_add_participants_button">Add participants button</string>
-    <string name="content_description_open_discussion_button">Open discussion button</string>
-    <string name="content_description_hang_up_button">Hang up button</string>
-    <string name="content_description_remove_contact_button">Remove contact button</string>
     <string name="dialog_title_webrtc_kick_participant">Exclude contact from call?</string>
-    <string name="dialog_message_webrtc_kick_participant">Do you really wish to exclude %1$s from this call?</string>
     <string name="webrtc_failed_kicked">You were excluded from this call</string>
     <string name="dialog_title_start_conference_call">Start conference call</string>
     <string name="label_subscription_status">Subscription status</string>
@@ -647,7 +628,6 @@
     <string name="dialog_title_subscription_updated">Subscription updated</string>
     <string name="button_label_add_contact">Add contact</string>
     <string name="button_label_add">Add</string>
-    <string name="text_explanation_warning_contact_already_known">%1$s is already part of your contacts. Adding them again will allow you to re-verify their identity.</string>
     <string name="toast_message_failed_to_invite_contact">Failed to add contact, please try again</string>
     <string name="text_explanation_warning_cannot_invite_yourself">You cannot add your own Olvid ID to your contacts!</string>
     <string name="activity_title_license_activation">License activation</string>
@@ -732,11 +712,6 @@
     <string name="text_visible_timer_h_once">Visible for %1$dh,\nand only once</string>
     <string name="text_visible_timer_d_once">Visible for %1$dd,\nand only once</string>
     <string name="text_visible_timer_y_once">Visible for %1$dy,\nand only once</string>
-    <string name="text_visible_timer_s_once_compact">Visible once, for %1$ds</string>
-    <string name="text_visible_timer_m_once_compact">Visible once, for %1$dm</string>
-    <string name="text_visible_timer_h_once_compact">Visible once, for %1$dh</string>
-    <string name="text_visible_timer_d_once_compact">Visible once, for %1$dd</string>
-    <string name="text_visible_timer_y_once_compact">Visible once, for %1$dy</string>
     <string name="text_no_messages">No messages yet</string>
     <string name="dialog_title_mute_discussion_notification_duration">Mute notifications for this discussion…</string>
     <string name="dialog_title_mute_discussions_notification_duration">Mute notifications for these discussions…</string>
@@ -817,9 +792,7 @@
     <string name="dialog_title_voice_message_explanation">Olvid voice messages</string>
     <string name="dialog_message_voice_message_explanation">Before recording voice messages, please grant Olvid the permission to record audio.</string>
     <string name="dialog_message_voice_message_explanation_blocked">Before recording voice messages, Olvid requires the permission to record audio.\n\nIt appears that this permission has been permanently denied to Olvid. You should open the App Settings to manually grant this permission.</string>
-    <string name="label_recording">Recording…</string>
     <string name="toast_message_voice_message_recording_failed">Failed to record voice message</string>
-    <string name="text_duration_indeterminate" translatable="false">\?:??</string>
     <string name="notification_channel_media_player_service_name">Media player</string>
     <string name="notification_channel_media_player_service_description">Play/pause controls when playing media in Olvid</string>
     <string name="notification_title_now_playing">Now playing…</string>
@@ -879,7 +852,6 @@
     <string name="toast_message_authentication_failed">Authentication failed. Please try again.</string>
     <string name="hint_identity_provider_client_id">Server \"client ID\"</string>
     <string name="hint_identity_provider_client_secret">Server \"client secret\"</string>
-    <string name="text_filename_hidden">(Hidden filename)</string>
     <string name="label_authenticating">Authenticating…</string>
     <string name="label_retrieving_user_details">Retrieving user details…</string>
     <string name="toast_message_unable_to_retrieve_details">Unable to retrieve identity details from provider. Please try again.</string>
@@ -961,7 +933,6 @@
     <string name="text_failed_call">Failed phone call</string>
     <string name="text_busy_call">Incoming call while busy</string>
     <string name="text_busy_outgoing_call">Phone call to busy contact</string>
-    <string name="content_description_call_back_button">Call back button</string>
     <string name="content_description_profile_picture">Profile picture</string>
     <string name="ime_action_rename">Rename</string>
     <string name="pref_storage_explorer_title">Internal storage explorer</string>
@@ -986,7 +957,8 @@
     <string name="button_label_call">Call</string>
     <string name="dialog_title_start_call">Start call</string>
     <string name="checkbox_label_conference_call">conf.\ncall</string>
-    <string name="message_unlock_before_web_client">Security check\nUnlock Olvid to connect to the web client</string>
+    <string name="message_unlock_before_web_client">Security check\nUnlock the app to connect to the web client</string>
+    <string name="message_unlock_before_showing_backup_key">Security check\nUnlock the app to access these settings</string>
     <string name="pref_require_unlock_before_connecting_to_webclient_title">Require unlock before each connection</string>
     <string name="pref_require_unlock_before_connecting_to_webclient_summary">When this security feature is active, connecting to the webclient will require to unlock Olvid.</string>
     <string name="pref_disable_push_notifications_title">Disable Google push notifications</string>
@@ -1031,8 +1003,6 @@
     <string name="dialog_message_backup_requires_sign_in">You have configured Olvid to use automatic backups to a cloud provider, but your session has expired. You need to sign in to this provider again.\n\nIf you no longer want automatic backups, you can disable them in the App Settings. Keep in mind that automatic backups are the only way to prevent the loss of your contacts if your device is lost or damaged.</string>
     <string name="button_label_sign_in">Sign in</string>
     <string name="button_label_invite_contact">Get in contact remotely</string>
-    <string name="text_explanation_mutual_scan_add_contact">Clicking ADD CONTACT will add %1$s to your contacts.</string>
-    <string name="text_explanation_warning_mutual_scan_direct">Make sure the QR code you scanned was indeed presented to you by %1$s, directly on their device, from within the Olvid application.</string>
     <string name="text_explanation_warning_mutual_scan_contact_already_known">%1$s is already part of your contacts.</string>
     <string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one">%1$s is part of your list of known users but is not yet in your contacts.</string>
     <string name="label_new">New</string>
@@ -1040,7 +1010,6 @@
     <string name="label_option_invite_remotely">Option 2: remotely</string>
     <string name="text_explanation_mutual_scan">Have %1$s scan this QR code to get in contact immediately.</string>
     <string name="text_explanation_invalid_mutual_scan_qr_code">This QR cannot be used to add %1$s to your contacts.\nPlease try again, making sure %1$s scans your QR code before you scan their\'s.</string>
-    <string name="label_loading_messages">Loading messages…</string>
     <string name="text_explanation_mutual_scan_pending">%1$s will be added to your contacts once their device can be reached.</string>
     <string name="text_explanation_mutual_scan_success">%1$s was added to your contact 🙌!</string>
     <string name="label_loading_contacts">Loading contacts…</string>
@@ -1079,7 +1048,6 @@
     <string name="button_label_backup_settings">Setup backups</string>
     <string name="snackbar_message_setup_backup">It\'s time to setup backups!</string>
     <string name="dialog_message_setup_backup_explanation">If you were to lose your device, or to uninstall Olvid by mistake, you would lose your profiles, all your contacts, and all your groups 😱. Luckily for you, it is possible to setup secure backups 😅.\n\nPress \"Setup backups\" to begin.</string>
-    <string name="snackbar_message_remember_to_backup">It\'s backup time!</string>
     <string name="restriction_keycloak_configuration_uri_title" translatable="false">Keycloak configuration</string>
     <string name="restriction_keycloak_configuration_uri_description" translatable="false">Configuration link provided in the keycloak Olvid Management Console.</string>
     <string name="restriction_disable_new_version_notification_title" translatable="false">Disable new version notification</string>
@@ -1120,8 +1088,6 @@
     <string name="text_notification_location_disabled_message">Olvid need to access your location to continue sharing</string>
     <string name="text_notification_location_permission_denied_title">Location permission denied</string>
     <string name="text_notification_location_permission_denied_message">Olvid needs you to grant location access to continue sharing</string>
-    <string name="text_notification_location_updates_unavailable_title">GPS signal lost</string>
-    <string name="text_notification_location_updates_unavailable_message">Location sharing will restart when signal is back</string>
     <string name="notification_action_authenticate">Authenticate</string>
     <string name="button_label_manage">Manage</string>
     <string name="button_label_add_new_profile">Add a profile</string>
@@ -1222,7 +1188,6 @@
     <string name="label_attach_video">Record a video</string>
     <string name="dialog_title_choose_icon_order">Choose attachment icon priority</string>
     <string name="label_icons_below_never_shown">Icons below this line are never shown</string>
-    <string name="menu_action_backup_settings">Backup settings</string>
     <string name="pref_font_scale">Font size</string>
     <string name="pref_text_font_scale_0_75">Tiny (75\%)</string>
     <string name="pref_text_font_scale_0_9">Small (90\%)</string>
@@ -1287,8 +1252,7 @@
     <string name="debug_label_capability_continuous_gathering">VoIP v2: %1$b</string>
     <string name="debug_label_capability_groups_v2">Groups v2: %1$b</string>
     <string name="bullet">-</string>
-    <string name="pref_use_system_emojis_title">Use system emoji font (when available)</string>
-    <string name="pref_use_system_emojis_summary">When activated, the system font will be used for supported emoji characters. Otherwise, the embedded font will be used.</string>
+    <string name="pref_use_animated_emojis_title">Use animated emojis (when available)</string>
     <string name="label_profile_storage_usage">Profile storage usage</string>
     <string name="label_photos">Photos</string>
     <string name="label_videos">Videos</string>
@@ -1335,7 +1299,6 @@
     <string name="notification_public_title_one_to_one_invitation">Invitation to a private discussion</string>
     <string name="pref_show_trust_levels_title">Show a \"trust origin\" indicator for contacts</string>
     <string name="pref_show_trust_levels_summary">When activated, a colored dot on their portrait indicates whether you personally verified a contact\'s identity or they were presented to you</string>
-    <string name="hint_user_name">User name</string>
     <string name="notification_title_sending_message">Olvid message being sent</string>
     <string name="dialog_message_widget_open_hidden_profile_warning">Warning: using a shortcut widget with a hidden profile may disclose the existence of this profile.</string>
     <string name="dialog_message_widget_open_hidden_profile_warning_no_lock_screen">Warning: using a shortcut widget with a hidden profile may disclose the existence of this profile.\nAs a bare minimum, you should configure a lock screen to restrict access to the widget configuration page.</string>
@@ -1448,7 +1411,7 @@
     <string name="dialog_message_clone_group_error_missing_capability">The group %1$s cannot be cloned because some members of this group use an outdated version of Olvid that does not support groups v2. Please let them know a newer version of Olvid is available!\n\nOutdated users:%2$s</string>
     <string name="dialog_title_clone_group_warning_missing_members">Warning: partial cloning</string>
     <string name="dialog_message_clone_group_warning_missing_members">The group %1$s contains members with whom you do not have a secure channel yet. You cannot invite them to the new group.\n\nAffected users:%2$s\n\nDo you wish to proceed with an incomplete group?</string>
-    <string name="text_copy_of_prefix">Copy of\u0020</string>
+    <string name="text_copy_of_prefix">"Copy of "</string>
     <string name="text_message_location_sent">Location sent</string>
     <string name="text_message_location_received">Location received</string>
     <string name="toast_message_location_services_unavailable">Location services unavailable</string>
@@ -1496,7 +1459,6 @@
     <string name="location_sharing_quality_balanced_full_string"><b>Balanced</b> location sharing mode</string>
     <string name="location_sharing_quality_power_save_full_string"><b>Power save</b> location sharing mode</string>
     <string name="label_sharing_location_until">Sharing location until: %1$s</string>
-    <string name="button_label_end_sharing_location">Stop sharing</string>
     <string name="label_location_sharing_ended">Location sharing ended</string>
     <string name="label_gps_coordinates">GPS coordinates</string>
     <string name="dialog_title_open_external_app_location_warning">Open location in external app</string>
@@ -1519,7 +1481,6 @@
     <string name="menu_action_location_message_open_preview">Open preview</string>
     <string name="dialog_title_google_maps_services_unavailable">Google Play Services Unavailable</string>
     <string name="dialog_message_google_maps_services_unavailable">It seems the Google Play Services are not installed on your device. They are required to use Google Maps integration. If you can\'t (or do not want to) install them, you may choose another map provider.</string>
-    <string name="pref_location_share_interval_title">Default refresh interval</string>
     <string name="pref_location_share_duration_title">Default share duration</string>
     <string name="pref_location_integration_title">Integration with a map provider</string>
     <string name="pref_location_hide_notifications_title">Hide all error notifications related to location sharing</string>
@@ -1558,53 +1519,51 @@
     <string name="label_pending">Pending</string>
     <string name="pref_app_language_title">App language</string>
     <string name="pref_text_default_device_language">Default device language</string>
-    <string name="pref_text_english" translatable="false">English</string>
-    <string name="pref_text_francais" translatable="false">Français</string>
     <string name="pref_block_untrusted_certificate_title">Block connections using an untrusted certificate</string>
     <string name="pref_text_never">Never</string>
     <string name="pref_text_always">Always</string>
     <string name="pref_text_issuer_changed">If the certificate issuer changed</string>
     <string name="text_notification_connection_blocked_title">Connection blocked</string>
     <string name="text_notification_connection_blocked_message">Olvid detected an untrusted SSL certificate</string>
-    <string name="text_setting_beta">\u2023 Enable beta features:\u0020</string>
-    <string name="text_setting_hide_notification_contents">\u2023 Hide notification contents:\u0020</string>
-    <string name="text_setting_allow_notification_suggestions">\u2023 Notification suggested replies:\u0020</string>
-    <string name="text_setting_expose_recent_discussions">\u2023 Maintain a list of recent discussions:\u0020</string>
-    <string name="text_setting_incognito_keyboard">\u2023 Use keyboard incognito mode:\u0020</string>
-    <string name="text_setting_prevent_screen_capture">\u2023 Prevent screenshots:\u0020</string>
-    <string name="text_setting_hidden_profile_policy">\u2023 Hidden profile closing policy:\u0020</string>
-    <string name="text_setting_disable_push_notifications">\u2023 Disable push notifications:\u0020</string>
-    <string name="text_setting_permanent_websocket">\u2023 Permanent WebSocket connection:\u0020</string>
-    <string name="text_setting_internal_viewer">\u2023 Use internal image viewer:\u0020</string>
-    <string name="text_setting_show_trust_level">\u2023 Show a \"trust origin\" indicator for contacts:\u0020</string>
-    <string name="text_setting_lock_biometry">\u2023 Unlock with biometry:\u0020</string>
-    <string name="text_setting_lock_notification">\u2023 Permanent lock screen notification:\u0020</string>
-    <string name="text_setting_lock_wipe_on_fail">\u2023 Erase sensitive messages after 3 bad PINs:\u0020</string>
-    <string name="text_setting_auto_download_archived">\u2023 Auto-download archived discussion attachments:\u0020</string>
-    <string name="text_setting_unarchive_on_notification">\u2023 Unarchive discussion on notification:\u0020</string>
-    <string name="text_setting_link_preview_inbound">\u2023 Link preview received:\u0020</string>
-    <string name="text_setting_link_preview_outbound">\u2023 Link preview sent:\u0020</string>
-    <string name="text_setting_send_read_receipt">\u2023 Send read receipts:\u0020</string>
-    <string name="text_setting_auto_open_limited_visibility">\u2023 Automatically open ephemeral messages:\u0020</string>
-    <string name="text_setting_retain_wiped_outbound">\u2023 Retain wiped outbound messages:\u0020</string>
-    <string name="text_setting_remove_jpeg_metadata">\u2023 Remove JPEG metadata:\u0020</string>
-    <string name="text_setting_wc_keep_after_close">\u2023 Keep WebClient running as a background task:\u0020</string>
-    <string name="text_setting_wc_error_notification">\u2023 Show WebClient error notifications:\u0020</string>
-    <string name="text_setting_wc_inactivity_indicator">\u2023 Notify after WebClient inactivity:\u0020</string>
-    <string name="text_setting_wc_require_unlock">\u2023 Require unlock before each WebClient connection:\u0020</string>
-    <string name="text_setting_permanent_foreground_service">\u2023 Use a permanent foreground service:\u0020</string>
-    <string name="text_setting_share_app_version">\u2023 Share app and OS version with Olvid:\u0020</string>
-    <string name="text_setting_map_integration">\u2023 Map provider integration:\u0020</string>
-    <string name="text_setting_address_lookup_server">\u2023 Custom address server:\u0020</string>
-    <string name="text_setting_disable_address_lookup">\u2023 Disable address lookup:\u0020</string>
-    <string name="text_setting_notify_certificate_change">\u2023 Notify when a server certificate changes:\u0020</string>
-    <string name="text_setting_sending_foreground_service">\u2023 Enable the \"message being sent\" notification:\u0020</string>
+    <string name="text_setting_beta">"\u2023 Enable beta features: "</string>
+    <string name="text_setting_hide_notification_contents">"\u2023 Hide notification contents: "</string>
+    <string name="text_setting_allow_notification_suggestions">"\u2023 Notification suggested replies: "</string>
+    <string name="text_setting_expose_recent_discussions">"\u2023 Maintain a list of recent discussions: "</string>
+    <string name="text_setting_incognito_keyboard">"\u2023 Use keyboard incognito mode: "</string>
+    <string name="text_setting_prevent_screen_capture">"\u2023 Prevent screenshots: "</string>
+    <string name="text_setting_hidden_profile_policy">"\u2023 Hidden profile closing policy: "</string>
+    <string name="text_setting_disable_push_notifications">"\u2023 Disable push notifications: "</string>
+    <string name="text_setting_permanent_websocket">"\u2023 Permanent WebSocket connection: "</string>
+    <string name="text_setting_internal_viewer">"\u2023 Use internal image viewer: "</string>
+    <string name="text_setting_show_trust_level">"\u2023 Show a \"trust origin\" indicator for contacts: "</string>
+    <string name="text_setting_lock_biometry">"\u2023 Unlock with biometry: "</string>
+    <string name="text_setting_lock_notification">"\u2023 Permanent lock screen notification: "</string>
+    <string name="text_setting_lock_wipe_on_fail">"\u2023 Erase sensitive messages after 3 bad PINs: "</string>
+    <string name="text_setting_auto_download_archived">"\u2023 Auto-download archived discussion attachments: "</string>
+    <string name="text_setting_unarchive_on_notification">"\u2023 Unarchive discussion on notification: "</string>
+    <string name="text_setting_link_preview_inbound">"\u2023 Link preview received: "</string>
+    <string name="text_setting_link_preview_outbound">"\u2023 Link preview sent: "</string>
+    <string name="text_setting_send_read_receipt">"\u2023 Send read receipts: "</string>
+    <string name="text_setting_auto_open_limited_visibility">"\u2023 Automatically open ephemeral messages: "</string>
+    <string name="text_setting_retain_wiped_outbound">"\u2023 Retain wiped outbound messages: "</string>
+    <string name="text_setting_remove_jpeg_metadata">"\u2023 Remove JPEG metadata: "</string>
+    <string name="text_setting_wc_keep_after_close">"\u2023 Keep WebClient running as a background task: "</string>
+    <string name="text_setting_wc_error_notification">"\u2023 Show WebClient error notifications: "</string>
+    <string name="text_setting_wc_inactivity_indicator">"\u2023 Notify after WebClient inactivity: "</string>
+    <string name="text_setting_wc_require_unlock">"\u2023 Require unlock before each WebClient connection: "</string>
+    <string name="text_setting_permanent_foreground_service">"\u2023 Use a permanent foreground service: "</string>
+    <string name="text_setting_share_app_version">"\u2023 Share app and OS version with Olvid: "</string>
+    <string name="text_setting_map_integration">"\u2023 Map provider integration: "</string>
+    <string name="text_setting_address_lookup_server">"\u2023 Custom address server: "</string>
+    <string name="text_setting_disable_address_lookup">"\u2023 Disable address lookup: "</string>
+    <string name="text_setting_notify_certificate_change">"\u2023 Notify when a server certificate changes: "</string>
+    <string name="text_setting_sending_foreground_service">"\u2023 Enable the \"message being sent\" notification: "</string>
     <string name="text_setting_auto_join_groups">\u2023 Automatically accept group invitations from:\u0020</string>
-    <string name="text_setting_lock_delay">\u2023 Lock screen delay:\u0020</string>
-    <string name="text_setting_auto_download_size">\u2023 Automatically download attachments:\u0020</string>
-    <string name="text_setting_block_unknown_certificate">\u2023 Block connections using an untrusted certificate:\u0020</string>
-    <string name="text_setting_no_notify_certificate_change_for_previews">\u2023 Disable certificate change notification for link previews:\u0020</string>
-    <string name="text_setting_connectivity_indicator">\u2023 Network connectivity indicator:\u0020</string>
+    <string name="text_setting_lock_delay">"\u2023 Lock screen delay: "</string>
+    <string name="text_setting_auto_download_size">"\u2023 Automatically download attachments: "</string>
+    <string name="text_setting_block_unknown_certificate">"\u2023 Block connections using an untrusted certificate: "</string>
+    <string name="text_setting_no_notify_certificate_change_for_previews">"\u2023 Disable certificate change notification for link previews: "</string>
+    <string name="text_setting_connectivity_indicator">"\u2023 Network connectivity indicator: "</string>
     <string name="text_setting_yes">yes</string>
     <string name="text_setting_no">no</string>
     <string name="text_setting_screen_lock">screen lock</string>
@@ -1810,8 +1769,6 @@
     <string name="troubleshooting_faq_link">https://olvid.io/faq</string>
     <string name="troubleshooting_request_permission">Request permission</string>
     <string name="troubleshooting_backup_valid_description">Olvid backups are properly setup. Please make sure you have access to your backup key, just to be sure you\'ll know what to do if you lose your device 😅.</string>
-    <string name="snackbar_go_to_troubleshooting_message">Want to improve your Olvid experience?</string>
-    <string name="snackbar_go_to_troubleshooting_button">Let\'s go</string>
     <string name="troubleshooting_ignored">Ignored</string>
     <string name="onboarding_transfer_multidevice_purchase_question">Do you want all your devices to remain active?</string>
     <string name="onboarding_transfer_multidevice_purchase_hyperlink">This way</string>
@@ -1867,7 +1824,6 @@
     <string name="menu_action_play_at_1_5x">Play at a faster speed (1.5\u00d7)</string>
     <string name="menu_action_play_at_2x">Play at the fastest speed (2\u00d7)</string>
     <string name="pref_location_share_quality_title">Default share quality</string>
-    <string name="pref_experimental_push_priority_title">Use experimental push notification priority</string>
     <string name="label_sharing_your_location">You are sharing your location</string>
     <string name="menu_action_open_map">Open map</string>
     <string name="language_short_string">en</string>
@@ -1878,7 +1834,6 @@
     <string name="button_label_copy">Copy</string>
     <string name="toast_message_link_copied">Link copied to clipboard</string>
     <string name="button_label_force_restart">Restart application</string>
-    <string name="dialog_title_restart_app">Restart application?</string>
     <string name="dialog_message_restart_app">Do you want to force a restart of Olvid?</string>
     <string name="call_encrypted_notice">End-to-end encrypted call</string>
     <string name="pref_hide_group_member_changes_title">Hide group member change messages</string>
@@ -1910,10 +1865,13 @@
     <string name="pref_app_icon_summary">Tired of the classic blue Olvid icon? Try something different!</string>
     <string name="pref_app_icon_fragment_title">Modify the application icon</string>
     <string name="pref_app_icon_fragment_summary">The name and icon of the application will be modified on your home screen. This does not apply to notifications icon.</string>
-    <string name="pref_app_icon_apply">Apply and close application</string>
+    <string name="pref_app_icon_apply">Apply (may close the application)</string>
     <string name="pref_app_icon_shortcut_warning_title">Discussion shortcuts</string>
     <string name="pref_app_icon_shortcut_warning_text">Please note that changing the app icon will delete the discussion shortcuts you have created. You will need to recreate them.</string>
     <string name="app_name_weather">Weather</string>
+    <string name="app_name_bricks">Bricks</string>
+    <string name="app_name_clock">Clock</string>
+    <string name="app_name_calculator">Calculator</string>
     <string name="app_name_gem">Diamonds</string>
     <string name="app_name_rosace">Notes</string>
     <string name="app_name_ghost">Ghost</string>
@@ -1977,7 +1935,6 @@
     <string name="troubleshooting_storage_db_sync_description">After an application crash, internal databases might have consistency issues. Run this check to ensure everything is fine 😁</string>
     <string name="button_label_check_now">Check now</string>
     <string name="pref_your_backup_key_title">Your key</string>
-    <string name="pref_your_backups_title">Your backups</string>
     <string name="backup_tip_message_multi_device">Use Olvid on multiple devices. You may then restore your account, without a key, from your other devices.</string>
     <string name="backup_tip_title">Tip</string>
     <string name="button_label_subscribe_olvid_plus">Subscribe to Olvid+</string>
@@ -1985,12 +1942,9 @@
     <string name="pref_show_your_backup_key_title">Show my key</string>
     <string name="pref_compromised_key_title">Stolen or compromised key?</string>
     <string name="button_label_show_my_backup_key">Show my backup key</string>
-    <string name="label_choose_backup_mode">Choose your backup mode</string>
     <string name="pref_use_credentials_manager_title">Save my key to my password manager (recommended)</string>
     <string name="label_choose_default_password_manager">Choose the default password manager</string>
     <string name="button_label_i_wrote_my_key">Well noted</string>
-    <string name="label_your_key">Your key</string>
-    <string name="explanation_write_your_key">Write down your key. You will need to enter it to restore your Olvid account on your future devices.</string>
     <string name="label_failed_to_generate_backup_seed">An error occurred while generating your backup key, please try again.</string>
     <string name="label_failed_to_save_backup_seed">An error occurred while saving your backup key to your default password manager.\n**You will need to write it down.**</string>
     <string name="label_saved_to_password_manager">Your key was successfully saved to your password manager.</string>
@@ -2001,16 +1955,14 @@
     <string name="dialog_message_reset_backup_key">If your backup key was lost or compromised you may reset it to **delete any backup of your account associated to this key**. This key will no longer be usable to restore your account.\n\nIf you believe someone could already have used this key to maliciously gain access to your account, you should **check your device list** in your profile\'s details for any unexpected device.</string>
     <string name="pref_manage_backups_title">Manage my Olvid backups</string>
     <string name="pref_initiate_backup_now_title">Initiate a backup now</string>
-    <string name="pref_backups_faq_title">FAQ: Understanding backups</string>
     <string name="backup_faq_link">https://olvid.io/faq/backup-your-profiles/</string>
     <string name="content_description_close_button">Close button</string>
     <string name="dialog_title_your_online_backups">Your online backups</string>
-    <string name="explanation_online_backup">When backed up on olvid.io, your profile is always encrypted and only you have the key.</string>
     <string name="button_label_reset">Reset</string>
     <string name="explanation_reset_backups">Resetting will delete all your backups.</string>
     <string name="dialog_message_reset_backups">Resetting your backup will **discard your backup key**, **erase any online backup** of your device, and **stop backing it up**.\n\nUnless your profile is active on another device, you will no longer be able to restore it if you were to lose this device.</string>
     <string name="toast_message_backups_reset">Backups successfully reset</string>
-    <string name="label_manage_backups_for_another_key">Your profile is not listed?\u0020</string>
+    <string name="label_manage_backups_for_another_key">"Your profile is not listed? "</string>
     <string name="label_manage_backups_for_another_key_blue_part">Manually enter another key</string>
     <string name="snackbar_action_label_undo">Undo</string>
     <string name="dialog_unarchive_setting_title">Unarchive setting</string>
@@ -2108,214 +2060,14 @@
     <string name="button_label_this_way">This way</string>
     <string name="toast_code_copied">Code copied</string>
     <string name="dialog_title_call_blocked">Call blocked</string>
-    <string name="dialog_message_call_blocked">Olvid does not allow starting a call with more than %1d persons.</string>
-
-
-    <plurals name="explanation_backup_v2_device_expiration_end">
-        <item quantity="one">\" on this device, your previous device below will be deactivated:</item>
-        <item quantity="other">\" on this device, your devices below will be deactivated:</item>
-    </plurals>
-    <plurals name="label_backups_found">
-        <item quantity="one">%1$d backup found</item>
-        <item quantity="other">%1$d backups found</item>
-    </plurals>
-    <plurals name="label_profiles_found">
-        <item quantity="one">%1$d profile found</item>
-        <item quantity="other">%1$d profiles found</item>
-    </plurals>
-    <plurals name="label_backup_groups">
-        <item quantity="zero">No group</item>
-        <item quantity="one">%1$d group</item>
-        <item quantity="other">%1$d groups</item>
-    </plurals>
-    <plurals name="label_backup_contacts">
-        <item quantity="zero">No contact</item>
-        <item quantity="one">%1$d contact</item>
-        <item quantity="other">%1$d contacts</item>
-    </plurals>
-    <plurals name="label_discussion_archive_done">
-        <item quantity="one">Discussion archived</item>
-        <item quantity="other">%1$d discussions archived</item>
-    </plurals>
-    <plurals name="label_discussion_unarchive_done">
-        <item quantity="one">Discussion unarchived</item>
-        <item quantity="other">%1$d discussions unarchived</item>
-    </plurals>
-    <plurals name="label_message_unbookmark_done">
-        <item quantity="one">Message unbookmarked</item>
-        <item quantity="other">%1$d messages unbookmarked</item>
-    </plurals>
-    <plurals name="dialog_title_delete_discussions">
-        <item quantity="one">Delete selected discussion?</item>
-        <item quantity="other">Delete selected discussions?</item>
-    </plurals>
-    <plurals name="dialog_title_delete_messages">
-        <item quantity="one">Delete selected message?</item>
-        <item quantity="other">Delete selected messages?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions">
-        <item quantity="one">Do you really want to delete the selected discussion and all the messages it contains?\nThis action cannot be undone.</item>
-        <item quantity="other">Do you really want to delete the %1$d selected discussions and all the messages they contain?\nThis action cannot be undone.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions_choice">
-        <item quantity="one">How do you want to delete the selected discussion and all the messages it contains?\nThis action cannot be undone.</item>
-        <item quantity="other">How do you want to delete the %1$d selected discussions and all the messages they contain?\nThis action cannot be undone.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages">
-        <item quantity="one">Do you really want to delete the selected message?\nThis action cannot be undone.</item>
-        <item quantity="other">Do you really want to delete the %1$d selected messages?\nThis action cannot be undone.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages_choice">
-        <item quantity="one">How do you want to delete the selected message?\nThis action cannot be undone.</item>
-        <item quantity="other">How do you want to delete the %1$d selected messages?\nThis action cannot be undone.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_messages_everywhere">
-        <item quantity="one">You are about to **permanently** delete a message for **everyone** in this discussion. Please make sure this is indeed what you want to do.</item>
-        <item quantity="other">You are about to **permanently** delete %1$d messages for **everyone** in this discussion. Please make sure this is indeed what you want to do.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_discussions_everywhere">
-        <item quantity="one">You are about to **permanently** delete a discussion and the messages it contains for **everyone** in this discussion. Please make sure this is indeed what you want to do.</item>
-        <item quantity="other">You are about to **permanently** delete %1$d discussions and the messages they contain for **everyone** in these discussions. Please make sure this is indeed what you want to do.</item>
-    </plurals>
-    <plurals name="dialog_message_invite_all_group_members">
-        <item quantity="one">You are about to invite each group member with whom you have a channel (currently 1 member) to a private discussion.\nDo you want to proceed?</item>
-        <item quantity="other">You are about to invite each group member with whom you have a channel (currently %1$d members) to a private discussion.\nDo you want to proceed?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_count">
-        <item quantity="one">1 common group</item>
-        <item quantity="other">%1$d common groups</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_end">
-        <item quantity="one">. You will need to leave this group to proceed.</item>
-        <item quantity="other">. You will need to leave these groups to proceed.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_with_pending_groups">
-        <item quantity="one">You are about to remove %1$s from your list of other users.\n\nNote that %1$s was invited to %2$d group you belong to. They will get added back to this list if they join it. You may want to leave this group to avoid this.\n\nReally delete this user?</item>
-        <item quantity="other">You are about to remove %1$s from your list of other users.\n\nNote that %1$s was invited to %2$d groups you belong to. They will get added back to this list if they join one of them. You may want to leave these groups to avoid this.\n\nReally delete this user?</item>
-    </plurals>
-    <plurals name="dialog_message_auto_join_pending_groups">
-        <item quantity="one">Modifying this settings will automatically accept one pending group invitation.\nPress OK to confirm your choice and join this group.</item>
-        <item quantity="other">Modifying this settings will automatically accept %1$d pending group invitations.\nPress OK to confirm your choice and join these groups.</item>
-    </plurals>
-    <plurals name="dialog_message_save_selected_attachments">
-        <item quantity="one">When prompted, please select the folder in which to save the selected attachment.\nNote that access to some folders may be restricted.</item>
-        <item quantity="other">When prompted, please select the folder in which to save the %1$d selected attachments.\nNote that access to some folders may be restricted.</item>
-    </plurals>
-    <plurals name="action_mode_title_storage">
-        <item quantity="other">%1$d selected</item>
-    </plurals>
-    <plurals name="dialog_message_delete_attachments">
-        <item quantity="one">Do you really want to delete the selected attachment?</item>
-        <item quantity="other">Do you really want to delete the %1$d selected attachments?</item>
-    </plurals>
-    <plurals name="text_app_uptime_days">
-        <item quantity="one">%1$d\u00a0day,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
-        <item quantity="other">%1$d\u00a0days,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
-    </plurals>
-    <plurals name="text_message_possibly_missing">
-        <item quantity="one">%1$d missing message…</item>
-        <item quantity="other">%1$d missing messages…</item>
-    </plurals>
-    <plurals name="text_outgoing_group_call_with_contacts">
-        <item quantity="one">Group call with %2$s and one other</item>
-        <item quantity="other">Group call with %2$s and %1$d others</item>
-    </plurals>
-    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
-        <item quantity="one">Unanswered group call with %2$s and one other</item>
-        <item quantity="other">Unanswered group call with %2$s and %1$d others</item>
-    </plurals>
-    <plurals name="text_failed_outgoing_group_call_with_contacts">
-        <item quantity="one">Failed group call with %2$s and one other</item>
-        <item quantity="other">Failed group call with %2$s and %1$d others</item>
-    </plurals>
-    <plurals name="text_busy_outgoing_group_call_with_contacts">
-        <item quantity="one">Group call while %2$s and one other were busy</item>
-        <item quantity="other">Group call while %2$s and %1$d others were busy</item>
-    </plurals>
-    <plurals name="text_rejected_outgoing_group_call_with_contacts">
-        <item quantity="one">Rejected group call with %2$s and one other</item>
-        <item quantity="other">Rejected group call with %2$s and %1$d others</item>
-    </plurals>
-    <plurals name="text_incoming_group_call_with_contacts">
-        <item quantity="two">Group call from %2$s and one other</item>
-        <item quantity="other">Group call from %2$s and %1$d others</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion">
-        <item quantity="other">%1$d selected</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion_list">
-        <item quantity="other">%1$d selected</item>
-    </plurals>
-    <plurals name="notification_public_title_new_messages">
-        <item quantity="one">%1$d new message</item>
-        <item quantity="other">%1$d new messages</item>
-    </plurals>
-    <plurals name="dialog_message_invite_group_members">
-        <item quantity="one">%3$s will be invited to join the group %2$s.</item>
-        <item quantity="other">The %1$d following contacts will be invited to join the group %2$s: %3$s.</item>
-    </plurals>
-    <plurals name="dialog_message_remove_group_members">
-        <item quantity="one">%3$s will be removed from the group %2$s.</item>
-        <item quantity="other">The %1$d following group members will be removed from %2$s: %3$s.</item>
-    </plurals>
-    <plurals name="text_unread_message_count">
-        <item quantity="one">%1$d new message</item>
-        <item quantity="other">%1$d new messages</item>
-    </plurals>
-    <plurals name="text_reply_attachment_count">
-        <item quantity="one">%1$d attachment</item>
-        <item quantity="other">%1$d attachments</item>
-    </plurals>
-    <plurals name="text_and_x_other">
-        <item quantity="one">And %1$d other</item>
-        <item quantity="other">And %1$d others</item>
-    </plurals>
-    <plurals name="text_contact_names_last_separator_x_other">
-        <item quantity="one"> &amp; %1$d other</item>
-        <item quantity="other"> &amp; %1$d others</item>
-    </plurals>
-    <plurals name="dialog_message_confirm_retention_policy">
-        <item quantity="one">Applying the retention policy you just selected would delete a single message.\nAre you sur you want to proceed?</item>
-        <item quantity="other">Applying the retention policy you just selected would delete %1$d messages.\nAre you sur you want to proceed?</item>
-    </plurals>
-    <plurals name="text_keycloak_missing_search_result">
-        <item quantity="one">… and one additional search result\nPlease refine your search</item>
-        <item quantity="other">… and %1$d additional search results\nPlease refine your search</item>
-    </plurals>
-    <plurals name="duration_seconds">
-        <item quantity="one">1\u00a0second</item>
-        <item quantity="other">%1$d\u00a0seconds</item>
-    </plurals>
-    <plurals name="duration_minutes">
-        <item quantity="one">1\u00a0minute</item>
-        <item quantity="other">%1$d\u00a0minutes</item>
-    </plurals>
-    <plurals name="duration_hours">
-        <item quantity="one">1\u00a0hour</item>
-        <item quantity="other">%1$d\u00a0hours</item>
-    </plurals>
-    <plurals name="duration_days">
-        <item quantity="one">1\u00a0day</item>
-        <item quantity="other">%1$d\u00a0days</item>
-    </plurals>
-    <plurals name="duration_years">
-        <item quantity="one">1\u00a0year</item>
-        <item quantity="other">%1$d\u00a0years</item>
-    </plurals>
-    <plurals name="other_members_count">
-        <item quantity="one">1\u00a0member</item>
-        <item quantity="other">%1$d\u00a0members</item>
-    </plurals>
-    <plurals name="dialog_message_delete_remote_deleted_messages">
-        <item quantity="one">You currently have 1 remote deleted message in your discussions. Do you want to delete it?</item>
-        <item quantity="other">You currently have %1$d remote deleted messages in your discussions. Do you want to delete all such markers?</item>
-    </plurals>
-    <plurals name="label_xxx_contacts_sharing_their_position">
-        <item quantity="one">1 contact is sharing their location</item>
-        <item quantity="other">%1$d contacts are sharing their location</item>
-    </plurals>
-    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
-        <item quantity="one">You and 1 other are sharing their location</item>
-        <item quantity="other">You and %1$d others are sharing their location</item>
-    </plurals>
+    <string name="dialog_message_call_blocked">Olvid does not allow starting a call with more than %1$d persons.</string>
+    <string name="pref_emoji_animation_loop">Loop</string>
+    <string name="pref_emoji_animation_once">Once</string>
+    <string name="pref_emoji_animation_never">Never</string>
+    <string name="button_label_send_us_a_mail">Send us an email</string>
+    <string name="tip_new_translations_title">Enjoy Olvid in new languages!</string>
+    <string name="tip_new_translations_message">We\'ve added many new languages to Olvid using AI-based translation, so some of them may be inaccurate.\nIf this is the case, do not hesitate to tell us at **lang@olvid.io**.</string>
+    <string name="mail_subject_olvid_translation">Android app translations</string>
+    <string name="pref_app_language_category_title">AI-based translations</string>
+    <string name="pref_app_language_category_summary">Some of the app\'s translations are generated using AI and may be inaccurate. If this is the case, do not hesitate to tell us at <b>lang@olvid.io</b>.</string>
 </resources>

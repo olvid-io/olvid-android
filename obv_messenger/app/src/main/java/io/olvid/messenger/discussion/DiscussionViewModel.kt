@@ -72,6 +72,9 @@ class DiscussionViewModel : ViewModel() {
     val messageLinkPreviewUrlCache = mutableStateMapOf<Long, String>()
     val remoteDeletedMessageDeleter: MutableMap<Long, ByteArray?> = ConcurrentHashMap()
 
+    val useAnimatedEmojis by lazy { SettingsActivity.useAnimatedEmojis() }
+    val loopAnimatedEmojis by lazy { SettingsActivity.loopAnimatedEmojis() }
+
     val discussion: LiveData<Discussion> =
         discussionIdLiveData.switchMap { discussionId: Long? ->
             if (discussionId == null) {

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">"En aquest dispositiu, el dispositiu anterior que teniu a continuació es desactivarà:</item>
+        <item quantity="other">"En aquest dispositiu, els dispositius següents es desactivaran:</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d còpia de seguretat trobada</item>
+        <item quantity="other">%1$d copies de seguretat trobades</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d perfil trobat</item>
+        <item quantity="other">%1$d perfils trobats</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Sense grups</item>
+        <item quantity="one">%1$d grup</item>
+        <item quantity="other">%1$d grups</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Sense contactes</item>
+        <item quantity="one">%1$d contacte</item>
+        <item quantity="other">%1$d contactes</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Conversa arxivada</item>
+        <item quantity="other">%1$d converses arxivades</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Conversa desarxivada</item>
+        <item quantity="other">%1$d converses desarxivades</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Missatge desmarcat</item>
+        <item quantity="other">%1$d missatges desmarcats</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Eliminar la conversa seleccionada?</item>
+        <item quantity="other">Eliminar les converses seleccionades?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Eliminar el missatge seleccionat?</item>
+        <item quantity="other">Eliminar els missatges seleccionats?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Vols eliminar realment la conversa seleccionada i tots els missatges que conté?\nAquesta acció no es pot desfer.</item>
+        <item quantity="other">Vols eliminar realment les %1$d converses seleccionades i tots els missatges que contenen?\nAquesta acció no es pot desfer.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Com vols eliminar la conversa seleccionada i tots els missatges que conté?\nAquesta acció no es pot desfer.</item>
+        <item quantity="other">Com vols eliminar les %1$d converses seleccionades i tots els missatges que contenen?\nAquesta acció no es pot desfer.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Vols eliminar realment el missatge seleccionat?\nAquesta acció no es pot desfer.</item>
+        <item quantity="other">Vols eliminar realment els %1$d missatges seleccionats?\nAquesta acció no es pot desfer.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Com vols eliminar el missatge seleccionat?\nAquesta acció no es pot desfer.</item>
+        <item quantity="other">Com vols eliminar els %1$d missatges seleccionats?\nAquesta acció no es pot desfer.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Estàs a punt d\'**eliminar permanentment** un missatge per a **tothom** en aquesta conversa. Assegura\'t que això és el que vols fer.</item>
+        <item quantity="other">Estàs a punt d\'**eliminar permanentment** %1$d missatges per a **tothom** en aquesta conversa. Assegura\'t que això és el que vols fer.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Estàs a punt d\'**eliminar permanentment** una conversa i els missatges que conté per a **tothom** en aquesta conversa. Assegura\'t que això és el que vols fer.</item>
+        <item quantity="other">Estàs a punt d\'**eliminar permanentment** %1$d converses i els missatges que contenen per a **tothom** en aquestes converses. Assegura\'t que això és el que vols fer.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Estàs a punt d\'invitar cada membre del grup amb qui tens un canal (actualment 1 membre) a una conversa privada.\nVols continuar?</item>
+        <item quantity="other">Estàs a punt d\'invitar cada membre del grup amb qui tens un canal (actualment %1$d membres) a una conversa privada.\nVols continuar?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 grup en comú</item>
+        <item quantity="other">%1$d grups en comú</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Hauràs de sortir d\'aquest grup per continuar.</item>
+        <item quantity="other">. Hauràs de sortir d\'aquests grups per continuar.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Estàs a punt d\'eliminar %1$s de la teva llista d\'altres usuaris.\n\nNota que %1$s va ser convidat a %2$d grup al qual pertanys. Es tornarà a afegir a aquesta llista si s\'hi uneix. Potser vulguis sortir d\'aquest grup per evitar-ho.\n\nEliminar realment aquest usuari?</item>
+        <item quantity="other">Estàs a punt d\'eliminar %1$s de la teva llista d\'altres usuaris.\n\nNota que %1$s va ser convidat a %2$d grups als quals pertanys. Es tornarà a afegir a aquesta llista si s\'uneix a un d\'ells. Potser vulguis sortir d\'aquests grups per evitar-ho.\n\nEliminar realment aquest usuari?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Modificar aquesta configuració acceptarà automàticament una invitació a un grup pendent.\nPrem OK per confirmar la teva elecció i unir-te a aquest grup.</item>
+        <item quantity="other">Modificar aquesta configuració acceptarà automàticament %1$d invitacions a grups pendents.\nPrem OK per confirmar la teva elecció i unir-te a aquests grups.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Quan se\'t demani, selecciona la carpeta on vols desar l\'attachment seleccionat.\nNota que l\'accés a algunes carpetes pot estar restringit.</item>
+        <item quantity="other">Quan se\'t demani, selecciona la carpeta on vols desar els %1$d attachments seleccionats.\nNota que l\'accés a algunes carpetes pot estar restringit.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d seleccionat</item>
+        <item quantity="other">%1$d seleccionats</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Vols eliminar realment l\'attachment seleccionat?</item>
+        <item quantity="other">Vols eliminar realment els %1$d attachments seleccionats?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d\u00a0dia, %2$02dh %3$02dm %4$02ds</item>
+        <item quantity="other">%1$d\u00a0dies, %2$02dh %3$02dm %4$02ds</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d missatge perdut…</item>
+        <item quantity="other">%1$d missatges perduts…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Trucada de grup amb %2$s i un altre</item>
+        <item quantity="other">Trucada de grup amb %2$s i %1$d més</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Trucada de grup sense resposta amb %2$s i un altre</item>
+        <item quantity="other">Trucada de grup sense resposta amb %2$s i %1$d més</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Trucada de grup fallida amb %2$s i un altre</item>
+        <item quantity="other">Trucada de grup fallida amb %2$s i %1$d més</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Trucada de grup mentre %2$s i un altre estaven ocupats</item>
+        <item quantity="other">Trucada de grup mentre %2$s i %1$d més estaven ocupats</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Trucada de grup rebutjada amb %2$s i un altre</item>
+        <item quantity="other">Trucada de grup rebutjada amb %2$s i %1$d més</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Trucada de grup de %2$s i un altre</item>
+        <item quantity="other">Trucada de grup de %2$s i %1$d més</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d seleccionat</item>
+        <item quantity="other">%1$d seleccionats</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d seleccionat</item>
+        <item quantity="other">%1$d seleccionats</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d missatge nou</item>
+        <item quantity="other">%1$d missatges nous</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s serà convidat a unir-se al grup %2$s.</item>
+        <item quantity="other">Els %1$d contactes següents seran convidats a unir-se al grup %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s serà eliminat del grup %2$s.</item>
+        <item quantity="other">Els %1$d membres del grup següents seran eliminats de %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d missatge sense llegir</item>
+        <item quantity="other">%1$d missatges sense llegir</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d attachment</item>
+        <item quantity="other">%1$d attachments</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">I %1$d més</item>
+        <item quantity="other">I %1$d més</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d més</item>
+        <item quantity="other"> &amp; %1$d més</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Aplicar la política de retenció que acabes de seleccionar eliminarà un únic missatge.\nEstàs segur que vols continuar?</item>
+        <item quantity="other">Aplicar la política de retenció que acabes de seleccionar eliminarà %1$d missatges.\nEstàs segur que vols continuar?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… i 1 resultat de cerca addicional\nSi us plau, refina la teva cerca</item>
+        <item quantity="other">… i %1$d resultats de cerca addicionals\nSi us plau, refina la teva cerca</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1\u00a0segon</item>
+        <item quantity="other">%1$d\u00a0segons</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1\u00a0minut</item>
+        <item quantity="other">%1$d\u00a0minuts</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1\u00a0hora</item>
+        <item quantity="other">%1$d\u00a0hores</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1\u00a0dia</item>
+        <item quantity="other">%1$d\u00a0dies</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1\u00a0any</item>
+        <item quantity="other">%1$d\u00a0anys</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1\u00a0membre</item>
+        <item quantity="other">%1$d\u00a0membres</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Actualment tens 1 missatge eliminat remotament a les teves converses. Vols eliminar-lo?</item>
+        <item quantity="other">Actualment tens %1$d missatges eliminats remotament a les teves converses. Vols eliminar tots aquests marcadors?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 contacte està compartint la seva ubicació</item>
+        <item quantity="other">%1$d contactes estan compartint la seva ubicació</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Tu i 1 altre estan compartint la seva ubicació</item>
+        <item quantity="other">Tu i %1$d més estan compartint la seva ubicació</item>
+    </plurals>
+</resources>

@@ -368,7 +368,7 @@ class StorageManagerActivity : LockScreenOrNotActivity() {
                         .setNegativeButton(R.string.button_label_cancel, null)
                     builder.create().show()
                 } else if (item.itemId == R.id.action_select_all) {
-                    val adapter = tabsPagerAdapter!!.getAdapter(viewPager.getCurrentItem())
+                    val adapter = tabsPagerAdapter!!.getAdapter(viewPager.currentItem)
                     if (adapter?.fyleAndOrigins != null) {
                         viewModel.selectAllFyles(adapter.fyleAndOrigins)
                         adapter.notifyDataSetChanged()

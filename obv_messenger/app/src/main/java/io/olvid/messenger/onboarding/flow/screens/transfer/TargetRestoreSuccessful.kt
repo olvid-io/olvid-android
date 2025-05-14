@@ -63,7 +63,7 @@ import io.olvid.messenger.onboarding.flow.OnboardingStep
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
-fun NavGraphBuilder.targetRestoreSuccessful(onNewTransfer: () -> Unit, onClose: () -> Unit,) {
+fun NavGraphBuilder.targetRestoreSuccessful(onNewTransfer: () -> Unit, onClose: () -> Unit) {
     composable(
         OnboardingRoutes.TRANSFER_TARGET_RESTORE_SUCCESSFUL,
         enterTransition = { slideIntoContainer(SlideDirection.Start) },

@@ -245,7 +245,7 @@ class OnboardingViewModel : ViewModel() {
     }
 
     fun checkServerAndApiKey() {
-        if (unvalidatedServer == null || unvalidatedServer!!.length == 0) {
+        if (unvalidatedServer == null || unvalidatedServer!!.isEmpty()) {
             return
         }
         currentlyCheckingServer = unvalidatedServer

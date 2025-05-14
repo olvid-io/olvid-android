@@ -19,27 +19,20 @@
 
 package io.olvid.messenger.databases.entity.backups;
 
-import androidx.annotation.NonNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.ObvBytesKey;
 import io.olvid.engine.engine.types.sync.ObvSyncDiff;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
-import io.olvid.messenger.databases.entity.sync.OwnedIdentitySyncSnapshot;
-import io.olvid.messenger.databases.entity.sync.SettingsSyncSnapshot;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppDeviceSnapshot implements ObvSyncSnapshotNode {

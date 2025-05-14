@@ -76,7 +76,6 @@ import io.olvid.messenger.openid.KeycloakTasks;
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.services.AvailableSpaceHelper;
 import io.olvid.messenger.services.BackupCloudProviderService;
-import io.olvid.messenger.services.MDMConfigurationSingleton;
 import io.olvid.messenger.settings.PrivacyPreferenceFragment;
 import io.olvid.messenger.settings.SettingsActivity;
 

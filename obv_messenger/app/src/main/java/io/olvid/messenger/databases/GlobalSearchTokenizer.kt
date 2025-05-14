@@ -35,7 +35,7 @@ class GlobalSearchTokenizer {
         }
     }
 
-    private val database: SupportSQLiteDatabase;
+    private val database: SupportSQLiteDatabase
 
     init {
         val supportSQLiteOpenHelper = SupportOpenHelperFactory(null).create(
@@ -45,7 +45,7 @@ class GlobalSearchTokenizer {
                 callback = object :
                     SupportSQLiteOpenHelper.Callback(1) {
                     override fun onCreate(db: SupportSQLiteDatabase) {
-                        db.execSQL("CREATE VIRTUAL TABLE tokenizer USING fts3tokenize(unicode61, \"remove_diacritics=2\");");
+                        db.execSQL("CREATE VIRTUAL TABLE tokenizer USING fts3tokenize(unicode61, \"remove_diacritics=2\");")
                     }
 
                     override fun onUpgrade(

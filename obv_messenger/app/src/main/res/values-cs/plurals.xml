@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">„Na tomto zařízení bude vaše předchozí zařízení níže deaktivováno:"</item>
+        <item quantity="other">„Na tomto zařízení budou vaše zařízení níže deaktivována:"</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">Nalezeno %1$d zálohování</item>
+        <item quantity="other">Nalezeno %1$d zálohování</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">Nalezeno %1$d profil</item>
+        <item quantity="other">Nalezeno %1$d profilů</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Žádná skupina</item>
+        <item quantity="one">%1$d skupina</item>
+        <item quantity="other">%1$d skupin</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Žádný kontakt</item>
+        <item quantity="one">%1$d kontakt</item>
+        <item quantity="other">%1$d kontaktů</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Diskuze archivována</item>
+        <item quantity="other">%1$d diskuzí archivováno</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Diskuze odarchivována</item>
+        <item quantity="other">%1$d diskuzí odarchivováno</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Zpráva odebrána ze záložek</item>
+        <item quantity="other">%1$d zpráv odebráno ze záložek</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Smazat vybranou diskuzi?</item>
+        <item quantity="other">Smazat vybrané diskuse?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Smazat vybranou zprávu?</item>
+        <item quantity="other">Smazat vybrané zprávy?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Skutečně chcete smazat vybranou diskuzi a všechny zprávy v ní obsažené?\nTato akce nelze vrátit.</item>
+        <item quantity="other">Skutečně chcete smazat %1$d vybraných diskuzí a všechny zprávy v nich obsažené?\nTato akce nelze vrátit.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Jak chcete smazat vybranou diskuzi a všechny zprávy v ní obsažené?\nTato akce nelze vrátit.</item>
+        <item quantity="other">Jak chcete smazat %1$d vybraných diskuzí a všechny zprávy v nich obsažené?\nTato akce nelze vrátit.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Skutečně chcete smazat vybranou zprávu?\nTato akce nelze vrátit.</item>
+        <item quantity="other">Skutečně chcete smazat %1$d vybraných zpráv?\nTato akce nelze vrátit.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Jak chcete smazat vybranou zprávu?\nTato akce nelze vrátit.</item>
+        <item quantity="other">Jak chcete smazat %1$d vybraných zpráv?\nTato akce nelze vrátit.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Chystáte se **trvale** smazat zprávu pro **všechny** účastníky této diskuze. Ujistěte se, že to opravdu chcete udělat.</item>
+        <item quantity="other">Chystáte se **trvale** smazat %1$d zpráv pro **všechny** účastníky této diskuze. Ujistěte se, že to opravdu chcete udělat.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Chystáte se **trvale** smazat diskuzi a zprávy v ní obsažené pro **všechny** účastníky této diskuze. Ujistěte se, že to opravdu chcete udělat.</item>
+        <item quantity="other">Chystáte se **trvale** smazat %1$d diskuzí a zprávy v nich obsažené pro **všechny** účastníky těchto diskuzí. Ujistěte se, že to opravdu chcete udělat.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (aktuálně 1 člen), do soukromé diskuze.\nChcete pokračovat?</item>
+        <item quantity="other">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (aktuálně %1$d členů), do soukromé diskuze.\nChcete pokračovat?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 společná skupina</item>
+        <item quantity="other">%1$d společných skupin</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Budete muset opustit tuto skupinu, abyste mohli pokračovat.</item>
+        <item quantity="other">. Budete muset opustit tyto skupiny, abyste mohli pokračovat.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Chystáte se odstranit %1$s ze seznamu ostatních uživatelů.\n\nPoznámka: %1$s byl pozván do %2$d skupiny, do kterých patříte. Pokud se k nim připojí, bude znovu přidán do tohoto seznamu. Možná budete chtít opustit tyto skupiny, abyste tomu zabránili.\n\nSkutečně chcete odstranit tohoto uživatele?</item>
+        <item quantity="other">Chystáte se odstranit %1$s ze seznamu ostatních uživatelů.\n\nPoznámka: %1$s byl pozván do %2$d skupin, do kterých patříte. Pokud se k jedné z nich připojí, bude znovu přidán do tohoto seznamu. Možná budete chtít opustit tyto skupiny, abyste tomu zabránili.\n\nSkutečně chcete odstranit tohoto uživatele?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Změna tohoto nastavení automaticky přijme jeden čekající pozvánku do skupiny.\nStiskněte OK a potvrďte svou volbu a připojte se k této skupině.</item>
+        <item quantity="other">Změna tohoto nastavení automaticky přijme %1$d čekajících pozvánek do skupiny.\nStiskněte OK a potvrďte svou volbu a připojte se k těmto skupinám.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Až budete vyzváni, vyberte složku, do které chcete uložit vybraný příloh.</item>
+        <item quantity="other">Až budete vyzváni, vyberte složku, do které chcete uložit %1$d vybraných příloh.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d vybráno</item>
+        <item quantity="other">%1$d vybráno</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Skutečně chcete smazat vybranou přílohu?</item>
+        <item quantity="other">Skutečně chcete smazat %1$d vybraných příloh?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d\u00a0den,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
+        <item quantity="other">%1$d\u00a0dnů,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d chybějící zpráva…</item>
+        <item quantity="other">%1$d chybějících zpráv…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Skupinový hovor s %2$s a jedním dalším</item>
+        <item quantity="other">Skupinový hovor s %2$s a %1$d dalšími</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Nezodpovězený skupinový hovor s %2$s a jedním dalším</item>
+        <item quantity="other">Nezodpovězený skupinový hovor s %2$s a %1$d dalšími</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Neúspěšný skupinový hovor s %2$s a jedním dalším</item>
+        <item quantity="other">Neúspěšný skupinový hovor s %2$s a %1$d dalšími</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Skupinový hovor, zatímco %2$s a jeden další byli zaneprázdněni</item>
+        <item quantity="other">Skupinový hovor, zatímco %2$s a %1$d dalších byli zaneprázdněni</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Odmítnutý skupinový hovor s %2$s a jedním dalším</item>
+        <item quantity="other">Odmítnutý skupinový hovor s %2$s a %1$d dalšími</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Skupinový hovor od %2$s a jednoho dalšího</item>
+        <item quantity="other">Skupinový hovor od %2$s a %1$d dalších</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d vybráno</item>
+        <item quantity="other">%1$d vybráno</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d vybráno</item>
+        <item quantity="other">%1$d vybráno</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d nová zpráva</item>
+        <item quantity="other">%1$d nových zpráv</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s bude pozván do skupiny %2$s.</item>
+        <item quantity="other">Následujících %1$d kontaktů bude pozváno do skupiny %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s bude odebrán ze skupiny %2$s.</item>
+        <item quantity="other">Následujících %1$d členů skupiny bude odebráno ze skupiny %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d nová zpráva</item>
+        <item quantity="other">%1$d nových zpráv</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d příloha</item>
+        <item quantity="other">%1$d příloh</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">a %1$d další</item>
+        <item quantity="other">a %1$d dalších</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d další</item>
+        <item quantity="other"> &amp; %1$d dalších</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Použití nastavené zásady uchovávání dat by smazalo jednu zprávu.\nJste si jisti, že chcete pokračovat?</item>
+        <item quantity="other">Použití nastavené zásady uchovávání dat by smazalo %1$d zpráv.\nJste si jisti, že chcete pokračovat?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… a jeden další výsledek vyhledávání\nUpřesněte své vyhledávání</item>
+        <item quantity="other">… a %1$d dalších výsledků vyhledávání\nUpřesněte své vyhledávání</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1\u00a0sekunda</item>
+        <item quantity="other">%1$d\u00a0sekund</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1\u00a0minuta</item>
+        <item quantity="other">%1$d\u00a0minut</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1\u00a0hodina</item>
+        <item quantity="other">%1$d\u00a0hodin</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1\u00a0den</item>
+        <item quantity="other">%1$d\u00a0dnů</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1\u00a0rok</item>
+        <item quantity="other">%1$d\u00a0roků</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1\u00a0člen</item>
+        <item quantity="other">%1$d\u00a0členů</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Máte aktuálně 1 vzdáleně smazanou zprávu ve svých diskuzích. Chcete ji smazat?</item>
+        <item quantity="other">Máte aktuálně %1$d vzdáleně smazaných zpráv ve svých diskuzích. Chcete smazat všechny takové markery?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 kontakt sdílí svou polohu</item>
+        <item quantity="other">%1$d kontaktů sdílí svou polohu</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Vy a 1 další sdílíte svou polohu</item>
+        <item quantity="other">Vy a %1$d dalších sdílíte svou polohu</item>
+    </plurals>
+</resources>

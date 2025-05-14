@@ -44,7 +44,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager.LayoutParams
 import android.widget.TextView
@@ -128,6 +127,7 @@ class GalleryActivity : LockableActivity() {
 
     private val viewPager: ViewPager2 by lazy { findViewById(R.id.gallery_pager) }
     private val galleryMotionLayout: MotionLayout by lazy { findViewById(R.id.gallery_motion_layout) }
+    private val popupAnchorView: View by lazy { findViewById(R.id.popup_menu_anchor_view) }
     private val bottomBar: View by lazy { findViewById(R.id.bottom_bar) }
     private val bottomBarComposeView: ComposeView by lazy { findViewById(R.id.bottom_bar_compose_view) }
     private val fileNameTextView: TextView by lazy { findViewById(R.id.file_name_text_view) }
@@ -203,19 +203,13 @@ class GalleryActivity : LockableActivity() {
                     textBlocks?.takeIf { textBlocks.isNotEmpty() }?.let {
                         val positionBlock =
                             textBlocks.find { it.isBlock.not() } ?: textBlocks.find { it.isBlock }
-                        val anchor = View(this@GalleryActivity).apply {
-                            layoutParams = ViewGroup.LayoutParams(1, 1)
-                            setBackgroundColor(Color.TRANSPARENT)
-                            galleryMotionLayout.addView(this)
+                        popupAnchorView.apply {
                             x = positionBlock?.boundingBox?.right?.toFloat() ?: 0f
                             y = positionBlock?.boundingBox?.bottom?.toFloat() ?: 0f
                         }
                         if (it.size > 1) {
-                            PopupMenu(this@GalleryActivity, anchor, Gravity.CENTER).apply {
+                            PopupMenu(this@GalleryActivity, popupAnchorView, Gravity.CENTER).apply {
                                 menuInflater.inflate(R.menu.popup_copy_text_block_from_image, menu)
-                                setOnDismissListener {
-                                    galleryMotionLayout.removeView(anchor)
-                                }
                                 setOnMenuItemClickListener { item ->
 
                                     when (item.itemId) {
@@ -249,6 +243,7 @@ class GalleryActivity : LockableActivity() {
                                 show()
                             }
                         } else {
+                            App.toast(R.string.toast_message_text_copied_to_clipboard, Toast.LENGTH_SHORT)
                             positionBlock?.text?.let {
                                 clipboard?.setPrimaryClip(
                                     ClipData.newPlainText(
@@ -539,7 +534,7 @@ class GalleryActivity : LockableActivity() {
                     if (expiration.getVisibilityDuration() == null) {
                         return
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     return
                 }
             }
@@ -902,7 +897,7 @@ class GalleryActivity : LockableActivity() {
                             Toast.LENGTH_SHORT
                         )
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     App.toast(
                         R.string.toast_message_failed_to_save_attachment,
                         Toast.LENGTH_SHORT

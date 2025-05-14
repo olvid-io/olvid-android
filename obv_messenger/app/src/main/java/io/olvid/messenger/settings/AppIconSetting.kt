@@ -43,10 +43,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.ripple
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,12 +69,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 
 data class AppIcon(val name: String, @DrawableRes val icon: Int, @StringRes val label: Int = R.string.app_name)
 
@@ -90,13 +91,17 @@ val appIcons = listOf(
     AppIcon(".main.MainActivityGem", R.mipmap.ic_launcher_gem, R.string.app_name_gem),
     AppIcon(".main.MainActivityRosace", R.mipmap.ic_launcher_rosace, R.string.app_name_rosace),
     AppIcon(".main.MainActivityWeather", R.mipmap.ic_launcher_weather, R.string.app_name_weather),
+    AppIcon(".main.MainActivityBricks", R.mipmap.ic_launcher_bricks, R.string.app_name_bricks),
+    AppIcon(".main.MainActivityBlackClock", R.mipmap.ic_launcher_black_clock, R.string.app_name_clock),
+    AppIcon(".main.MainActivityWhiteClock", R.mipmap.ic_launcher_white_clock, R.string.app_name_clock),
+    AppIcon(".main.MainActivityCalculator", R.mipmap.ic_launcher_calculator, R.string.app_name_calculator),
 )
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AppIconSettingScreen(isCurrentIcon: (appIcon: AppIcon) -> Boolean) {
     val context = LocalContext.current
-    val currentIcon = appIcons.find { isCurrentIcon(it) } ?: appIcons.first()
+    var currentIcon by remember { mutableStateOf(appIcons.find { isCurrentIcon(it) } ?: appIcons.first()) }
     var selectedAppIcon by remember {
         mutableStateOf(currentIcon)
     }
@@ -110,7 +115,7 @@ fun AppIconSettingScreen(isCurrentIcon: (appIcon: AppIcon) -> Boolean) {
                 .widthIn(max = 600.dp)
                 .padding(8.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(color = colorResource(id = R.color.greySubtleOverlay))
+                .background(color = colorResource(id = R.color.lightGrey))
                 .padding(6.dp)
         ) {
             FlowRow(
@@ -121,11 +126,10 @@ fun AppIconSettingScreen(isCurrentIcon: (appIcon: AppIcon) -> Boolean) {
                     Column(
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
-                            .clickable(interactionSource = remember {
-                                MutableInteractionSource()
-                            }, indication = ripple()) {
-                                selectedAppIcon = appIcon
-                            }
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = ripple()
+                            ) { selectedAppIcon = appIcon }
                             .then(
                                 if (appIcon == selectedAppIcon)
                                     Modifier
@@ -134,9 +138,10 @@ fun AppIconSettingScreen(isCurrentIcon: (appIcon: AppIcon) -> Boolean) {
                                             color = colorResource(id = R.color.olvid_gradient_light),
                                             shape = RoundedCornerShape(16.dp)
                                         )
-                                        .padding(8.dp)
-                                else Modifier.padding(8.dp)
-                            ), horizontalAlignment = Alignment.CenterHorizontally
+                                else Modifier
+                            )
+                            .padding(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Image(
                             modifier = Modifier
@@ -149,8 +154,7 @@ fun AppIconSettingScreen(isCurrentIcon: (appIcon: AppIcon) -> Boolean) {
                         Text(modifier = Modifier.width(64.dp),
                             text = stringResource(id = appIcon.label),
                             textAlign = TextAlign.Center,
-                            fontSize = 13.sp,
-                            lineHeight = 17.sp,
+                            style = OlvidTypography.body2,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             color = colorResource(id = R.color.almostBlack),
@@ -161,14 +165,23 @@ fun AppIconSettingScreen(isCurrentIcon: (appIcon: AppIcon) -> Boolean) {
             TextButton(
                 modifier = Modifier.align(Alignment.End),
                 enabled = selectedAppIcon != currentIcon,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = colorResource(R.color.olvid_gradient_light),
+                    disabledContentColor = colorResource(R.color.grey),
+                ),
+                shape = RoundedCornerShape(6.dp),
                 onClick = {
                     if (hasPinnedShortcuts()) {
                         showShortcutWarning = true
                     } else {
+                        currentIcon = selectedAppIcon
                         context.setIcon(selectedAppIcon)
                     }
                 }) {
-                Text(text = stringResource(id = R.string.pref_app_icon_apply))
+                Text(
+                    text = stringResource(id = R.string.pref_app_icon_apply),
+                    style = OlvidTypography.body2,
+                )
             }
         }
     }
@@ -245,7 +258,9 @@ fun Context.setIcon(appIcon: AppIcon) {
             PackageManager.DONT_KILL_APP
         )
 
-        App.currentIcon?.let {
+        App.currentIcon?.takeIf {
+            it != appIcon
+        }?.let {
             packageManager.setComponentEnabledSetting(
                 ComponentName(
                     this,

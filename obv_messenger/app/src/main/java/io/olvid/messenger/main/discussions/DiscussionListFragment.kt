@@ -137,20 +137,19 @@ class DiscussionListFragment : RefreshingFragment() {
             override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
                 menu.clear()
                 inflater.inflate(R.menu.action_menu_delete, menu)
-                menu.findItem(R.id.action_delete_messages)
-                    ?.setTitle(SpannableString(getString(string.menu_action_delete)).apply {
-                        setSpan(
-                            ForegroundColorSpan(
-                                ContextCompat.getColor(
-                                    requireContext(),
-                                    R.color.red
-                                )
-                            ),
-                            0,
-                            length,
-                            0
-                        )
-                    })
+                menu.findItem(R.id.action_delete_messages)?.title = SpannableString(getString(string.menu_action_delete)).apply {
+                    setSpan(
+                        ForegroundColorSpan(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.red
+                            )
+                        ),
+                        0,
+                        length,
+                        0
+                    )
+                }
                 if (discussionListViewModel.selection.any { it.discussion.pinned == 0 }) {
                     inflater.inflate(R.menu.popup_discussion_pin, menu)
                 } else {

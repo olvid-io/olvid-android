@@ -492,6 +492,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
 
         const val PREF_KEY_MUTE_TROUBLESHOOTING_TIP_UNTIL: String = "pref_key_mute_troubleshooting_tip_until"
+        const val PREF_KEY_MUTE_NEW_TRANSLATIONS_TIP: String = "pref_key_mute_new_translations_tip"
 
         // BETA
         const val PREF_KEY_ENABLE_BETA_FEATURES: String = "pref_key_enable_beta_features"
@@ -541,6 +542,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
 
         // CUSTOMIZATION
+        const val PREF_KEY_APP_LANGUAGE_CATEGORY: String = "pref_key_app_language_category"
         const val PREF_KEY_APP_LANGUAGE: String = "pref_key_app_language"
         const val PREF_KEY_DARK_MODE: String = "pref_key_dark_mode"
         const val PREF_KEY_DARK_MODE_DEFAULT: Boolean = false
@@ -555,8 +557,8 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_SCREEN_SCALE: String = "pref_key_screen_scale"
         const val PREF_KEY_SCREEN_SCALE_DEFAULT: String = "1.0"
 
-        const val PREF_KEY_USE_SYSTEM_EMOJIS: String = "pref_key_use_system_emojis"
-        const val PREF_KEY_USE_SYSTEM_EMOJIS_DEFAULT: Boolean = false
+        const val PREF_KEY_USE_ANIMATED_EMOJIS: String = "pref_key_use_animated_emojis"
+        const val PREF_KEY_USE_ANIMATED_EMOJIS_DEFAULT: String = "loop"
 
         const val PREF_KEY_USE_INTERNAL_IMAGE_VIEWER: String = "pref_key_use_internal_image_viewer"
         const val PREF_KEY_USE_INTERNAL_IMAGE_VIEWER_DEFAULT: Boolean = true
@@ -1080,16 +1082,26 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         }
 
         @JvmStatic
-        fun useSystemEmojis(): Boolean {
-            return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
-                PREF_KEY_USE_SYSTEM_EMOJIS, PREF_KEY_USE_SYSTEM_EMOJIS_DEFAULT
-            )
+        fun animatedEmojisSetting(): String {
+            return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(
+                PREF_KEY_USE_ANIMATED_EMOJIS, PREF_KEY_USE_ANIMATED_EMOJIS_DEFAULT
+            ) ?: PREF_KEY_USE_ANIMATED_EMOJIS_DEFAULT
         }
 
         @JvmStatic
-        fun setUseSystemEmojis(useSystemEmojis: Boolean) {
+        fun useAnimatedEmojis(): Boolean {
+            return animatedEmojisSetting() in listOf("loop", "once")
+        }
+
+        @JvmStatic
+        fun loopAnimatedEmojis(): Boolean {
+            return animatedEmojisSetting() == "loop"
+        }
+
+        @JvmStatic
+        fun setUseAnimatedEmojis(useAnimatedEmojis: String) {
             PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
-                putBoolean(PREF_KEY_USE_SYSTEM_EMOJIS, useSystemEmojis)
+                putString(PREF_KEY_USE_ANIMATED_EMOJIS, useAnimatedEmojis)
             }
         }
 
@@ -2332,6 +2344,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     }
             }
 
+        @JvmStatic
         var backupsV2Status: Int
             get() {
                 return PreferenceManager.getDefaultSharedPreferences(App.getContext())
@@ -2357,6 +2370,20 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     .getDefaultSharedPreferences(App.getContext())
                     .edit {
                         putLong(PREF_KEY_MUTE_TROUBLESHOOTING_TIP_UNTIL, timestamp)
+                    }
+            }
+
+        @JvmStatic
+        var muteNewTranslationsTip: Boolean
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getBoolean(PREF_KEY_MUTE_NEW_TRANSLATIONS_TIP, true)
+            }
+            set(mute) {
+                PreferenceManager
+                    .getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(PREF_KEY_MUTE_NEW_TRANSLATIONS_TIP, mute)
                     }
             }
 

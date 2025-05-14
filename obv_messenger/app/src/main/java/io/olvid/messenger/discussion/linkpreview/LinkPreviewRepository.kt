@@ -39,7 +39,6 @@ import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.io.IOException
 import java.security.KeyStore
-import java.util.Arrays
 import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
@@ -61,7 +60,7 @@ class LinkPreviewRepository {
                         val trustManagers = trustManagerFactory.trustManagers
                         check(!(trustManagers.size != 1 || trustManagers[0] !is X509TrustManager)) {
                             ("Unexpected default trust managers:"
-                                    + Arrays.toString(trustManagers))
+                                    + trustManagers.contentToString())
                         }
                         val trustManager = trustManagers[0] as X509TrustManager
                         this.sslSocketFactory(sslSocketFactory, trustManager)

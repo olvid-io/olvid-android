@@ -551,7 +551,7 @@ class OnboardingFlowActivity : AppCompatActivity() {
                                     Intent(this@OnboardingFlowActivity, OnboardingFlowActivity::class.java)
                                         .putExtra(TRANSFER_TARGET_INTENT_EXTRA, true)
                                 )
-                            }, 300);
+                            }, 300)
                         },
                         onClose = {
                             App.openCurrentOwnedIdentityDetails(this@OnboardingFlowActivity)

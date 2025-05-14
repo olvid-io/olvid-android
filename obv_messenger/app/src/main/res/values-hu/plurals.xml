@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">\" ezen az eszközön az előző eszközöd alább lesz deaktiválva:</item>
+        <item quantity="other">\" ezen az eszközön az alábbi eszközeid lesznek deaktiválva:</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d biztonsági mentés talált</item>
+        <item quantity="other">%1$d biztonsági mentés talált</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d profil talált</item>
+        <item quantity="other">%1$d profil talált</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Nincs csoport</item>
+        <item quantity="one">%1$d csoport</item>
+        <item quantity="other">%1$d csoport</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Nincs kontakt</item>
+        <item quantity="one">%1$d kontakt</item>
+        <item quantity="other">%1$d kontakt</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Beszélgetés archiválva</item>
+        <item quantity="other">%1$d beszélgetés archiválva</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Beszélgetés visszaállítva</item>
+        <item quantity="other">%1$d beszélgetés visszaállítva</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Üzenet könyvjelzője törölve</item>
+        <item quantity="other">%1$d üzenet könyvjelzője törölve</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Törölni a kiválasztott beszélgetést?</item>
+        <item quantity="other">Törölni a kiválasztott beszélgetéseket?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Törölni a kiválasztott üzenetet?</item>
+        <item quantity="other">Törölni a kiválasztott üzeneteket?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Biztosan törölni szeretnéd a kiválasztott beszélgetést és az összes benne lévő üzenetet?\nEz a művelet nem vonható vissza.</item>
+        <item quantity="other">Biztosan törölni szeretnéd a %1$d kiválasztott beszélgetést és az összes benne lévő üzenetet?\nEz a művelet nem vonható vissza.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Hogyan szeretnéd törölni a kiválasztott beszélgetést és az összes benne lévő üzenetet?\nEz a művelet nem vonható vissza.</item>
+        <item quantity="other">Hogyan szeretnéd törölni a %1$d kiválasztott beszélgetést és az összes benne lévő üzenetet?\nEz a művelet nem vonható vissza.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Biztosan törölni szeretnéd a kiválasztott üzenetet?\nEz a művelet nem vonható vissza.</item>
+        <item quantity="other">Biztosan törölni szeretnéd a %1$d kiválasztott üzenetet?\nEz a művelet nem vonható vissza.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Hogyan szeretnéd törölni a kiválasztott üzenetet?\nEz a művelet nem vonható vissza.</item>
+        <item quantity="other">Hogyan szeretnéd törölni a %1$d kiválasztott üzenetet?\nEz a művelet nem vonható vissza.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">**Véglegesen** törölni fogsz egy üzenetet **mindenki** számára ebben a beszélgetésben. Kérlek, győződj meg róla, hogy ez valóban amit akarsz.</item>
+        <item quantity="other">**Véglegesen** törölni fogsz %1$d üzenetet **mindenki** számára ebben a beszélgetésben. Kérlek, győződj meg róla, hogy ez valóban amit akarsz.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">**Véglegesen** törölni fogsz egy beszélgetést és az abban lévő üzeneteket **mindenki** számára ebben a beszélgetésben. Kérlek, győződj meg róla, hogy ez valóban amit akarsz.</item>
+        <item quantity="other">**Véglegesen** törölni fogsz %1$d beszélgetést és az abban lévő üzeneteket **mindenki** számára ezekben a beszélgetésekben. Kérlek, győződj meg róla, hogy ez valóban amit akarsz.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Minden csoporttagot, akivel van csatornád (jelenleg 1 tag), meghívsz egy privát beszélgetésre.\nSzeretnéd folytatni?</item>
+        <item quantity="other">Minden csoporttagot, akivel van csatornád (jelenleg %1$d tag), meghívsz egy privát beszélgetésre.\nSzeretnéd folytatni?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 közös csoport</item>
+        <item quantity="other">%1$d közös csoport</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. El kell hagynod ezt a csoportot a folytatáshoz.</item>
+        <item quantity="other">. El kell hagynod ezeket a csoportokat a folytatáshoz.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">%1$s eltávolításával törlöd a többi felhasználók listájából.\n\nMegjegyzés: %1$s meghívást kapott %2$d csoportba, aminek tagja vagy. Újra felkerül a listára, ha csatlakozik. Érdemes lehet elhagyni ezt a csoportot, hogy ez ne történjen meg.\n\nTörölni szeretnéd ezt a felhasználót?</item>
+        <item quantity="other">%1$s eltávolításával törlöd a többi felhasználók listájából.\n\nMegjegyzés: %1$s meghívást kapott %2$d csoportba, aminek tagja vagy. Újra felkerül a listára, ha csatlakozik az egyikhez. Érdemes lehet elhagyni ezeket a csoportokat, hogy ez ne történjen meg.\n\nTörölni szeretnéd ezt a felhasználót?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Ennek a beállításnak a módosítása automatikusan elfogad egy függőben lévő csoport meghívást.\nNyomd meg az OK-t a választás megerősítéséhez és a csoporthoz való csatlakozáshoz.</item>
+        <item quantity="other">Ennek a beállításnak a módosítása automatikusan elfogad %1$d függőben lévő csoport meghívást.\nNyomd meg az OK-t a választás megerősítéséhez és a csoporthoz való csatlakozáshoz.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Amikor a rendszer kéri, válaszd ki azt a mappát, ahová a kiválasztott mellékletet szeretnéd menteni.\nMegjegyzés: egyes mappákhoz való hozzáférés korlátozott lehet.</item>
+        <item quantity="other">Amikor a rendszer kéri, válaszd ki azt a mappát, ahová a %1$d kiválasztott mellékletet szeretnéd menteni.\nMegjegyzés: egyes mappákhoz való hozzáférés korlátozott lehet.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d kiválasztva</item>
+        <item quantity="other">%1$d kiválasztva</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Biztosan törölni szeretnéd a kiválasztott mellékletet?</item>
+        <item quantity="other">Biztosan törölni szeretnéd a %1$d kiválasztott mellékletet?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d\u00a0nap,\u00a0%2$02d óra\u00a0%3$02d perc\u00a0%4$02d másodperc</item>
+        <item quantity="other">%1$d\u00a0nap,\u00a0%2$02d óra\u00a0%3$02d perc\u00a0%4$02d másodperc</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d hiányzó üzenet…</item>
+        <item quantity="other">%1$d hiányzó üzenet…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Csoportbeszélgetés %2$s-sel és még 1 fővel</item>
+        <item quantity="other">Csoportbeszélgetés %2$s-sel és %1$d fővel</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Nem fogadott csoportbeszélgetés %2$s-sel és még 1 fővel</item>
+        <item quantity="other">Nem fogadott csoportbeszélgetés %2$s-sel és %1$d fővel</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Sikertelen csoportbeszélgetés %2$s-sel és még 1 fővel</item>
+        <item quantity="other">Sikertelen csoportbeszélgetés %2$s-sel és %1$d fővel</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Csoportbeszélgetés, miközben %2$s és még 1 fő foglalt</item>
+        <item quantity="other">Csoportbeszélgetés, miközben %2$s és %1$d fő foglalt</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Elutasított csoportbeszélgetés %2$s-sel és még 1 fővel</item>
+        <item quantity="other">Elutasított csoportbeszélgetés %2$s-sel és %1$d fővel</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Csoportbeszélgetés %2$s-sel és még 1 fővel</item>
+        <item quantity="other">Csoportbeszélgetés %2$s-sel és %1$d fővel</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d kiválasztva</item>
+        <item quantity="other">%1$d kiválasztva</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d kiválasztva</item>
+        <item quantity="other">%1$d kiválasztva</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d új üzenet</item>
+        <item quantity="other">%1$d új üzenet</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s meghívása a %2$s csoportba.</item>
+        <item quantity="other">A következő %1$d kontakt meghívása a %2$s csoportba: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s eltávolítása a %2$s csoportból.</item>
+        <item quantity="other">A következő %1$d csoporttag eltávolítása a %2$s csoportból: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d új üzenet</item>
+        <item quantity="other">%1$d új üzenet</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d melléklet</item>
+        <item quantity="other">%1$d melléklet</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">és %1$d más</item>
+        <item quantity="other">és %1$d más</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one">&amp; %1$d más</item>
+        <item quantity="other">&amp; %1$d más</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">A kiválasztott megőrzési szabály alkalmazása egy üzenetet töröl.\nBiztosan folytatni szeretnéd?</item>
+        <item quantity="other">A kiválasztott megőrzési szabály alkalmazása %1$d üzenetet töröl.\nBiztosan folytatni szeretnéd?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… és 1 további keresési eredmény\nFinomítsd a keresést</item>
+        <item quantity="other">… és %1$d további keresési eredmény\nFinomítsd a keresést</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1\u00a0másodperc</item>
+        <item quantity="other">%1$d\u00a0másodperc</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1\u00a0perc</item>
+        <item quantity="other">%1$d\u00a0perc</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1\u00a0óra</item>
+        <item quantity="other">%1$d\u00a0óra</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1\u00a0nap</item>
+        <item quantity="other">%1$d\u00a0nap</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1\u00a0év</item>
+        <item quantity="other">%1$d\u00a0év</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1\u00a0tag</item>
+        <item quantity="other">%1$d\u00a0tag</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Jelenleg 1 távolról törölt üzenet van a beszélgetéseidben. Törölni szeretnéd?</item>
+        <item quantity="other">Jelenleg %1$d távolról törölt üzenet van a beszélgetéseidben. Törölni szeretnéd az összes ilyen jelölést?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 kontakt megosztja a helyzetét</item>
+        <item quantity="other">%1$d kontakt megosztja a helyzetét</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Te és 1 másik megosztja a helyzetét</item>
+        <item quantity="other">Te és %1$d másik megosztja a helyzetét</item>
+    </plurals>
+</resources>

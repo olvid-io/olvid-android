@@ -30,7 +30,6 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.InputType
-import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -49,7 +48,6 @@ import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager.LayoutParams
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.ImageView
@@ -61,7 +59,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.cardview.widget.CardView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -77,7 +74,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil.ItemCallback
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
@@ -105,7 +101,6 @@ import io.olvid.messenger.customClasses.MuteNotificationDialog.MuteType.PROFILE
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.TextChangeListener
-import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedDevice
 import io.olvid.messenger.databases.entity.OwnedIdentity
@@ -115,10 +110,8 @@ import io.olvid.messenger.fragments.FullScreenImageFragment
 import io.olvid.messenger.fragments.SubscriptionStatusFragment
 import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.notifications.AndroidNotificationManager
-import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.plus_button.PlusButtonActivity
-import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.settings.SettingsActivity.Companion.contactDisplayNameFormat
 import io.olvid.messenger.settings.SettingsActivity.Companion.uppercaseLastName
 import java.util.Locale
@@ -296,7 +289,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
             if (identityObserver.ownedIdentity!!.isHidden) {
                 menuInflater.inflate(R.menu.menu_owned_identity_details_hidden, menu)
                 val neutralNotificationItem = menu.findItem(R.id.action_neutral_notification)
-                neutralNotificationItem.setChecked(identityObserver.ownedIdentity!!.prefShowNeutralNotificationWhenHidden)
+                neutralNotificationItem.isChecked = identityObserver.ownedIdentity!!.prefShowNeutralNotificationWhenHidden
             }
         }
         // make the delete profile item red
@@ -309,7 +302,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                 spannableString.length,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            deleteItem.setTitle(spannableString)
+            deleteItem.title = spannableString
         }
         return true
     }
@@ -902,6 +895,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
     }
 
 
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
             FULL_SCREEN_IMAGE_FRAGMENT_TAG

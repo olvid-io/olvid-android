@@ -61,6 +61,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.statusBars
@@ -74,8 +75,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetScaffoldState
 import androidx.compose.material.BottomSheetValue.Collapsed
@@ -917,7 +916,9 @@ private fun ColumnScope.CallBottomSheetContent(
                             }
                         }
                         Box {
-                            InitialView(initialViewSetup = { initialView ->
+                            InitialView(
+                                modifier = Modifier.requiredSize(56.dp),
+                                initialViewSetup = { initialView ->
                                 callParticipant.contact?.let {
                                     initialView.setContact(it)
                                 }
@@ -1824,7 +1825,10 @@ fun AudioParticipant(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        InitialView(initialViewSetup = initialViewSetup)
+        InitialView(
+            modifier = Modifier.requiredSize(56.dp),
+            initialViewSetup = initialViewSetup
+        )
         Spacer(modifier = Modifier.width(12.dp))
         Column (
             modifier = Modifier.weight(1f, true)

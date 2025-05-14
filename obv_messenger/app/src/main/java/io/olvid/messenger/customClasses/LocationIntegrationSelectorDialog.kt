@@ -36,7 +36,7 @@ import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum
 
 class LocationIntegrationSelectorDialog(
     private val context: Context,
-    private val hideSettingsBottomMessage: Boolean,
+    hideSettingsBottomMessage: Boolean,
     private val onIntegrationSelectedListener: OnIntegrationSelectedListener
 ) {
     private val builder: AlertDialog.Builder

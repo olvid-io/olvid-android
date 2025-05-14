@@ -219,7 +219,7 @@ public class StringUtils {
         return computedEmojiLength <= maxLength;
     }
 
-    private static boolean isEmojiCodepoint(int codePoint) {
+    static boolean isEmojiCodepoint(int codePoint) {
         if (codePoint >= 0x1f000 && codePoint <= 0x1faff) {
             return true;
         }

@@ -75,7 +75,6 @@ import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.switchMap
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.MarginPageTransformer
@@ -131,9 +130,7 @@ import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.NO
 import io.olvid.messenger.troubleshooting.TroubleshootingActivity
 import io.olvid.messenger.webrtc.CallNotificationManager
 import io.olvid.messenger.webrtc.components.CallNotification
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 class MainActivity : LockableActivity(), OnClickListener {
@@ -814,6 +811,7 @@ class MainActivity : LockableActivity(), OnClickListener {
         }
     }
 
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         if (!moveTaskToBack(true)) {
             finishAndRemoveTask()

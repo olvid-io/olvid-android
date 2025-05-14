@@ -19,46 +19,19 @@
 
 package io.olvid.engine.identity.databases.backups;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
-import io.olvid.engine.Logger;
-import io.olvid.engine.datatypes.BackupSeed;
-import io.olvid.engine.datatypes.Identity;
-import io.olvid.engine.datatypes.containers.GroupV2;
-import io.olvid.engine.datatypes.key.asymmetric.EncryptionPrivateKey;
-import io.olvid.engine.datatypes.key.asymmetric.ServerAuthenticationPrivateKey;
-import io.olvid.engine.datatypes.key.symmetric.MACKey;
-import io.olvid.engine.encoder.Encoded;
-import io.olvid.engine.engine.types.ObvBytesKey;
-import io.olvid.engine.engine.types.ObvCapability;
-import io.olvid.engine.engine.types.ObvGroupOwnerAndUidKey;
-import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.sync.ObvSyncDiff;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
-import io.olvid.engine.identity.databases.ContactGroup;
-import io.olvid.engine.identity.databases.ContactGroupV2;
-import io.olvid.engine.identity.databases.ContactIdentity;
-import io.olvid.engine.identity.databases.KeycloakServer;
-import io.olvid.engine.identity.databases.OwnedDevice;
 import io.olvid.engine.identity.databases.OwnedIdentity;
 import io.olvid.engine.identity.databases.OwnedIdentityDetails;
-import io.olvid.engine.identity.databases.sync.ContactSyncSnapshot;
-import io.olvid.engine.identity.databases.sync.GroupV1SyncSnapshot;
-import io.olvid.engine.identity.databases.sync.GroupV2SyncSnapshot;
 import io.olvid.engine.identity.databases.sync.IdentityDetailsSyncSnapshot;
-import io.olvid.engine.identity.databases.sync.KeycloakSyncSnapshot;
 import io.olvid.engine.identity.datatypes.IdentityManagerSession;
-import io.olvid.engine.protocol.datatypes.ProtocolStarterDelegate;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)

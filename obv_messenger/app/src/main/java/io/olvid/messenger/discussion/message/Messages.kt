@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -120,6 +121,7 @@ import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder.DeletionChoice.LOCAL
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.customClasses.getShortEmojis
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.Discussion
@@ -131,6 +133,7 @@ import io.olvid.messenger.databases.entity.MessageMetadata
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
+import io.olvid.messenger.designsystem.components.AnimatedEmoji
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionViewModel
 import io.olvid.messenger.discussion.linkpreview.LinkPreview
@@ -252,6 +255,8 @@ fun Message(
     showSender: Boolean,
     lastFromSender: Boolean,
     scale: Float,
+    useAnimatedEmojis: Boolean = false,
+    loopAnimatedEmojis: Boolean = false,
     linkPreviewViewModel: LinkPreviewViewModel? = null,
     messageExpiration: MessageExpiration? = null,
     discussionViewModel: DiscussionViewModel? = null,
@@ -261,15 +266,16 @@ fun Message(
     openOnClick: Boolean = true,
     openViewerCallback: (() -> Unit)? = null,
     saveAttachment: () -> Unit = {},
-    saveAllAttachments: () -> Unit = {}
+    saveAllAttachments: () -> Unit = {},
+    blockSwipe: Boolean = false,
 ) {
     Box {
         val maxWidth = 400.dp
         var enableSwipe by remember { mutableStateOf(true) }
         SwipeForActionBox(
             modifier = modifier,
-            enabledFromStartToEnd = enableSwipe && discussionViewModel?.isSelectingForDeletion != true && replyAction != null,
-            enabledFromEndToStart = enableSwipe && discussionViewModel?.isSelectingForDeletion != true,
+            enabledFromStartToEnd = blockSwipe.not() && enableSwipe && discussionViewModel?.isSelectingForDeletion != true && replyAction != null,
+            enabledFromEndToStart = blockSwipe.not() && enableSwipe && discussionViewModel?.isSelectingForDeletion != true,
             callbackStartToEnd = replyAction,
             callbackEndToStart = menuAction,
             backgroundContentFromStartToEnd = {
@@ -457,6 +463,8 @@ fun Message(
                             discussionViewModel = discussionViewModel,
                             discussionSearch = discussionSearch,
                             scale = scale,
+                            useAnimatedEmojis = useAnimatedEmojis,
+                            loopAnimatedEmojis = loopAnimatedEmojis,
                             openDiscussionDetailsCallback = openDiscussionDetailsCallback,
                             messageBubbleInteractionSource = interactionSource
                         )
@@ -510,7 +518,9 @@ fun Message(
                     // reactions
                     Reactions(
                         modifier = if (message.isInbound.not()) Modifier.align(Alignment.End) else Modifier,
-                        message = message
+                        message = message,
+                        useAnimatedEmojis = useAnimatedEmojis,
+                        loopAnimatedEmojis = loopAnimatedEmojis,
                     )
                 }
 
@@ -716,6 +726,7 @@ private fun Replied(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(RoundedCornerShape(4.dp))
                 .background(
                     color = color,
                     shape = RoundedCornerShape(4.dp)
@@ -808,6 +819,8 @@ fun MessageBody(
     onLongClick: () -> Unit,
     onCallBackButtonClicked: (callLogId: Long) -> Unit,
     scale: Float,
+    useAnimatedEmojis: Boolean,
+    loopAnimatedEmojis: Boolean,
     discussionViewModel: DiscussionViewModel? = null,
     discussionSearch: DiscussionSearch? = null,
     openDiscussionDetailsCallback: (() -> Unit)? = null,
@@ -1076,98 +1089,114 @@ fun MessageBody(
                 }
                 val uriHandler = LocalUriHandler.current
                 if (text.isNotBlank()) {
-                    val shortEmoji = StringUtils.isShortEmojiString(text.text, 5)
-                    val textSize = if (shortEmoji) 48.sp * scale else 16.sp * scale
-                    val textAlign = if (shortEmoji) TextAlign.Center else TextAlign.Start
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .pointerInput(message) {
-                                detectTapGestures(
-                                    onPress = { offset ->
-                                        val press = PressInteraction.Press(offset)
-                                        messageBubbleInteractionSource.emit(press)
-                                        tryAwaitRelease()
-                                        messageBubbleInteractionSource.emit(
-                                            PressInteraction.Release(
-                                                press
+                    val shortEmojis = text.text.getShortEmojis(5)
+                    if (useAnimatedEmojis == true && shortEmojis.isNotEmpty()) {
+                        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                            shortEmojis.forEach { shortEmoji ->
+                                AnimatedEmoji(
+                                    modifier = Modifier.padding(horizontal = 2.dp),
+                                    shortEmoji = shortEmoji,
+                                    size = 48 * scale,
+                                    loop = loopAnimatedEmojis,
+                                    onLongClick = onLongClick,
+                                    onDoubleClick = { onDoubleClick?.invoke() }
+                                )
+                            }
+                        }
+                    } else {
+                        val textSize = if (shortEmojis.isNotEmpty()) 48.sp * scale else 16.sp * scale
+                        val textAlign = if (shortEmojis.isNotEmpty()) TextAlign.Center else TextAlign.Start
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .pointerInput(message) {
+                                    detectTapGestures(
+                                        onPress = { offset ->
+                                            val press = PressInteraction.Press(offset)
+                                            messageBubbleInteractionSource.emit(press)
+                                            tryAwaitRelease()
+                                            messageBubbleInteractionSource.emit(
+                                                PressInteraction.Release(
+                                                    press
+                                                )
                                             )
-                                        )
-                                    },
-                                    onLongPress = { onLongClick() },
-                                    onDoubleTap = { onDoubleClick?.invoke() }) { offset ->
-                                    layoutResult?.let { layoutResult ->
-                                        val position = layoutResult.getOffsetForPosition(offset)
-                                        text
-                                            .getStringAnnotations(
-                                                tag = MENTION_ANNOTATION_TAG,
-                                                start = position,
-                                                end = position,
-                                            )
-                                            .firstOrNull()
-                                            ?.let { annotation ->
-                                                val bytesOwnedIdentity =
-                                                    AppSingleton.getBytesCurrentIdentity()
-                                                        ?: byteArrayOf()
-                                                val userIdentifier =
-                                                    ObvBase64.decode(annotation.item)
-                                                if (bytesOwnedIdentity.contentEquals(userIdentifier)) {
-                                                    context.startActivity(
-                                                        Intent(
-                                                            context,
-                                                            OwnedIdentityDetailsActivity::class.java
+                                        },
+                                        onLongPress = { onLongClick() },
+                                        onDoubleTap = { onDoubleClick?.invoke() }) { offset ->
+                                        layoutResult?.let { layoutResult ->
+                                            val position = layoutResult.getOffsetForPosition(offset)
+                                            text
+                                                .getStringAnnotations(
+                                                    tag = MENTION_ANNOTATION_TAG,
+                                                    start = position,
+                                                    end = position,
+                                                )
+                                                .firstOrNull()
+                                                ?.let { annotation ->
+                                                    val bytesOwnedIdentity =
+                                                        AppSingleton.getBytesCurrentIdentity()
+                                                            ?: byteArrayOf()
+                                                    val userIdentifier =
+                                                        ObvBase64.decode(annotation.item)
+                                                    if (bytesOwnedIdentity.contentEquals(
+                                                            userIdentifier
                                                         )
-                                                    )
-                                                } else {
-                                                    // check that there is indeed a contact
-                                                    App.runThread {
-                                                        val bytesOwnedIdentity =
-                                                            AppSingleton.getBytesCurrentIdentity()
-                                                        if (bytesOwnedIdentity != null
-                                                            && AppDatabase
-                                                                .getInstance()
-                                                                .contactDao()[bytesOwnedIdentity, userIdentifier] != null
-                                                        ) {
-                                                            AppSingleton.getBytesCurrentIdentity()?.let {
-                                                                App.openContactDetailsActivity(
+                                                    ) {
+                                                        context.startActivity(
+                                                            Intent(
+                                                                context,
+                                                                OwnedIdentityDetailsActivity::class.java
+                                                            )
+                                                        )
+                                                    } else {
+                                                        // check that there is indeed a contact
+                                                        App.runThread {
+                                                            val bytesOwnedIdentity =
+                                                                AppSingleton.getBytesCurrentIdentity()
+                                                            if (bytesOwnedIdentity != null
+                                                                && AppDatabase
+                                                                    .getInstance()
+                                                                    .contactDao()[bytesOwnedIdentity, userIdentifier] != null
+                                                            ) {
+                                                                AppSingleton.getBytesCurrentIdentity()?.let {App.openContactDetailsActivity(
                                                                     context,
                                                                     it,
-                                                                    userIdentifier
-                                                                )
+                                                                    userIdentifier)
+                                                                }
                                                             }
                                                         }
                                                     }
+                                                    return@detectTapGestures
                                                 }
-                                                return@detectTapGestures
-                                            }
-                                        text
-                                            .getStringAnnotations(
-                                                tag = LINK_ANNOTATION_TAG,
-                                                start = position,
-                                                end = position,
-                                            )
-                                            .firstOrNull()
-                                            ?.let { annotation ->
-                                                uriHandler.openUri(annotation.item)
-                                                return@detectTapGestures
-                                            }
-                                        onClick()
+                                            text
+                                                .getStringAnnotations(
+                                                    tag = LINK_ANNOTATION_TAG,
+                                                    start = position,
+                                                    end = position,
+                                                )
+                                                .firstOrNull()
+                                                ?.let { annotation ->
+                                                    uriHandler.openUri(annotation.item)
+                                                    return@detectTapGestures
+                                                }
+                                            onClick()
+                                        }
                                     }
-                                }
-                            },
-                        text = text,
-                        textAlign = if (message.isInbound || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) textAlign else TextAlign.Center,
-                        onTextLayout = { layoutResult = it },
-                        overflow = TextOverflow.Visible,
-                        color = if (message.isInbound) colorResource(id = R.color.inboundMessageBody) else colorResource(
-                            id = R.color.primary700
-                        ),
-                        style = if (message.isInbound || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) OlvidTypography.body1.copy(
-                            fontSize = textSize,
-                            lineHeight = 1.1.em
-                        ) else OlvidTypography.body2,
-                        inlineContent = inlineContentMap(scale = scale)
-                    )
+                                },
+                            text = text,
+                            textAlign = if (message.isInbound || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) textAlign else TextAlign.Center,
+                            onTextLayout = { layoutResult = it },
+                            overflow = TextOverflow.Visible,
+                            color = if (message.isInbound) colorResource(id = R.color.inboundMessageBody) else colorResource(
+                                id = R.color.primary700
+                            ),
+                            style = if (message.isInbound || message.messageType == Message.TYPE_OUTBOUND_MESSAGE) OlvidTypography.body1.copy(
+                                fontSize = textSize,
+                                lineHeight = 1.1.em
+                            ) else OlvidTypography.body2,
+                            inlineContent = inlineContentMap(scale = scale)
+                        )
+                    }
                 }
             }
         }

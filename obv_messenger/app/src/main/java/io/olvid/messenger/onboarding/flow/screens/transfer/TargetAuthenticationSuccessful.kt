@@ -40,7 +40,7 @@ import io.olvid.messenger.onboarding.flow.OnboardingRoutes
 import io.olvid.messenger.onboarding.flow.OnboardingScreen
 import io.olvid.messenger.onboarding.flow.OnboardingStep
 
-fun NavGraphBuilder.targetAuthenticationSuccessful(onClose: () -> Unit,) {
+fun NavGraphBuilder.targetAuthenticationSuccessful(onClose: () -> Unit) {
     composable(
         OnboardingRoutes.TRANSFER_TARGET_AUTHENTICATION_SUCCESSFUL,
         enterTransition = { slideIntoContainer(SlideDirection.Start) },

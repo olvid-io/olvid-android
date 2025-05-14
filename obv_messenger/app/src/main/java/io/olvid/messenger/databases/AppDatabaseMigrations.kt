@@ -53,17 +53,17 @@ internal object AppDatabaseMigrations {
 
         object : Migration(74, 75) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                Logger.w("ROOM MIGRATING FROM VERSION 74 TO 75");
+                Logger.w("ROOM MIGRATING FROM VERSION 74 TO 75")
 
-                db.execSQL("CREATE TABLE IF NOT EXISTS `message_return_receipt_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nonce` BLOB NOT NULL, `payload` BLOB NOT NULL, `timestamp` INTEGER NOT NULL)");
-                db.execSQL("CREATE INDEX IF NOT EXISTS `index_message_return_receipt_table_return_receipt_nonce` ON `message_return_receipt_table` (`nonce`)");
+                db.execSQL("CREATE TABLE IF NOT EXISTS `message_return_receipt_table` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nonce` BLOB NOT NULL, `payload` BLOB NOT NULL, `timestamp` INTEGER NOT NULL)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_message_return_receipt_table_return_receipt_nonce` ON `message_return_receipt_table` (`nonce`)")
             }
         },
 
         object : Migration(73, 74) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                Logger.w("ROOM MIGRATING FROM VERSION 73 TO 74");
-                db.execSQL("CREATE INDEX IF NOT EXISTS `index_message_table_location_type` ON `message_table` (`location_type`)");
+                Logger.w("ROOM MIGRATING FROM VERSION 73 TO 74")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_message_table_location_type` ON `message_table` (`location_type`)")
             }
         },
 

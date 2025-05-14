@@ -80,8 +80,14 @@ public class OwnIdentitySelectorPopupWindow {
         this.activity = activity;
         this.anchorView = anchorView;
         final DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
-        offsetPixelX = activity.getResources().getDimensionPixelSize(R.dimen.owned_identity_list_popup_y_offset);
-        offsetPixelY = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, metrics) + offsetPixelX;
+        if (anchorView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+            offsetPixelX = - activity.getResources().getDimensionPixelSize(R.dimen.owned_identity_list_popup_y_offset);
+            offsetPixelY = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, metrics) - offsetPixelX;
+        } else {
+            offsetPixelX = activity.getResources().getDimensionPixelSize(R.dimen.owned_identity_list_popup_y_offset);
+            offsetPixelY = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, metrics) + offsetPixelX;
+        }
+
 
         @SuppressLint("InflateParams")
         View popupView = LayoutInflater.from(activity).inflate(R.layout.popup_owned_identity_selector, null);

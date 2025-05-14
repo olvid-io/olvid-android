@@ -56,7 +56,7 @@ class BackupsV2ViewModel : ViewModel() {
 
     val deviceBackup: MutableState<List<DeviceBackupProfile>> = mutableStateOf(emptyList())
     val profileSnapshots: MutableState<List<ProfileBackupSnapshot>> = mutableStateOf(emptyList())
-    val selectedDeviceBackupProfile: MutableState<DeviceBackupProfile?> = mutableStateOf(null);
+    val selectedDeviceBackupProfile: MutableState<DeviceBackupProfile?> = mutableStateOf(null)
     val selectedProfileDeviceList: MutableState<ObvDeviceList?> = mutableStateOf(null)
     val keycloakInfo: MutableState<KeycloakInfo?> = mutableStateOf(null)
 
@@ -130,7 +130,7 @@ class BackupsV2ViewModel : ViewModel() {
 
     fun fetchProfileSnapshots(deviceBackupProfile: DeviceBackupProfile) {
         val fetchId = fetchCount.addAndGet(1)
-        selectedDeviceBackupProfile.value = deviceBackupProfile;
+        selectedDeviceBackupProfile.value = deviceBackupProfile
         backupProfileSnapshotsFetchState.value = BackupSnapshotsFetchState.FETCHING
         profileSnapshots.value = emptyList()
         App.runThread {
@@ -208,7 +208,7 @@ class BackupsV2ViewModel : ViewModel() {
                             backupRestoreState.value = BackupRestoreState.SUCCESS
                         }
                     }
-                    AppSingleton.getEngine().addNotificationListener(EngineNotifications.ENGINE_SNAPSHOT_RESTORATION_FINISHED, engineListenerForRestore, ListenerPriority.LOW);
+                    AppSingleton.getEngine().addNotificationListener(EngineNotifications.ENGINE_SNAPSHOT_RESTORATION_FINISHED, engineListenerForRestore, ListenerPriority.LOW)
 
                     App.runThread {
                         if (AppSingleton.getEngine().restoreProfile(

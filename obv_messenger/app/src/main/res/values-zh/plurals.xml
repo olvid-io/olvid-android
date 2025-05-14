@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">“在此设备上，您之前的设备将会被停用：”</item>
+        <item quantity="other">“在此设备上，您之前的设备将会被停用：”</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">找到 %1$d 个备份</item>
+        <item quantity="other">找到 %1$d 个备份</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">找到 %1$d 个资料</item>
+        <item quantity="other">找到 %1$d 个资料</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">无群组</item>
+        <item quantity="one">%1$d 个群组</item>
+        <item quantity="other">%1$d 个群组</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">无联系人</item>
+        <item quantity="one">%1$d 个联系人</item>
+        <item quantity="other">%1$d 个联系人</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">已归档对话</item>
+        <item quantity="other">已归档 %1$d 个对话</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">已取消归档对话</item>
+        <item quantity="other">已取消归档 %1$d 个对话</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">已取消收藏消息</item>
+        <item quantity="other">已取消收藏 %1$d 条消息</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">删除选定的对话？</item>
+        <item quantity="other">删除选定的对话？</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">删除选定的消息？</item>
+        <item quantity="other">删除选定的消息？</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">您确定要删除选定的对话及其包含的所有消息吗？\n此操作无法撤销。</item>
+        <item quantity="other">您确定要删除 %1$d 个选定的对话及其包含的所有消息吗？\n此操作无法撤销。</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">您想如何删除选定的对话及其包含的所有消息？\n此操作无法撤销。</item>
+        <item quantity="other">您想如何删除 %1$d 个选定的对话及其包含的所有消息？\n此操作无法撤销。</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">您确定要删除选定的消息吗？\n此操作无法撤销。</item>
+        <item quantity="other">您确定要删除 %1$d 条选定的消息吗？\n此操作无法撤销。</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">您想如何删除选定的消息？\n此操作无法撤销。</item>
+        <item quantity="other">您想如何删除 %1$d 条选定的消息？\n此操作无法撤销。</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">您即将**永久**删除此对话中的一条消息，**对所有人**可见。请确保这是您想要的操作。</item>
+        <item quantity="other">您即将**永久**删除此对话中的 %1$d 条消息，**对所有人**可见。请确保这是您想要的操作。</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">您即将**永久**删除一个对话及其消息，**对所有人**可见。请确保这是您想要的操作。</item>
+        <item quantity="other">您即将**永久**删除 %1$d 个对话及其消息，**对所有人**可见。请确保这是您想要的操作。</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">您即将邀请该群组（当前 1 名成员）中的每位成员加入一个私密对话。\n您要继续吗？</item>
+        <item quantity="other">您即将邀请该群组（当前 %1$d 名成员）中的每位成员加入一个私密对话。\n您要继续吗？</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 个共同群组</item>
+        <item quantity="other">%1$d 个共同群组</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">。您需要退出该群组才能继续。</item>
+        <item quantity="other">。您需要退出这些群组才能继续。</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">您即将从您的其他用户列表中删除 %1$s。\n\n请注意，%1$s 曾被邀请加入您所属的 %2$d 个群组。如果他们加入其中一个群组，他们将被重新添加到此列表中。您可能需要退出这些群组以避免这种情况。\n\n真的删除此用户吗？</item>
+        <item quantity="other">您即将从您的其他用户列表中删除 %1$s。\n\n请注意，%1$s 曾被邀请加入您所属的 %2$d 个群组。如果他们加入其中一个群组，他们将被重新添加到此列表中。您可能需要退出这些群组以避免这种情况。\n\n真的删除此用户吗？</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">修改此设置将自动接受一个待处理的群组邀请。\n按确定确认您的选择并加入此群组。</item>
+        <item quantity="other">修改此设置将自动接受 %1$d 个待处理的群组邀请。\n按确定确认您的选择并加入这些群组。</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">当提示时，请选择保存选定附件的文件夹。\n请注意，访问某些文件夹可能会受到限制。</item>
+        <item quantity="other">当提示时，请选择保存 %1$d 个选定附件的文件夹。\n请注意，访问某些文件夹可能会受到限制。</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d 个已选</item>
+        <item quantity="other">%1$d 个已选</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">您确定要删除选定的附件吗？</item>
+        <item quantity="other">您确定要删除 %1$d 个选定的附件吗？</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d 天，%2$02d 小时 %3$02d 分 %4$02d 秒</item>
+        <item quantity="other">%1$d 天，%2$02d 小时 %3$02d 分 %4$02d 秒</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d 条未找到的消息…</item>
+        <item quantity="other">%1$d 条未找到的消息…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">与 %2$s 和 1 位其他人的群组通话</item>
+        <item quantity="other">与 %2$s 和 %1$d 位其他人的群组通话</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">未接听的与 %2$s 和 1 位其他人的群组通话</item>
+        <item quantity="other">未接听的与 %2$s 和 %1$d 位其他人的群组通话</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">与 %2$s 和 1 位其他人的群组通话失败</item>
+        <item quantity="other">与 %2$s 和 %1$d 位其他人的群组通话失败</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">与 %2$s 和 1 位其他人在忙时进行群组通话</item>
+        <item quantity="other">与 %2$s 和 %1$d 位其他人在忙时进行群组通话</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">被拒绝的与 %2$s 和 1 位其他人的群组通话</item>
+        <item quantity="other">被拒绝的与 %2$s 和 %1$d 位其他人的群组通话</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">来自 %2$s 和 1 位其他人的群组通话</item>
+        <item quantity="other">来自 %2$s 和 %1$d 位其他人的群组通话</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d 个已选</item>
+        <item quantity="other">%1$d 个已选</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d 个已选</item>
+        <item quantity="other">%1$d 个已选</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d 条新消息</item>
+        <item quantity="other">%1$d 条新消息</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s 将被邀请加入群组 %2$s。</item>
+        <item quantity="other">以下 %1$d 位联系人将被邀请加入群组 %2$s： %3$s。</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s 将被从群组 %2$s 中移除。</item>
+        <item quantity="other">以下 %1$d 位群组成员将被从 %2$s 中移除： %3$s。</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d 条未读消息</item>
+        <item quantity="other">%1$d 条未读消息</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d 个附件</item>
+        <item quantity="other">%1$d 个附件</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">和 %1$d 个其他</item>
+        <item quantity="other">和 %1$d 个其他</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d 个其他</item>
+        <item quantity="other"> &amp; %1$d 个其他</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">应用您刚刚选择的保留策略将删除一条消息。\n您确定要继续吗？</item>
+        <item quantity="other">应用您刚刚选择的保留策略将删除 %1$d 条消息。\n您确定要继续吗？</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">…和 1 个其他搜索结果\n请优化您的搜索</item>
+        <item quantity="other">…和 %1$d 个其他搜索结果\n请优化您的搜索</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1 秒</item>
+        <item quantity="other">%1$d 秒</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1 分钟</item>
+        <item quantity="other">%1$d 分钟</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1 小时</item>
+        <item quantity="other">%1$d 小时</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1 天</item>
+        <item quantity="other">%1$d 天</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1 年</item>
+        <item quantity="other">%1$d 年</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1 名成员</item>
+        <item quantity="other">%1$d 名成员</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">您当前在您的对话中拥有 1 条远程已删除的消息。您要删除它吗？</item>
+        <item quantity="other">您当前在您的对话中拥有 %1$d 条远程已删除的消息。您要删除所有此类标记吗？</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 个联系人正在共享他们的位置</item>
+        <item quantity="other">%1$d 个联系人正在共享他们的位置</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">您和 1 位其他人在共享他们的位置</item>
+        <item quantity="other">您和 %1$d 位其他人在共享他们的位置</item>
+    </plurals>
+</resources>

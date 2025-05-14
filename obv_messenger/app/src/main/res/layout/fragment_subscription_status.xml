@@ -211,7 +211,6 @@
         android:background="@color/lightGrey" />
 
     <TextView
-        android:id="@+id/premium_features_title_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="@style/RobotoMedium"

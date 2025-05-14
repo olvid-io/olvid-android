@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.databases.tasks
 
+import android.annotation.SuppressLint
 import io.olvid.engine.engine.types.identities.ObvOwnedDevice
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.BytesKey
@@ -40,6 +41,7 @@ class OwnedDevicesSynchronisationWithEngineTask(
         }
     }
 
+    @SuppressLint("ImplicitSamInstance")
     override fun run() {
         val deviceDao = AppDatabase.getInstance().ownedDeviceDao()
 

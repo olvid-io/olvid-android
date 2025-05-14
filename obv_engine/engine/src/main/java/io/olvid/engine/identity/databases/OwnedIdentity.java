@@ -932,7 +932,13 @@ public class OwnedIdentity implements ObvDatabase {
         if (pojo.latest_details != null && pojo.latest_details.version != pojo.published_details.version) {
             latest_details = OwnedIdentityDetails.restore(identityManagerSession, ownedIdentity, pojo.latest_details);
         }
-        OwnedIdentity ownedIdentityObject = new OwnedIdentity(identityManagerSession, privateIdentity, null, published_details.getVersion());
+        BackupSeed backupSeed;
+        try {
+            backupSeed = privateIdentity.getDeterministicBackupSeedForLegacyIdentity();
+        } catch (Exception ignored) {
+            backupSeed = null;
+        }
+        OwnedIdentity ownedIdentityObject = new OwnedIdentity(identityManagerSession, privateIdentity, backupSeed, published_details.getVersion());
         if (latest_details != null) {
             ownedIdentityObject.latestDetailsVersion = latest_details.getVersion();
         }

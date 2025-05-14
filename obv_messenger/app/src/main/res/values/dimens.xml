@@ -2,8 +2,6 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="attachment_small_preview_size">72dp</dimen>
     <dimen name="attachment_corner_radius">6dp</dimen>
-    <dimen name="single_line_emoji_size">48sp</dimen>
-    <dimen name="single_line_emoji_reply_size">40sp</dimen>
     <dimen name="notification_icon_size">64dp</dimen>
     <dimen name="shortcut_icon_size">108dp</dimen>
     <dimen name="inner_shortcut_icon_size">72dp</dimen>
@@ -11,7 +9,6 @@
 
     <!--<dimen name="design_fab_image_size" tools:override="true">24dp</dimen>-->
     <dimen name="identity_details_margin">4dp</dimen>
-    <dimen name="new_message_scroll_offset">64dp</dimen>
     <dimen name="qr_code_margin">0dp</dimen>
     <dimen name="plus_button_card_half_margins">4dp</dimen>
     <dimen name="plus_button_card_margins">8dp</dimen>

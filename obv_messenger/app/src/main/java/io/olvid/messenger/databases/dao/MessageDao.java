@@ -418,6 +418,7 @@ public interface MessageDao {
             " INNER JOIN " + Discussion.TABLE_NAME + " AS discussion " +
             " ON discussion.id = " + Message.DISCUSSION_ID +
             " WHERE discussion." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND discussion." + Discussion.ARCHIVED + " = 0 " +
             " AND message." + Message.STATUS + " = " + Message.STATUS_UNREAD +
             " " +
             " UNION " +

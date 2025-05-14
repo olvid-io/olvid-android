@@ -88,7 +88,6 @@ import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest
 import io.olvid.messenger.databases.entity.TextBlock
 import net.zetetic.database.sqlcipher.SQLiteDatabase
 import java.io.File
-import kotlin.concurrent.Volatile
 
 @Database(
     entities = [ActionShortcutConfiguration::class, CallLogItem::class, CallLogItemContactJoin::class, Contact::class, ContactGroupJoin::class, Discussion::class, DiscussionCustomization::class, Fyle::class, FyleMessageJoinWithStatus::class, FyleMessageJoinWithStatusFTS::class, Group::class, Group2::class, Group2Member::class, Group2PendingMember::class, Invitation::class, KnownCertificate::class, LatestDiscussionSenderSequenceNumber::class, Message::class, MessageExpiration::class, MessageFTS::class, MessageMetadata::class, MessageRecipientInfo::class, MessageReturnReceipt::class, OwnedDevice::class, OwnedIdentity::class, PendingGroupMember::class, Reaction::class, ReactionRequest::class, RemoteDeleteAndEditRequest::class, TextBlock::class

@@ -293,7 +293,7 @@ internal class VoiceMessageRecorder(
 
 data class SampleAndTicker(val samples: List<Float> = listOf(), val ticker: Int = 0) {
     companion object {
-        val TICKS_PER_SAMPLE = 6
+        const val TICKS_PER_SAMPLE = 6
     }
 
     fun add(v: Float): SampleAndTicker {

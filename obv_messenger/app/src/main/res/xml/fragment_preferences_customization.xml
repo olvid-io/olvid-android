@@ -1,15 +1,22 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <ListPreference
-        android:key="pref_key_app_language"
-        android:defaultValue="default"
-        android:title="@string/pref_app_language_title"
-        app:useSimpleSummaryProvider="true"
-        app:singleLineTitle="false"
-        android:entries="@array/app_language_choice"
-        android:entryValues="@array/app_language_choice_values"
-        android:icon="@drawable/ic_pref_language"
-        android:order="5" />
+    <io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory
+        android:order="4"
+        app:iconSpaceReserved="false"
+        android:key="pref_key_app_language_category"
+        android:title="@string/pref_app_language_category_title"
+        android:summary="@string/pref_app_language_category_summary">
+        <ListPreference
+            android:key="pref_key_app_language"
+            android:defaultValue="default"
+            android:title="@string/pref_app_language_title"
+            app:useSimpleSummaryProvider="true"
+            app:singleLineTitle="false"
+            android:entries="@array/app_language_choice"
+            android:entryValues="@array/app_language_choice_values"
+            android:icon="@drawable/ic_pref_language"
+            android:order="5" />
+    </io.olvid.messenger.customClasses.MultilineSummaryPreferenceCategory>
     <SwitchPreference
         android:key="pref_key_dark_mode"
         android:defaultValue="false"
@@ -57,13 +64,16 @@
         android:icon="@drawable/ic_pref_app_icon"
         android:order="13" />
 
-    <SwitchPreference
-        android:key="pref_key_use_system_emojis"
-        android:defaultValue="false"
-        android:title="@string/pref_use_system_emojis_title"
-        android:summary="@string/pref_use_system_emojis_summary"
-        android:icon="@drawable/ic_pref_emoji"
-        android:order="14"
+    <DropDownPreference
+        android:key="pref_key_use_animated_emojis"
+        android:defaultValue="loop"
+        app:singleLineTitle="false"
+        android:title="@string/pref_use_animated_emojis_title"
+        app:useSimpleSummaryProvider="true"
+        android:entries="@array/emoji_animation"
+        android:entryValues="@array/emoji_animation_values"
+        android:icon="@drawable/ic_pref_emoji_animated"
+        android:order="15"
         />
 
     <SwitchPreference
@@ -72,6 +82,6 @@
         android:title="@string/pref_use_internal_image_viewer_title"
         android:summary="@string/pref_use_internal_image_viewer_summary"
         android:icon="@drawable/ic_pref_image"
-        android:order="15" />
+        android:order="16" />
 
 </PreferenceScreen>

@@ -134,7 +134,7 @@ fun EphemeralTimer(modifier: Modifier = Modifier, expiration: MessageExpiration?
                 delay(1000)
             }
         } ?: run {
-            ephemeralState = expiration.getTimerResources(context, readOnce, bookmarked)
+            ephemeralState = null.getTimerResources(context, readOnce, bookmarked)
         }
     }
     ephemeralState?.let {

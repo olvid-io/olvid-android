@@ -60,7 +60,6 @@ import io.olvid.engine.crypto.Signature;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.BackupSeed;
 import io.olvid.engine.datatypes.Constants;
-import io.olvid.engine.datatypes.DictionaryKey;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.OperationQueue;
