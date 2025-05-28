@@ -191,12 +191,14 @@ public class ObvDialog {
 
 
     public static class Category {
-        public static final int INVITE_SENT_DIALOG_CATEGORY = 0; // not found!
-        public static final int ACCEPT_INVITE_DIALOG_CATEGORY = 1; //
-        public static final int SAS_EXCHANGE_DIALOG_CATEGORY = 2; //
-        public static final int SAS_CONFIRMED_DIALOG_CATEGORY = 3; //
+        public static final int UNKNOWN_DIALOG_CATEGORY = -1; // used when deserializing to avoid crash
+
+        public static final int INVITE_SENT_DIALOG_CATEGORY = 0;
+        public static final int ACCEPT_INVITE_DIALOG_CATEGORY = 1;
+        public static final int SAS_EXCHANGE_DIALOG_CATEGORY = 2;
+        public static final int SAS_CONFIRMED_DIALOG_CATEGORY = 3;
         //public static final int MUTUAL_TRUST_CONFIRMED_DIALOG_CATEGORY = 4;
-        public static final int INVITE_ACCEPTED_DIALOG_CATEGORY = 5; // not found
+        public static final int INVITE_ACCEPTED_DIALOG_CATEGORY = 5;
         public static final int ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY = 6;
         public static final int MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY = 7;
         public static final int ACCEPT_GROUP_INVITE_DIALOG_CATEGORY = 8;
@@ -430,8 +432,9 @@ public class ObvDialog {
                     break;
                 }
                 default: {
-                    Logger.w("Found an UI dialog with unknown category");
-                    throw new Exception();
+                    Logger.e("Found an UI dialog with unknown category " + id);
+                    id = UNKNOWN_DIALOG_CATEGORY;
+                    break;
                 }
             }
             return new Category(id, bytesContactIdentity, contactDisplayNameOrSerializedDetails, sasToDisplay, sasEntered, bytesMediatorOrGroupOwnerIdentity, serializedGroupDetails, bytesGroupUid, pendingGroupMemberIdentities, serverTimestamp, obvGroupV2, obvSyncAtom, obvTransferStep);

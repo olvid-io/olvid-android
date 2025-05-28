@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">" op hierdie toestel sal jou vorige toestel hieronder gedeaktiveer word:</item>
+        <item quantity="other">" op hierdie toestel sal jou toestelle hieronder gedeaktiveer word:</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d rugsteun gevind</item>
+        <item quantity="other">%1$d rugsteune gevind</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d profiel gevind</item>
+        <item quantity="other">%1$d profiele gevind</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Geen groep</item>
+        <item quantity="one">%1$d groep</item>
+        <item quantity="other">%1$d groepe</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Geen kontak</item>
+        <item quantity="one">%1$d kontak</item>
+        <item quantity="other">%1$d kontakte</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Gesprek gearchiveer</item>
+        <item quantity="other">%1$d gesprekke gearchiveer</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Gesprek gedearchiveer</item>
+        <item quantity="other">%1$d gesprekke gedearchiveer</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Boodskap ontboekmerk</item>
+        <item quantity="other">%1$d boodskappe ontboekmerk</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Geselekteerde gesprek verwyder?</item>
+        <item quantity="other">Geselekteerde gesprekke verwyder?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Geselekteerde boodskap verwyder?</item>
+        <item quantity="other">Geselekteerde boodskappe verwyder?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Wil jy regtig die geselekteerde gesprek en al die boodskappe daarin verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
+        <item quantity="other">Wil jy regtig die %1$d geselekteerde gesprekke en al die boodskappe daarin verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Hoe wil jy die geselekteerde gesprek en al die boodskappe daarin verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
+        <item quantity="other">Hoe wil jy die %1$d geselekteerde gesprekke en al die boodskappe daarin verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Wil jy regtig die geselekteerde boodskap verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
+        <item quantity="other">Wil jy regtig die %1$d geselekteerde boodskappe verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Hoe wil jy die geselekteerde boodskap verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
+        <item quantity="other">Hoe wil jy die %1$d geselekteerde boodskappe verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Jy is besig om **permanent** \'n boodskap vir **almal** in hierdie gesprek te verwyder. Maak seker dat dit regtig is wat jy wil doen.</item>
+        <item quantity="other">Jy is besig om **permanent** %1$d boodskappe vir **almal** in hierdie gesprek te verwyder. Maak seker dat dit regtig is wat jy wil doen.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Jy is besig om **permanent** \'n gesprek en die boodskappe daarin vir **almal** in hierdie gesprek te verwyder. Maak seker dat dit regtig is wat jy wil doen.</item>
+        <item quantity="other">Jy is besig om **permanent** %1$d gesprekke en die boodskappe daarin vir **almal** in hierdie gesprekke te verwyder. Maak seker dat dit regtig is wat jy wil doen.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Jy is besig om elke groeplid met wie jy \'n kanaal het (tans 1 lid) na \'n privaat gesprek te nooi.\nWil jy voortgaan?</item>
+        <item quantity="other">Jy is besig om elke groeplid met wie jy \'n kanaal het (tans %1$d lede) na \'n privaat gesprek te nooi.\nWil jy voortgaan?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 gemeenskaplike groep</item>
+        <item quantity="other">%1$d gemeenskaplike groepe</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Jy sal hierdie groep moet verlaat om voort te gaan.</item>
+        <item quantity="other">. Jy sal hierdie groepe moet verlaat om voort te gaan.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Jy is besig om %1$s van jou lys van ander gebruikers te verwyder.\n\nLet wel dat %1$s na %2$d groep waaraan jy behoort, genooi is. Hulle sal teruggevoeg word tot hierdie lys as hulle by die groep aansluit. Jy wil dalk hierdie groep verlaat om dit te vermy.\n\nVerwyder hierdie gebruiker regtig?</item>
+        <item quantity="other">Jy is besig om %1$s van jou lys van ander gebruikers te verwyder.\n\nLet wel dat %1$s na %2$d groepe waaraan jy behoort, genooi is. Hulle sal teruggevoeg word tot hierdie lys as hulle by een van hulle aansluit. Jy wil dalk hierdie groepe verlaat om dit te vermy.\n\nVerwyder hierdie gebruiker regtig?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Deur hierdie instelling te verander, sal outomaties een hangende groepuitnodiging aanvaar word.\nDruk OK om jou keuse te bevestig en by hierdie groep aan te sluit.</item>
+        <item quantity="other">Deur hierdie instelling te verander, sal outomaties %1$d hangende groepuitnodigings aanvaar word.\nDruk OK om jou keuse te bevestig en by hierdie groepe aan te sluit.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Wanneer gevra, kies asseblief die vouer waarin die geselekteerde aanhangsel gestoor moet word.\nLet wel dat toegang tot sommige vouers beperk kan wees.</item>
+        <item quantity="other">Wanneer gevra, kies asseblief die vouer waarin die %1$d geselekteerde aanhangsels gestoor moet word.\nLet wel dat toegang tot sommige vouers beperk kan wees.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d gekies</item>
+        <item quantity="other">%1$d gekies</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Wil jy regtig die geselekteerde aanhangsel verwyder?</item>
+        <item quantity="other">Wil jy regtig die %1$d geselekteerde aanhangsels verwyder?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d dag, %2$02d uur %3$02d min %4$02d sek</item>
+        <item quantity="other">%1$d dae, %2$02d uur %3$02d min %4$02d sek</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d ontbrekende boodskap…</item>
+        <item quantity="other">%1$d ontbrekende boodskappe…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Groeppraat met %2$s en een ander</item>
+        <item quantity="other">Groeppraat met %2$s en %1$d ander</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Onbeantwoorde groeppraat met %2$s en een ander</item>
+        <item quantity="other">Onbeantwoorde groeppraat met %2$s en %1$d ander</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Misgeslaagde groeppraat met %2$s en een ander</item>
+        <item quantity="other">Misgeslaagde groeppraat met %2$s en %1$d ander</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Groeppraat terwyl %2$s en een ander besig was</item>
+        <item quantity="other">Groeppraat terwyl %2$s en %1$d ander besig was</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Verwerpte groeppraat met %2$s en een ander</item>
+        <item quantity="other">Verwerpte groeppraat met %2$s en %1$d ander</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Groeppraat van %2$s en een ander</item>
+        <item quantity="other">Groeppraat van %2$s en %1$d ander</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d gekies</item>
+        <item quantity="other">%1$d gekies</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d gekies</item>
+        <item quantity="other">%1$d gekies</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d nuwe boodskap</item>
+        <item quantity="other">%1$d nuwe boodskappe</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s sal genooi word om by die groep %2$s aan te sluit.</item>
+        <item quantity="other">Die %1$d volgende lede sal genooi word om by die groep %2$s aan te sluit: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s sal verwyder word van die groep %2$s.</item>
+        <item quantity="other">Die %1$d volgende groeplede sal verwyder word van %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d nuwe boodskap</item>
+        <item quantity="other">%1$d nuwe boodskappe</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d aanhangsel</item>
+        <item quantity="other">%1$d aanhangsels</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">En %1$d ander</item>
+        <item quantity="other">En %1$d ander</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d ander</item>
+        <item quantity="other"> &amp; %1$d ander</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Deur hierdie retensiebeleid toe te pas, sal \'n enkele boodskap verwyder word.\nWil jy voortgaan?</item>
+        <item quantity="other">Deur hierdie retensiebeleid toe te pas, sal %1$d boodskappe verwyder word.\nWil jy voortgaan?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… en een bykomende soekresultaat\nPas jou soekterm aan</item>
+        <item quantity="other">… en %1$d bykomende soekresultate\nPas jou soekterm aan</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1 sekonde</item>
+        <item quantity="other">%1$d sekondes</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1 minuut</item>
+        <item quantity="other">%1$d minute</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1 uur</item>
+        <item quantity="other">%1$d ure</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1 dag</item>
+        <item quantity="other">%1$d dae</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1 jaar</item>
+        <item quantity="other">%1$d jaar</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1 lid</item>
+        <item quantity="other">%1$d lede</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Jy het tans 1 verwyderde boodskap in jou gesprekke. Wil jy dit verwyder?</item>
+        <item quantity="other">Jy het tans %1$d verwyderde boodskappe in jou gesprekke. Wil jy al hierdie merkers verwyder?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 kontak deel hul posisie</item>
+        <item quantity="other">%1$d kontakte deel hul posisie</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Jy en 1 ander deel hul posisie</item>
+        <item quantity="other">Jy en %1$d ander deel hul posisie</item>
+    </plurals>
+</resources>

@@ -22,6 +22,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import io.olvid.engine.engine.types.identities.ObvMutualScanUrl
 import io.olvid.engine.engine.types.identities.ObvUrlIdentity
 import io.olvid.messenger.App
 import io.olvid.messenger.R.string
@@ -84,23 +85,14 @@ class ObvLinkActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val URL_INVITATION_HOST = ObvUrlIdentity.URL_INVITATION_HOST
         private const val URL_CONFIGURATION_HOST = "configuration.olvid.io"
         private const val URL_WEB_CLIENT_HOST = "web.olvid.io"
 
         @JvmField
-        val INVITATION_PATTERN: Pattern = Pattern.compile(
-            "(" + ObvUrlIdentity.URL_PROTOCOL + "|" + ObvUrlIdentity.URL_PROTOCOL_OLVID + ")" + Pattern.quote(
-                "://$URL_INVITATION_HOST"
-            ) + "/1?#([-_a-zA-Z\\d]+)"
-        )
+        val INVITATION_PATTERN: Pattern = ObvUrlIdentity.INVITATION_PATTERN
 
         @JvmField
-        val MUTUAL_SCAN_PATTERN: Pattern = Pattern.compile(
-            "(" + ObvUrlIdentity.URL_PROTOCOL + "|" + ObvUrlIdentity.URL_PROTOCOL_OLVID + ")" + Pattern.quote(
-                "://$URL_INVITATION_HOST"
-            ) + "/2#([-_a-zA-Z\\d]+)"
-        )
+        val MUTUAL_SCAN_PATTERN: Pattern = ObvMutualScanUrl.MUTUAL_SCAN_PATTERN
 
         @JvmField
         val CONFIGURATION_PATTERN: Pattern = Pattern.compile(

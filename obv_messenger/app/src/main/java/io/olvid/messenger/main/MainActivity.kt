@@ -597,9 +597,7 @@ class MainActivity : LockableActivity(), OnClickListener {
                             // nothing to do
                             e.printStackTrace()
                         }
-                    } else if (ObvLinkActivity.INVITATION_PATTERN.matcher(uri).find()
-                        || ObvLinkActivity.MUTUAL_SCAN_PATTERN.matcher(uri).find()
-                    ) {
+                    } else if (ObvLinkActivity.INVITATION_PATTERN.matcher(uri).find()) {
                         // offer to chose a profile
                         val ownedIdentitySelectionDialogFragment =
                             OwnedIdentitySelectionDialogFragment.newInstance(

@@ -2003,7 +2003,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">שמור אותם כולם עם Olvid+</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">לאחר שחזור הפרופיל שלך, תוכל לבחור באיזה מכשיר להשאיר פעיל מהגדרות הפרופיל שלך.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">על ידי שחזור הפרופיל שלך \"</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">" (%1$s)"</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">לא נמצא מפתח גיבוי.</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">הגיבויים שלך</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">מתקדם</string>
@@ -2022,7 +2022,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">אל תאבד גישה לפרופילים שלך!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">גיבויים מאפשרים לשחזר את הפרופילים שלך אם איבדת גישה למכשיר זה. החוויה החדשה קלה מתמיד 😉 וניתן להגדיר אותה תוך שניות ספורות.</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">הגדרת גיבויים</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">אל תשכח לרשום את מפתח הגיבוי שלך 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">אל תשכח לרשום את מפתח הגיבוי שלך â</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">מפתח הגיבוי שלך חיוני לשחזור הפרופילים שלך אם תאבד גישה למכשיר זה.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">שפר את חוויית Olvid שלך 🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">הגדרות מסוימות אינן מוגדרות כראוי במכשיר שלך ועלולות להשפיע על חוויית השימוש שלך ב-Olvid.</string>
@@ -2033,7 +2033,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">לולאה</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">פעם אחת</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">לעולם לא</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">שלח לנו אימייל</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">שלחו לנו אימייל</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">תיהנו מ-Olvid בשפות חדשות!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">הוספנו שפות רבות לאולביד באמצעות תרגום מבוסס בינה מלאכותית, ולכן חלקן עלולות להיות לא מדויקות.\nאם זה המצב, אנא הודעו לנו בכתובת **lang@olvid.io**.</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">תרגומי אפליקציית אנדרואיד</string>

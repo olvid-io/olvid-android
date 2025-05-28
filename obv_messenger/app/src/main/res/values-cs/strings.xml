@@ -2001,7 +2001,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Uchovejte je všechny s Olvid+</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Po obnovení profilu si můžete vybrat, které zařízení ponechat aktivní v nastavení profilu.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Obnovením svého profilu «</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">(%1$s)</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Nebyl nalezen žádný klíč zálohy</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">Zálohy</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">Pokročilé</string>
@@ -2020,7 +2020,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Neztráťte přístup ke svým profilům!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Zálohy umožňují obnovit vaše profily, pokud ztratíte přístup k tomuto zařízení. Nové prostředí je snadnější než kdykoli předtím 😉 a lze jej nastavit během několika sekund.</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Nastavit zálohy</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">Nezapomeňte si poznamenat záložní klíč 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Nezapomeň si poznamenat zálohový klíč ☺</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Váš klíč zálohy je nezbytný pro obnovení vašich profilů, pokud ztratíte přístup k tomuto zařízení.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Vylepšete svůj zážitek s Olvid 🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">Některé parametry nejsou na vašem zařízení správně nastaveny a mohou ovlivnit vaše používání Olvid.</string>
@@ -2031,7 +2031,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">Opakování</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">Jednou</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">Nikdy</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">Pošlete nám e-mail</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">Pošlete nám e-mail</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">Užijte si Olvid v nových jazycích!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">Do Olvid jsme přidali mnoho nových jazyků pomocí překladu založeného na umělé inteligenci, takže některé z nich mohou být nepřesné.\nPokud tomu tak je, neváhejte nás kontaktovat na **lang@olvid.io**.</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Překlady aplikace Android</string>

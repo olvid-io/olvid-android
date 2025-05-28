@@ -26,11 +26,11 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 21
         targetSdk 35
-        versionCode 271
-        versionName "3.7.1"
+        versionCode 272
+        versionName "3.7.2"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
-        resourceConfigurations += ['en', 'fr', 'ar', 'ca', 'cs', 'da', 'de', 'el', 'es', 'fi', 'hi', 'hu', 'it', 'iw', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-rBR', 'ro', 'ru', 'sk', 'sl', 'sv', 'uk', 'zh', 'zh-rTW']
+        resourceConfigurations += ['en', 'fr', 'af', 'ar', 'ca', 'cs', 'da', 'de', 'el', 'es', 'fa', 'fi', 'hi', 'hr', 'hu', 'it', 'iw', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-rBR', 'ro', 'ru', 'sk', 'sl', 'sv', 'tr', 'uk', 'vi', 'zh', 'zh-rTW']
         manifestPlaceholders.appAuthRedirectScheme = "olvid.openid"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

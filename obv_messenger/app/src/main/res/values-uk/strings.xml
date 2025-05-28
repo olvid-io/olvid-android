@@ -2003,7 +2003,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Збережіть все з Olvid+</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Після відновлення профілю ви можете вибрати, який пристрій залишити активним, у налаштуваннях вашого профілю.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Відновлюючи свій профіль «</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">" (%1$s)"</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Не знайдено ключ резервної копії</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">Ваші резервні копії</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">Розширені</string>
@@ -2022,7 +2022,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Не втрачайте доступ до своїх профілів!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Резервні копії дозволяють відновити ваші профілі, якщо ви втратите доступ до цього пристрою. Новий досвід простіший, ніж будь-коли 😉, і його можна налаштувати за лічені секунди.</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Налаштувати резервні копії</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">Не забудьте записати ваш ключ резервної копії 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Не забудьте записати ваш ключ резервної копії‍ ☕</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Ваш ключ резервного копіювання є важливим для відновлення ваших профілів, якщо ви втратите доступ до цього пристрою.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Покращте свій досвід використання Olvid 🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">Деякі параметри на вашому пристрої налаштовані неправильно і можуть вплинути на ваш досвід використання Olvid.</string>
@@ -2033,7 +2033,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">У циклі</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">Один раз</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">Ніколи</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">Надішліть нам електронний лист</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">Надішліть нам електронний лист</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">Насолоджуйтесь Olvid новими мовами!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">Ми додали багато нових мов до Olvid, використовуючи переклад на основі штучного інтелекту, тому деякі з них можуть бути неточними.\nЯкщо це так, будь ласка, повідомте нам на **lang@olvid.io**.</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Переклади Android-додатку</string>

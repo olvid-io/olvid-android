@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">"Bu cihazda, aşağıdaki önceki cihazınız devre dışı bırakılacak:"</item>
+        <item quantity="other">"Bu cihazda, aşağıdaki cihazlarınız devre dışı bırakılacak:"</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d yedekleme bulundu</item>
+        <item quantity="other">%1$d yedekleme bulundu</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d profil bulundu</item>
+        <item quantity="other">%1$d profil bulundu</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Grup yok</item>
+        <item quantity="one">%1$d grup</item>
+        <item quantity="other">%1$d grup</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Kişi yok</item>
+        <item quantity="one">%1$d kişi</item>
+        <item quantity="other">%1$d kişi</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Konuşma arşivlendi</item>
+        <item quantity="other">%1$d konuşma arşivlendi</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Konuşma arşivden çıkarıldı</item>
+        <item quantity="other">%1$d konuşma arşivden çıkarıldı</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Mesaj işaretlemesi kaldırıldı</item>
+        <item quantity="other">%1$d mesaj işaretlemesi kaldırıldı</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Seçili konuşmayı sil?</item>
+        <item quantity="other">Seçili konuşmaları sil?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Seçili mesajı sil?</item>
+        <item quantity="other">Seçili mesajları sil?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Seçili konuşmayı ve içerdiği tüm mesajları silmek istediğinizden emin misiniz?\nBu işlem geri alınamaz.</item>
+        <item quantity="other">Seçili %1$d konuşmayı ve içerdiği tüm mesajları silmek istediğinizden emin misiniz?\nBu işlem geri alınamaz.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Seçili konuşmayı ve içerdiği tüm mesajları silmek için ne yapmak istiyorsunuz?\nBu işlem geri alınamaz.</item>
+        <item quantity="other">Seçili %1$d konuşmayı ve içerdiği tüm mesajları silmek için ne yapmak istiyorsunuz?\nBu işlem geri alınamaz.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Seçili mesajı silmek istediğinizden emin misiniz?\nBu işlem geri alınamaz.</item>
+        <item quantity="other">Seçili %1$d mesajı silmek istediğinizden emin misiniz?\nBu işlem geri alınamaz.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Seçili mesajı silmek için ne yapmak istiyorsunuz?\nBu işlem geri alınamaz.</item>
+        <item quantity="other">Seçili %1$d mesajı silmek için ne yapmak istiyorsunuz?\nBu işlem geri alınamaz.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Bu konuşmadaki bir mesajı **kalıcı olarak** silmek üzeresiniz. Lütfen gerçekten istediğinizden emin olun.</item>
+        <item quantity="other">Bu konuşmadaki %1$d mesajı **kalıcı olarak** silmek üzeresiniz. Lütfen gerçekten istediğinizden emin olun.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Bu konuşmayı ve içerdiği mesajları **kalıcı olarak** silmek üzeresiniz. Lütfen gerçekten istediğinizden emin olun.</item>
+        <item quantity="other">Bu konuşmaları ve içerdiği mesajları **kalıcı olarak** silmek üzeresiniz. Lütfen gerçekten istediğinizden emin olun.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Gruptaki her üye (şu anda 1 üye) ile özel bir konuşmaya davet etmek üzeresiniz.\nDevam etmek istiyor musunuz?</item>
+        <item quantity="other">Gruptaki her üye (şu anda %1$d üye) ile özel bir konuşmaya davet etmek üzeresiniz.\nDevam etmek istiyor musunuz?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 ortak grup</item>
+        <item quantity="other">%1$d ortak grup</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Bu gruptan ayrılmanız gerekiyor.</item>
+        <item quantity="other">. Bu gruplardan ayrılmanız gerekiyor.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">%1$s\'i diğer kullanıcılar listenizden silmek üzeresiniz.\n\n%1$s, ait olduğunuz %2$d gruba davet edildi. Gruba katılırsa bu listeye geri eklenecektir. Bunu önlemek için bu gruptan ayrılmak isteyebilirsiniz.\n\nBu kullanıcıyı gerçekten silmek istiyor musunuz?</item>
+        <item quantity="other">%1$s\'i diğer kullanıcılar listenizden silmek üzeresiniz.\n\n%1$s, ait olduğunuz %2$d gruba davet edildi. Bunlardan birine katılırsa bu listeye geri eklenecektir. Bunu önlemek için bu gruplardan ayrılmak isteyebilirsiniz.\n\nBu kullanıcıyı gerçekten silmek istiyor musunuz?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Bu ayarı değiştirmek, bir bekleyen grup davetini otomatik olarak kabul edecektir.\nSeçiminizi onaylamak ve bu gruba katılmak için Tamam\'a basın.</item>
+        <item quantity="other">Bu ayarı değiştirmek, %1$d bekleyen grup davetini otomatik olarak kabul edecektir.\nSeçiminizi onaylamak ve bu gruplara katılmak için Tamam\'a basın.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">İstenildiğinde, seçilen eklemeyi kaydetmek için klasörü seçin.\nBazı klasörlere erişim kısıtlanmış olabilir.</item>
+        <item quantity="other">İstenildiğinde, %1$d seçilen eklemeyi kaydetmek için klasörü seçin.\nBazı klasörlere erişim kısıtlanmış olabilir.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d seçildi</item>
+        <item quantity="other">%1$d seçildi</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Seçilen eklemeyi silmek istediğinizden emin misiniz?</item>
+        <item quantity="other">Seçilen %1$d eklemeyi silmek istediğinizden emin misiniz?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d gün, %2$02dsa %3$02d dk %4$02ds</item>
+        <item quantity="other">%1$d gün, %2$02dsa %3$02d dk %4$02ds</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d kayıp mesaj…</item>
+        <item quantity="other">%1$d kayıp mesaj…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$s ve 1 kişi ile grup görüşmesi</item>
+        <item quantity="other">%2$s ve %1$d kişi ile grup görüşmesi</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$s ve 1 kişi ile grup görüşmesi yanıtlanmadı</item>
+        <item quantity="other">%2$s ve %1$d kişi ile grup görüşmesi yanıtlanmadı</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$s ve 1 kişi ile grup görüşmesi başarısız oldu</item>
+        <item quantity="other">%2$s ve %1$d kişi ile grup görüşmesi başarısız oldu</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$s ve 1 kişi meşguldü</item>
+        <item quantity="other">%2$s ve %1$d kişi meşguldü</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">%2$s ve 1 kişi ile grup görüşmesi reddedildi</item>
+        <item quantity="other">%2$s ve %1$d kişi ile grup görüşmesi reddedildi</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">%2$s ve 1 kişi ile grup görüşmesi</item>
+        <item quantity="other">%2$s ve %1$d kişi ile grup görüşmesi</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d seçildi</item>
+        <item quantity="other">%1$d seçildi</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d seçildi</item>
+        <item quantity="other">%1$d seçildi</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d yeni mesaj</item>
+        <item quantity="other">%1$d yeni mesaj</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s, %2$s grubuna davet edilecek.</item>
+        <item quantity="other">%1$d kişi, %2$s grubuna davet edilecek: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s, %2$s grubundan çıkarılacak.</item>
+        <item quantity="other">%1$d kişi, %2$s grubundan çıkarılacak: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d yeni mesaj</item>
+        <item quantity="other">%1$d yeni mesaj</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d ek</item>
+        <item quantity="other">%1$d ek</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">ve %1$d kişi</item>
+        <item quantity="other">ve %1$d kişi</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d kişi</item>
+        <item quantity="other"> &amp; %1$d kişi</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Seçtiğiniz saklama ilkesi tek bir mesajı silecektir.\nDevam etmek istediğinizden emin misiniz?</item>
+        <item quantity="other">Seçtiğiniz saklama ilkesi %1$d mesajı silecektir.\nDevam etmek istediğinizden emin misiniz?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… ve 1 ek arama sonucu\nLütfen aramanızı hassaslaştırın</item>
+        <item quantity="other">… ve %1$d ek arama sonucu\nLütfen aramanızı hassaslaştırın</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1 saniye</item>
+        <item quantity="other">%1$d saniye</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1 dakika</item>
+        <item quantity="other">%1$d dakika</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1 saat</item>
+        <item quantity="other">%1$d saat</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1 gün</item>
+        <item quantity="other">%1$d gün</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1 yıl</item>
+        <item quantity="other">%1$d yıl</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1 üye</item>
+        <item quantity="other">%1$d üye</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Tartışmalarınızda 1 uzaktan silinmiş mesajınız var. Silmek istiyor musunuz?</item>
+        <item quantity="other">Tartışmalarınızda %1$d uzaktan silinmiş mesajınız var. Tüm bu işaretleri silmek istiyor musunuz?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 kişi konumunu paylaşıyor</item>
+        <item quantity="other">%1$d kişi konumunu paylaşıyor</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Siz ve 1 kişi konumunuzu paylaşıyor</item>
+        <item quantity="other">Siz ve %1$d kişi konumunuzu paylaşıyor</item>
+    </plurals>
+</resources>

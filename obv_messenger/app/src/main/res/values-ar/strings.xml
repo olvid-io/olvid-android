@@ -2002,7 +2002,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">احتفظ بهم جميعًا مع Olvid+</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">بمجرد استعادة ملفك الشخصي، يمكنك اختيار الجهاز الذي تريد الاحتفاظ به نشطًا من إعدادات ملفك الشخصي.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">بواسطة استعادة ملفك الشخصي \"</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">" (%1$s)"</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">لم يتم العثور على مفتاح النسخ الاحتياطي.</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">نسخك الاحتياطية</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">متقدم</string>
@@ -2021,7 +2021,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">لا تفقد الوصول إلى ملفاتك الشخصية!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">تتيح لك النسخ الاحتياطية استعادة ملفاتك الشخصية في حال فقدت الوصول إلى هذا الجهاز. التجربة الجديدة أسهل من أي وقت مضى 😉 ويمكن إعدادها في ثوانٍ قليلة.</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">تهيئة النسخ الاحتياطي</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">لا تنسَ تدوين مفتاح النسخ الاحتياطي الخاص بك 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">لتنسي ما تنسي تدوين مفتاح الانساخ الانساءيم عينيم الملائكيم عينيم‍☺</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">مفتاح النسخ الاحتياطي الخاص بك ضروري لاستعادة ملفاتك الشخصية في حال فقدت الوصول إلى هذا الجهاز.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">حسّن تجربتك في أولفيد 🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">بعض الإعدادات غير مُعدة بشكل صحيح على جهازك وقد تؤثر على تجربتك مع Olvid.</string>
@@ -2032,7 +2032,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">تكرار</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">مرة واحدة</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">أبدًا</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">أرسل لنا بريدًا إلكترونيًا</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">أرسل لنا بريدًا إلكترونيًا</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">استمتعوا بـ Olvid بلغات جديدة!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">أضفنا العديد من اللغات الجديدة إلى Olvid باستخدام الترجمة القائمة على الذكاء الاصطناعي، لذلك قد تكون بعضها غير دقيقة.\nإذا كان هذا هو الحال، فلا تتردد في إخبارنا على **lang@olvid.io**.</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">ترجمات تطبيق أندرويد</string>

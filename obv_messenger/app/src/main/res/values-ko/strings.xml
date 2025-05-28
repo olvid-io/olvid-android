@@ -1392,7 +1392,7 @@
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">그룹 %1$s는 이 그룹의 일부 구성원이 그룹 v2를 지원하지 않는 Olvid의 이전 버전을 사용하고 있기 때문에 복제할 수 없습니다. Olvid의 새 버전이 있다는 것을 알려주세요!\n\n오래된 사용자:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">경고: 부분 복제</string>
 	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">그룹 %1$s에는 아직 보안 채널이 설정되지 않은 멤버가 포함되어 있습니다. 새 그룹에 초대할 수 없습니다.\n\n영향을 받는 사용자:%2$s\n\n불완전한 그룹으로 진행하시겠습니까?</string>
-	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">\"\"의 사본</string>
+	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">의 사본</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">위치 정보 전송됨</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">위치 정보 수신됨</string>
 	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">위치 정보 서비스 이용 불가</string>
@@ -2003,7 +2003,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Olvid+로 모두 보관하세요</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">프로필이 복원되면 프로필 설정에서 활성 상태로 유지할 기기를 선택할 수 있습니다.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">프로필을 복원하여 \"</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">" (%1$s)"</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">백업 키를 찾을 수 없습니다.</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">백업</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">고급</string>
@@ -2022,7 +2022,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">프로필에 대한 액세스 권한을 잃지 마세요!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">백업을 사용하면 이 장치에 대한 액세스 권한을 잃은 경우 프로필을 복원할 수 있습니다. 새로운 경험은 그 어느 때보다 쉽고 😉 몇 초 만에 설정할 수 있습니다.</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">백업 설정하기</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">백업 키를 적어두지 마세요 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">백업 키를 적어두지 마세요 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">이 장치에 대한 액세스 권한을 잃은 경우 프로필을 복원하려면 백업 키가 필수적입니다.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Olvid 경험을 향상해 보세요🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">일부 매개변수가 장치에서 제대로 구성되지 않아 Olvid 사용 경험에 영향을 줄 수 있습니다.</string>
@@ -2033,7 +2033,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">반복</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">한 번</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">절대</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">이메일을 보내주세요</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">이메일을 보내주세요</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">새로운 언어로 Olvid를 즐겨보세요!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">저희는 AI 기반 번역을 사용하여 Olvid에 많은 새로운 언어를 추가했지만, 일부는 부정확할 수 있습니다.\n그럴 경우 **lang@olvid.io**로 알려주세요.</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Android 앱 번역</string>

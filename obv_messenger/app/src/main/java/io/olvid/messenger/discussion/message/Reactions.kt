@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -43,6 +44,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +62,7 @@ import androidx.compose.ui.unit.sp
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Message
@@ -112,6 +115,9 @@ fun Reactions(modifier: Modifier = Modifier, message: Message, useAnimatedEmojis
                     .getAllNonNullForMessageSortedByTimestampLiveData(message.id)
                     .observeAsState()
                 reactionsDetail?.let {
+                    if (it.isEmpty()) {
+                        openReactionPopup = false
+                    }
                     ModalBottomSheet(
                         modifier = Modifier.padding(horizontal = 8.dp),
                         containerColor = colorResource(id = R.color.dialogBackground),
@@ -191,7 +197,7 @@ fun Reactions(modifier: Modifier = Modifier, message: Message, useAnimatedEmojis
 
 @Composable
 private fun ReactionsDetail(reactions: List<Reaction>, useAnimatedEmojis: Boolean = true, loopAnimatedEmojis: Boolean = true) {
-    val reactionTabs = remember {
+    val reactionTabs = remember(reactions) {
         reactions.groupBy(keySelector = { it.emoji }).map {
             ReactionItem(
                 emoji = it.key ?: "",
@@ -199,14 +205,21 @@ private fun ReactionsDetail(reactions: List<Reaction>, useAnimatedEmojis: Boolea
             )
         }
     }
-    Column {
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
         var selectedTab: String? by remember {
             mutableStateOf(null)
         }
+        LaunchedEffect(reactions, selectedTab) {
+            if (selectedTab != null && reactions.none { it.emoji == selectedTab }) {
+                selectedTab = null
+            }
+        }
         val context = LocalContext.current
         LazyColumn(modifier = Modifier.height((24 + 48 * reactions.size).coerceAtMost(300).dp)) {
-            items(items = reactions.filter { if (selectedTab != null) it.emoji == selectedTab else true }) { reaction ->
-                val contactName = remember {
+            items(items = reactions.filter { if (selectedTab != null) it.emoji == selectedTab else true }, key = {it -> BytesKey(it.bytesIdentity) }) { reaction ->
+                val contactName = remember(reaction.bytesIdentity) {
                     AppSingleton.getContactCustomDisplayName(
                         reaction.bytesIdentity
                             ?: AppSingleton.getBytesCurrentIdentity()
@@ -214,6 +227,7 @@ private fun ReactionsDetail(reactions: List<Reaction>, useAnimatedEmojis: Boolea
                 }
 
                 ContactListItem(
+                    modifier = Modifier.animateItem(),
                     useDialogBackgroundColor = true,
                     title = AnnotatedString(contactName),
                     body = AnnotatedString(
@@ -277,7 +291,9 @@ private fun ReactionsDetail(reactions: List<Reaction>, useAnimatedEmojis: Boolea
                             selectedTab =
                                 reactionTab.emoji.takeUnless { selectedTab == reactionTab.emoji }
                         }
-                        .padding(horizontal = 8.dp, vertical = 2.dp)) {
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     if (useAnimatedEmojis) {
                         AnimatedEmoji(shortEmoji = reactionTab.emoji,
                             loop = loopAnimatedEmojis,

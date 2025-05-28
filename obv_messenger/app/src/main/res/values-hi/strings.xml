@@ -2002,7 +2002,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Olvid+ के साथ उन सभी को सुरक्षित रखें</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">एक बार आपका प्रोफ़ाइल पुनर्स्थापित हो जाने के बाद, आप अपने प्रोफ़ाइल सेटिंग्स से सक्रिय रखने के लिए डिवाइस चुन सकते हैं।</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">अपने प्रोफ़ाइल को पुनर्स्थापित करके \"</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">" (%1$s)"</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">कोई बैकअप कुंजी नहीं मिली।</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">आपके बैकअप</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">उन्नत</string>
@@ -2021,7 +2021,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">अपने प्रोफाइल तक पहुंच न खोएं!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">बैकअप आपको अपने प्रोफाइल को पुनर्स्थापित करने की अनुमति देते हैं यदि आप इस डिवाइस तक पहुंच खो देते हैं। नया अनुभव पहले से कहीं अधिक आसान है 😉 और इसे कुछ ही सेकंड में सेट किया जा सकता है।</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">बैकअप कॉन्फ़िगर करें</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">अपने बैकअप कुंजी को लिखना न भूलें 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">अपने बैकअप कुंजी को लिखना न भूलें ‌😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">आपकी बैकअप कुंजी आपके प्रोफाइल को पुनर्स्थापित करने के लिए आवश्यक है यदि आप इस डिवाइस तक पहुंच खो देते हैं।</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">अपने Olvid अनुभव को बेहतर बनाएं 🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">आपके डिवाइस पर कुछ पैरामीटर ठीक से कॉन्फ़िगर नहीं किए गए हैं और ये Olvid के साथ आपके अनुभव को प्रभावित कर सकते हैं।</string>
@@ -2032,7 +2032,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">लूप</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">एक बार</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">कभी नहीं</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">हमें एक ईमेल भेजें</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">हमें एक ईमेल भेजें</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">नई भाषाओं में Olvid का आनंद लें!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">हमने AI-आधारित अनुवाद का उपयोग करके Olvid में कई नई भाषाएँ जोड़ी हैं, इसलिए उनमें से कुछ गलत भी हो सकती हैं।\nयदि ऐसा है, तो कृपया हमें **lang@olvid.io** पर बताएं।</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">एंड्रॉइड ऐप अनुवाद</string>

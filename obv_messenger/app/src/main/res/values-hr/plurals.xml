@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">"Na ovom uređaju, vaš prethodni uređaj ispod će biti deaktiviran:"</item>
+        <item quantity="other">"Na ovom uređaju, vaši uređaji ispod će biti deaktivirani:"</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d sigurnosna kopija pronađena</item>
+        <item quantity="other">%1$d sigurnosnih kopija pronađeno</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d profil pronađen</item>
+        <item quantity="other">%1$d profila pronađeno</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Nema grupa</item>
+        <item quantity="one">%1$d grupa</item>
+        <item quantity="other">%1$d grupa</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Nema kontakata</item>
+        <item quantity="one">%1$d kontakt</item>
+        <item quantity="other">%1$d kontakata</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Razgovor arhiviran</item>
+        <item quantity="other">%1$d razgovora arhivirano</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Razgovor de-arhiviran</item>
+        <item quantity="other">%1$d razgovora de-arhivirano</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Poruka uklonjena s popisa favorita</item>
+        <item quantity="other">%1$d poruka uklonjeno s popisa favorita</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Brisati odabrani razgovor?</item>
+        <item quantity="other">Brisati odabrane razgovore?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Brisati odabranu poruku?</item>
+        <item quantity="other">Brisati odabrane poruke?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Jeste li sigurni da želite izbrisati odabrani razgovor i sve poruke koje sadrži?\nOva radnja se ne može poništiti.</item>
+        <item quantity="other">Jeste li sigurni da želite izbrisati %1$d odabranih razgovora i sve poruke koje sadrže?\nOva radnja se ne može poništiti.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Kako želite izbrisati odabrani razgovor i sve poruke koje sadrži?\nOva radnja se ne može poništiti.</item>
+        <item quantity="other">Kako želite izbrisati %1$d odabranih razgovora i sve poruke koje sadrže?\nOva radnja se ne može poništiti.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Jeste li sigurni da želite izbrisati odabranu poruku?\nOva radnja se ne može poništiti.</item>
+        <item quantity="other">Jeste li sigurni da želite izbrisati %1$d odabranih poruka?\nOva radnja se ne može poništiti.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Kako želite izbrisati odabranu poruku?\nOva radnja se ne može poništiti.</item>
+        <item quantity="other">Kako želite izbrisati %1$d odabranih poruka?\nOva radnja se ne može poništiti.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Izbrisat ćete **trajno** poruku za **sve** sudionike u ovom razgovoru. Molimo vas da se uvjerite da to želite učiniti.</item>
+        <item quantity="other">Izbrisat ćete **trajno** %1$d poruka za **sve** sudionike u ovom razgovoru. Molimo vas da se uvjerite da to želite učiniti.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Izbrisat ćete **trajno** razgovor i poruke koje sadrži za **sve** sudionike u ovom razgovoru. Molimo vas da se uvjerite da to želite učiniti.</item>
+        <item quantity="other">Izbrisat ćete **trajno** %1$d razgovora i poruke koje sadrže za **sve** sudionike u ovim razgovorima. Molimo vas da se uvjerite da to želite učiniti.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Pozvat ćete svakog člana grupe s kojim imate kanal (trenutno 1 član) u privatni razgovor.\nŽelite li nastaviti?</item>
+        <item quantity="other">Pozvat ćete svakog člana grupe s kojim imate kanal (trenutno %1$d članova) u privatni razgovor.\nŽelite li nastaviti?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 zajednička grupa</item>
+        <item quantity="other">%1$d zajedničkih grupa</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Morat ćete napustiti ovu grupu da biste nastavili.</item>
+        <item quantity="other">. Morat ćete napustiti ove grupe da biste nastavili.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Uklonit ćete %1$s s popisa ostalih korisnika.\n\nImajte na umu da je %1$s pozvan u %2$d grupu kojoj pripadate. Bit će ponovno dodan na ovaj popis ako joj se pridruži. Možda ćete htjeti napustiti ovu grupu da biste to izbjegli.\n\nJeste li sigurni da želite ukloniti ovog korisnika?</item>
+        <item quantity="other">Uklonit ćete %1$s s popisa ostalih korisnika.\n\nImajte na umu da je %1$s pozvan u %2$d grupa kojima pripadate. Bit će ponovno dodan na ovaj popis ako joj se pridruži jednoj od njih. Možda ćete htjeti napustiti ove grupe da biste to izbjegli.\n\nJeste li sigurni da želite ukloniti ovog korisnika?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Promjena ove postavke automatski će prihvatiti jedan poziv u grupu.\nPritisnite OK da potvrdite svoj izbor i pridružite se ovoj grupi.</item>
+        <item quantity="other">Promjena ove postavke automatski će prihvatiti %1$d poziva u grupu.\nPritisnite OK da potvrdite svoj izbor i pridružite se ovim grupama.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Kada budete upitani, odaberite mapu u koju želite spremiti odabrani prilog.\nNapomena: pristup nekim mapama može biti ograničen.</item>
+        <item quantity="other">Kada budete upitani, odaberite mapu u koju želite spremiti %1$d odabranih priloga.\nNapomena: pristup nekim mapama može biti ograničen.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d odabran</item>
+        <item quantity="other">%1$d odabrano</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Jeste li sigurni da želite izbrisati odabrani prilog?</item>
+        <item quantity="other">Jeste li sigurni da želite izbrisati %1$d odabranih priloga?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d\u00a0dan,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
+        <item quantity="other">%1$d\u00a0dana,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d propuštena poruka…</item>
+        <item quantity="other">%1$d propuštenih poruka…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Grupni poziv s %2$s i još jednom osobom</item>
+        <item quantity="other">Grupni poziv s %2$s i %1$d drugih osoba</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Neodgovoreni grupni poziv s %2$s i još jednom osobom</item>
+        <item quantity="other">Neodgovoreni grupni poziv s %2$s i %1$d drugih osoba</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Neuspjeli grupni poziv s %2$s i još jednom osobom</item>
+        <item quantity="other">Neuspjeli grupni poziv s %2$s i %1$d drugih osoba</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Grupni poziv dok su %2$s i još jedna osoba zauzeti</item>
+        <item quantity="other">Grupni poziv dok su %2$s i %1$d drugih osoba zauzeti</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Odbijen grupni poziv s %2$s i još jednom osobom</item>
+        <item quantity="other">Odbijen grupni poziv s %2$s i %1$d drugih osoba</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Grupni poziv od %2$s i još jedne osobe</item>
+        <item quantity="other">Grupni poziv od %2$s i %1$d drugih osoba</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d odabran</item>
+        <item quantity="other">%1$d odabrano</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d odabran</item>
+        <item quantity="other">%1$d odabrano</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d nova poruka</item>
+        <item quantity="other">%1$d novih poruka</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s će biti pozvan da se pridruži grupi %2$s.</item>
+        <item quantity="other">Sljedećih %1$d kontakata će biti pozvano da se pridruži grupi %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s će biti uklonjen iz grupe %2$s.</item>
+        <item quantity="other">Sljedećih %1$d članova grupe će biti uklonjeno iz %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d nova poruka</item>
+        <item quantity="other">%1$d novih poruka</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d prilog</item>
+        <item quantity="other">%1$d priloga</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">i %1$d drugih</item>
+        <item quantity="other">i %1$d drugih</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d drugih</item>
+        <item quantity="other"> &amp; %1$d drugih</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Primjena politike zadržavanja koju ste upravo odabrali izbrisat će jednu poruku.\nJeste li sigurni da želite nastaviti?</item>
+        <item quantity="other">Primjena politike zadržavanja koju ste upravo odabrali izbrisat će %1$d poruka.\nJeste li sigurni da želite nastaviti?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… i još jedan rezultat pretraživanja\nMolimo vas da poboljšate svoje pretraživanje</item>
+        <item quantity="other">… i %1$d dodatnih rezultata pretraživanja\nMolimo vas da poboljšate svoje pretraživanje</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1\u00a0sekunda</item>
+        <item quantity="other">%1$d\u00a0sekundi</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1\u00a0minuta</item>
+        <item quantity="other">%1$d\u00a0minuta</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1\u00a0sat</item>
+        <item quantity="other">%1$d\u00a0sata</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1\u00a0dan</item>
+        <item quantity="other">%1$d\u00a0dana</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1\u00a0godina</item>
+        <item quantity="other">%1$d\u00a0godina</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1\u00a0član</item>
+        <item quantity="other">%1$d\u00a0članova</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Trenutno imate 1 izbrisanu poruku na daljinu u svojim razgovorima. Želite li je izbrisati?</item>
+        <item quantity="other">Trenutno imate %1$d izbrisanih poruka na daljinu u svojim razgovorima. Želite li izbrisati sve takve oznake?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 kontakt dijeli svoju lokaciju</item>
+        <item quantity="other">%1$d kontakata dijeli svoju lokaciju</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Vi i 1 druga osoba dijele svoju lokaciju</item>
+        <item quantity="other">Vi i %1$d drugih osoba dijele svoju lokaciju</item>
+    </plurals>
+</resources>

@@ -4,6 +4,7 @@
     <bytecodeTargetLevel target="17">
       <module name="android.obv_messenger.Olvid_for_Android.app" target="21" />
       <module name="obv_messenger.Olvid_for_Android.app" target="21" />
+      <module name="Olvid for Android.Olvid_for_Android.app" target="21" />
       <module name="Olvid_for_Android.app" target="21" />
     </bytecodeTargetLevel>
   </component>

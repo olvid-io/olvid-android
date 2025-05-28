@@ -240,7 +240,7 @@ class UploadMessageAndGetUidsServerMethod extends ServerMethod {
             encodedAttachmentLengths[i] = Encoded.of(attachments[i].getCiphertextLength());
             encodedChunkLengths[i] = Encoded.of(attachments[i].getCiphertextChunkLength());
         }
-        if (encryptedExtendedMessage == null || encodedAttachmentLengths.length > Constants.MAX_MESSAGE_EXTENDED_CONTENT_LENGTH) {
+        if (encryptedExtendedMessage == null || encryptedExtendedMessage.length > Constants.MAX_MESSAGE_EXTENDED_CONTENT_LENGTH) {
             return Encoded.of(new Encoded[]{
                     Encoded.of(encodedHeaders),
                     Encoded.of(encryptedMessage),

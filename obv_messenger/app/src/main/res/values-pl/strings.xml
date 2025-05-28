@@ -2032,7 +2032,7 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Zachowaj ich wszystkich dzięki Olvid+</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Po przywróceniu profilu możesz wybrać, które urządzenie ma pozostać aktywne w ustawieniach profilu.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Przywracając swój profil «</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">(%1$s)</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Nie znaleziono klucza kopii zapasowej</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">Twoje kopie zapasowe</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">Zaawansowane</string>
@@ -2051,7 +2051,7 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Nie trać dostępu do swoich profili!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Kopie zapasowe umożliwiają odzyskanie profili w przypadku utraty dostępu do tego urządzenia. Nowa wersja jest łatwiejsza niż kiedykolwiek 😉 i można ją skonfigurować w kilka sekund.</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Skonfiguruj kopie zapasowe</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">Nie zapomnij zanotować klucza zapasowego 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Nie zapomnij zanotować klucza zapasowego 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Twój klucz zapasowy jest niezbędny do przywrócenia profili, jeśli utracisz dostęp do tego urządzenia.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Ulepsz swoje doświadczenie z Olvid 🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">Niektóre parametry nie są poprawnie skonfigurowane na Twoim urządzeniu i mogą wpłynąć na Twoje wrażenia z korzystania z Olvid.</string>
@@ -2062,7 +2062,7 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">W pętli</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">Raz</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">Nigdy</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">Wyślij do nas e-mail</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">Wyślij nam e-mail</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">Ciesz się Olvid w nowych językach!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">Dodaliśmy wiele nowych języków do Olvid, korzystając z tłumaczeń opartych na sztucznej inteligencji, więc niektóre z nich mogą być niedokładne.\nJeśli tak jest, skontaktuj się z nami pod adresem **lang@olvid.io**.</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Tłumaczenia aplikacji na Androida</string>

@@ -54,7 +54,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
@@ -67,6 +66,7 @@ import io.olvid.messenger.main.cutoutHorizontalPadding
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ContactListItem(
+    modifier: Modifier = Modifier,
     title: AnnotatedString,
     body: AnnotatedString?,
     onClick: () -> Unit,
@@ -82,7 +82,7 @@ fun ContactListItem(
     additionalHorizontalPadding: Dp = 0.dp,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .background(colorResource(id = if (useDialogBackgroundColor) R.color.dialogBackground else R.color.almostWhite))
             .cutoutHorizontalPadding()
     ) {
@@ -236,15 +236,13 @@ fun ContactMenu(
 @Preview
 @Composable
 private fun ContactListItemPreview() {
-    AppCompatTheme {
-        ContactListItem(
-            title = AnnotatedString("Contact"),
-            body = AnnotatedString("Description"),
-            publishedDetails = true,
-            publishedDetailsNotification = true,
-            shouldAnimateChannel = false,
-            onClick = {},
-            initialViewSetup = {},
-        )
-    }
+    ContactListItem(
+        title = AnnotatedString("Contact"),
+        body = AnnotatedString("Description"),
+        publishedDetails = true,
+        publishedDetailsNotification = true,
+        shouldAnimateChannel = false,
+        onClick = {},
+        initialViewSetup = {},
+    )
 }

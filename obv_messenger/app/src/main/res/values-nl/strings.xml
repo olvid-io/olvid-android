@@ -2002,7 +2002,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Houd ze allemaal veilig met Olvid+</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Zodra je profiel is hersteld, kun je kiezen welk apparaat actief moet blijven via de instellingen van je profiel.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Door je profiel te herstellen «</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">(%1$s)</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Er is geen back-upsleutel gevonden</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">Je back-ups</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">Geavanceerd</string>
@@ -2021,7 +2021,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Verlies geen toegang tot je profielen!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Back-ups stellen je in staat om je profielen te herstellen als je de toegang tot dit apparaat verliest. De nieuwe ervaring is gemakkelijker dan ooit 😉 en kan in enkele seconden worden ingesteld.</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Back-ups configureren</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">Vergeet niet je back-upsleutel op te schrijven 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Vergeet niet je back-upsleutel op te schrijven 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Je back-upsleutel is essentieel om je profielen te herstellen als je de toegang tot dit apparaat verliest.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Verbeter je Olvid-ervaring🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">Sommige parameters zijn niet correct geconfigureerd op je apparaat en kunnen je ervaring met Olvid beïnvloeden.</string>
@@ -2032,7 +2032,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">Herhalen</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">Eén keer</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">Nooit</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">Stuur ons een e-mail</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">Stuur ons een e-mail</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">Geniet van Olvid in nieuwe talen!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">We hebben veel nieuwe talen aan Olvid toegevoegd met behulp van AI-gebaseerde vertaling, dus sommige kunnen onnauwkeurig zijn.\nAls dat het geval is, aarzel dan niet om ons te laten weten op **lang@olvid.io**.</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Android-app vertalingen</string>

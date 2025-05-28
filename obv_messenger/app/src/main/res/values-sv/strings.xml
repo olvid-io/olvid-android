@@ -2003,7 +2003,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Behåll dem alla med Olvid+</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">När din profil har återställts kan du välja vilken enhet du vill hålla aktiv från profilinställningarna.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Genom att återställa din profil «</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">(%1$s)</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Ingen säkerhetskopieringsnyckel hittades</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">Dina säkerhetskopior</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">Avancerat</string>
@@ -2022,7 +2022,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Missa inte åtkomsten till dina profiler!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Säkerhetskopior låter dig återställa dina profiler om du förlorar åtkomsten till den här enheten. Den nya upplevelsen är enklare än någonsin 😉 och kan konfigureras på några sekunder.</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Konfigurera säkerhetskopior</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">Glöm inte att skriva ner din säkerhetskopieringsnyckel 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Glöm inte att skriva ner din säkerhetskopieringsnyckel 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Din säkerhetskopieringsnyckel är viktig för att återställa dina profiler om du förlorar åtkomsten till den här enheten.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Förbättra din Olvid-upplevelse 🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">Vissa parametrar är inte korrekt konfigurerade på din enhet och kan påverka din upplevelse med Olvid.</string>
@@ -2033,7 +2033,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">Loop</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">En gång</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">Aldrig</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">Skicka ett e-postmeddelande till oss</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">Skicka ett e-postmeddelande till oss</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">Njut av Olvid på nya språk!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">Vi har lagt till många nya språk till Olvid med hjälp av AI-baserad översättning, så vissa av dem kan vara felaktiga.\nOm det är fallet, tveka inte att berätta för oss på **lang@olvid.io**.</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Android-applikationsöversättningar</string>

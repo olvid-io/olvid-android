@@ -2029,7 +2029,7 @@
     <string name="pref_emoji_animation_loop">En boucle</string>
     <string name="pref_emoji_animation_once">Une fois</string>
     <string name="pref_emoji_animation_never">Jamais</string>
-    <string name="button_label_send_us_a_mail">Envoyer nous un mail</string>
+    <string name="button_label_send_us_a_mail">Envoyez nous un mail</string>
     <string name="tip_new_translations_title">Profitez d\'Olvid dans de nouvelles langues !</string>
     <string name="tip_new_translations_message">Nous avons ajouté de nombreuses nouvelles langues à Olvid en utilisant des traductions à base d\'IA, donc certaines peuvent être imprécises.\nSi c\'est le cas, faites le nous savoir à l\'adresse **lang@olvid.io**.</string>
     <string name="mail_subject_olvid_translation">Traductions de l\'app Android</string>

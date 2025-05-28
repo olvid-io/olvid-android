@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">"Trên thiết bị này, thiết bị trước đó của bạn sẽ bị hủy kích hoạt:</item>
+        <item quantity="other">"Trên thiết bị này, các thiết bị trước đó của bạn sẽ bị hủy kích hoạt:</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d bản sao lưu được tìm thấy</item>
+        <item quantity="other">%1$d bản sao lưu được tìm thấy</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d hồ sơ được tìm thấy</item>
+        <item quantity="other">%1$d hồ sơ được tìm thấy</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">Không có nhóm</item>
+        <item quantity="one">%1$d nhóm</item>
+        <item quantity="other">%1$d nhóm</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">Không có liên hệ</item>
+        <item quantity="one">%1$d liên hệ</item>
+        <item quantity="other">%1$d liên hệ</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">Đã lưu trữ cuộc trò chuyện</item>
+        <item quantity="other">%1$d cuộc trò chuyện đã được lưu trữ</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">Đã bỏ lưu trữ cuộc trò chuyện</item>
+        <item quantity="other">%1$d cuộc trò chuyện đã được bỏ lưu trữ</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">Đã bỏ đánh dấu tin nhắn</item>
+        <item quantity="other">%1$d tin nhắn đã được bỏ đánh dấu</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">Xóa cuộc trò chuyện đã chọn?</item>
+        <item quantity="other">Xóa các cuộc trò chuyện đã chọn?</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">Xóa tin nhắn đã chọn?</item>
+        <item quantity="other">Xóa các tin nhắn đã chọn?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">Bạn có thực sự muốn xóa cuộc trò chuyện đã chọn và tất cả các tin nhắn trong đó không?\nHành động này không thể hoàn tác.</item>
+        <item quantity="other">Bạn có thực sự muốn xóa %1$d cuộc trò chuyện đã chọn và tất cả các tin nhắn trong đó không?\nHành động này không thể hoàn tác.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">Bạn muốn xóa cuộc trò chuyện đã chọn và tất cả các tin nhắn trong đó như thế nào?\nHành động này không thể hoàn tác.</item>
+        <item quantity="other">Bạn muốn xóa %1$d cuộc trò chuyện đã chọn và tất cả các tin nhắn trong đó như thế nào?\nHành động này không thể hoàn tác.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">Bạn có thực sự muốn xóa tin nhắn đã chọn không?\nHành động này không thể hoàn tác.</item>
+        <item quantity="other">Bạn có thực sự muốn xóa %1$d tin nhắn đã chọn không?\nHành động này không thể hoàn tác.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">Bạn muốn xóa tin nhắn đã chọn như thế nào?\nHành động này không thể hoàn tác.</item>
+        <item quantity="other">Bạn muốn xóa %1$d tin nhắn đã chọn như thế nào?\nHành động này không thể hoàn tác.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">Bạn sắp **vĩnh viễn** xóa một tin nhắn cho **tất cả mọi người** trong cuộc trò chuyện này. Hãy chắc chắn rằng đây là những gì bạn muốn làm.</item>
+        <item quantity="other">Bạn sắp **vĩnh viễn** xóa %1$d tin nhắn cho **tất cả mọi người** trong cuộc trò chuyện này. Hãy chắc chắn rằng đây là những gì bạn muốn làm.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">Bạn sắp **vĩnh viễn** xóa một cuộc trò chuyện và các tin nhắn trong đó cho **tất cả mọi người** trong cuộc trò chuyện này. Hãy chắc chắn rằng đây là những gì bạn muốn làm.</item>
+        <item quantity="other">Bạn sắp **vĩnh viễn** xóa %1$d cuộc trò chuyện và các tin nhắn trong đó cho **tất cả mọi người** trong các cuộc trò chuyện này. Hãy chắc chắn rằng đây là những gì bạn muốn làm.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">Bạn sắp mời từng thành viên nhóm mà bạn có kênh (hiện có 1 thành viên) tham gia một cuộc trò chuyện riêng tư.\nBạn có muốn tiếp tục không?</item>
+        <item quantity="other">Bạn sắp mời từng thành viên nhóm mà bạn có kênh (hiện có %1$d thành viên) tham gia một cuộc trò chuyện riêng tư.\nBạn có muốn tiếp tục không?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 nhóm chung</item>
+        <item quantity="other">%1$d nhóm chung</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. Bạn cần rời khỏi nhóm này để tiếp tục.</item>
+        <item quantity="other">. Bạn cần rời khỏi các nhóm này để tiếp tục.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">Bạn sắp xóa %1$s khỏi danh sách người dùng khác của mình.\n\nLưu ý rằng %1$s đã được mời vào %2$d nhóm mà bạn thuộc về. Họ sẽ được thêm lại vào danh sách này nếu họ tham gia nó. Bạn có thể muốn rời khỏi nhóm này để tránh điều này.\n\nXóa người dùng này không?</item>
+        <item quantity="other">Bạn sắp xóa %1$s khỏi danh sách người dùng khác của mình.\n\nLưu ý rằng %1$s đã được mời vào %2$d nhóm mà bạn thuộc về. Họ sẽ được thêm lại vào danh sách này nếu họ tham gia một trong số đó. Bạn có thể muốn rời khỏi các nhóm này để tránh điều này.\n\nXóa người dùng này không?</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">Việc sửa đổi cài đặt này sẽ tự động chấp nhận một lời mời nhóm đang chờ xử lý.\nNhấn OK để xác nhận lựa chọn của bạn và tham gia nhóm này.</item>
+        <item quantity="other">Việc sửa đổi cài đặt này sẽ tự động chấp nhận %1$d lời mời nhóm đang chờ xử lý.\nNhấn OK để xác nhận lựa chọn của bạn và tham gia các nhóm này.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">Khi được nhắc, vui lòng chọn thư mục để lưu tệp đính kèm đã chọn.\nLưu ý rằng quyền truy cập vào một số thư mục có thể bị hạn chế.</item>
+        <item quantity="other">Khi được nhắc, vui lòng chọn thư mục để lưu %1$d tệp đính kèm đã chọn.\nLưu ý rằng quyền truy cập vào một số thư mục có thể bị hạn chế.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d đã chọn</item>
+        <item quantity="other">%1$d đã chọn</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">Bạn có thực sự muốn xóa tệp đính kèm đã chọn không?</item>
+        <item quantity="other">Bạn có thực sự muốn xóa %1$d tệp đính kèm đã chọn không?</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d ngày, %2$02d giờ %3$02d phút %4$02d giây</item>
+        <item quantity="other">%1$d ngày, %2$02d giờ %3$02d phút %4$02d giây</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d tin nhắn bị thiếu…</item>
+        <item quantity="other">%1$d tin nhắn bị thiếu…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">Cuộc gọi nhóm với %2$s và 1 người khác</item>
+        <item quantity="other">Cuộc gọi nhóm với %2$s và %1$d người khác</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">Cuộc gọi nhóm không trả lời với %2$s và 1 người khác</item>
+        <item quantity="other">Cuộc gọi nhóm không trả lời với %2$s và %1$d người khác</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">Cuộc gọi nhóm thất bại với %2$s và 1 người khác</item>
+        <item quantity="other">Cuộc gọi nhóm thất bại với %2$s và %1$d người khác</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">Cuộc gọi nhóm trong khi %2$s và 1 người khác bận</item>
+        <item quantity="other">Cuộc gọi nhóm trong khi %2$s và %1$d người khác bận</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">Cuộc gọi nhóm bị từ chối với %2$s và 1 người khác</item>
+        <item quantity="other">Cuộc gọi nhóm bị từ chối với %2$s và %1$d người khác</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">Cuộc gọi nhóm từ %2$s và 1 người khác</item>
+        <item quantity="other">Cuộc gọi nhóm từ %2$s và %1$d người khác</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d đã chọn</item>
+        <item quantity="other">%1$d đã chọn</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d đã chọn</item>
+        <item quantity="other">%1$d đã chọn</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d tin nhắn mới</item>
+        <item quantity="other">%1$d tin nhắn mới</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s sẽ được mời tham gia nhóm %2$s.</item>
+        <item quantity="other">Các liên hệ sau %1$d sẽ được mời tham gia nhóm %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s sẽ bị xóa khỏi nhóm %2$s.</item>
+        <item quantity="other">Các thành viên nhóm sau %1$d sẽ bị xóa khỏi %2$s: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d tin nhắn mới</item>
+        <item quantity="other">%1$d tin nhắn mới</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d tệp đính kèm</item>
+        <item quantity="other">%1$d tệp đính kèm</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">Và %1$d người khác</item>
+        <item quantity="other">Và %1$d người khác</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d người khác</item>
+        <item quantity="other"> &amp; %1$d người khác</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">Việc áp dụng chính sách lưu giữ bạn vừa chọn sẽ xóa một tin nhắn.\nBạn có chắc muốn tiếp tục không?</item>
+        <item quantity="other">Việc áp dụng chính sách lưu giữ bạn vừa chọn sẽ xóa %1$d tin nhắn.\nBạn có chắc muốn tiếp tục không?</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… và 1 kết quả tìm kiếm khác\nVui lòng tinh chỉnh tìm kiếm của bạn</item>
+        <item quantity="other">… và %1$d kết quả tìm kiếm khác\nVui lòng tinh chỉnh tìm kiếm của bạn</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1 giây</item>
+        <item quantity="other">%1$d giây</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1 phút</item>
+        <item quantity="other">%1$d phút</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1 giờ</item>
+        <item quantity="other">%1$d giờ</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1 ngày</item>
+        <item quantity="other">%1$d ngày</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1 năm</item>
+        <item quantity="other">%1$d năm</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1 thành viên</item>
+        <item quantity="other">%1$d thành viên</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">Bạn hiện có 1 tin nhắn đã xóa từ xa trong các cuộc trò chuyện của mình. Bạn có muốn xóa nó không?</item>
+        <item quantity="other">Bạn hiện có %1$d tin nhắn đã xóa từ xa trong các cuộc trò chuyện của mình. Bạn có muốn xóa tất cả các dấu hiệu đó không?</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 liên hệ đang chia sẻ vị trí của họ</item>
+        <item quantity="other">%1$d liên hệ đang chia sẻ vị trí của họ</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">Bạn và 1 người khác đang chia sẻ vị trí của họ</item>
+        <item quantity="other">Bạn và %1$d người khác đang chia sẻ vị trí của họ</item>
+    </plurals>
+</resources>

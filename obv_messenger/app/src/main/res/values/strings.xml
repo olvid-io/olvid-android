@@ -2034,7 +2034,7 @@
     <string name="button_label_keep_all_with_olvid_plus">Keep them all with Olvid+</string>
     <string name="explanation_backup_v2_choose_device_after_restore">Once your profile is restored, you may choose which device to keep active from your profile\'s settings</string>
     <string name="explanation_backup_v2_device_expiration_start">By restoring your profile \"</string>
-    <string name="explanation_backup_v2_device_expiration_nickname">" (%1$s)"</string>
+    <string name="explanation_backup_v2_device_expiration_nickname">\u0020(%1$s)</string>
     <string name="toast_message_no_key_found">No backup key was found</string>
     <string name="label_backup_headers_title">Your backups</string>
     <string name="label_advanced">Advanced</string>
@@ -2053,7 +2053,7 @@
     <string name="tip_setup_new_backups_title">Don\'t loose access to your profiles!</string>
     <string name="tip_setup_new_backups_message">Backups allow to restore your profiles if you lose access to this device. The new experience is easier than ever 😉, and can be setup in a few seconds.</string>
     <string name="button_label_configure_backups">Configure backups</string>
-    <string name="tip_write_backup_key_title">Don\'t forget to write down your backup key 😇</string>
+    <string name="tip_write_backup_key_title">Do not forget to write down your backup key 😇</string>
     <string name="tip_write_backup_key_message">Your backup key is essential for restoring your profiles if you lose access to this device.</string>
     <string name="tip_troubleshooting_title">Improve your Olvid experience 🚀</string>
     <string name="tip_troubleshooting_message">Some parameters are not properly configured on your device and may impact your experience with Olvid.</string>

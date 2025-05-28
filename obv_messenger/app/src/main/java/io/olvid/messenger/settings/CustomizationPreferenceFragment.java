@@ -116,6 +116,9 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
                             case "en":
                                 languagePreference.setValue("en");
                                 break;
+                            case "af":
+                                languagePreference.setValue("af");
+                                break;
                             case "ar":
                                 languagePreference.setValue("ar");
                                 break;
@@ -137,6 +140,9 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
                             case "es":
                                 languagePreference.setValue("es");
                                 break;
+                            case "fa":
+                                languagePreference.setValue("fa");
+                                break;
                             case "fi":
                                 languagePreference.setValue("fi");
                                 break;
@@ -145,6 +151,9 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
                                 break;
                             case "hu":
                                 languagePreference.setValue("hu");
+                                break;
+                            case "hr":
+                                languagePreference.setValue("hr");
                                 break;
                             case "it":
                                 languagePreference.setValue("it");
@@ -189,8 +198,14 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
                             case "sv":
                                 languagePreference.setValue("sv");
                                 break;
+                            case "tr":
+                                languagePreference.setValue("tr");
+                                break;
                             case "uk":
                                 languagePreference.setValue("uk");
+                                break;
+                            case "vi":
+                                languagePreference.setValue("vi");
                                 break;
                             case "zh":
                                 if (country.equalsIgnoreCase("TW")) {
@@ -217,6 +232,9 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
                                 case "en":
                                     localeManager.setApplicationLocales(LocaleList.forLanguageTags("en"));
                                     break;
+                                case "af":
+                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("af"));
+                                    break;
                                 case "ar":
                                     localeManager.setApplicationLocales(LocaleList.forLanguageTags("ar"));
                                     break;
@@ -238,11 +256,17 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
                                 case "es":
                                     localeManager.setApplicationLocales(LocaleList.forLanguageTags("es"));
                                     break;
+                                case "fa":
+                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("fa"));
+                                    break;
                                 case "fi":
                                     localeManager.setApplicationLocales(LocaleList.forLanguageTags("fi"));
                                     break;
                                 case "hi":
                                     localeManager.setApplicationLocales(LocaleList.forLanguageTags("hi"));
+                                    break;
+                                case "hr":
+                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("hr"));
                                     break;
                                 case "hu":
                                     localeManager.setApplicationLocales(LocaleList.forLanguageTags("hu"));
@@ -289,13 +313,19 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
                                 case "sv":
                                     localeManager.setApplicationLocales(LocaleList.forLanguageTags("sv"));
                                     break;
+                                case "tr":
+                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("tr"));
+                                    break;
                                 case "uk":
                                     localeManager.setApplicationLocales(LocaleList.forLanguageTags("uk"));
                                     break;
-                               case "zh":
+                                case "vi":
+                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("vi"));
+                                    break;
+                                case "zh":
                                     localeManager.setApplicationLocales(LocaleList.forLanguageTags("zh"));
                                     break;
-                               case "zh-rTW":
+                                case "zh-rTW":
                                     localeManager.setApplicationLocales(LocaleList.forLanguageTags("zh-tw"));
                                     break;
                                 default:

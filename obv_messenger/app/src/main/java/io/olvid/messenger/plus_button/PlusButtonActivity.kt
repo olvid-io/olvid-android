@@ -83,16 +83,16 @@ class PlusButtonActivity : LockableActivity(), EngineNotificationListener {
         if (navHostFragment != null && intent.hasExtra(LINK_URI_INTENT_EXTRA)) {
             val uri = intent.getStringExtra(LINK_URI_INTENT_EXTRA)
             if (uri != null) {
-                if (ObvLinkActivity.INVITATION_PATTERN.matcher(uri).find()) {
-                    plusButtonViewModel.scannedUri = uri
-                    plusButtonViewModel.isDeepLinked = true
-                    navHostFragment.navController.popBackStack()
-                    navHostFragment.navController.navigate(R.id.invitation_scanned)
-                } else if (ObvLinkActivity.MUTUAL_SCAN_PATTERN.matcher(uri).find()) {
+                if (ObvLinkActivity.MUTUAL_SCAN_PATTERN.matcher(uri).find()) { // first check for mutual scan as INVITATION_PATTERN includes MUTUAL_SCAN_PATTERN
                     plusButtonViewModel.scannedUri = uri
                     plusButtonViewModel.isDeepLinked = true
                     navHostFragment.navController.popBackStack()
                     navHostFragment.navController.navigate(R.id.mutual_scan_invitation_scanned)
+                } else if (ObvLinkActivity.INVITATION_PATTERN.matcher(uri).find()) {
+                    plusButtonViewModel.scannedUri = uri
+                    plusButtonViewModel.isDeepLinked = true
+                    navHostFragment.navController.popBackStack()
+                    navHostFragment.navController.navigate(R.id.invitation_scanned)
                 } else if (ObvLinkActivity.CONFIGURATION_PATTERN.matcher(uri).find()) {
                     plusButtonViewModel.scannedUri = uri
                     plusButtonViewModel.isDeepLinked = true

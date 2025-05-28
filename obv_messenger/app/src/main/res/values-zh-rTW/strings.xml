@@ -2003,7 +2003,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">讓所有回憶都留在 Olvid+\u0020</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">當您的個人資料還原後，您可以從個人資料設定中選擇要維持運作的裝置。</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">藉由還原您的個人資料「</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">(%1$s)</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">找不到備份金鑰</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">您的備份</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">進階</string>
@@ -2022,7 +2022,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">別遺失您帳戶的存取權！</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">備份功能讓您在遺失此裝置的存取權時，能夠還原您的個人資料。全新的體驗比以往更簡單 😉，設定僅需幾秒鐘。</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">設定備份</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">別忘了記下你的備份金鑰😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">請不要忘記記錄您的備份金鑰‍☕</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">您的備份金鑰對於在您遺失此裝置的存取權時，還原您的個人資料至關重要。</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">提升您的 Olvid 體驗🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">您的裝置上的一些參數未正確設定，可能會影響您使用 Olvid 的體驗。</string>
@@ -2033,7 +2033,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">迴圈</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">一次</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">從不</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">寄送我們一封電子郵件</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">寄送我們一封電子郵件</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">盡享 Olvid 的新語言！</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">我們使用基於人工智慧的翻譯向 Olvid 添加了許多新語言，因此其中一些可能不準確。\n如果是這樣，請隨時透過 **lang@olvid.io** 告訴我們。</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Android 應用程式翻譯</string>

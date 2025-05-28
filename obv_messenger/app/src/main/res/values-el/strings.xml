@@ -2002,7 +2002,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Διατηρήστε τα όλα με το Olvid+</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Αφού επαναφέρετε το προφίλ σας, μπορείτε να επιλέξετε ποια συσκευή θα παραμείνει ενεργή από τις ρυθμίσεις του προφίλ σας.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Επαναφέροντας το προφίλ σας «</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">(%1$s)</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Δεν βρέθηκε κανένα κλειδί δημιουργίας αντιγράφων ασφαλείας</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">Τα αντίγραφα ασφαλείας σας</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">Προηγμένες</string>
@@ -2021,7 +2021,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Μην χάσετε την πρόσβαση στα προφίλ σας!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Τα αντίγραφα ασφαλείας σάς επιτρέπουν να επαναφέρετε τα προφίλ σας εάν χάσετε την πρόσβαση σε αυτήν τη συσκευή. Η νέα εμπειρία είναι πιο εύκολη από ποτέ 😉 και μπορεί να ρυθμιστεί σε λίγα δευτερόλεπτα.</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Διαμόρφωση αντιγράφων ασφαλείας</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">Μην ξεχάσετε να σημειώσετε το κλειδί ασφαλείας 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Μην ξεχάσεις να σημειώσεις το κλειδί δημιουργίας αντιγράφων ασφαλείας σου 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Το κλειδί ασφαλείας είναι απαραίτητο για την επαναφορά των προφίλ σας σε περίπτωση που χάσετε την πρόσβαση στη συσκευή σας.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Βελτιώστε την εμπειρία σας στο Olvid 🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">Ορισμένες παράμετροι δεν έχουν ρυθμιστεί σωστά στη συσκευή σας και ενδέχεται να επηρεάσουν την εμπειρία σας με το Olvid.</string>
@@ -2032,7 +2032,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">Επανάληψη</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">Μία φορά</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">Ποτέ</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">Στείλτε μας ένα email</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">Στείλτε μας ένα email</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">Απολαύστε το Olvid σε νέες γλώσσες!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">Προσθέσαμε πολλές νέες γλώσσες στο Olvid χρησιμοποιώντας μετάφραση βάσει τεχνητής νοημοσύνης, επομένως ορισμένες από αυτές ενδέχεται να είναι ανακριβείς.\nΕάν συμβαίνει αυτό, μη διστάσετε να μας ενημερώσετε στο **lang@olvid.io**.</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Μεταφράσεις εφαρμογής Android</string>

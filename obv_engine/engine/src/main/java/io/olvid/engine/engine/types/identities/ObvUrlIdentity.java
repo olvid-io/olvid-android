@@ -33,7 +33,10 @@ public class ObvUrlIdentity {
     public static final String URL_PROTOCOL_OLVID = "olvid";
     public static final String URL_INVITATION_HOST = "invitation.olvid.io";
 
-    private static final Pattern INVITATION_PATTERN = Pattern.compile("(" + URL_PROTOCOL + "|" + URL_PROTOCOL_OLVID + ")" + Pattern.quote("://" + URL_INVITATION_HOST) + "/1?#([-_a-zA-Z0-9]+)");
+    public static final Pattern INVITATION_PATTERN = Pattern.compile(
+            "(" + URL_PROTOCOL + "|" + URL_PROTOCOL_OLVID + ")" +
+                    Pattern.quote("://" + URL_INVITATION_HOST) +
+                    "/([-_a-zA-Z0-9]*)?#([-_a-zA-Z0-9]+)");
 
     public final Identity identity;
     public final String displayName;
@@ -69,7 +72,7 @@ public class ObvUrlIdentity {
         Matcher matcher = INVITATION_PATTERN.matcher(urlRepresentation);
         if (matcher.find()) {
             try {
-                Encoded[] list = new Encoded(ObvBase64.decode(matcher.group(2))).decodeList();
+                Encoded[] list = new Encoded(ObvBase64.decode(matcher.group(3))).decodeList();
                 Identity identity = list[0].decodeIdentity();
                 String displayName = list[1].decodeString();
                 return new ObvUrlIdentity(identity, displayName);

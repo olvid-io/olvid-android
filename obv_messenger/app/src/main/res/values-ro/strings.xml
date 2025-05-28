@@ -2003,7 +2003,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Păstrează-le pe toate cu Olvid+</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">După restaurarea profilului, puteți alege ce dispozitiv să păstrați activ din setările profilului.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Restaurând profilul tău «</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">(%1$s)</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Nu a fost găsită nicio cheie de rezervă</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">Copii de rezervă</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">Avansat</string>
@@ -2022,7 +2022,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Nu pierdeți accesul la profilurile dumneavoastră!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Backup-urile vă permit să restaurați profilurile dacă pierdeți accesul la acest dispozitiv. Experiența nouă este mai ușoară ca niciodată 😉 și poate fi configurată în câteva secunde.</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Configurare copii de siguranță</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">Nu uitați să notați cheia de rezervă 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Nu uitați să notați cheia de rezervă 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Cheia de backup este esențială pentru a restaura profilurile tale dacă pierzi accesul la acest dispozitiv.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Îmbunătățește-ți experiența Olvid 🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">Anumite setări nu sunt configurate corect pe dispozitivul dumneavoastră și pot afecta experiența cu Olvid.</string>
@@ -2033,7 +2033,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">În buclă</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">O dată</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">Niciodată</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">Trimiteți-ne un e-mail</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">Trimiteş-ne un e-mail</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">Bucură-te de Olvid în limbi noi!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">Am adăugat multe limbi noi la Olvid folosind traducerea bazată pe inteligență artificială, deci unele pot fi inexacte.\nDacă este cazul, nu ezitați să ne spuneți la **lang@olvid.io**.</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Traduceri pentru aplicația Android</string>

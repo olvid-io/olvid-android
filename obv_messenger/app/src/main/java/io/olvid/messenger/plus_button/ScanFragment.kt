@@ -101,7 +101,19 @@ class ScanFragment : Fragment(), OnClickListener,
 
     override fun handleResult(text: String): Boolean {
         (activity?.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator)?.vibrate(100)
-        var matcher = ObvLinkActivity.INVITATION_PATTERN.matcher(text)
+
+        var matcher = ObvMutualScanUrl.MUTUAL_SCAN_PATTERN.matcher(text)
+        if (matcher.find()) {
+            viewModel.scannedUri = matcher.group(0)
+            Handler(Looper.getMainLooper()).post {
+                findNavController(
+                    rootView
+                ).navigate(R.id.action_scanned_mutual_scan_invitation)
+            }
+            return true
+        }
+
+        matcher = ObvLinkActivity.INVITATION_PATTERN.matcher(text)
         if (matcher.find()) {
             viewModel.scannedUri = matcher.group(0)
             Handler(Looper.getMainLooper()).post {
@@ -130,17 +142,6 @@ class ScanFragment : Fragment(), OnClickListener,
                 findNavController(
                     rootView
                 ).navigate(R.id.action_scanned_webclient)
-            }
-            return true
-        }
-
-        matcher = ObvMutualScanUrl.MUTUAL_SCAN_PATTERN.matcher(text)
-        if (matcher.find()) {
-            viewModel.scannedUri = matcher.group(0)
-            Handler(Looper.getMainLooper()).post {
-                findNavController(
-                    rootView
-                ).navigate(R.id.action_scanned_mutual_scan_invitation)
             }
             return true
         }

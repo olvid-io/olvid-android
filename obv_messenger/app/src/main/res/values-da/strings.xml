@@ -2002,7 +2002,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Behold dem alle med Olvid+</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Når din profil er gendannet, kan du vælge, hvilken enhed du vil holde aktiv fra dine profilindstillinger.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Ved at gendanne din profil «</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">(%1$s)</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Ingen sikkerhedskopieringsnøgle blev fundet</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">Dine sikkerhedskopier</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">Avanceret</string>
@@ -2021,7 +2021,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Glem ikke adgangen til dine profiler!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Backup giver dig mulighed for at gendanne dine profiler, hvis du mister adgangen til denne enhed. Den nye oplevelse er nemmere end nogensinde 😉 og kan konfigureres på få sekunder.</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Konfigurer sikkerhedskopier</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">Glem ikke at notere din sikkerhedskopi-nøgle 😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Glem ikke at notere din backup-nøgle 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Din backup-nøgle er afgørende for at gendanne dine profiler, hvis du mister adgangen til denne enhed.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Forbedr din Olvid-oplevelse 🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">Nogle parametre er ikke konfigureret korrekt på din enhed og kan påvirke din oplevelse med Olvid.</string>
@@ -2032,7 +2032,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">Sløjfe</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">Én gang</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">Aldrig</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">Send os en e-mail</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">Send os en e-mail</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">Nyd Olvid på nye sprog!</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">Vi har tilføjet mange nye sprog til Olvid ved hjælp af AI-baseret oversættelse, så nogle af dem kan være unøjagtige.\nHvis det er tilfældet, er du velkommen til at fortælle os det på **lang@olvid.io**.</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Android app oversættelser</string>

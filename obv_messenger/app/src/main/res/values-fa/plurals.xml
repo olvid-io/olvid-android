@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="explanation_backup_v2_device_expiration_end">
+        <item quantity="one">"در این دستگاه، دستگاه قبلی شما که در زیر آمده، غیرفعال خواهد شد:"</item>
+        <item quantity="other">"در این دستگاه، دستگاه‌های قبلی شما که در زیر آمده‌اند، غیرفعال خواهند شد:"</item>
+    </plurals>
+    <plurals name="label_backups_found">
+        <item quantity="one">%1$d نسخه پشتیبان یافت شد</item>
+        <item quantity="other">%1$d نسخه پشتیبان یافت شد</item>
+    </plurals>
+    <plurals name="label_profiles_found">
+        <item quantity="one">%1$d پروفایل یافت شد</item>
+        <item quantity="other">%1$d پروفایل یافت شد</item>
+    </plurals>
+    <plurals name="label_backup_groups">
+        <item quantity="zero">هیچ گروهی</item>
+        <item quantity="one">%1$d گروه</item>
+        <item quantity="other">%1$d گروه</item>
+    </plurals>
+    <plurals name="label_backup_contacts">
+        <item quantity="zero">هیچ مخاطبی</item>
+        <item quantity="one">%1$d مخاطب</item>
+        <item quantity="other">%1$d مخاطب</item>
+    </plurals>
+    <plurals name="label_discussion_archive_done">
+        <item quantity="one">گفتگو آرشیو شد</item>
+        <item quantity="other">%1$d گفتگو آرشیو شد</item>
+    </plurals>
+    <plurals name="label_discussion_unarchive_done">
+        <item quantity="one">گفتگو از آرشیو خارج شد</item>
+        <item quantity="other">%1$d گفتگو از آرشیو خارج شد</item>
+    </plurals>
+    <plurals name="label_message_unbookmark_done">
+        <item quantity="one">پیام از نشانگرها حذف شد</item>
+        <item quantity="other">%1$d پیام از نشانگرها حذف شد</item>
+    </plurals>
+    <plurals name="dialog_title_delete_discussions">
+        <item quantity="one">آیا می‌خواهید این گفتگو را حذف کنید؟</item>
+        <item quantity="other">آیا می‌خواهید این گفتگوها را حذف کنید؟</item>
+    </plurals>
+    <plurals name="dialog_title_delete_messages">
+        <item quantity="one">آیا می‌خواهید این پیام را حذف کنید؟</item>
+        <item quantity="other">آیا می‌خواهید این پیام‌ها را حذف کنید؟</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions">
+        <item quantity="one">آیا واقعاً می‌خواهید این گفتگو و تمام پیام‌های آن را حذف کنید؟\nاین عمل قابل برگشت نیست.</item>
+        <item quantity="other">آیا واقعاً می‌خواهید %1$d گفتگو و تمام پیام‌های آن‌ها را حذف کنید؟\nاین عمل قابل برگشت نیست.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_discussions_choice">
+        <item quantity="one">چگونه می‌خواهید این گفتگو و تمام پیام‌های آن را حذف کنید؟\nاین عمل قابل برگشت نیست.</item>
+        <item quantity="other">چگونه می‌خواهید %1$d گفتگو و تمام پیام‌های آن‌ها را حذف کنید؟\nاین عمل قابل برگشت نیست.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages">
+        <item quantity="one">آیا واقعاً می‌خواهید این پیام را حذف کنید؟\nاین عمل قابل برگشت نیست.</item>
+        <item quantity="other">آیا واقعاً می‌خواهید %1$d پیام را حذف کنید؟\nاین عمل قابل برگشت نیست.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_messages_choice">
+        <item quantity="one">چگونه می‌خواهید این پیام را حذف کنید؟\nاین عمل قابل برگشت نیست.</item>
+        <item quantity="other">چگونه می‌خواهید %1$d پیام را حذف کنید؟\nاین عمل قابل برگشت نیست.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_messages_everywhere">
+        <item quantity="one">در حال حاضر قصد دارید یک پیام را به‌طور **دائم** برای **همه** در این گفتگو حذف کنید. لطفاً مطمئن شوید که این همان چیزی است که می‌خواهید انجام دهید.</item>
+        <item quantity="other">در حال حاضر قصد دارید %1$d پیام را به‌طور **دائم** برای **همه** در این گفتگو حذف کنید. لطفاً مطمئن شوید که این همان چیزی است که می‌خواهید انجام دهید.</item>
+    </plurals>
+    <plurals name="dialog_warning_delete_discussions_everywhere">
+        <item quantity="one">در حال حاضر قصد دارید یک گفتگو و پیام‌های آن را به‌طور **دائم** برای **همه** در این گفتگو حذف کنید. لطفاً مطمئن شوید که این همان چیزی است که می‌خواهید انجام دهید.</item>
+        <item quantity="other">در حال حاضر قصد دارید %1$d گفتگو و پیام‌های آن‌ها را به‌طور **دائم** برای **همه** در این گفتگوها حذف کنید. لطفاً مطمئن شوید که این همان چیزی است که می‌خواهید انجام دهید.</item>
+    </plurals>
+    <plurals name="dialog_message_invite_all_group_members">
+        <item quantity="one">در حال حاضر قصد دارید هر یک از اعضای گروه که با او کانال دارید (در حال حاضر 1 عضو) را به یک گفتگوی خصوصی دعوت کنید.\nآیا می‌خواهید ادامه دهید؟</item>
+        <item quantity="other">در حال حاضر قصد دارید هر یک از اعضای گروه که با او کانال دارید (در حال حاضر %1$d عضو) را به یک گفتگوی خصوصی دعوت کنید.\nآیا می‌خواهید ادامه دهید؟</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_count">
+        <item quantity="one">1 گروه مشترک</item>
+        <item quantity="other">%1$d گروه مشترک</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_impossible_end">
+        <item quantity="one">. برای ادامه باید از این گروه خارج شوید.</item>
+        <item quantity="other">. برای ادامه باید از این گروه‌ها خارج شوید.</item>
+    </plurals>
+    <plurals name="dialog_message_delete_user_with_pending_groups">
+        <item quantity="one">در حال حاضر قصد دارید %1$s را از لیست سایر کاربران خود حذف کنید.\n\nتوجه داشته باشید که %1$s به %2$d گروهی که به آن تعلق دارید دعوت شده است. اگر به آن بپیوندد، دوباره به این لیست اضافه خواهد شد. ممکن است بخواهید از این گروه خارج شوید تا از این امر جلوگیری کنید.\n\nآیا واقعاً می‌خواهید این کاربر را حذف کنید؟</item>
+        <item quantity="other">در حال حاضر قصد دارید %1$s را از لیست سایر کاربران خود حذف کنید.\n\nتوجه داشته باشید که %1$s به %2$d گروهی که به آن تعلق دارید دعوت شده است. اگر به یکی از آن‌ها بپیوندد، دوباره به این لیست اضافه خواهد شد. ممکن است بخواهید از این گروه‌ها خارج شوید تا از این امر جلوگیری کنید.\n\nآیا واقعاً می‌خواهید این کاربر را حذف کنید؟</item>
+    </plurals>
+    <plurals name="dialog_message_auto_join_pending_groups">
+        <item quantity="one">تغییر این تنظیمات به‌طور خودکار یک دعوت گروه معلق را می‌پذیرد.\nبرای تأیید انتخاب خود و پیوستن به این گروه، OK را فشار دهید.</item>
+        <item quantity="other">تغییر این تنظیمات به‌طور خودکار %1$d دعوت گروه معلق را می‌پذیرد.\nبرای تأیید انتخاب خود و پیوستن به این گروه‌ها، OK را فشار دهید.</item>
+    </plurals>
+    <plurals name="dialog_message_save_selected_attachments">
+        <item quantity="one">هنگامی که از شما خواسته شد، پوشه‌ای را انتخاب کنید که پیوست انتخاب شده را در آن ذخیره کنید.\nتوجه داشته باشید که دسترسی به برخی از پوشه‌ها ممکن است محدود باشد.</item>
+        <item quantity="other">هنگامی که از شما خواسته شد، پوشه‌ای را انتخاب کنید که %1$d پیوست انتخاب شده را در آن ذخیره کنید.\nتوجه داشته باشید که دسترسی به برخی از پوشه‌ها ممکن است محدود باشد.</item>
+    </plurals>
+    <plurals name="action_mode_title_storage">
+        <item quantity="one">%1$d انتخاب شده</item>
+        <item quantity="other">%1$d انتخاب شده</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments">
+        <item quantity="one">آیا واقعاً می‌خواهید این پیوست را حذف کنید؟</item>
+        <item quantity="other">آیا واقعاً می‌خواهید %1$d پیوست را حذف کنید؟</item>
+    </plurals>
+    <plurals name="text_app_uptime_days">
+        <item quantity="one">%1$d روز، %2$02dساعت %3$02d دقیقه %4$02d ثانیه</item>
+        <item quantity="other">%1$d روز، %2$02d ساعت %3$02d دقیقه %4$02d ثانیه</item>
+    </plurals>
+    <plurals name="text_message_possibly_missing">
+        <item quantity="one">%1$d پیام از دست رفته…</item>
+        <item quantity="other">%1$d پیام از دست رفته…</item>
+    </plurals>
+    <plurals name="text_outgoing_group_call_with_contacts">
+        <item quantity="one">تماس گروهی با %2$s و یک نفر دیگر</item>
+        <item quantity="other">تماس گروهی با %2$s و %1$d نفر دیگر</item>
+    </plurals>
+    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
+        <item quantity="one">تماس گروهی بدون پاسخ با %2$s و یک نفر دیگر</item>
+        <item quantity="other">تماس گروهی بدون پاسخ با %2$s و %1$d نفر دیگر</item>
+    </plurals>
+    <plurals name="text_failed_outgoing_group_call_with_contacts">
+        <item quantity="one">تماس گروهی ناموفق با %2$s و یک نفر دیگر</item>
+        <item quantity="other">تماس گروهی ناموفق با %2$s و %1$d نفر دیگر</item>
+    </plurals>
+    <plurals name="text_busy_outgoing_group_call_with_contacts">
+        <item quantity="one">تماس گروهی در حالی که %2$s و یک نفر دیگر مشغول بودند</item>
+        <item quantity="other">تماس گروهی در حالی که %2$s و %1$d نفر دیگر مشغول بودند</item>
+    </plurals>
+    <plurals name="text_rejected_outgoing_group_call_with_contacts">
+        <item quantity="one">تماس گروهی رد شده با %2$s و یک نفر دیگر</item>
+        <item quantity="other">تماس گروهی رد شده با %2$s و %1$d نفر دیگر</item>
+    </plurals>
+    <plurals name="text_incoming_group_call_with_contacts">
+        <item quantity="one">تماس گروهی از %2$s و یک نفر دیگر</item>
+        <item quantity="other">تماس گروهی از %2$s و %1$d نفر دیگر</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion">
+        <item quantity="one">%1$d انتخاب شده</item>
+        <item quantity="other">%1$d انتخاب شده</item>
+    </plurals>
+    <plurals name="action_mode_title_discussion_list">
+        <item quantity="one">%1$d انتخاب شده</item>
+        <item quantity="other">%1$d انتخاب شده</item>
+    </plurals>
+    <plurals name="notification_public_title_new_messages">
+        <item quantity="one">%1$d پیام جدید</item>
+        <item quantity="other">%1$d پیام جدید</item>
+    </plurals>
+    <plurals name="dialog_message_invite_group_members">
+        <item quantity="one">%3$s دعوت خواهد شد تا به گروه %2$s بپیوندد.</item>
+        <item quantity="other">افراد زیر دعوت خواهند شد تا به گروه %2$s بپیوندند: %3$s.</item>
+    </plurals>
+    <plurals name="dialog_message_remove_group_members">
+        <item quantity="one">%3$s از گروه %2$s حذف خواهد شد.</item>
+        <item quantity="other">افراد زیر از %2$s حذف خواهند شد: %3$s.</item>
+    </plurals>
+    <plurals name="text_unread_message_count">
+        <item quantity="one">%1$d پیام خوانده نشده</item>
+        <item quantity="other">%1$d پیام خوانده نشده</item>
+    </plurals>
+    <plurals name="text_reply_attachment_count">
+        <item quantity="one">%1$d پیوست</item>
+        <item quantity="other">%1$d پیوست</item>
+    </plurals>
+    <plurals name="text_and_x_other">
+        <item quantity="one">و %1$d نفر دیگر</item>
+        <item quantity="other">و %1$d نفر دیگر</item>
+    </plurals>
+    <plurals name="text_contact_names_last_separator_x_other">
+        <item quantity="one"> &amp; %1$d نفر دیگر</item>
+        <item quantity="other"> &amp; %1$d نفر دیگر</item>
+    </plurals>
+    <plurals name="dialog_message_confirm_retention_policy">
+        <item quantity="one">اعمال سیاست حفظ و نگهداری که انتخاب کردید یک پیام را حذف می‌کند.\nآیا مطمئن هستید که می‌خواهید ادامه دهید؟</item>
+        <item quantity="other">اعمال سیاست حفظ و نگهداری که انتخاب کردید %1$d پیام را حذف می‌کند.\nآیا مطمئن هستید که می‌خواهید ادامه دهید؟</item>
+    </plurals>
+    <plurals name="text_keycloak_missing_search_result">
+        <item quantity="one">… و یک نتیجه جستجوی دیگر\nلطفاً جستجوی خود را اصلاح کنید</item>
+        <item quantity="other">… و %1$d نتیجه جستجوی دیگر\nلطفاً جستجوی خود را اصلاح کنید</item>
+    </plurals>
+    <plurals name="duration_seconds">
+        <item quantity="one">1 ثانیه</item>
+        <item quantity="other">%1$d ثانیه</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">1 دقیقه</item>
+        <item quantity="other">%1$d دقیقه</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">1 ساعت</item>
+        <item quantity="other">%1$d ساعت</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">1 روز</item>
+        <item quantity="other">%1$d روز</item>
+    </plurals>
+    <plurals name="duration_years">
+        <item quantity="one">1 سال</item>
+        <item quantity="other">%1$d سال</item>
+    </plurals>
+    <plurals name="other_members_count">
+        <item quantity="one">1 عضو</item>
+        <item quantity="other">%1$d عضو</item>
+    </plurals>
+    <plurals name="dialog_message_delete_remote_deleted_messages">
+        <item quantity="one">در حال حاضر 1 پیام حذف شده از راه دور در گفتگوهای شما وجود دارد. آیا می‌خواهید آن را حذف کنید؟</item>
+        <item quantity="other">در حال حاضر %1$d پیام حذف شده از راه دور در گفتگوهای شما وجود دارد. آیا می‌خواهید تمام این نشانگرها را حذف کنید؟</item>
+    </plurals>
+    <plurals name="label_xxx_contacts_sharing_their_position">
+        <item quantity="one">1 مخاطب در حال به اشتراک گذاری موقعیت مکانی خود است</item>
+        <item quantity="other">%1$d مخاطب در حال به اشتراک گذاری موقعیت مکانی خود است</item>
+    </plurals>
+    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
+        <item quantity="one">شما و 1 نفر دیگر در حال به اشتراک گذاری موقعیت مکانی خود هستند</item>
+        <item quantity="other">شما و %1$d نفر دیگر در حال به اشتراک گذاری موقعیت مکانی خود هستند</item>
+    </plurals>
+</resources>

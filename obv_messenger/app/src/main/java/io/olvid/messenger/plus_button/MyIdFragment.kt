@@ -229,28 +229,22 @@ class MyIdFragment : Fragment(), OnClickListener {
                                         ObvLinkActivity.ANY_PATTERN.matcher(textChars)
                                     if (matcher.find()) {
                                         val text = textChars.toString()
-                                        if (ObvLinkActivity.INVITATION_PATTERN.matcher(text).find()) {
-                                            viewModel.scannedUri = text
-                                            viewModel.isDeepLinked = true
-                                            findNavController(v).navigate(R.id.invitation_scanned)
-                                            return@setOnMenuItemClickListener true
-                                        } else if (ObvLinkActivity.MUTUAL_SCAN_PATTERN.matcher(text)
-                                                .find()
-                                        ) {
+                                        if (ObvLinkActivity.MUTUAL_SCAN_PATTERN.matcher(text).find()) { // first check for mutual scan as INVITATION_PATTERN includes MUTUAL_SCAN_PATTERN
                                             viewModel.scannedUri = text
                                             viewModel.isDeepLinked = true
                                             findNavController(v).navigate(R.id.mutual_scan_invitation_scanned)
                                             return@setOnMenuItemClickListener true
-                                        } else if (ObvLinkActivity.CONFIGURATION_PATTERN.matcher(text)
-                                                .find()
-                                        ) {
+                                        } else if (ObvLinkActivity.INVITATION_PATTERN.matcher(text).find()) {
+                                            viewModel.scannedUri = text
+                                            viewModel.isDeepLinked = true
+                                            findNavController(v).navigate(R.id.invitation_scanned)
+                                            return@setOnMenuItemClickListener true
+                                        } else if (ObvLinkActivity.CONFIGURATION_PATTERN.matcher(text).find()) {
                                             viewModel.scannedUri = text
                                             viewModel.isDeepLinked = true
                                             findNavController(v).navigate(R.id.configuration_scanned)
                                             return@setOnMenuItemClickListener true
-                                        } else if (ObvLinkActivity.WEB_CLIENT_PATTERN.matcher(text)
-                                                .find()
-                                        ) {
+                                        } else if (ObvLinkActivity.WEB_CLIENT_PATTERN.matcher(text).find()) {
                                             viewModel.scannedUri = text
                                             viewModel.isDeepLinked = true
                                             findNavController(v).navigate(R.id.webclient_scanned)

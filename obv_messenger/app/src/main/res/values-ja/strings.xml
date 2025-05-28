@@ -1391,7 +1391,7 @@
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">グループ %1$s は、このグループのメンバーの一部がグループ v2 をサポートしていない Olvid の古いバージョンを使用しているため、クローンできません。Olvid の新しいバージョンが利用可能であることを彼らに知らせてください。\n\n古いユーザー：%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">警告：部分クローン</string>
 	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">グループ %1$s には、まだ安全なチャンネルが確立されていないメンバーが含まれています。新しいグループに招待することはできません。\n\n影響を受けるユーザー：%2$s\n\n不完全なグループで続行しますか？</string>
-	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">\"\"のコピー</string>
+	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">のコピー</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">位置情報を送信しました</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">位置情報を受信しました</string>
 	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">位置情報サービスが利用できません</string>
@@ -2000,7 +2000,7 @@
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Olvid+でそれらをすべて保存</string>
 	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">プロフィールが復元されると、プロフィールの設定からアクティブに維持するデバイスを選択できます。</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">プロフィールを復元することで \"</string>
-	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="608812480">" (%1$s)"</string>
+	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">バックアップキーが見つかりませんでした。</string>
 	<string name="label_backup_headers_title" state="needs_review" hash="-846183546">バックアップ</string>
 	<string name="label_advanced" state="needs_review" hash="-462706070">高度な</string>
@@ -2019,7 +2019,7 @@
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">プロフィールへのアクセスを失わないでください！</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">バックアップを使用すると、このデバイスへのアクセスを失った場合にプロファイルを復元できます。新しいエクスペリエンスはこれまで以上に簡単 😉 で、数秒で設定できます。</string>
 	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">バックアップを設定</string>
-	<string name="tip_write_backup_key_title" state="needs_review" hash="-1333698915">バックアップキーを書き留めることを忘れないでください😇</string>
+	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">バックアップキーを書き留めるのを忘れないでください 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">このデバイスへのアクセスを失った場合に、プロファイルを復元するには、バックアップキーが不可欠です。</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Olvid体験を向上させましょう🚀</string>
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">一部のパラメータがデバイスで正しく設定されておらず、Olvidでの体験に影響を与える可能性があります。</string>
@@ -2030,7 +2030,7 @@
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">繰り返し</string>
 	<string name="pref_emoji_animation_once" state="needs_review" hash="947597352">一度</string>
 	<string name="pref_emoji_animation_never" state="needs_review" hash="610329857">決して</string>
-	<string name="button_label_send_us_a_mail" state="needs_review" hash="-1019733684">メールをお送りください</string>
+	<string name="button_label_send_us_a_mail" state="needs_review" hash="-769235388">メールをお送りください</string>
 	<string name="tip_new_translations_title" state="needs_review" hash="1677570642">Olvidを新しい言語でお楽しみください！</string>
 	<string name="tip_new_translations_message" state="needs_review" hash="404124006">OlvidにAIベースの翻訳を使用して多くの新言語を追加しましたが、その一部は不正確な場合があります。\nもしそうであれば、**lang@olvid.io**までお知らせください。</string>
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Androidアプリの翻訳</string>

@@ -2,12 +2,14 @@
 <resources>
 	<string-array name="app_language_choice">
 		<item>@string/pref_text_default_device_language</item>
+		<item>Afrikaans</item>
 		<item>Català</item>
 		<item>Dansk</item>
 		<item>Deutsch</item>
 		<item>English</item>
 		<item>Español</item>
 		<item>Français</item>
+		<item>Hrvatski</item>
 		<item>Italiano</item>
 		<item>Magyar</item>
 		<item>Nederlands</item>
@@ -20,12 +22,15 @@
 		<item>Slovenščina</item>
 		<item>Suomi</item>
 		<item>Svenska</item>
+		<item>Tiếng Việt</item>
+		<item>Türkçe</item>
 		<item>Čeština</item>
 		<item>Ελληνικά</item>
 		<item>Русский</item>
 		<item>Українська</item>
 		<item>עברית</item>
 		<item>اَلْعَرَبِيَّةُ</item>
+		<item>فارسی</item>
 		<item>हिन्दी</item>
 		<item>日本語</item>
 		<item>漢語</item>
@@ -34,12 +39,14 @@
 	</string-array>
 	<string-array name="app_language_choice_values">
 		<item>default</item>
+		<item>af</item>
 		<item>ca</item>
 		<item>da</item>
 		<item>de</item>
 		<item>en</item>
 		<item>es</item>
 		<item>fr</item>
+		<item>hr</item>
 		<item>it</item>
 		<item>hu</item>
 		<item>nl</item>
@@ -52,12 +59,15 @@
 		<item>sl</item>
 		<item>fi</item>
 		<item>sv</item>
+		<item>vi</item>
+		<item>tr</item>
 		<item>cs</item>
 		<item>el</item>
 		<item>ru</item>
 		<item>uk</item>
 		<item>iw</item>
 		<item>ar</item>
+		<item>fa</item>
 		<item>hi</item>
 		<item>ja</item>
 		<item>zh-rTW</item>

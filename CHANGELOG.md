@@ -1,3 +1,8 @@
+# Build 272 (3.7.2)
+2025-05-28
+
+- Added 5 more translations
+
 # Build 271 (3.7.1)
 2025-05-14
 
