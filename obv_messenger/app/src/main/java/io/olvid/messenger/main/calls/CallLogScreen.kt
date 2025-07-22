@@ -46,7 +46,7 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
 import io.olvid.messenger.main.MainScreenEmptyList
-import io.olvid.messenger.main.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 
 @Composable
 fun CallLogScreen(

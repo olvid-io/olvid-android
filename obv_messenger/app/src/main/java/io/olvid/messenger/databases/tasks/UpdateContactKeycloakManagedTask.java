@@ -23,6 +23,7 @@ import java.util.Arrays;
 
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Contact;
 
 public class UpdateContactKeycloakManagedTask implements Runnable {
@@ -46,7 +47,7 @@ public class UpdateContactKeycloakManagedTask implements Runnable {
             db.discussionDao().updateKeycloakManaged(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.keycloakManaged);
 
             if (Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                AppSingleton.updateContactCachedInfo(contact);
+                ContactCacheSingleton.INSTANCE.updateContactCachedInfo(contact);
             }
         }
     }

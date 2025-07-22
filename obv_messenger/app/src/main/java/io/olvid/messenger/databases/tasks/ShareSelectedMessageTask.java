@@ -53,7 +53,8 @@ public class ShareSelectedMessageTask implements Runnable {
             if ((message.messageType != Message.TYPE_OUTBOUND_MESSAGE
                     && message.messageType != Message.TYPE_INBOUND_MESSAGE)
                     || message.wipeStatus != Message.WIPE_STATUS_NONE
-                    || message.limitedVisibility) {
+                    || message.limitedVisibility
+                    || message.isPollMessage()) {
                 return;
             }
 

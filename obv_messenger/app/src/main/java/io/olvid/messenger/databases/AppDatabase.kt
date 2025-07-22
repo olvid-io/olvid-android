@@ -49,12 +49,13 @@ import io.olvid.messenger.databases.dao.MessageExpirationDao
 import io.olvid.messenger.databases.dao.MessageMetadataDao
 import io.olvid.messenger.databases.dao.MessageRecipientInfoDao
 import io.olvid.messenger.databases.dao.MessageReturnReceiptDao
+import io.olvid.messenger.databases.dao.OnHoldInboxMessageDao
 import io.olvid.messenger.databases.dao.OwnedDeviceDao
 import io.olvid.messenger.databases.dao.OwnedIdentityDao
 import io.olvid.messenger.databases.dao.PendingGroupMemberDao
+import io.olvid.messenger.databases.dao.PollVoteDao
 import io.olvid.messenger.databases.dao.RawDao
 import io.olvid.messenger.databases.dao.ReactionDao
-import io.olvid.messenger.databases.dao.ReactionRequestDao
 import io.olvid.messenger.databases.dao.RemoteDeleteAndEditRequestDao
 import io.olvid.messenger.databases.entity.ActionShortcutConfiguration
 import io.olvid.messenger.databases.entity.CallLogItem
@@ -79,19 +80,50 @@ import io.olvid.messenger.databases.entity.MessageFTS
 import io.olvid.messenger.databases.entity.MessageMetadata
 import io.olvid.messenger.databases.entity.MessageRecipientInfo
 import io.olvid.messenger.databases.entity.MessageReturnReceipt
+import io.olvid.messenger.databases.entity.OnHoldInboxMessage
 import io.olvid.messenger.databases.entity.OwnedDevice
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.databases.entity.PendingGroupMember
+import io.olvid.messenger.databases.entity.PollVote
 import io.olvid.messenger.databases.entity.Reaction
-import io.olvid.messenger.databases.entity.ReactionRequest
 import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest
 import io.olvid.messenger.databases.entity.TextBlock
 import net.zetetic.database.sqlcipher.SQLiteDatabase
 import java.io.File
 
 @Database(
-    entities = [ActionShortcutConfiguration::class, CallLogItem::class, CallLogItemContactJoin::class, Contact::class, ContactGroupJoin::class, Discussion::class, DiscussionCustomization::class, Fyle::class, FyleMessageJoinWithStatus::class, FyleMessageJoinWithStatusFTS::class, Group::class, Group2::class, Group2Member::class, Group2PendingMember::class, Invitation::class, KnownCertificate::class, LatestDiscussionSenderSequenceNumber::class, Message::class, MessageExpiration::class, MessageFTS::class, MessageMetadata::class, MessageRecipientInfo::class, MessageReturnReceipt::class, OwnedDevice::class, OwnedIdentity::class, PendingGroupMember::class, Reaction::class, ReactionRequest::class, RemoteDeleteAndEditRequest::class, TextBlock::class
-    ], version = AppDatabase.DB_SCHEMA_VERSION
+    entities = [
+        ActionShortcutConfiguration::class,
+        CallLogItem::class,
+        CallLogItemContactJoin::class,
+        Contact::class, ContactGroupJoin::class,
+        Discussion::class, DiscussionCustomization::class,
+        Fyle::class,
+        FyleMessageJoinWithStatus::class,
+        FyleMessageJoinWithStatusFTS::class,
+        Group::class,
+        Group2::class,
+        Group2Member::class,
+        Group2PendingMember::class,
+        Invitation::class,
+        KnownCertificate::class,
+        LatestDiscussionSenderSequenceNumber::class,
+        Message::class,
+        MessageExpiration::class,
+        MessageFTS::class,
+        MessageMetadata::class,
+        MessageRecipientInfo::class,
+        MessageReturnReceipt::class,
+        OwnedDevice::class,
+        OwnedIdentity::class,
+        PendingGroupMember::class,
+        Reaction::class,
+        RemoteDeleteAndEditRequest::class,
+        TextBlock::class,
+        PollVote::class,
+        OnHoldInboxMessage::class,
+    ],
+    version = AppDatabase.DB_SCHEMA_VERSION
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -137,8 +169,6 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun latestDiscussionSenderSequenceNumberDao(): LatestDiscussionSenderSequenceNumberDao
 
-    abstract fun reactionRequestDao(): ReactionRequestDao
-
     abstract fun actionShortcutConfigurationDao(): ActionShortcutConfigurationDao
 
     abstract fun group2Dao(): Group2Dao
@@ -153,8 +183,12 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun messageReturnReceiptDao(): MessageReturnReceiptDao
 
+    abstract fun pollVoteDao(): PollVoteDao
+
+    abstract fun onHoldInboxMessageDao(): OnHoldInboxMessageDao
+
     companion object {
-        const val DB_SCHEMA_VERSION: Int = 77
+        const val DB_SCHEMA_VERSION: Int = 79
         const val DB_FTS_GLOBAL_SEARCH_VERSION: Int = 1
         const val DB_FILE_NAME: String = "app_database"
         const val TMP_ENCRYPTED_DB_FILE_NAME: String = "encrypted_app_database"
@@ -176,9 +210,7 @@ abstract class AppDatabase : RoomDatabase() {
                     if (instance == null) {
                         System.loadLibrary("sqlcipher")
                         val dbFile = File(
-                            App.absolutePathFromRelative(
-                                DB_FILE_NAME
-                            )
+                            App.absolutePathFromRelative(DB_FILE_NAME)!!
                         )
                         var dbKey = get(DatabaseKey.APP_DATABASE_SECRET)
                         if (dbKey == null) {
@@ -193,15 +225,13 @@ abstract class AppDatabase : RoomDatabase() {
                                 null
                             )
                             db.close()
-                        } catch (ex: Exception) {
+                        } catch (_: Exception) {
                             Logger.i("App database may need to be encrypted")
                             val startTime = System.currentTimeMillis()
                             try {
                                 var oldUserVersion = -1
                                 val tmpEncryptedDbFile = File(
-                                    App.absolutePathFromRelative(
-                                        TMP_ENCRYPTED_DB_FILE_NAME
-                                    )
+                                    App.absolutePathFromRelative(TMP_ENCRYPTED_DB_FILE_NAME)!!
                                 )
                                 if (tmpEncryptedDbFile.exists()) {
                                     tmpEncryptedDbFile.delete()
@@ -249,7 +279,7 @@ abstract class AppDatabase : RoomDatabase() {
                                 } else {
                                     throw RuntimeException("App database encryption error: unable to delete unencrypted database!")
                                 }
-                            } catch (fatal: Exception) {
+                            } catch (_: Exception) {
                                 // database is encrypted but not with the provided dbKey, or database encryption failed --> try disabling encryption to use a plain database
                                 Logger.e("App database encryption failed, falling back to un-encrypted database")
                                 dbKey = ""

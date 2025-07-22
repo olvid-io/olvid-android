@@ -24,8 +24,6 @@ import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
-import android.os.Handler
-import android.os.Looper
 import android.os.Vibrator
 import android.text.TextUtils.TruncateAt.END
 import android.util.DisplayMetrics
@@ -105,7 +103,6 @@ import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.tasks.CopySelectedMessageTask
-import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.PropagateBookmarkedMessageChangeTask
 import io.olvid.messenger.databases.tasks.ShareSelectedMessageTask
 import io.olvid.messenger.databases.tasks.UpdateReactionsTask
@@ -357,9 +354,7 @@ class MessageLongPressPopUp(
             }
 
             COPY -> {
-                if (message.hasAttachments() && message.contentBody.isNullOrEmpty()
-                        .not()
-                ) {
+                if (message.hasAttachments() && message.contentBody.isNullOrEmpty().not()) {
                     copyMenuExpanded = true
                 } else if (message.hasAttachments()) {
                     App.runThread(
@@ -427,62 +422,7 @@ class MessageLongPressPopUp(
             }
 
             DELETE -> {
-                App.runThread {
-                    val offerToRemoteDeleteEverywhere: Boolean
-                    val remoteDeletingMakesSense: Boolean = listOf(
-                        Message.TYPE_INBOUND_MESSAGE,
-                        Message.TYPE_OUTBOUND_MESSAGE,
-                        Message.TYPE_INBOUND_EPHEMERAL_MESSAGE
-                    ).contains(message.messageType) && (message.wipeStatus == Message.WIPE_STATUS_NONE)
-                    if (remoteDeletingMakesSense) {
-                        when (discussion.discussionType) {
-                            Discussion.TYPE_GROUP_V2 -> {
-                                val group2 = AppDatabase.getInstance()
-                                    .group2Dao()[discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier]
-                                offerToRemoteDeleteEverywhere = if (group2 != null) {
-                                    (((group2.ownPermissionEditOrRemoteDeleteOwnMessages && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE))
-                                            || (group2.ownPermissionRemoteDeleteAnything && ((message.messageType == Message.TYPE_INBOUND_MESSAGE) || (message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE))))
-                                            && AppDatabase.getInstance().group2MemberDao()
-                                        .groupHasMembers(
-                                            discussion.bytesOwnedIdentity,
-                                            discussion.bytesDiscussionIdentifier
-                                        ))
-                                } else {
-                                    false
-                                }
-                            }
-
-                            Discussion.TYPE_GROUP -> {
-                                offerToRemoteDeleteEverywhere =
-                                    (discussion.isNormal && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE))
-                                            && AppDatabase.getInstance().contactGroupJoinDao()
-                                        .groupHasMembers(
-                                            discussion.bytesOwnedIdentity,
-                                            discussion.bytesDiscussionIdentifier
-                                        )
-                            }
-
-                            else -> {
-                                offerToRemoteDeleteEverywhere =
-                                    (discussion.isNormal && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE))
-                            }
-                        }
-                    } else {
-                        offerToRemoteDeleteEverywhere = false
-                    }
-
-                    val builder = SecureDeleteEverywhereDialogBuilder(
-                        activity,
-                        SecureDeleteEverywhereDialogBuilder.Type.MESSAGE,
-                        1,
-                        offerToRemoteDeleteEverywhere,
-                        remoteDeletingMakesSense
-                    )
-                        .setDeleteCallback { deletionChoice: SecureDeleteEverywhereDialogBuilder.DeletionChoice ->
-                            App.runThread(DeleteMessagesTask(listOf(messageId), deletionChoice))
-                        }
-                    Handler(Looper.getMainLooper()).post { builder.create().show() }
-                }
+                SecureDeleteEverywhereDialogBuilder.openForSingleMessage(activity, message, discussion)
                 popupWindow.dismiss()
             }
         }
@@ -502,17 +442,28 @@ class MessageLongPressPopUp(
         val saveOwner = activity.window.decorView.findViewTreeSavedStateRegistryOwner()
 
         val actions = listOf<PopupActionType>().toMutableList().apply {
-            if (canEdit && message.messageType == Message.TYPE_OUTBOUND_MESSAGE && message.wipeStatus != Message.WIPE_STATUS_WIPED && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED && !message.isLocationMessage
+            if (canEdit
+                && message.messageType == Message.TYPE_OUTBOUND_MESSAGE
+                && message.wipeStatus != Message.WIPE_STATUS_WIPED
+                && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
+                && !message.isLocationMessage
+                && !message.isPollMessage
             ) {
                 add(EDIT)
             }
-            if (discussion.isNormal && message.messageType == Message.TYPE_INBOUND_MESSAGE && message.wipeStatus != Message.WIPE_STATUS_WIPED && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
+            // for inbound messages, put REPLY at the beginning
+            if (discussion.isNormal
+                && message.messageType == Message.TYPE_INBOUND_MESSAGE
+                && message.wipeStatus != Message.WIPE_STATUS_WIPED
+                && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
             ) {
                 add(REPLY)
             }
             if (message.isForwardable) {
                 add(SHARE)
                 add(FORWARD)
+                add(COPY)
+            } else if (message.isPollMessage) {
                 add(COPY)
             }
             add(SELECT)
@@ -525,7 +476,10 @@ class MessageLongPressPopUp(
                 }
             }
             // for outbound messages, put REPLY at the end
-            if (discussion.isNormal && message.messageType == Message.TYPE_OUTBOUND_MESSAGE && message.wipeStatus != Message.WIPE_STATUS_WIPED && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
+            if (discussion.isNormal
+                && message.messageType == Message.TYPE_OUTBOUND_MESSAGE
+                && message.wipeStatus != Message.WIPE_STATUS_WIPED
+                && message.wipeStatus != Message.WIPE_STATUS_REMOTE_DELETED
             ) {
                 add(REPLY)
             }
@@ -963,7 +917,7 @@ class MessageLongPressPopUp(
         }
 
         var fingerOffset = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 8f, metrics).toInt()
-        var additionalBottomPadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, metrics).toInt()
+        val additionalBottomPadding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, metrics).toInt()
         val x = max(
             sixteenDpInPx.toDouble(),
             min(

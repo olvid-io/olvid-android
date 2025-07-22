@@ -27,6 +27,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
@@ -64,8 +65,8 @@ public class UpdateContactDisplayNameAndPhotoTask implements Runnable {
             db.contactDao().updatePublishedDetailsStatus(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.newPublishedDetails);
 
             if (Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                AppSingleton.updateCachedCustomDisplayName(contact.bytesContactIdentity, contact.getCustomDisplayName(), contact.getFirstNameOrCustom());
-                AppSingleton.updateCachedPhotoUrl(contact.bytesContactIdentity, contact.getCustomPhotoUrl());
+                ContactCacheSingleton.INSTANCE.updateCachedCustomDisplayName(contact);
+                ContactCacheSingleton.INSTANCE.updateCachedPhotoUrl(contact.bytesContactIdentity, contact.getCustomPhotoUrl());
             }
 
             // rename the corresponding one-to-one discussion

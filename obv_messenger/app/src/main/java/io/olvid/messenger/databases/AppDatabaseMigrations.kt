@@ -28,12 +28,36 @@ import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
 import java.nio.charset.StandardCharsets
 import java.text.Collator
-import java.util.Arrays
 import java.util.regex.Pattern
 
 
 internal object AppDatabaseMigrations {
     val MIGRATIONS: Array<Migration> = arrayOf(
+
+        object : Migration(78, 79) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                Logger.w("ROOM MIGRATING FROM VERSION 78 TO 79")
+                db.execSQL( "CREATE TABLE IF NOT EXISTS `on_hold_inbox_message_table` (`bytes_owned_identity` BLOB NOT NULL, `engine_message_identifier` BLOB NOT NULL, `waiting_for_message` INTEGER NOT NULL, `server_timestamp` INTEGER NOT NULL, `expiration_timestamp` INTEGER, `bytes_contact_identity` BLOB, `bytes_group_owner_and_uid` BLOB, `bytes_group_identifier` BLOB, `sender_identifier` BLOB, `sender_thread_identifier` TEXT, `sender_sequence_number` INTEGER, `ready_to_process` INTEGER NOT NULL, PRIMARY KEY(`bytes_owned_identity`, `engine_message_identifier`, `waiting_for_message`))")
+                db.execSQL( "CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_expiration_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `expiration_timestamp`)")
+                db.execSQL( "CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_waiting_for_message_bytes_contact_identity_bytes_group_owner_and_uid_bytes_group_identifier_server_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `waiting_for_message`, `bytes_contact_identity`, `bytes_group_owner_and_uid`, `bytes_group_identifier`, `server_timestamp`)")
+                db.execSQL( "CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_sender_identifier_sender_thread_identifier_sender_sequence_number_server_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `sender_identifier`, `sender_thread_identifier`, `sender_sequence_number`, `server_timestamp`)")
+                db.execSQL( "CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_ready_to_process_server_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `ready_to_process`, `server_timestamp`)")
+
+                db.execSQL("DROP INDEX `index_reaction_request_table_discussion_id`")
+                db.execSQL("DROP INDEX `index_reaction_request_table_server_timestamp`")
+                db.execSQL("DROP INDEX `index_reaction_request_table_discussion_id_sender_identifier_sender_thread_identifier_sender_sequence_number`")
+                db.execSQL("DROP TABLE IF EXISTS `reaction_request_table`")
+            }
+        },
+
+        object : Migration(77, 78) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                Logger.w("ROOM MIGRATING FROM VERSION 77 TO 78")
+                db.execSQL("ALTER TABLE `message_table` ADD COLUMN `json_poll` TEXT DEFAULT NULL")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `poll_vote_table` (`message_id` INTEGER NOT NULL, `server_timestamp` INTEGER NOT NULL, `version` INTEGER NOT NULL, `vote_uuid` TEXT NOT NULL, `voter` BLOB NOT NULL, `vote` INTEGER NOT NULL, PRIMARY KEY(`message_id`, `voter`, `vote_uuid`), FOREIGN KEY(`message_id`) REFERENCES `message_table`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_poll_vote_table_message_id` ON `poll_vote_table` (`message_id`)")
+            }
+        },
 
         object : Migration(76, 77) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -938,9 +962,9 @@ internal object AppDatabaseMigrations {
                                 if (m.find()) {
                                     try {
                                         val serverBytes =
-                                            (m.group(1).replace("https:/", "https://")).toByteArray(
+                                            (m.group(1)?.replace("https:/", "https://"))?.toByteArray(
                                                 StandardCharsets.UTF_8
-                                            )
+                                            ) ?: ByteArray(0)
                                         val compactAuthKey = Logger.fromHexString(m.group(2))
                                         val compactEncKey = Logger.fromHexString(m.group(3))
                                         val suffix = m.group(4)
@@ -977,7 +1001,7 @@ internal object AppDatabaseMigrations {
                                             "UPDATE `fyle_message_join_with_status` SET `file_path` = ? WHERE `fyle_id` = ? AND `message_id` = ?",
                                             arrayOf<Any?>(newPath, fileId, messageId)
                                         )
-                                    } catch (e: Exception) {
+                                    } catch (_: Exception) {
                                         db.execSQL(
                                             "DELETE FROM `fyle_message_join_with_status` WHERE `fyle_id` = ? AND `message_id` = ?",
                                             arrayOf<Any?>(fileId, messageId)
@@ -1348,8 +1372,7 @@ internal object AppDatabaseMigrations {
                             val groupId = cursor.getBlob(0)
                             val bytesOwnedIdentity = cursor.getBlob(1)
                             val name = cursor.getString(2)
-                            var bytesGroupOwnerIdentity: ByteArray? =
-                                Arrays.copyOfRange(groupId, 0, groupId.size - 32)
+                            var bytesGroupOwnerIdentity: ByteArray? = groupId.copyOfRange(0, groupId.size - 32)
                             db.query(
                                 "SELECT * FROM `contact_table` WHERE `bytes_contact_identity` = ? AND `bytes_owned_identity` = ?",
                                 arrayOf<Any?>(bytesGroupOwnerIdentity, bytesOwnedIdentity)

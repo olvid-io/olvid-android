@@ -113,7 +113,7 @@ class WebrtcPeerConnectionHolder(
     private var readyToProcessPeerIceCandidates = false
     private val pendingPeerIceCandidates: MutableList<JsonIceCandidate>
     private val pendingIceCandidatesToSend: MutableList<JsonIceCandidate>
-    var peerConnection: PeerConnection? = null
+    private var peerConnection: PeerConnection? = null
     private var audioTrack: AudioTrack? = null
     var remoteVideoTrack by mutableStateOf<VideoTrack?>(null)
     var remoteScreenTrack by mutableStateOf<VideoTrack?>(null)
@@ -261,12 +261,12 @@ class WebrtcPeerConnectionHolder(
             localAudioLevelListener = null
             try {
                 localVideoTrack?.dispose()
-            } catch (ignored: Exception) {
+            } catch (_: Exception) {
             }
             localVideoTrack = null
             try {
                 localScreenTrack?.dispose()
-            } catch (ignored: Exception) {
+            } catch (_: Exception) {
             }
             localScreenTrack = null
             audioSource?.dispose()
@@ -478,7 +478,8 @@ class WebrtcPeerConnectionHolder(
         dataChannel?.registerObserver(dataChannelObserver)
     }
 
-    fun createPeerConnection() {
+    // returns true if the peer connection was successfully created
+    fun createPeerConnection(): Boolean {
         val iceServer = getIceServer(turnUsername, turnPassword)
         val configuration = RTCConfiguration(mutableListOf(iceServer).apply {
             getMdMIceServer()?.let {
@@ -490,8 +491,7 @@ class WebrtcPeerConnectionHolder(
         configuration.continualGatheringPolicy =
             if (gatheringPolicy == GATHER_CONTINUOUSLY) GATHER_CONTINUALLY else GATHER_ONCE
         Logger.d("☎ Creating PeerConnection with GatheringPolicy: $gatheringPolicy")
-        peerConnection =
-            peerConnectionFactory?.createPeerConnection(configuration, peerConnectionObserver)
+        peerConnection = peerConnectionFactory?.createPeerConnection(configuration, peerConnectionObserver)
         if (peerConnection != null) {
             createAudioTrack()
             createDataChannel()
@@ -508,7 +508,9 @@ class WebrtcPeerConnectionHolder(
                 peerSessionDescriptionType = null
                 markAsReadyToProcessPeerIceCandidates()
             }
+            return true
         }
+        return false
     }
 
     fun createLocalDescription(reason: String) {
@@ -819,13 +821,13 @@ class WebrtcPeerConnectionHolder(
         dataChannel = null
         try {
             remoteVideoTrack?.dispose()
-        } catch (ignored: Exception) {
+        } catch (_: Exception) {
         } finally {
             remoteVideoTrack = null
         }
         try {
             remoteScreenTrack?.dispose()
-        } catch (ignored: Exception) {
+        } catch (_: Exception) {
         } finally {
             remoteScreenTrack = null
         }
@@ -886,7 +888,7 @@ class WebrtcPeerConnectionHolder(
                             // --> there might be false positives, but this is not a big deal, worst case, we clear the cache...
                             try {
                                 Thread.sleep(5000)
-                            } catch (e: InterruptedException) {
+                            } catch (_: InterruptedException) {
                                 return@runThread
                             }
                             if (turnCandidates == 0) {
@@ -923,7 +925,7 @@ class WebrtcPeerConnectionHolder(
                             App.runThread {
                                 try {
                                     Thread.sleep(2000)
-                                } catch (e: InterruptedException) {
+                                } catch (_: InterruptedException) {
                                     // Nothing special to do
                                 }
                                 iceGatheringCompleted()

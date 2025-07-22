@@ -824,13 +824,14 @@ fun EphemeralSettingsPreferenceLayout(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 private fun EphemeralSettingsPreview() {
+    val ephemeralViewModel = remember { EphemeralViewModel() }
     Column (
         verticalArrangement = spacedBy(32.dp)
     ) {
-        EphemeralSettingsPopupLayout(modifier = Modifier.fillMaxWidth(), EphemeralViewModel(), {}, {}, false)
+        EphemeralSettingsPopupLayout(modifier = Modifier.fillMaxWidth(), ephemeralViewModel, {}, {}, false)
         
         EphemeralSettingsGroup(
-            ephemeralViewModel = EphemeralViewModel(),
+            ephemeralViewModel = ephemeralViewModel,
             expanded = null,
             locked = true,
             dismiss = {}
@@ -897,7 +898,7 @@ private fun EphemeralSetting(
                     Text(
                         text = stringResource(id = R.string.preset_ephemeral_settings_custom)
                     )
-                    if (settings.filter { it.value == selected }.isEmpty()) {
+                    if (settings.none { it.value == selected }) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             modifier = Modifier.requiredSize(20.dp),

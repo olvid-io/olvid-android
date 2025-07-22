@@ -32,6 +32,7 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 
@@ -63,7 +64,7 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
             if (!Objects.equals(contact.customNameHue, customNameHue)) {
                 contact.customNameHue = customNameHue;
                 db.contactDao().updateCustomNameHue(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.customNameHue);
-                AppSingleton.updateCachedCustomHue(contact.bytesContactIdentity, contact.customNameHue);
+                ContactCacheSingleton.INSTANCE.updateCachedCustomHue(contact.bytesContactIdentity, contact.customNameHue);
 
                 AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity);
                 if (!propagated) {
@@ -98,7 +99,7 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                 contact.setCustomDisplayName(customDisplayName);
                 db.contactDao().updateAllDisplayNames(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.identityDetails, contact.displayName, contact.firstName, contact.customDisplayName, contact.sortDisplayName, contact.fullSearchDisplayName);
                 if (Arrays.equals(AppSingleton.getBytesCurrentIdentity(), contact.bytesOwnedIdentity)) {
-                    AppSingleton.updateCachedCustomDisplayName(contact.bytesContactIdentity, contact.getCustomDisplayName(), contact.getFirstNameOrCustom());
+                    ContactCacheSingleton.INSTANCE.updateCachedCustomDisplayName(contact);
                 }
 
                 AppSingleton.getEngine().profileBackupNeeded(bytesOwnedIdentity);
@@ -167,7 +168,7 @@ public class UpdateContactCustomDisplayNameAndPhotoTask implements Runnable {
                     }
                 }
                 db.contactDao().updateCustomPhotoUrl(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.customPhotoUrl);
-                AppSingleton.updateCachedPhotoUrl(contact.bytesContactIdentity, contact.getCustomPhotoUrl());
+                ContactCacheSingleton.INSTANCE.updateCachedPhotoUrl(contact.bytesContactIdentity, contact.getCustomPhotoUrl());
             }
 
 

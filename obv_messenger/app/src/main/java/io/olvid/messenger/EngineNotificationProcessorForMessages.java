@@ -44,8 +44,8 @@ import io.olvid.messenger.databases.entity.MessageMetadata;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
 import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
 import io.olvid.messenger.databases.tasks.HandleMessageExtendedPayloadTask;
-import io.olvid.messenger.databases.tasks.HandleNewMessageNotificationTask;
 import io.olvid.messenger.databases.tasks.HandleReceiveReturnReceipt;
+import io.olvid.messenger.databases.tasks.new_message.HandleNewMessageTask;
 import io.olvid.messenger.services.UnifiedForegroundService;
 
 public class EngineNotificationProcessorForMessages implements EngineNotificationListener {
@@ -84,7 +84,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 if (obvMessage == null) {
                     break;
                 }
-                new HandleNewMessageNotificationTask(engine, obvMessage).run();
+                new HandleNewMessageTask(engine, obvMessage, AppDatabase.getInstance()).run();
                 break;
             }
             case EngineNotifications.MESSAGE_EXTENDED_PAYLOAD_DOWNLOADED: {
@@ -120,7 +120,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                     FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(downloadedAttachment.getBytesOwnedIdentity(), downloadedAttachment.getMessageIdentifier(), downloadedAttachment.getNumber());
                     if (fyleMessageJoinWithStatus != null) {
                         final Fyle fyle = db.fyleDao().getById(fyleMessageJoinWithStatus.fyleId);
-                        final byte[] sha256 = fyle.sha256;
+                        final byte[] sha256 = (fyle != null) ? fyle.sha256 : null;
                         if (sha256 == null) {
                             break;
                         }
@@ -378,6 +378,9 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
             case EngineNotifications.MESSAGE_UPLOAD_FAILED: {
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.MESSAGE_UPLOAD_FAILED_BYTES_OWNED_IDENTITY_KEY);
                 byte[] engineMessageIdentifier = (byte[]) userInfo.get(EngineNotifications.MESSAGE_UPLOAD_FAILED_IDENTIFIER_KEY);
+                if (bytesOwnedIdentity == null || engineMessageIdentifier == null) {
+                    break;
+                }
 
                 List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getAllByEngineMessageIdentifier(bytesOwnedIdentity, engineMessageIdentifier);
                 if (!messageRecipientInfos.isEmpty()) {

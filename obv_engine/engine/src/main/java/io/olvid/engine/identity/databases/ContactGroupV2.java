@@ -806,6 +806,7 @@ public class ContactGroupV2 implements ObvDatabase {
             statement.executeUpdate();
             this.trustedDetailsVersion = trustedDetailsVersion;
             this.updatedByMe = true;
+            this.updatedBy = null;
             commitHookBits |= HOOK_BIT_UPDATED;
             identityManagerSession.session.addSessionCommitListener(this);
         }
@@ -813,7 +814,7 @@ public class ContactGroupV2 implements ObvDatabase {
 
 
 
-    public List<Identity> updateWithNewBlob(GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe) throws SQLException {
+    public List<Identity> updateWithNewBlob(GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe, Identity updatedBy, List<Identity> leavers) throws SQLException {
         if (!identityManagerSession.session.isInTransaction()) {
             throw new SQLException("Calling ContactGroupV2.updateGroupV2WithNewBlob outside a transaction!");
         }
@@ -862,6 +863,11 @@ public class ContactGroupV2 implements ObvDatabase {
         groupAdminServerAuthenticationPrivateKey = blobKeys.groupAdminServerAuthenticationPrivateKey;
         lastModificationTimestamp = System.currentTimeMillis();
         serializedJsonGroupType = serverBlob.serializedGroupType;
+
+        if (serverBlob.version - version == 1) {
+            this.updatedBy = updatedBy;
+            this.updatedGroupLeavers = leavers;
+        }
 
         // create the new group details
         GroupV2.Identifier groupIdentifier = getGroupIdentifier();
@@ -1056,6 +1062,7 @@ public class ContactGroupV2 implements ObvDatabase {
         }
 
         this.updatedByMe = false;
+        this.updatedBy = null;
         commitHookBits |= HOOK_BIT_UPDATED;
         identityManagerSession.session.addSessionCommitListener(this);
     }
@@ -1367,6 +1374,7 @@ public class ContactGroupV2 implements ObvDatabase {
             return null;
         }
 
+        updatedBy = null;
         commitHookBits |= HOOK_BIT_UPDATED;
         identityManagerSession.session.addSessionCommitListener(this);
 
@@ -1581,6 +1589,7 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public void triggerUpdateNotification() {
+        updatedBy = null;
         commitHookBits |= HOOK_BIT_UPDATED;
         identityManagerSession.session.addSessionCommitListener(this);
     }
@@ -1594,6 +1603,8 @@ public class ContactGroupV2 implements ObvDatabase {
     // region hooks
     private UID labelToDelete;
     private boolean updatedByMe;
+    private Identity updatedBy;
+    private List<Identity> updatedGroupLeavers;
 
     private long commitHookBits = 0;
     private static final long HOOK_BIT_INSERTED = 0x1;
@@ -1634,6 +1645,8 @@ public class ContactGroupV2 implements ObvDatabase {
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_OWNED_IDENTITY_KEY, ownedIdentity);
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_GROUP_IDENTIFIER_KEY, getGroupIdentifier());
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_BY_ME_KEY, updatedByMe);
+            userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_BY_KEY, updatedBy);
+            userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_GROUP_LEAVERS_KEY, updatedGroupLeavers);
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED, userInfo);
         }
         if ((commitHookBits & HOOK_BIT_PHOTO_UPDATED) != 0) {

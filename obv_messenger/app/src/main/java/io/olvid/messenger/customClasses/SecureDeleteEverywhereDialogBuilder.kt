@@ -20,15 +20,21 @@ package io.olvid.messenger.customClasses
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.RadioButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.entity.Discussion
+import io.olvid.messenger.databases.entity.Message
+import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 
 
 class SecureDeleteEverywhereDialogBuilder(private val context: Context, private val type: Type, private val count: Int, private val offerToDeleteEverywhere: Boolean, remoteDeletingMakesSense: Boolean) : SecureAlertDialogBuilder(context, R.style.CustomAlertDialog) {
@@ -171,5 +177,71 @@ class SecureDeleteEverywhereDialogBuilder(private val context: Context, private 
 
     fun interface DeleteCallback {
         fun performDelete(deletionChoice: DeletionChoice)
+    }
+
+    companion object {
+        fun openForSingleMessage(context: Context, message: Message, discussion: Discussion? = null) {
+            App.runThread {
+                val offerToRemoteDeleteEverywhere: Boolean
+                val remoteDeletingMakesSense: Boolean = listOf(
+                    Message.TYPE_INBOUND_MESSAGE,
+                    Message.TYPE_OUTBOUND_MESSAGE,
+                    Message.TYPE_INBOUND_EPHEMERAL_MESSAGE
+                ).contains(message.messageType) && (message.wipeStatus == Message.WIPE_STATUS_NONE)
+                if (remoteDeletingMakesSense) {
+                    val disc = discussion ?: AppDatabase.getInstance().discussionDao().getById(message.discussionId)
+                    when (disc?.discussionType) {
+                        Discussion.TYPE_GROUP_V2 -> {
+                            val group2 = AppDatabase.getInstance()
+                                .group2Dao()[disc.bytesOwnedIdentity, disc.bytesDiscussionIdentifier]
+                            offerToRemoteDeleteEverywhere = if (group2 != null) {
+                                (((group2.ownPermissionEditOrRemoteDeleteOwnMessages && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE))
+                                        || (group2.ownPermissionRemoteDeleteAnything && ((message.messageType == Message.TYPE_INBOUND_MESSAGE) || (message.messageType == Message.TYPE_INBOUND_EPHEMERAL_MESSAGE))))
+                                        && AppDatabase.getInstance().group2MemberDao()
+                                    .groupHasMembers(
+                                        disc.bytesOwnedIdentity,
+                                        disc.bytesDiscussionIdentifier
+                                    ))
+                            } else {
+                                false
+                            }
+                        }
+
+                        Discussion.TYPE_GROUP -> {
+                            offerToRemoteDeleteEverywhere =
+                                (disc.isNormal && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE))
+                                        && AppDatabase.getInstance().contactGroupJoinDao()
+                                    .groupHasMembers(
+                                        disc.bytesOwnedIdentity,
+                                        disc.bytesDiscussionIdentifier
+                                    )
+                        }
+
+                        Discussion.TYPE_CONTACT -> {
+                            offerToRemoteDeleteEverywhere =
+                                (disc.isNormal && (message.messageType == Message.TYPE_OUTBOUND_MESSAGE))
+                        }
+
+                        else -> {
+                            return@runThread
+                        }
+                    }
+                } else {
+                    offerToRemoteDeleteEverywhere = false
+                }
+
+                val builder = SecureDeleteEverywhereDialogBuilder(
+                    context,
+                    Type.MESSAGE,
+                    1,
+                    offerToRemoteDeleteEverywhere,
+                    remoteDeletingMakesSense
+                )
+                    .setDeleteCallback { deletionChoice: DeletionChoice ->
+                        App.runThread(DeleteMessagesTask(listOf(message.id), deletionChoice))
+                    }
+                Handler(Looper.getMainLooper()).post { builder.create().show() }
+            }
+        }
     }
 }

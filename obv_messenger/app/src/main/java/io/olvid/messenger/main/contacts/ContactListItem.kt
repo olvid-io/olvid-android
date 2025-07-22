@@ -22,12 +22,14 @@ package io.olvid.messenger.main.contacts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize.Min
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,9 +37,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,41 +53,39 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.EstablishingChannel
 import io.olvid.messenger.main.InitialView
-import io.olvid.messenger.main.cutoutHorizontalPadding
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ContactListItem(
     modifier: Modifier = Modifier,
+    padding: PaddingValues = PaddingValues(),
     title: AnnotatedString,
     body: AnnotatedString?,
     onClick: () -> Unit,
     initialViewSetup: (initialView: InitialView) -> Unit,
     publishedDetails: Boolean = false,
     publishedDetailsNotification: Boolean = false,
+    startContent: (@Composable () -> Unit)? = null,
     endContent : (@Composable () -> Unit)? = null,
     shouldAnimateChannel: Boolean = false,
     onRenameContact: (() -> Unit)? = null,
     onCallContact: (() -> Unit)? = null,
     onDeleteContact: (() -> Unit)? = null,
-    useDialogBackgroundColor: Boolean = false,
-    additionalHorizontalPadding: Dp = 0.dp,
 ) {
     Box(
-        modifier = modifier
-            .background(colorResource(id = if (useDialogBackgroundColor) R.color.dialogBackground else R.color.almostWhite))
-            .cutoutHorizontalPadding()
+        modifier = modifier.cutoutHorizontalPadding()
     ) {
-
         // menu
         var menuOpened by remember { mutableStateOf(false) }
         if (onRenameContact != null && onCallContact != null && onDeleteContact != null) {
@@ -101,15 +100,28 @@ fun ContactListItem(
 
         Row(
             modifier = Modifier
-                .height(Min)
-                .fillMaxWidth()
-                .combinedClickable(
-                    onClick = onClick,
-                    onLongClick = { menuOpened = true },
+                .then(
+                    if (onRenameContact != null && onCallContact != null && onDeleteContact != null)
+                        Modifier.combinedClickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(bounded = true, color = colorResource(R.color.greyOverlay)),
+                            onClick = onClick,
+                            onLongClick = { menuOpened = true },
+                        )
+                    else
+                        Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(bounded = true, color = colorResource(R.color.greyOverlay)),
+                            onClick = onClick,
+                        )
                 )
-                .padding(horizontal = 8.dp + additionalHorizontalPadding),
+                .padding(padding)
+                .height(Min)
+                .fillMaxWidth(),
             verticalAlignment = CenterVertically
         ) {
+            // start content
+            startContent?.invoke()
 
             // InitialView
             InitialView(
@@ -205,31 +217,32 @@ fun ContactMenu(
     onCallContact: () -> Unit,
     onDeleteContact: () -> Unit,
 ) {
-    DropdownMenu(expanded = menuOpened, onDismissRequest = onDismissRequest) {
+    OlvidDropdownMenu(expanded = menuOpened, onDismissRequest = onDismissRequest) {
         // rename
-        DropdownMenuItem(onClick = {
-            onRenameContact()
-            onDismissRequest()
-        }) {
-            Text(text = stringResource(id = string.menu_action_rename_contact))
-        }
+        OlvidDropdownMenuItem(
+            onClick = {
+                onRenameContact()
+                onDismissRequest()
+            },
+            text = stringResource(id = string.menu_action_rename_contact)
+        )
         // call
-        DropdownMenuItem(onClick = {
-            onCallContact()
-            onDismissRequest()
-        }) {
-            Text(text = stringResource(id = string.menu_action_call_contact))
-        }
+        OlvidDropdownMenuItem(
+            onClick = {
+                onCallContact()
+                onDismissRequest()
+            },
+            text = stringResource(id = string.menu_action_call_contact)
+        )
         // delete
-        DropdownMenuItem(onClick = {
-            onDeleteContact()
-            onDismissRequest()
-        }) {
-            Text(
-                text = stringResource(id = string.menu_action_delete_contact),
-                color = colorResource(id = R.color.red)
-            )
-        }
+        OlvidDropdownMenuItem(
+            onClick = {
+                onDeleteContact()
+                onDismissRequest()
+            },
+            text = stringResource(id = string.menu_action_delete_contact),
+            textColor = colorResource(id = R.color.red)
+        )
     }
 }
 

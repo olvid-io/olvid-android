@@ -33,6 +33,7 @@ import io.olvid.engine.datatypes.containers.ReceivedAttachment;
 import io.olvid.engine.datatypes.containers.ServerQuery;
 import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.engine.types.JsonOsmStyle;
+import io.olvid.engine.engine.types.ObvMessage;
 
 public interface NetworkFetchDelegate {
     void downloadMessages(Identity ownedIdentity, UID deviceUid);
@@ -48,8 +49,10 @@ public interface NetworkFetchDelegate {
     void deleteMessageAndAttachments(Session session, Identity ownedIdentity, UID messageUid);
     void deleteMessage(Session session, Identity ownedIdentity, UID messageUid);
     void deleteAttachment(Session session, Identity ownedIdentity, UID messageUid, int attachmentNumber) throws SQLException;
+    void markMessageAsOnHold(Session session, Identity ownedIdentity, UID messageUid) throws SQLException;
 
     void resendAllDownloadedAttachmentNotifications() throws Exception;
+    ObvMessage getOnHoldMessage(Session session, Identity ownedIdentity, UID messageUid) throws Exception;
 
     void createPendingServerQuery(Session session, ServerQuery serverQuery) throws Exception;
     void deleteExistingServerSession(Session session, Identity identity, boolean createNewSession);

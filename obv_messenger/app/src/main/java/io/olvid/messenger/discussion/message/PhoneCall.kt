@@ -46,9 +46,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
 import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.databases.entity.Message
@@ -217,7 +217,7 @@ private fun getCallDescription(
     } else {
         // first, find the caller
         var callerDisplayName =
-            AppSingleton.getContactCustomDisplayName(senderIdentifier)
+            ContactCacheSingleton.getContactCustomDisplayName(senderIdentifier)
         if (callerDisplayName == null) {
             callerDisplayName =
                 callDetails.oneContact.getCustomDisplayName()

@@ -63,6 +63,7 @@ fun InitialView(
     muted: Boolean = false,
     locked: Boolean = false,
     onCall: Boolean = false,
+    editable: Boolean = false,
     selected: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
@@ -151,6 +152,16 @@ fun InitialView(
                         (drawable as AnimationDrawable).start()
                     }
                 })
+        }
+        if (editable) {
+            Image(
+                modifier = Modifier
+                    .size(maxWidth.times(0.4f))
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 4.dp, y = 4.dp),
+                painter = painterResource(id = R.drawable.ic_camera_bordered),
+                contentDescription = null
+            )
         }
     }
 }

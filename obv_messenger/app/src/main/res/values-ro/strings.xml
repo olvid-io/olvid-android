@@ -1,7 +1,6 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Detalii contact</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Detalii utilizator</string>
-	<string name="activity_title_create_group" state="needs_review" hash="323669209">Creează grup</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Detalii grup</string>
 	<string name="activity_title_my_details" state="needs_review" hash="-1089973499">Profilul meu</string>
 	<string name="activity_title_settings" state="needs_review" hash="-686438097">Setări Olvid</string>
@@ -32,13 +31,12 @@
 	<string name="button_label_ignore" state="needs_review" hash="-806373746">Ignoră</string>
 	<string name="button_label_reject" state="needs_review" hash="-2094664161">Respinge</string>
 	<string name="button_label_introduce" state="needs_review" hash="193852909">A prezenta</string>
-	<string name="button_label_invite_members" state="needs_review" hash="-118308632">Invitămembri</string>
+	<string name="button_label_invite_members" state="needs_review" hash="-1063364436">Invită membri</string>
 	<string name="button_label_next" state="needs_review" hash="1158639077">Următorul</string>
 	<string name="button_label_ok" state="needs_review" hash="2428088">OK</string>
-	<string name="button_label_previous" state="needs_review" hash="-1639666563">Anterior</string>
 	<string name="button_label_proceed" state="needs_review" hash="-1224815476">Continuă</string>
 	<string name="button_label_publish" state="needs_review" hash="-1355390088">Publică</string>
-	<string name="button_label_remove_members" state="needs_review" hash="707573877">Eliminămembri</string>
+	<string name="button_label_remove_members" state="needs_review" hash="1938722985">Elimină membri</string>
 	<string name="button_label_remove_nickname" state="needs_review" hash="-1702159211">Resetează</string>
 	<string name="button_label_update" state="needs_review" hash="648230638">Actualizați</string>
 	<string name="button_label_validate" state="needs_review" hash="-521764973">Validează</string>
@@ -90,7 +88,9 @@
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">Momentan, nu există grupuri</string>
 	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Apasă \"Grup nou\" pentru a crea prima ta grupă.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">Administratorul grupului a actualizat Cardul de Grup. Atât versiunea veche, cât și cea nouă sunt afișate mai jos.Apăsați \"actualizare\" pentru a actualiza informațiile grupului.</string>
-	<string name="explanation_new_group_v2_card" state="needs_review" hash="-224925220">Unul dintre administratorii grupului a actualizat detaliile grupului. Noua versiune este afișată mai sus.Apăsați \"actualizare\" pentru a utiliza această nouă versiune.</string>
+	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Un administrator a schimbat numele grupului în:</string>
+	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Un administrator a modificat descrierea grupului în:</string>
+	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">Un administrator a schimbat fotografia de grup.</string>
 	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">Contactul tău a actualizat Olvid Card. Versiunile veche și nouă sunt afișate mai jos.Apăsați \"actualizare\" pentru a actualiza informațiile contactului tău cu această nouă versiune.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">Un canal de comunicare securizat este în curs de stabilire. Nu vei putea începe nicio discuție cu acest contact până când acest lucru nu este finalizat. Acest proces ar trebui să dureze doar câteva secunde dacă tu și contactul tău sunteți online.Dacă crezi că ceva a mers prost, poți reporni stabilirea canalului.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">Nu s-a găsit niciun contact</string>
@@ -159,7 +159,8 @@
 	<string name="label_group_card_published" state="needs_review" hash="-58328192">Card de grup - Publicată</string>
 	<string name="label_group_card_published_update" state="needs_review" hash="-1889428058">Card de grup - Nou</string>
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">Card de grup - Schiță nepublicată</string>
-	<string name="label_group_members" state="needs_review" hash="-2121490032">Alți membri ai grupului</string>
+	<string name="label_group_members" state="needs_review" hash="1460220752">Membrii grupului</string>
+	<string name="label_other_group_members" state="needs_review" hash="-2121490032">Alți membri ai grupului</string>
 	<string name="label_groups" state="needs_review" hash="-990226727">Grupuri</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">Invitațierespinsă</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">Detalii grup actualizate</string>
@@ -190,7 +191,6 @@
 	<string name="menu_action_recreate_channels" state="needs_review" hash="39178988">Recreează canale sigure</string>
 	<string name="menu_action_rename" state="needs_review" hash="-1795678977">Redenumire</string>
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">Redenumire contact</string>
-	<string name="menu_action_rename_group" state="needs_review" hash="1461324427">Redenumire grup</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">Salvează</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">Setări</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">Distribuie</string>
@@ -232,15 +232,16 @@
 	<string name="pref_text_QR_correction_low" state="needs_review" hash="-2013029312">Scăzut</string>
 	<string name="pref_text_QR_correction_medium" state="needs_review" hash="-1685793941">Mediu</string>
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">Foarte ridicat</string>
-	<string name="subtitle_choose_group_name" state="needs_review" hash="-631282661">Alegeți numele grupului</string>
-	<string name="subtitle_select_group_members" state="needs_review" hash="1572094257">Selectați membrii grupului</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Ai părăsit grupul</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Ai reintrat în grup</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Ai aderat la grup</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Grup gestionat de %1$s</string>
 	<string name="text_joined_group" state="needs_review" hash="369878021">A aderat la grup: %1$s</string>
-	<string name="text_joined_the_group" state="needs_review" hash="-683497602">%1$s a aderat la grup</string>
-	<string name="text_left_the_group" state="needs_review" hash="399208793">%1$s a părăsit grupul</string>
+	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s a adăugat %2$s la grup</string>
+	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Ai adăugat %2$s la grup</string>
+	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s l-a scos pe %2$s din grup</string>
+	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">L-ați eliminat pe %2$s din grup</string>
+	<string name="text_unknown_member" state="needs_review" hash="-698194630">necunoscut</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Nimeni</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Schită:</string>
 	<string name="text_inbound_group_message_prefix" state="needs_review" hash="1359425562">%1$s:\u0020</string>
@@ -549,8 +550,8 @@
 	<string name="webrtc_stop_screen_sharing" state="needs_review" hash="585626699">Oprește partajarea</string>
 	<string name="webrtc_speaking_while_muted" state="needs_review" hash="1865652540">Microfonul dumneavoastră este dezactivat</string>
 	<string name="webrtc_speaking_while_muted_action" state="needs_review" hash="-1839617181">Activează sunetul</string>
-	<string name="content_description_reject_call_button" state="needs_review" hash="931620384">Buton respinge apel</string>
-	<string name="content_description_accept_call_button" state="needs_review" hash="-1857614269">Butonul Acceptă apelul</string>
+	<string name="content_description_reject_call_button" state="needs_review" hash="-332175555">Respinge apelul</string>
+	<string name="content_description_accept_call_button" state="needs_review" hash="-934081402">Acceptă apelul</string>
 	<string name="dialog_title_webrtc_kick_participant" state="needs_review" hash="389469769">Exclude contactul din apel?</string>
 	<string name="webrtc_failed_kicked" state="needs_review" hash="-758835021">Ai fost exclus din acest apel</string>
 	<string name="dialog_title_start_conference_call" state="needs_review" hash="-1418585505">Inițiază apel conferință</string>
@@ -571,7 +572,7 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">Fila Discuții</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">Fila Contacte</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">Grupuri</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="1038824704">Buton adăugare contact</string>
+	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">Adăugare contact</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">Punct de notificare</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">Elimină metadate JPEG sensibile</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">Când este activată, Olvid va încerca să elimine metadatele sensibile din fișierele foto importate.Acest lucru include datele GPS, marca camerei, data creării…</string>
@@ -777,7 +778,7 @@
 	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">Politica de retenție a mesajelor din conversație</string>
 	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">Setările de mai jos îți permit să ștergi automat mesajele vechi din această conversație. Acestea au prioritate față de politica ta implicită de retenție.</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">Utilizați setarea implicită (%1$s)</string>
-	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1987562758">Buton înregistrare mesaj vocal</string>
+	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">Înregistrare mesaj vocal</string>
 	<string name="dialog_title_voice_message_explanation" state="needs_review" hash="943269997">Mesaje vocale Olvid</string>
 	<string name="dialog_message_voice_message_explanation" state="needs_review" hash="-1860729852">Înainte de a înregistra mesaje vocale, vă rugăm să acordați Olvid permisiunea de a înregistra audio.</string>
 	<string name="dialog_message_voice_message_explanation_blocked" state="needs_review" hash="-1293891432">Înainte de a înregistra mesaje vocale, Olvid necesită permisiunea de a înregistra audio.Pare că această permisiune a fost refuzată permanent pentru Olvid. Ar trebui să deschizi Setările aplicației pentru a acorda manual această permisiune.</string>
@@ -1002,7 +1003,7 @@
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s va fi adăugat la contactele tale de îndată ce dispozitivul său va fi accesibil.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s a fost adăugat la contactele tale 🙌!</string>
 	<string name="label_loading_contacts" state="needs_review" hash="-343348890">Încărcare contacte…</string>
-	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-916981123">Butonul de selecție a browserului</string>
+	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-934849519">Selecția browserului</string>
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Nu s-au putut găsi browserele instalate</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Alege browserul pe care dorești să îl folosești pentru autentificare</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Browser implicit</string>
@@ -1122,7 +1123,7 @@
 	<string name="dialog_title_unable_to_load_backup_configuration" state="needs_review" hash="-718937548">Nu s-a putut încărca configurația de backup</string>
 	<string name="dialog_message_unable_to_load_backup_configuration" state="needs_review" hash="1322112021">După mai multe încercări, Olvid nu a putut încărca configurația actuală a backup-ului. Dacă ați încercat deja să reporniți complet Olvid/dispozitivul și încă primiți acest mesaj de eroare, se recomandă să generați o nouă cheie de backup.</string>
 	<string name="pref_reload_backup_configuration_title" state="needs_review" hash="2000428891">Reîncarcă configurația de backup</string>
-	<string name="content_description_back_button" state="needs_review" hash="-1902681195">Buton Înapoi</string>
+	<string name="content_description_back_button" state="needs_review" hash="48196338">Înapoi</string>
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">Șterge răspunsul la mesaj</string>
 	<string name="content_description_remove_link_preview" state="needs_review" hash="-1085272528">Șterge previzualizarea linkului</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">Indicator că notificările sunt dezactivate pentru acest profil</string>
@@ -1148,10 +1149,10 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Ștergerea unui profil va șterge orice informație legată de acest profil de pe dispozitivul dumneavoastră. Aceasta include contactele, grupurile și conținutul tuturor conversațiilor dumneavoastră (mesaje și atașamente) pentru acest profil.\n\n<b>Acesta este singurul dumneavoastră profil vizibil și, dacă aveți profiluri ascunse, acestea vor fi șterse simultan.</b>\n\nApăsați \"următorul\" pentru a alege modul în care să ștergeți acest profil.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Șterge profilul <b>de peste tot</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1363713497">Scrie ȘTERGE aici pentru a continua</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">Scrie \"%1$s\" aici pentru a continua</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">Dacă alegi să ștergi profilul <b>de peste tot</b>:\n - acesta va fi șters local <b>și</b> de pe dispozitivele contactelor tale\n - vei părăsi grupurile în care ai intrat\n - grupurile pe care le gestionezi vor fi desființate\n\nDacă <b>nu</b> ștergi profilul de peste tot, acesta va fi șters doar local pe dispozitivul tău. Dacă nu intenționezi să restaurezi o copie de rezervă pe un alt dispozitiv, contactele tale pot continua să îți trimită mesaje și este posibil să nu realizeze că aceste mesaje nu pot fi livrate.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">Profilul tău actual pare să fie inactiv, probabil pentru că l-ai transferat pe un alt dispozitiv. Dacă intenționezi să continui să folosești acest profil pe celălalt dispozitiv, îl poți șterge în siguranță de aici.\n\nDacă nu mai dorești să folosești niciodată acest profil, va trebui mai întâi să îl reactivezi pe acest dispozitiv, să aștepți recrearea canalelor securizate cu contactele tale și abia apoi să ștergi acest profil alegând opțiunea „șterge peste tot”.</string>
-	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">Profilul tău este în prezent activat pe mai multe dispozitive.\n\nDacă alegi să ștergi profilul <b>pretutindeni</b>: &amp;\newline; - acesta va fi șters de pe toate dispozitivele tale <b>și</b> de pe dispozitivele contactelor tale &amp;\newline; - vei părăsi grupurile în care ai intrat &amp;\newline; - grupurile pe care le gestionezi vor fi desființate &amp;\newline;\nDacă <b>nu</b> ștergi profilul pretutindeni, acesta va fi șters doar local și îl poți continua să îl folosești normal pe celelalte dispozitive.</string>
+	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">Profilul tău este în prezent activat pe mai multe dispozitive.\n\nDacă alegi să ștergi profilul <b>pretutindeni</b>:\n - acesta va fi șters de pe toate dispozitivele tale <b>și</b> de pe dispozitivele contactelor tale\n - vei părăsi grupurile în care ai intrat\n - grupurile pe care le gestionezi vor fi desființate\n\nDacă <b>nu</b> ștergi profilul pretutindeni, acesta va fi șters doar local și îl poți continua să îl folosești normal pe celelalte dispozitive.</string>
 	<string name="text_delete_capitalized" state="needs_review" hash="-121819082">ȘTERGE</string>
 	<string name="toast_message_something_went_wrong" state="needs_review" hash="-1612522924">Ceva a mers greșit, vă rugăm să încercați din nou</string>
 	<string name="toast_message_profile_deleted" state="needs_review" hash="-467850761">Profil șters</string>
@@ -1202,7 +1203,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Configurare widget…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Aspectul widgetului</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Acțiune la atingerea widget-ului</string>
-	<string name="label_discussion" state="needs_review" hash="301166224">Discuție</string>
+	<string name="label_discuss" state="needs_review" hash="422951553">Discută</string>
 	<string name="label_message" state="needs_review" hash="809999904">Mesaj</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Mesaj predefinit de trimis</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Confirmă înainte de a trimite</string>
@@ -1242,6 +1243,7 @@
 	<string name="label_audio" state="needs_review" hash="-779820608">Audio</string>
 	<string name="label_other" state="needs_review" hash="-543765264">Altele</string>
 	<string name="label_all" state="needs_review" hash="752498555">Toate</string>
+	<string name="label_see_all" state="needs_review" hash="-1659641788">Vezi toate</string>
 	<string name="menu_action_storage_management" state="needs_review" hash="2130982617">Gestionarea spațiului de stocare</string>
 	<string name="menu_action_troubleshooting" state="needs_review" hash="-798155217">Depanare</string>
 	<string name="explanation_no_files" state="needs_review" hash="-1050005240">Niciun fișier atașat pentru afișare</string>
@@ -1346,11 +1348,10 @@
 	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">Discuțiile fixate rămân întotdeauna în partea de sus a listei tale de discuții</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Dimensiune afișaj</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Deschide discuția</string>
-	<string name="label_read_only" state="needs_review" hash="-954957022">Numai citire</string>
-	<string name="label_read_only_short" state="needs_review" hash="1635912872">Numai în citire</string>
+	<string name="label_read_only" state="needs_review" hash="1996439460">Numai în modul de citire</string>
+	<string name="label_pending_read_only" state="needs_review" hash="649164855">În așteptare - Numai citire</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Administrator</string>
-	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Administrator în așteptare</string>
-	<string name="label_not_admin" state="needs_review" hash="286893263">Nu este administrator</string>
+	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Administrator în așteptare</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Nu se poate afișa numele acestui utilizator</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Grup fără nume</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Notificări discuții</string>
@@ -1365,10 +1366,9 @@
 	<string name="notification_channel_discussion_name" state="needs_review" hash="588648320">Discuție %1$d</string>
 	<string name="notification_channel_discussion_group_name" state="needs_review" hash="491497248">Discuții</string>
 	<string name="notification_channel_discussion_group_description" state="needs_review" hash="-1448542719">Notificări personalizate pentru discuții specifice Olvid.</string>
-	<string name="button_label_edit_group_members" state="needs_review" hash="-1379721010">Editează acest grup</string>
+	<string name="button_label_edit_group_members" state="needs_review" hash="1855939143">Editare membri</string>
 	<string name="button_label_add_members" state="needs_review" hash="-203515331">Adăugați membri</string>
 	<string name="label_group_update_in_progress_title" state="needs_review" hash="-2019791170">Sincronizarea grupului este în curs de desfășurare</string>
-	<string name="label_group_update_in_progress_title_for_creation" state="needs_review" hash="388073211">Crearea grupului este în curs de desfășurare</string>
 	<string name="explanation_group_update_in_progress" state="needs_review" hash="360407479">Grupul este în curs de sincronizare. Acest ecran se va actualiza după finalizarea actualizării.</string>
 	<string name="toast_message_unable_to_update_group" state="needs_review" hash="-513468036">Nu s-a putut actualiza grupul. Modificările dumneavoastră au fost pierdute. Vă rugăm să încercați din nou.</string>
 	<string name="dialog_title_unable_to_leave_group" state="needs_review" hash="-297756627">Nu se poate părăsi grupul</string>
@@ -1487,7 +1487,7 @@
 	<string name="message_discussion_group_v2_updating" state="needs_review" hash="1490065684">Lista membrilor grupului este în curs de sincronizare</string>
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">Grupul este în curs de creare</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">Grup nou</string>
-	<string name="label_group_type" state="needs_review" hash="-1954959814">Tip de grup</string>
+	<string name="label_group_type" state="needs_review" hash="498463258">Tip de grup</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">Standard</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">Toți membrii grupului pot invita membri noi</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">Controlat</string>
@@ -1496,7 +1496,6 @@
 	<string name="label_group_read_only_subtitle" state="needs_review" hash="-1941498988">Doar administratorii pot trimite mesaje</string>
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Avansat</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Dezlănțuie întreaga putere a grupurilor Olvid!</string>
-	<string name="label_group_custom_settings" state="needs_review" hash="-1024799981">Setări avansate</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Administratori de grup</string>
 	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Acum sunteți administrator de grup</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Nu mai sunteți administratorul acestui grup</string>
@@ -1744,7 +1743,11 @@
 	<string name="troubleshooting_storage_valid_description" state="needs_review" hash="1144963725">%1$s spațiu de stocare disponibil pe dispozitivul dumneavoastră.</string>
 	<string name="troubleshooting_storage_invalid_title" state="needs_review" hash="-854482374">Spațiul de stocare al dispozitivului este aproape plin</string>
 	<string name="troubleshooting_storage_invalid_description" state="needs_review" hash="-1018820796">Au rămas doar %1$s spațiu de stocare disponibil pe dispozitivul dumneavoastră.\n\nDispozitivul dumneavoastră are spațiu de stocare limitat. Vă puteți aștepta la erori neașteptate la primirea sau trimiterea de fișiere cu Olvid.\n\nProbabil că acum este momentul potrivit pentru a elibera spațiu pe dispozitivul dumneavoastră.</string>
-	<string name="troubleshooting_header" state="needs_review" hash="138020490">**Versiunea aplicației**: %1$s (build %2$d)\n**Modelul dispozitivului**: %3$s\n**API Android**: %4$s\n**Aplicația rulează de**: %5$s</string>
+	<string name="troubleshooting_header_app_version" state="needs_review" hash="2096978646">**Versiunea aplicației**: %1$s (build %2$d)</string>
+	<string name="troubleshooting_header_device_model" state="needs_review" hash="911858141">**Modelul dispozitivului**: %1$s</string>
+	<string name="troubleshooting_header_android_api" state="needs_review" hash="-1735136766">**API Android**: %1$s</string>
+	<string name="troubleshooting_header_app_running_time" state="needs_review" hash="1952701839">**Aplicația rulează de**: %1$s</string>
+	<string name="troubleshooting_header_app_install_date" state="needs_review" hash="1411458773">**Data instalării aplicației**: %1$s</string>
 	<string name="troubleshooting_faq_description" state="needs_review" hash="1969820989">Aveți nevoie de ajutor cu Olvid? Vă rugăm să citiți întrebările frecvente (FAQ):</string>
 	<string name="troubleshooting_faq_link" state="needs_review" hash="-353352916">https://olvid.io/faq</string>
 	<string name="troubleshooting_request_permission" state="needs_review" hash="-463634281">Solicită permisiune</string>
@@ -1767,7 +1770,7 @@
 	<string name="dialog_title_invite_contact" state="needs_review" hash="1121224764">Invitație la discuție privată</string>
 	<string name="dialog_message_invite_contact" state="needs_review" hash="883261663">Dorești să inviți pe %1$s într-o discuție privată?</string>
 	<string name="explanation_empty_other_contact_list" state="needs_review" hash="-121261312">Nimeni aici momentan</string>
-	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="-510803038">Membrii grupului care nu sunt încă în contacte vor apărea aici.</string>
+	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="1669386057">Membrii grupului care nu sunt încă în contacte vor apărea aici.</string>
 	<string name="explanation_empty_directory" state="needs_review" hash="298073547">Director gol</string>
 	<string name="menu_action_invite_all_members" state="needs_review" hash="-1044752673">Invită toți membrii grupului</string>
 	<string name="dialog_title_invite_all_group_members" state="needs_review" hash="2130589049">Invitați toți membrii grupului?</string>
@@ -1833,7 +1836,6 @@
 	<string name="global_search_result_links" state="needs_review" hash="-579291596">Link-uri</string>
 	<string name="button_label_send_read_receipts" state="needs_review" hash="-1730457934">Informează-mi contactele</string>
 	<string name="button_label_do_not_send" state="needs_review" hash="-1938459086">Nu le spune</string>
-	<string name="button_label_ask_later" state="needs_review" hash="-1104721203">Întreabă-mă mai târziu</string>
 	<string name="dialog_message_prompt_user_for_read_receipts" state="needs_review" hash="-1157866927">Doriți ca persoanele de contact să știe când citiți mesajele lor?</string>
 	<string name="dialog_title_prompt_user_for_read_receipts" state="needs_review" hash="-2045842725">Confirmări de citire</string>
 	<string name="pref_app_icon_title" state="needs_review" hash="-1219448320">Pictograma aplicației</string>
@@ -1925,7 +1927,7 @@
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Gestionarea backup-urilor Olvid</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Inițiază o copie de rezervă acum</string>
 	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-profilele-tale/</string>
-	<string name="content_description_close_button" state="needs_review" hash="-1770116030">Buton Închidere</string>
+	<string name="content_description_close_button" state="needs_review" hash="1454843231">Închide</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Copii de rezervă online</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Resetați</string>
 	<string name="explanation_reset_backups" state="needs_review" hash="-594480541">Resetarea va șterge toate copiile de rezervă.</string>
@@ -1955,7 +1957,7 @@
 	<string name="enable_backups_title" state="needs_review" hash="-1103233135">Realizează o copie de rezervă a profilului tău</string>
 	<string name="enable_backups_message_with_legacy" state="needs_review" hash="-508019994">În prezent, aveți activate copii de rezervă Olvid vechi, care vor înceta să mai fie suportate în curând.\nTreceți la noul sistem de backup Olvid pentru a vă asigura că puteți restaura profilurile și contactele dacă vă pierdeți dispozitivul.</string>
 	<string name="enable_backups_message" state="needs_review" hash="1555907343">Activarea backup-ului vă permite să restaurați profilul și contactele, chiar dacă pierdeți dispozitivul.</string>
-	<string name="content_description_contextual_actions" state="needs_review" hash="984380377">Buton acțiuni contextuale</string>
+	<string name="content_description_contextual_actions" state="needs_review" hash="563463836">Acțiuni contextuale</string>
 	<string name="label_backup_from" state="needs_review" hash="-1486363430">De la %1$s</string>
 	<string name="label_backup_groups_and_contacts" state="needs_review" hash="1197923862">%1$s, %2$s</string>
 	<string name="label_this_device" state="needs_review" hash="273515292">Acest dispozitiv</string>
@@ -2028,6 +2030,8 @@
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">Anumite setări nu sunt configurate corect pe dispozitivul dumneavoastră și pot afecta experiența cu Olvid.</string>
 	<string name="button_label_this_way" state="needs_review" hash="747183939">Pe aici</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">Cod copiat</string>
+	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">Alegeți pe cine să adăugați în acest grup.</string>
+	<string name="label_group_administration" state="needs_review" hash="871355986">Administrarea grupului</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">Apel blocat</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid nu permite inițierea unui apel cu mai mult de %1$d persoane.</string>
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">În buclă</string>
@@ -2039,4 +2043,51 @@
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Traduceri pentru aplicația Android</string>
 	<string name="pref_app_language_category_title" state="needs_review" hash="1411591324">Traduceri bazate pe inteligență artificială</string>
 	<string name="pref_app_language_category_summary" state="needs_review" hash="-1895843046">Unele dintre traducerile aplicației sunt generate folosind AI și pot fi inexacte. Dacă este cazul, nu ezitați să ne spuneți la <b>lang@olvid.io</b>.</string>
+	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">Este necesară o parolă pentru a deschide acest fișier PDF</string>
+	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">Parolă</string>
+	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">Parolă incorectă</string>
+	<string name="label_poll_create" state="needs_review" hash="-1677246175">Creează un sondaj</string>
+	<string name="label_poll_question" state="needs_review" hash="-1615603188">Întrebare</string>
+	<string name="hint_poll_question" state="needs_review" hash="1961289317">Pune o întrebare</string>
+	<string name="label_poll_answers" state="needs_review" hash="-382063458">Răspunsuri</string>
+	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">Adaugă</string>
+	<string name="label_poll_see_answers" state="needs_review" hash="710858547">Vizualizați răspunsurile</string>
+	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">Aștept răspunsul lor</string>
+	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">Reamintește</string>
+	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">Adăugați un răspuns \"%1$s\"</string>
+	<string name="label_poll_options" state="needs_review" hash="-13216192">Opțiuni</string>
+	<string name="text_none_answer" state="needs_review" hash="560562575">Niciuna dintre variantele de mai sus</string>
+	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">Permite răspunsuri multiple</string>
+	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">Alege una sau mai multe răspunsuri</string>
+	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">Mod quiz</string>
+	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">Sfârșit</string>
+	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">Adăugați data de expirare</string>
+	<string name="label_poll_expiration" state="needs_review" hash="605126523">Sondajul se încheie în %1$s</string>
+	<string name="label_poll_ended" state="needs_review" hash="415569292">Sondajul s-a încheiat</string>
+	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">Adăugați cel puțin două răspunsuri</string>
+	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">Acest răspuns există deja</string>
+	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">Exportă ca CSV</string>
+	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">Eroare la exportarea sondajului în format CSV. Vă rugăm să încercați din nou.</string>
+	<string name="toast_message_success_exporting_poll_csv" state="needs_review" hash="16134555">Exportul CSV al sondajului a fost realizat cu succes</string>
+	<string name="label_poll_answers_sorted_by" state="needs_review" hash="102938809">Sortat după</string>
+	<string name="label_poll_answers_sorted_by_poll_order" state="needs_review" hash="685632215">Ordinea sondajului</string>
+	<string name="label_poll_answers_sorted_by_answer_count" state="needs_review" hash="516869301">Număr de răspunsuri</string>
+	<string name="notification_public_title_new_poll_vote" state="needs_review" hash="-1901040080">Răspuns nou la sondajul tău</string>
+	<string name="toast_message_remove_none_answer" state="needs_review" hash="277924655">Elimină mai întâi răspunsul \"%1$s\"</string>
+	<string name="text_poll" state="needs_review" hash="-153643506">sondaj</string>
+	<string name="poll_csv_headers" state="needs_review" hash="1869917931">Întrebare sondaj,Nume votant,Vot,Data</string>
+	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">Niciun răspuns încă</string>
+	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">Dezactivare iminentă a dispozitivului</string>
+	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">Gestionați dispozitivele mele</string>
+	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">Dispozitiv offline</string>
+	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">Unul dintre dispozitivele tale este offline de **mai mult de 30 de zile**.\nDacă nu îl mai folosești, îți recomandăm să **îl elimini** pentru a evita probleme de sincronizare.</string>
+	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">Gestionați dispozitivele mele</string>
+	<string name="tip_playstore_review_title" state="needs_review" hash="-1396782635">Îți place Olvid?</string>
+	<string name="tip_playstore_email_message" state="needs_review" hash="-583394070">Dacă aveți sugestii de îmbunătățiri pentru Olvid, vă rugăm să ne scrieți la **feedback@olvid.io**.</string>
+	<string name="tip_playstore_email_subject" state="needs_review" hash="-1010646301">Evaluarea aplicației Android: %1$d/5</string>
+	<string name="tip_playstore_review_message" state="needs_review" hash="-407660073">Dacă vă place Olvid, nu ezitați să **lăsați o recenzie** pe Google Play!</string>
+	<string name="tip_playstore_review_action" state="needs_review" hash="-271353090">Evaluează-ne pe Google Play</string>
+	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Deschide în vizualizator extern</string>
+	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Eroare la deschiderea acestui fișier în vizualizatorul intern Olvid</string>
+	<string name="button_label_invited" state="needs_review" hash="2094724552">Invitat</string>
 </resources>

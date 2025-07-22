@@ -23,7 +23,7 @@
         android:layout_marginTop="44dp"
         app:layout_constraintStart_toStartOf="@+id/group_details_initial_view"
         app:layout_constraintTop_toTopOf="@+id/group_details_initial_view"
-        app:srcCompat="@drawable/ic_camera_bordered" />
+        app:srcCompat="@drawable/ic_camera_bordered_dialog" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/group_details_group_name_layout"

@@ -1,213 +1,237 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <plurals name="explanation_backup_v2_device_expiration_end">
-        <item quantity="one">" su questo dispositivo, il tuo dispositivo precedente sottostante verrà disattivato:</item>
-        <item quantity="other">" su questo dispositivo, i tuoi dispositivi sottostanti verranno disattivati:</item>
-    </plurals>
-    <plurals name="label_backups_found">
-        <item quantity="one">%1$d backup trovato</item>
-        <item quantity="other">%1$d backup trovati</item>
-    </plurals>
-    <plurals name="label_profiles_found">
-        <item quantity="one">%1$d profilo trovato</item>
-        <item quantity="other">%1$d profili trovati</item>
-    </plurals>
-    <plurals name="label_backup_groups">
-        <item quantity="zero">Nessun gruppo</item>
-        <item quantity="one">%1$d gruppo</item>
-        <item quantity="other">%1$d gruppi</item>
-    </plurals>
-    <plurals name="label_backup_contacts">
-        <item quantity="zero">Nessun contatto</item>
-        <item quantity="one">%1$d contatto</item>
-        <item quantity="other">%1$d contatti</item>
-    </plurals>
-    <plurals name="label_discussion_archive_done">
-        <item quantity="one">Discussione archiviata</item>
-        <item quantity="other">%1$d discussioni archiviate</item>
-    </plurals>
-    <plurals name="label_discussion_unarchive_done">
-        <item quantity="one">Discussione ripristinata</item>
-        <item quantity="other">%1$d discussioni ripristinate</item>
-    </plurals>
-    <plurals name="label_message_unbookmark_done">
-        <item quantity="one">Messaggio rimosso dai preferiti</item>
-        <item quantity="other">%1$d messaggi rimossi dai preferiti</item>
-    </plurals>
-    <plurals name="dialog_title_delete_discussions">
-        <item quantity="one">Eliminare la discussione selezionata?</item>
-        <item quantity="other">Eliminare le discussioni selezionate?</item>
-    </plurals>
-    <plurals name="dialog_title_delete_messages">
-        <item quantity="one">Eliminare il messaggio selezionato?</item>
-        <item quantity="other">Eliminare i messaggi selezionati?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions">
-        <item quantity="one">Sei sicuro di voler eliminare la discussione selezionata e tutti i messaggi in essa contenuti?\nQuesta azione non può essere annullata.</item>
-        <item quantity="other">Sei sicuro di voler eliminare le %1$d discussioni selezionate e tutti i messaggi in esse contenuti?\nQuesta azione non può essere annullata.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions_choice">
-        <item quantity="one">Come vuoi eliminare la discussione selezionata e tutti i messaggi in essa contenuti?\nQuesta azione non può essere annullata.</item>
-        <item quantity="other">Come vuoi eliminare le %1$d discussioni selezionate e tutti i messaggi in esse contenuti?\nQuesta azione non può essere annullata.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages">
-        <item quantity="one">Sei sicuro di voler eliminare il messaggio selezionato?\nQuesta azione non può essere annullata.</item>
-        <item quantity="other">Sei sicuro di voler eliminare i %1$d messaggi selezionati?\nQuesta azione non può essere annullata.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages_choice">
-        <item quantity="one">Come vuoi eliminare il messaggio selezionato?\nQuesta azione non può essere annullata.</item>
-        <item quantity="other">Come vuoi eliminare i %1$d messaggi selezionati?\nQuesta azione non può essere annullata.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_messages_everywhere">
-        <item quantity="one">Stai per **eliminare definitivamente** un messaggio per **tutti** in questa discussione. Assicurati di volerlo fare.</item>
-        <item quantity="other">Stai per **eliminare definitivamente** %1$d messaggi per **tutti** in questa discussione. Assicurati di volerlo fare.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_discussions_everywhere">
-        <item quantity="one">Stai per **eliminare definitivamente** una discussione e i messaggi in essa contenuti per **tutti** in questa discussione. Assicurati di volerlo fare.</item>
-        <item quantity="other">Stai per **eliminare definitivamente** %1$d discussioni e i messaggi in esse contenuti per **tutti** in queste discussioni. Assicurati di volerlo fare.</item>
-    </plurals>
-    <plurals name="dialog_message_invite_all_group_members">
-        <item quantity="one">Stai per invitare ogni membro del gruppo con cui hai un canale (attualmente 1 membro) a una discussione privata.\nVuoi procedere?</item>
-        <item quantity="other">Stai per invitare ogni membro del gruppo con cui hai un canale (attualmente %1$d membri) a una discussione privata.\nVuoi procedere?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_count">
-        <item quantity="one">1 gruppo in comune</item>
-        <item quantity="other">%1$d gruppi in comune</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_end">
-        <item quantity="one">. Dovrai lasciare questo gruppo per procedere.</item>
-        <item quantity="other">. Dovrai lasciare questi gruppi per procedere.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_with_pending_groups">
-        <item quantity="one">Stai per rimuovere %1$s dalla tua lista di altri utenti.\n\nNota che %1$s è stato invitato a %2$d gruppo a cui appartieni. Verrà aggiunto di nuovo a questa lista se vi aderirà. Potresti voler lasciare questo gruppo per evitarlo.\n\nEliminare davvero questo utente?</item>
-        <item quantity="other">Stai per rimuovere %1$s dalla tua lista di altri utenti.\n\nNota che %1$s è stato invitato a %2$d gruppi a cui appartieni. Verrà aggiunto di nuovo a questa lista se aderirà a uno di essi. Potresti voler lasciare questi gruppi per evitarlo.\n\nEliminare davvero questo utente?</item>
-    </plurals>
-    <plurals name="dialog_message_auto_join_pending_groups">
-        <item quantity="one">Modificando questa impostazione verrà accettato automaticamente un invito a un gruppo in sospeso.\nPremi OK per confermare la tua scelta e aderire a questo gruppo.</item>
-        <item quantity="other">Modificando questa impostazione verranno accettati automaticamente %1$d inviti a gruppi in sospeso.\nPremi OK per confermare la tua scelta e aderire a questi gruppi.</item>
-    </plurals>
-    <plurals name="dialog_message_save_selected_attachments">
-        <item quantity="one">Quando richiesto, seleziona la cartella in cui salvare l\'allegato selezionato.\nNota che l\'accesso ad alcune cartelle potrebbe essere limitato.</item>
-        <item quantity="other">Quando richiesto, seleziona la cartella in cui salvare i %1$d allegati selezionati.\nNota che l\'accesso ad alcune cartelle potrebbe essere limitato.</item>
-    </plurals>
-    <plurals name="action_mode_title_storage">
-        <item quantity="one">%1$d selezionato</item>
-        <item quantity="other">%1$d selezionati</item>
-    </plurals>
-    <plurals name="dialog_message_delete_attachments">
-        <item quantity="one">Sei sicuro di voler eliminare l\'allegato selezionato?</item>
-        <item quantity="other">Sei sicuro di voler eliminare i %1$d allegati selezionati?</item>
-    </plurals>
-    <plurals name="text_app_uptime_days">
-        <item quantity="one">%1$d giorno, %2$02d ore %3$02d minuti %4$02d secondi</item>
-        <item quantity="other">%1$d giorni, %2$02d ore %3$02d minuti %4$02d secondi</item>
-    </plurals>
-    <plurals name="text_message_possibly_missing">
-        <item quantity="one">%1$d messaggio mancante…</item>
-        <item quantity="other">%1$d messaggi mancanti…</item>
-    </plurals>
-    <plurals name="text_outgoing_group_call_with_contacts">
-        <item quantity="one">Chiamata di gruppo con %2$s e un altro</item>
-        <item quantity="other">Chiamata di gruppo con %2$s e %1$d altri</item>
-    </plurals>
-    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
-        <item quantity="one">Chiamata di gruppo senza risposta con %2$s e un altro</item>
-        <item quantity="other">Chiamata di gruppo senza risposta con %2$s e %1$d altri</item>
-    </plurals>
-    <plurals name="text_failed_outgoing_group_call_with_contacts">
-        <item quantity="one">Chiamata di gruppo fallita con %2$s e un altro</item>
-        <item quantity="other">Chiamata di gruppo fallita con %2$s e %1$d altri</item>
-    </plurals>
-    <plurals name="text_busy_outgoing_group_call_with_contacts">
-        <item quantity="one">Chiamata di gruppo mentre %2$s e un altro erano occupati</item>
-        <item quantity="other">Chiamata di gruppo mentre %2$s e %1$d altri erano occupati</item>
-    </plurals>
-    <plurals name="text_rejected_outgoing_group_call_with_contacts">
-        <item quantity="one">Chiamata di gruppo rifiutata con %2$s e un altro</item>
-        <item quantity="other">Chiamata di gruppo rifiutata con %2$s e %1$d altri</item>
-    </plurals>
-    <plurals name="text_incoming_group_call_with_contacts">
-        <item quantity="one">Chiamata di gruppo da %2$s e un altro</item>
-        <item quantity="other">Chiamata di gruppo da %2$s e %1$d altri</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion">
-        <item quantity="one">%1$d selezionato</item>
-        <item quantity="other">%1$d selezionati</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion_list">
-        <item quantity="one">%1$d selezionato</item>
-        <item quantity="other">%1$d selezionati</item>
-    </plurals>
-    <plurals name="notification_public_title_new_messages">
-        <item quantity="one">%1$d nuovo messaggio</item>
-        <item quantity="other">%1$d nuovi messaggi</item>
-    </plurals>
-    <plurals name="dialog_message_invite_group_members">
-        <item quantity="one">%3$s verrà invitato ad aderire al gruppo %2$s.</item>
-        <item quantity="other">I seguenti %1$d contatti verranno invitati ad aderire al gruppo %2$s: %3$s.</item>
-    </plurals>
-    <plurals name="dialog_message_remove_group_members">
-        <item quantity="one">%3$s verrà rimosso dal gruppo %2$s.</item>
-        <item quantity="other">I seguenti %1$d membri del gruppo verranno rimossi da %2$s: %3$s.</item>
-    </plurals>
-    <plurals name="text_unread_message_count">
-        <item quantity="one">%1$d nuovo messaggio</item>
-        <item quantity="other">%1$d nuovi messaggi</item>
-    </plurals>
-    <plurals name="text_reply_attachment_count">
-        <item quantity="one">%1$d allegato</item>
-        <item quantity="other">%1$d allegati</item>
-    </plurals>
-    <plurals name="text_and_x_other">
-        <item quantity="one">e %1$d altro</item>
-        <item quantity="other">e %1$d altri</item>
-    </plurals>
-    <plurals name="text_contact_names_last_separator_x_other">
-        <item quantity="one"> &amp; %1$d altro</item>
-        <item quantity="other"> &amp; %1$d altri</item>
-    </plurals>
-    <plurals name="dialog_message_confirm_retention_policy">
-        <item quantity="one">Applicando la politica di conservazione appena selezionata verrà eliminato un singolo messaggio.\nSei sicuro di voler procedere?</item>
-        <item quantity="other">Applicando la politica di conservazione appena selezionata verranno eliminati %1$d messaggi.\nSei sicuro di voler procedere?</item>
-    </plurals>
-    <plurals name="text_keycloak_missing_search_result">
-        <item quantity="one">… e 1 altro risultato di ricerca\nPer favore, affina la tua ricerca</item>
-        <item quantity="other">… e %1$d altri risultati di ricerca\nPer favore, affina la tua ricerca</item>
-    </plurals>
-    <plurals name="duration_seconds">
-        <item quantity="one">1 secondo</item>
-        <item quantity="other">%1$d secondi</item>
-    </plurals>
-    <plurals name="duration_minutes">
-        <item quantity="one">1 minuto</item>
-        <item quantity="other">%1$d minuti</item>
-    </plurals>
-    <plurals name="duration_hours">
-        <item quantity="one">1 ora</item>
-        <item quantity="other">%1$d ore</item>
-    </plurals>
-    <plurals name="duration_days">
-        <item quantity="one">1 giorno</item>
-        <item quantity="other">%1$d giorni</item>
-    </plurals>
-    <plurals name="duration_years">
-        <item quantity="one">1 anno</item>
-        <item quantity="other">%1$d anni</item>
-    </plurals>
-    <plurals name="other_members_count">
-        <item quantity="one">1 membro</item>
-        <item quantity="other">%1$d membri</item>
-    </plurals>
-    <plurals name="dialog_message_delete_remote_deleted_messages">
-        <item quantity="one">Attualmente hai 1 messaggio cancellato da remoto nelle tue discussioni. Vuoi eliminarlo?</item>
-        <item quantity="other">Attualmente hai %1$d messaggi cancellati da remoto nelle tue discussioni. Vuoi eliminare tutti questi marcatori?</item>
-    </plurals>
-    <plurals name="label_xxx_contacts_sharing_their_position">
-        <item quantity="one">1 contatto sta condividendo la sua posizione</item>
-        <item quantity="other">%1$d contatti stanno condividendo la loro posizione</item>
-    </plurals>
-    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
-        <item quantity="one">Tu e 1 altro state condividendo la vostra posizione</item>
-        <item quantity="other">Tu e %1$d altri state condividendo la vostra posizione</item>
-    </plurals>
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1156880361">Uno dei tuoi dispositivi scadrà e verrà disattivato in **meno di %1$d giorno**.\nPuoi acquistare un abbonamento **Olvid+** per mantenerlo attivo.</item>
+		<item quantity="other" state="needs_review" hash="-574658149">Uno dei tuoi dispositivi scadrà e verrà disattivato in **meno di %1$d giorni**.\nPuoi acquistare un abbonamento **Olvid+** per mantenerlo attivo.</item>
+	</plurals>
+	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-683497602">%1$s è entrato/a nel gruppo</item>
+		<item quantity="other" state="needs_review" hash="51603026">%1$s è entrato/a nel gruppo</item>
+	</plurals>
+	<plurals name="text_left_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="399208793">%1$s ha lasciato il gruppo</item>
+		<item quantity="other" state="needs_review" hash="1945116549">%1$s ha lasciato il gruppo</item>
+	</plurals>
+	<plurals name="label_poll_answers" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="1797058436">Nessuna risposta</item>
+		<item quantity="one" state="needs_review" hash="-7151672">%1$d risposta</item>
+		<item quantity="other" state="needs_review" hash="1394570044">%1$d risposte</item>
+	</plurals>
+	<plurals name="label_remove_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="312762041">Rimuovi membro %1$d</item>
+		<item quantity="other" state="needs_review" hash="1816849257">Rimuovi %1$d membri</item>
+	</plurals>
+	<plurals name="label_add_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1537484553">Aggiungi %1$d membro</item>
+		<item quantity="other" state="needs_review" hash="1091232977">Aggiungi %1$d membri</item>
+	</plurals>
+	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1131862199">\" su questo dispositivo, il tuo dispositivo precedente elencato di seguito verrà disattivato:</item>
+		<item quantity="other" state="needs_review" hash="-2011302529">\" su questo dispositivo, i tuoi dispositivi elencati di seguito verranno disattivati:</item>
+	</plurals>
+	<plurals name="label_backups_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1088606803">Backup %1$d trovato</item>
+		<item quantity="other" state="needs_review" hash="-577868099">Trovati %1$d backup</item>
+	</plurals>
+	<plurals name="label_profiles_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1498976610">%1$d profilo trovato</item>
+		<item quantity="other" state="needs_review" hash="749391135">Trovati %1$d profili</item>
+	</plurals>
+	<plurals name="label_backup_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="-174007554">Nessun gruppo</item>
+		<item quantity="one" state="needs_review" hash="237276495">%1$d gruppo</item>
+		<item quantity="other" state="needs_review" hash="900821953">%1$d gruppi</item>
+	</plurals>
+	<plurals name="label_backup_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="246373927">Nessun contatto</item>
+		<item quantity="one" state="needs_review" hash="-1671298344">%1$d contatto</item>
+		<item quantity="other" state="needs_review" hash="1022571360">%1$d contatti</item>
+	</plurals>
+	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1772966333">Conversazione archiviata</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d discussioni archiviate</item>
+	</plurals>
+	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1312483800">Discussione ripristinata</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d discussioni ripristinate</item>
+	</plurals>
+	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2045500103">Messaggio rimosso dai preferiti</item>
+		<item quantity="other" state="needs_review" hash="204728896">%1$d messaggi rimossi dai preferiti</item>
+	</plurals>
+	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-716893580">Eliminare la conversazione selezionata?</item>
+		<item quantity="other" state="needs_review" hash="-15840526">Eliminare le conversazioni selezionate?</item>
+	</plurals>
+	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-862879351">Eliminare il messaggio selezionato?</item>
+		<item quantity="other" state="needs_review" hash="-2020248805">Eliminare i messaggi selezionati?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-931157230">Vuoi davvero eliminare la conversazione selezionata e tutti i messaggi che contiene?\nQuesta azione non può essere annullata.</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">Sei sicuro di voler eliminare le %1$d conversazioni selezionate e tutti i messaggi in esse contenuti?\nQuesta azione non può essere annullata.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2139168692">Come desideri eliminare la conversazione selezionata e tutti i messaggi che contiene?\nQuesta azione non può essere annullata.</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">Come vuoi eliminare le %1$d conversazioni selezionate e tutti i messaggi che contengono?\nQuesta azione non può essere annullata.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-947341357">Sei sicuro di voler eliminare il messaggio selezionato?\nQuesta azione non può essere annullata.</item>
+		<item quantity="other" state="needs_review" hash="-752621695">Sei sicuro di voler eliminare i %1$d messaggi selezionati?\nQuesta azione non può essere annullata.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-474913536">Come vuoi eliminare il messaggio selezionato?\nQuesta azione non può essere annullata.</item>
+		<item quantity="other" state="needs_review" hash="-895867176">Come vuoi eliminare i %1$d messaggi selezionati?\nQuesta azione non può essere annullata.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-606769319">Stai per eliminare **definitivamente** un messaggio per **tutti** i partecipanti a questa conversazione. Assicurati che sia proprio quello che vuoi fare.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">Stai per eliminare **definitivamente** %1$d messaggi per **tutti** in questa conversazione. Assicurati che sia proprio quello che vuoi fare.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118446236">Stai per eliminare **definitivamente** una conversazione e tutti i messaggi che contiene per **tutti** i partecipanti a questa conversazione. Assicurati che sia proprio quello che vuoi fare.</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">Stai per eliminare **definitivamente** %1$d conversazioni e i messaggi in esse contenuti per **tutti** i partecipanti a queste conversazioni. Assicurati che sia proprio quello che vuoi fare.</item>
+	</plurals>
+	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1306576418">Stai per invitare ogni membro del gruppo con cui hai un canale (attualmente 1 membro) in una discussione privata.\nVuoi procedere?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Stai per invitare ogni membro del gruppo con cui hai un canale (attualmente %1$d membri) a una discussione privata.\nVuoi procedere?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1699852572">1 gruppo comune</item>
+		<item quantity="other" state="needs_review" hash="-261780100">%1$d gruppi comuni</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1000092559">Devi lasciare questo gruppo per continuare.</item>
+		<item quantity="other" state="needs_review" hash="-1973752801">Devi lasciare questi gruppi per continuare.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_with_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1290867480">Stai per rimuovere %1$s dalla tua lista di altri utenti.\n\nTieni presente che %1$s è stato invitato al gruppo %2$d a cui appartieni. Sarà aggiunto nuovamente a questo elenco se vi si unirà. Potresti voler lasciare questo gruppo per evitarlo.\n\nEliminare definitivamente questo utente?</item>
+		<item quantity="other" state="needs_review" hash="1544662217">Stai per rimuovere %1$s dalla tua lista di altri utenti.\n\nTieni presente che %1$s è stato invitato in %2$d gruppi a cui appartieni. Se si unisce a uno di questi, verrà aggiunto nuovamente a questo elenco. Potresti voler lasciare questi gruppi per evitare ciò.\n\nEliminare definitivamente questo utente?</item>
+	</plurals>
+	<plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-97256410">Modificando questa impostazione, accetterai automaticamente un invito di gruppo in sospeso.\nPremi OK per confermare la tua scelta e unirti a questo gruppo.</item>
+		<item quantity="other" state="needs_review" hash="1009007696">Modificando questa impostazione, accetterai automaticamente %1$d inviti di gruppo in sospeso.\nPremi OK per confermare la tua scelta e unirti a questi gruppi.</item>
+	</plurals>
+	<plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1768885312">Quando richiesto, seleziona la cartella in cui salvare l\'allegato selezionato.\nTieni presente che l\'accesso ad alcune cartelle potrebbe essere limitato.</item>
+		<item quantity="other" state="needs_review" hash="-1416662415">Quando richiesto, seleziona la cartella in cui salvare gli allegati %1$d selezionati.\nTieni presente che l\'accesso ad alcune cartelle potrebbe essere limitato.</item>
+	</plurals>
+	<plurals name="action_mode_title_storage" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d selezionato</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d selezionati</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1117804388">Sei sicuro di voler eliminare l\'allegato selezionato?</item>
+		<item quantity="other" state="needs_review" hash="-1540151013">Vuoi davvero eliminare gli %1$d allegati selezionati?</item>
+	</plurals>
+	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1400550170">%1$d giorno, %2$02dh %3$02dm %4$02ds</item>
+		<item quantity="other" state="needs_review" hash="-1847999182">%1$d giorni, %2$02dh %3$02dm %4$02ds</item>
+	</plurals>
+	<plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1040869757">%1$d messaggio mancante…</item>
+		<item quantity="other" state="needs_review" hash="-970055416">%1$d messaggi mancanti…</item>
+	</plurals>
+	<plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="800251665">Chiamata di gruppo con %2$s e un altro partecipante</item>
+		<item quantity="other" state="needs_review" hash="-1654053808">Chiamata di gruppo con %2$s e altri %1$d</item>
+	</plurals>
+	<plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1313506338">Chiamata di gruppo senza risposta con %2$s e un altro partecipante</item>
+		<item quantity="other" state="needs_review" hash="1027194941">Chiamata di gruppo senza risposta con %2$s e altri %1$d</item>
+	</plurals>
+	<plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="575911091">Chiamata di gruppo fallita con %2$s e un altro utente</item>
+		<item quantity="other" state="needs_review" hash="1768048524">Chiamata di gruppo fallita con %2$s e altri %1$d</item>
+	</plurals>
+	<plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1115369211">Chiamata di gruppo mentre %2$s e un altro erano occupati</item>
+		<item quantity="other" state="needs_review" hash="-332659300">Chiamata di gruppo mentre %2$s e altri %1$d erano occupati</item>
+	</plurals>
+	<plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1401449639">Chiamata di gruppo rifiutata da %2$s e un altro partecipante</item>
+		<item quantity="other" state="needs_review" hash="-150166810">Chiamata di gruppo rifiutata da %2$s e altri %1$d</item>
+	</plurals>
+	<plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-366344569">Chiamata di gruppo da %2$s e un altro partecipante</item>
+		<item quantity="other" state="needs_review" hash="1471743578">Chiamata di gruppo da %2$s e altri %1$d</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="461822174">%1$d selezionato</item>
+		<item quantity="other" state="needs_review" hash="1431585621">%1$d selezionati</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion_list" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d selezionato/a</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d selezionati</item>
+	</plurals>
+	<plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d nuovo messaggio</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d nuovi messaggi</item>
+	</plurals>
+	<plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1495957123">%3$s sarà invitato a unirsi al gruppo %2$s.</item>
+		<item quantity="other" state="needs_review" hash="-250521442">I seguenti %1$d contatti verranno invitati ad unirsi al gruppo %2$s: %3$s.</item>
+	</plurals>
+	<plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1633684901">%3$s verrà rimosso/a dal gruppo %2$s.</item>
+		<item quantity="other" state="needs_review" hash="2062819899">I seguenti %1$d membri saranno rimossi dal gruppo %2$s: %3$s.</item>
+	</plurals>
+	<plurals name="text_unread_message_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d nuovo messaggio</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d nuovi messaggi</item>
+	</plurals>
+	<plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118984743">%1$d allegato</item>
+		<item quantity="other" state="needs_review" hash="1321323314">%1$d allegati</item>
+	</plurals>
+	<plurals name="text_and_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-226443285">E altri %1$d</item>
+		<item quantity="other" state="needs_review" hash="-2101659023">E altri %1$d</item>
+	</plurals>
+	<plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-970333"> &amp; %1$d altro</item>
+		<item quantity="other" state="needs_review" hash="1931856055"> &amp; %1$d altri</item>
+	</plurals>
+	<plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-202072457">L\'applicazione della politica di conservazione che hai appena selezionato cancellerebbe un singolo messaggio.\nSei sicuro di voler procedere?</item>
+		<item quantity="other" state="needs_review" hash="-576713525">L\'applicazione della politica di conservazione che hai appena selezionato cancellerà %1$d messaggi.\nSei sicuro di voler procedere?</item>
+	</plurals>
+	<plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="812170692">… e un risultato aggiuntivo\nSi prega di affinare la ricerca</item>
+		<item quantity="other" state="needs_review" hash="1969873890">… e %1$d altri risultati\nSi prega di affinare la ricerca</item>
+	</plurals>
+	<plurals name="duration_seconds" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="251130693">1 secondo</item>
+		<item quantity="other" state="needs_review" hash="624952161">%1$d secondi</item>
+	</plurals>
+	<plurals name="duration_minutes" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1053938976">1 minuto</item>
+		<item quantity="other" state="needs_review" hash="-1051808">%1$d minuti</item>
+	</plurals>
+	<plurals name="duration_hours" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1004063951">1 ora</item>
+		<item quantity="other" state="needs_review" hash="1322950935">%1$d ore</item>
+	</plurals>
+	<plurals name="duration_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1264358968">1 giorno</item>
+		<item quantity="other" state="needs_review" hash="-1170846734">%1$d giorni</item>
+	</plurals>
+	<plurals name="duration_years" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="388401904">1 anno</item>
+		<item quantity="other" state="needs_review" hash="298429520">%1$d anni</item>
+	</plurals>
+	<plurals name="other_members_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1379655782">1 membro</item>
+		<item quantity="other" state="needs_review" hash="965402074">%1$d membri</item>
+	</plurals>
+	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1006155949">Hai attualmente 1 messaggio cancellato da remoto nelle tue conversazioni. Vuoi eliminarlo?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">Hai attualmente %1$d messaggi cancellati da remoto nelle tue conversazioni. Vuoi eliminare tutti questi indicatori?</item>
+	</plurals>
+	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1367750681">1 contatto sta condividendo la propria posizione</item>
+		<item quantity="other" state="needs_review" hash="1164266856">%1$d contatti stanno condividendo la loro posizione</item>
+	</plurals>
+	<plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1602016664">Tu e un\'altra persona state condividendo la vostra posizione</item>
+		<item quantity="other" state="needs_review" hash="1789697147">Tu e altri %1$d state condividendo la vostra posizione</item>
+	</plurals>
 </resources>

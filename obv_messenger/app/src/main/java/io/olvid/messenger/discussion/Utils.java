@@ -49,7 +49,6 @@ import java.util.regex.Pattern;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
-import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.Markdown;
@@ -57,11 +56,13 @@ import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.customClasses.StringUtils2Kt;
 import io.olvid.messenger.customClasses.spans.OrderedListItemSpan;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonUserMention;
 import io.olvid.messenger.discussion.mention.MentionUrlSpan;
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.settings.SettingsActivity;
+import kotlin.Unit;
 
 public class Utils {
     private static final Calendar cal1 = Calendar.getInstance();
@@ -171,11 +172,11 @@ public class Utils {
             for (JsonUserMention mention : mentions) {
                 if (mention.getRangeStart() >= 0 && mention.getRangeEnd() <= result.length()) {
                     // this test also considers groupV2 pending members as contacts --> need to check this at click time
-                    if (mention.getUserIdentifier() == null || AppSingleton.getContactCustomDisplayName(mention.getUserIdentifier()) == null) {
+                    if (mention.getUserIdentifier() == null || ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(mention.getUserIdentifier()) == null) {
                         // Unknown contact
                         result.setSpan(new MentionUrlSpan(mention.getUserIdentifier(), mention.getLength(), context.getResources().getColor(R.color.darkGrey), null), mention.getRangeStart(), mention.getRangeEnd(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     } else {
-                        int color = InitialView.getTextColor(context, mention.getUserIdentifier(), AppSingleton.getContactCustomHue(mention.getUserIdentifier()));
+                        int color = InitialView.getTextColor(context, mention.getUserIdentifier(), ContactCacheSingleton.INSTANCE.getContactCustomHue(mention.getUserIdentifier()));
                          result.setSpan(new MentionUrlSpan(mention.getUserIdentifier(), mention.getLength(), color, () -> {
                             if (Arrays.equals(bytesOwnedIdentity, mention.getUserIdentifier())) {
                                 context.startActivity(new Intent(context, OwnedIdentityDetailsActivity.class));
@@ -187,7 +188,7 @@ public class Utils {
                                     }
                                 });
                             }
-                            return null;
+                            return Unit.INSTANCE;
                         }), mention.getRangeStart(), mention.getRangeEnd(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
                 }

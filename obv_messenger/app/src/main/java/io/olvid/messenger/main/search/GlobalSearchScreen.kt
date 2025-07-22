@@ -21,7 +21,6 @@ package io.olvid.messenger.main.search
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -73,14 +72,15 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.App
-import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.dao.MessageDao.DiscussionAndMessage
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Message
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.gallery.FyleListItem
@@ -89,7 +89,6 @@ import io.olvid.messenger.discussion.message.OutboundMessageStatus
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.contacts.CustomTab
-import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.main.discussions.getAnnotatedBody
 import io.olvid.messenger.main.discussions.getAnnotatedTitle
 import io.olvid.messenger.settings.SettingsActivity
@@ -115,11 +114,11 @@ fun GlobalSearchScreen(
     val pages = listOf(
         // first -> label, second -> hasResults
         R.string.global_search_result_contacts to {
-            globalSearchViewModel.otherDiscussionsFound.isNullOrEmpty()
-                .not() || globalSearchViewModel.contactsFound.isNullOrEmpty().not()
+            globalSearchViewModel.contactsFound.isNullOrEmpty().not()
         },
         R.string.global_search_result_groups to {
-            globalSearchViewModel.groupsFound.isNullOrEmpty().not()
+            globalSearchViewModel.otherDiscussionsFound.isNullOrEmpty()
+                .not() || globalSearchViewModel.groupsFound.isNullOrEmpty().not()
         },
         R.string.global_search_result_messages to { (messages?.itemCount ?: 0) > 0 },
         R.string.global_search_result_attachments to { (attachments?.itemCount ?: 0) > 0 },
@@ -141,9 +140,9 @@ fun GlobalSearchScreen(
 
         LaunchedEffect(loading) {
             if (!loading && neverSwitchedTab) {
-                if (!globalSearchViewModel.otherDiscussionsFound.isNullOrEmpty() || !globalSearchViewModel.contactsFound.isNullOrEmpty()) {
+                if (!globalSearchViewModel.contactsFound.isNullOrEmpty()) {
                     pagerState.requestScrollToPage(0)
-                } else if (!globalSearchViewModel.groupsFound.isNullOrEmpty()) {
+                } else if (!globalSearchViewModel.otherDiscussionsFound.isNullOrEmpty() || !globalSearchViewModel.groupsFound.isNullOrEmpty()) {
                     pagerState.requestScrollToPage(1)
                 } else if ((messages?.itemCount ?: 0) > 0) {
                     pagerState.requestScrollToPage(2)
@@ -205,7 +204,7 @@ fun GlobalSearchScreen(
             ) {
                 when (page) {
                     0 -> {
-                        if (globalSearchViewModel.otherDiscussionsFound.isNullOrEmpty() && globalSearchViewModel.contactsFound.isNullOrEmpty()) {
+                        if (globalSearchViewModel.contactsFound.isNullOrEmpty()) {
                             if (!loading) {
                                 NoResultsFound(0)
                             }
@@ -226,6 +225,31 @@ fun GlobalSearchScreen(
                                             Spacer(modifier = Modifier.height(8.dp))
                                         }
                                     }
+                            }
+                        }
+                    }
+
+                    1 -> {
+                        if (globalSearchViewModel.otherDiscussionsFound.isNullOrEmpty()
+                            && globalSearchViewModel.groupsFound.isNullOrEmpty()) {
+                            if (!loading) {
+                                NoResultsFound(1)
+                            }
+                        } else {
+                            LazyColumn(
+                                state = lazyListState,
+                                contentPadding = PaddingValues(bottom = 64.dp)
+                            ) {
+                                globalSearchViewModel.groupsFound?.takeIf { it.isNotEmpty() }
+                                    ?.let {
+                                        items(it) { searchableDiscussion ->
+                                            SearchResult(
+                                                searchableDiscussion = searchableDiscussion,
+                                                globalSearchViewModel = globalSearchViewModel
+                                            )
+                                        }
+                                    }
+
                                 globalSearchViewModel.otherDiscussionsFound?.takeIf { it.isNotEmpty() }
                                     ?.let {
                                         item {
@@ -242,26 +266,6 @@ fun GlobalSearchScreen(
                                             )
                                         }
                                     }
-                            }
-                        }
-                    }
-
-                    1 -> {
-                        globalSearchViewModel.groupsFound?.takeIf { it.isNotEmpty() }?.let {
-                            LazyColumn(
-                                state = lazyListState,
-                                contentPadding = PaddingValues(bottom = 64.dp)
-                            ) {
-                                items(it) { searchableDiscussion ->
-                                    SearchResult(
-                                        searchableDiscussion = searchableDiscussion,
-                                        globalSearchViewModel = globalSearchViewModel
-                                    )
-                                }
-                            }
-                        } ?: run {
-                            if (!loading) {
-                                NoResultsFound(1)
                             }
                         }
                     }
@@ -319,7 +323,7 @@ fun GlobalSearchScreen(
                                                 )
                                                 Text(
                                                     modifier = Modifier.weight(1f),
-                                                    text = AppSingleton.getContactCustomDisplayName(
+                                                    text = ContactCacheSingleton.getContactCustomDisplayName(
                                                         fyle.message.senderIdentifier
                                                     )
                                                         ?: stringResource(id = R.string.text_deleted_contact),
@@ -414,7 +418,7 @@ fun GlobalSearchScreen(
                                                 )
                                                 Text(
                                                     modifier = Modifier.weight(1f),
-                                                    text = AppSingleton.getContactCustomDisplayName(
+                                                    text = ContactCacheSingleton.getContactCustomDisplayName(
                                                         fyle.message.senderIdentifier
                                                     )
                                                         ?: stringResource(id = R.string.text_deleted_contact),
@@ -502,7 +506,6 @@ fun Message.goto(context: Context, searchQuery: String? = null) {
     })
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SearchResult(
     modifier: Modifier = Modifier,

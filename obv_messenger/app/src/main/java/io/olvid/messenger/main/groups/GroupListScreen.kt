@@ -61,7 +61,7 @@ import io.olvid.messenger.R.string
 import io.olvid.messenger.databases.dao.Group2Dao.GroupOrGroup2
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
-import io.olvid.messenger.main.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -101,7 +101,7 @@ fun GroupListScreen(
                             Box {
                                 GroupListItem(
                                     modifier = Modifier
-                                        .background(colorResource(id = R.color.almostWhite))
+                                        .background(colorResource(id = color.almostWhite))
                                         .cutoutHorizontalPadding(),
                                     group = group,
                                     title = group.getAnnotatedName(LocalContext.current),

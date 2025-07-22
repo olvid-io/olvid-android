@@ -266,14 +266,14 @@ fun OnboardingScreen(
             }
         }
 
-        footer?.let {
+        footer?.also {
             val density = LocalDensity.current
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .onSizeChanged {
+                    .onSizeChanged { size ->
                         footerHeight = with(density) {
-                            it.height.toDp()
+                            size.height.toDp()
                         }
                     }
                     .background(colorResource(R.color.whiteOverlay))

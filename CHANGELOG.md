@@ -1,3 +1,14 @@
+# Build 273 (3.8)
+2025-07-22
+
+- Complete redesign of the group creation workflow.
+- Update to the group management UI/UX.
+- Improved internal PDF viewer on Android 15 and above.
+- When possible, indicate who added a member to a group.
+- Preliminary support for polls in Olvid.
+- Replacement of some disruptive alert dialogs by "tips".
+- Complete rewrite of how messages received "out-of-order" are put on hold, for better reliability and performances.
+
 # Build 272 (3.7.2)
 2025-05-28
 

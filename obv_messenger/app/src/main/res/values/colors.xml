@@ -42,7 +42,6 @@
 
     <color name="mimeIcon">#99808080</color>
 
-    <!-- New color -->
     <color name="dialogBackground">#ffffff</color>
     <color name="itemBackground">#ffffff</color>
     <color name="dialogBackgroundOverlay">#99ffffff</color>
@@ -50,4 +49,18 @@
     <color name="alwaysWhite">#ffffff</color>
     <color name="alwaysWhiteOverlay">#bbffffff</color>
     <color name="alwaysWhiteSubtleOverlay">#33ffffff</color>
+
+    <!-- Poll colors-->
+    <color name="poll0">#E0473B</color>
+    <color name="poll1">#5E8542</color>
+    <color name="poll2">#001855</color>
+    <color name="poll3">#C66273</color>
+    <color name="poll4">#195D5D</color>
+    <color name="poll5">#569440</color>
+    <color name="poll6">#7479B6</color>
+    <color name="poll7">#5B1708</color>
+    <color name="poll8">#947511</color>
+    <color name="poll9">#6C3C00</color>
+    <color name="poll10">#A85151</color>
+    <color name="poll11">#85785C</color>
 </resources>

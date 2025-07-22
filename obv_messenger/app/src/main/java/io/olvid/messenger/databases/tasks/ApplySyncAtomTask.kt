@@ -298,6 +298,10 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                     ObvSyncAtom.TYPE_SETTING_UNARCHIVE_ON_NOTIFICATION -> {
                         SettingsActivity.setUnarchiveDiscussionOnNotification(obvSyncAtom.booleanValue)
                     }
+                    ObvSyncAtom.TYPE_SETTING_LAST_RATING -> {
+                        SettingsActivity.lastRating = obvSyncAtom.integerValue
+                        SettingsActivity.lastRatingTipTimestamp = runCatching { obvSyncAtom.stringValue.toLong() }.getOrDefault(0L)
+                    }
                     else -> {
                         throw Exception("Unknown App sync atom type")
                     }

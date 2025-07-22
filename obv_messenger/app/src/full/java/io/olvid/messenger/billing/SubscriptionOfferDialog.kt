@@ -43,7 +43,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -71,6 +70,7 @@ import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 
 
@@ -184,15 +184,10 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                                 color = colorResource(id = R.color.almostBlack),
                             )
                             Spacer(Modifier.height(8.dp))
-                            TextButton(
-                                shape = RoundedCornerShape(6.dp),
+                            OlvidTextButton(
+                                text = stringResource(id = R.string.button_label_retry),
                                 onClick = { fetchSubscriptionOptions() }
-                            ) {
-                                Text(
-                                    text = stringResource(id = R.string.button_label_retry),
-                                    color = colorResource(id = R.color.olvid_gradient_light)
-                                )
-                            }
+                            )
                         } else {
                             subscriptionsOffers?.forEach { offerDetails ->
                                 Row {

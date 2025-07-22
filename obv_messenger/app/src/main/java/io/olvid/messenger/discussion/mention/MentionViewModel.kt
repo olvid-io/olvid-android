@@ -26,6 +26,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.jsons.JsonUserMention
 import java.util.regex.Pattern
@@ -83,7 +84,7 @@ class MentionViewModel : ViewModel() {
                         } catch (e: Exception) {
                             null
                         }
-                    } ?: AppSingleton.getContactFirstName(mention.userIdentifier)
+                    } ?: ContactCacheSingleton.getContactFirstName(mention.userIdentifier)
                     if (firstName != null && mention.length > firstName.length + 1) {
                         // length mismatch, cut mention to firstname
                         editable.removeSpan(mentionUrlSpan)

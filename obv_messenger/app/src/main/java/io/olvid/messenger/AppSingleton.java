@@ -26,7 +26,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.util.Pair;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -70,12 +69,10 @@ import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.engine.engine.types.identities.ObvKeycloakState;
 import io.olvid.messenger.billing.BillingUtils;
 import io.olvid.messenger.customClasses.BytesKey;
-import io.olvid.messenger.customClasses.ContactCacheInfo;
 import io.olvid.messenger.customClasses.CustomSSLSocketFactory;
 import io.olvid.messenger.customClasses.DatabaseKey;
 import io.olvid.messenger.databases.AppDatabase;
-import io.olvid.messenger.databases.entity.Contact;
-import io.olvid.messenger.databases.entity.Group2PendingMember;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
@@ -352,11 +349,6 @@ public class AppSingleton {
         };
         selectLatestOpenedIdentity();
 
-        this.contactNamesCache = new MutableLiveData<>();
-        this.contactHuesCache = new MutableLiveData<>();
-        this.contactPhotoUrlsCache = new MutableLiveData<>();
-        this.contactInfoCache = new MutableLiveData<>();
-
         Observer<OwnedIdentity> currentIdentityObserverForNameCache = new Observer<>() {
             byte[] bytesPreviousOwnedIdentity = null;
 
@@ -364,10 +356,10 @@ public class AppSingleton {
             public void onChanged(OwnedIdentity ownedIdentity) {
                 if (ownedIdentity == null) {
                     bytesPreviousOwnedIdentity = null;
-                    App.runThread(() -> instance.reloadCachedDisplayNamesAndHues(null));
+                    App.runThread(() -> ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues(null));
                 } else if (!Arrays.equals(bytesPreviousOwnedIdentity, ownedIdentity.bytesOwnedIdentity)) {
                     bytesPreviousOwnedIdentity = ownedIdentity.bytesOwnedIdentity;
-                    App.runThread(() -> instance.reloadCachedDisplayNamesAndHues(ownedIdentity));
+                    App.runThread(() -> ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues(ownedIdentity));
                 }
             }
         };
@@ -971,210 +963,210 @@ public class AppSingleton {
 
     // endregion
 
-    // region Contact names and info caches (for main thread access)
-
-    @NonNull private final MutableLiveData<HashMap<BytesKey, Pair<String, String>>> contactNamesCache; // the first element of the pair is the full display name, the second the first name (or custom name for both, if set)
-    @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactHuesCache;
-    @NonNull private final MutableLiveData<HashMap<BytesKey, String>> contactPhotoUrlsCache;
-    @NonNull private final MutableLiveData<HashMap<BytesKey, ContactCacheInfo>> contactInfoCache;
-
-
-
-    @NonNull
-    public static LiveData<HashMap<BytesKey, Pair<String, String>>> getContactNamesCache() {
-        return getInstance().contactNamesCache;
-    }
-
-    @NonNull
-    public static LiveData<HashMap<BytesKey, Integer>> getContactHuesCache() {
-        return getInstance().contactHuesCache;
-    }
-
-    @NonNull
-    public static LiveData<HashMap<BytesKey, String>> getContactPhotoUrlsCache() {
-        return getInstance().contactPhotoUrlsCache;
-    }
-
-    @NonNull
-    public static LiveData<HashMap<BytesKey, ContactCacheInfo>> getContactInfoCache() {
-        return getInstance().contactInfoCache;
-    }
-
-    public static void reloadCachedDisplayNamesAndHues() {
-        instance.reloadCachedDisplayNamesAndHues(getCurrentIdentityLiveData().getValue());
-    }
-
-    private void reloadCachedDisplayNamesAndHues(@Nullable OwnedIdentity ownedIdentity) {
-        if (ownedIdentity == null) {
-            getInstance().contactNamesCache.postValue(new HashMap<>());
-            getInstance().contactHuesCache.postValue(new HashMap<>());
-            getInstance().contactPhotoUrlsCache.postValue(new HashMap<>());
-            getInstance().contactInfoCache.postValue(new HashMap<>());
-            return;
-        }
-        List<Contact> contacts = AppDatabase.getInstance().contactDao().getAllForOwnedIdentitySync(ownedIdentity.bytesOwnedIdentity);
-        HashMap<BytesKey, Pair<String, String>> contactNamesHashMap = new HashMap<>();
-        HashMap<BytesKey, Integer> contactHuesHashMap = new HashMap<>();
-        HashMap<BytesKey, String> contactPhotoUrlsHashMap = new HashMap<>();
-        HashMap<BytesKey, ContactCacheInfo> contactCacheInfoHashMap = new HashMap<>();
-        for (Contact contact : contacts) {
-            BytesKey key = new BytesKey(contact.bytesContactIdentity);
-            contactNamesHashMap.put(key, new Pair<>(contact.getCustomDisplayName(), contact.getFirstNameOrCustom()));
-            if (contact.customNameHue != null) {
-                contactHuesHashMap.put(key, contact.customNameHue);
-            }
-            if (contact.getCustomPhotoUrl() != null) {
-                contactPhotoUrlsHashMap.put(key, contact.getCustomPhotoUrl());
-            }
-            contactCacheInfoHashMap.put(key, new ContactCacheInfo(contact.keycloakManaged, contact.active, contact.oneToOne, contact.recentlyOnline, contact.trustLevel));
-        }
-
-        BytesKey ownKey = new BytesKey(ownedIdentity.bytesOwnedIdentity);
-        contactNamesHashMap.put(ownKey, new Pair<>(App.getContext().getString(R.string.text_you), App.getContext().getString(R.string.text_you)));
-        if (ownedIdentity.photoUrl != null) {
-            contactPhotoUrlsHashMap.put(ownKey, ownedIdentity.photoUrl);
-        }
-        contactCacheInfoHashMap.put(ownKey, new ContactCacheInfo(ownedIdentity.keycloakManaged, ownedIdentity.active, true, true, 0));
-
-        List<Group2PendingMember> pendingMembers = AppDatabase.getInstance().group2PendingMemberDao().getAll(ownedIdentity.bytesOwnedIdentity);
-        for (Group2PendingMember pendingMember : pendingMembers) {
-            BytesKey key = new BytesKey(pendingMember.bytesContactIdentity);
-            if (!contactNamesHashMap.containsKey(key)) {
-                contactNamesHashMap.put(key, new Pair<>(pendingMember.displayName, pendingMember.getFirstName()));
-            }
-        }
-
-        getInstance().contactNamesCache.postValue(contactNamesHashMap);
-        getInstance().contactHuesCache.postValue(contactHuesHashMap);
-        getInstance().contactPhotoUrlsCache.postValue(contactPhotoUrlsHashMap);
-        getInstance().contactInfoCache.postValue(contactCacheInfoHashMap);
-    }
-
-    @Nullable
-    public static String getContactCustomDisplayName(byte[] bytesContactIdentity) {
-        if (getContactNamesCache().getValue() == null) {
-            return null;
-        }
-        Pair<String, String> cache = getContactNamesCache().getValue().get(new BytesKey(bytesContactIdentity));
-        if (cache != null) {
-            return cache.first;
-        }
-        return null;
-    }
-
-    @Nullable
-    public static String getContactFirstName(byte[] bytesContactIdentity) {
-        if (getContactNamesCache().getValue() == null) {
-            return null;
-        }
-        Pair<String, String> cache = getContactNamesCache().getValue().get(new BytesKey(bytesContactIdentity));
-        if (cache != null) {
-            return cache.second;
-        }
-        return null;
-    }
-
-    @Nullable
-    public static Integer getContactCustomHue(byte[] bytesContactIdentity) {
-        if (getContactHuesCache().getValue() == null) {
-            return null;
-        }
-        return getContactHuesCache().getValue().get(new BytesKey(bytesContactIdentity));
-    }
-
-    @Nullable
-    public static String getContactPhotoUrl(byte[] bytesContactIdentity) {
-        if (getContactPhotoUrlsCache().getValue() == null) {
-            return null;
-        }
-        return getContactPhotoUrlsCache().getValue().get(new BytesKey(bytesContactIdentity));
-    }
-
-    @Nullable
-    public static ContactCacheInfo getContactCacheInfo(byte[] bytesContactIdentity) {
-        HashMap<BytesKey, ContactCacheInfo> cacheInfoHashMap = getContactInfoCache().getValue();
-        if (cacheInfoHashMap == null) {
-            return null;
-        }
-        return cacheInfoHashMap.get(new BytesKey(bytesContactIdentity));
-    }
-
-    public static void updateCachedCustomDisplayName(@NonNull byte[] bytesContactIdentity, @NonNull String customDisplayName, @NonNull String firstNameOrCustom) {
-        if (getContactNamesCache().getValue() == null) {
-            return;
-        }
-        HashMap<BytesKey, Pair<String, String>> hashMap = getContactNamesCache().getValue();
-        hashMap.put(new BytesKey(bytesContactIdentity), new Pair<>(customDisplayName, firstNameOrCustom));
-        getInstance().contactNamesCache.postValue(hashMap);
-    }
-
-    public static void updateCachedCustomHue(byte[] bytesContactIdentity, Integer customHue) {
-        if (getContactHuesCache().getValue() == null) {
-            return;
-        }
-        HashMap<BytesKey, Integer> hashMap = getContactHuesCache().getValue();
-        if (customHue != null) {
-            hashMap.put(new BytesKey(bytesContactIdentity), customHue);
-        } else {
-            hashMap.remove(new BytesKey(bytesContactIdentity));
-        }
-        getInstance().contactHuesCache.postValue(hashMap);
-    }
-
-    public static void updateCachedPhotoUrl(byte[] bytesContactIdentity, String photoUrl) {
-        if (getContactPhotoUrlsCache().getValue() == null) {
-            return;
-        }
-        HashMap<BytesKey, String> hashMap = getContactPhotoUrlsCache().getValue();
-        if (photoUrl != null) {
-            hashMap.put(new BytesKey(bytesContactIdentity), photoUrl);
-        } else {
-            hashMap.remove(new BytesKey(bytesContactIdentity));
-        }
-        getInstance().contactPhotoUrlsCache.postValue(hashMap);
-    }
-
-    public static void updateContactCachedInfo(Contact contact) {
-        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
-        if (contactInfoHashMap == null) {
-            return;
-        }
-        contactInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new ContactCacheInfo(contact.keycloakManaged, contact.active, contact.oneToOne, contact.recentlyOnline, contact.trustLevel));
-        getInstance().contactInfoCache.postValue(contactInfoHashMap);
-    }
-
-    public static void updateContactCachedInfo(OwnedIdentity ownedIdentity) {
-        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
-        if (contactInfoHashMap == null) {
-            return;
-        }
-        contactInfoHashMap.put(new BytesKey(ownedIdentity.bytesOwnedIdentity), new ContactCacheInfo(ownedIdentity.keycloakManaged, ownedIdentity.active, true, true, 0));
-        getInstance().contactInfoCache.postValue(contactInfoHashMap);
-    }
-
-
-
-    public static void updateCacheContactDeleted(byte[] bytesContactIdentity) {
-        BytesKey key = new BytesKey(bytesContactIdentity);
-        HashMap<BytesKey, Pair<String, String>> namesHashMap = getContactNamesCache().getValue();
-        if (namesHashMap != null && namesHashMap.remove(key) != null) {
-            getInstance().contactNamesCache.postValue(namesHashMap);
-        }
-        HashMap<BytesKey, Integer> huesHashMap = getContactHuesCache().getValue();
-        if (huesHashMap != null && huesHashMap.remove(key) != null) {
-            getInstance().contactHuesCache.postValue(huesHashMap);
-        }
-        HashMap<BytesKey, String> photosHashMap = getContactPhotoUrlsCache().getValue();
-        if (photosHashMap != null && photosHashMap.remove(key) != null) {
-            getInstance().contactPhotoUrlsCache.postValue(photosHashMap);
-        }
-        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
-        if (contactInfoHashMap != null && contactInfoHashMap.remove(key) != null) {
-            getInstance().contactInfoCache.postValue(contactInfoHashMap);
-        }
-    }
-
-    // endregion
+//    // region Contact names and info caches (for main thread access)
+//
+//    @NonNull private final MutableLiveData<HashMap<BytesKey, Pair<String, String>>> contactNamesCache; // the first element of the pair is the full display name, the second the first name (or custom name for both, if set)
+//    @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactHuesCache;
+//    @NonNull private final MutableLiveData<HashMap<BytesKey, String>> contactPhotoUrlsCache;
+//    @NonNull private final MutableLiveData<HashMap<BytesKey, ContactCacheInfo>> contactInfoCache;
+//
+//
+//
+//    @NonNull
+//    public static LiveData<HashMap<BytesKey, Pair<String, String>>> getContactNamesCache() {
+//        return getInstance().contactNamesCache;
+//    }
+//
+//    @NonNull
+//    public static LiveData<HashMap<BytesKey, Integer>> getContactHuesCache() {
+//        return getInstance().contactHuesCache;
+//    }
+//
+//    @NonNull
+//    public static LiveData<HashMap<BytesKey, String>> getContactPhotoUrlsCache() {
+//        return getInstance().contactPhotoUrlsCache;
+//    }
+//
+//    @NonNull
+//    public static LiveData<HashMap<BytesKey, ContactCacheInfo>> getContactInfoCache() {
+//        return getInstance().contactInfoCache;
+//    }
+//
+//    public static void reloadCachedDisplayNamesAndHues() {
+//        instance.reloadCachedDisplayNamesAndHues(getCurrentIdentityLiveData().getValue());
+//    }
+//
+//    private void reloadCachedDisplayNamesAndHues(@Nullable OwnedIdentity ownedIdentity) {
+//        if (ownedIdentity == null) {
+//            getInstance().contactNamesCache.postValue(new HashMap<>());
+//            getInstance().contactHuesCache.postValue(new HashMap<>());
+//            getInstance().contactPhotoUrlsCache.postValue(new HashMap<>());
+//            getInstance().contactInfoCache.postValue(new HashMap<>());
+//            return;
+//        }
+//        List<Contact> contacts = AppDatabase.getInstance().contactDao().getAllForOwnedIdentitySync(ownedIdentity.bytesOwnedIdentity);
+//        HashMap<BytesKey, Pair<String, String>> contactNamesHashMap = new HashMap<>();
+//        HashMap<BytesKey, Integer> contactHuesHashMap = new HashMap<>();
+//        HashMap<BytesKey, String> contactPhotoUrlsHashMap = new HashMap<>();
+//        HashMap<BytesKey, ContactCacheInfo> contactCacheInfoHashMap = new HashMap<>();
+//        for (Contact contact : contacts) {
+//            BytesKey key = new BytesKey(contact.bytesContactIdentity);
+//            contactNamesHashMap.put(key, new Pair<>(contact.getCustomDisplayName(), contact.getFirstNameOrCustom()));
+//            if (contact.customNameHue != null) {
+//                contactHuesHashMap.put(key, contact.customNameHue);
+//            }
+//            if (contact.getCustomPhotoUrl() != null) {
+//                contactPhotoUrlsHashMap.put(key, contact.getCustomPhotoUrl());
+//            }
+//            contactCacheInfoHashMap.put(key, new ContactCacheInfo(contact.keycloakManaged, contact.active, contact.oneToOne, contact.recentlyOnline, contact.trustLevel));
+//        }
+//
+//        BytesKey ownKey = new BytesKey(ownedIdentity.bytesOwnedIdentity);
+//        contactNamesHashMap.put(ownKey, new Pair<>(App.getContext().getString(R.string.text_you), App.getContext().getString(R.string.text_you)));
+//        if (ownedIdentity.photoUrl != null) {
+//            contactPhotoUrlsHashMap.put(ownKey, ownedIdentity.photoUrl);
+//        }
+//        contactCacheInfoHashMap.put(ownKey, new ContactCacheInfo(ownedIdentity.keycloakManaged, ownedIdentity.active, true, true, 0));
+//
+//        List<Group2PendingMember> pendingMembers = AppDatabase.getInstance().group2PendingMemberDao().getAll(ownedIdentity.bytesOwnedIdentity);
+//        for (Group2PendingMember pendingMember : pendingMembers) {
+//            BytesKey key = new BytesKey(pendingMember.bytesContactIdentity);
+//            if (!contactNamesHashMap.containsKey(key)) {
+//                contactNamesHashMap.put(key, new Pair<>(pendingMember.displayName, pendingMember.getFirstName()));
+//            }
+//        }
+//
+//        getInstance().contactNamesCache.postValue(contactNamesHashMap);
+//        getInstance().contactHuesCache.postValue(contactHuesHashMap);
+//        getInstance().contactPhotoUrlsCache.postValue(contactPhotoUrlsHashMap);
+//        getInstance().contactInfoCache.postValue(contactCacheInfoHashMap);
+//    }
+//
+//    @Nullable
+//    public static String getContactCustomDisplayName(byte[] bytesContactIdentity) {
+//        if (getContactNamesCache().getValue() == null) {
+//            return null;
+//        }
+//        Pair<String, String> cache = getContactNamesCache().getValue().get(new BytesKey(bytesContactIdentity));
+//        if (cache != null) {
+//            return cache.first;
+//        }
+//        return null;
+//    }
+//
+//    @Nullable
+//    public static String getContactFirstName(byte[] bytesContactIdentity) {
+//        if (getContactNamesCache().getValue() == null) {
+//            return null;
+//        }
+//        Pair<String, String> cache = getContactNamesCache().getValue().get(new BytesKey(bytesContactIdentity));
+//        if (cache != null) {
+//            return cache.second;
+//        }
+//        return null;
+//    }
+//
+//    @Nullable
+//    public static Integer getContactCustomHue(byte[] bytesContactIdentity) {
+//        if (getContactHuesCache().getValue() == null) {
+//            return null;
+//        }
+//        return getContactHuesCache().getValue().get(new BytesKey(bytesContactIdentity));
+//    }
+//
+//    @Nullable
+//    public static String getContactPhotoUrl(byte[] bytesContactIdentity) {
+//        if (getContactPhotoUrlsCache().getValue() == null) {
+//            return null;
+//        }
+//        return getContactPhotoUrlsCache().getValue().get(new BytesKey(bytesContactIdentity));
+//    }
+//
+//    @Nullable
+//    public static ContactCacheInfo getContactCacheInfo(byte[] bytesContactIdentity) {
+//        HashMap<BytesKey, ContactCacheInfo> cacheInfoHashMap = getContactInfoCache().getValue();
+//        if (cacheInfoHashMap == null) {
+//            return null;
+//        }
+//        return cacheInfoHashMap.get(new BytesKey(bytesContactIdentity));
+//    }
+//
+//    public static void updateCachedCustomDisplayName(@NonNull byte[] bytesContactIdentity, @NonNull String customDisplayName, @NonNull String firstNameOrCustom) {
+//        if (getContactNamesCache().getValue() == null) {
+//            return;
+//        }
+//        HashMap<BytesKey, Pair<String, String>> hashMap = getContactNamesCache().getValue();
+//        hashMap.put(new BytesKey(bytesContactIdentity), new Pair<>(customDisplayName, firstNameOrCustom));
+//        getInstance().contactNamesCache.postValue(hashMap);
+//    }
+//
+//    public static void updateCachedCustomHue(byte[] bytesContactIdentity, Integer customHue) {
+//        if (getContactHuesCache().getValue() == null) {
+//            return;
+//        }
+//        HashMap<BytesKey, Integer> hashMap = getContactHuesCache().getValue();
+//        if (customHue != null) {
+//            hashMap.put(new BytesKey(bytesContactIdentity), customHue);
+//        } else {
+//            hashMap.remove(new BytesKey(bytesContactIdentity));
+//        }
+//        getInstance().contactHuesCache.postValue(hashMap);
+//    }
+//
+//    public static void updateCachedPhotoUrl(byte[] bytesContactIdentity, String photoUrl) {
+//        if (getContactPhotoUrlsCache().getValue() == null) {
+//            return;
+//        }
+//        HashMap<BytesKey, String> hashMap = getContactPhotoUrlsCache().getValue();
+//        if (photoUrl != null) {
+//            hashMap.put(new BytesKey(bytesContactIdentity), photoUrl);
+//        } else {
+//            hashMap.remove(new BytesKey(bytesContactIdentity));
+//        }
+//        getInstance().contactPhotoUrlsCache.postValue(hashMap);
+//    }
+//
+//    public static void updateContactCachedInfo(Contact contact) {
+//        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
+//        if (contactInfoHashMap == null) {
+//            return;
+//        }
+//        contactInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new ContactCacheInfo(contact.keycloakManaged, contact.active, contact.oneToOne, contact.recentlyOnline, contact.trustLevel));
+//        getInstance().contactInfoCache.postValue(contactInfoHashMap);
+//    }
+//
+//    public static void updateContactCachedInfo(OwnedIdentity ownedIdentity) {
+//        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
+//        if (contactInfoHashMap == null) {
+//            return;
+//        }
+//        contactInfoHashMap.put(new BytesKey(ownedIdentity.bytesOwnedIdentity), new ContactCacheInfo(ownedIdentity.keycloakManaged, ownedIdentity.active, true, true, 0));
+//        getInstance().contactInfoCache.postValue(contactInfoHashMap);
+//    }
+//
+//
+//
+//    public static void updateCacheContactDeleted(byte[] bytesContactIdentity) {
+//        BytesKey key = new BytesKey(bytesContactIdentity);
+//        HashMap<BytesKey, Pair<String, String>> namesHashMap = getContactNamesCache().getValue();
+//        if (namesHashMap != null && namesHashMap.remove(key) != null) {
+//            getInstance().contactNamesCache.postValue(namesHashMap);
+//        }
+//        HashMap<BytesKey, Integer> huesHashMap = getContactHuesCache().getValue();
+//        if (huesHashMap != null && huesHashMap.remove(key) != null) {
+//            getInstance().contactHuesCache.postValue(huesHashMap);
+//        }
+//        HashMap<BytesKey, String> photosHashMap = getContactPhotoUrlsCache().getValue();
+//        if (photosHashMap != null && photosHashMap.remove(key) != null) {
+//            getInstance().contactPhotoUrlsCache.postValue(photosHashMap);
+//        }
+//        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
+//        if (contactInfoHashMap != null && contactInfoHashMap.remove(key) != null) {
+//            getInstance().contactInfoCache.postValue(contactInfoHashMap);
+//        }
+//    }
+//
+//    // endregion
 
     // region Upgrade after new build
 

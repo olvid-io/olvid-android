@@ -275,7 +275,10 @@ public class Discussion {
             discussionCustomization.settingReadOnce = readOnce;
             discussionCustomization.sharedSettingsVersion = 0;
             db.discussionCustomizationDao().insert(discussionCustomization);
-            db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), contact, false, 0L));
+            Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), contact, false, 0L);
+            if (message != null) {
+                db.messageDao().insert(message);
+            }
         }
     }
 
@@ -290,7 +293,10 @@ public class Discussion {
             discussionCustomization.settingReadOnce = readOnce;
             discussionCustomization.sharedSettingsVersion = 0;
             db.discussionCustomizationDao().insert(discussionCustomization);
-            db.messageDao().insert(Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), contact, false, 0L));
+            Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), contact, false, 0L);
+            if (message != null) {
+                db.messageDao().insert(message);
+            }
         }
     }
 

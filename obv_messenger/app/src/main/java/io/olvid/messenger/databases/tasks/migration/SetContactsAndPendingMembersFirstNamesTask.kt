@@ -22,6 +22,7 @@ package io.olvid.messenger.databases.tasks.migration
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames
 
 
@@ -60,6 +61,6 @@ class SetContactsAndPendingMembersFirstNamesTask : Runnable {
         UpdateAllGroupMembersNames().run()
 
         // reload cache
-        AppSingleton.reloadCachedDisplayNamesAndHues()
+        ContactCacheSingleton.reloadCachedDisplayNamesAndHues()
     }
 }

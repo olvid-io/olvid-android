@@ -19,11 +19,14 @@
 
 package io.olvid.messenger.databases.entity.jsons;
 
+import androidx.annotation.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JsonSharedSettings {
@@ -82,6 +85,7 @@ public class JsonSharedSettings {
         this.oneToOneIdentifier = oneToOneIdentifier;
     }
 
+    @Nullable
     @JsonProperty("exp")
     public JsonExpiration getJsonExpiration() {
         return jsonExpiration;

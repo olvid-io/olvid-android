@@ -33,9 +33,22 @@
     <color name="attachmentBorder">#33ffffff</color>
     <color name="locationBorder">#3b3b3b</color>
 
-    <!-- New color -->
     <color name="dialogBackground">#303030</color>
     <color name="itemBackground">#171717</color>
     <color name="dialogBackgroundOverlay">#99303030</color>
     <color name="inboundMessageBody">#c3d9e6</color>
+
+    <!-- Poll colors-->
+    <color name="poll0">#EBBD57</color>
+    <color name="poll1">#B6EBEB</color>
+    <color name="poll2">#E99EAB</color>
+    <color name="poll3">#87C272</color>
+    <color name="poll4">#F5D1C9</color>
+    <color name="poll5">#C3D4FF</color>
+    <color name="poll6">#EF8E87</color>
+    <color name="poll7">#FFD9AC</color>
+    <color name="poll8">#FF7D7D</color>
+    <color name="poll9">#FEDE78</color>
+    <color name="poll10">#6369AD</color>
+    <color name="poll11">#B9DBA0</color>
 </resources>

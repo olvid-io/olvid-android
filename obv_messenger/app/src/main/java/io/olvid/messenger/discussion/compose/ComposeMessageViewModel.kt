@@ -62,11 +62,11 @@ class ComposeMessageViewModel(
             return@switchMap MutableLiveData<Message?>(null)
         }
         val jsonReply: JsonMessageReference = try {
-            AppSingleton.getJsonObjectMapper().readValue<JsonMessageReference>(
+            AppSingleton.getJsonObjectMapper().readValue(
                 draftMessage.jsonReply,
                 JsonMessageReference::class.java
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return@switchMap MutableLiveData<Message?>(null)
         }
         db.messageDao().getBySenderSequenceNumberAsync(
@@ -183,7 +183,7 @@ class ComposeMessageViewModel(
                 try {
                     AppSingleton.getJsonObjectMapper()
                         .readValue(message.jsonExpiration, JsonExpiration::class.java)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     null
                 }
             }
@@ -197,6 +197,7 @@ class ComposeMessageViewModel(
 
         private fun onDraftMessageEditChanged(editedMessage: Message?) {
             isEditing = editedMessage != null
+            compareJsonExpirations()
         }
 
         private fun compareJsonExpirations() {

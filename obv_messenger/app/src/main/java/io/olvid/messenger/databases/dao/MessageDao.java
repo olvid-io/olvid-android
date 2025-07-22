@@ -32,6 +32,7 @@ import androidx.room.Embedded;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 import java.util.UUID;
@@ -77,11 +78,15 @@ public interface MessageDao {
             "mess." + Message.LINK_PREVIEW_FYLE_ID + " AS mess_" + Message.LINK_PREVIEW_FYLE_ID + ", " +
             "mess." + Message.JSON_MENTIONS + " AS mess_" + Message.JSON_MENTIONS + ", " +
             "mess." + Message.MENTIONED + " AS mess_" + Message.MENTIONED + ", " +
-            "mess." + Message.BOOKMARKED + " AS mess_" + Message.BOOKMARKED;
+            "mess." + Message.BOOKMARKED + " AS mess_" + Message.BOOKMARKED + ", " +
+            "mess." + Message.JSON_POLL + " AS mess_" + Message.JSON_POLL;
 
 
     @Insert
     long insert(@NonNull Message message);
+
+    @Upsert
+    long upsert(@NonNull Message message);
 
     @Delete
     void delete(@NonNull Message... messages);
@@ -150,6 +155,7 @@ public interface MessageDao {
             Message.REACTIONS + " = NULL, " +
             Message.IMAGE_RESOLUTIONS + " = NULL, " +
             Message.JSON_MENTIONS + " = NULL, " +
+            Message.JSON_POLL + " = NULL, " +
             Message.LIMITED_VISIBILITY + " = 0 " +
             " WHERE id = :messageId")
     void updateWipe(long messageId, int wipeStatus);
@@ -212,13 +218,6 @@ public interface MessageDao {
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " DESC")
     PagingSource<Integer,Message> getDiscussionMessagesPaged(long discussionId);
 
-//    @Query("SELECT * FROM " + Message.TABLE_NAME +
-//            " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
-//            " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
-//            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_GROUP_MEMBER_JOINED +
-//            " AND " + Message.MESSAGE_TYPE + " != " + Message.TYPE_GROUP_MEMBER_LEFT +
-//            " ORDER BY " + Message.SORT_INDEX + " ASC")
-//    LiveData<List<Message>> getDiscussionMessagesWithoutGroupMemberChanges(long discussionId);
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
@@ -230,6 +229,12 @@ public interface MessageDao {
     @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " DESC LIMIT :count")
     LiveData<List<Message>> getLastDiscussionMessages(long discussionId, int count);
 
+    @Query("SELECT * FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId AND " + Message.STATUS + " != " + Message.STATUS_DRAFT + " ORDER BY " + Message.SORT_INDEX + " DESC LIMIT 1")
+    Message getLastDiscussionMessage(long discussionId);
+
+    @Query("SELECT COUNT(*) FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.MESSAGE_TYPE + " = " + Message.TYPE_OUTBOUND_MESSAGE)
+    int countOutbound();
 
     @Query("SELECT COUNT(*) FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +

@@ -45,6 +45,7 @@ public class JsonMessage {
     public JsonExpiration jsonExpiration;
     public JsonLocation jsonLocation;
     public List<JsonUserMention> jsonUserMentions;
+    public JsonPoll jsonPoll;
 
 
     public JsonMessage(String body) {
@@ -183,9 +184,20 @@ public class JsonMessage {
         this.jsonUserMentions = jsonUserMentions;
     }
 
+    @JsonProperty("p")
+    @Nullable
+    public JsonPoll getJsonPoll() {
+        return jsonPoll;
+    }
+
+    @JsonProperty("p")
+    public void setJsonPoll(@Nullable JsonPoll jsonPoll) {
+        this.jsonPoll = jsonPoll;
+    }
+
     @JsonIgnore
     public boolean isEmpty() {
-        return (body == null || body.trim().length() == 0) && jsonReply == null && jsonLocation == null;
+        return (body == null || body.trim().isEmpty()) && jsonReply == null && jsonLocation == null && jsonPoll == null;
     }
 
     @JsonIgnore

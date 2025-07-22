@@ -37,7 +37,6 @@ import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.view.Gravity;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -58,7 +57,6 @@ import java.util.HashMap;
 
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.engine.engine.types.ObvDeviceList;
-import io.olvid.engine.engine.types.sync.ObvSyncAtom;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
@@ -138,7 +136,7 @@ public class AppDialogShowActivity extends LockableActivity {
 
     public static final String DIALOG_CONFIGURE_HIDDEN_PROFILE_CLOSE_POLICY = "configure_hidden_profile_close_policy";
 
-    public static final String DIALOG_PROMPT_USER_FOR_READ_RECEIPTS = "prompt_user_for_read_receipts";
+    
 
     public static final String DIALOG_INTRODUCING_MULTI_PROFILE = "introducing_multi_profile";
     public static final String DIALOG_INTRODUCING_GROUPS_V2 = "introducing_groups_v2";
@@ -555,50 +553,6 @@ public class AppDialogShowActivity extends LockableActivity {
                         })
                         .setOnDismissListener(dialog -> continueWithNextDialog());
                 builder.create().show();
-                break;
-            }
-            case DIALOG_PROMPT_USER_FOR_READ_RECEIPTS: {
-                View dialogView = getLayoutInflater().inflate(R.layout.dialog_view_prompt_user_for_read_receipts, null);
-
-                AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                        .setView(dialogView)
-                        .setOnDismissListener(dialog -> {
-                            if (SettingsActivity.getLastReadReceiptPromptAnswerTimestamp() != -1) {
-                                SettingsActivity.setLastReadReceiptPromptAnswerTimestamp(System.currentTimeMillis());
-                            }
-                            continueWithNextDialog();
-                        });
-                AlertDialog dialog = builder.create();
-                Window window = dialog.getWindow();
-                if (window != null) {
-                    window.setBackgroundDrawableResource(android.R.color.transparent);
-                }
-
-                dialogView.findViewById(R.id.send_button).setOnClickListener((View v) -> {
-                    SettingsActivity.setDefaultSendReadReceipt(true);
-                    SettingsActivity.setLastReadReceiptPromptAnswerTimestamp(-1);
-                    try {
-                        AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingDefaultSendReadReceipts(true));
-                        AppSingleton.getEngine().deviceBackupNeeded();
-                    } catch (Exception ignored) {}
-                    dialog.dismiss();
-                });
-
-                dialogView.findViewById(R.id.do_not_send_button).setOnClickListener((View v) -> {
-                    SettingsActivity.setDefaultSendReadReceipt(false);
-                    SettingsActivity.setLastReadReceiptPromptAnswerTimestamp(-1);
-                    try {
-                        AppSingleton.getEngine().propagateAppSyncAtomToAllOwnedIdentitiesOtherDevicesIfNeeded(ObvSyncAtom.createSettingDefaultSendReadReceipts(false));
-                        AppSingleton.getEngine().deviceBackupNeeded();
-                    } catch (Exception ignored) {}
-                    dialog.dismiss();
-                });
-
-                dialogView.findViewById(R.id.ask_later_button).setOnClickListener((View v) -> {
-                    dialog.dismiss();
-                });
-
-                dialog.show();
                 break;
             }
             case DIALOG_INTRODUCING_MULTI_PROFILE: {

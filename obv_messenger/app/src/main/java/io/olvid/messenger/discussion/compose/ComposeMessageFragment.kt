@@ -104,7 +104,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.engine.Logger
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.App
@@ -136,6 +135,7 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.TextChangeListener
 import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.customClasses.insertMarkdown
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
@@ -167,6 +167,7 @@ import io.olvid.messenger.discussion.mention.MentionViewModel.MentionStatus.End
 import io.olvid.messenger.discussion.mention.MentionViewModel.MentionStatus.Filter
 import io.olvid.messenger.discussion.mention.MentionViewModel.MentionStatus.None
 import io.olvid.messenger.discussion.message.attachments.Visibility
+import io.olvid.messenger.discussion.poll.PollCreationActivity
 import io.olvid.messenger.fragments.FilteredContactListFragment
 import io.olvid.messenger.fragments.FilteredContactListFragment.FilteredContactListOnClickDelegate
 import io.olvid.messenger.fragments.dialog.ContactIntroductionDialogFragment.Companion.newInstance
@@ -243,7 +244,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             }
             return try {
                 modelClass.getDeclaredConstructor().newInstance()
-            } catch (e: java.lang.InstantiationException) {
+            } catch (e: InstantiationException) {
                 throw RuntimeException("Cannot create an instance of $modelClass", e)
             } catch (e: IllegalAccessException) {
                 throw RuntimeException("Cannot create an instance of $modelClass", e)
@@ -440,7 +441,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 val color = getTextColor(
                     newMessageEditText!!.context,
                     mention.userIdentifier,
-                    AppSingleton.getContactCustomHue(mention.userIdentifier)
+                    ContactCacheSingleton.getContactCustomHue(mention.userIdentifier)
                 )
                 if (newMessageEditText?.text != null) {
                     var mentionText: String = try {
@@ -512,7 +513,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                     discussionViewModel.discussionId!!,
                     trimAndMentions.first,
                     composeMessageViewModel.getDraftMessage().value,
-                    trimAndMentions.second
+                    trimAndMentions.second,
+                    true
                 ).run()
             }
             AddFyleToDraftFromUriTask(
@@ -666,17 +668,15 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         attachStuffPlusGoldenDot = view.findViewById(R.id.golden_dot)
         val voiceRecorderView = view.findViewById<ComposeView>(R.id.voice_recorder)
         voiceRecorderView.setContent {
-            voiceMessageRecorder?.let {
-                AppCompatTheme {
-                    Box {
-                        AnimatedVisibility(
-                            visible = it.opened,
-                            enter = slideInHorizontally { it / 2 }) {
-                            SoundWave(voiceMessageRecorder?.soundWave ?: SampleAndTicker()) {
-                                voiceMessageRecorder?.stopRecord(
-                                    discard = false
-                                )
-                            }
+            voiceMessageRecorder?.let { recorder ->
+                Box {
+                    AnimatedVisibility(
+                        visible = recorder.opened,
+                        enter = slideInHorizontally { it / 2 }) {
+                        SoundWave(recorder.soundWave) {
+                            recorder.stopRecord(
+                                discard = false
+                            )
                         }
                     }
                 }
@@ -704,29 +704,27 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         attachIconsGroup = view.findViewById(R.id.attach_icons_group)
         popupMenu = view.findViewById(R.id.popup_menu)
         popupMenu.setContent {
-            AppCompatTheme {
-                EphemeralSettingsGroup(
-                    ephemeralViewModel = ephemeralViewModel,
-                    expanded = composeMessageViewModel.openEphemeralSettings
+            EphemeralSettingsGroup(
+                ephemeralViewModel = ephemeralViewModel,
+                expanded = composeMessageViewModel.openEphemeralSettings
+            ) {
+                if (ephemeralViewModel.getValid()
+                        .value == true
                 ) {
-                    if (ephemeralViewModel.getValid()
-                            .value == true
-                    ) {
-                        val jsonExpiration = JsonExpiration()
-                        if (ephemeralViewModel.getReadOnce()) {
-                            jsonExpiration.setReadOnce(true)
-                        }
-                        jsonExpiration.setVisibilityDuration(ephemeralViewModel.getVisibility())
-                        jsonExpiration.setExistenceDuration(ephemeralViewModel.getExistence())
-                        App.runThread(
-                            SetDraftJsonExpirationTask(
-                                discussionViewModel.discussionId!!,
-                                jsonExpiration
-                            )
-                        )
+                    val jsonExpiration = JsonExpiration()
+                    if (ephemeralViewModel.getReadOnce()) {
+                        jsonExpiration.setReadOnce(true)
                     }
-                    composeMessageViewModel.openEphemeralSettings = false
+                    jsonExpiration.setVisibilityDuration(ephemeralViewModel.getVisibility())
+                    jsonExpiration.setExistenceDuration(ephemeralViewModel.getExistence())
+                    App.runThread(
+                        SetDraftJsonExpirationTask(
+                            discussionViewModel.discussionId!!,
+                            jsonExpiration
+                        )
+                    )
                 }
+                composeMessageViewModel.openEphemeralSettings = false
             }
         }
 
@@ -869,12 +867,12 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                             try {
                                 val spannableString = SpannableString(draftMessage.contentBody)
                                 if (draftMessage.mentions != null) {
-                                    for (mention in draftMessage.mentions) {
+                                    for (mention in draftMessage.mentions ?: emptyList()) {
                                         if (mention.rangeEnd <= spannableString.length) {
                                             val color = getTextColor(
                                                 view.context,
                                                 mention.userIdentifier,
-                                                AppSingleton.getContactCustomHue(mention.userIdentifier)
+                                                ContactCacheSingleton.getContactCustomHue(mention.userIdentifier)
                                             )
                                             spannableString.setSpan(
                                                 MentionUrlSpan(
@@ -962,7 +960,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                     composeMessageReplyGroup?.visibility = View.VISIBLE
                     composeMessageReplyMessageId = draftReplyMessage.id
                     val displayName =
-                        AppSingleton.getContactCustomDisplayName(draftReplyMessage.senderIdentifier)
+                        ContactCacheSingleton.getContactCustomDisplayName(draftReplyMessage.senderIdentifier)
                     if (displayName != null) {
                         composeMessageReplySenderName?.text = displayName
                     } else {
@@ -971,7 +969,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                     val color = getTextColor(
                         requireContext(),
                         draftReplyMessage.senderIdentifier,
-                        AppSingleton.getContactCustomHue(draftReplyMessage.senderIdentifier)
+                        ContactCacheSingleton.getContactCustomHue(draftReplyMessage.senderIdentifier)
                     )
                     composeMessageReplySenderName?.setTextColor(color)
                     val drawable = ContextCompat.getDrawable(
@@ -1080,7 +1078,8 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                             discussionId,
                             true,
                             linkPreviewViewModel.openGraph.value,
-                            trimAndMentions.second
+                            trimAndMentions.second,
+                            null
                         ).run()
                     }
                     discussionDelegate?.messageWasSent()
@@ -1221,6 +1220,10 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             }
         } else if (id == R.id.attach_emoji) {
             showEmojiKeyboard()
+        } else if (id == R.id.attach_poll) {
+            startActivity(Intent(view.context, PollCreationActivity::class.java).apply {
+                putExtra(PollCreationActivity.DISCUSSION_ID_INTENT_EXTRA, discussionViewModel.discussionId)
+            })
         } else if (id == R.id.attach_location) {
             discussionViewModel.discussionId?.let { discussionId ->
                 // if currently sharing location: stop sharing location
@@ -1632,6 +1635,9 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         } else {
             adapterIcons!!.add(-1)
         }
+        if (!SettingsActivity.betaFeaturesEnabled) {
+            adapterIcons?.remove(ICON_ATTACH_POLL)
+        }
         adapter.submitList(adapterIcons)
         val builder = Builder(
             iconOrderRecyclerView.context, R.style.CustomAlertDialog
@@ -1736,6 +1742,11 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         if (discussionViewModel.discussion.value?.discussionType != Discussion.TYPE_CONTACT) {
             icons.remove(ICON_INTRODUCE)
             otherIcons.remove(ICON_INTRODUCE)
+        }
+
+        if (SettingsActivity.betaFeaturesEnabled.not()) {
+            icons.remove(ICON_ATTACH_POLL)
+            otherIcons.remove(ICON_ATTACH_POLL)
         }
 
         // Compose area layout
@@ -2015,7 +2026,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
             } else {
                 R.drawable.ic_attach_timer
             }
-
+            ICON_ATTACH_POLL -> R.drawable.ic_attach_poll
             ICON_TAKE_PICTURE -> R.drawable.ic_attach_camera
             ICON_TAKE_VIDEO -> R.drawable.ic_attach_video
             ICON_EMOJI -> R.drawable.ic_attach_emoji
@@ -2029,6 +2040,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         return when (icon) {
             ICON_ATTACH_FILE -> R.id.attach_file
             ICON_ATTACH_PICTURE -> R.id.attach_image
+            ICON_ATTACH_POLL -> R.id.attach_poll
             ICON_EPHEMERAL_SETTINGS -> R.id.attach_timer
             ICON_TAKE_PICTURE -> R.id.attach_camera
             ICON_TAKE_VIDEO -> R.id.attach_video
@@ -2043,6 +2055,7 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         return when (icon) {
             ICON_ATTACH_FILE -> R.string.label_attach_file
             ICON_ATTACH_PICTURE -> R.string.label_attach_image
+            ICON_ATTACH_POLL -> R.string.label_poll_create
             ICON_EPHEMERAL_SETTINGS -> R.string.label_attach_timer
             ICON_TAKE_PICTURE -> R.string.label_attach_camera
             ICON_TAKE_VIDEO -> R.string.label_attach_video
@@ -2136,11 +2149,13 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         const val ICON_EMOJI = 6
         const val ICON_SEND_LOCATION = 7
         const val ICON_INTRODUCE = 8
+        const val ICON_ATTACH_POLL = 9
         val DEFAULT_ICON_ORDER = listOf(
             ICON_EMOJI,
             ICON_EPHEMERAL_SETTINGS,
             ICON_ATTACH_FILE,
             ICON_ATTACH_PICTURE,
+            ICON_ATTACH_POLL,
             ICON_TAKE_PICTURE,
             ICON_TAKE_VIDEO,
             ICON_SEND_LOCATION,

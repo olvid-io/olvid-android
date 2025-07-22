@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity">
+        <item quantity="one">L\'un de vos appareils va expirer et être désactivé dans **moins de %1$d jour**.\nVous pouvez souscrire à un abonnement **Olvid+** pour le garder actif.</item>
+        <item quantity="other">L\'un de vos appareils va expirer et être désactivé dans **moins de %1$d jours**.\nVous pouvez souscrire à un abonnement **Olvid+** pour le garder actif.</item>
+    </plurals>
+    <plurals name="text_joined_the_group" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$s a rejoint le groupe</item>
+        <item quantity="other">%1$s ont rejoint le groupe</item>
+    </plurals>
+    <plurals name="text_left_the_group" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$s a quitté le groupe</item>
+        <item quantity="other">%1$s ont quitté le groupe</item>
+    </plurals>
+    <plurals name="label_poll_answers" tools:ignore="MissingQuantity,UnusedQuantity">
+        <item quantity="zero">Aucune réponse</item>
+        <item quantity="one">%1$d réponse</item>
+        <item quantity="other">%1$d réponses</item>
+    </plurals>
+    <plurals name="label_remove_members" tools:ignore="MissingQuantity">
+        <item quantity="one">Retirer %1$d membre</item>
+        <item quantity="other">Retirer %1$d membres</item>
+    </plurals>
+    <plurals name="label_add_members" tools:ignore="MissingQuantity">
+        <item quantity="one">Ajouter %1$d membre</item>
+        <item quantity="other">Ajouter %1$d membres</item>
+    </plurals>
     <plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity"> » sur cet appareil, vous allez désactiver votre ancien appareil :</item>
         <item quantity="other"> » sur cet appareil, vous allez désactiver vos anciens appareils :</item>

@@ -76,7 +76,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -88,9 +87,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.Utils
+import io.olvid.messenger.main.tips.installTimestamp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
@@ -114,14 +115,33 @@ fun AppVersionHeader(betaEnabled: Boolean) {
                 .widthIn(max = 400.dp)
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp),
-            text = AnnotatedString(stringResource(
-                R.string.troubleshooting_header,
-                BuildConfig.VERSION_NAME + if (betaEnabled) " beta" else "",
-                BuildConfig.VERSION_CODE,
-                "${Build.BRAND} ${Build.MODEL}",
-                VERSION.SDK_INT,
-                uptime
-            )).formatMarkdown(),
+            text =
+                buildAnnotatedString {
+                    appendLine(stringResource(
+                        R.string.troubleshooting_header_app_version,
+                        BuildConfig.VERSION_NAME + if (betaEnabled) " beta" else "",
+                        BuildConfig.VERSION_CODE))
+                    installTimestamp()?.let { timestamp ->
+                        appendLine(
+                            stringResource(
+                                R.string.troubleshooting_header_app_install_date,
+                                StringUtils.getDateString(context, timestamp)
+                            )
+                        )
+                    }
+                    appendLine(stringResource(
+                        R.string.troubleshooting_header_device_model,
+                        "${Build.BRAND} ${Build.MODEL}"
+                    ))
+                    appendLine(stringResource(
+                        R.string.troubleshooting_header_android_api,
+                        VERSION.SDK_INT
+                    ))
+                    append(stringResource(
+                        R.string.troubleshooting_header_app_running_time,
+                        uptime
+                    ))
+                }.formatMarkdown(),
             color = colorResource(id = R.color.almostBlack),
             style = OlvidTypography.body1,
         )

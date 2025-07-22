@@ -140,10 +140,6 @@
         <item name="colorControlHighlight">@color/greyOverlay</item>
     </style>
 
-    <style name="RedRipple" parent="AppTheme">
-        <item name="colorControlHighlight">@color/red</item>
-    </style>
-
 
     <!-- OnClick small element (upload file, ....)-->
     <style name="SubtleGreyRipple" parent="AppTheme">
@@ -213,12 +209,6 @@
     </style>
     <style name="AppTheme.GreyAccent">
         <item name="colorAccent">@color/greyOverlay</item>
-    </style>
-    <style name="AppTheme.GreenAccent">
-        <item name="colorAccent">@color/green</item>
-    </style>
-    <style name="AppTheme.RedAccent">
-        <item name="colorAccent">@color/red</item>
     </style>
 
     <!--  bottom sheet with transparent background  -->

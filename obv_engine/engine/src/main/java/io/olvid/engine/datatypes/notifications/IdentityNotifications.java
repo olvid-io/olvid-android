@@ -60,7 +60,7 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_NEW_OWNED_DEVICE_OWNED_IDENTITY_KEY = "owned_identity";
 
     public static final String NOTIFICATION_GROUP_MEMBER_ADDED = "identity_manager_notification_group_member_added";
-    public static final String NOTIFICATION_GROUP_MEMBER_ADDED_GROUP_UID_KEY = "group_uid";
+    public static final String NOTIFICATION_GROUP_MEMBER_ADDED_GROUP_OWNER_AND_UID_KEY = "group_owner_and_uid";
     public static final String NOTIFICATION_GROUP_MEMBER_ADDED_OWNED_IDENTITY_KEY = "owned_identity";
     public static final String NOTIFICATION_GROUP_MEMBER_ADDED_CONTACT_IDENTITY_KEY = "contact_identity";
 
@@ -196,6 +196,8 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_GROUP_V2_UPDATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
     public static final String NOTIFICATION_GROUP_V2_UPDATED_GROUP_IDENTIFIER_KEY = "group_identifier"; // GroupV2.Identifier
     public static final String NOTIFICATION_GROUP_V2_UPDATED_BY_ME_KEY = "by_me"; // boolean
+    public static final String NOTIFICATION_GROUP_V2_UPDATED_BY_KEY = "by"; // Identity
+    public static final String NOTIFICATION_GROUP_V2_UPDATED_GROUP_LEAVERS_KEY = "group_leavers"; // List<Identity>
 
     public static final String NOTIFICATION_GROUP_V2_PHOTO_UPDATED = "identity_manager_notification_group_v2_photo_updated";
     public static final String NOTIFICATION_GROUP_V2_PHOTO_UPDATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity

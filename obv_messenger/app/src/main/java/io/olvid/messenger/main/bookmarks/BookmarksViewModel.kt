@@ -40,8 +40,6 @@ class BookmarksViewModel : ViewModel() {
     var selection by mutableStateOf<List<Message>>(emptyList())
         private set
 
-    fun isSelected(message: Message): Boolean = _selection.contains(message.id)
-
     fun clearSelection() {
         viewModelScope.launch(Dispatchers.IO) {
             _selection.clear()

@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,6 +57,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,6 +67,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.Reaction
 import io.olvid.messenger.designsystem.components.AnimatedEmoji
@@ -220,16 +223,16 @@ private fun ReactionsDetail(reactions: List<Reaction>, useAnimatedEmojis: Boolea
         LazyColumn(modifier = Modifier.height((24 + 48 * reactions.size).coerceAtMost(300).dp)) {
             items(items = reactions.filter { if (selectedTab != null) it.emoji == selectedTab else true }, key = {it -> BytesKey(it.bytesIdentity) }) { reaction ->
                 val contactName = remember(reaction.bytesIdentity) {
-                    AppSingleton.getContactCustomDisplayName(
+                    ContactCacheSingleton.getContactDetailsSingleLine(
                         reaction.bytesIdentity
                             ?: AppSingleton.getBytesCurrentIdentity()
-                    ).orEmpty()
+                    )
                 }
 
                 ContactListItem(
                     modifier = Modifier.animateItem(),
-                    useDialogBackgroundColor = true,
-                    title = AnnotatedString(contactName),
+                    padding = PaddingValues(horizontal = 8.dp),
+                    title = AnnotatedString(contactName ?: stringResource(R.string.text_deleted_contact)),
                     body = AnnotatedString(
                         StringUtils.getNiceDateString(
                             context,
@@ -249,7 +252,7 @@ private fun ReactionsDetail(reactions: List<Reaction>, useAnimatedEmojis: Boolea
                     },
                     onClick = {
                         // only make the item clickable if a contact actually exists
-                        if (contactName.isNotEmpty()) {
+                        if (contactName != null) {
                             reaction.bytesIdentity?.let { contactBytes ->
                                 AppSingleton.getBytesCurrentIdentity()?.let { ownBytes ->
                                     App.openContactDetailsActivity(context, ownBytes, contactBytes)

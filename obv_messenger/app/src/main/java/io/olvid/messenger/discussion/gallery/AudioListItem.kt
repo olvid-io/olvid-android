@@ -43,8 +43,6 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
@@ -78,6 +76,8 @@ import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding.timeFromMs
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.Fyle
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.gallery.DiscussionMediaGalleryActivity.AudioServiceBindable
 import io.olvid.messenger.discussion.message.attachments.constantSp
@@ -270,35 +270,35 @@ fun AudioListItem(
                         Box(
                             modifier = Modifier.padding(top = 2.dp, end = 4.dp)
                         ) {
-                            DropdownMenu(
+                            OlvidDropdownMenu(
                                 expanded = playbackSpeedMenuOpened,
                                 onDismissRequest = {
                                     playbackSpeedMenuOpened = false
                                 }) {
-                                DropdownMenuItem(onClick = {
-                                    audioAttachmentServiceBinding?.setPlaybackSpeed(
-                                        1f
-                                    )
-                                    playbackSpeedMenuOpened = false
-                                }) {
-                                    Text(text = stringResource(id = R.string.menu_action_play_at_1x))
-                                }
-                                DropdownMenuItem(onClick = {
-                                    audioAttachmentServiceBinding?.setPlaybackSpeed(
-                                        1.5f
-                                    )
-                                    playbackSpeedMenuOpened = false
-                                }) {
-                                    Text(text = stringResource(id = R.string.menu_action_play_at_1_5x))
-                                }
-                                DropdownMenuItem(onClick = {
-                                    audioAttachmentServiceBinding?.setPlaybackSpeed(
-                                        2f
-                                    )
-                                    playbackSpeedMenuOpened = false
-                                }) {
-                                    Text(text = stringResource(id = R.string.menu_action_play_at_2x))
-                                }
+                                OlvidDropdownMenuItem(
+                                    text = stringResource(id = R.string.menu_action_play_at_1x),
+                                    onClick = {
+                                        audioAttachmentServiceBinding?.setPlaybackSpeed(
+                                            1f
+                                        )
+                                        playbackSpeedMenuOpened = false
+                                    })
+                                OlvidDropdownMenuItem(
+                                    text = stringResource(id = R.string.menu_action_play_at_1_5x),
+                                    onClick = {
+                                        audioAttachmentServiceBinding?.setPlaybackSpeed(
+                                            1.5f
+                                        )
+                                        playbackSpeedMenuOpened = false
+                                    })
+                                OlvidDropdownMenuItem(
+                                    text = stringResource(id = R.string.menu_action_play_at_2x),
+                                    onClick = {
+                                        audioAttachmentServiceBinding?.setPlaybackSpeed(
+                                            2f
+                                        )
+                                        playbackSpeedMenuOpened = false
+                                    })
                             }
                             Text(
                                 modifier = Modifier

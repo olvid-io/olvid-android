@@ -39,10 +39,12 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.PendingPurchasesParams;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryProductDetailsResult;
 import com.android.billingclient.api.QueryPurchasesParams;
 
 import java.util.ArrayDeque;
@@ -72,7 +74,7 @@ public class BillingUtils {
     private static SimpleEngineNotificationListener engineNotificationListener = null;
     private static final Queue<Runnable> tasksAwaitingBillingClientConnection = new ArrayDeque<>();
     private static final NoExceptionSingleThreadExecutor executor = new NoExceptionSingleThreadExecutor("BillingUtils");
-    private static final Set<PurchasesUpdatedListener> externalPurchaseListeners = new HashSet();
+    private static final Set<PurchasesUpdatedListener> externalPurchaseListeners = new HashSet<>();
 
     private static boolean billingUnavailable = false;
     private static List<Purchase> purchaseList = null;
@@ -90,7 +92,7 @@ public class BillingUtils {
                             }
                             refreshPurchases(null);
                         })
-                        .enablePendingPurchases()
+                        .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
                         .build();
                 engineNotificationListener = new SimpleEngineNotificationListener(EngineNotifications.VERIFY_RECEIPT_SUCCESS) {
                     @Override
@@ -291,10 +293,11 @@ public class BillingUtils {
                                 .build()))
                         .build();
 
-                billingClientInstance.queryProductDetailsAsync(queryProductDetailsParams, (@NonNull BillingResult billingResult, @NonNull List<ProductDetails> productDetailsList) -> {
+                billingClientInstance.queryProductDetailsAsync(queryProductDetailsParams, (@NonNull BillingResult billingResult, @NonNull QueryProductDetailsResult queryProductDetailsResult) -> {
                     if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
                         subscriptionProductsCallback.callback(null);
                     } else {
+                        List<ProductDetails> productDetailsList = queryProductDetailsResult.getProductDetailsList();
                         List<SubscriptionOfferDetails> subscriptionOfferDetails = new ArrayList<>();
                         for (ProductDetails productDetails: productDetailsList) {
                             if (productDetails.getSubscriptionOfferDetails() == null) {

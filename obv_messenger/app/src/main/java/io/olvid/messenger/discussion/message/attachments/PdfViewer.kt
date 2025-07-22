@@ -20,6 +20,7 @@
 package io.olvid.messenger.discussion.message.attachments
 
 import android.graphics.RectF
+import android.graphics.pdf.content.PdfPageGotoLinkContent
 import android.os.Build
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -27,6 +28,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.gestures.calculateCentroid
 import androidx.compose.foundation.gestures.calculateCentroidSize
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -49,10 +51,16 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +71,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -71,20 +81,27 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.designsystem.components.ExpandableSearchBar
+import io.olvid.messenger.designsystem.components.OlvidTextButton
+import io.olvid.messenger.designsystem.plus
+import io.olvid.messenger.designsystem.theme.olvidDefaultTextFieldColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -97,7 +114,8 @@ data class SearchResults(
 @Composable
 fun PdfViewerScreen(
     modifier: Modifier = Modifier,
-    pdfFyleAndStatus: FyleAndStatus
+    pdfFyleAndStatus: FyleAndStatus,
+    onClose: () -> Unit,
 ) {
     val minZoom = .8f
     val maxZoom = 3f
@@ -114,6 +132,11 @@ fun PdfViewerScreen(
     var searchResults by remember {
         mutableStateOf(emptyList<SearchResults>())
     }
+    var pdfNotSupported by remember { mutableStateOf(false) }
+    var showPasswordDialog by remember { mutableStateOf(false) }
+    var pdfPassword by remember { mutableStateOf<String?>(null) }
+    var tempPassword by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     val maxPageWidthPx =
@@ -121,15 +144,47 @@ fun PdfViewerScreen(
     val maxPageHeightPx =
         with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp.dp.toPx() } * maxZoom
     val screenWidthDp = LocalConfiguration.current.screenWidthDp.dp
-    LaunchedEffect(pdfFyleAndStatus, maxPageWidthPx) {
-        renderablePages =
-            pdfFyleAndStatus.fyle.filePath?.let { pdfBitmapConverter.pdfToBitmaps(it, maxPageWidthPx, maxPageHeightPx) }
-                .orEmpty()
+    LaunchedEffect(tempPassword) {
+        passwordError = false
+    }
+    LaunchedEffect(pdfFyleAndStatus, maxPageWidthPx, pdfPassword) {
+        try {
+            renderablePages =
+                pdfFyleAndStatus.fyle.filePath?.let {
+                    pdfBitmapConverter.pdfToBitmaps(
+                        it,
+                        maxPageWidthPx,
+                        maxPageHeightPx,
+                        pdfPassword
+                    )
+                }.orEmpty()
+            passwordError = false
+        } catch (_: SecurityException) {
+            if (Build.VERSION.SDK_INT >= 35) {
+                if (pdfPassword.isNullOrEmpty().not()) {
+                    pdfPassword = null
+                    passwordError = true
+                }
+                showPasswordDialog = true
+            } else {
+                pdfNotSupported = true
+            }
+        } catch (_: Exception) {
+            pdfNotSupported = true
+        }
     }
 
     var scale by remember { mutableFloatStateOf(1f) }
     val lazyListState = rememberLazyListState()
     val horizontalScrollState = rememberScrollState()
+
+    fun goto(destination: PdfPageGotoLinkContent.Destination) {
+        if (Build.VERSION.SDK_INT >= 35) {
+            scope.launch {
+                lazyListState.animateScrollToItem(index = destination.pageNumber)
+            }
+        }
+    }
 
     Box(
         modifier = modifier
@@ -171,7 +226,7 @@ fun PdfViewerScreen(
                 }
             },
     ) {
-        Box (
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .horizontalScroll(horizontalScrollState),
@@ -181,31 +236,14 @@ fun PdfViewerScreen(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .requiredWidth(screenWidthDp * scale),
-                contentPadding = WindowInsets.safeDrawing.asPaddingValues() // add an 8.dp content padding at the top and bottom
-                    .let { object: PaddingValues {
-                        override fun calculateBottomPadding(): Dp {
-                            return it.calculateBottomPadding() + 8.dp
-                        }
-
-                        override fun calculateLeftPadding(layoutDirection: LayoutDirection): Dp {
-                            return it.calculateLeftPadding(layoutDirection)
-                        }
-
-                        override fun calculateRightPadding(layoutDirection: LayoutDirection): Dp {
-                            return it.calculateRightPadding(layoutDirection)
-                        }
-
-                        override fun calculateTopPadding(): Dp {
-                            return it.calculateTopPadding() + 8.dp
-                        }
-
-                    } },
+                contentPadding = WindowInsets.safeDrawing.asPaddingValues() + PaddingValues(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 24.dp), // add more bottom padding to account for the shadow
                 state = lazyListState,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 itemsIndexed(renderablePages) { index, page ->
                     PdfPage(
                         page = page,
+                        goto = ::goto,
                         searchResults = searchResults.find { it.page == index },
                         imageLoader = App.imageLoader
                     )
@@ -218,7 +256,7 @@ fun PdfViewerScreen(
                 .displayCutoutPadding()
                 .align(Alignment.TopEnd)
                 .padding(end = 16.dp, top = 16.dp),
-            visible = lazyListState.isScrollInProgress.not(),
+            visible = lazyListState.isScrollInProgress.not() && pdfNotSupported.not(),
             enter = fadeIn() + scaleIn(),
             exit = fadeOut() + scaleOut()
         ) {
@@ -241,7 +279,7 @@ fun PdfViewerScreen(
                     .displayCutoutPadding()
                     .padding(start = 20.dp, bottom = 8.dp)
                     .align(Alignment.BottomStart),
-                visible = searchText.isNotEmpty() || lazyListState.isScrollInProgress.not(),
+                visible = (searchText.isNotEmpty() || lazyListState.isScrollInProgress.not()) && pdfNotSupported.not(),
                 enter = fadeIn() + scaleIn(),
                 exit = fadeOut() + scaleOut()
             ) {
@@ -275,6 +313,95 @@ fun PdfViewerScreen(
                 )
             }
         }
+        if (pdfNotSupported) {
+            AlertDialog(
+                onDismissRequest = { },
+                containerColor = colorResource(R.color.dialogBackground),
+                title = {
+                    Text(
+                        stringResource(R.string.pdf_viewer_password_not_supported),
+                        color = colorResource(R.color.almostBlack)
+                    )
+                },
+                confirmButton = {
+                    OlvidTextButton(
+                        onClick = {
+                            App.openFyleInExternalViewer(context, pdfFyleAndStatus) {
+                                onClose.invoke()
+                            }
+                        },
+                        text = stringResource(R.string.button_label_open_in_external_viewer),
+                    )
+                },
+                dismissButton = {
+                    OlvidTextButton(
+                        text = stringResource(R.string.button_label_cancel),
+                        onClick = onClose
+                    )
+                }
+            )
+        }
+        if (showPasswordDialog) {
+            val focusRequester = remember { FocusRequester() }
+            AlertDialog(
+                onDismissRequest = { showPasswordDialog = false },
+                containerColor = colorResource(R.color.dialogBackground),
+                title = {
+                    Text(
+                        stringResource(R.string.pdf_viewer_password_required),
+                        color = colorResource(R.color.almostBlack)
+                    )
+                },
+                text = {
+                    LaunchedEffect(Unit) {
+                        focusRequester.requestFocus()
+                    }
+                    OutlinedTextField(
+                        value = tempPassword,
+                        onValueChange = { tempPassword = it },
+                        label = { Text(stringResource(R.string.pdf_viewer_enter_password)) },
+                        singleLine = true,
+                        colors = olvidDefaultTextFieldColors(),
+                        isError = passwordError,
+                        keyboardOptions = KeyboardOptions(
+                            autoCorrectEnabled = false,
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done,
+                            showKeyboardOnFocus = true,
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                pdfPassword = tempPassword
+                                showPasswordDialog = false
+                            }
+                        ),
+                        supportingText = {
+                            if (passwordError) {
+                                Text(stringResource(R.string.pdf_viewer_incorrect_password))
+                            }
+                        },
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.focusRequester(focusRequester = focusRequester)
+                    )
+                },
+                confirmButton = {
+                    OlvidTextButton(
+                        onClick = {
+                            pdfPassword = tempPassword
+                            showPasswordDialog = false
+                        },
+                        text = stringResource(R.string.button_label_ok),
+                        enabled = tempPassword.isNotEmpty() && passwordError.not()
+                    )
+                },
+                dismissButton = {
+                    OlvidTextButton(
+                        text = stringResource(R.string.button_label_cancel),
+                        onClick = { showPasswordDialog = false }
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -282,9 +409,15 @@ fun PdfViewerScreen(
 fun PdfPage(
     modifier: Modifier = Modifier,
     page: RenderablePdfPage,
+    goto: (PdfPageGotoLinkContent.Destination) -> Unit,
     searchResults: SearchResults? = null,
     imageLoader: ImageLoader
 ) {
+    val context = LocalContext.current
+    var canvasSize by remember { mutableStateOf(Size.Zero) }
+    val scaleFactorX by remember { derivedStateOf { canvasSize.width / page.originalWidth } }
+    val scaleFactorY by remember { derivedStateOf { canvasSize.height / page.originalHeight } }
+
     AsyncImage(
         model = page,
         imageLoader = imageLoader,
@@ -295,11 +428,35 @@ fun PdfPage(
             .padding(horizontal = 8.dp)
             .aspectRatio(page.width.toFloat() / page.height.toFloat())
             .shadow(elevation = 12.dp)
+            .onSizeChanged {
+                canvasSize = it.toSize()
+            }
+            .pointerInput(Unit) {
+                if (Build.VERSION.SDK_INT >= 35) {
+                    detectTapGestures { offset ->
+                        val scaledX = offset.x / scaleFactorX
+                        val scaledY = offset.y / scaleFactorY
+
+                        page.gotoLinks.firstOrNull { link ->
+                            link.bounds.any { it.contains(scaledX, scaledY) }
+                        }?.let {
+                            goto(it.destination)
+                            return@detectTapGestures
+                        }
+
+                        page.linkContents.firstOrNull { link ->
+                            link.bounds.any { it.contains(scaledX, scaledY) }
+                        }?.let {
+                            App.openLink(
+                                context,
+                                it.uri
+                            )
+                        }
+                    }
+                }
+            }
             .drawWithContent {
                 drawContent()
-
-                val scaleFactorX = size.width / page.width
-                val scaleFactorY = size.height / page.height
 
                 searchResults?.results?.forEach { rect ->
                     val adjustedRect = RectF(

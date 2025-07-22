@@ -1,7 +1,6 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">联系人详情</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">用户详情</string>
-	<string name="activity_title_create_group" state="needs_review" hash="323669209">创建群组</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">群组详情</string>
 	<string name="activity_title_my_details" state="needs_review" hash="-1089973499">我的资料</string>
 	<string name="activity_title_settings" state="needs_review" hash="-686438097">Olvid 设置</string>
@@ -32,13 +31,12 @@
 	<string name="button_label_ignore" state="needs_review" hash="-806373746">忽略</string>
 	<string name="button_label_reject" state="needs_review" hash="-2094664161">拒绝</string>
 	<string name="button_label_introduce" state="needs_review" hash="193852909">介绍</string>
-	<string name="button_label_invite_members" state="needs_review" hash="-118308632">邀请成员</string>
+	<string name="button_label_invite_members" state="needs_review" hash="-1063364436">邀请成员</string>
 	<string name="button_label_next" state="needs_review" hash="1158639077">下一步</string>
 	<string name="button_label_ok" state="needs_review" hash="2428088">好的</string>
-	<string name="button_label_previous" state="needs_review" hash="-1639666563">上一个</string>
 	<string name="button_label_proceed" state="needs_review" hash="-1224815476">继续</string>
 	<string name="button_label_publish" state="needs_review" hash="-1355390088">发布</string>
-	<string name="button_label_remove_members" state="needs_review" hash="707573877">移除成员</string>
+	<string name="button_label_remove_members" state="needs_review" hash="1938722985">移除成员</string>
 	<string name="button_label_remove_nickname" state="needs_review" hash="-1702159211">重置</string>
 	<string name="button_label_update" state="needs_review" hash="648230638">更新</string>
 	<string name="button_label_validate" state="needs_review" hash="-521764973">验证</string>
@@ -90,7 +88,9 @@
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">目前没有群组</string>
 	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">点击“新建群组”来创建您的第一个群组。</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">群管理员已更新群名片。旧版本和新版本如下所示。\n\n点击“更新”以更新群组信息。</string>
-	<string name="explanation_new_group_v2_card" state="needs_review" hash="-224925220">群管理员更新了群组信息。新的版本显示在上方。\n\n请点击“更新”以使用新版本。</string>
+	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">管理员已将群组名称更改为：</string>
+	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">管理员已更改群组描述为：</string>
+	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">管理员更改了群组照片。</string>
 	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">您的联系人更新了他们的 Olvid Card。旧版本和新版本如下所示。\n\n请点击“更新”以更新您联系人的信息为最新版本。</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">正在建立安全对话通道。在通道建立完成之前，您无法与此联系人开始任何对话。如果双方都在线，此过程应只需几秒钟。\n\n如果您认为出现问题，可以重新启动通道建立。</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">未找到联系人</string>
@@ -159,7 +159,8 @@
 	<string name="label_group_card_published" state="needs_review" hash="-58328192">群组名片 - 已发布</string>
 	<string name="label_group_card_published_update" state="needs_review" hash="-1889428058">群组名片 - 新建</string>
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">群组卡片 - 未发布草稿</string>
-	<string name="label_group_members" state="needs_review" hash="-2121490032">其他群成员</string>
+	<string name="label_group_members" state="needs_review" hash="1460220752">群组成员</string>
+	<string name="label_other_group_members" state="needs_review" hash="-2121490032">其他群组成员</string>
 	<string name="label_groups" state="needs_review" hash="-990226727">群组</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">邀请被拒绝</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">群组信息已更新</string>
@@ -190,7 +191,6 @@
 	<string name="menu_action_recreate_channels" state="needs_review" hash="39178988">重新创建安全通道</string>
 	<string name="menu_action_rename" state="needs_review" hash="-1795678977">重命名</string>
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">重命名联系人</string>
-	<string name="menu_action_rename_group" state="needs_review" hash="1461324427">重命名群组</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">保存</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">设置</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">分享</string>
@@ -232,15 +232,16 @@
 	<string name="pref_text_QR_correction_low" state="needs_review" hash="-2013029312">低</string>
 	<string name="pref_text_QR_correction_medium" state="needs_review" hash="-1685793941">中等</string>
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">非常高</string>
-	<string name="subtitle_choose_group_name" state="needs_review" hash="-631282661">选择群组名称</string>
-	<string name="subtitle_select_group_members" state="needs_review" hash="1572094257">选择群成员</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">你已离开群组</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">你重新加入了群组</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">你已加入群组</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">由 %1$s 管理的群组</string>
 	<string name="text_joined_group" state="needs_review" hash="369878021">加入了群组：%1$s</string>
-	<string name="text_joined_the_group" state="needs_review" hash="-683497602">%1$s 加入了群聊</string>
-	<string name="text_left_the_group" state="needs_review" hash="399208793">%1$s 离开了群聊</string>
+	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s 将 %2$s 添加到群组</string>
+	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">您已将%2$s添加到群组</string>
+	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s 将 %2$s 从群组中移除</string>
+	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">您已将%2$s从群组中移除</string>
+	<string name="text_unknown_member" state="needs_review" hash="-698194630">未知</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">没有人</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">草稿：</string>
 	<string name="text_inbound_group_message_prefix" state="needs_review" hash="1359425562">%1$s:\u0020</string>
@@ -549,8 +550,8 @@
 	<string name="webrtc_stop_screen_sharing" state="needs_review" hash="585626699">停止共享</string>
 	<string name="webrtc_speaking_while_muted" state="needs_review" hash="1865652540">您的麦克风已静音</string>
 	<string name="webrtc_speaking_while_muted_action" state="needs_review" hash="-1839617181">解除静音</string>
-	<string name="content_description_reject_call_button" state="needs_review" hash="931620384">拒绝通话按钮</string>
-	<string name="content_description_accept_call_button" state="needs_review" hash="-1857614269">接听电话按钮</string>
+	<string name="content_description_reject_call_button" state="needs_review" hash="-332175555">拒绝通话</string>
+	<string name="content_description_accept_call_button" state="needs_review" hash="-934081402">接听电话</string>
 	<string name="dialog_title_webrtc_kick_participant" state="needs_review" hash="389469769">从通话中排除该联系人？</string>
 	<string name="webrtc_failed_kicked" state="needs_review" hash="-758835021">您已被从本次通话中移除</string>
 	<string name="dialog_title_start_conference_call" state="needs_review" hash="-1418585505">开始语音会议</string>
@@ -571,7 +572,7 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">对话选项卡</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">联系人</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">群组</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="1038824704">添加联系人按钮</string>
+	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">添加联系人</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">通知点</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">移除敏感的JPEG元数据</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">启用后，Olvid 将尝试删除导入照片文件中的敏感元数据。\n这包括 GPS 数据、相机型号、创建日期等。</string>
@@ -777,7 +778,7 @@
 	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">消息保留策略</string>
 	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">以下设置允许您自动删除此对话中的旧消息。它们优先于您的默认保留策略。</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">使用您的默认设置 (%1$s)</string>
-	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1987562758">录音消息按钮</string>
+	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">录制语音消息</string>
 	<string name="dialog_title_voice_message_explanation" state="needs_review" hash="943269997">Olvid语音消息</string>
 	<string name="dialog_message_voice_message_explanation" state="needs_review" hash="-1860729852">在录制语音消息之前，请授予Olvid录音权限。</string>
 	<string name="dialog_message_voice_message_explanation_blocked" state="needs_review" hash="-1293891432">为了录制语音消息，Olvid需要录音权限。\n\n似乎此权限已被永久拒绝Olvid使用。 您应该打开应用程序设置手动授予此权限。</string>
@@ -1002,7 +1003,7 @@
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">一旦对方设备可连接，%1$s 将被添加到您的联系人中。</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s 已添加到您的联系人列表！🙌</string>
 	<string name="label_loading_contacts" state="needs_review" hash="-343348890">正在加载联系人…</string>
-	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-916981123">浏览器选择按钮</string>
+	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-934849519">浏览器选择</string>
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">无法查询已安装的浏览器</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">选择用于身份验证的浏览器</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">默认浏览器</string>
@@ -1122,7 +1123,7 @@
 	<string name="dialog_title_unable_to_load_backup_configuration" state="needs_review" hash="-718937548">无法加载备份配置</string>
 	<string name="dialog_message_unable_to_load_backup_configuration" state="needs_review" hash="1322112021">经过多次尝试，Olvid 无法加载您当前的备份配置。如果您已经完全重启 Olvid/您的设备，但仍然出现此错误消息，建议您生成一个新的备份密钥。</string>
 	<string name="pref_reload_backup_configuration_title" state="needs_review" hash="2000428891">重新加载备份配置</string>
-	<string name="content_description_back_button" state="needs_review" hash="-1902681195">返回按钮</string>
+	<string name="content_description_back_button" state="needs_review" hash="48196338">返回</string>
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">移除回复消息</string>
 	<string name="content_description_remove_link_preview" state="needs_review" hash="-1085272528">清除链接预览</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">指示此配置文件的通知已静音</string>
@@ -1148,7 +1149,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">删除资料将删除您设备上与此资料相关的所有信息。这包括您的联系人、群组以及此资料下所有对话（消息和附件）的内容。\n\n<b>这是您唯一可见的资料，如果您有隐藏的资料，它们将被同时删除。</b>\n\n按“下一步”选择如何删除此资料。</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">删除资料<b>所有地方</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1363713497">在此输入删除以继续</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">在此输入 \"%1$s\" 以继续</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">如果您选择<b>完全</b>删除您的个人资料：\n-\n它将从您的设备上删除，<b>并且</b>从您联系人的设备上删除\n-\n您将退出您加入的所有群组\n-\n您管理的群组将被解散\n\n如果您<b>不</b>选择完全删除您的个人资料，它将仅从您的设备上删除。除非您计划在另一台设备上恢复备份，否则您的联系人可能仍然会尝试给您发送消息，并且可能没有意识到这些消息无法送达。</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">您的当前资料似乎不活跃，这可能意味着您已将其转移到另一台设备。如果您计划继续在另一台设备上使用此资料，您可以安全地将其删除。\n\n如果您不再想使用此资料，您需要先在此设备上重新激活它，等待与联系人之间的安全通道重建，然后才能选择“在所有设备上删除”选项删除此资料。</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">您的个人资料目前已在多个设备上启用。\n\n如果您选择<b>完全</b>删除您的个人资料：\n - 它将被从您的所有设备<b>和</b>您的联系人设备上删除\n - 您将退出您加入的群组\n - 您管理的群组将被解散\n\n如果您<b>不</b>完全删除您的个人资料，它将仅在本地删除，您可以继续在其他设备上正常使用它。</string>
@@ -1202,7 +1203,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">配置小部件…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">小部件外观</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">小部件点击操作</string>
-	<string name="label_discussion" state="needs_review" hash="301166224">讨论</string>
+	<string name="label_discuss" state="needs_review" hash="422951553">讨论</string>
 	<string name="label_message" state="needs_review" hash="809999904">消息</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">预设消息</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">发送前确认</string>
@@ -1242,6 +1243,7 @@
 	<string name="label_audio" state="needs_review" hash="-779820608">音频</string>
 	<string name="label_other" state="needs_review" hash="-543765264">其他</string>
 	<string name="label_all" state="needs_review" hash="752498555">全部</string>
+	<string name="label_see_all" state="needs_review" hash="-1659641788">查看全部</string>
 	<string name="menu_action_storage_management" state="needs_review" hash="2130982617">存储管理</string>
 	<string name="menu_action_troubleshooting" state="needs_review" hash="-798155217">故障排除</string>
 	<string name="explanation_no_files" state="needs_review" hash="-1050005240">没有可显示的文件</string>
@@ -1346,11 +1348,10 @@
 	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">已置顶的对话始终位于您的对话列表顶部</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">显示大小</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">开启讨论</string>
-	<string name="label_read_only" state="needs_review" hash="-954957022">只读</string>
-	<string name="label_read_only_short" state="needs_review" hash="1635912872">只读</string>
+	<string name="label_read_only" state="needs_review" hash="1996439460">仅供阅读</string>
+	<string name="label_pending_read_only" state="needs_review" hash="649164855">待读 (仅查看)</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">管理员</string>
-	<string name="label_pending_admin" state="needs_review" hash="-2032202913">等待审核的管理员</string>
-	<string name="label_not_admin" state="needs_review" hash="286893263">非管理员</string>
+	<string name="label_pending_admin" state="needs_review" hash="-1074135173">待定管理员</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">无法显示该用户的姓名</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">未命名群组</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">讨论通知</string>
@@ -1365,10 +1366,9 @@
 	<string name="notification_channel_discussion_name" state="needs_review" hash="588648320">讨论 %1$d</string>
 	<string name="notification_channel_discussion_group_name" state="needs_review" hash="491497248">对话</string>
 	<string name="notification_channel_discussion_group_description" state="needs_review" hash="-1448542719">针对特定 Olvid 对话的个性化通知。</string>
-	<string name="button_label_edit_group_members" state="needs_review" hash="-1379721010">编辑此群</string>
+	<string name="button_label_edit_group_members" state="needs_review" hash="1855939143">编辑成员</string>
 	<string name="button_label_add_members" state="needs_review" hash="-203515331">添加成员</string>
 	<string name="label_group_update_in_progress_title" state="needs_review" hash="-2019791170">群组同步进行中</string>
-	<string name="label_group_update_in_progress_title_for_creation" state="needs_review" hash="388073211">群组创建中</string>
 	<string name="explanation_group_update_in_progress" state="needs_review" hash="360407479">群组正在同步。同步完成后此屏幕将刷新。</string>
 	<string name="toast_message_unable_to_update_group" state="needs_review" hash="-513468036">无法更新群组。您的更改已丢失。请重试。</string>
 	<string name="dialog_title_unable_to_leave_group" state="needs_review" hash="-297756627">无法离开群组</string>
@@ -1487,7 +1487,7 @@
 	<string name="message_discussion_group_v2_updating" state="needs_review" hash="1490065684">群成员正在同步</string>
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">群组正在创建中</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">新建群组</string>
-	<string name="label_group_type" state="needs_review" hash="-1954959814">群组类型</string>
+	<string name="label_group_type" state="needs_review" hash="498463258">群组类型</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">标准</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">所有群组成员都可以邀请新成员</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">掌控</string>
@@ -1496,7 +1496,6 @@
 	<string name="label_group_read_only_subtitle" state="needs_review" hash="-1941498988">只有管理员可以发送消息</string>
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">高级</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">释放Olvid群组的全部力量！</string>
-	<string name="label_group_custom_settings" state="needs_review" hash="-1024799981">高级设置</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">群组管理员</string>
 	<string name="text_you_became_admin" state="needs_review" hash="-806884370">你现在是该群组的管理员</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">你不再是该群组的管理员</string>
@@ -1744,7 +1743,11 @@
 	<string name="troubleshooting_storage_valid_description" state="needs_review" hash="1144963725">您的设备上可用 %1$s 存储空间。</string>
 	<string name="troubleshooting_storage_invalid_title" state="needs_review" hash="-854482374">设备存储空间即将满</string>
 	<string name="troubleshooting_storage_invalid_description" state="needs_review" hash="-1018820796">您的设备仅剩 %1$s 存储空间.\n\n您的设备可用存储空间不足。在使用 Olvid 收发文件时，可能会遇到意外错误.\n\n现在可能是清理设备存储空间的最佳时机。</string>
-	<string name="troubleshooting_header" state="needs_review" hash="138020490">**应用版本**：%1$s (构建 %2$d)\n**设备型号**：%3$s\n**Android API**：%4$s\n**应用运行时间**：%5$s</string>
+	<string name="troubleshooting_header_app_version" state="needs_review" hash="2096978646">**应用版本**: %1$s (构建 %2$d)</string>
+	<string name="troubleshooting_header_device_model" state="needs_review" hash="911858141">**设备型号**: %1$s</string>
+	<string name="troubleshooting_header_android_api" state="needs_review" hash="-1735136766">**Android API**: %1$s</string>
+	<string name="troubleshooting_header_app_running_time" state="needs_review" hash="1952701839">**应用运行时间**: %1$s</string>
+	<string name="troubleshooting_header_app_install_date" state="needs_review" hash="1411458773">**应用安装日期**: %1$s</string>
 	<string name="troubleshooting_faq_description" state="needs_review" hash="1969820989">需要 Olvid 的帮助吗？请阅读我们的常见问题解答：</string>
 	<string name="troubleshooting_faq_link" state="needs_review" hash="-353352916">https://olvid.io/faq</string>
 	<string name="troubleshooting_request_permission" state="needs_review" hash="-463634281">请求权限</string>
@@ -1767,7 +1770,7 @@
 	<string name="dialog_title_invite_contact" state="needs_review" hash="1121224764">私密对话邀请</string>
 	<string name="dialog_message_invite_contact" state="needs_review" hash="883261663">您想邀请 %1$s 进行私密讨论吗？</string>
 	<string name="explanation_empty_other_contact_list" state="needs_review" hash="-121261312">目前没有人</string>
-	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="-510803038">尚未添加为联系人的群组成员将在此处显示。</string>
+	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="1669386057">尚未添加为联系人的群组成员将在此处显示。</string>
 	<string name="explanation_empty_directory" state="needs_review" hash="298073547">空目录</string>
 	<string name="menu_action_invite_all_members" state="needs_review" hash="-1044752673">邀请所有群成员</string>
 	<string name="dialog_title_invite_all_group_members" state="needs_review" hash="2130589049">邀请所有群成员？</string>
@@ -1833,7 +1836,6 @@
 	<string name="global_search_result_links" state="needs_review" hash="-579291596">链接</string>
 	<string name="button_label_send_read_receipts" state="needs_review" hash="-1730457934">通知我的联系人</string>
 	<string name="button_label_do_not_send" state="needs_review" hash="-1938459086">不要告诉他们</string>
-	<string name="button_label_ask_later" state="needs_review" hash="-1104721203">稍后提醒我</string>
 	<string name="dialog_message_prompt_user_for_read_receipts" state="needs_review" hash="-1157866927">您希望您的联系人知道您何时阅读他们的消息吗？</string>
 	<string name="dialog_title_prompt_user_for_read_receipts" state="needs_review" hash="-2045842725">已读回执</string>
 	<string name="pref_app_icon_title" state="needs_review" hash="-1219448320">应用程序图标</string>
@@ -1925,7 +1927,7 @@
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">管理我的 Olvid 备份</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">立即备份</string>
 	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/备份您的资料/</string>
-	<string name="content_description_close_button" state="needs_review" hash="-1770116030">关闭按钮</string>
+	<string name="content_description_close_button" state="needs_review" hash="1454843231">关闭</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">您的在线备份</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">重置</string>
 	<string name="explanation_reset_backups" state="needs_review" hash="-594480541">重置会删除所有备份。</string>
@@ -1955,7 +1957,7 @@
 	<string name="enable_backups_title" state="needs_review" hash="-1103233135">备份您的个人资料</string>
 	<string name="enable_backups_message_with_legacy" state="needs_review" hash="-508019994">您目前启用了旧版 Olvid 备份，该备份很快将停止支持。\n请切换到新的 Olvid 备份系统，以确保在丢失设备时可以恢复您的资料和联系人。</string>
 	<string name="enable_backups_message" state="needs_review" hash="1555907343">启用备份功能可让您在丢失设备后恢复您的个人资料和联系人。</string>
-	<string name="content_description_contextual_actions" state="needs_review" hash="984380377">上下文操作按钮</string>
+	<string name="content_description_contextual_actions" state="needs_review" hash="563463836">情境操作</string>
 	<string name="label_backup_from" state="needs_review" hash="-1486363430">来自 %1$s</string>
 	<string name="label_backup_groups_and_contacts" state="needs_review" hash="1197923862">%1$s，%2$s</string>
 	<string name="label_this_device" state="needs_review" hash="273515292">此设备</string>
@@ -2028,6 +2030,8 @@
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">您的设备上的一些参数配置不正确，可能会影响您使用Olvid的体验。</string>
 	<string name="button_label_this_way" state="needs_review" hash="747183939">这边</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">代码已复制</string>
+	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">请选择要添加到此群组的人。</string>
+	<string name="label_group_administration" state="needs_review" hash="871355986">群组管理</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">呼叫已阻止</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid 不允许发起包含超过 %1$d 人的通话。</string>
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">循环</string>
@@ -2039,4 +2043,51 @@
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Android 应用翻译</string>
 	<string name="pref_app_language_category_title" state="needs_review" hash="1411591324">基于人工智能的翻译</string>
 	<string name="pref_app_language_category_summary" state="needs_review" hash="-1895843046">本应用的部分翻译由人工智能生成，可能存在不准确之处。如果出现这种情况，请随时通过 <b>lang@olvid.io</b> 向我们反馈。</string>
+	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">需要密码才能打开此 PDF 文件</string>
+	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">密码</string>
+	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">密码错误</string>
+	<string name="label_poll_create" state="needs_review" hash="-1677246175">创建投票</string>
+	<string name="label_poll_question" state="needs_review" hash="-1615603188">问题</string>
+	<string name="hint_poll_question" state="needs_review" hash="1961289317">提问</string>
+	<string name="label_poll_answers" state="needs_review" hash="-382063458">回复</string>
+	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">添加</string>
+	<string name="label_poll_see_answers" state="needs_review" hash="710858547">查看回复</string>
+	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">等待他们的回复</string>
+	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">提醒</string>
+	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">添加 \"%1$s\" 选项</string>
+	<string name="label_poll_options" state="needs_review" hash="-13216192">选项</string>
+	<string name="text_none_answer" state="needs_review" hash="560562575">以上皆非</string>
+	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">允许多个答案</string>
+	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">选择一个或多个答案</string>
+	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">测验模式</string>
+	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">结束</string>
+	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">添加过期日期</string>
+	<string name="label_poll_expiration" state="needs_review" hash="605126523">投票将在%1$s结束</string>
+	<string name="label_poll_ended" state="needs_review" hash="415569292">投票结束</string>
+	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">添加至少两个回复</string>
+	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">此回复已存在</string>
+	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">导出为 CSV</string>
+	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">导出投票为 CSV 文件时出错。请重试。</string>
+	<string name="toast_message_success_exporting_poll_csv" state="needs_review" hash="16134555">投票 CSV 导出成功</string>
+	<string name="label_poll_answers_sorted_by" state="needs_review" hash="102938809">按排序</string>
+	<string name="label_poll_answers_sorted_by_poll_order" state="needs_review" hash="685632215">投票顺序</string>
+	<string name="label_poll_answers_sorted_by_answer_count" state="needs_review" hash="516869301">回复数</string>
+	<string name="notification_public_title_new_poll_vote" state="needs_review" hash="-1901040080">您投票的最新回复</string>
+	<string name="toast_message_remove_none_answer" state="needs_review" hash="277924655">请先删除答案 \"%1$s\"</string>
+	<string name="text_poll" state="needs_review" hash="-153643506">投票</string>
+	<string name="poll_csv_headers" state="needs_review" hash="1869917931">投票问题,投票人姓名,投票,日期</string>
+	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">尚未收到回复</string>
+	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">即将停用设备</string>
+	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">管理我的设备</string>
+	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">设备离线</string>
+	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">您的其中一台设备已离线 **超过 30 天**。\n如果您不再使用它，我们建议您 **移除它** 以避免同步问题。</string>
+	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">管理我的设备</string>
+	<string name="tip_playstore_review_title" state="needs_review" hash="-1396782635">您喜欢 Olvid 吗？</string>
+	<string name="tip_playstore_email_message" state="needs_review" hash="-583394070">如果您对Olvid有任何改进建议，请通过**feedback@olvid.io**与我们联系。</string>
+	<string name="tip_playstore_email_subject" state="needs_review" hash="-1010646301">Android 应用评分：%1$d/5</string>
+	<string name="tip_playstore_review_message" state="needs_review" hash="-407660073">如果您喜欢 Olvid，请随时在 Google Play 上 **留下评论**！</string>
+	<string name="tip_playstore_review_action" state="needs_review" hash="-271353090">在 Google Play 上评价我们</string>
+	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">在外部查看器中打开</string>
+	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">无法在Olvid的内部查看器中打开此文件</string>
+	<string name="button_label_invited" state="needs_review" hash="2094724552">已邀请</string>
 </resources>

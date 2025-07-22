@@ -54,7 +54,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
@@ -80,11 +79,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
-import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
+import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
+import io.olvid.messenger.designsystem.components.OlvidTextButton
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
@@ -92,7 +94,6 @@ import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDe
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_MORE_RESULTS
-import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -257,36 +258,34 @@ fun ContactListScreen(
                                                                         && contactOrKeycloakDetails.contact.shouldShowChannelCreationSpinner()
                                                                     .not() -> {
                                                                     {
-                                                                        TextButton(onClick = {
-                                                                            onInvite.invoke(
-                                                                                contactOrKeycloakDetails.contact
-                                                                            )
-                                                                        }) {
-                                                                            Text(
-                                                                                text = stringResource(
-                                                                                    id = R.string.button_label_invite
+                                                                        val inviteSent = AppDatabase.getInstance().invitationDao()
+                                                                            .getContactOneToOneInvitation(contactOrKeycloakDetails.contact.bytesOwnedIdentity, contactOrKeycloakDetails.contact.bytesContactIdentity).observeAsState()
+                                                                        OlvidTextButton(
+                                                                            text = if (inviteSent.value == null) stringResource(R.string.button_label_invite) else stringResource(R.string.button_label_invited),
+                                                                            contentColor = if (inviteSent.value == null) colorResource(R.color.olvid_gradient_light) else colorResource(R.color.greyTint),
+                                                                            enabled = inviteSent.value == null,
+                                                                            onClick = {
+                                                                                onInvite.invoke(
+                                                                                    contactOrKeycloakDetails.contact
                                                                                 )
-                                                                            )
-                                                                        }
+                                                                            },
+                                                                        )
                                                                     }
                                                                 }
 
                                                                 contactOrKeycloakDetails.contactType == KEYCLOAK
-                                                                        && AppSingleton.getContactCacheInfo(
+                                                                        && ContactCacheSingleton.getContactCacheInfo(
                                                                     contactOrKeycloakDetails.keycloakUserDetails?.identity
                                                                 ) == null -> {
                                                                     {
-                                                                        TextButton(onClick = {
-                                                                            onClick.invoke(
-                                                                                contactOrKeycloakDetails
-                                                                            )
-                                                                        }) {
-                                                                            Text(
-                                                                                text = stringResource(
-                                                                                    id = R.string.button_label_add
+                                                                        OlvidTextButton(
+                                                                            text = stringResource(R.string.button_label_add),
+                                                                            onClick = {
+                                                                                onClick.invoke(
+                                                                                    contactOrKeycloakDetails
                                                                                 )
-                                                                            )
-                                                                        }
+                                                                            }
+                                                                        )
                                                                     }
                                                                 }
 
@@ -453,6 +452,8 @@ private fun Contact(
     endContent: (@Composable () -> Unit)? = null
 ) {
     ContactListItem(
+        modifier = Modifier.background(colorResource(id = R.color.almostWhite)),
+        padding = PaddingValues(horizontal = 8.dp),
         title = contactOrKeycloakDetails.getAnnotatedName()
             .highlight(
                 SpanStyle(
@@ -496,7 +497,7 @@ private fun Contact(
                             SettingsActivity.contactDisplayNameFormat,
                             SettingsActivity.uppercaseLastName
                         )
-                    AppSingleton.getContactPhotoUrl(keycloakUserDetails.identity)?.let {
+                    ContactCacheSingleton.getContactPhotoUrl(keycloakUserDetails.identity)?.let {
                         initialView.setPhotoUrl(keycloakUserDetails.identity, it)
                     } ?: initialView.setInitial(
                         keycloakUserDetails.identity,

@@ -61,6 +61,7 @@ import io.olvid.messenger.databases.tasks.ApplyDiscussionRetentionPoliciesTask;
 import io.olvid.messenger.databases.tasks.CreateOrUpdateGroupV2Task;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
+import io.olvid.messenger.databases.tasks.new_message.ProcessReadyToProcessOnHoldMessagesTask;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class AppDatabaseOpenCallback implements Runnable {
@@ -151,7 +152,7 @@ public class AppDatabaseOpenCallback implements Runnable {
             // then update all ongoing dialogs
             engine.resendAllPersistedDialogs();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             Logger.w("Error syncing Room invitations with Engine dialogs.");
         }
 
@@ -164,7 +165,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             Logger.w("Error cleaning up pre-discussions without invitation.");
         }
 
@@ -172,7 +173,7 @@ public class AppDatabaseOpenCallback implements Runnable {
         try {
             engine.resendAllAttachmentNotifications();
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             Logger.w("Error syncing Room attachments with Engine attachments.");
         }
 
@@ -219,7 +220,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             Logger.w("Error refreshing Fyle statuses.");
         }
 
@@ -249,7 +250,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             Logger.w("Error cleaning stray Fyles.");
         }
 
@@ -400,10 +401,24 @@ public class AppDatabaseOpenCallback implements Runnable {
                                         if (discussion == null) {
                                             throw new RuntimeException("Unable to create discussion!");
                                         }
+
+                                        // mark all on hold messages (if any) as ready to process
+                                        int count = db.onHoldInboxMessageDao().markAsReadyToProcessForContactDiscussion(
+                                                newContact.bytesOwnedIdentity,
+                                                newContact.bytesContactIdentity
+                                        );
+                                        if (count > 0) {
+                                            Logger.i("⏸️ Marked " + count + " on hold messages as ready to process");
+                                        }
                                     }
                                 });
+
+                                if (contactInfo.oneToOne) {
+                                    // if the transaction finished without an exception, trigger the process of on hold messages that are ready to process
+                                    AppSingleton.getEngine().runTaskOnEngineNotificationQueue(new ProcessReadyToProcessOnHoldMessagesTask(engine, db, contactInfo.bytesOwnedIdentity));
+                                }
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Logger.x(e);
                             }
                             contact = db.contactDao().get(ownedIdentity.getBytesIdentity(), contactInfo.bytesContactIdentity);
                             if (contact == null) {
@@ -434,9 +449,21 @@ public class AppDatabaseOpenCallback implements Runnable {
                                         if (discussion == null) {
                                             throw new RuntimeException("Unable to create discussion!");
                                         }
+
+                                        // mark all on hold messages (if any) as ready to process
+                                        int count = db.onHoldInboxMessageDao().markAsReadyToProcessForContactDiscussion(
+                                                finalContact.bytesOwnedIdentity,
+                                                finalContact.bytesContactIdentity
+                                        );
+                                        if (count > 0) {
+                                            Logger.i("⏸️ Marked " + count + " on hold messages as ready to process");
+                                        }
                                     });
+
+                                    // if the transaction finished without an exception, trigger the process of on hold messages that are ready to process
+                                    AppSingleton.getEngine().runTaskOnEngineNotificationQueue(new ProcessReadyToProcessOnHoldMessagesTask(engine, db, contact.bytesOwnedIdentity));
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    Logger.x(e);
                                 }
                             } else {
                                 db.runInTransaction(() -> {
@@ -571,8 +598,8 @@ public class AppDatabaseOpenCallback implements Runnable {
                                         ContactGroupJoin contactGroupJoin = new ContactGroupJoin(newGroup.bytesGroupOwnerAndUid, newGroup.bytesOwnedIdentity, bytesContactIdentity);
                                         db.contactGroupJoinDao().insert(contactGroupJoin);
 
-                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, bytesContactIdentity);
-                                        db.messageDao().insert(groupJoinedMessage);
+                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, bytesContactIdentity, null);
+                                        db.messageDao().upsert(groupJoinedMessage);
                                         messageInserted = true;
                                     }
                                     if (messageInserted) {
@@ -605,15 +632,27 @@ public class AppDatabaseOpenCallback implements Runnable {
                                         PendingGroupMember pendingGroupMember = new PendingGroupMember(obvIdentity.getBytesIdentity(), obvIdentity.getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()), newGroup.bytesOwnedIdentity, newGroup.bytesGroupOwnerAndUid, declinedSet.contains(new BytesKey(obvIdentity.getBytesIdentity())));
                                         db.pendingGroupMemberDao().insert(pendingGroupMember);
                                     }
+
+                                    // mark all on hold messages (if any) as ready to process
+                                    int count = db.onHoldInboxMessageDao().markAsReadyToProcessForGroupDiscussion(
+                                            newGroup.bytesOwnedIdentity,
+                                            newGroup.bytesGroupOwnerAndUid
+                                    );
+                                    if (count > 0) {
+                                        Logger.i("⏸️ Marked " + count + " on hold messages as ready to process");
+                                    }
                                 });
+
+                                // if the transaction finished without an exception, trigger the process of on hold messages that are ready to process
+                                AppSingleton.getEngine().runTaskOnEngineNotificationQueue(new ProcessReadyToProcessOnHoldMessagesTask(engine, db, obvGroup.getBytesOwnedIdentity()));
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Logger.x(e);
                             }
                         } else {
                             // check if the discussion exists
                             Group finalGroup = group;
                             try {
-                                db.runInTransaction(() -> {
+                                boolean someMembersWereAdded = db.runInTransaction(() -> {
                                     Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid);
                                     if (discussion == null) {
                                         Logger.d("Creating missing discussion for existing group !!!");
@@ -638,15 +677,17 @@ public class AppDatabaseOpenCallback implements Runnable {
                                     }
                                     for (BytesKey bytesKey : contactToRemove) {
                                         ContactGroupJoin contactGroupJoin = db.contactGroupJoinDao().get(finalGroup.bytesGroupOwnerAndUid, finalGroup.bytesOwnedIdentity, bytesKey.bytes);
-                                        db.contactGroupJoinDao().delete(contactGroupJoin);
-                                        Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, bytesKey.bytes);
-                                        db.messageDao().insert(groupLeftMessage);
+                                        if (contactGroupJoin != null) {
+                                            db.contactGroupJoinDao().delete(contactGroupJoin);
+                                        }
+                                        Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, bytesKey.bytes, null);
+                                        db.messageDao().upsert(groupLeftMessage);
                                     }
                                     for (BytesKey bytesKey : contactToAdd) {
                                         ContactGroupJoin contactGroupJoin = new ContactGroupJoin(finalGroup.bytesGroupOwnerAndUid, finalGroup.bytesOwnedIdentity, bytesKey.bytes);
                                         db.contactGroupJoinDao().insert(contactGroupJoin);
-                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, bytesKey.bytes);
-                                        db.messageDao().insert(groupJoinedMessage);
+                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, bytesKey.bytes, null);
+                                        db.messageDao().upsert(groupJoinedMessage);
                                     }
 
                                     if (!contactToAdd.isEmpty() || !contactToRemove.isEmpty()) {
@@ -686,6 +727,16 @@ public class AppDatabaseOpenCallback implements Runnable {
                                         }
                                     }
 
+                                    if (!contactToAdd.isEmpty()) {
+                                        // mark all on hold messages (if any) as ready to process
+                                        int count = db.onHoldInboxMessageDao().markAsReadyToProcessForGroupDiscussion(
+                                                finalGroup.bytesOwnedIdentity,
+                                                finalGroup.bytesGroupOwnerAndUid
+                                        );
+                                        if (count > 0) {
+                                            Logger.i("⏸️ Marked " + count + " on hold messages as ready to process");
+                                        }
+                                    }
 
                                     // now check for different pendingMembers
                                     HashMap<BytesKey, PendingGroupMember> pendingGroupMembersToRemove = new HashMap<>();
@@ -722,9 +773,16 @@ public class AppDatabaseOpenCallback implements Runnable {
                                         PendingGroupMember pendingGroupMember = new PendingGroupMember(obvIdentity.getBytesIdentity(), obvIdentity.getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()), finalGroup.bytesOwnedIdentity, finalGroup.bytesGroupOwnerAndUid, declinedSet.contains(new BytesKey(obvIdentity.getBytesIdentity())));
                                         db.pendingGroupMemberDao().insert(pendingGroupMember);
                                     }
+
+                                    return !contactToAdd.isEmpty();
                                 });
+
+                                if (someMembersWereAdded) {
+                                    // if some members were added, trigger the process of on hold messages that are ready to process
+                                    AppSingleton.getEngine().runTaskOnEngineNotificationQueue(new ProcessReadyToProcessOnHoldMessagesTask(engine, db, finalGroup.bytesOwnedIdentity));
+                                }
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Logger.x(e);
                             }
                         }
                     }
@@ -745,7 +803,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                         if (subMap != null) {
                             subMap.remove(new BytesKey(obvGroupV2.groupIdentifier.getBytes()));
                         }
-                        new CreateOrUpdateGroupV2Task(obvGroupV2, false, false, false,true, null).run();
+                        new CreateOrUpdateGroupV2Task(obvGroupV2, false, false, false,true, null, null, null).run();
                     }
 
                     if (subMap != null && subMap.isEmpty()) {
@@ -820,12 +878,12 @@ public class AppDatabaseOpenCallback implements Runnable {
                 }
             }
 
-           AppSingleton.reloadCachedDisplayNamesAndHues();
+            ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues();
 
             // save the last synchronisation completion time
             AppSingleton.saveLastEngineSynchronisationTime(System.currentTimeMillis());
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.x(e);
             Logger.w("Error syncing Room database with Engine database");
         }
         Logger.d("🔁 Finished App database synchronisation");

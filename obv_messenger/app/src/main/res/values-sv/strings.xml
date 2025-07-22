@@ -1,7 +1,6 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Kontaktuppgifter</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Användardetaljer</string>
-	<string name="activity_title_create_group" state="needs_review" hash="323669209">Skapa grupp</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Gruppdetaljer</string>
 	<string name="activity_title_my_details" state="needs_review" hash="-1089973499">Min profil</string>
 	<string name="activity_title_settings" state="needs_review" hash="-686438097">Olvid-inställningar</string>
@@ -32,13 +31,12 @@
 	<string name="button_label_ignore" state="needs_review" hash="-806373746">Ignorera</string>
 	<string name="button_label_reject" state="needs_review" hash="-2094664161">Avvisa</string>
 	<string name="button_label_introduce" state="needs_review" hash="193852909">Presentera</string>
-	<string name="button_label_invite_members" state="needs_review" hash="-118308632">Bjud in\nmedlemmar</string>
+	<string name="button_label_invite_members" state="needs_review" hash="-1063364436">Bjud in medlemmar</string>
 	<string name="button_label_next" state="needs_review" hash="1158639077">Nästa</string>
 	<string name="button_label_ok" state="needs_review" hash="2428088">OK</string>
-	<string name="button_label_previous" state="needs_review" hash="-1639666563">Föregående</string>
 	<string name="button_label_proceed" state="needs_review" hash="-1224815476">Fortsätt</string>
 	<string name="button_label_publish" state="needs_review" hash="-1355390088">Publicera</string>
-	<string name="button_label_remove_members" state="needs_review" hash="707573877">Ta bort\nmedlemmar</string>
+	<string name="button_label_remove_members" state="needs_review" hash="1938722985">Ta bort medlemmar</string>
 	<string name="button_label_remove_nickname" state="needs_review" hash="-1702159211">Återställ</string>
 	<string name="button_label_update" state="needs_review" hash="648230638">Uppdatera</string>
 	<string name="button_label_validate" state="needs_review" hash="-521764973">Bekräfta</string>
@@ -90,7 +88,9 @@
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">Inga grupper just nu</string>
 	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Tryck på \"Ny grupp\" för att skapa din första grupp.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">Gruppadministratören har uppdaterat Gruppkortet. Både den gamla och den nya versionen visas nedan.\n\nTryck på \"uppdatera\" för att uppdatera gruppens information.</string>
-	<string name="explanation_new_group_v2_card" state="needs_review" hash="-224925220">En av gruppadministratörerna har uppdaterat gruppdetaljerna. Den nya versionen visas ovan.\n\nTryck på \"uppdatera\" för att använda den här nya versionen.</string>
+	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">En administratör har ändrat gruppens namn till:</string>
+	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">En administratör har ändrat gruppbeskrivningen till:</string>
+	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">En administratör har ändrat gruppbilden.</string>
 	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">Din kontakt har uppdaterat sitt Olvid Card. Både den gamla och den nya versionen visas nedan.\n\nTryck på \"uppdatera\" för att uppdatera din kontakts information med denna nya version.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">En säker kommunikationskanal upprättas just nu. Du kan inte starta någon diskussion med den här kontakten förrän detta är klart. Denna process bör bara ta några sekunder om du och din kontakt är online.\n\nOm du tror att något gick fel kan du starta om kanalupprättningen.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">Inga kontakter hittades</string>
@@ -159,7 +159,8 @@
 	<string name="label_group_card_published" state="needs_review" hash="-58328192">Gruppkort - Publicerad</string>
 	<string name="label_group_card_published_update" state="needs_review" hash="-1889428058">Gruppkort - Ny</string>
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">Gruppkort - Ej publicerat utkast</string>
-	<string name="label_group_members" state="needs_review" hash="-2121490032">Övriga gruppmedlemmar</string>
+	<string name="label_group_members" state="needs_review" hash="1460220752">Gruppmedlemmar</string>
+	<string name="label_other_group_members" state="needs_review" hash="-2121490032">Övriga gruppmedlemmar</string>
 	<string name="label_groups" state="needs_review" hash="-990226727">Grupper</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">Inbjudan\navslagen</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">Gruppdetaljer uppdaterade</string>
@@ -190,7 +191,6 @@
 	<string name="menu_action_recreate_channels" state="needs_review" hash="39178988">Återskapa säkra kanaler</string>
 	<string name="menu_action_rename" state="needs_review" hash="-1795678977">Byt namn</string>
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">Byt namn på kontakt</string>
-	<string name="menu_action_rename_group" state="needs_review" hash="1461324427">Byt namn på grupp</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">Spara</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">Inställningar</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">Dela</string>
@@ -232,15 +232,16 @@
 	<string name="pref_text_QR_correction_low" state="needs_review" hash="-2013029312">Låg</string>
 	<string name="pref_text_QR_correction_medium" state="needs_review" hash="-1685793941">Medel</string>
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">Mycket hög</string>
-	<string name="subtitle_choose_group_name" state="needs_review" hash="-631282661">Välj gruppnamn</string>
-	<string name="subtitle_select_group_members" state="needs_review" hash="1572094257">Välj gruppmedlemmar</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Du har lämnat gruppen</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Du har återanslutit dig till gruppen</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Du har gått med i gruppen</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Grupp hanterad av %1$s</string>
 	<string name="text_joined_group" state="needs_review" hash="369878021">Gick med i gruppen: %1$s</string>
-	<string name="text_joined_the_group" state="needs_review" hash="-683497602">%1$s har gått med i gruppen</string>
-	<string name="text_left_the_group" state="needs_review" hash="399208793">%1$s lämnade gruppen</string>
+	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s lade till %2$s i gruppen</string>
+	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Du har lagt till %2$s i gruppen</string>
+	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s tog bort %2$s från gruppen</string>
+	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">Du har tagit bort %2$s från gruppen</string>
+	<string name="text_unknown_member" state="needs_review" hash="-698194630">okänd</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Ingen</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Utkast:</string>
 	<string name="text_inbound_group_message_prefix" state="needs_review" hash="1359425562">%1$s:\u0020</string>
@@ -549,8 +550,8 @@
 	<string name="webrtc_stop_screen_sharing" state="needs_review" hash="585626699">Sluta dela</string>
 	<string name="webrtc_speaking_while_muted" state="needs_review" hash="1865652540">Din mikrofon är avstängd</string>
 	<string name="webrtc_speaking_while_muted_action" state="needs_review" hash="-1839617181">Slå på ljudet</string>
-	<string name="content_description_reject_call_button" state="needs_review" hash="931620384">Avvisa samtal-knapp</string>
-	<string name="content_description_accept_call_button" state="needs_review" hash="-1857614269">Acceptera samtal-knapp</string>
+	<string name="content_description_reject_call_button" state="needs_review" hash="-332175555">Avvisa samtal</string>
+	<string name="content_description_accept_call_button" state="needs_review" hash="-934081402">Acceptera samtalet</string>
 	<string name="dialog_title_webrtc_kick_participant" state="needs_review" hash="389469769">Uteslut kontakt från samtalet?</string>
 	<string name="webrtc_failed_kicked" state="needs_review" hash="-758835021">Du har blivit utesluten från detta samtal</string>
 	<string name="dialog_title_start_conference_call" state="needs_review" hash="-1418585505">Starta konferenssamtal</string>
@@ -571,7 +572,7 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">Flik Diskussioner</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">Kontakter-fliken</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">Grupper</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="1038824704">Lägg till kontakt-knapp</string>
+	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">Lägg till kontakt</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">Notifikationspunkt</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">Ta bort känsliga JPEG-metadata</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">När den är aktiverad kommer Olvid att försöka ta bort känslig metadata från importerade fotofiler.\nDetta inkluderar GPS-data, kameramärke, skapelsedatum…</string>
@@ -777,7 +778,7 @@
 	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">Policy för bevarande av konversationsmeddelanden</string>
 	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">Inställningarna nedan låter dig automatiskt radera gamla meddelanden i denna konversation. De har företräde framför din standardpolicy för kvarhållning.</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">Använd din standardinställning (%1$s)</string>
-	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1987562758">Spela in röstmeddelande-knapp</string>
+	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">Spela in röstmeddelande</string>
 	<string name="dialog_title_voice_message_explanation" state="needs_review" hash="943269997">Röstmeddelanden från Olvid</string>
 	<string name="dialog_message_voice_message_explanation" state="needs_review" hash="-1860729852">Innan du spelar in röstmeddelanden, ge Olvid tillstånd att spela in ljud.</string>
 	<string name="dialog_message_voice_message_explanation_blocked" state="needs_review" hash="-1293891432">Innan du spelar in röstmeddelanden kräver Olvid tillstånd att spela in ljud.\n\nDet ser ut som att detta tillstånd har nekats Olvid permanent. Du bör öppna Appinställningarna för att manuellt bevilja detta tillstånd.</string>
@@ -1002,7 +1003,7 @@
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s kommer att läggas till i dina kontakter så snart deras enhet kan nås.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s har lagts till i dina kontakter 🙌!</string>
 	<string name="label_loading_contacts" state="needs_review" hash="-343348890">Laddar kontakter…</string>
-	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-916981123">Välj webbläsarknapp</string>
+	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-934849519">Webbläsarval</string>
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Kunde inte hitta installerade webbläsare</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Välj vilken webbläsare du vill använda för autentisering</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Standardwebbläsare</string>
@@ -1122,7 +1123,7 @@
 	<string name="dialog_title_unable_to_load_backup_configuration" state="needs_review" hash="-718937548">Kunde inte ladda konfigurationen för säkerhetskopiering</string>
 	<string name="dialog_message_unable_to_load_backup_configuration" state="needs_review" hash="1322112021">Efter flera försök kunde Olvid inte ladda din nuvarande säkerhetskopieringskonfiguration. Om du redan har provat att starta om Olvid/din enhet helt och fortfarande får detta felmeddelande rekommenderas det att du genererar en ny säkerhetskopieringsnyckel.</string>
 	<string name="pref_reload_backup_configuration_title" state="needs_review" hash="2000428891">Ladda om säkerhetskopieringskonfigurationen</string>
-	<string name="content_description_back_button" state="needs_review" hash="-1902681195">Tillbaka-knapp</string>
+	<string name="content_description_back_button" state="needs_review" hash="48196338">Tillbaka</string>
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">Radera svar på meddelande</string>
 	<string name="content_description_remove_link_preview" state="needs_review" hash="-1085272528">Ta bort länkförhandsvisning</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">Indikator att aviseringar är tysta för den här profilen</string>
@@ -1148,7 +1149,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Att radera ett profil kommer att radera all information som är kopplad till det här profilet på din enhet. Detta inkluderar dina kontakter, grupper och innehållet i alla dina diskussioner (meddelanden och bilagor) för det här profilet.\n\n<b>Detta är ditt enda synliga profil och om du har dolda profiler kommer de att raderas samtidigt.</b>\n\nTryck på \"nästa\" för att välja hur det här profilet ska raderas.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Radera profil <b>överallt</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1363713497">Skriv RADERA här för att fortsätta</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">Skriv \"%1$s\" här för att fortsätta</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">Om du väljer att radera din profil <b>överallt</b>:\n - så kommer det att raderas lokalt <b>och</b> på dina kontakters enheter\n - du kommer att lämna grupper du har gått med i\n - grupper du hanterar kommer att upplösas\n\nOm du <b>inte</b> raderar ditt profil överallt kommer det bara att raderas lokalt på din enhet. Om du inte planerar att återställa en säkerhetskopia på en annan enhet kan dina kontakter fortfarande försöka skicka meddelanden till dig och inser kanske inte att dessa meddelanden inte kan levereras.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">Din nuvarande profil verkar vara inaktiv, troligen eftersom du har överfört den till en annan enhet. Om du planerar att fortsätta använda den här profilen på din andra enhet kan du säkert radera den här.\n\nOm du inte vill använda den här profilen igen måste du först reaktivera den på den här enheten, vänta tills säkra kanaler med dina kontakter har återskapats och först därefter radera den här profilen genom att välja alternativet \"radera överallt\".</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">Din profil är för närvarande aktiverat på flera enheter.\n\nOm du väljer att radera detta profil <b>överallt</b>: - det kommer att raderas från alla dina enheter <b>och</b> från dina kontakters enheter - du kommer att lämna grupper du har gått med i - grupper du hanterar kommer att upplösas\n\nOm du <b>inte</b> raderar detta profil överallt kommer det bara att raderas lokalt och du kan fortsätta använda det som vanligt på dina andra enheter.</string>
@@ -1202,7 +1203,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Konfigurera widget…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Widget-utseende</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Widget-tryckåtgärd</string>
-	<string name="label_discussion" state="needs_review" hash="301166224">Diskussion</string>
+	<string name="label_discuss" state="needs_review" hash="422951553">Diskutera</string>
 	<string name="label_message" state="needs_review" hash="809999904">Meddelande</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Fördefinierat meddelande att skicka</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Bekräfta innan du skickar</string>
@@ -1242,6 +1243,7 @@
 	<string name="label_audio" state="needs_review" hash="-779820608">Ljud</string>
 	<string name="label_other" state="needs_review" hash="-543765264">Annat</string>
 	<string name="label_all" state="needs_review" hash="752498555">Allt</string>
+	<string name="label_see_all" state="needs_review" hash="-1659641788">Visa alla</string>
 	<string name="menu_action_storage_management" state="needs_review" hash="2130982617">Lagringshantering</string>
 	<string name="menu_action_troubleshooting" state="needs_review" hash="-798155217">Felsökning</string>
 	<string name="explanation_no_files" state="needs_review" hash="-1050005240">Inga bilagor att visa</string>
@@ -1346,11 +1348,10 @@
 	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">Fästa konversationer visas alltid överst i din samtalslista</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Visningsstorlek</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Öppna diskussion</string>
-	<string name="label_read_only" state="needs_review" hash="-954957022">Endast läsa</string>
-	<string name="label_read_only_short" state="needs_review" hash="1635912872">Skrivskyddad</string>
+	<string name="label_read_only" state="needs_review" hash="1996439460">Skrivskyddad</string>
+	<string name="label_pending_read_only" state="needs_review" hash="649164855">Väntar på läsning endast för läsaren</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Administratör</string>
-	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Väntande\nadministratör</string>
-	<string name="label_not_admin" state="needs_review" hash="286893263">Inte administratör</string>
+	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Väntande administratör</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Det gick inte att visa den här användarens namn</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Namnlös grupp</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Diskussionsnotiser</string>
@@ -1365,10 +1366,9 @@
 	<string name="notification_channel_discussion_name" state="needs_review" hash="588648320">Diskussion %1$d</string>
 	<string name="notification_channel_discussion_group_name" state="needs_review" hash="491497248">Samtal</string>
 	<string name="notification_channel_discussion_group_description" state="needs_review" hash="-1448542719">Personliga aviseringar för specifika Olvid-diskussioner.</string>
-	<string name="button_label_edit_group_members" state="needs_review" hash="-1379721010">Redigera den här gruppen</string>
+	<string name="button_label_edit_group_members" state="needs_review" hash="1855939143">Redigera medlemmar</string>
 	<string name="button_label_add_members" state="needs_review" hash="-203515331">Lägg till medlemmar</string>
 	<string name="label_group_update_in_progress_title" state="needs_review" hash="-2019791170">Gruppsynkronisering pågår</string>
-	<string name="label_group_update_in_progress_title_for_creation" state="needs_review" hash="388073211">Gruppskapande pågår</string>
 	<string name="explanation_group_update_in_progress" state="needs_review" hash="360407479">Gruppen synkroniseras just nu. Den här skärmen uppdateras när uppdateringen är klar.</string>
 	<string name="toast_message_unable_to_update_group" state="needs_review" hash="-513468036">Kunde inte uppdatera gruppen. Dina ändringar har förlorats. Försök igen.</string>
 	<string name="dialog_title_unable_to_leave_group" state="needs_review" hash="-297756627">Kunde inte lämna gruppen</string>
@@ -1487,7 +1487,7 @@
 	<string name="message_discussion_group_v2_updating" state="needs_review" hash="1490065684">Gruppmedlemmarna synkroniseras just nu</string>
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">Gruppen skapas</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">Ny grupp</string>
-	<string name="label_group_type" state="needs_review" hash="-1954959814">Grupptyp</string>
+	<string name="label_group_type" state="needs_review" hash="498463258">Grupptyp</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">Standard</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">Alla gruppmedlemmar kan bjuda in nya medlemmar</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">Kontrollerad</string>
@@ -1496,7 +1496,6 @@
 	<string name="label_group_read_only_subtitle" state="needs_review" hash="-1941498988">Endast administratörer kan skicka meddelanden</string>
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Avancerat</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Släpp lös den fulla kraften i Olvid-grupper!</string>
-	<string name="label_group_custom_settings" state="needs_review" hash="-1024799981">Avancerade inställningar</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Gruppadministratörer</string>
 	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Du är nu en gruppadministratör</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Du är inte längre gruppadministratör</string>
@@ -1744,7 +1743,11 @@
 	<string name="troubleshooting_storage_valid_description" state="needs_review" hash="1144963725">%1$s lagringsutrymme tillgängligt på din enhet.</string>
 	<string name="troubleshooting_storage_invalid_title" state="needs_review" hash="-854482374">Enhetens lagringsutrymme nästan fullt</string>
 	<string name="troubleshooting_storage_invalid_description" state="needs_review" hash="-1018820796">Endast %1$s lagringsutrymme kvar på din enhet.\n\nDin enhet har lite ledigt utrymme. Räkna med oväntade fel när du tar emot eller skickar filer med Olvid.\n\nDetta är förmodligen rätt tidpunkt att frigöra utrymme på din enhet.</string>
-	<string name="troubleshooting_header" state="needs_review" hash="138020490">**Appversion**: %1$s (build %2$d)\n**Enhetsmodell**: %3$s\n**Android API**: %4$s\n**Appen har körts sedan**: %5$s</string>
+	<string name="troubleshooting_header_app_version" state="needs_review" hash="2096978646">**Appversion**: %1$s (bygg %2$d)</string>
+	<string name="troubleshooting_header_device_model" state="needs_review" hash="911858141">**Enhetsmodell**: %1$s</string>
+	<string name="troubleshooting_header_android_api" state="needs_review" hash="-1735136766">**Android API**: %1$s</string>
+	<string name="troubleshooting_header_app_running_time" state="needs_review" hash="1952701839">**Appen har körts sedan**: %1$s</string>
+	<string name="troubleshooting_header_app_install_date" state="needs_review" hash="1411458773">**Appens installationsdatum**: %1$s</string>
 	<string name="troubleshooting_faq_description" state="needs_review" hash="1969820989">Behöver du hjälp med Olvid? Läs vår FAQ:</string>
 	<string name="troubleshooting_faq_link" state="needs_review" hash="-353352916">https://olvid.io/faq</string>
 	<string name="troubleshooting_request_permission" state="needs_review" hash="-463634281">Begär behörighet</string>
@@ -1767,7 +1770,7 @@
 	<string name="dialog_title_invite_contact" state="needs_review" hash="1121224764">Inbjudan till en privat konversation</string>
 	<string name="dialog_message_invite_contact" state="needs_review" hash="883261663">Vill du bjuda in %1$s till en privat diskussion?</string>
 	<string name="explanation_empty_other_contact_list" state="needs_review" hash="-121261312">Ingen här just nu</string>
-	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="-510803038">Gruppmedlemmar som ännu inte är kontakter visas här.</string>
+	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="1669386057">Gruppmedlemmar som ännu inte är kontakter visas här.</string>
 	<string name="explanation_empty_directory" state="needs_review" hash="298073547">Tom katalog</string>
 	<string name="menu_action_invite_all_members" state="needs_review" hash="-1044752673">Bjud in alla gruppmedlemmar</string>
 	<string name="dialog_title_invite_all_group_members" state="needs_review" hash="2130589049">Bjud in alla gruppmedlemmar?</string>
@@ -1833,7 +1836,6 @@
 	<string name="global_search_result_links" state="needs_review" hash="-579291596">Länkar</string>
 	<string name="button_label_send_read_receipts" state="needs_review" hash="-1730457934">Informera mina kontakter</string>
 	<string name="button_label_do_not_send" state="needs_review" hash="-1938459086">Informera dem inte</string>
-	<string name="button_label_ask_later" state="needs_review" hash="-1104721203">Fråga mig senare</string>
 	<string name="dialog_message_prompt_user_for_read_receipts" state="needs_review" hash="-1157866927">Vill du att dina kontakter ska kunna se när du läser deras meddelanden?</string>
 	<string name="dialog_title_prompt_user_for_read_receipts" state="needs_review" hash="-2045842725">Läsbekräftelser</string>
 	<string name="pref_app_icon_title" state="needs_review" hash="-1219448320">Appikon</string>
@@ -1925,7 +1927,7 @@
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Hantera mina Olvid-säkerhetskopior</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Starta en säkerhetskopia nu</string>
 	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/säkerhetskopiera-dina-profiler/</string>
-	<string name="content_description_close_button" state="needs_review" hash="-1770116030">Stäng-knapp</string>
+	<string name="content_description_close_button" state="needs_review" hash="1454843231">Stäng</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Dina online-säkerhetskopior</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Återställ</string>
 	<string name="explanation_reset_backups" state="needs_review" hash="-594480541">Återställning kommer att radera alla dina säkerhetskopior.</string>
@@ -1955,7 +1957,7 @@
 	<string name="enable_backups_title" state="needs_review" hash="-1103233135">Säkerhetskopiera din profil</string>
 	<string name="enable_backups_message_with_legacy" state="needs_review" hash="-508019994">Du har för närvarande aktiverat äldre Olvid-säkerhetskopior som snart kommer att sluta stödjas.\nByt till det nya Olvid-säkerhetskopieringssystemet för att säkerställa att du kan återställa dina profiler och kontakter om du skulle förlora din enhet.</string>
 	<string name="enable_backups_message" state="needs_review" hash="1555907343">Genom att aktivera säkerhetskopior kan du återställa din profil och dina kontakter, även om du skulle förlora din enhet.</string>
-	<string name="content_description_contextual_actions" state="needs_review" hash="984380377">Kontextuella åtgärder-knapp</string>
+	<string name="content_description_contextual_actions" state="needs_review" hash="563463836">Kontextuella åtgärder</string>
 	<string name="label_backup_from" state="needs_review" hash="-1486363430">Från %1$s</string>
 	<string name="label_backup_groups_and_contacts" state="needs_review" hash="1197923862">%1$s, %2$s</string>
 	<string name="label_this_device" state="needs_review" hash="273515292">Den här enheten</string>
@@ -2028,6 +2030,8 @@
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">Vissa parametrar är inte korrekt konfigurerade på din enhet och kan påverka din upplevelse med Olvid.</string>
 	<string name="button_label_this_way" state="needs_review" hash="747183939">Den här vägen</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">Kod kopierad</string>
+	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">Välj vem du vill lägga till i den här gruppen.</string>
+	<string name="label_group_administration" state="needs_review" hash="871355986">Gruppadministration</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">Samtal blockerat</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid tillåter inte att starta ett samtal med fler än %1$d personer.</string>
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">Loop</string>
@@ -2039,4 +2043,51 @@
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Android-applikationsöversättningar</string>
 	<string name="pref_app_language_category_title" state="needs_review" hash="1411591324">AI-baserade översättningar</string>
 	<string name="pref_app_language_category_summary" state="needs_review" hash="-1895843046">Vissa av appens översättningar genereras med hjälp av AI och kan vara felaktiga. Om så är fallet, tveka inte att kontakta oss på <b>lang@olvid.io</b>.</string>
+	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">Ett lösenord krävs för att öppna denna PDF-fil</string>
+	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">Lösenord</string>
+	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">Felaktigt lösenord</string>
+	<string name="label_poll_create" state="needs_review" hash="-1677246175">Skapa en omröstning</string>
+	<string name="label_poll_question" state="needs_review" hash="-1615603188">Fråga</string>
+	<string name="hint_poll_question" state="needs_review" hash="1961289317">Ställa en fråga</string>
+	<string name="label_poll_answers" state="needs_review" hash="-382063458">Svar</string>
+	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">Lägg till</string>
+	<string name="label_poll_see_answers" state="needs_review" hash="710858547">Visa svar</string>
+	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">Väntar på deras svar</string>
+	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">Påminn</string>
+	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">Lägg till ett svar \"%1$s\"</string>
+	<string name="label_poll_options" state="needs_review" hash="-13216192">Alternativ</string>
+	<string name="text_none_answer" state="needs_review" hash="560562575">Inget av ovanstående</string>
+	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">Tillåt flera svar</string>
+	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">Välj ett eller flera svar</string>
+	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">Quizläge</string>
+	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">Slut</string>
+	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">Lägg till förfallodatum</string>
+	<string name="label_poll_expiration" state="needs_review" hash="605126523">Omröstningen avslutas om %1$s</string>
+	<string name="label_poll_ended" state="needs_review" hash="415569292">Omröstningen är avslutad</string>
+	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">Lägg till minst två svar</string>
+	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">Det här svaret finns redan</string>
+	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">Exportera som CSV</string>
+	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">Fel vid export av omröstning som CSV. Försök igen.</string>
+	<string name="toast_message_success_exporting_poll_csv" state="needs_review" hash="16134555">Export av omröstning till CSV lyckades</string>
+	<string name="label_poll_answers_sorted_by" state="needs_review" hash="102938809">Sorterat efter</string>
+	<string name="label_poll_answers_sorted_by_poll_order" state="needs_review" hash="685632215">Omröstningsordning</string>
+	<string name="label_poll_answers_sorted_by_answer_count" state="needs_review" hash="516869301">Antal svar</string>
+	<string name="notification_public_title_new_poll_vote" state="needs_review" hash="-1901040080">Nytt svar på din omröstning</string>
+	<string name="toast_message_remove_none_answer" state="needs_review" hash="277924655">Ta bort svaret \"%1$s\" först</string>
+	<string name="text_poll" state="needs_review" hash="-153643506">omröstning</string>
+	<string name="poll_csv_headers" state="needs_review" hash="1869917931">Enkätfråga,Väljarens namn,Röst,Datum</string>
+	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">Inget svar ännu</string>
+	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">Förestående enhetsavaktivering</string>
+	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">Hantera mina enheter</string>
+	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">Offline-enhet</string>
+	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">En av dina enheter har varit offline i **mer än 30 dagar**.\nOm du inte använder den längre rekommenderar vi att du **tar bort den** för att undvika synkroniseringsproblem.</string>
+	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">Hantera mina enheter</string>
+	<string name="tip_playstore_review_title" state="needs_review" hash="-1396782635">Tycker du om Olvid?</string>
+	<string name="tip_playstore_email_message" state="needs_review" hash="-583394070">Om du har några förslag på hur Olvid kan förbättras, hör av dig till oss på **feedback@olvid.io**.</string>
+	<string name="tip_playstore_email_subject" state="needs_review" hash="-1010646301">Android-appbetyg: %1$d/5</string>
+	<string name="tip_playstore_review_message" state="needs_review" hash="-407660073">Om du gillar Olvid, tveka inte att **lämna ett omdöme** på Google Play!</string>
+	<string name="tip_playstore_review_action" state="needs_review" hash="-271353090">Betygsätt oss på Google Play</string>
+	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Öppna i extern visare</string>
+	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Fel vid öppning av filen i Olvids interna visare</string>
+	<string name="button_label_invited" state="needs_review" hash="2094724552">Bjuden</string>
 </resources>

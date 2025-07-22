@@ -58,11 +58,11 @@ import androidx.core.view.WindowCompat
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.LockableActivity
-import io.olvid.messenger.designsystem.components.SimpleTopAppBar
+import io.olvid.messenger.designsystem.components.SelectionTopAppBar
 import io.olvid.messenger.discussion.message.SwipeForActionBox
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.archived.SwipeActionBackground
-import io.olvid.messenger.main.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.main.search.SearchResult
 import kotlinx.coroutines.launch
 
@@ -86,7 +86,7 @@ class BookmarkedMessagesActivity : LockableActivity() {
                     containerColor = colorResource(R.color.almostWhite),
                     contentColor = colorResource(R.color.almostBlack),
                     topBar = {
-                        SimpleTopAppBar(
+                        SelectionTopAppBar(
                             title = stringResource(R.string.activity_title_bookmarks),
                             selection = bookmarksViewModel.selection,
                             actions = listOf(R.drawable.ic_star_off to {

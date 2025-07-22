@@ -163,13 +163,13 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
         this.contactFilterEditText.addTextChangedListener(this);
         if (filteredContactListViewModel != null) {
             Editable editable = this.contactFilterEditText.getText();
-            filteredContactListViewModel.setFilter(editable == null ? "" : editable.toString());
+            filteredContactListViewModel.setSearchFilter(editable == null ? "" : editable.toString());
         }
     }
 
     public void setFilter(String filter) {
         if (filteredContactListViewModel != null) {
-            filteredContactListViewModel.setFilter(filter);
+            filteredContactListViewModel.setSearchFilter(filter);
         }
     }
 
@@ -219,7 +219,7 @@ public class FilteredContactListFragment extends Fragment implements TextWatcher
     @Override
     public void afterTextChanged(Editable editable) {
         if (filteredContactListViewModel != null) {
-            filteredContactListViewModel.setFilter(editable.toString());
+            filteredContactListViewModel.setSearchFilter(editable.toString());
         }
     }
 

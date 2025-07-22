@@ -54,7 +54,6 @@ import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.MessageReturnReceipt;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
-import io.olvid.messenger.databases.entity.ReactionRequest;
 import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest;
 import io.olvid.messenger.databases.tasks.ApplyDiscussionRetentionPoliciesTask;
 import io.olvid.messenger.databases.tasks.UpdateMessageImageResolutionsTask;
@@ -416,7 +415,6 @@ public class PeriodicTasksScheduler {
                 logPeriodicTaskRun(getApplicationContext(), getClass());
                 // delete all requests that have a server timestamp more than TTL in the past
                 AppDatabase.getInstance().remoteDeleteAndEditRequestDao().deleteOlderThan(System.currentTimeMillis() - RemoteDeleteAndEditRequest.TTL);
-                AppDatabase.getInstance().reactionRequestDao().deleteOlderThan(System.currentTimeMillis() - ReactionRequest.TTL);
                 AppDatabase.getInstance().messageReturnReceiptDao().deleteOlderThan(System.currentTimeMillis() - MessageReturnReceipt.TTL);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -424,7 +422,6 @@ public class PeriodicTasksScheduler {
             }
             return Result.success();
         }
-
     }
 
     public static class ImageAndVideoResolutionWorker extends Worker {

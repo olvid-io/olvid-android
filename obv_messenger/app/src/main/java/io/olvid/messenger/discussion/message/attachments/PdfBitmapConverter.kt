@@ -23,7 +23,12 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.ShapeDrawable
+import android.graphics.pdf.LoadParams
 import android.graphics.pdf.PdfRenderer
+import android.graphics.pdf.RenderParams
+import android.graphics.pdf.content.PdfPageGotoLinkContent
+import android.graphics.pdf.content.PdfPageLinkContent
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
@@ -44,14 +49,24 @@ class PdfBitmapConverter {
     var renderer: PdfRenderer? = null
     val lock = Object()
 
-    suspend fun pdfToBitmaps(filePath: String, maxPageWidthPx: Float, maxPageHeightPx: Float): List<RenderablePdfPage> {
+    suspend fun pdfToBitmaps(
+        filePath: String,
+        maxPageWidthPx: Float,
+        maxPageHeightPx: Float,
+        pdfPassword: String?
+    ): List<RenderablePdfPage> {
         return withContext(Dispatchers.IO) {
             renderer?.close()
             val fd = ParcelFileDescriptor.open(
-                File(App.absolutePathFromRelative(filePath)),
+                File(App.absolutePathFromRelative(filePath)!!),
                 ParcelFileDescriptor.MODE_READ_ONLY
             )
-            with(PdfRenderer(fd)) {
+            val localRenderer = if (pdfPassword != null && Build.VERSION.SDK_INT >= 35) {
+                PdfRenderer(fd, LoadParams.Builder().setPassword(pdfPassword).build())
+            } else {
+                PdfRenderer(fd)
+            }
+            with(localRenderer) {
                 renderer = this
                 return@withContext (0 until pageCount).map { index ->
                     openPage(index).use { page ->
@@ -66,8 +81,15 @@ class PdfBitmapConverter {
                             height = maxPageHeightPx.roundToInt()
                             width = (maxPageHeightPx * pageRatio).roundToInt()
                         }
-
-                        RenderablePdfPage(width, height, key = "${filePath}-${index}") {
+                        RenderablePdfPage(
+                            width = width,
+                            height = height,
+                            key = "${filePath}-${index}",
+                            originalWidth = page.width,
+                            originalHeight = page.height,
+                            linkContents = if (Build.VERSION.SDK_INT >= 35) page.linkContents else emptyList(),
+                            gotoLinks = if (Build.VERSION.SDK_INT >= 35) page.gotoLinks else emptyList()
+                        ) {
                             val bitmap = createBitmap(width, height)
 
                             Canvas(bitmap).apply {
@@ -79,12 +101,23 @@ class PdfBitmapConverter {
                             // on API35 this works fine without the lock
                             synchronized(lock) {
                                 openPage(index).use { page ->
-                                    page.render(
-                                        bitmap,
-                                        null,
-                                        null,
-                                        PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
-                                    )
+                                    if (Build.VERSION.SDK_INT >= 35) {
+                                        page.render(
+                                            bitmap,
+                                            null,
+                                            null,
+                                            RenderParams.Builder(RenderParams.RENDER_MODE_FOR_DISPLAY)
+                                                .setRenderFlags(RenderParams.FLAG_RENDER_TEXT_ANNOTATIONS or RenderParams.FLAG_RENDER_HIGHLIGHT_ANNOTATIONS)
+                                                .build()
+                                        )
+                                    } else {
+                                        page.render(
+                                            bitmap,
+                                            null,
+                                            null,
+                                            PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
+                                        )
+                                    }
                                 }
                             }
                             bitmap
@@ -96,27 +129,42 @@ class PdfBitmapConverter {
     }
 }
 
-data class RenderablePdfPage(val width: Int, val height: Int, val key: String, val render: suspend () -> Bitmap?)
+data class RenderablePdfPage(
+    val width: Int,
+    val height: Int,
+    val key: String,
+    val originalWidth: Int,
+    val originalHeight: Int,
+    val linkContents: List<PdfPageLinkContent>,
+    val gotoLinks: List<PdfPageGotoLinkContent>,
+    val render: suspend () -> Bitmap?
+)
 
 class RenderablePdfPageFetcher(
     private val renderablePdfPage: RenderablePdfPage,
     private val options: Options,
-): Fetcher {
+) : Fetcher {
     override suspend fun fetch(): FetchResult {
         return DrawableResult(
-            drawable = renderablePdfPage.render()?.toDrawable(options.context.resources) ?: ShapeDrawable(),
+            drawable = renderablePdfPage.render()?.toDrawable(options.context.resources)
+                ?: ShapeDrawable(),
             isSampled = true,
-            dataSource = DataSource.MEMORY)
+            dataSource = DataSource.MEMORY
+        )
     }
 
-    class Factory: Fetcher.Factory<RenderablePdfPage> {
-        override fun create(data: RenderablePdfPage, options: Options, imageLoader: ImageLoader): Fetcher {
+    class Factory : Fetcher.Factory<RenderablePdfPage> {
+        override fun create(
+            data: RenderablePdfPage,
+            options: Options,
+            imageLoader: ImageLoader
+        ): Fetcher {
             return RenderablePdfPageFetcher(data, options)
         }
     }
 }
 
-class RenderablePdfPageKeyer: Keyer<RenderablePdfPage> {
+class RenderablePdfPageKeyer : Keyer<RenderablePdfPage> {
     override fun key(data: RenderablePdfPage, options: Options): String {
         return data.key
     }

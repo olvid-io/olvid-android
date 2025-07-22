@@ -577,13 +577,15 @@ public class GroupV2 {
             return new ServerBlob(administratorsChain, groupMemberIdentityAndPermissionsAndDetailsList, version, serializedGroupDetails, serverPhotoInfo, serializedGroupType);
         }
 
-        public void consolidateWithLogEntries(GroupV2.Identifier groupIdentifier, List<byte[]> logEntries) {
+        public List<Identity> consolidateWithLogEntries(GroupV2.Identifier groupIdentifier, List<byte[]> logEntries) {
             HashSet<IdentityAndPermissionsAndDetails> leavers = new HashSet<>();
+            List<Identity> out = new ArrayList<>();
             for (byte[] logEntry : logEntries) {
                 for (IdentityAndPermissionsAndDetails groupMember : groupMemberIdentityAndPermissionsAndDetailsList) {
                     try {
                         if (Signature.verify(Constants.SignatureContext.GROUP_LEAVE_NONCE, groupIdentifier, groupMember.groupInvitationNonce, null, groupMember.identity, logEntry)) {
                             leavers.add(groupMember);
+                            out.add(groupMember.identity);
                             break;
                         }
                     } catch (Exception ignored) {}
@@ -591,6 +593,7 @@ public class GroupV2 {
             }
 
             groupMemberIdentityAndPermissionsAndDetailsList.removeAll(leavers);
+            return out;
         }
     }
 

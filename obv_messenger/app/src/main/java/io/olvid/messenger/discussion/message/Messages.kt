@@ -24,7 +24,11 @@ import android.content.Intent
 import android.text.SpannableString
 import android.text.style.URLSpan
 import android.text.util.Linkify
+import android.view.Gravity
+import android.widget.Toast
 import androidx.annotation.DrawableRes
+import androidx.annotation.PluralsRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -110,6 +114,9 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.text.util.LinkifyCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.engine.datatypes.ObvBase64
 import io.olvid.messenger.App
@@ -123,6 +130,7 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.customClasses.getShortEmojis
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.DiscussionCustomization
@@ -130,7 +138,9 @@ import io.olvid.messenger.databases.entity.Group
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.MessageExpiration
 import io.olvid.messenger.databases.entity.MessageMetadata
+import io.olvid.messenger.databases.entity.PollVote
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
+import io.olvid.messenger.databases.entity.jsons.JsonPoll
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
 import io.olvid.messenger.designsystem.components.AnimatedEmoji
@@ -139,6 +149,11 @@ import io.olvid.messenger.discussion.DiscussionViewModel
 import io.olvid.messenger.discussion.linkpreview.LinkPreview
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.message.attachments.Attachments
+import io.olvid.messenger.discussion.poll.PollCreationViewModel.Companion.NONE_ANSWER
+import io.olvid.messenger.discussion.poll.PollMessageBody
+import io.olvid.messenger.discussion.poll.PollResultActivity
+import io.olvid.messenger.discussion.poll.PollResultViewModel
+import io.olvid.messenger.discussion.poll.postPollVote
 import io.olvid.messenger.discussion.search.DiscussionSearch
 import io.olvid.messenger.discussion.search.DiscussionSearchViewModel
 import io.olvid.messenger.main.InitialView
@@ -176,10 +191,8 @@ fun MessageDisclaimer(modifier: Modifier = Modifier) {
 
 @Preview(widthDp = 300)
 @Composable
-private fun MessageDisclaimerPreview(modifier: Modifier = Modifier) {
-    AppCompatTheme {
-        MessageDisclaimer(modifier = Modifier.fillMaxWidth())
-    }
+private fun MessageDisclaimerPreview() {
+    MessageDisclaimer(modifier = Modifier.fillMaxWidth())
 }
 
 @Composable
@@ -187,7 +200,7 @@ fun ScrollDownButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     IconButton(
         modifier = modifier
             .background(
-                color = colorResource(id = R.color.accent),
+                color = colorResource(id = R.color.olvid_gradient_light),
                 shape = CircleShape
             )
             .requiredSize(40.dp),
@@ -205,10 +218,7 @@ fun ScrollDownButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
 @Preview
 @Composable
 private fun ScrollDownButtonPreview() {
-    AppCompatTheme {
-        ScrollDownButton {
-        }
-    }
+    ScrollDownButton {}
 }
 
 @Composable
@@ -388,33 +398,39 @@ fun Message(
                                 onLongClick = if (message.isLocationMessage) onLocationLongClick else onLongClick
                             )
                             .then(
-                                when (message.messageType) {
-                                    Message.TYPE_OUTBOUND_MESSAGE -> Modifier
-                                        .widthIn(max = maxWidth)
-                                        .align(Alignment.End)
-
-                                    Message.TYPE_INBOUND_MESSAGE -> Modifier
-                                        .widthIn(max = maxWidth)
-
-                                    Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> Modifier
+                                if (message.jsonPoll != null) {
+                                    Modifier
                                         .fillMaxWidth()
                                         .widthIn(max = maxWidth)
+                                } else {
+                                    when (message.messageType) {
+                                        Message.TYPE_OUTBOUND_MESSAGE -> Modifier
+                                            .widthIn(max = maxWidth)
+                                            .align(Alignment.End)
 
-                                    else -> Modifier
-                                        .fillMaxWidth()
-                                        .widthIn(max = maxWidth)
-                                        .padding(2.dp)
-                                        .background(
-                                            color = colorResource(id = R.color.almostWhite),
-                                            shape = RoundedCornerShape(8.dp)
-                                        )
-                                        .border(
-                                            width = 1.dp,
-                                            color = colorResource(
-                                                id = if (message.messageType == Message.TYPE_SCREEN_SHOT_DETECTED) R.color.red else R.color.primary400_90
-                                            ),
-                                            shape = RoundedCornerShape(8.dp)
-                                        )
+                                        Message.TYPE_INBOUND_MESSAGE -> Modifier
+                                            .widthIn(max = maxWidth)
+
+                                        Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> Modifier
+                                            .fillMaxWidth()
+                                            .widthIn(max = maxWidth)
+
+                                        else -> Modifier
+                                            .fillMaxWidth()
+                                            .widthIn(max = maxWidth)
+                                            .padding(2.dp)
+                                            .background(
+                                                color = colorResource(id = R.color.almostWhite),
+                                                shape = RoundedCornerShape(8.dp)
+                                            )
+                                            .border(
+                                                width = 1.dp,
+                                                color = colorResource(
+                                                    id = if (message.messageType == Message.TYPE_SCREEN_SHOT_DETECTED) R.color.red else R.color.primary400_90
+                                                ),
+                                                shape = RoundedCornerShape(8.dp)
+                                            )
+                                    }
                                 }
                             )
                             .padding(6.dp),
@@ -424,7 +440,7 @@ fun Message(
                         // Sender
                         if (showSender && lastFromSender) {
                             val displayName =
-                                AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                                ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
                                     ?: stringResource(
                                         id = R.string.text_deleted_contact
                                     )
@@ -436,7 +452,7 @@ fun Message(
                                     InitialView.getTextColor(
                                         context,
                                         message.senderIdentifier,
-                                        AppSingleton.getContactCustomHue(message.senderIdentifier)
+                                        ContactCacheSingleton.getContactCustomHue(message.senderIdentifier)
                                     )
                                 )
                             )
@@ -453,6 +469,22 @@ fun Message(
                         // forwarded
                         Forwarded(message)
 
+                        val jsonPoll = message.getPoll()
+                        val pollResults = jsonPoll?.let {
+                            val viewModel: PollResultViewModel = viewModel(
+                                key = message.id.toString(),
+                                factory =
+                                    viewModelFactory {
+                                        initializer {
+                                            PollResultViewModel(message.id)
+                                        }
+                                    })
+                            viewModel.pollResults.observeAsState(emptyList())
+                        }
+                        val voters = remember(pollResults?.value) {
+                            pollResults?.value?.filter { it.voted }
+                                ?.distinctBy { it.voter.contentToString() }?.size
+                        }
                         // content body
                         MessageBody(
                             message = message,
@@ -466,7 +498,10 @@ fun Message(
                             useAnimatedEmojis = useAnimatedEmojis,
                             loopAnimatedEmojis = loopAnimatedEmojis,
                             openDiscussionDetailsCallback = openDiscussionDetailsCallback,
-                            messageBubbleInteractionSource = interactionSource
+                            messageBubbleInteractionSource = interactionSource,
+                            jsonPoll = jsonPoll,
+                            pollResults = pollResults?.value,
+                            interactionSource = interactionSource
                         )
 
                         // message footer
@@ -479,6 +514,7 @@ fun Message(
                                 }
                                 App.runThread { DeleteMessagesTask(listOf(messageId), LOCAL).run() }
                             },
+                            pollVoters = voters,
                             context = context
                         )
 
@@ -607,6 +643,7 @@ private fun MessageFooter(
     message: Message,
     editedSeen: () -> Unit,
     directDelete: (Long) -> Unit,
+    pollVoters: Int? = null,
     context: Context
 ) {
     Row(
@@ -665,6 +702,33 @@ private fun MessageFooter(
             )
         }
 
+        pollVoters?.let { voters ->
+            // View Answers Button
+            Text(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple(color = colorResource(R.color.olvid_gradient_light))
+                    ) {
+                        context.startActivity(
+                            Intent(
+                                context,
+                                PollResultActivity::class.java
+                            ).apply {
+                                putExtra(
+                                    PollResultActivity.MESSAGE_ID_INTENT_EXTRA,
+                                    message.id
+                                )
+                            })
+                    }
+                    .padding(vertical = 2.dp, horizontal = 4.dp),
+                text = stringResource(R.string.label_poll_see_answers) + if (voters == 0) "" else " ($voters)",
+                style = OlvidTypography.body2.copy(fontWeight = FontWeight.Medium),
+                color = colorResource(R.color.olvid_gradient_light)
+            )
+        }
+
         Spacer(modifier = Modifier.weight(1f, true))
 
         // timestamp
@@ -717,9 +781,9 @@ private fun Replied(
             Color(
                 InitialView.getTextColor(
                     context = context,
-                    message.jsonMessage?.jsonReply?.senderIdentifier
+                    message.jsonMessage.jsonReply?.senderIdentifier
                         ?: byteArrayOf(),
-                    AppSingleton.getContactCustomHue(message.jsonMessage?.jsonReply?.senderIdentifier)
+                    ContactCacheSingleton.getContactCustomHue(message.jsonMessage.jsonReply?.senderIdentifier)
                 )
             )
         }
@@ -740,8 +804,8 @@ private fun Replied(
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = message.jsonMessage?.jsonReply?.senderIdentifier?.let {
-                    AppSingleton.getContactCustomDisplayName(it)
+                text = message.jsonMessage.jsonReply?.senderIdentifier?.let {
+                    ContactCacheSingleton.getContactCustomDisplayName(it)
                 } ?: stringResource(id = R.string.text_deleted_contact),
                 style = OlvidTypography.body2.copy(
                     fontWeight = FontWeight.Medium
@@ -825,6 +889,9 @@ fun MessageBody(
     discussionSearch: DiscussionSearch? = null,
     openDiscussionDetailsCallback: (() -> Unit)? = null,
     messageBubbleInteractionSource: MutableInteractionSource,
+    jsonPoll: JsonPoll?,
+    pollResults: List<PollVote>?,
+    interactionSource: MutableInteractionSource? = null,
 ) {
     val context = LocalContext.current
 
@@ -856,7 +923,7 @@ fun MessageBody(
                     text = stringResource(R.string.text_message_content_remote_deleted_by_you)
                 } else {
                     val displayName =
-                        AppSingleton.getContactCustomDisplayName(deleter)
+                        ContactCacheSingleton.getContactCustomDisplayName(deleter)
                     if (displayName != null) {
                         text = stringResource(
                             R.string.text_message_content_remote_deleted_by,
@@ -887,7 +954,7 @@ fun MessageBody(
                                 context.getString(R.string.text_message_content_remote_deleted_by_you)
                         } else {
                             val displayName =
-                                AppSingleton.getContactCustomDisplayName(
+                                ContactCacheSingleton.getContactCustomDisplayName(
                                     messageMetadata.bytesRemoteIdentity
                                 )
                             if (displayName != null) {
@@ -929,26 +996,36 @@ fun MessageBody(
         when (message.messageType) {
 
             Message.TYPE_GROUP_MEMBER_JOINED -> {
-                MessageInfoWithSenderDisplayName(
-                    message.senderIdentifier,
-                    R.string.text_joined_the_group,
-                    R.string.text_unknown_member_joined_the_group
+                GroupUpdateMessageInfo(
+                    message = message,
+                    updatedBy = R.string.text_joined_the_group_by,
+                    updatedByYou = R.string.text_joined_the_group_by_you,
+                    default = R.plurals.text_joined_the_group,
+                    unknown = R.string.text_unknown_member_joined_the_group,
+                    onLongClick = onLongClick,
+                    interactionSource = interactionSource,
                 )
             }
 
             Message.TYPE_GROUP_MEMBER_LEFT -> {
-                MessageInfoWithSenderDisplayName(
-                    message.senderIdentifier,
-                    R.string.text_left_the_group,
-                    R.string.text_unknown_member_left_the_group
+                GroupUpdateMessageInfo(
+                    message = message,
+                    updatedBy = R.string.text_left_the_group_by,
+                    updatedByYou = R.string.text_left_the_group_by_you,
+                    default = R.plurals.text_left_the_group,
+                    unknown = R.string.text_unknown_member_left_the_group,
+                    onLongClick = onLongClick,
+                    interactionSource = interactionSource,
                 )
             }
 
             Message.TYPE_DISCUSSION_REMOTELY_DELETED -> {
-                MessageInfoWithSenderDisplayName(
-                    message.senderIdentifier,
-                    R.string.text_discussion_remotely_deleted_by,
-                    R.string.text_discussion_remotely_deleted
+                MessageInfo(
+                    text = ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                        ?.let {
+                            stringResource(id = R.string.text_discussion_remotely_deleted_by, it)
+                        } ?: stringResource(id = R.string.text_discussion_remotely_deleted),
+                    interactionSource = interactionSource
                 )
             }
 
@@ -970,7 +1047,7 @@ fun MessageBody(
                         ) {
                             stringResource(id = R.string.text_you_captured_sensitive_message)
                         } else {
-                            AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                            ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
                                 ?.let {
                                     stringResource(
                                         id = R.string.text_xxx_captured_sensitive_message,
@@ -1040,13 +1117,14 @@ fun MessageBody(
 
             Message.TYPE_DISCUSSION_SETTINGS_UPDATE -> {
                 Column {
-                    Text(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
                         maxLines = 3,
                         textAlign = TextAlign.Center,
                         text = if (message.status == Message.STATUS_READ) {
-                            AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                            ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
                                 ?.let {
                                     stringResource(id = R.string.text_updated_shared_settings, it)
                                 }
@@ -1088,10 +1166,46 @@ fun MessageBody(
                     )
                 }
                 val uriHandler = LocalUriHandler.current
-                if (text.isNotBlank()) {
+                if (pollResults != null && jsonPoll != null) {
+                    PollMessageBody(
+                        pollResults = pollResults,
+                        jsonPoll = jsonPoll,
+                        highlighter = discussionSearch?.viewModel?.let {
+                            it::highlight
+                        },
+                        onVote = { voteUuid, voted ->
+                            if (jsonPoll.expiration != null && jsonPoll.expiration < System.currentTimeMillis()) {
+                                App.toast(R.string.label_poll_ended, Toast.LENGTH_SHORT)
+                                return@PollMessageBody
+                            }
+                            if (jsonPoll.multipleChoice && voteUuid != NONE_ANSWER.uuid && pollResults.any {
+                                    it.voteUuid == NONE_ANSWER.uuid && it.voter.contentEquals(
+                                        AppSingleton.getBytesCurrentIdentity()
+                                    )
+                                }) {
+                                App.toast(
+                                    context.getString(
+                                        R.string.toast_message_remove_none_answer,
+                                        context.getString(R.string.text_none_answer)
+                                    ), Toast.LENGTH_SHORT, Gravity.BOTTOM
+                                )
+                                return@PollMessageBody
+                            }
+                            App.runThread {
+                                message.postPollVote(
+                                    voteUuid = voteUuid,
+                                    voted = voted
+                                )
+                            }
+                        }
+                    )
+                } else if (text.isNotBlank()) {
                     val shortEmojis = text.text.getShortEmojis(5)
-                    if (useAnimatedEmojis == true && shortEmojis.isNotEmpty()) {
-                        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    if (useAnimatedEmojis && shortEmojis.isNotEmpty()) {
+                        FlowRow(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
                             shortEmojis.forEach { shortEmoji ->
                                 AnimatedEmoji(
                                     modifier = Modifier.padding(horizontal = 2.dp),
@@ -1104,8 +1218,10 @@ fun MessageBody(
                             }
                         }
                     } else {
-                        val textSize = if (shortEmojis.isNotEmpty()) 48.sp * scale else 16.sp * scale
-                        val textAlign = if (shortEmojis.isNotEmpty()) TextAlign.Center else TextAlign.Start
+                        val textSize =
+                            if (shortEmojis.isNotEmpty()) 48.sp * scale else 16.sp * scale
+                        val textAlign =
+                            if (shortEmojis.isNotEmpty()) TextAlign.Center else TextAlign.Start
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1158,11 +1274,14 @@ fun MessageBody(
                                                                     .getInstance()
                                                                     .contactDao()[bytesOwnedIdentity, userIdentifier] != null
                                                             ) {
-                                                                AppSingleton.getBytesCurrentIdentity()?.let {App.openContactDetailsActivity(
-                                                                    context,
-                                                                    it,
-                                                                    userIdentifier)
-                                                                }
+                                                                AppSingleton.getBytesCurrentIdentity()
+                                                                    ?.let {
+                                                                        App.openContactDetailsActivity(
+                                                                            context,
+                                                                            it,
+                                                                            userIdentifier
+                                                                        )
+                                                                    }
                                                             }
                                                         }
                                                     }
@@ -1239,43 +1358,47 @@ fun inlineContentMap(scale: Float = 1f) = mapOf(
         val quoteImage = ImageVector.vectorResource(id = R.drawable.quote)
         val quotePainter = rememberVectorPainter(image = quoteImage)
         val fontScale = with(LocalDensity.current) { fontScale }
-        Box(modifier = Modifier
-            .offset(x = (-26 * fontScale * scale).dp, y = 0.dp)
-            .drawBehind {
-                with(quotePainter) {
-                    draw(
-                        size = Size(
-                            20 * density * fontScale * scale,
-                            16.6f * density * fontScale * scale
+        Box(
+            modifier = Modifier
+                .offset(x = (-26 * fontScale * scale).dp, y = 0.dp)
+                .drawBehind {
+                    with(quotePainter) {
+                        draw(
+                            size = Size(
+                                20 * density * fontScale * scale,
+                                16.6f * density * fontScale * scale
+                            )
                         )
-                    )
-                }
-            })
+                    }
+                })
     }
 )
 
 
 @Composable
-private fun MessageInfoWithSenderDisplayName(
-    senderIdentifier: ByteArray,
-    senderStringResource: Int,
-    unknownStringResource: Int
+private fun MessageInfo(
+    text: String,
+    interactionSource: MutableInteractionSource? = null,
+    expanded: Boolean = false,
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
 ) {
-    Text(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 16.dp),
-        maxLines = 3,
+    Text(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                interactionSource = interactionSource ?: remember { MutableInteractionSource() },
+                indication = if (interactionSource == null) ripple(color = colorResource(R.color.almostBlack)) else null,
+                onClick =
+                    onClick ?: {},
+                onLongClick = onLongClick
+            )
+            .padding(horizontal = 16.dp),
+        maxLines = if (expanded) Int.MAX_VALUE else 3,
         textAlign = TextAlign.Center,
-        text =
-        AppSingleton.getContactCustomDisplayName(senderIdentifier)
-            ?.let {
-                stringResource(
-                    id = senderStringResource,
-                    it
-                )
-            }
-            ?: stringResource(id = unknownStringResource),
-        color = colorResource(id = R.color.primary700))
+        text = text,
+        color = colorResource(id = R.color.primary700)
+    )
 }
 
 fun getAnnotatedStringContent(
@@ -1477,6 +1600,89 @@ private fun MessagePreview() {
 }
 
 @Composable
+fun GroupUpdateMessageInfo(
+    message: Message,
+    @StringRes updatedBy: Int,
+    @StringRes updatedByYou: Int,
+    @PluralsRes default: Int,
+    @StringRes unknown: Int,
+    onLongClick: (() -> Unit)? = null,
+    interactionSource: MutableInteractionSource? = null,
+) {
+    val context = LocalContext.current
+    var expanded by remember { mutableStateOf(false) }
+
+    if (message.jsonMentions == null) {
+        // legacy group left/joined messages
+        val displayName =
+            ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
+
+        MessageInfo(
+            text = if (displayName != null) {
+                pluralStringResource(id = default, 1, displayName)
+            } else {
+                stringResource(id = unknown)
+            },
+            interactionSource = interactionSource,
+            expanded = expanded,
+            onClick = { expanded = !expanded },
+            onLongClick = onLongClick
+        )
+    } else {
+        // new (possibly merged) left/joined group messages
+        val byYou =
+            AppSingleton.getBytesCurrentIdentity()?.contentEquals(message.senderIdentifier) == true
+        val displayName = ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
+        var mentionCount = remember(expanded, message.jsonMentions) {
+            0
+        }
+        val mention = remember(expanded, message.jsonMentions) {
+            message.mentions?.map {
+                ContactCacheSingleton.getContactCustomDisplayName(it.userIdentifier)
+                    ?: context.getString(R.string.text_unknown_member)
+            }?.sortedBy {
+                StringUtils.unAccent(it)
+            }?.let {
+                mentionCount = it.size
+                StringUtils.joinContactDisplayNames(
+                    it.toTypedArray(),
+                    if (expanded) 0 else 5
+                )
+            }
+        }
+        MessageInfo(
+            text = if (mention != null) {
+                if (displayName != null) {
+                    if (byYou) {
+                        stringResource(
+                            id = updatedByYou,
+                            displayName,
+                            mention
+                        )
+                    } else {
+                        stringResource(
+                            id = updatedBy,
+                            displayName,
+                            mention
+                        )
+                    }
+                } else {
+                    pluralStringResource(id = default, mentionCount, mention)
+                }
+            } else if (displayName != null) {
+                pluralStringResource(id = default, 1, displayName)
+            } else {
+                stringResource(id = unknown)
+            },
+            interactionSource = interactionSource,
+            expanded = expanded,
+            onClick = { expanded = !expanded },
+            onLongClick = onLongClick
+        )
+    }
+}
+
+@Composable
 fun MissedMessageCount(modifier: Modifier = Modifier, missedMessageCount: Int) {
     val context = LocalContext.current
     Row(
@@ -1514,8 +1720,6 @@ fun MissedMessageCount(modifier: Modifier = Modifier, missedMessageCount: Int) {
             color = colorResource(id = R.color.greyOverlay)
         )
     }
-
-
 }
 
 @PreviewLightDark
@@ -1556,6 +1760,7 @@ val messageInbound = Message(
     null,
     null,
     false,
+    null
 ).apply {
     bookmarked = true
 }
@@ -1589,6 +1794,7 @@ val messageOutboundLocation = Message(
     null,
     null,
     false,
+    null
 )
 val messageOutbound = Message(
     0,
@@ -1620,6 +1826,7 @@ val messageOutbound = Message(
     null,
     null,
     false,
+    null
 )
 val messageSystem = Message(
     0,
@@ -1651,4 +1858,5 @@ val messageSystem = Message(
     null,
     null,
     false,
+    null
 )

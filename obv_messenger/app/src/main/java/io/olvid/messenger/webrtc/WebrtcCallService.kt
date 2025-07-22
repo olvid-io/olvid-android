@@ -1256,8 +1256,7 @@ class WebrtcCallService : Service() {
                     callerUsername,
                     callerPassword /*, turnServers*/
                 )
-                callParticipant.peerConnectionHolder.createPeerConnection()
-                if (callParticipant.peerConnectionHolder.peerConnection == null) {
+                if (!callParticipant.peerConnectionHolder.createPeerConnection()) {
                     peerConnectionHolderFailed(callParticipant, PEER_CONNECTION_CREATION_ERROR)
                 }
             }
@@ -1746,8 +1745,7 @@ class WebrtcCallService : Service() {
         }
 
         // turn credentials have already been set in recipientReceiveCall step, so we can create the peer connection
-        callerCallParticipant.peerConnectionHolder.createPeerConnection()
-        if (callerCallParticipant.peerConnectionHolder.peerConnection == null) {
+        if (!callerCallParticipant.peerConnectionHolder.createPeerConnection()) {
             peerConnectionHolderFailed(callerCallParticipant, PEER_CONNECTION_CREATION_ERROR)
             return
         }
@@ -1909,8 +1907,8 @@ class WebrtcCallService : Service() {
                         turnUserName,
                         turnPassword /*, turnServers*/
                     )
-                    callParticipant.peerConnectionHolder.createPeerConnection()
-                    if (callParticipant.peerConnectionHolder.peerConnection == null) {
+
+                    if (!callParticipant.peerConnectionHolder.createPeerConnection()) {
                         peerConnectionHolderFailed(callParticipant, PEER_CONNECTION_CREATION_ERROR)
                     }
                 }
@@ -2002,8 +2000,8 @@ class WebrtcCallService : Service() {
                 turnUserName,
                 turnPassword /*, turnServers*/
             )
-            callParticipant.peerConnectionHolder.createPeerConnection()
-            if (callParticipant.peerConnectionHolder.peerConnection == null) {
+
+            if (!callParticipant.peerConnectionHolder.createPeerConnection()) {
                 peerConnectionHolderFailed(callParticipant, PEER_CONNECTION_CREATION_ERROR)
             }
         }
@@ -2166,8 +2164,8 @@ class WebrtcCallService : Service() {
                             turnUserName,
                             turnPassword /*, turnServers*/
                         )
-                        callParticipant.peerConnectionHolder.createPeerConnection()
-                        if (callParticipant.peerConnectionHolder.peerConnection == null) {
+
+                        if (!callParticipant.peerConnectionHolder.createPeerConnection()) {
                             peerConnectionHolderFailed(
                                 callParticipant,
                                 PEER_CONNECTION_CREATION_ERROR
@@ -2512,7 +2510,7 @@ class WebrtcCallService : Service() {
 
     // region Helper methods
     fun shouldISendTheOfferToCallParticipant(callParticipant: CallParticipant): Boolean {
-        return BytesKey(bytesOwnedIdentity) > BytesKey(callParticipant.bytesContactIdentity)
+        return BytesKey(callParticipant.bytesOwnedIdentity) > BytesKey(callParticipant.bytesContactIdentity)
     }
 
     fun synchronizeOnExecutor(runnable: Runnable) {
@@ -4478,7 +4476,7 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
         const val CALL_IDENTIFIER_INTENT_EXTRA = "call_identifier"
         const val MESSAGE_TYPE_INTENT_EXTRA = "message_type"
         const val SERIALIZED_MESSAGE_PAYLOAD_INTENT_EXTRA = "serialized_message_payload"
-        private const val CREDENTIALS_TTL: Long = 43200000
+        private const val CREDENTIALS_TTL: Long = 43_200_000
         private const val PREF_KEY_TIMESTAMP = "timestamp"
         private const val PREF_KEY_USERNAME1 = "username1"
         private const val PREF_KEY_PASSWORD1 = "password1"

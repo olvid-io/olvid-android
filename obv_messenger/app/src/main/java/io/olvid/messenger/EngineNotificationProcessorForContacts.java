@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
@@ -32,18 +33,19 @@ import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.ObvContactDeviceCount;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.dao.MessageRecipientInfoDao;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
-import io.olvid.messenger.databases.tasks.HandleNewMessageNotificationTask;
 import io.olvid.messenger.databases.tasks.InsertContactRevokedMessageTask;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.UpdateContactActiveTask;
 import io.olvid.messenger.databases.tasks.UpdateContactDisplayNameAndPhotoTask;
 import io.olvid.messenger.databases.tasks.UpdateContactKeycloakManagedTask;
+import io.olvid.messenger.databases.tasks.new_message.ProcessReadyToProcessOnHoldMessagesTask;
 
 public class EngineNotificationProcessorForContacts implements EngineNotificationListener {
     private final Engine engine;
@@ -157,8 +159,8 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                             try {
                                 createdContact = new Contact(contactIdentity.getBytesIdentity(), bytesOwnedIdentity, contactIdentity.getIdentityDetails(), hasUntrustedPublishedDetails, null, contactIdentity.isKeycloakManaged(), contactIdentity.isActive(), oneToOne, trustLevel, true);
                                 if (Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                                    AppSingleton.updateCachedCustomDisplayName(createdContact.bytesContactIdentity, createdContact.getCustomDisplayName(), createdContact.getFirstNameOrCustom());
-                                    AppSingleton.updateContactCachedInfo(createdContact);
+                                    ContactCacheSingleton.INSTANCE.updateCachedCustomDisplayName(createdContact);
+                                    ContactCacheSingleton.INSTANCE.updateContactCachedInfo(createdContact);
                                 }
                                 db.contactDao().insert(createdContact);
                             } catch (Exception e) {
@@ -171,8 +173,22 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                                 if (discussion == null) {
                                     throw new RuntimeException("Unable to create discussion!");
                                 }
+
+                                // mark all on hold messages (if any) as ready to process
+                                int count = db.onHoldInboxMessageDao().markAsReadyToProcessForContactDiscussion(
+                                        createdContact.bytesOwnedIdentity,
+                                        createdContact.bytesContactIdentity
+                                );
+                                if (count > 0) {
+                                    Logger.i("⏸️ Marked " + count + " on hold messages as ready to process");
+                                }
                             }
                         });
+
+                        if (oneToOne) {
+                            // if the transaction finished without an exception, trigger the process of on hold messages that are ready to process
+                            AppSingleton.getEngine().runTaskOnEngineNotificationQueue(new ProcessReadyToProcessOnHoldMessagesTask(engine, db, bytesOwnedIdentity));
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -199,7 +215,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                     if (contact != null) {
                         contact.delete();
                         if (Arrays.equals(contact.bytesContactIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                            AppSingleton.reloadCachedDisplayNamesAndHues();
+                            ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues();
                         }
                     }
                 }
@@ -363,7 +379,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                     contact.oneToOne = oneToOne;
                     db.contactDao().updateOneToOne(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.oneToOne);
                     if (Arrays.equals(contact.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                        AppSingleton.updateContactCachedInfo(contact);
+                        ContactCacheSingleton.INSTANCE.updateContactCachedInfo(contact);
                     }
                     if (oneToOne) {
                         try {
@@ -372,12 +388,22 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                                 if (discussion == null) {
                                     throw new RuntimeException("Unable to create discussion");
                                 }
+
+                                // mark all on hold messages (if any) as ready to process
+                                int count = db.onHoldInboxMessageDao().markAsReadyToProcessForContactDiscussion(
+                                        contact.bytesOwnedIdentity,
+                                        contact.bytesContactIdentity
+                                );
+                                if (count > 0) {
+                                    Logger.i("⏸️ Marked " + count + " on hold messages as ready to process");
+                                }
                             });
+
+                            // if the transaction finished without an exception, trigger the process of on hold messages that are ready to process
+                            AppSingleton.getEngine().runTaskOnEngineNotificationQueue(new ProcessReadyToProcessOnHoldMessagesTask(engine, db, contact.bytesOwnedIdentity));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        // reprocess any one-to-one message that was put on hold
-                        HandleNewMessageNotificationTask.processAllOneToOneMessagesOnHold(engine, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                     } else {
                         db.runInTransaction(() -> {
                             Discussion discussion = db.discussionDao().getByContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
@@ -402,7 +428,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                 if (contact != null && contact.recentlyOnline != recentlyOnline) {
                     contact.recentlyOnline = recentlyOnline;
                     db.contactDao().updateRecentlyOnline(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.recentlyOnline);
-                    AppSingleton.updateContactCachedInfo(contact);
+                    ContactCacheSingleton.INSTANCE.updateContactCachedInfo(contact);
                 }
                 break;
             }
@@ -420,7 +446,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                     contact.trustLevel = trustLevel;
                     db.contactDao().updateTrustLevel(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.trustLevel);
                     if (Arrays.equals(contact.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                        AppSingleton.updateContactCachedInfo(contact);
+                        ContactCacheSingleton.INSTANCE.updateContactCachedInfo(contact);
                     }
 
                     if (contact.oneToOne) {

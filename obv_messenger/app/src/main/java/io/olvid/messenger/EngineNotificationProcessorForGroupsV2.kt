@@ -57,9 +57,12 @@ class EngineNotificationProcessorForGroupsV2 internal constructor(engine: Engine
     override fun callback(notificationName: String, userInfo: HashMap<String, Any>) {
         when (notificationName) {
             EngineNotifications.GROUP_V2_CREATED_OR_UPDATED -> {
-                val groupV2 = userInfo[EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_GROUP_KEY] as ObvGroupV2?
-                val groupWasJustCreatedByMe = userInfo[EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_NEW_GROUP_KEY] as Boolean?
-                val updatedByMe = userInfo[EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_BY_ME_KEY] as Boolean?
+                val groupV2 = userInfo[EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_GROUP_KEY] as? ObvGroupV2?
+                val groupWasJustCreatedByMe = userInfo[EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_NEW_GROUP_KEY] as? Boolean?
+                val updatedByMe = userInfo[EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_BY_ME_KEY] as? Boolean?
+                val updatedBy = userInfo[EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_BY_KEY] as? ByteArray?
+                @Suppress("UNCHECKED_CAST")
+                val groupLeavers = userInfo[EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_GROUP_LEAVERS_KEY] as? Array<ByteArray>?
                 val createdOnOtherDevice = userInfo[EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_CREATED_ON_OTHER_DEVICE] as Boolean?
                 if (groupV2 == null || groupWasJustCreatedByMe == null || updatedByMe == null || createdOnOtherDevice == null) {
                     return
@@ -80,7 +83,9 @@ class EngineNotificationProcessorForGroupsV2 internal constructor(engine: Engine
                     updatedByMe,
                     createdOnOtherDevice,
                     false,
-                    jsonExpirationSettings
+                    jsonExpirationSettings,
+                    updatedBy,
+                    groupLeavers
                 ).run()
             }
 

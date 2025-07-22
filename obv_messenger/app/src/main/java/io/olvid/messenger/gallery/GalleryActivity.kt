@@ -50,6 +50,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.viewModels
+import androidx.annotation.OptIn
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.animation.AnimatedVisibility
@@ -61,7 +62,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -99,6 +99,7 @@ import io.olvid.messenger.databases.entity.MessageExpiration
 import io.olvid.messenger.databases.entity.TextBlock
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask
+import io.olvid.messenger.designsystem.theme.olvidSwitchDefaults
 import io.olvid.messenger.gallery.GalleryActivity.MENU_TYPE.DELETE_ONLY
 import io.olvid.messenger.gallery.GalleryActivity.MENU_TYPE.INCOMPLETE_OR_DRAFT
 import io.olvid.messenger.gallery.GalleryActivity.MENU_TYPE.NONE
@@ -117,7 +118,6 @@ import java.util.TimerTask
 import kotlin.math.abs
 
 
-@UnstableApi
 class GalleryActivity : LockableActivity() {
     private val viewModel: GalleryViewModel by viewModels()
 
@@ -281,6 +281,7 @@ class GalleryActivity : LockableActivity() {
             var currentPosition: Int = 0
             var oldPlayerView: PlayerView? = null
 
+            @OptIn(UnstableApi::class)
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 var newVideoViewHolder: GalleryImageViewHolder?
@@ -395,14 +396,7 @@ class GalleryActivity : LockableActivity() {
                         onCheckedChange = { checked ->
                             showTextBlocks = checked
                         },
-                        colors = SwitchDefaults.colors(
-                            uncheckedTrackColor = colorResource(R.color.alwaysWhite),
-                            uncheckedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
-                            checkedTrackColor = colorResource(R.color.olvid_gradient_dark),
-                            checkedBorderColor = androidx.compose.ui.graphics.Color.Transparent,
-                            checkedThumbColor = colorResource(R.color.alwaysWhite),
-                            checkedIconColor = colorResource(R.color.olvid_gradient_dark),
-                        ),
+                        colors = olvidSwitchDefaults(),
                         thumbContent = {
                             Icon(
                                 modifier = Modifier.padding(4.dp),
@@ -508,7 +502,8 @@ class GalleryActivity : LockableActivity() {
             ): Boolean {
                 if (4 * abs(velocityX.toDouble()) < abs(velocityY.toDouble()) && (velocityY > SWIPE_THRESHOLD_VELOCITY || velocityY < -SWIPE_THRESHOLD_VELOCITY)
                     && viewPager.isUserInputEnabled
-                    && e1!!.y > 100 // no fling if starting from top of screen (like to show status bar)
+                    && e1 != null
+                    && e1.y > 100 // no fling if starting from top of screen (like to show status bar)
                 ) {
                     finish()
                     if (velocityY < 0) {

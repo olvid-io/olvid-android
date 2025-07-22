@@ -74,6 +74,13 @@ public class BatchUploadMessagesCompositeOperation extends Operation {
         return Collections.emptyList();
     }
 
+    public List<IdentityAndUid> getTooManyHeadersUnsentMessageUids() {
+        if (suboperations != null && suboperations.length > 0) {
+            return ((BatchUploadMessagesOperation) suboperations[0]).getTooManyHeadersUnsentMessageUids();
+        }
+        return Collections.emptyList();
+    }
+
     @Override
     public void doCancel() {
         for (Operation op: suboperations) {

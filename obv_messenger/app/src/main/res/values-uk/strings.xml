@@ -1,7 +1,6 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Деталі контакту</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Деталі користувача</string>
-	<string name="activity_title_create_group" state="needs_review" hash="323669209">Створити групу</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Деталі групи</string>
 	<string name="activity_title_my_details" state="needs_review" hash="-1089973499">Мій профіль</string>
 	<string name="activity_title_settings" state="needs_review" hash="-686438097">Налаштування Olvid</string>
@@ -32,13 +31,12 @@
 	<string name="button_label_ignore" state="needs_review" hash="-806373746">Ігнорувати</string>
 	<string name="button_label_reject" state="needs_review" hash="-2094664161">Відхилити</string>
 	<string name="button_label_introduce" state="needs_review" hash="193852909">Представити</string>
-	<string name="button_label_invite_members" state="needs_review" hash="-118308632">Запросити\nчленів</string>
+	<string name="button_label_invite_members" state="needs_review" hash="-1063364436">Запросити учасників</string>
 	<string name="button_label_next" state="needs_review" hash="1158639077">Наступний</string>
 	<string name="button_label_ok" state="needs_review" hash="2428088">Добре</string>
-	<string name="button_label_previous" state="needs_review" hash="-1639666563">Попередній</string>
 	<string name="button_label_proceed" state="needs_review" hash="-1224815476">Продовжити</string>
 	<string name="button_label_publish" state="needs_review" hash="-1355390088">Опублікувати</string>
-	<string name="button_label_remove_members" state="needs_review" hash="707573877">Видалити\nучасників</string>
+	<string name="button_label_remove_members" state="needs_review" hash="1938722985">Видалити учасників</string>
 	<string name="button_label_remove_nickname" state="needs_review" hash="-1702159211">Скинути</string>
 	<string name="button_label_update" state="needs_review" hash="648230638">Оновлення</string>
 	<string name="button_label_validate" state="needs_review" hash="-521764973">Підтвердити</string>
@@ -90,7 +88,9 @@
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">Наразі груп немає</string>
 	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Натисніть "Нову групу", щоб створити свою першу групу.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">Менеджер групи оновив картку групи. Стара та нова версії показані нижче.\n\nНатисніть "Оновити", щоб оновити інформацію про групу.</string>
-	<string name="explanation_new_group_v2_card" state="needs_review" hash="-224925220">Один з адміністраторів групи оновив деталі групи. Нова версія відображена вище.\n\nНатисніть "Оновити", щоб використати цю нову версію.</string>
+	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Адміністратор змінив назву групи на:</string>
+	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Адміністратор змінив опис групи на:</string>
+	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">Адміністратор змінив фотографію групи.</string>
 	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">Ваш контакт оновив свою Olvid Card. Стара та нова версії показані нижче.\n\nНатисніть "Оновити", щоб оновити інформацію про ваш контакт цією новою версією.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">Зараз відбувається встановлення безпечного каналу зв’язку. Ви не зможете розпочати будь-яку дискусію з цим контактом, поки це не буде завершено. Цей процес повинен зайняти кілька секунд, якщо ви та ваш контакт перебуваєте в мережі.\n\nЯкщо ви вважаєте, що щось пішло не так, ви можете перезапустити встановлення каналу.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">Не знайдено контактів</string>
@@ -159,7 +159,8 @@
 	<string name="label_group_card_published" state="needs_review" hash="-58328192">Картка Групи - Опубліковано</string>
 	<string name="label_group_card_published_update" state="needs_review" hash="-1889428058">Картка Групи - Нова</string>
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">Картка групи - Неопублікований чернетка</string>
-	<string name="label_group_members" state="needs_review" hash="-2121490032">Інші учасники групи</string>
+	<string name="label_group_members" state="needs_review" hash="1460220752">Члени групи</string>
+	<string name="label_other_group_members" state="needs_review" hash="-2121490032">Інші учасники групи</string>
 	<string name="label_groups" state="needs_review" hash="-990226727">Групи</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">Запрошення відхилено</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">Деталі групи оновлено</string>
@@ -190,7 +191,6 @@
 	<string name="menu_action_recreate_channels" state="needs_review" hash="39178988">Відтворити безпечні канали</string>
 	<string name="menu_action_rename" state="needs_review" hash="-1795678977">Перейменувати</string>
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">Перейменувати контакт</string>
-	<string name="menu_action_rename_group" state="needs_review" hash="1461324427">Перейменувати групу</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">Зберегти</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">Налаштування</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">Поділитися</string>
@@ -232,15 +232,16 @@
 	<string name="pref_text_QR_correction_low" state="needs_review" hash="-2013029312">Низький</string>
 	<string name="pref_text_QR_correction_medium" state="needs_review" hash="-1685793941">середній</string>
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">Дуже високий</string>
-	<string name="subtitle_choose_group_name" state="needs_review" hash="-631282661">Оберіть назву групи</string>
-	<string name="subtitle_select_group_members" state="needs_review" hash="1572094257">Виберіть учасників групи</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Ви вийшли з групи</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Ви знову приєдналися до групи</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Ви приєдналися до групи</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Групу адмініструє %1$s</string>
 	<string name="text_joined_group" state="needs_review" hash="369878021">Приєднався до групи: %1$s</string>
-	<string name="text_joined_the_group" state="needs_review" hash="-683497602">%1$s приєднався/приєдналася до групи</string>
-	<string name="text_left_the_group" state="needs_review" hash="399208793">%1$s покинув групу</string>
+	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s додав/додала %2$s до групи</string>
+	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Ви додали %2$s до групи</string>
+	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s видалив %2$s з групи</string>
+	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">Ви видалили %2$s з групи</string>
+	<string name="text_unknown_member" state="needs_review" hash="-698194630">невідомо</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Ніхто</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Чернетка:</string>
 	<string name="text_inbound_group_message_prefix" state="needs_review" hash="1359425562">%1$s:\u0020</string>
@@ -550,8 +551,8 @@
 	<string name="webrtc_stop_screen_sharing" state="needs_review" hash="585626699">Зупинити спільний доступ</string>
 	<string name="webrtc_speaking_while_muted" state="needs_review" hash="1865652540">Ваш мікрофон вимкнено</string>
 	<string name="webrtc_speaking_while_muted_action" state="needs_review" hash="-1839617181">Увімкнути звук</string>
-	<string name="content_description_reject_call_button" state="needs_review" hash="931620384">Кнопка відхилити дзвінок</string>
-	<string name="content_description_accept_call_button" state="needs_review" hash="-1857614269">Кнопка прийняти дзвінок</string>
+	<string name="content_description_reject_call_button" state="needs_review" hash="-332175555">Відхилити дзвінок</string>
+	<string name="content_description_accept_call_button" state="needs_review" hash="-934081402">Прийняти дзвінок</string>
 	<string name="dialog_title_webrtc_kick_participant" state="needs_review" hash="389469769">Виключити контакт із дзвінка?</string>
 	<string name="webrtc_failed_kicked" state="needs_review" hash="-758835021">Вас виключено з цього дзвінка</string>
 	<string name="dialog_title_start_conference_call" state="needs_review" hash="-1418585505">Розпочати конференц-зв\'язок</string>
@@ -572,7 +573,7 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">Вкладка розмов</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">Контакти</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">Вкладка Групи</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="1038824704">Кнопка додати контакт</string>
+	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">Додати контакт</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">Крапка сповіщення</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">Видалити конфіденційні метадані JPEG</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">При активації Olvid спробує видалити конфіденційні метадані з імпортованих файлів зображень.\nЦе включає дані GPS, марку камери, дату створення…</string>
@@ -778,7 +779,7 @@
 	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">Політика зберігання повідомлень</string>
 	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">Налаштування нижче дозволяють автоматично видаляти старі повідомлення в цій розмові. Вони мають пріоритет над вашою політикою зберігання за замовчуванням.</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">Використовуйте ваше стандартне налаштування (%1$s)</string>
-	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1987562758">Кнопка запису голосового повідомлення</string>
+	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">Записати голосове повідомлення</string>
 	<string name="dialog_title_voice_message_explanation" state="needs_review" hash="943269997">Голосові повідомлення Olvid</string>
 	<string name="dialog_message_voice_message_explanation" state="needs_review" hash="-1860729852">Перш ніж записувати голосові повідомлення, будь ласка, надайте Olvid дозвіл на запис аудіо.</string>
 	<string name="dialog_message_voice_message_explanation_blocked" state="needs_review" hash="-1293891432">Перш ніж записувати голосові повідомлення, Olvid вимагає дозволу на запис аудіо.\n\nЗдається, цей дозвіл було назавжди відмовлено Olvid. Вам слід відкрити налаштування програми, щоб вручну надати цей дозвіл.</string>
@@ -1003,7 +1004,7 @@
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s буде додано до ваших контактів, щойно його/її пристрій стане доступним.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s додано до ваших контактів 🙌!</string>
 	<string name="label_loading_contacts" state="needs_review" hash="-343348890">Завантаження контактів…</string>
-	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-916981123">Кнопка вибору браузера</string>
+	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-934849519">Вибір браузера</string>
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Не вдалося отримати список встановлених браузерів</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Оберіть браузер для використання при аутентифікації</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Браузер за замовчуванням</string>
@@ -1123,7 +1124,7 @@
 	<string name="dialog_title_unable_to_load_backup_configuration" state="needs_review" hash="-718937548">Не вдалося завантажити конфігурацію резервного копіювання</string>
 	<string name="dialog_message_unable_to_load_backup_configuration" state="needs_review" hash="1322112021">Після кількох спроб Olvid не зміг завантажити поточну конфігурацію резервного копіювання. Якщо ви вже спробували повністю перезавантажити Olvid/свій пристрій і все ще отримуєте це повідомлення про помилку, рекомендується створити новий ключ резервного копіювання.</string>
 	<string name="pref_reload_backup_configuration_title" state="needs_review" hash="2000428891">Перезавантажити конфігурацію резервних копій</string>
-	<string name="content_description_back_button" state="needs_review" hash="-1902681195">Кнопка назад</string>
+	<string name="content_description_back_button" state="needs_review" hash="48196338">Назад</string>
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">Видалити відповідь на повідомлення</string>
 	<string name="content_description_remove_link_preview" state="needs_review" hash="-1085272528">Видалити попередній перегляд посилання</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">Індикатор того, що сповіщення вимкнено для цього профілю</string>
@@ -1149,7 +1150,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Видалення профілю призведе до видалення будь-якої інформації, пов’язаної з цим профілем на вашому пристрої. Це включає ваші контакти, групи та вміст усіх ваших розмов (повідомлень і вкладень) для цього профілю.\n\n<b>Це ваш єдиний видимий профіль, і якщо у вас є приховані профілі, вони будуть видалені одночасно.</b>\n\nНатисніть «далі», щоб вибрати, як видалити цей профіль.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Видалити профіль <b>всюди</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1363713497">Введіть ВИДАЛИТИ тут, щоб продовжити</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">Введіть \"%1$s\" тут, щоб продовжити</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">Якщо ви вирішите видалити свій профіль <b>всюди</b>:\n - він буде видалено локально <b>і</b> на пристроях ваших контактів\n - ви покинете групи, до яких приєдналися\n - групи, якими ви керуєте, будуть розформовані\n\nЯкщо ви <b>не</b> видалите свій профіль всюди, він буде видалено лише локально на вашому пристрої. Якщо ви не плануєте відновлювати резервну копію на іншому пристрої, ваші контакти можуть продовжувати надсилати вам повідомлення та не усвідомлювати, що ці повідомлення не можуть бути доставлені.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">Виглядає, що ваш поточний профіль неактивний, ймовірно, тому що ви перенесли його на інший пристрій. Якщо ви плануєте продовжувати використовувати цей профіль на іншому пристрої, ви можете безпечно видалити його тут.\n\nЯкщо ви більше ніколи не хочете використовувати цей профіль, спочатку потрібно реактивувати його на цьому пристрої, дочекатися відновлення захищених каналів зі своїми контактами, і лише потім видалити цей профіль, вибравши опцію «видалити всюди».</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">Ваш профіль зараз активовано на декількох пристроях.\n\nЯкщо ви вирішите видалити свій профіль <b>всюди</b>:\n - він буде видалено з усіх ваших пристроїв <b>та</b> з пристроїв ваших контактів\n - ви покинете групи, до яких приєдналися\n - групи, якими ви керуєте, будуть розформовані\n\nЯкщо ви <b>не</b> видалите свій профіль всюди, він буде видалено лише локально, і ви зможете продовжувати використовувати його як зазвичай на своїх інших пристроях.</string>
@@ -1203,7 +1204,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Налаштувати віджет…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Зовнішній вигляд віджета</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Дія при натисканні віджета</string>
-	<string name="label_discussion" state="needs_review" hash="301166224">Обговорення</string>
+	<string name="label_discuss" state="needs_review" hash="422951553">Обговорити</string>
 	<string name="label_message" state="needs_review" hash="809999904">Повідомлення</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Попередньо визначене повідомлення для відправки</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Підтвердіть перед відправкою</string>
@@ -1243,6 +1244,7 @@
 	<string name="label_audio" state="needs_review" hash="-779820608">Аудіо</string>
 	<string name="label_other" state="needs_review" hash="-543765264">Інше</string>
 	<string name="label_all" state="needs_review" hash="752498555">Усі</string>
+	<string name="label_see_all" state="needs_review" hash="-1659641788">Дивитися все</string>
 	<string name="menu_action_storage_management" state="needs_review" hash="2130982617">Керування сховищем</string>
 	<string name="menu_action_troubleshooting" state="needs_review" hash="-798155217">Усунення несправностей</string>
 	<string name="explanation_no_files" state="needs_review" hash="-1050005240">Немає вкладень для відображення</string>
@@ -1347,11 +1349,10 @@
 	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">Закріплені розмови завжди залишаються вгорі списку розмов</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Розмір відображення</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Відкрити обговорення</string>
-	<string name="label_read_only" state="needs_review" hash="-954957022">Лише для читання</string>
-	<string name="label_read_only_short" state="needs_review" hash="1635912872">Лише для читання</string>
+	<string name="label_read_only" state="needs_review" hash="1996439460">Лише для читання</string>
+	<string name="label_pending_read_only" state="needs_review" hash="649164855">Очікує прочитання (лише перегляд)</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Адмін</string>
-	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Адміністратор на розгляді</string>
-	<string name="label_not_admin" state="needs_review" hash="286893263">Не адміністратор</string>
+	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Адміністратор на розгляді</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Не вдалося відобразити ім\'я цього користувача</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Група без назви</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Сповіщення про розмови</string>
@@ -1366,10 +1367,9 @@
 	<string name="notification_channel_discussion_name" state="needs_review" hash="588648320">Обговорення %1$d</string>
 	<string name="notification_channel_discussion_group_name" state="needs_review" hash="491497248">Розмови</string>
 	<string name="notification_channel_discussion_group_description" state="needs_review" hash="-1448542719">Персоналізовані сповіщення для окремих обговорень в Olvid.</string>
-	<string name="button_label_edit_group_members" state="needs_review" hash="-1379721010">Редагувати цю групу</string>
+	<string name="button_label_edit_group_members" state="needs_review" hash="1855939143">Редагувати учасників</string>
 	<string name="button_label_add_members" state="needs_review" hash="-203515331">Додати учасників</string>
 	<string name="label_group_update_in_progress_title" state="needs_review" hash="-2019791170">Групова синхронізація в процесі</string>
-	<string name="label_group_update_in_progress_title_for_creation" state="needs_review" hash="388073211">Групу створено</string>
 	<string name="explanation_group_update_in_progress" state="needs_review" hash="360407479">Групу зараз синхронізують. Цей екран оновиться після завершення оновлення.</string>
 	<string name="toast_message_unable_to_update_group" state="needs_review" hash="-513468036">Не вдалося оновити групу. Ваші зміни втрачено. Будь ласка, спробуйте ще раз.</string>
 	<string name="dialog_title_unable_to_leave_group" state="needs_review" hash="-297756627">Не вдалося покинути групу</string>
@@ -1487,7 +1487,7 @@
 	<string name="message_discussion_group_v2_updating" state="needs_review" hash="1490065684">Список учасників групи синхронізується</string>
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">Групу створено</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">Нова група</string>
-	<string name="label_group_type" state="needs_review" hash="-1954959814">Тип групи</string>
+	<string name="label_group_type" state="needs_review" hash="498463258">Тип групи</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">Стандартний</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">Усі учасники групи можуть запрошувати нових учасників</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">Контрольований</string>
@@ -1496,7 +1496,6 @@
 	<string name="label_group_read_only_subtitle" state="needs_review" hash="-1941498988">Лише адміністратори можуть надсилати повідомлення</string>
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Розширені</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Розкрийте всю силу груп Olvid!</string>
-	<string name="label_group_custom_settings" state="needs_review" hash="-1024799981">Додаткові налаштування</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Адміністратори групи</string>
 	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Тепер ви адміністратор групи</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Ви більше не є адміністратором групи</string>
@@ -1744,7 +1743,11 @@
 	<string name="troubleshooting_storage_valid_description" state="needs_review" hash="1144963725">На вашому пристрої доступно %1$s місця для зберігання.</string>
 	<string name="troubleshooting_storage_invalid_title" state="needs_review" hash="-854482374">Сховище майже заповнене</string>
 	<string name="troubleshooting_storage_invalid_description" state="needs_review" hash="-1018820796">На вашому пристрої залишилось лише %1$s місця для зберігання.\n\nНа вашому пристрої закінчується доступний обсяг пам\'яті. Очікуйте несподіваних помилок під час отримання або надсилання файлів за допомогою Olvid.\n\nНапевно, зараз настав час звільнити місце на вашому пристрої.</string>
-	<string name="troubleshooting_header" state="needs_review" hash="138020490">**Версія програми**: %1$s (збірка %2$d)\n**Модель пристрою**: %3$s\n**API Android**: %4$s\n**Програма працює з**: %5$s</string>
+	<string name="troubleshooting_header_app_version" state="needs_review" hash="2096978646">**Версія програми**: %1$s (збірка %2$d)</string>
+	<string name="troubleshooting_header_device_model" state="needs_review" hash="911858141">**Модель пристрою**: %1$s</string>
+	<string name="troubleshooting_header_android_api" state="needs_review" hash="-1735136766">**Android API**: %1$s</string>
+	<string name="troubleshooting_header_app_running_time" state="needs_review" hash="1952701839">**Програма запущена протягом**: %1$s</string>
+	<string name="troubleshooting_header_app_install_date" state="needs_review" hash="1411458773">**Дата встановлення програми**: %1$s</string>
 	<string name="troubleshooting_faq_description" state="needs_review" hash="1969820989">Потрібна допомога з Olvid? Будь ласка, прочитайте наш FAQ:</string>
 	<string name="troubleshooting_faq_link" state="needs_review" hash="-353352916">https://olvid.io/faq</string>
 	<string name="troubleshooting_request_permission" state="needs_review" hash="-463634281">Запросити дозвіл</string>
@@ -1767,7 +1770,7 @@
 	<string name="dialog_title_invite_contact" state="needs_review" hash="1121224764">Запрошення до приватної розмови</string>
 	<string name="dialog_message_invite_contact" state="needs_review" hash="883261663">Ви хочете запросити %1$s до приватної розмови?</string>
 	<string name="explanation_empty_other_contact_list" state="needs_review" hash="-121261312">Тут поки нікого немає</string>
-	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="-510803038">Члени групи, які ще не є контактами, з’являться тут.</string>
+	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="1669386057">Члени групи, які ще не є у ваших контактах, з\'являться тут.</string>
 	<string name="explanation_empty_directory" state="needs_review" hash="298073547">Порожня директорія</string>
 	<string name="menu_action_invite_all_members" state="needs_review" hash="-1044752673">Запросити всіх учасників групи</string>
 	<string name="dialog_title_invite_all_group_members" state="needs_review" hash="2130589049">Запросити всіх учасників групи?</string>
@@ -1833,7 +1836,6 @@
 	<string name="global_search_result_links" state="needs_review" hash="-579291596">Посилання</string>
 	<string name="button_label_send_read_receipts" state="needs_review" hash="-1730457934">Повідомити мої контакти</string>
 	<string name="button_label_do_not_send" state="needs_review" hash="-1938459086">Не повідомляйте їх</string>
-	<string name="button_label_ask_later" state="needs_review" hash="-1104721203">Запитайте мене пізніше</string>
 	<string name="dialog_message_prompt_user_for_read_receipts" state="needs_review" hash="-1157866927">Чи бажаєте ви, щоб ваші контакти знали, коли ви прочитали їхні повідомлення?</string>
 	<string name="dialog_title_prompt_user_for_read_receipts" state="needs_review" hash="-2045842725">Підтвердження прочитання</string>
 	<string name="pref_app_icon_title" state="needs_review" hash="-1219448320">Іконка застосунку</string>
@@ -1925,7 +1927,7 @@
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Керувати резервними копіями Olvid</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Розпочати резервне копіювання зараз</string>
 	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
-	<string name="content_description_close_button" state="needs_review" hash="-1770116030">Кнопка закрити</string>
+	<string name="content_description_close_button" state="needs_review" hash="1454843231">Закрити</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Ваші онлайн-резервні копії</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Скинути</string>
 	<string name="explanation_reset_backups" state="needs_review" hash="-594480541">Скидання видалить усі ваші резервні копії.</string>
@@ -1955,7 +1957,7 @@
 	<string name="enable_backups_title" state="needs_review" hash="-1103233135">Збережіть свій профіль</string>
 	<string name="enable_backups_message_with_legacy" state="needs_review" hash="-508019994">У вас зараз увімкнено застарілі резервні копії Olvid, підтримка яких незабаром буде припинена.\nПерейдіть на нову систему резервного копіювання Olvid, щоб переконатися, що ви зможете відновити свої профілі та контакти у разі втрати пристрою.</string>
 	<string name="enable_backups_message" state="needs_review" hash="1555907343">Увімкнення резервного копіювання дозволить вам відновити профіль і контакти, навіть якщо ви втратите пристрій.</string>
-	<string name="content_description_contextual_actions" state="needs_review" hash="984380377">Кнопка контекстних дій</string>
+	<string name="content_description_contextual_actions" state="needs_review" hash="563463836">Контекстні дії</string>
 	<string name="label_backup_from" state="needs_review" hash="-1486363430">Від %1$s</string>
 	<string name="label_backup_groups_and_contacts" state="needs_review" hash="1197923862">%1$s, %2$s</string>
 	<string name="label_this_device" state="needs_review" hash="273515292">Цей пристрій</string>
@@ -2028,6 +2030,8 @@
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">Деякі параметри на вашому пристрої налаштовані неправильно і можуть вплинути на ваш досвід використання Olvid.</string>
 	<string name="button_label_this_way" state="needs_review" hash="747183939">Тут</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">Код скопійовано</string>
+	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">Будь ласка, оберіть, кого додати до цієї групи.</string>
+	<string name="label_group_administration" state="needs_review" hash="871355986">Адміністрування групи</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">Дзвінок заблоковано</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid не дозволяє розпочинати дзвінок з більш ніж %1$d особами.</string>
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">У циклі</string>
@@ -2039,4 +2043,51 @@
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Переклади Android-додатку</string>
 	<string name="pref_app_language_category_title" state="needs_review" hash="1411591324">Переклади на основі штучного інтелекту</string>
 	<string name="pref_app_language_category_summary" state="needs_review" hash="-1895843046">Деякі переклади в додатку згенеровані за допомогою ШІ та можуть бути неточними. Якщо це так, будь ласка, повідомте нас за адресою <b>lang@olvid.io</b>.</string>
+	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">Для відкриття цього PDF-файлу потрібен пароль</string>
+	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">Пароль</string>
+	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">Неправильний пароль</string>
+	<string name="label_poll_create" state="needs_review" hash="-1677246175">Створити опитування</string>
+	<string name="label_poll_question" state="needs_review" hash="-1615603188">Питання</string>
+	<string name="hint_poll_question" state="needs_review" hash="1961289317">Задати питання</string>
+	<string name="label_poll_answers" state="needs_review" hash="-382063458">Відповіді</string>
+	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">Додати</string>
+	<string name="label_poll_see_answers" state="needs_review" hash="710858547">Переглянути відповіді</string>
+	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">Очікую на їхню відповідь</string>
+	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">Нагадати</string>
+	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">Додати відповідь \"%1$s\"</string>
+	<string name="label_poll_options" state="needs_review" hash="-13216192">Налаштування</string>
+	<string name="text_none_answer" state="needs_review" hash="560562575">Жоден з перелічених варіантів</string>
+	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">Дозволити множинні відповіді</string>
+	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">Оберіть одну або кілька відповідей</string>
+	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">Режим вікторини</string>
+	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">Кінець</string>
+	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">Додати дату закінчення дії</string>
+	<string name="label_poll_expiration" state="needs_review" hash="605126523">Опитування завершиться через %1$s</string>
+	<string name="label_poll_ended" state="needs_review" hash="415569292">Опитування завершено</string>
+	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">Додайте щонайменше дві відповіді</string>
+	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">Ця відповідь вже існує</string>
+	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">Експортувати у CSV</string>
+	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">Помилка експорту опитування у форматі CSV. Будь ласка, спробуйте ще раз.</string>
+	<string name="toast_message_success_exporting_poll_csv" state="needs_review" hash="16134555">Експорт опитування у форматі CSV виконано успішно</string>
+	<string name="label_poll_answers_sorted_by" state="needs_review" hash="102938809">Відсортовано за</string>
+	<string name="label_poll_answers_sorted_by_poll_order" state="needs_review" hash="685632215">Порядок опитування</string>
+	<string name="label_poll_answers_sorted_by_answer_count" state="needs_review" hash="516869301">Кількість відповідей</string>
+	<string name="notification_public_title_new_poll_vote" state="needs_review" hash="-1901040080">Нова відповідь на ваше опитування</string>
+	<string name="toast_message_remove_none_answer" state="needs_review" hash="277924655">Спочатку видаліть відповідь \"%1$s\"</string>
+	<string name="text_poll" state="needs_review" hash="-153643506">опитування</string>
+	<string name="poll_csv_headers" state="needs_review" hash="1869917931">Питання опитування,Ім\'я виборця,Голос,Дата</string>
+	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">Відповіді поки немає</string>
+	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">Майбутня деактивація пристрою</string>
+	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">Керувати моїми пристроями</string>
+	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">Пристрій офлайн</string>
+	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">Один з ваших пристроїв не був онлайн **більше 30 днів**.\nЯкщо ви більше ним не користуєтеся, ми рекомендуємо **видалити його**, щоб уникнути проблем із синхронізацією.</string>
+	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">Керувати моїми пристроями</string>
+	<string name="tip_playstore_review_title" state="needs_review" hash="-1396782635">Вам подобається Olvid?</string>
+	<string name="tip_playstore_email_message" state="needs_review" hash="-583394070">Якщо у вас є пропозиції щодо покращення Olvid, будь ласка, повідомте нас на **feedback@olvid.io**.</string>
+	<string name="tip_playstore_email_subject" state="needs_review" hash="-1010646301">Оцінка додатку для Android: %1$d/5</string>
+	<string name="tip_playstore_review_message" state="needs_review" hash="-407660073">Якщо вам подобається Olvid, будь ласка, не соромтеся **залишити відгук** на Google Play!</string>
+	<string name="tip_playstore_review_action" state="needs_review" hash="-271353090">Оцініть нас на Google Play</string>
+	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Відкрити у зовнішньому переглядачі</string>
+	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Помилка відкриття цього файлу у вбудованому переглядачі Olvid</string>
+	<string name="button_label_invited" state="needs_review" hash="2094724552">Запрошено</string>
 </resources>

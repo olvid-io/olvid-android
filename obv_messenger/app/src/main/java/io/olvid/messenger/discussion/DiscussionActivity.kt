@@ -134,6 +134,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.media3.common.util.UnstableApi
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
@@ -185,6 +186,7 @@ import io.olvid.messenger.databases.tasks.SaveDraftTask
 import io.olvid.messenger.databases.tasks.SaveMultipleAttachmentsTask
 import io.olvid.messenger.databases.tasks.SetDraftReplyTask
 import io.olvid.messenger.databases.tasks.propagateMuteSettings
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.compose.ComposeMessageFragment
 import io.olvid.messenger.discussion.compose.ComposeMessageFragment.EmojiKeyboardAttachDelegate
@@ -204,7 +206,6 @@ import io.olvid.messenger.discussion.search.DiscussionSearch
 import io.olvid.messenger.discussion.settings.DiscussionSettingsActivity
 import io.olvid.messenger.fragments.FullScreenImageFragment
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment
-import io.olvid.messenger.main.cutoutHorizontalPadding
 import io.olvid.messenger.main.invitations.InvitationListItem
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.main.invitations.getAnnotatedDate
@@ -1664,6 +1665,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         }
     }
 
+    @androidx.annotation.OptIn(UnstableApi::class)
     private fun onLocationClick(message: Message) {
         when (SettingsActivity.locationIntegration) {
             OSM, CUSTOM_OSM, MAPS -> {
@@ -1873,6 +1875,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             || message.wipeStatus == Message.WIPE_STATUS_WIPED
             || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED
             || message.isLocationMessage
+            || message.isPollMessage
             || locked == true
             || canEdit != true
         ) {
@@ -1893,7 +1896,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                         it,
                         trimAndMentions.first,
                         previousDraft,
-                        trimAndMentions.second
+                        trimAndMentions.second,
+                        true
                     )
                 )
             }
@@ -2265,7 +2269,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                         Discussion.TYPE_GROUP, Discussion.TYPE_GROUP_V2 -> {
                             val contacts = discussionViewModel.discussionContacts.value
                             if (contacts != null) {
-                                val bytesContactIdentities: List<BytesKey>?
+                                val bytesContactIdentities: ArrayList<BytesKey>?
                                 if (contacts.size > WebrtcCallService.MAX_GROUP_SIZE_TO_SELECT_ALL_BY_DEFAULT) {
                                     bytesContactIdentities = null
                                 } else {
@@ -2667,7 +2671,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                     discussionViewModel.discussionId!!,
                     trimAndMentions.first,
                     composeMessageViewModel.getDraftMessage().value,
-                    trimAndMentions.second
+                    trimAndMentions.second,
+                    !markAsReadOnPause // keep the empty draft if only exiting the discussion for a short operation
                 )
             )
         }

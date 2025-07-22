@@ -285,7 +285,7 @@ public class StringUtils {
                 sb.append(groupMembersNames[i]);
             }
             if (others > 0) {
-                sb.append(App.getContext().getResources().getQuantityString(R.plurals.text_contact_names_last_separator_x_other, others, others));
+                sb.append(" ").append(App.getContext().getResources().getQuantityString(R.plurals.text_contact_names_last_separator_x_other, others, others));
             } else {
                 sb.append(lastJoiner);
                 sb.append(groupMembersNames[groupMembersNames.length - 1]);

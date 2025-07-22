@@ -77,7 +77,6 @@
             android:textColor="@color/red"
             android:maxLines="1"
             android:selectAllOnFocus="true"
-            android:hint="@string/hint_type_delete_here_to_proceed"
             android:inputType="textCapCharacters"/>
     </com.google.android.material.textfield.TextInputLayout>
 

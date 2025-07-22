@@ -48,6 +48,7 @@ import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.encoder.DecodingException;
 import io.olvid.engine.engine.types.JsonOsmStyle;
+import io.olvid.engine.engine.types.ObvMessage;
 import io.olvid.engine.metamanager.ChannelDelegate;
 import io.olvid.engine.metamanager.CreateSessionDelegate;
 import io.olvid.engine.metamanager.IdentityDelegate;
@@ -550,6 +551,16 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     }
 
     @Override
+    public void markMessageAsOnHold(Session session, Identity ownedIdentity, UID messageUid) throws SQLException {
+        FetchManagerSession fetchManagerSession = wrapSession(session);
+        InboxMessage inboxMessage = InboxMessage.get(fetchManagerSession, ownedIdentity, messageUid);
+        if (inboxMessage == null) {
+            return;
+        }
+        inboxMessage.markAsOnHold();
+    }
+
+    @Override
     public void resendAllDownloadedAttachmentNotifications() throws Exception {
         try (FetchManagerSession fetchManagerSession = getSession()) {
             InboxAttachment[] inboxAttachments = InboxAttachment.getAllDownloaded(fetchManagerSession);
@@ -557,6 +568,29 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
                 downloadAttachmentCoordinator.attachmentDownloadFinished(inboxAttachment.getOwnedIdentity(), inboxAttachment.getMessageUid(), inboxAttachment.getAttachmentNumber());
             }
         }
+    }
+
+    @Override
+    public ObvMessage getOnHoldMessage(Session session, Identity ownedIdentity, UID messageUid) throws Exception {
+        FetchManagerSession fetchManagerSession = wrapSession(session);
+        InboxMessage inboxMessage = InboxMessage.get(fetchManagerSession, ownedIdentity, messageUid);
+        if (inboxMessage == null) {
+            throw new Exception("Message not found in Inbox");
+        }
+        InboxAttachment[] attachments = inboxMessage.getAttachments();
+        ReceivedAttachment[] receivedAttachments = new ReceivedAttachment[attachments.length];
+        for (int i = 0; i < attachments.length; i++) {
+            receivedAttachments[i] = new ReceivedAttachment(
+                    attachments[i].getOwnedIdentity(),
+                    attachments[i].getMessageUid(),
+                    attachments[i].getAttachmentNumber(),
+                    attachments[i].getMetadata(),
+                    attachments[i].getUrl(),
+                    attachments[i].getPlaintextExpectedLength(),
+                    attachments[i].getPlaintextReceivedLength(),
+                    attachments[i].isDownloadRequested());
+        }
+        return new ObvMessage(inboxMessage.getDecryptedApplicationMessage(), receivedAttachments);
     }
 
     @Override

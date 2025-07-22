@@ -35,6 +35,7 @@ import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -356,7 +357,7 @@ public class Contact {
 
             if (Arrays.equals(AppSingleton.getBytesCurrentIdentity(), bytesOwnedIdentity) && (db.group2PendingMemberDao().countContactGroups(bytesOwnedIdentity, bytesContactIdentity) == 0)) {
                 // remove this contact from all caches
-                AppSingleton.updateCacheContactDeleted(bytesContactIdentity);
+                ContactCacheSingleton.INSTANCE.updateCacheContactDeleted(bytesContactIdentity);
             }
 
             // get all unsent (not passed to the engine because of a lack of channel) MessageRecipientInfo and delete them

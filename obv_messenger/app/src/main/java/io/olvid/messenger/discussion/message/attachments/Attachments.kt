@@ -110,6 +110,7 @@ import io.olvid.messenger.customClasses.ImageResolution
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.PreviewUtilsWithDrawables
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
+import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
@@ -1079,22 +1080,27 @@ fun AttachmentContextMenu(
     val delete = @Composable {
         DropdownMenuItem(
             onClick = {
-                SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
-                    .setTitle(R.string.dialog_title_delete_attachment)
-                    .setMessage(
-                        context.getString(
-                            R.string.dialog_message_delete_attachment,
-                            attachment.fyleMessageJoinWithStatus.fileName
+                if (message.isWithoutText && multipleAttachment.not()) {
+                    // we are deleting the last attachment, show the delete message dialog
+                    SecureDeleteEverywhereDialogBuilder.openForSingleMessage(context, message)
+                } else {
+                    SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_delete_attachment)
+                        .setMessage(
+                            context.getString(
+                                R.string.dialog_message_delete_attachment,
+                                attachment.fyleMessageJoinWithStatus.fileName
+                            )
                         )
-                    )
-                    .setPositiveButton(R.string.button_label_ok) { _: DialogInterface?, _: Int ->
-                        App.runThread(
-                            DeleteAttachmentTask(attachment.fyleAndStatus)
-                        )
-                    }
-                    .setNegativeButton(R.string.button_label_cancel, null)
-                    .create()
-                    .show()
+                        .setPositiveButton(R.string.button_label_ok) { _: DialogInterface?, _: Int ->
+                            App.runThread(
+                                DeleteAttachmentTask(attachment.fyleAndStatus)
+                            )
+                        }
+                        .setNegativeButton(R.string.button_label_cancel, null)
+                        .create()
+                        .show()
+                }
                 onDismiss()
             },
             text = {

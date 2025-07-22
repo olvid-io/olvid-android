@@ -1,213 +1,237 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <plurals name="explanation_backup_v2_device_expiration_end">
-        <item quantity="one">\" ezen az eszközön az előző eszközöd alább lesz deaktiválva:</item>
-        <item quantity="other">\" ezen az eszközön az alábbi eszközeid lesznek deaktiválva:</item>
-    </plurals>
-    <plurals name="label_backups_found">
-        <item quantity="one">%1$d biztonsági mentés talált</item>
-        <item quantity="other">%1$d biztonsági mentés talált</item>
-    </plurals>
-    <plurals name="label_profiles_found">
-        <item quantity="one">%1$d profil talált</item>
-        <item quantity="other">%1$d profil talált</item>
-    </plurals>
-    <plurals name="label_backup_groups">
-        <item quantity="zero">Nincs csoport</item>
-        <item quantity="one">%1$d csoport</item>
-        <item quantity="other">%1$d csoport</item>
-    </plurals>
-    <plurals name="label_backup_contacts">
-        <item quantity="zero">Nincs kontakt</item>
-        <item quantity="one">%1$d kontakt</item>
-        <item quantity="other">%1$d kontakt</item>
-    </plurals>
-    <plurals name="label_discussion_archive_done">
-        <item quantity="one">Beszélgetés archiválva</item>
-        <item quantity="other">%1$d beszélgetés archiválva</item>
-    </plurals>
-    <plurals name="label_discussion_unarchive_done">
-        <item quantity="one">Beszélgetés visszaállítva</item>
-        <item quantity="other">%1$d beszélgetés visszaállítva</item>
-    </plurals>
-    <plurals name="label_message_unbookmark_done">
-        <item quantity="one">Üzenet könyvjelzője törölve</item>
-        <item quantity="other">%1$d üzenet könyvjelzője törölve</item>
-    </plurals>
-    <plurals name="dialog_title_delete_discussions">
-        <item quantity="one">Törölni a kiválasztott beszélgetést?</item>
-        <item quantity="other">Törölni a kiválasztott beszélgetéseket?</item>
-    </plurals>
-    <plurals name="dialog_title_delete_messages">
-        <item quantity="one">Törölni a kiválasztott üzenetet?</item>
-        <item quantity="other">Törölni a kiválasztott üzeneteket?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions">
-        <item quantity="one">Biztosan törölni szeretnéd a kiválasztott beszélgetést és az összes benne lévő üzenetet?\nEz a művelet nem vonható vissza.</item>
-        <item quantity="other">Biztosan törölni szeretnéd a %1$d kiválasztott beszélgetést és az összes benne lévő üzenetet?\nEz a művelet nem vonható vissza.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions_choice">
-        <item quantity="one">Hogyan szeretnéd törölni a kiválasztott beszélgetést és az összes benne lévő üzenetet?\nEz a művelet nem vonható vissza.</item>
-        <item quantity="other">Hogyan szeretnéd törölni a %1$d kiválasztott beszélgetést és az összes benne lévő üzenetet?\nEz a művelet nem vonható vissza.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages">
-        <item quantity="one">Biztosan törölni szeretnéd a kiválasztott üzenetet?\nEz a művelet nem vonható vissza.</item>
-        <item quantity="other">Biztosan törölni szeretnéd a %1$d kiválasztott üzenetet?\nEz a művelet nem vonható vissza.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages_choice">
-        <item quantity="one">Hogyan szeretnéd törölni a kiválasztott üzenetet?\nEz a művelet nem vonható vissza.</item>
-        <item quantity="other">Hogyan szeretnéd törölni a %1$d kiválasztott üzenetet?\nEz a művelet nem vonható vissza.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_messages_everywhere">
-        <item quantity="one">**Véglegesen** törölni fogsz egy üzenetet **mindenki** számára ebben a beszélgetésben. Kérlek, győződj meg róla, hogy ez valóban amit akarsz.</item>
-        <item quantity="other">**Véglegesen** törölni fogsz %1$d üzenetet **mindenki** számára ebben a beszélgetésben. Kérlek, győződj meg róla, hogy ez valóban amit akarsz.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_discussions_everywhere">
-        <item quantity="one">**Véglegesen** törölni fogsz egy beszélgetést és az abban lévő üzeneteket **mindenki** számára ebben a beszélgetésben. Kérlek, győződj meg róla, hogy ez valóban amit akarsz.</item>
-        <item quantity="other">**Véglegesen** törölni fogsz %1$d beszélgetést és az abban lévő üzeneteket **mindenki** számára ezekben a beszélgetésekben. Kérlek, győződj meg róla, hogy ez valóban amit akarsz.</item>
-    </plurals>
-    <plurals name="dialog_message_invite_all_group_members">
-        <item quantity="one">Minden csoporttagot, akivel van csatornád (jelenleg 1 tag), meghívsz egy privát beszélgetésre.\nSzeretnéd folytatni?</item>
-        <item quantity="other">Minden csoporttagot, akivel van csatornád (jelenleg %1$d tag), meghívsz egy privát beszélgetésre.\nSzeretnéd folytatni?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_count">
-        <item quantity="one">1 közös csoport</item>
-        <item quantity="other">%1$d közös csoport</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_end">
-        <item quantity="one">. El kell hagynod ezt a csoportot a folytatáshoz.</item>
-        <item quantity="other">. El kell hagynod ezeket a csoportokat a folytatáshoz.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_with_pending_groups">
-        <item quantity="one">%1$s eltávolításával törlöd a többi felhasználók listájából.\n\nMegjegyzés: %1$s meghívást kapott %2$d csoportba, aminek tagja vagy. Újra felkerül a listára, ha csatlakozik. Érdemes lehet elhagyni ezt a csoportot, hogy ez ne történjen meg.\n\nTörölni szeretnéd ezt a felhasználót?</item>
-        <item quantity="other">%1$s eltávolításával törlöd a többi felhasználók listájából.\n\nMegjegyzés: %1$s meghívást kapott %2$d csoportba, aminek tagja vagy. Újra felkerül a listára, ha csatlakozik az egyikhez. Érdemes lehet elhagyni ezeket a csoportokat, hogy ez ne történjen meg.\n\nTörölni szeretnéd ezt a felhasználót?</item>
-    </plurals>
-    <plurals name="dialog_message_auto_join_pending_groups">
-        <item quantity="one">Ennek a beállításnak a módosítása automatikusan elfogad egy függőben lévő csoport meghívást.\nNyomd meg az OK-t a választás megerősítéséhez és a csoporthoz való csatlakozáshoz.</item>
-        <item quantity="other">Ennek a beállításnak a módosítása automatikusan elfogad %1$d függőben lévő csoport meghívást.\nNyomd meg az OK-t a választás megerősítéséhez és a csoporthoz való csatlakozáshoz.</item>
-    </plurals>
-    <plurals name="dialog_message_save_selected_attachments">
-        <item quantity="one">Amikor a rendszer kéri, válaszd ki azt a mappát, ahová a kiválasztott mellékletet szeretnéd menteni.\nMegjegyzés: egyes mappákhoz való hozzáférés korlátozott lehet.</item>
-        <item quantity="other">Amikor a rendszer kéri, válaszd ki azt a mappát, ahová a %1$d kiválasztott mellékletet szeretnéd menteni.\nMegjegyzés: egyes mappákhoz való hozzáférés korlátozott lehet.</item>
-    </plurals>
-    <plurals name="action_mode_title_storage">
-        <item quantity="one">%1$d kiválasztva</item>
-        <item quantity="other">%1$d kiválasztva</item>
-    </plurals>
-    <plurals name="dialog_message_delete_attachments">
-        <item quantity="one">Biztosan törölni szeretnéd a kiválasztott mellékletet?</item>
-        <item quantity="other">Biztosan törölni szeretnéd a %1$d kiválasztott mellékletet?</item>
-    </plurals>
-    <plurals name="text_app_uptime_days">
-        <item quantity="one">%1$d\u00a0nap,\u00a0%2$02d óra\u00a0%3$02d perc\u00a0%4$02d másodperc</item>
-        <item quantity="other">%1$d\u00a0nap,\u00a0%2$02d óra\u00a0%3$02d perc\u00a0%4$02d másodperc</item>
-    </plurals>
-    <plurals name="text_message_possibly_missing">
-        <item quantity="one">%1$d hiányzó üzenet…</item>
-        <item quantity="other">%1$d hiányzó üzenet…</item>
-    </plurals>
-    <plurals name="text_outgoing_group_call_with_contacts">
-        <item quantity="one">Csoportbeszélgetés %2$s-sel és még 1 fővel</item>
-        <item quantity="other">Csoportbeszélgetés %2$s-sel és %1$d fővel</item>
-    </plurals>
-    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
-        <item quantity="one">Nem fogadott csoportbeszélgetés %2$s-sel és még 1 fővel</item>
-        <item quantity="other">Nem fogadott csoportbeszélgetés %2$s-sel és %1$d fővel</item>
-    </plurals>
-    <plurals name="text_failed_outgoing_group_call_with_contacts">
-        <item quantity="one">Sikertelen csoportbeszélgetés %2$s-sel és még 1 fővel</item>
-        <item quantity="other">Sikertelen csoportbeszélgetés %2$s-sel és %1$d fővel</item>
-    </plurals>
-    <plurals name="text_busy_outgoing_group_call_with_contacts">
-        <item quantity="one">Csoportbeszélgetés, miközben %2$s és még 1 fő foglalt</item>
-        <item quantity="other">Csoportbeszélgetés, miközben %2$s és %1$d fő foglalt</item>
-    </plurals>
-    <plurals name="text_rejected_outgoing_group_call_with_contacts">
-        <item quantity="one">Elutasított csoportbeszélgetés %2$s-sel és még 1 fővel</item>
-        <item quantity="other">Elutasított csoportbeszélgetés %2$s-sel és %1$d fővel</item>
-    </plurals>
-    <plurals name="text_incoming_group_call_with_contacts">
-        <item quantity="one">Csoportbeszélgetés %2$s-sel és még 1 fővel</item>
-        <item quantity="other">Csoportbeszélgetés %2$s-sel és %1$d fővel</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion">
-        <item quantity="one">%1$d kiválasztva</item>
-        <item quantity="other">%1$d kiválasztva</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion_list">
-        <item quantity="one">%1$d kiválasztva</item>
-        <item quantity="other">%1$d kiválasztva</item>
-    </plurals>
-    <plurals name="notification_public_title_new_messages">
-        <item quantity="one">%1$d új üzenet</item>
-        <item quantity="other">%1$d új üzenet</item>
-    </plurals>
-    <plurals name="dialog_message_invite_group_members">
-        <item quantity="one">%3$s meghívása a %2$s csoportba.</item>
-        <item quantity="other">A következő %1$d kontakt meghívása a %2$s csoportba: %3$s.</item>
-    </plurals>
-    <plurals name="dialog_message_remove_group_members">
-        <item quantity="one">%3$s eltávolítása a %2$s csoportból.</item>
-        <item quantity="other">A következő %1$d csoporttag eltávolítása a %2$s csoportból: %3$s.</item>
-    </plurals>
-    <plurals name="text_unread_message_count">
-        <item quantity="one">%1$d új üzenet</item>
-        <item quantity="other">%1$d új üzenet</item>
-    </plurals>
-    <plurals name="text_reply_attachment_count">
-        <item quantity="one">%1$d melléklet</item>
-        <item quantity="other">%1$d melléklet</item>
-    </plurals>
-    <plurals name="text_and_x_other">
-        <item quantity="one">és %1$d más</item>
-        <item quantity="other">és %1$d más</item>
-    </plurals>
-    <plurals name="text_contact_names_last_separator_x_other">
-        <item quantity="one">&amp; %1$d más</item>
-        <item quantity="other">&amp; %1$d más</item>
-    </plurals>
-    <plurals name="dialog_message_confirm_retention_policy">
-        <item quantity="one">A kiválasztott megőrzési szabály alkalmazása egy üzenetet töröl.\nBiztosan folytatni szeretnéd?</item>
-        <item quantity="other">A kiválasztott megőrzési szabály alkalmazása %1$d üzenetet töröl.\nBiztosan folytatni szeretnéd?</item>
-    </plurals>
-    <plurals name="text_keycloak_missing_search_result">
-        <item quantity="one">… és 1 további keresési eredmény\nFinomítsd a keresést</item>
-        <item quantity="other">… és %1$d további keresési eredmény\nFinomítsd a keresést</item>
-    </plurals>
-    <plurals name="duration_seconds">
-        <item quantity="one">1\u00a0másodperc</item>
-        <item quantity="other">%1$d\u00a0másodperc</item>
-    </plurals>
-    <plurals name="duration_minutes">
-        <item quantity="one">1\u00a0perc</item>
-        <item quantity="other">%1$d\u00a0perc</item>
-    </plurals>
-    <plurals name="duration_hours">
-        <item quantity="one">1\u00a0óra</item>
-        <item quantity="other">%1$d\u00a0óra</item>
-    </plurals>
-    <plurals name="duration_days">
-        <item quantity="one">1\u00a0nap</item>
-        <item quantity="other">%1$d\u00a0nap</item>
-    </plurals>
-    <plurals name="duration_years">
-        <item quantity="one">1\u00a0év</item>
-        <item quantity="other">%1$d\u00a0év</item>
-    </plurals>
-    <plurals name="other_members_count">
-        <item quantity="one">1\u00a0tag</item>
-        <item quantity="other">%1$d\u00a0tag</item>
-    </plurals>
-    <plurals name="dialog_message_delete_remote_deleted_messages">
-        <item quantity="one">Jelenleg 1 távolról törölt üzenet van a beszélgetéseidben. Törölni szeretnéd?</item>
-        <item quantity="other">Jelenleg %1$d távolról törölt üzenet van a beszélgetéseidben. Törölni szeretnéd az összes ilyen jelölést?</item>
-    </plurals>
-    <plurals name="label_xxx_contacts_sharing_their_position">
-        <item quantity="one">1 kontakt megosztja a helyzetét</item>
-        <item quantity="other">%1$d kontakt megosztja a helyzetét</item>
-    </plurals>
-    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
-        <item quantity="one">Te és 1 másik megosztja a helyzetét</item>
-        <item quantity="other">Te és %1$d másik megosztja a helyzetét</item>
-    </plurals>
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1156880361">Az egyik eszközöd **%1$d nap** múlva lejár és deaktiválódik.\nMegvásárolhatsz egy **Olvid+** előfizetést, hogy aktív maradjon.</item>
+		<item quantity="other" state="needs_review" hash="-574658149">Az egyik eszközöd **%1$d napon belül** lejár és deaktiválódik.\nMegvásárolhatsz egy **Olvid+** előfizetést, hogy aktív maradjon.</item>
+	</plurals>
+	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-683497602">%1$s csatlakozott a csoporthoz</item>
+		<item quantity="other" state="needs_review" hash="51603026">%1$s csatlakozott a csoporthoz</item>
+	</plurals>
+	<plurals name="text_left_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="399208793">%1$s elhagyta a csoportot</item>
+		<item quantity="other" state="needs_review" hash="1945116549">%1$s elhagyta a csoportot</item>
+	</plurals>
+	<plurals name="label_poll_answers" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="1797058436">Nincs válasz</item>
+		<item quantity="one" state="needs_review" hash="-7151672">%1$d válasz</item>
+		<item quantity="other" state="needs_review" hash="1394570044">%1$d válaszok</item>
+	</plurals>
+	<plurals name="label_remove_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="312762041">%1$d tag eltávolítása</item>
+		<item quantity="other" state="needs_review" hash="1816849257">%1$d tag eltávolítása</item>
+	</plurals>
+	<plurals name="label_add_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1537484553">%1$d tag hozzáadás</item>
+		<item quantity="other" state="needs_review" hash="1091232977">%1$d tag hozzá</item>
+	</plurals>
+	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1131862199">» Ezen az eszközön az előző eszköze deaktiválásra kerül:</item>
+		<item quantity="other" state="needs_review" hash="-2011302529">» Ezen az eszközön az alábbi eszközeid lesznek deaktiválva:</item>
+	</plurals>
+	<plurals name="label_backups_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1088606803">%1$d biztonsági másolat megtalálva</item>
+		<item quantity="other" state="needs_review" hash="-577868099">%1$d biztonsági másolatok találva</item>
+	</plurals>
+	<plurals name="label_profiles_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1498976610">%1$d profil található</item>
+		<item quantity="other" state="needs_review" hash="749391135">%1$d profil található</item>
+	</plurals>
+	<plurals name="label_backup_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="-174007554">Nincs csoport</item>
+		<item quantity="one" state="needs_review" hash="237276495">%1$d csoport</item>
+		<item quantity="other" state="needs_review" hash="900821953">%1$d csoportok</item>
+	</plurals>
+	<plurals name="label_backup_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="246373927">Nincs kontakt</item>
+		<item quantity="one" state="needs_review" hash="-1671298344">%1$d kapcsolattartó</item>
+		<item quantity="other" state="needs_review" hash="1022571360">%1$d kontaktok</item>
+	</plurals>
+	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1772966333">A beszélgetés archiválva</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d archivált beszélgetések</item>
+	</plurals>
+	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1312483800">A beszélgetés visszaállítva</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d archivált beszélgetések visszaállítva</item>
+	</plurals>
+	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2045500103">Üzenet eltávolítása a kedvencekből</item>
+		<item quantity="other" state="needs_review" hash="204728896">%1$d üzenet törlése a kedvencekből</item>
+	</plurals>
+	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-716893580">Töröljem a kiválasztott beszélgetést?</item>
+		<item quantity="other" state="needs_review" hash="-15840526">Töröljem a kiválasztott beszélgetéseket?</item>
+	</plurals>
+	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-862879351">Töröljem a kiválasztott üzenetet?</item>
+		<item quantity="other" state="needs_review" hash="-2020248805">Töröljem a kiválasztott üzeneteket?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-931157230">Biztosan törölni szeretné a kiválasztott beszélgetést és annak összes üzenetét?\nEz a művelet nem vonható vissza.</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">Biztosan törölni szeretné a kiválasztott %1$d beszélgetéseket és az összes bennük található üzenetet?\nEz a művelet nem vonható vissza.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2139168692">Hogyan szeretnéd törölni a kiválasztott beszélgetést és annak összes üzenetét?\nEz a művelet nem vonható vissza.</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">Hogyan szeretnéd törölni a kiválasztott %1$d beszélgetéseket és az összes bennük található üzenetet?\nEz a művelet nem vonható vissza.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-947341357">Biztosan törölni szeretné a kiválasztott üzenetet?\nEz a művelet nem vonható vissza.</item>
+		<item quantity="other" state="needs_review" hash="-752621695">Biztosan törölni szeretné a kiválasztott %1$d üzeneteket?\nEz a művelet nem vonható vissza.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-474913536">Hogyan szeretnéd törölni a kiválasztott üzenetet?\nEz a művelet nem vonható vissza.</item>
+		<item quantity="other" state="needs_review" hash="-895867176">Hogyan szeretnéd törölni a kiválasztott %1$d üzeneteket?\nEz a művelet nem vonható vissza.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-606769319">Éppen egy üzenetet szeretne **véglegesen** törölni **mindenki** számára ebben a beszélgetésben. Kérjük, győződjön meg arról, hogy ez valóban az, amit szeretne.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">A %1$d üzeneteket éppen **mindenki** számára **véglegesen** törölni fogja ebben a beszélgetésben. Kérjük, győződjön meg arról, hogy ez valóban az, amit szeretne.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118446236">Éppen most fogsz **véglegesen** törölni egy beszélgetést és annak tartalmát **mindenki** számára ebben a beszélgetésben. Kérlek, győződj meg róla, hogy ez valóban a kívánt művelet.</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">A %1$d beszélgetéseket és az azok tartalmát képező üzeneteket **véglegesen** törölni fogja **mindenki** számára ezekben a beszélgetésekben. Kérjük, győződjön meg arról, hogy ez valóban az, amit szeretne.</item>
+	</plurals>
+	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1306576418">Azon vagyok, hogy meghívjam a csoport minden tagját, akivel van csatornád (jelenleg 1 tag) egy privát beszélgetésre.\nSzeretnéd folytatni?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Azon vagy, hogy meghívod a csoport minden tagját, akivel van közös csatornád (jelenleg %1$d tag).\nSzeretnéd folytatni?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1699852572">1 közös csoport</item>
+		<item quantity="other" state="needs_review" hash="-261780100">%1$d közös csoportok</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1000092559">A folytatáshoz el kell hagynia ezt a csoportot.</item>
+		<item quantity="other" state="needs_review" hash="-1973752801">A folytatáshoz el kell hagynia ezeket a csoportokat.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_with_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1290867480">Éppen most szeretnéd eltávolítani %1$s-t a felhasználóid listájáról.\n\nKérjük, vedd figyelembe, hogy %1$s-t meghívták a %2$d csoportba, amelynek tagja vagy. Ha csatlakozik ehhez a csoporthoz, akkor újra hozzá lesz adva ehhez a listához. Elkerülheted ezt a csoport elhagyásával.\n\nTényleg törölni szeretnéd ezt a felhasználót?</item>
+		<item quantity="other" state="needs_review" hash="1544662217">Azon vagyok, hogy eltávolítom a %1$s felhasználót a felhasználói listádról.\n\nKérjük, vedd figyelembe, hogy a %1$s felhasználót meghívták a %2$d csoportokba, amelyekben te is tag vagy. Ha csatlakozik az egyikhez, akkor újra hozzáadódik ehhez a listához. Elkerülheted ezt, ha kilépsz ezekből a csoportokból.\n\nTényleg törölni szeretnéd ezt a felhasználót?</item>
+	</plurals>
+	<plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-97256410">Ennek a beállításnak a módosítása automatikusan elfogad egy függőben lévő csoportmeghívást.\nNyomja meg az OK gombot a választás megerősítéséhez és a csoporthoz való csatlakozáshoz.</item>
+		<item quantity="other" state="needs_review" hash="1009007696">Ennek a beállításnak a módosítása automatikusan elfogadja a %1$d függőben lévő csoportmeghívásokat.\nNyomja meg az OK gombot a választás megerősítéséhez és a csoportokhoz való csatlakozáshoz.</item>
+	</plurals>
+	<plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1768885312">Amikor a rendszer kéri, kérjük, válassza ki azt a mappát, amelybe a kiválasztott mellékletet menteni szeretné.\nKérjük, vegye figyelembe, hogy egyes mappákhoz való hozzáférés korlátozott lehet.</item>
+		<item quantity="other" state="needs_review" hash="-1416662415">Amikor a rendszer kéri, kérjük, válassza ki azt a mappát, amelybe a kiválasztott %1$d mellékleteket szeretné menteni.\nKérjük, vegye figyelembe, hogy egyes mappákhoz való hozzáférés korlátozott lehet.</item>
+	</plurals>
+	<plurals name="action_mode_title_storage" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">A(z) %1$d kiválasztva</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d kiválasztva</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1117804388">Tényleg törölni szeretnéd a kiválasztott mellékletet?</item>
+		<item quantity="other" state="needs_review" hash="-1540151013">Biztosan törölni szeretné a kiválasztott %1$d mellékletet?</item>
+	</plurals>
+	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1400550170">%1$d nap, %2$02dóra %3$02dperc %4$02dmásodperc</item>
+		<item quantity="other" state="needs_review" hash="-1847999182">%1$d nap, %2$02dóra %3$02dperc %4$02dmásodperc</item>
+	</plurals>
+	<plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1040869757">%1$d hiányzó üzenet…</item>
+		<item quantity="other" state="needs_review" hash="-970055416">%1$d hiányzó üzenetek…</item>
+	</plurals>
+	<plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="800251665">Csoportos hívás %2$s-vel és még egy másik személlyel</item>
+		<item quantity="other" state="needs_review" hash="-1654053808">Csoportos hívás %2$s és %1$d másokkal</item>
+	</plurals>
+	<plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1313506338">Nem fogadott csoportos hívás %2$s-gyel és még egy másik személlyel</item>
+		<item quantity="other" state="needs_review" hash="1027194941">Válasz nélküli csoportos hívás %2$s-gyel és még %1$d másokkal</item>
+	</plurals>
+	<plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="575911091">Sikertelen csoportos hívás %2$s-gyel és még egy személlyel</item>
+		<item quantity="other" state="needs_review" hash="1768048524">Sikertelen csoportos hívás %2$s és %1$d más felhasználóval</item>
+	</plurals>
+	<plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1115369211">Csoportos hívás, amikor %2$s és még valaki más foglalt volt</item>
+		<item quantity="other" state="needs_review" hash="-332659300">Csoportos hívás, amíg %2$s és %1$d más személy foglalt volt</item>
+	</plurals>
+	<plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1401449639">Elutasított csoportos hívás %2$s és még egy másik felhasználótól</item>
+		<item quantity="other" state="needs_review" hash="-150166810">Elutasított csoportos hívás %2$s és %1$d másokkal</item>
+	</plurals>
+	<plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-366344569">Csoportos hívás %2$s-től és még egy embertől</item>
+		<item quantity="other" state="needs_review" hash="1471743578">Csoportos hívás %2$s-tól és %1$d más résztvevőtől</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="461822174">%1$d kiválasztva</item>
+		<item quantity="other" state="needs_review" hash="1431585621">%1$d kiválasztva</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion_list" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d kiválasztva</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d kiválasztva</item>
+	</plurals>
+	<plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d új üzenet</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d új üzenetek</item>
+	</plurals>
+	<plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1495957123">%3$s meghívást kap a %2$s csoportba.</item>
+		<item quantity="other" state="needs_review" hash="-250521442">A következő %1$d kapcsolattartót meghívjuk a %2$s csoportba: %3$s.</item>
+	</plurals>
+	<plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1633684901">%3$s felhasználót eltávolítják a %2$s csoportból.</item>
+		<item quantity="other" state="needs_review" hash="2062819899">A következő %1$d csoporttagok eltávolításra kerülnek a %2$s csoportból: %3$s.</item>
+	</plurals>
+	<plurals name="text_unread_message_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d új üzenet</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d új üzenetek</item>
+	</plurals>
+	<plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118984743">%1$d melléklet</item>
+		<item quantity="other" state="needs_review" hash="1321323314">%1$d mellékletek</item>
+	</plurals>
+	<plurals name="text_and_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-226443285">És %1$d más</item>
+		<item quantity="other" state="needs_review" hash="-2101659023">és még %1$d más</item>
+	</plurals>
+	<plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-970333"> &amp; %1$d másik</item>
+		<item quantity="other" state="needs_review" hash="1931856055"> &amp; %1$d más</item>
+	</plurals>
+	<plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-202072457">A most recently kiválasztott üzenettárolási szabály alkalmazása egyetlen üzenetet törölne.\nBiztosan szeretné folytatni?</item>
+		<item quantity="other" state="needs_review" hash="-576713525">A mostanában kiválasztott üzenettárolási szabály alkalmazása %1$d üzenetet törölne.\nBiztosan szeretné folytatni?</item>
+	</plurals>
+	<plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="812170692">… és egy további találat\nKérjük, finomítsa a keresést</item>
+		<item quantity="other" state="needs_review" hash="1969873890">… és %1$d további találat\nKérjük, finomítsa a keresést</item>
+	</plurals>
+	<plurals name="duration_seconds" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="251130693">1 másodperc</item>
+		<item quantity="other" state="needs_review" hash="624952161">%1$d másodperc</item>
+	</plurals>
+	<plurals name="duration_minutes" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1053938976">1 perc</item>
+		<item quantity="other" state="needs_review" hash="-1051808">%1$d perc</item>
+	</plurals>
+	<plurals name="duration_hours" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1004063951">1 óra</item>
+		<item quantity="other" state="needs_review" hash="1322950935">%1$d óra</item>
+	</plurals>
+	<plurals name="duration_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1264358968">1 nap</item>
+		<item quantity="other" state="needs_review" hash="-1170846734">%1$d nap</item>
+	</plurals>
+	<plurals name="duration_years" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="388401904">1 év</item>
+		<item quantity="other" state="needs_review" hash="298429520">%1$d év</item>
+	</plurals>
+	<plurals name="other_members_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1379655782">1 tag</item>
+		<item quantity="other" state="needs_review" hash="965402074">%1$d tag</item>
+	</plurals>
+	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1006155949">Jelenleg 1 távolról törölt üzenet található a beszélgetéseidben. Törölni szeretnéd?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">Jelenleg %1$d távolról törölt üzenet található a beszélgetéseidben. Szeretnéd törölni az összes ilyen jelölést?</item>
+	</plurals>
+	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1367750681">1 kontaktmegosztja a helyzetét</item>
+		<item quantity="other" state="needs_review" hash="1164266856">%1$d kontaktok megosztják a tartózkodási helyüket</item>
+	</plurals>
+	<plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1602016664">Te és még [PLACEHOLDER_1] másik személy megosztja a helyzetét</item>
+		<item quantity="other" state="needs_review" hash="1789697147">Te és %1$d más személy megosztja a helyzetét</item>
+	</plurals>
 </resources>

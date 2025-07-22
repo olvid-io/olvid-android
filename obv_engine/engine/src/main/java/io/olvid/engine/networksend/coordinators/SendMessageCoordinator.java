@@ -216,7 +216,21 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
     public void onFinishCallbackProtocol(Operation operation) {
         String server = ((BatchUploadMessagesCompositeOperation) operation).getServer();
         List<IdentityAndUid> identityInactiveMessageUids = ((BatchUploadMessagesCompositeOperation) operation).getIdentityInactiveMessageUids();
+        List<IdentityAndUid> tooManyHeadersUnsentMessageUids = ((BatchUploadMessagesCompositeOperation) operation).getTooManyHeadersUnsentMessageUids();
         batchScheduler.clearFailedCount(new StringAndBoolean(server, false));
+
+        // if the batch was truncated because of too many headers, re-queue the remaining ones
+        if (tooManyHeadersUnsentMessageUids != null && !tooManyHeadersUnsentMessageUids.isEmpty()) {
+            Logger.i("A batch of messages contained too many headers, using a smaller batch.");
+            synchronized (protocolMessageUidsByServer) {
+                Queue<IdentityAndUid> queue = protocolMessageUidsByServer.get(server);
+                if (queue == null) {
+                    queue = new ArrayDeque<>();
+                    protocolMessageUidsByServer.put(server, queue);
+                }
+                queue.addAll(tooManyHeadersUnsentMessageUids);
+            }
+        }
 
         // if there are still some messages in the queue, reschedule a batch operation
         synchronized (protocolMessageUidsByServer) {
@@ -269,7 +283,21 @@ public class SendMessageCoordinator implements OutboxMessage.NewOutboxMessageLis
     public void onFinishCallbackUserContent(Operation operation) {
         String server = ((BatchUploadMessagesCompositeOperation) operation).getServer();
         List<IdentityAndUid> identityInactiveMessageUids = ((BatchUploadMessagesCompositeOperation) operation).getIdentityInactiveMessageUids();
+        List<IdentityAndUid> tooManyHeadersUnsentMessageUids = ((BatchUploadMessagesCompositeOperation) operation).getTooManyHeadersUnsentMessageUids();
         batchScheduler.clearFailedCount(new StringAndBoolean(server, true));
+
+        // if the batch was truncated because of too many headers, re-queue the remaining ones
+        if (tooManyHeadersUnsentMessageUids != null && !tooManyHeadersUnsentMessageUids.isEmpty()) {
+            Logger.i("A batch of messages contained too many headers, using a smaller batch.");
+            synchronized (userContentMessageUidsByServer) {
+                Queue<IdentityAndUid> queue = userContentMessageUidsByServer.get(server);
+                if (queue == null) {
+                    queue = new ArrayDeque<>();
+                    userContentMessageUidsByServer.put(server, queue);
+                }
+                queue.addAll(tooManyHeadersUnsentMessageUids);
+            }
+        }
 
         // if there are still some messages in the queue, reschedule a batch operation
         synchronized (userContentMessageUidsByServer) {

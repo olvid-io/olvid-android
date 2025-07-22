@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.colorResource
 import androidx.fragment.app.DialogFragment
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
@@ -69,8 +70,11 @@ class PdfViewerDialog(val fyleAndStatus: FyleAndStatus) : DialogFragment() {
         return ComposeView(inflater.context).apply {
             consumeWindowInsets = false
             setContent {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    PdfViewerScreen(Modifier.fillMaxSize(), pdfFyleAndStatus = fyleAndStatus)
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                     color = colorResource(R.color.lightGrey)
+                ) {
+                    PdfViewerScreen(Modifier.fillMaxSize(), pdfFyleAndStatus = fyleAndStatus, onClose = { dismiss() } )
                 }
             }
         }

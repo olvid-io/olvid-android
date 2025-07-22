@@ -54,8 +54,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Text
@@ -233,8 +231,6 @@ fun InvitationListItem(
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-
-                    val accentColor = colorResource(id = R.color.accent)
                     val context = LocalContext.current
 
                     val myCode = String(invitation?.associatedDialog?.category?.sasToDisplay ?: byteArrayOf(), StandardCharsets.UTF_8)
@@ -298,11 +294,6 @@ fun InvitationListItem(
                     // their code
                     Box {
                         if (invitation?.associatedDialog?.category?.id == Category.SAS_EXCHANGE_DIALOG_CATEGORY) {
-
-                            val customTextSelectionColors = TextSelectionColors(
-                                handleColor = accentColor,
-                                backgroundColor = accentColor.copy(alpha = 0.4f)
-                            )
                             val sasInputField = remember { FocusRequester() }
                             val interactionSource = remember { MutableInteractionSource() }
                             val focused by interactionSource.collectIsFocusedAsState()
@@ -314,7 +305,7 @@ fun InvitationListItem(
                                 }
                             }
 
-                            CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
+                            CompositionLocalProvider() {
                                 BasicTextField(
                                     modifier = Modifier
                                         .requiredWidth(with(LocalDensity.current) { 128.sp.toDp() })
@@ -444,7 +435,7 @@ fun InvitationListItem(
                             .padding(8.dp, 8.dp)
                     ) {
                         Text(
-                            text = stringResource(id = R.string.label_group_members),
+                            text = stringResource(id = R.string.label_other_group_members),
                             color = colorResource(
                                 id = R.color.primary700
                             ),

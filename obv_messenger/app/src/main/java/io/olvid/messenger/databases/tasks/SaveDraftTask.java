@@ -34,12 +34,14 @@ public class SaveDraftTask implements Runnable {
     private final String text;
     private final Message previousDraftMessage;
     private final List<JsonUserMention> mentions;
+    private final boolean keepEmptyDraft;
 
-    public SaveDraftTask(long discussionId, String text, Message previousDraftMessage, List<JsonUserMention> mentions) {
+    public SaveDraftTask(long discussionId, String text, Message previousDraftMessage, List<JsonUserMention> mentions, boolean keepEmptyDraft) {
         this.discussionId = discussionId;
         this.text = text;
         this.previousDraftMessage = previousDraftMessage;
         this.mentions = mentions;
+        this.keepEmptyDraft = keepEmptyDraft;
     }
 
     @Override
@@ -72,7 +74,7 @@ public class SaveDraftTask implements Runnable {
             if (text != null && Objects.equals(jsonMessage.getBody(), text) && Objects.equals(mentionSet, newMentionSet)) {
                 // the draft did not change, no need to do anything here
                 return;
-            } else if (draftMessage.totalAttachmentCount == 0 && text == null) {
+            } else if (draftMessage.totalAttachmentCount == 0 && text == null && !keepEmptyDraft) {
                 // the draft was cleared --> delete it
                 db.messageDao().delete(draftMessage);
                 return;

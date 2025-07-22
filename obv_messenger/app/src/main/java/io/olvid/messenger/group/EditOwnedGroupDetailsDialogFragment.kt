@@ -19,7 +19,6 @@
 package io.olvid.messenger.group
 
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -33,27 +32,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
-import io.olvid.engine.engine.types.JsonGroupDetails
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto
-import io.olvid.engine.engine.types.identities.ObvGroupV2.ObvGroupV2ChangeSet
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.R.layout
 import io.olvid.messenger.R.string
-import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
-import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.databases.tasks.UpdateGroupCustomNameAndPhotoTask
-import io.olvid.messenger.databases.tasks.UpdateGroupV2CustomNameAndPhotoTask
 import io.olvid.messenger.settings.SettingsActivity
 
 
 class EditOwnedGroupDetailsDialogFragment : DialogFragment() {
     private val viewModel: OwnedGroupDetailsViewModel by activityViewModels()
-    private val groupV2DetailsViewModel: GroupV2DetailsViewModel by activityViewModels()
 
     private var onOkCallback: Runnable? = null
-    private var doNotRollbackOnDismiss = false
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.window?.let { window ->
@@ -85,203 +78,81 @@ class EditOwnedGroupDetailsDialogFragment : DialogFragment() {
         dialogTitle.setText(string.dialog_title_edit_group_details)
         val cancelButton = dialogView.findViewById<Button>(R.id.button_cancel)
         cancelButton.setOnClickListener {
-            if (groupV2DetailsViewModel.isEditingGroupCustomSettingsLiveData.value == true) {
-                groupV2DetailsViewModel.isEditingGroupCustomSettingsLiveData.value = false
-                groupV2DetailsViewModel.oldCustomGroupType?.let {
-                    groupV2DetailsViewModel.setGroupType(
-                        it
-                    )
-                }
-            } else {
-                dismiss()
-            }
+            dismiss()
         }
         val publishButton = dialogView.findViewById<Button>(R.id.button_publish)
         publishButton.setOnClickListener {
-            if (groupV2DetailsViewModel.isEditingGroupCustomSettingsLiveData.value == true) {
-                groupV2DetailsViewModel.isEditingGroupCustomSettingsLiveData.value = false
-            } else {
-                if (viewModel.isGroupV2()) {
-                    val changes = groupV2DetailsViewModel.getPermissionsChangeAlert()
-                    if (changes.isEmpty().not()) {
-                        SecureAlertDialogBuilder(it.context, R.style.CustomAlertDialog)
-                            .setTitle(getString(R.string.dialog_permissions_change_title))
-                            .setMessage(changes.formatMarkdown())
-                            .setPositiveButton(getString(R.string.button_label_ok)) { _,_ ->
-                                publish()
-                            }
-                            .setNegativeButton(getString(R.string.button_label_cancel), null)
-                            .show()
-                    } else {
-                        publish()
-                    }
-                } else {
-                    publish()
-                }
-            }
+            publish()
         }
         viewModel.getValid()
             .observe(this) { valid: Boolean? -> publishButton.isEnabled = valid != null && valid }
 
-        val ownedGroupDetailsFragment = OwnedGroupDetailsFragment()
-        ownedGroupDetailsFragment.setUseDialogBackground(true)
-        ownedGroupDetailsFragment.setInitialGroupType(
-            groupV2DetailsViewModel.initialGroupType ?: GroupTypeModel.SimpleGroup
+        val transaction = childFragmentManager.beginTransaction()
+        transaction.replace(
+            R.id.fragment_placeholder,
+            OwnedGroupDetailsFragment()
         )
-        val groupCustomSettingsFragment =
-            GroupCustomSettingsPreferenceFragment(isGroupCreation = false)
-
-
-        groupV2DetailsViewModel.isEditingGroupCustomSettingsLiveData.observe(this) {
-            val transaction = childFragmentManager.beginTransaction()
-            transaction.replace(
-                R.id.fragment_placeholder,
-                if (it) groupCustomSettingsFragment else ownedGroupDetailsFragment
-            )
-            transaction.commit()
-            publishButton.text =
-                if (it) getString(string.button_label_ok) else getString(string.button_label_publish)
-            if (it) {
-                groupV2DetailsViewModel.oldCustomGroupType =
-                    (groupV2DetailsViewModel.getGroupTypeLiveData().value as? GroupTypeModel.CustomGroup)?.let {
-                        GroupTypeModel.CustomGroup(
-                            readOnlySetting = it.readOnlySetting,
-                            remoteDeleteSetting = it.remoteDeleteSetting
-                        )
-                    }
-            }
-        }
+        transaction.commit()
 
         return dialogView
     }
 
     private fun publish() {
-        doNotRollbackOnDismiss = true
-        dismiss()
-        if (viewModel.isGroupV2()) {
-            App.runThread {
-                var changed = false
-                val obvChangeSet: ObvGroupV2ChangeSet
-                if (groupV2DetailsViewModel.groupTypeChanged()) {
-                    groupV2DetailsViewModel.createGroupeTypeChangeSet(groupV2DetailsViewModel.getGroupTypeLiveData().value?.toJsonGroupType())
-                    obvChangeSet = groupV2DetailsViewModel.getObvChangeSet()
-                    changed = true
-                } else {
-                    obvChangeSet = ObvGroupV2ChangeSet()
-                }
-                if (viewModel.detailsChanged()) {
-                    try {
-                        obvChangeSet.updatedSerializedGroupDetails =
-                            AppSingleton.getJsonObjectMapper().writeValueAsString(
-                                viewModel.jsonGroupDetails
-                            )
-                        changed = true
-                    } catch (ignored: Exception) {
-                    }
-                }
-                if (viewModel.photoChanged()) {
-                    obvChangeSet.updatedPhotoUrl =
-                        if (viewModel.getAbsolutePhotoUrl() == null) "" else viewModel.getAbsolutePhotoUrl()
-                    changed = true
-                }
-                if (changed) {
-                    try {
-                        AppSingleton.getEngine().initiateGroupV2Update(
-                            viewModel.bytesOwnedIdentity,
-                            viewModel.getBytesGroupOwnerAndUidOrIdentifier(),
-                            obvChangeSet
-                        )
-                        UpdateGroupV2CustomNameAndPhotoTask(
-                            viewModel.bytesOwnedIdentity,
-                            viewModel.getBytesGroupOwnerAndUidOrIdentifier(),
-                            null,
-                            null,
-                            viewModel.personalNote,
-                            false
-                        ).run()
-                    } catch (e: Exception) {
-                        App.toast(string.toast_message_error_retry, Toast.LENGTH_SHORT)
-                    }
-                } else if (viewModel.personalNoteChanged()) {
-                    UpdateGroupV2CustomNameAndPhotoTask(
+        App.runThread {
+            var changed = false
+            if (viewModel.detailsChanged()) {
+                val newDetails = viewModel.jsonGroupDetails
+                try {
+                    AppSingleton.getEngine().updateLatestGroupDetails(
                         viewModel.bytesOwnedIdentity,
                         viewModel.getBytesGroupOwnerAndUidOrIdentifier(),
-                        null,
-                        null,
-                        viewModel.personalNote,
-                        false
-                    ).run()
-                }
-                if (onOkCallback != null) {
-                    onOkCallback!!.run()
-                }
-            }
-        } else {
-            App.runThread {
-                var changed = false
-                if (viewModel.detailsChanged()) {
-                    val newDetails = viewModel.jsonGroupDetails
-                    try {
-                        AppSingleton.getEngine().updateLatestGroupDetails(
-                            viewModel.bytesOwnedIdentity,
-                            viewModel.getBytesGroupOwnerAndUidOrIdentifier(),
-                            newDetails
-                        )
-                        changed = true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        App.toast(
-                            string.toast_message_error_publishing_group_details,
-                            Toast.LENGTH_SHORT
-                        )
-                    }
-                }
-                if (viewModel.photoChanged()) {
-                    val absolutePhotoUrl = viewModel.getAbsolutePhotoUrl()
-                    try {
-                        AppSingleton.getEngine().updateOwnedGroupPhoto(
-                            viewModel.bytesOwnedIdentity,
-                            viewModel.getBytesGroupOwnerAndUidOrIdentifier(),
-                            absolutePhotoUrl
-                        )
-                        changed = true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        App.toast(
-                            string.toast_message_error_publishing_group_details,
-                            Toast.LENGTH_SHORT
-                        )
-                    }
-                }
-                if (viewModel.personalNoteChanged()) {
-                    UpdateGroupCustomNameAndPhotoTask(
-                        viewModel.bytesOwnedIdentity,
-                        viewModel.getBytesGroupOwnerAndUidOrIdentifier(),
-                        null,
-                        null,
-                        viewModel.personalNote,
-                        false
-                    ).run()
-                }
-                if (changed) {
-                    AppSingleton.getEngine().publishLatestGroupDetails(
-                        viewModel.bytesOwnedIdentity,
-                        viewModel.getBytesGroupOwnerAndUidOrIdentifier()
+                        newDetails
+                    )
+                    changed = true
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    App.toast(
+                        string.toast_message_error_publishing_group_details,
+                        Toast.LENGTH_SHORT
                     )
                 }
-                if (onOkCallback != null) {
-                    onOkCallback!!.run()
+            }
+            if (viewModel.photoChanged()) {
+                val absolutePhotoUrl = viewModel.getAbsolutePhotoUrl()
+                try {
+                    AppSingleton.getEngine().updateOwnedGroupPhoto(
+                        viewModel.bytesOwnedIdentity,
+                        viewModel.getBytesGroupOwnerAndUidOrIdentifier(),
+                        absolutePhotoUrl
+                    )
+                    changed = true
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    App.toast(
+                        string.toast_message_error_publishing_group_details,
+                        Toast.LENGTH_SHORT
+                    )
                 }
             }
+            if (viewModel.personalNoteChanged()) {
+                UpdateGroupCustomNameAndPhotoTask(
+                    viewModel.bytesOwnedIdentity,
+                    viewModel.getBytesGroupOwnerAndUidOrIdentifier(),
+                    null,
+                    null,
+                    viewModel.personalNote,
+                    false
+                ).run()
+            }
+            if (changed) {
+                AppSingleton.getEngine().publishLatestGroupDetails(
+                    viewModel.bytesOwnedIdentity,
+                    viewModel.getBytesGroupOwnerAndUidOrIdentifier()
+                )
+            }
+            onOkCallback?.run()
         }
-    }
-
-    override fun onDismiss(dialog: DialogInterface) {
-        super.onDismiss(dialog)
-        groupV2DetailsViewModel.isEditingGroupCustomSettingsLiveData.value = false
-        if (doNotRollbackOnDismiss.not()) {
-            groupV2DetailsViewModel.initialGroupType?.let { groupV2DetailsViewModel.setGroupType(it) }
-        }
+        dismiss()
     }
 
     companion object {
@@ -302,27 +173,6 @@ class EditOwnedGroupDetailsDialogFragment : DialogFragment() {
             viewModel.bytesOwnedIdentity = byteOwnedIdentity
             viewModel.setBytesGroupOwnerAndUidOrIdentifier(bytesGroupOwnerAndUid)
             viewModel.setOwnedGroupDetails(groupDetails, personalNote)
-            return fragment
-        }
-
-        @JvmStatic
-        fun newInstanceV2(
-            parentActivity: AppCompatActivity,
-            byteOwnedIdentity: ByteArray,
-            bytesGroupIdentifier: ByteArray,
-            groupDetails: JsonGroupDetails,
-            photoUrl: String?,
-            personalNote: String?,
-            onOkCallback: Runnable?
-        ): EditOwnedGroupDetailsDialogFragment {
-            val fragment = EditOwnedGroupDetailsDialogFragment()
-            fragment.onOkCallback = onOkCallback
-            val viewModel =
-                ViewModelProvider(parentActivity)[OwnedGroupDetailsViewModel::class.java]
-            viewModel.setGroupV2(true)
-            viewModel.bytesOwnedIdentity = byteOwnedIdentity
-            viewModel.setBytesGroupOwnerAndUidOrIdentifier(bytesGroupIdentifier)
-            viewModel.setOwnedGroupDetailsV2(groupDetails, photoUrl, personalNote)
             return fragment
         }
     }

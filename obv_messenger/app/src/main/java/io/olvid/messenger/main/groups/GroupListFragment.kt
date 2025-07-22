@@ -41,7 +41,6 @@ import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.Group2Dao.GroupOrGroup2
 import io.olvid.messenger.databases.entity.Group2
 import io.olvid.messenger.databases.tasks.GroupCloningTasks
-import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment
 import io.olvid.messenger.main.RefreshingFragment
 
 class GroupListFragment : RefreshingFragment(), OnRefreshListener, EngineNotificationListener, GroupMenu {
@@ -86,38 +85,6 @@ class GroupListFragment : RefreshingFragment(), OnRefreshListener, EngineNotific
                 group.group2.bytesOwnedIdentity,
                 group.group2.bytesGroupIdentifier
             )
-        }
-    }
-
-    override fun rename(groupOrGroup2: GroupOrGroup2) {
-        if (groupOrGroup2.group != null) {
-            val group = groupOrGroup2.group
-            if (group.bytesGroupOwnerIdentity == null) {
-                // you own the group --> show group details and open edit details
-                App.openGroupDetailsActivityForEditDetails(
-                    activity,
-                    group.bytesOwnedIdentity,
-                    group.bytesGroupOwnerAndUid
-                )
-            } else {
-                val editNameAndPhotoDialogFragment =
-                    EditNameAndPhotoDialogFragment.newInstance(activity, group)
-                editNameAndPhotoDialogFragment.show(childFragmentManager, "dialog")
-            }
-        } else if (groupOrGroup2.group2 != null) {
-            val group2 = groupOrGroup2.group2
-            if (group2.ownPermissionAdmin) {
-                // you own the group --> show group details and open edit details
-                App.openGroupV2DetailsActivityForEditDetails(
-                    activity,
-                    group2.bytesOwnedIdentity,
-                    group2.bytesGroupIdentifier
-                )
-            } else {
-                val editNameAndPhotoDialogFragment =
-                    EditNameAndPhotoDialogFragment.newInstance(activity, group2)
-                editNameAndPhotoDialogFragment.show(childFragmentManager, "dialog")
-            }
         }
     }
 

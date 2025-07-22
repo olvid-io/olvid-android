@@ -1,0 +1,5 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:viewportHeight="26" android:viewportWidth="26" android:width="24dp">
+    <path android:fillColor="@color/olvid_gradient_light" android:pathData="M5,9h8.62v2.8l-5,6h5v2.8h-8.62v-2.8l5,-6h-5z"/>
+    <path android:fillColor="@color/olvid_gradient_light" android:pathData="M15,3.5h4v1.5l-2,2.2h2v1.5h-4v-1.5l2,-2.2h-2z"/>
+    <path android:fillColor="@color/olvid_gradient_light" android:pathData="M17,10.5h5.41v2l-3,3.5h3v2h-5.41v-2l3,-3.5h-3z"/>
+</vector>

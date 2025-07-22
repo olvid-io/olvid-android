@@ -69,6 +69,7 @@ public interface EngineAPI {
     void removeNotificationListener(String notificationName, EngineNotificationListener engineNotificationListener);
     void startSendingNotifications();
     void stopSendingNotifications();
+    void runTaskOnEngineNotificationQueue(Runnable runnable);
 
     enum ListenerPriority {
         LOW,
@@ -218,12 +219,14 @@ public interface EngineAPI {
     void markAttachmentForDeletion(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber);
     void deleteMessageAndAttachments(byte[] bytesOwnedIdentity, byte[] messageIdentifier);
     void markMessageForDeletion(byte[] bytesOwnedIdentity, byte[] messageIdentifier);
+    void markMessageAsOnHold(byte[] bytesOwnedIdentity, byte[] messageIdentifier);
     void cancelAttachmentUpload(byte[] bytesOwnedIdentity, byte[] messageIdentifier, int attachmentNumber);
     void resendAllAttachmentNotifications() throws Exception;
     void connectWebsocket(boolean relyOnWebsocketForNetworkDetection, String os, String osVersion, int appBuild, String appVersion);
     void disconnectWebsocket();
     void pingWebsocket(byte[] bytesOwnedIdentity);
     void retryScheduledNetworkTasks();
+    ObvMessage getOnHoldMessage(byte[] bytesOwnedIdentity, byte[] messageIdentifier) throws Exception;
 
     // Backups
     void initiateBackup(boolean forExport);

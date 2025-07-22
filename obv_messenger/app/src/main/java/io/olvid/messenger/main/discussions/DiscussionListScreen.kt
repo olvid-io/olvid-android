@@ -106,7 +106,7 @@ import io.olvid.messenger.main.archived.ArchivedDiscussionsActivity
 import io.olvid.messenger.main.archived.SwipeActionBackground
 import io.olvid.messenger.main.bookmarks.BookmarkedMessagesActivity
 import io.olvid.messenger.main.bookmarks.BookmarksViewModel
-import io.olvid.messenger.main.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.main.invitations.getAnnotatedDate
 import io.olvid.messenger.main.invitations.getAnnotatedTitle
@@ -404,6 +404,7 @@ fun DiscussionListScreen(
                                                         }
                                                     },
                                                     tipToShow = tip,
+                                                    expirationDays = tipsViewModel.deviceExpirationDays,
                                                 )
                                                 Spacer(
                                                     modifier = Modifier
@@ -699,6 +700,7 @@ fun DiscussionListScreen(
                                                     }
                                                 },
                                                 tipToShow = tip,
+                                                expirationDays = tipsViewModel.deviceExpirationDays,
                                             )
                                         }
                                     }

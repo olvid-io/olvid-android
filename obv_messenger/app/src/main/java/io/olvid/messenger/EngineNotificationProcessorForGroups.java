@@ -20,12 +20,14 @@
 package io.olvid.messenger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
@@ -46,6 +48,7 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.PendingGroupMember;
 import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.databases.tasks.UpdateGroupNameAndPhotoTask;
+import io.olvid.messenger.databases.tasks.new_message.ProcessReadyToProcessOnHoldMessagesTask;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class EngineNotificationProcessorForGroups implements EngineNotificationListener {
@@ -87,23 +90,24 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                 if (obvGroup == null || hasMultipleDetails == null || createdOnOtherDevice == null) {
                     break;
                 }
-                final byte[] bytesGroupUid = obvGroup.getBytesGroupOwnerAndUid();
+                final byte[] bytesGroupOwnerAndUid = obvGroup.getBytesGroupOwnerAndUid();
                 final byte[] bytesOwnedIdentity = obvGroup.getBytesOwnedIdentity();
+                final byte[] bytesGroupOwnerIdentity = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - UID.UID_LENGTH);
 
                 try {
                     db.runInTransaction(() -> {
                         // create the group, if needed
-                        Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupUid);
+                        Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUid);
                         if (group != null) {
                             // This case should normally never happen
                             Logger.e("Received a GROUP_CREATED notification but the group already exists on the App side.");
                         } else {
-                            group = new Group(bytesGroupUid, bytesOwnedIdentity, obvGroup.getGroupDetails(), photoUrl, obvGroup.getBytesGroupOwnerIdentity(), hasMultipleDetails);
+                            group = new Group(bytesGroupOwnerAndUid, bytesOwnedIdentity, obvGroup.getGroupDetails(), photoUrl, obvGroup.getBytesGroupOwnerIdentity(), hasMultipleDetails);
                             db.groupDao().insert(group);
                         }
 
                         // create the discussion if it does not exist
-                        Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupUid);
+                        Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupOwnerAndUid);
                         if (discussion == null) {
                             discussion = Discussion.createOrReuseGroupDiscussion(db, group, createdOnOtherDevice);
 
@@ -120,10 +124,10 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                             Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesGroupMemberIdentity);
                             if (contact != null) {
                                 fullSearchItems.add(contact.fullSearchDisplayName);
-                                ContactGroupJoin contactGroupJoin = new ContactGroupJoin(bytesGroupUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                                ContactGroupJoin contactGroupJoin = new ContactGroupJoin(bytesGroupOwnerAndUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                                 db.contactGroupJoinDao().insert(contactGroupJoin);
-                                Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity);
-                                db.messageDao().insert(groupJoinedMessage);
+                                Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity, bytesGroupOwnerIdentity);
+                                db.messageDao().upsert(groupJoinedMessage);
                                 messageInserted = true;
                             }
                         }
@@ -139,7 +143,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                             declinedSet.add(new BytesKey(bytesDeclinedPendingMember));
                         }
                         for (ObvIdentity obvPendingGroupMember : obvGroup.getPendingGroupMembers()) {
-                            PendingGroupMember pendingGroupMember = new PendingGroupMember(obvPendingGroupMember.getBytesIdentity(), obvPendingGroupMember.getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()), bytesOwnedIdentity, bytesGroupUid, declinedSet.contains(new BytesKey(obvPendingGroupMember.getBytesIdentity())));
+                            PendingGroupMember pendingGroupMember = new PendingGroupMember(obvPendingGroupMember.getBytesIdentity(), obvPendingGroupMember.getIdentityDetails().formatDisplayName(SettingsActivity.getContactDisplayNameFormat(), SettingsActivity.getUppercaseLastName()), bytesOwnedIdentity, bytesGroupOwnerAndUid, declinedSet.contains(new BytesKey(obvPendingGroupMember.getBytesIdentity())));
                             db.pendingGroupMemberDao().insert(pendingGroupMember);
                         }
 
@@ -166,7 +170,18 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                 e.printStackTrace();
                             }
                         }
+
+                        // mark all on hold messages (if any) as ready to process
+                        int count = db.onHoldInboxMessageDao().markAsReadyToProcessForGroupDiscussion(
+                                bytesOwnedIdentity,
+                                bytesGroupOwnerAndUid
+                        );
+                        if (count > 0) {
+                            Logger.i("⏸️ Marked " + count + " on hold messages as ready to process");
+                        }
                     });
+                    // if the transaction finished without an exception, trigger the process of on hold messages that are ready to process
+                    AppSingleton.getEngine().runTaskOnEngineNotificationQueue(new ProcessReadyToProcessOnHoldMessagesTask(engine, db, bytesOwnedIdentity));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -174,101 +189,20 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                 break;
             }
             case EngineNotifications.GROUP_MEMBER_ADDED: {
-                byte[] bytesGroupUid = (byte[]) userInfo.get(EngineNotifications.GROUP_MEMBER_ADDED_BYTES_GROUP_UID_KEY);
+                byte[] bytesGroupOwnerAndUid = (byte[]) userInfo.get(EngineNotifications.GROUP_MEMBER_ADDED_BYTES_GROUP_UID_KEY);
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.GROUP_MEMBER_ADDED_BYTES_OWNED_IDENTITY_KEY);
                 byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.GROUP_MEMBER_ADDED_BYTES_CONTACT_IDENTITY_KEY);
 
-                if (bytesOwnedIdentity == null || bytesContactIdentity == null || bytesGroupUid == null) {
+                if (bytesOwnedIdentity == null || bytesContactIdentity == null || bytesGroupOwnerAndUid == null) {
                     break;
                 }
                 try {
-                    db.runInTransaction(() -> {
-                        Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupUid);
-                        if (group != null) {
-                            Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
-                            if (contact != null) {
-                                db.runInTransaction(() -> {
-                                    Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupUid);
-                                    if (discussion == null) {
-                                        // this case should never happen
-                                        discussion = Discussion.createOrReuseGroupDiscussion(db, group, false);
-
-                                        if (discussion == null) {
-                                            throw new RuntimeException("Unable to create group discussion");
-                                        }
-                                    }
-
-                                    ContactGroupJoin contactGroupJoin = db.contactGroupJoinDao().get(bytesGroupUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                                    if (contactGroupJoin == null) {
-                                        contactGroupJoin = new ContactGroupJoin(bytesGroupUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
-                                        db.contactGroupJoinDao().insert(contactGroupJoin);
-
-                                        group.groupMembersNames = StringUtils.joinContactDisplayNames(
-                                                SettingsActivity.getAllowContactFirstName() ?
-                                                        db.groupDao().getGroupMembersFirstNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
-                                                        :
-                                                        db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
-                                        );
-                                        db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.fullSearchField + " " + contact.fullSearchDisplayName);
-
-                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity);
-                                        db.messageDao().insert(groupJoinedMessage);
-                                        if (discussion.updateLastMessageTimestamp(System.currentTimeMillis())) {
-                                            db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
-                                        }
-                                    }
-
-                                    // resend all unsent messages for this contact
-                                    if (contact.hasChannelOrPreKey()) {
-                                        List<MessageRecipientInfoDao.MessageRecipientInfoAndMessage> messageRecipientInfoAndMessages = db.messageRecipientInfoDao().getUnsentForContactInDiscussion(discussion.id, contact.bytesContactIdentity);
-                                        App.runThread(() -> db.runInTransaction(() -> {
-                                            for (MessageRecipientInfoDao.MessageRecipientInfoAndMessage messageRecipientInfoAndMessage : messageRecipientInfoAndMessages) {
-                                                messageRecipientInfoAndMessage.message.repost(messageRecipientInfoAndMessage.messageRecipientInfo, null);
-                                            }
-                                        }));
-                                    }
-
-                                    // if you are the group owner, check if the group discussion has some shared settings, and resend them
-                                    if (group.bytesGroupOwnerIdentity == null) {
-                                        DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
-                                        if (discussionCustomization != null) {
-                                            JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
-                                            if (jsonSharedSettings != null) {
-                                                Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, bytesOwnedIdentity, true, null);
-                                                if (message != null) {
-                                                    message.postSettingsMessage(true, bytesContactIdentity);
-                                                }
-                                            }
-                                        }
-                                    }
-                                });
-                            } else {
-                                Logger.w("Contact not found while processing a \"Group Member Added\" notification.");
-                            }
-                        } else {
-                            Logger.i("Trying to add group member to a non-existing (yet) group");
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-            case EngineNotifications.GROUP_MEMBER_REMOVED: {
-                byte[] bytesGroupUid = (byte[]) userInfo.get(EngineNotifications.GROUP_MEMBER_REMOVED_BYTES_GROUP_UID_KEY);
-                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.GROUP_MEMBER_REMOVED_BYTES_OWNED_IDENTITY_KEY);
-                byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.GROUP_MEMBER_REMOVED_BYTES_CONTACT_IDENTITY_KEY);
-
-                if (bytesOwnedIdentity == null || bytesContactIdentity == null || bytesGroupUid == null) {
-                    break;
-                }
-                try {
-                    db.runInTransaction(() -> {
-                        Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupUid);
-                        if (group != null) {
-                            Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
-                            if (contact != null) {
-                                Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupUid);
+                    Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUid);
+                    if (group != null) {
+                        Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                        if (contact != null) {
+                            db.runInTransaction(() -> {
+                                Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupOwnerAndUid);
                                 if (discussion == null) {
                                     // this case should never happen
                                     discussion = Discussion.createOrReuseGroupDiscussion(db, group, false);
@@ -278,7 +212,107 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                     }
                                 }
 
-                                ContactGroupJoin contactGroupJoin = db.contactGroupJoinDao().get(bytesGroupUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                                ContactGroupJoin contactGroupJoin = db.contactGroupJoinDao().get(bytesGroupOwnerAndUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                                if (contactGroupJoin == null) {
+                                    contactGroupJoin = new ContactGroupJoin(bytesGroupOwnerAndUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+                                    db.contactGroupJoinDao().insert(contactGroupJoin);
+
+                                    group.groupMembersNames = StringUtils.joinContactDisplayNames(
+                                            SettingsActivity.getAllowContactFirstName() ?
+                                                    db.groupDao().getGroupMembersFirstNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
+                                                    :
+                                                    db.groupDao().getGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
+                                    );
+                                    db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.fullSearchField + " " + contact.fullSearchDisplayName);
+
+                                    Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity, Arrays.copyOfRange(group.bytesGroupOwnerAndUid, 0, group.bytesGroupOwnerAndUid.length - UID.UID_LENGTH));
+                                    db.messageDao().upsert(groupJoinedMessage);
+                                    if (discussion.updateLastMessageTimestamp(System.currentTimeMillis())) {
+                                        db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
+                                    }
+                                }
+
+                                // resend all unsent messages for this contact
+                                if (contact.hasChannelOrPreKey()) {
+                                    List<MessageRecipientInfoDao.MessageRecipientInfoAndMessage> messageRecipientInfoAndMessages = db.messageRecipientInfoDao().getUnsentForContactInDiscussion(discussion.id, contact.bytesContactIdentity);
+                                    App.runThread(() -> db.runInTransaction(() -> {
+                                        for (MessageRecipientInfoDao.MessageRecipientInfoAndMessage messageRecipientInfoAndMessage : messageRecipientInfoAndMessages) {
+                                            messageRecipientInfoAndMessage.message.repost(messageRecipientInfoAndMessage.messageRecipientInfo, null);
+                                        }
+                                    }));
+                                }
+
+                                // if you are the group owner, check if the group discussion has some shared settings, and resend them
+                                if (group.bytesGroupOwnerIdentity == null) {
+                                    DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);
+                                    if (discussionCustomization != null) {
+                                        JsonSharedSettings jsonSharedSettings = discussionCustomization.getSharedSettingsJson();
+                                        if (jsonSharedSettings != null) {
+                                            Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, jsonSharedSettings, bytesOwnedIdentity, true, null);
+                                            if (message != null) {
+                                                message.postSettingsMessage(true, bytesContactIdentity);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // mark all on hold messages (if any) as ready to process
+                                int count = db.onHoldInboxMessageDao().markAsReadyToProcessForGroupDiscussion(
+                                        bytesOwnedIdentity,
+                                        bytesGroupOwnerAndUid
+                                );
+                                if (count > 0) {
+                                    Logger.i("⏸️ Marked " + count + " on hold messages as ready to process");
+                                }
+                            });
+
+                            // if the transaction finished without an exception, trigger the process of on hold messages that are ready to process
+                            AppSingleton.getEngine().runTaskOnEngineNotificationQueue(new ProcessReadyToProcessOnHoldMessagesTask(engine, db, bytesOwnedIdentity));
+                        } else {
+                            Logger.w("Contact not found while processing a \"Group Member Added\" notification.");
+                        }
+                    } else {
+                        Logger.i("Trying to add group member to a non-existing (yet) group");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+            case EngineNotifications.GROUP_MEMBER_REMOVED: {
+                byte[] bytesGroupOwnerAndUid = (byte[]) userInfo.get(EngineNotifications.GROUP_MEMBER_REMOVED_BYTES_GROUP_UID_KEY);
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.GROUP_MEMBER_REMOVED_BYTES_OWNED_IDENTITY_KEY);
+                byte[] bytesContactIdentity = (byte[]) userInfo.get(EngineNotifications.GROUP_MEMBER_REMOVED_BYTES_CONTACT_IDENTITY_KEY);
+
+                if (bytesOwnedIdentity == null || bytesContactIdentity == null || bytesGroupOwnerAndUid == null) {
+                    break;
+                }
+                try {
+                    db.runInTransaction(() -> {
+                        Group group = db.groupDao().get(bytesOwnedIdentity, bytesGroupOwnerAndUid);
+                        if (group != null) {
+                            Contact contact = db.contactDao().get(bytesOwnedIdentity, bytesContactIdentity);
+                            if (contact != null) {
+                                Discussion discussion = db.discussionDao().getByGroupOwnerAndUid(bytesOwnedIdentity, bytesGroupOwnerAndUid);
+                                if (discussion == null) {
+                                    // this case should never happen
+                                    discussion = Discussion.createOrReuseGroupDiscussion(db, group, false);
+
+                                    if (discussion == null) {
+                                        throw new RuntimeException("Unable to create group discussion");
+                                    }
+
+                                    // mark all on hold messages (if any) as ready to process
+                                    int count = db.onHoldInboxMessageDao().markAsReadyToProcessForGroupDiscussion(
+                                            bytesOwnedIdentity,
+                                            bytesGroupOwnerAndUid
+                                    );
+                                    if (count > 0) {
+                                        Logger.i("⏸️ Marked " + count + " on hold messages as ready to process");
+                                    }
+                                }
+
+                                ContactGroupJoin contactGroupJoin = db.contactGroupJoinDao().get(bytesGroupOwnerAndUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                                 if (contactGroupJoin != null) {
                                     db.contactGroupJoinDao().delete(contactGroupJoin);
 
@@ -290,7 +324,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                     );
 
                                     List<String> fullSearchItems = new ArrayList<>();
-                                    for (Contact groupContact : db.contactGroupJoinDao().getGroupContactsSync(bytesOwnedIdentity, bytesGroupUid)) {
+                                    for (Contact groupContact : db.contactGroupJoinDao().getGroupContactsSync(bytesOwnedIdentity, bytesGroupOwnerAndUid)) {
                                         if (groupContact != null) {
                                             fullSearchItems.add(groupContact.fullSearchDisplayName);
                                         }
@@ -298,8 +332,8 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
 
                                     db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.computeFullSearch(fullSearchItems));
 
-                                    Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, contact.bytesContactIdentity);
-                                    db.messageDao().insert(groupLeftMessage);
+                                    Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, contact.bytesContactIdentity, null);
+                                    db.messageDao().upsert(groupLeftMessage);
                                     if (discussion.updateLastMessageTimestamp(System.currentTimeMillis())) {
                                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                                     }

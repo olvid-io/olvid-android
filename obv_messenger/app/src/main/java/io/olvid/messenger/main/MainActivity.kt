@@ -340,6 +340,9 @@ class MainActivity : LockableActivity(), OnClickListener {
                 return@observe
             }
             ownInitialView.setOwnedIdentity(ownedIdentity)
+            App.runThread {
+                tipsViewModel.refreshTipToShow(this)
+            }
             if (ownedIdentity.shouldMuteNotifications()) {
                 ownedIdentityMutedImageView.visibility = View.VISIBLE
             } else {
@@ -418,7 +421,7 @@ class MainActivity : LockableActivity(), OnClickListener {
             }
         }
 
-        App.openAppDialogPromptUserForReadReceiptsIfRelevant()
+        
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

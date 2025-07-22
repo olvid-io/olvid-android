@@ -51,6 +51,8 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.dimen
 import io.olvid.messenger.R.drawable
+import io.olvid.messenger.databases.ContactCacheInfo
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Group
@@ -321,7 +323,7 @@ class InitialView : View {
                             initial = discussionInitial
                             changed = true
                         }
-                        val contactRecentlyOnline = AppSingleton.getContactCacheInfo(discussion.bytesDiscussionIdentifier)?.recentlyOnline ?: true
+                        val contactRecentlyOnline = ContactCacheSingleton.getContactCacheInfo(discussion.bytesDiscussionIdentifier)?.recentlyOnline ?: true
                         if (recentlyOnline != contactRecentlyOnline) {
                             recentlyOnline = contactRecentlyOnline
                             changed = true
@@ -443,77 +445,79 @@ class InitialView : View {
     }
 
     fun setFromCache(bytesIdentifier: ByteArray) {
-        var changed = false
-        val displayName: String? =
-            if (bytesIdentifier.contentEquals(AppSingleton.getBytesCurrentIdentity())) {
-                val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
-                if (ownedIdentity != null) {
-                    ownedIdentity.getCustomDisplayName()
+        runCatching {
+            var changed = false
+            val displayName: String? =
+                if (bytesIdentifier.contentEquals(AppSingleton.getBytesCurrentIdentity())) {
+                    val ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
+                    if (ownedIdentity != null) {
+                        ownedIdentity.getCustomDisplayName()
+                    } else {
+                        ContactCacheSingleton.getContactCustomDisplayName(bytesIdentifier)
+                    }
                 } else {
-                    AppSingleton.getContactCustomDisplayName(bytesIdentifier)
+                    ContactCacheSingleton.getContactCustomDisplayName(bytesIdentifier)
                 }
+            val contactInitial: String
+            val bytes: ByteArray
+            if (displayName == null) {
+                contactInitial = "?"
+                bytes = ByteArray(0)
             } else {
-                AppSingleton.getContactCustomDisplayName(bytesIdentifier)
+                contactInitial = StringUtils.getInitial(displayName)
+                bytes = bytesIdentifier
             }
-        val contactInitial: String
-        val bytes: ByteArray
-        if (displayName == null) {
-            contactInitial = "?"
-            bytes = ByteArray(0)
-        } else {
-            contactInitial = StringUtils.getInitial(displayName)
-            bytes = bytesIdentifier
-        }
-        if (!this.bytes.contentEquals(bytes)) {
-            this.bytes = bytes
-            changed = true
-        }
-        if (initial != contactInitial) {
-            initial = contactInitial
-            changed = true
-        }
-        val contactPhotoUrl =
-            App.absolutePathFromRelative(AppSingleton.getContactPhotoUrl(bytesIdentifier))
-        if (photoUrl != contactPhotoUrl) {
-            photoUrl = contactPhotoUrl
-            changed = true
-        }
-        val contactCacheInfo =
-            AppSingleton.getContactCacheInfo(bytesIdentifier) ?: ContactCacheInfo(
-                keycloakManaged = false,
-                active = true,
-                oneToOne = true,
-                recentlyOnline = true,
-                trustLevel = 0
-            )
-        if (keycloakCertified != contactCacheInfo.keycloakManaged) {
-            keycloakCertified = contactCacheInfo.keycloakManaged
-            changed = true
-        }
-        if (inactive == contactCacheInfo.active) { // We are indeed checking that the value changed ;)
-            inactive = !contactCacheInfo.active
-            changed = true
-        }
-        if (locked) {
-            locked = false
-            changed = true
-        }
-        if (notOneToOne == contactCacheInfo.oneToOne) { // We are indeed checking that the value changed ;)
-            notOneToOne = !contactCacheInfo.oneToOne
-            changed = true
-        }
-        if (recentlyOnline != contactCacheInfo.recentlyOnline) {
-            recentlyOnline = contactCacheInfo.recentlyOnline
-            changed = true
-        }
-        if (contactTrustLevel != contactCacheInfo.trustLevel) {
-            contactTrustLevel = contactCacheInfo.trustLevel
-            changed = true
-        }
-        if (changed) {
-            bitmap = null
-            init()
-        }
+            if (!this.bytes.contentEquals(bytes)) {
+                this.bytes = bytes
+                changed = true
+            }
+            if (initial != contactInitial) {
+                initial = contactInitial
+                changed = true
+            }
+            val contactPhotoUrl =
+                App.absolutePathFromRelative(ContactCacheSingleton.getContactPhotoUrl(bytesIdentifier))
+            if (photoUrl != contactPhotoUrl) {
+                photoUrl = contactPhotoUrl
+                changed = true
+            }
+            val contactCacheInfo =
+                ContactCacheSingleton.getContactCacheInfo(bytesIdentifier) ?: ContactCacheInfo(
+                    keycloakManaged = false,
+                    active = true,
+                    oneToOne = true,
+                    recentlyOnline = true,
+                    trustLevel = 0
+                )
+            if (keycloakCertified != contactCacheInfo.keycloakManaged) {
+                keycloakCertified = contactCacheInfo.keycloakManaged
+                changed = true
+            }
+            if (inactive == contactCacheInfo.active) { // We are indeed checking that the value changed ;)
+                inactive = !contactCacheInfo.active
+                changed = true
+            }
+            if (locked) {
+                locked = false
+                changed = true
+            }
+            if (notOneToOne == contactCacheInfo.oneToOne) { // We are indeed checking that the value changed ;)
+                notOneToOne = !contactCacheInfo.oneToOne
+                changed = true
+            }
+            if (recentlyOnline != contactCacheInfo.recentlyOnline) {
+                recentlyOnline = contactCacheInfo.recentlyOnline
+                changed = true
+            }
+            if (contactTrustLevel != contactCacheInfo.trustLevel) {
+                contactTrustLevel = contactCacheInfo.trustLevel
+                changed = true
+            }
+            if (changed) {
+                bitmap = null
+                init()
+            }
+        }.onFailure { setUnknown() }
     }
 
     fun setUnknown() {

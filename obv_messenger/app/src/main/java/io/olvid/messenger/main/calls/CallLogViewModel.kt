@@ -31,6 +31,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
 import io.olvid.messenger.databases.entity.CallLogItem
 import io.olvid.messenger.databases.entity.OwnedIdentity
@@ -66,7 +67,7 @@ class CallLogViewModel : ViewModel() {
             var first = true
             for (callLogItemContactJoin in callLogItemAndContacts.contacts) {
                 val contactDisplayName =
-                    AppSingleton.getContactCustomDisplayName(callLogItemContactJoin.bytesContactIdentity)
+                    ContactCacheSingleton.getContactCustomDisplayName(callLogItemContactJoin.bytesContactIdentity)
                 if (contactDisplayName != null) {
                     if (!first) {
                         sb.append(separator)
@@ -141,7 +142,7 @@ fun CallLogItemAndContacts.getAnnotatedTitle(): AnnotatedString {
             var first = true
             for (callLogItemContactJoin in contacts) {
                 val contactDisplayName =
-                    AppSingleton.getContactCustomDisplayName(callLogItemContactJoin.bytesContactIdentity)
+                    ContactCacheSingleton.getContactCustomDisplayName(callLogItemContactJoin.bytesContactIdentity)
                 if (contactDisplayName != null) {
                     if (!first) {
                         sb.append(separator)

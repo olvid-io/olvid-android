@@ -28,6 +28,7 @@ import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.ServerMethod;
@@ -45,6 +46,7 @@ public class BatchUploadMessagesOperation extends Operation {
     private final SSLSocketFactory sslSocketFactory;
     private final String server;
     private final IdentityAndUid[] messageIdentitiesAndUids;
+    private final List<IdentityAndUid> tooManyHeadersUnsentMessageUids;
     private final List<IdentityAndUid> identityInactiveMessageUids;
 
     public BatchUploadMessagesOperation(SendManagerSessionFactory sendManagerSessionFactory, SSLSocketFactory sslSocketFactory, String server, IdentityAndUid[] messageIdentitiesAndUids) {
@@ -53,11 +55,16 @@ public class BatchUploadMessagesOperation extends Operation {
         this.sslSocketFactory = sslSocketFactory;
         this.server = server;
         this.messageIdentitiesAndUids = messageIdentitiesAndUids;
+        this.tooManyHeadersUnsentMessageUids = new ArrayList<>();
         this.identityInactiveMessageUids = new ArrayList<>();
     }
 
     public List<IdentityAndUid> getIdentityInactiveMessageUids() {
         return identityInactiveMessageUids;
+    }
+
+    public List<IdentityAndUid> getTooManyHeadersUnsentMessageUids() {
+        return tooManyHeadersUnsentMessageUids;
     }
 
     @Override
@@ -71,6 +78,7 @@ public class BatchUploadMessagesOperation extends Operation {
         try (SendManagerSession sendManagerSession = sendManagerSessionFactory.getSession()) {
             try {
                 List<OutboxMessageAndHeaders> outboxMessageAndHeaders = new ArrayList<>();
+                int totalHeaders = 0;
 
                 Logger.d("BatchUploadMessagesOperation uploading a batch of " + messageIdentitiesAndUids.length);
 
@@ -97,11 +105,18 @@ public class BatchUploadMessagesOperation extends Operation {
                     } else {
                         OutboxMessage[] outboxMessages = OutboxMessage.getManyWithoutUidFromServer(sendManagerSession, ownedIdentity, server, messageUids.toArray(new UID[0]));
                         for (OutboxMessage outboxMessage : outboxMessages) {
-                            MessageHeader[] headers = outboxMessage.getHeaders();
-                            outboxMessageAndHeaders.add(new OutboxMessageAndHeaders(outboxMessage, headers));
+                            if (totalHeaders > Constants.MAX_UPLOAD_MESSAGE_BATCH_HEADER_COUNT) {
+                                tooManyHeadersUnsentMessageUids.add(new IdentityAndUid(outboxMessage.getOwnedIdentity(), outboxMessage.getUid()));
+                            } else {
+                                MessageHeader[] headers = outboxMessage.getHeaders();
+                                outboxMessageAndHeaders.add(new OutboxMessageAndHeaders(outboxMessage, headers));
+                                totalHeaders += headers.length;
+                            }
                         }
                     }
                 }
+
+                Logger.d("Total header count for this batch: " + totalHeaders);
 
                 if (cancelWasRequested()) {
                     return;

@@ -1,213 +1,237 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <plurals name="explanation_backup_v2_device_expiration_end">
-        <item quantity="one">" på denne enhed vil din tidligere enhed nedenfor blive deaktiveret:</item>
-        <item quantity="other">" på denne enhed vil dine enheder nedenfor blive deaktiveret:</item>
-    </plurals>
-    <plurals name="label_backups_found">
-        <item quantity="one">%1$d backup fundet</item>
-        <item quantity="other">%1$d backups fundet</item>
-    </plurals>
-    <plurals name="label_profiles_found">
-        <item quantity="one">%1$d profil fundet</item>
-        <item quantity="other">%1$d profiler fundet</item>
-    </plurals>
-    <plurals name="label_backup_groups">
-        <item quantity="zero">Ingen gruppe</item>
-        <item quantity="one">%1$d gruppe</item>
-        <item quantity="other">%1$d grupper</item>
-    </plurals>
-    <plurals name="label_backup_contacts">
-        <item quantity="zero">Ingen kontakt</item>
-        <item quantity="one">%1$d kontakt</item>
-        <item quantity="other">%1$d kontakter</item>
-    </plurals>
-    <plurals name="label_discussion_archive_done">
-        <item quantity="one">Samtale arkiveret</item>
-        <item quantity="other">%1$d samtaler arkiveret</item>
-    </plurals>
-    <plurals name="label_discussion_unarchive_done">
-        <item quantity="one">Samtale fjernet fra arkiv</item>
-        <item quantity="other">%1$d samtaler fjernet fra arkiv</item>
-    </plurals>
-    <plurals name="label_message_unbookmark_done">
-        <item quantity="one">Besked fjernet fra bogmærker</item>
-        <item quantity="other">%1$d beskeder fjernet fra bogmærker</item>
-    </plurals>
-    <plurals name="dialog_title_delete_discussions">
-        <item quantity="one">Slet valgt samtale?</item>
-        <item quantity="other">Slet valgte samtaler?</item>
-    </plurals>
-    <plurals name="dialog_title_delete_messages">
-        <item quantity="one">Slet valgt besked?</item>
-        <item quantity="other">Slet valgte beskeder?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions">
-        <item quantity="one">Vil du virkelig slette den valgte samtale og alle dens beskeder?\nDenne handling kan ikke fortrydes.</item>
-        <item quantity="other">Vil du virkelig slette de %1$d valgte samtaler og alle deres beskeder?\nDenne handling kan ikke fortrydes.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions_choice">
-        <item quantity="one">Hvordan vil du slette den valgte samtale og alle dens beskeder?\nDenne handling kan ikke fortrydes.</item>
-        <item quantity="other">Hvordan vil du slette de %1$d valgte samtaler og alle deres beskeder?\nDenne handling kan ikke fortrydes.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages">
-        <item quantity="one">Vil du virkelig slette den valgte besked?\nDenne handling kan ikke fortrydes.</item>
-        <item quantity="other">Vil du virkelig slette de %1$d valgte beskeder?\nDenne handling kan ikke fortrydes.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages_choice">
-        <item quantity="one">Hvordan vil du slette den valgte besked?\nDenne handling kan ikke fortrydes.</item>
-        <item quantity="other">Hvordan vil du slette de %1$d valgte beskeder?\nDenne handling kan ikke fortrydes.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_messages_everywhere">
-        <item quantity="one">Du er ved at **permanent** slette en besked for **alle** i denne samtale. Sørg for, at dette er, hvad du vil.</item>
-        <item quantity="other">Du er ved at **permanent** slette %1$d beskeder for **alle** i denne samtale. Sørg for, at dette er, hvad du vil.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_discussions_everywhere">
-        <item quantity="one">Du er ved at **permanent** slette en samtale og dens beskeder for **alle** i denne samtale. Sørg for, at dette er, hvad du vil.</item>
-        <item quantity="other">Du er ved at **permanent** slette %1$d samtaler og deres beskeder for **alle** i disse samtaler. Sørg for, at dette er, hvad du vil.</item>
-    </plurals>
-    <plurals name="dialog_message_invite_all_group_members">
-        <item quantity="one">Du er ved at invitere hvert gruppemedlem, som du har en kanal med (i øjeblikket 1 medlem) til en privat samtale.\nVil du fortsætte?</item>
-        <item quantity="other">Du er ved at invitere hvert gruppemedlem, som du har en kanal med (i øjeblikket %1$d medlemmer) til en privat samtale.\nVil du fortsætte?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_count">
-        <item quantity="one">1 fælles gruppe</item>
-        <item quantity="other">%1$d fælles grupper</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_end">
-        <item quantity="one">. Du skal forlade denne gruppe for at fortsætte.</item>
-        <item quantity="other">. Du skal forlade disse grupper for at fortsætte.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_with_pending_groups">
-        <item quantity="one">Du er ved at fjerne %1$s fra din liste over andre brugere.\n\nBemærk, at %1$s er blevet inviteret til %2$d gruppe, du er medlem af. De vil blive tilføjet tilbage til denne liste, hvis de tilslutter sig den. Du vil måske forlade denne gruppe for at undgå dette.\n\nVil du virkelig slette denne bruger?</item>
-        <item quantity="other">Du er ved at fjerne %1$s fra din liste over andre brugere.\n\nBemærk, at %1$s er blevet inviteret til %2$d grupper, du er medlem af. De vil blive tilføjet tilbage til denne liste, hvis de tilslutter sig en af dem. Du vil måske forlade disse grupper for at undgå dette.\n\nVil du virkelig slette denne bruger?</item>
-    </plurals>
-    <plurals name="dialog_message_auto_join_pending_groups">
-        <item quantity="one">Ændring af denne indstilling vil automatisk acceptere en afventende gruppeinvitation.\nTryk OK for at bekræfte dit valg og tilslutte dig denne gruppe.</item>
-        <item quantity="other">Ændring af denne indstilling vil automatisk acceptere %1$d afventende gruppeinvitationer.\nTryk OK for at bekræfte dit valg og tilslutte dig disse grupper.</item>
-    </plurals>
-    <plurals name="dialog_message_save_selected_attachments">
-        <item quantity="one">Når du bliver bedt om det, skal du vælge den mappe, hvor du vil gemme det valgte vedhæftede fil.\nBemærk, at adgangen til nogle mapper kan være begrænset.</item>
-        <item quantity="other">Når du bliver bedt om det, skal du vælge den mappe, hvor du vil gemme de %1$d valgte vedhæftede filer.\nBemærk, at adgangen til nogle mapper kan være begrænset.</item>
-    </plurals>
-    <plurals name="action_mode_title_storage">
-        <item quantity="one">%1$d valgt</item>
-        <item quantity="other">%1$d valgt</item>
-    </plurals>
-    <plurals name="dialog_message_delete_attachments">
-        <item quantity="one">Vil du virkelig slette det valgte vedhæftede fil?</item>
-        <item quantity="other">Vil du virkelig slette de %1$d valgte vedhæftede filer?</item>
-    </plurals>
-    <plurals name="text_app_uptime_days">
-        <item quantity="one">%1$d dag, %2$02dt %3$02dm %4$02ds</item>
-        <item quantity="other">%1$d dage, %2$02dt %3$02dm %4$02ds</item>
-    </plurals>
-    <plurals name="text_message_possibly_missing">
-        <item quantity="one">%1$d manglende besked…</item>
-        <item quantity="other">%1$d manglende beskeder…</item>
-    </plurals>
-    <plurals name="text_outgoing_group_call_with_contacts">
-        <item quantity="one">Gruppeopkald med %2$s og 1 anden</item>
-        <item quantity="other">Gruppeopkald med %2$s og %1$d andre</item>
-    </plurals>
-    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
-        <item quantity="one">Ubesvaret gruppeopkald med %2$s og 1 anden</item>
-        <item quantity="other">Ubesvaret gruppeopkald med %2$s og %1$d andre</item>
-    </plurals>
-    <plurals name="text_failed_outgoing_group_call_with_contacts">
-        <item quantity="one">Mislykket gruppeopkald med %2$s og 1 anden</item>
-        <item quantity="other">Mislykket gruppeopkald med %2$s og %1$d andre</item>
-    </plurals>
-    <plurals name="text_busy_outgoing_group_call_with_contacts">
-        <item quantity="one">Gruppeopkald mens %2$s og 1 anden var optaget</item>
-        <item quantity="other">Gruppeopkald mens %2$s og %1$d andre var optaget</item>
-    </plurals>
-    <plurals name="text_rejected_outgoing_group_call_with_contacts">
-        <item quantity="one">Afvist gruppeopkald med %2$s og 1 anden</item>
-        <item quantity="other">Afvist gruppeopkald med %2$s og %1$d andre</item>
-    </plurals>
-    <plurals name="text_incoming_group_call_with_contacts">
-        <item quantity="one">Gruppeopkald fra %2$s og 1 anden</item>
-        <item quantity="other">Gruppeopkald fra %2$s og %1$d andre</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion">
-        <item quantity="one">%1$d valgt</item>
-        <item quantity="other">%1$d valgt</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion_list">
-        <item quantity="one">%1$d valgt</item>
-        <item quantity="other">%1$d valgt</item>
-    </plurals>
-    <plurals name="notification_public_title_new_messages">
-        <item quantity="one">%1$d ny besked</item>
-        <item quantity="other">%1$d nye beskeder</item>
-    </plurals>
-    <plurals name="dialog_message_invite_group_members">
-        <item quantity="one">%3$s vil blive inviteret til at deltage i gruppen %2$s.</item>
-        <item quantity="other">De %1$d følgende kontakter vil blive inviteret til at deltage i gruppen %2$s: %3$s.</item>
-    </plurals>
-    <plurals name="dialog_message_remove_group_members">
-        <item quantity="one">%3$s vil blive fjernet fra gruppen %2$s.</item>
-        <item quantity="other">De %1$d følgende gruppemedlemmer vil blive fjernet fra %2$s: %3$s.</item>
-    </plurals>
-    <plurals name="text_unread_message_count">
-        <item quantity="one">%1$d ny besked</item>
-        <item quantity="other">%1$d nye beskeder</item>
-    </plurals>
-    <plurals name="text_reply_attachment_count">
-        <item quantity="one">%1$d vedhæftet fil</item>
-        <item quantity="other">%1$d vedhæftede filer</item>
-    </plurals>
-    <plurals name="text_and_x_other">
-        <item quantity="one">Og %1$d anden</item>
-        <item quantity="other">Og %1$d andre</item>
-    </plurals>
-    <plurals name="text_contact_names_last_separator_x_other">
-        <item quantity="one"> &amp; %1$d anden</item>
-        <item quantity="other"> &amp; %1$d andre</item>
-    </plurals>
-    <plurals name="dialog_message_confirm_retention_policy">
-        <item quantity="one">Anvendelse af den retentionspolitik, du lige har valgt, vil slette en enkelt besked.\nEr du sikker på, at du vil fortsætte?</item>
-        <item quantity="other">Anvendelse af den retentionspolitik, du lige har valgt, vil slette %1$d beskeder.\nEr du sikker på, at du vil fortsætte?</item>
-    </plurals>
-    <plurals name="text_keycloak_missing_search_result">
-        <item quantity="one">… og 1 yderligere søgeresultat\nVenligst forfin din søgning</item>
-        <item quantity="other">… og %1$d yderligere søgeresultater\nVenligst forfin din søgning</item>
-    </plurals>
-    <plurals name="duration_seconds">
-        <item quantity="one">1 sekund</item>
-        <item quantity="other">%1$d sekunder</item>
-    </plurals>
-    <plurals name="duration_minutes">
-        <item quantity="one">1 minut</item>
-        <item quantity="other">%1$d minutter</item>
-    </plurals>
-    <plurals name="duration_hours">
-        <item quantity="one">1 time</item>
-        <item quantity="other">%1$d timer</item>
-    </plurals>
-    <plurals name="duration_days">
-        <item quantity="one">1 dag</item>
-        <item quantity="other">%1$d dage</item>
-    </plurals>
-    <plurals name="duration_years">
-        <item quantity="one">1 år</item>
-        <item quantity="other">%1$d år</item>
-    </plurals>
-    <plurals name="other_members_count">
-        <item quantity="one">1 medlem</item>
-        <item quantity="other">%1$d medlemmer</item>
-    </plurals>
-    <plurals name="dialog_message_delete_remote_deleted_messages">
-        <item quantity="one">Du har i øjeblikket 1 fjern-slettet besked i dine samtaler. Vil du slette den?</item>
-        <item quantity="other">Du har i øjeblikket %1$d fjern-slettede beskeder i dine samtaler. Vil du slette alle disse markeringer?</item>
-    </plurals>
-    <plurals name="label_xxx_contacts_sharing_their_position">
-        <item quantity="one">1 kontakt deler deres placering</item>
-        <item quantity="other">%1$d kontakter deler deres placering</item>
-    </plurals>
-    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
-        <item quantity="one">Du og 1 anden deler deres placering</item>
-        <item quantity="other">Du og %1$d andre deler deres placering</item>
-    </plurals>
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1156880361">En af dine enheder udløber og bliver deaktiveret om **mindre end %1$d dag**.\nDu kan købe et **Olvid+** abonnement for at holde den aktiv.</item>
+		<item quantity="other" state="needs_review" hash="-574658149">En af dine enheder udløber og bliver deaktiveret om **mindre end %1$d dage**.\nDu kan købe et **Olvid+** abonnement for at holde den aktiv.</item>
+	</plurals>
+	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-683497602">%1$s er tilføjet til gruppen</item>
+		<item quantity="other" state="needs_review" hash="51603026">%1$s er tilføjet til gruppen</item>
+	</plurals>
+	<plurals name="text_left_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="399208793">%1$s forlod gruppen</item>
+		<item quantity="other" state="needs_review" hash="1945116549">%1$s forlod gruppen</item>
+	</plurals>
+	<plurals name="label_poll_answers" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="1797058436">Intet svar</item>
+		<item quantity="one" state="needs_review" hash="-7151672">%1$d svar</item>
+		<item quantity="other" state="needs_review" hash="1394570044">%1$d svar</item>
+	</plurals>
+	<plurals name="label_remove_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="312762041">Fjern %1$d medlem</item>
+		<item quantity="other" state="needs_review" hash="1816849257">Fjern %1$d medlemmer</item>
+	</plurals>
+	<plurals name="label_add_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1537484553">Tilføj %1$d medlem</item>
+		<item quantity="other" state="needs_review" hash="1091232977">Tilføj %1$d medlemmer</item>
+	</plurals>
+	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1131862199">\" på denne enhed vil din tidligere enhed nedenfor blive deaktiveret:</item>
+		<item quantity="other" state="needs_review" hash="-2011302529">\" på denne enhed vil dine enheder nedenfor blive deaktiveret:</item>
+	</plurals>
+	<plurals name="label_backups_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1088606803">%1$d sikkerhedskopi fundet</item>
+		<item quantity="other" state="needs_review" hash="-577868099">%1$d sikkerhedskopier fundet</item>
+	</plurals>
+	<plurals name="label_profiles_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1498976610">%1$d profil fundet</item>
+		<item quantity="other" state="needs_review" hash="749391135">%1$d profiler fundet</item>
+	</plurals>
+	<plurals name="label_backup_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="-174007554">Ingen gruppe</item>
+		<item quantity="one" state="needs_review" hash="237276495">%1$d gruppe</item>
+		<item quantity="other" state="needs_review" hash="900821953">%1$d grupper</item>
+	</plurals>
+	<plurals name="label_backup_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="246373927">Ingen kontakt</item>
+		<item quantity="one" state="needs_review" hash="-1671298344">%1$d kontakt</item>
+		<item quantity="other" state="needs_review" hash="1022571360">%1$d kontakter</item>
+	</plurals>
+	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1772966333">Samtalen er arkiveret</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d samtaler arkiveret</item>
+	</plurals>
+	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1312483800">Samtale er ikke arkiveret</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d samtaler genoprettet</item>
+	</plurals>
+	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2045500103">Besked fjernet fra bogmærker</item>
+		<item quantity="other" state="needs_review" hash="204728896">%1$d beskeder er fjernet fra bogmærker</item>
+	</plurals>
+	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-716893580">Slet den valgte samtale?</item>
+		<item quantity="other" state="needs_review" hash="-15840526">Slet udvalgte samtaler?</item>
+	</plurals>
+	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-862879351">Slet den valgte besked?</item>
+		<item quantity="other" state="needs_review" hash="-2020248805">Slet de valgte beskeder?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-931157230">Vil du virkelig slette den valgte samtale og alle dens beskeder?\nDenne handling kan ikke fortrydes.</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">Vil du virkelig slette de %1$d valgte samtaler og alle de beskeder, de indeholder?\nDenne handling kan ikke fortrydes.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2139168692">Hvordan vil du slette den valgte samtale og alle dens beskeder?\nDenne handling kan ikke fortrydes.</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">Hvordan vil du slette de %1$d valgte samtaler og alle de beskeder, de indeholder?\nDenne handling kan ikke fortrydes.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-947341357">Vil du virkelig slette den valgte besked?\nDenne handling kan ikke fortrydes.</item>
+		<item quantity="other" state="needs_review" hash="-752621695">Vil du virkelig slette de %1$d valgte beskeder?\nDenne handling kan ikke fortrydes.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-474913536">Hvordan vil du slette den valgte besked?\nDenne handling kan ikke fortrydes.</item>
+		<item quantity="other" state="needs_review" hash="-895867176">Hvordan vil du slette de %1$d valgte beskeder?\nDenne handling kan ikke fortrydes.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-606769319">Du er ved at slette en besked **permanent** for **alle** i denne samtale. Sørg for, at det er det, du ønsker at gøre.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">Du er ved at slette %1$d beskeder **permanent** for **alle** i denne samtale. Sørg for, at det er det, du ønsker at gøre.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118446236">Du er ved at slette en samtale og alle dens beskeder **permanent** for **alle** i denne samtale. Sørg for, at dette er det, du ønsker at gøre.</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">Du er ved at slette %1$d samtaler og de beskeder, de indeholder, **permanent** for **alle** deltagere i disse samtaler. Sørg for, at dette er det, du ønsker at gøre.</item>
+	</plurals>
+	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1306576418">Du er ved at invitere hvert gruppemedlem, som du har en kanal med (i øjeblikket 1 medlem) til en privat samtale.\nVil du fortsætte?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Du er ved at invitere hvert gruppemedlem, som du har en kanal med (i øjeblikket %1$d medlemmer) til en privat samtale.\nVil du fortsætte?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1699852572">1 fælles gruppe</item>
+		<item quantity="other" state="needs_review" hash="-261780100">%1$d fælles grupper</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1000092559">Du skal forlade denne gruppe for at fortsætte.</item>
+		<item quantity="other" state="needs_review" hash="-1973752801">Du skal forlade disse grupper for at fortsætte.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_with_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1290867480">Du er ved at fjerne %1$s fra din liste over andre brugere.\n\nBemærk, at %1$s blev inviteret til %2$d gruppen, som du er medlem af. De vil blive tilføjet til listen igen, hvis de deltager i den. Du kan overveje at forlade denne gruppe for at undgå dette.\n\nVil du virkelig slette denne bruger?</item>
+		<item quantity="other" state="needs_review" hash="1544662217">Du er ved at fjerne %1$s fra din liste over andre brugere.\n\nBemærk, at %1$s er blevet inviteret til %2$d grupper, som du er medlem af. Hvis de tilslutter sig en af dem, vil de blive tilføjet til denne liste igen. Du kan overveje at forlade disse grupper for at undgå dette.\n\nVil du virkelig slette denne bruger?</item>
+	</plurals>
+	<plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-97256410">Ændring af denne indstilling vil automatisk acceptere en afventende gruppeinvitation.\nTryk på OK for at bekræfte dit valg og tilslutte dig denne gruppe.</item>
+		<item quantity="other" state="needs_review" hash="1009007696">Ændring af denne indstilling vil automatisk acceptere %1$d afventende gruppeinvitationer.\nTryk på OK for at bekræfte dit valg og tilslutte dig disse grupper.</item>
+	</plurals>
+	<plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1768885312">Når du bliver bedt om det, skal du vælge den mappe, hvor du vil gemme det valgte vedhæftede fil.\nBemærk, at adgangen til nogle mapper kan være begrænset.</item>
+		<item quantity="other" state="needs_review" hash="-1416662415">Når du bliver bedt om det, skal du vælge den mappe, hvor du vil gemme de valgte %1$d vedhæftede filer.\nBemærk, at adgangen til nogle mapper kan være begrænset.</item>
+	</plurals>
+	<plurals name="action_mode_title_storage" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d valgt</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d valgt</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1117804388">Vil du virkelig slette det valgte vedhæftede fil?</item>
+		<item quantity="other" state="needs_review" hash="-1540151013">Vil du virkelig slette de %1$d valgte vedhæftede filer?</item>
+	</plurals>
+	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1400550170">%1$d dag, %2$02dt %3$02dm %4$02ds</item>
+		<item quantity="other" state="needs_review" hash="-1847999182">%1$d dage, %2$02dt %3$02dm %4$02ds</item>
+	</plurals>
+	<plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1040869757">%1$d manglende besked…</item>
+		<item quantity="other" state="needs_review" hash="-970055416">%1$d manglende beskeder…</item>
+	</plurals>
+	<plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="800251665">Gruppeopkald med %2$s og 1 anden</item>
+		<item quantity="other" state="needs_review" hash="-1654053808">Gruppeopkald med %2$s og %1$d andre</item>
+	</plurals>
+	<plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1313506338">Ubesvaret gruppeopkald med %2$s og én anden</item>
+		<item quantity="other" state="needs_review" hash="1027194941">Ubesvaret gruppeopkald med %2$s og %1$d andre</item>
+	</plurals>
+	<plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="575911091">Gruppeopkald mislykkedes med %2$s og én anden</item>
+		<item quantity="other" state="needs_review" hash="1768048524">Gruppeopkald mislykkedes med %2$s og %1$d andre</item>
+	</plurals>
+	<plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1115369211">Gruppeopkald mens %2$s og én anden var optaget</item>
+		<item quantity="other" state="needs_review" hash="-332659300">Gruppeopkald mens %2$s og %1$d andre var optaget</item>
+	</plurals>
+	<plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1401449639">Afvist gruppeopkald med %2$s og én anden</item>
+		<item quantity="other" state="needs_review" hash="-150166810">Afvist gruppeopkald med %2$s og %1$d andre</item>
+	</plurals>
+	<plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-366344569">Gruppeopkald fra %2$s og 1 anden</item>
+		<item quantity="other" state="needs_review" hash="1471743578">Gruppeopkald fra %2$s og %1$d andre</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="461822174">%1$d valgt</item>
+		<item quantity="other" state="needs_review" hash="1431585621">%1$d valgt</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion_list" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d valgt</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d valgt</item>
+	</plurals>
+	<plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d ny besked</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d nye beskeder</item>
+	</plurals>
+	<plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1495957123">%3$s vil blive inviteret til at deltage i gruppen %2$s.</item>
+		<item quantity="other" state="needs_review" hash="-250521442">Følgende %1$d kontakter vil blive inviteret til at deltage i gruppen %2$s: %3$s.</item>
+	</plurals>
+	<plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1633684901">%3$s vil blive fjernet fra gruppen %2$s.</item>
+		<item quantity="other" state="needs_review" hash="2062819899">Følgende %1$d gruppemedlemmer vil blive fjernet fra %2$s: %3$s.</item>
+	</plurals>
+	<plurals name="text_unread_message_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d ny besked</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d nye beskeder</item>
+	</plurals>
+	<plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118984743">%1$d vedhæftet fil</item>
+		<item quantity="other" state="needs_review" hash="1321323314">%1$d vedhæftninger</item>
+	</plurals>
+	<plurals name="text_and_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-226443285">Og %1$d anden</item>
+		<item quantity="other" state="needs_review" hash="-2101659023">Og %1$d andre</item>
+	</plurals>
+	<plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-970333"> &amp; %1$d andre</item>
+		<item quantity="other" state="needs_review" hash="1931856055"> &amp; %1$d andre</item>
+	</plurals>
+	<plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-202072457">Anvendelse af den valgte opbevaringspolitik vil slette en enkelt besked.\nEr du sikker på, at du vil fortsætte?</item>
+		<item quantity="other" state="needs_review" hash="-576713525">Anvendelse af den valgte opbevaringspolitik vil slette %1$d beskeder.\nEr du sikker på, at du vil fortsætte?</item>
+	</plurals>
+	<plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="812170692">… og et yderligere søgeresultat\nVenligst indsnævre din søgning</item>
+		<item quantity="other" state="needs_review" hash="1969873890">… og %1$d yderligere søgeresultater\nVenligst forfin din søgning</item>
+	</plurals>
+	<plurals name="duration_seconds" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="251130693">1 sekund</item>
+		<item quantity="other" state="needs_review" hash="624952161">%1$d sekunder</item>
+	</plurals>
+	<plurals name="duration_minutes" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1053938976">1 minut</item>
+		<item quantity="other" state="needs_review" hash="-1051808">%1$d minutter</item>
+	</plurals>
+	<plurals name="duration_hours" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1004063951">1 time</item>
+		<item quantity="other" state="needs_review" hash="1322950935">%1$d timer</item>
+	</plurals>
+	<plurals name="duration_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1264358968">1 dag</item>
+		<item quantity="other" state="needs_review" hash="-1170846734">%1$d dage</item>
+	</plurals>
+	<plurals name="duration_years" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="388401904">1 år</item>
+		<item quantity="other" state="needs_review" hash="298429520">%1$d år</item>
+	</plurals>
+	<plurals name="other_members_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1379655782">1 medlem</item>
+		<item quantity="other" state="needs_review" hash="965402074">%1$d medlemmer</item>
+	</plurals>
+	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1006155949">Du har i øjeblikket 1 slettet fjernbesked i dine samtaler. Vil du slette den?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">Du har i øjeblikket %1$d fjernslettede beskeder i dine samtaler. Vil du slette alle disse markeringer?</item>
+	</plurals>
+	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1367750681">1 kontakt deler deres placering</item>
+		<item quantity="other" state="needs_review" hash="1164266856">%1$d kontakter deler deres placering</item>
+	</plurals>
+	<plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1602016664">Du og [PLACEHOLDER_1] anden deler jeres lokation</item>
+		<item quantity="other" state="needs_review" hash="1789697147">Du og %1$d andre deler jeres lokation</item>
+	</plurals>
 </resources>

@@ -43,6 +43,7 @@ import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Invitation
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.main.invitations.InvitationListViewModel.Action.ABORT
@@ -96,7 +97,7 @@ class InvitationListViewModel : ViewModel() {
             }
 
             Category.INVITE_SENT_DIALOG_CATEGORY -> {
-                if (AppSingleton.getContactCustomDisplayName(invitation.associatedDialog.category.bytesContactIdentity) != null) {
+                if (ContactCacheSingleton.getContactCustomDisplayName(invitation.associatedDialog.category.bytesContactIdentity) != null) {
                     initialView.setFromCache(invitation.associatedDialog.category.bytesContactIdentity)
                 } else {
                     val invitationName = invitation.associatedDialog.category.contactDisplayNameOrSerializedDetails
@@ -117,7 +118,7 @@ class InvitationListViewModel : ViewModel() {
             Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY,
             Category.INVITE_ACCEPTED_DIALOG_CATEGORY,
             Category.MEDIATOR_INVITE_ACCEPTED_DIALOG_CATEGORY -> {
-                if (AppSingleton.getContactCustomDisplayName(invitation.associatedDialog.category.bytesContactIdentity) != null) {
+                if (ContactCacheSingleton.getContactCustomDisplayName(invitation.associatedDialog.category.bytesContactIdentity) != null) {
                     initialView.setFromCache(invitation.associatedDialog.category.bytesContactIdentity)
                 } else {
                     val invitationName = try {
@@ -678,14 +679,14 @@ fun Invitation.getAnnotatedTitle(context: Context): AnnotatedString {
 
             Category.INVITE_SENT_DIALOG_CATEGORY -> {
                 append(
-                    AppSingleton.getContactCustomDisplayName(associatedDialog.category.bytesContactIdentity)
+                    ContactCacheSingleton.getContactCustomDisplayName(associatedDialog.category.bytesContactIdentity)
                         ?: associatedDialog.category.contactDisplayNameOrSerializedDetails
                 )
             }
 
             Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY, Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY -> {
                 append(
-                    AppSingleton.getContactCustomDisplayName(associatedDialog.category.bytesContactIdentity)
+                    ContactCacheSingleton.getContactCustomDisplayName(associatedDialog.category.bytesContactIdentity)
                         ?: context.getString(R.string.text_deleted_contact)
                 )
             }
@@ -749,7 +750,7 @@ fun ObvGroupV2.getReadableMembers(): String? {
     return try {
         StringUtils.joinContactDisplayNames(
             otherGroupMembers?.map {
-                AppSingleton.getContactCustomDisplayName(it.bytesIdentity)
+                ContactCacheSingleton.getContactCustomDisplayName(it.bytesIdentity)
             }.orEmpty()
                 .plus(pendingGroupMembers?.map {
                     AppSingleton.getJsonObjectMapper().readValue(

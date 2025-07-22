@@ -253,7 +253,7 @@ public class ContactGroupMembersJoin implements ObvDatabase {
     public void wasCommitted() {
         if ((commitHookBits & HOOK_BIT_INSERTED) != 0) {
             HashMap<String, Object> userInfo = new HashMap<>();
-            userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED_GROUP_UID_KEY, groupOwnerAndUid);
+            userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED_GROUP_OWNER_AND_UID_KEY, groupOwnerAndUid);
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED_OWNED_IDENTITY_KEY, ownedIdentity);
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED_CONTACT_IDENTITY_KEY, contactIdentity);
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED, userInfo);

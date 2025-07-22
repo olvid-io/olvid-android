@@ -33,6 +33,7 @@ import io.olvid.engine.Logger;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.webclient.WebClientManager;
@@ -185,7 +186,7 @@ public class DiscussionListener {
             } else if (element1.discussion == null || element2.discussion == null) {
                 return false;
             } else if (element1.discussion.lastMessageTimestamp != element2.discussion.lastMessageTimestamp
-                    || !element1.discussion.title.equals(element2.discussion.title)
+                    || !Objects.equals(element1.discussion.title, element2.discussion.title)
                     || !Objects.equals(element1.discussion.photoUrl, element2.discussion.photoUrl)
                     || element1.discussion.status != element2.discussion.status) {
                 return false;
@@ -282,7 +283,7 @@ public class DiscussionListener {
             discussionBuilder.setDiscussionTimestamp(discussionAndLastMessage.discussion.lastMessageTimestamp);
             //set last message fields
             if (discussionAndLastMessage.message != null) {
-                String contactName = AppSingleton.getContactCustomDisplayName(discussionAndLastMessage.message.senderIdentifier);
+                String contactName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(discussionAndLastMessage.message.senderIdentifier);
                 if (contactName == null) {
                     lastMessageBuilder.setSenderName(context.getString(R.string.text_deleted_contact));
                     lastMessageBuilder.setSenderIsSelf(false);

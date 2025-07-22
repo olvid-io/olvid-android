@@ -33,6 +33,7 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonMessage;
+import io.olvid.messenger.databases.entity.jsons.JsonPoll;
 import io.olvid.messenger.databases.entity.jsons.JsonUserMention;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
@@ -43,14 +44,16 @@ public class PostMessageInDiscussionTask implements Runnable {
     private final boolean showToast;
     private final OpenGraph openGraph;
     private final List<JsonUserMention> mentions;
+    private final JsonPoll poll;
 
-    public PostMessageInDiscussionTask(String body, long discussionId, boolean showToast, OpenGraph openGraph, List<JsonUserMention> mentions) {
+    public PostMessageInDiscussionTask(String body, long discussionId, boolean showToast, OpenGraph openGraph, List<JsonUserMention> mentions, JsonPoll poll) {
         this.db = AppDatabase.getInstance();
         this.body = body;
         this.discussionId = discussionId;
         this.showToast = showToast;
         this.openGraph = openGraph;
         this.mentions = mentions;
+        this.poll = poll;
     }
 
     @Override
@@ -98,6 +101,7 @@ public class PostMessageInDiscussionTask implements Runnable {
                 jsonMessage = new JsonMessage(body);
             }
             jsonMessage.setJsonUserMentions(mentions);
+            jsonMessage.setJsonPoll(poll);
 
             if (discussionDefaultJsonExpiration != null) {
                 jsonMessage.setJsonExpiration(discussionDefaultJsonExpiration);
@@ -130,6 +134,7 @@ public class PostMessageInDiscussionTask implements Runnable {
             final JsonMessage jsonMessage = draftMessage.getJsonMessage();
             jsonMessage.setBody(body);
             jsonMessage.setJsonUserMentions(mentions);
+            jsonMessage.jsonPoll = poll;
 
             if (discussionDefaultJsonExpiration != null) {
                 if (jsonMessage.getJsonExpiration() == null) {

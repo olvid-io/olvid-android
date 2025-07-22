@@ -44,11 +44,11 @@ import java.util.List;
 import java.util.Objects;
 
 import io.olvid.messenger.App;
-import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 
@@ -221,7 +221,7 @@ public class FullscreenMapBottomSheetDialog extends BottomSheetDialogFragment {
                 });
 
                 initialView.setFromCache(message.senderIdentifier);
-                displayNameTextView.setText(AppSingleton.getContactCustomDisplayName(message.senderIdentifier));
+                displayNameTextView.setText(ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(message.senderIdentifier));
                 lastUpdateTextView.setText(getString(R.string.label_share_location_latest_update, StringUtils.getLongNiceDateString(App.getContext(), message.getJsonLocation().getTimestamp())));
                 openInThirdPartyAppImageView.setOnClickListener((view) -> {
                     JsonLocation jsonLocation = message.getJsonLocation();

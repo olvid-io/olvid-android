@@ -1,213 +1,237 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <plurals name="explanation_backup_v2_device_expiration_end">
-        <item quantity="one">" op hierdie toestel sal jou vorige toestel hieronder gedeaktiveer word:</item>
-        <item quantity="other">" op hierdie toestel sal jou toestelle hieronder gedeaktiveer word:</item>
-    </plurals>
-    <plurals name="label_backups_found">
-        <item quantity="one">%1$d rugsteun gevind</item>
-        <item quantity="other">%1$d rugsteune gevind</item>
-    </plurals>
-    <plurals name="label_profiles_found">
-        <item quantity="one">%1$d profiel gevind</item>
-        <item quantity="other">%1$d profiele gevind</item>
-    </plurals>
-    <plurals name="label_backup_groups">
-        <item quantity="zero">Geen groep</item>
-        <item quantity="one">%1$d groep</item>
-        <item quantity="other">%1$d groepe</item>
-    </plurals>
-    <plurals name="label_backup_contacts">
-        <item quantity="zero">Geen kontak</item>
-        <item quantity="one">%1$d kontak</item>
-        <item quantity="other">%1$d kontakte</item>
-    </plurals>
-    <plurals name="label_discussion_archive_done">
-        <item quantity="one">Gesprek gearchiveer</item>
-        <item quantity="other">%1$d gesprekke gearchiveer</item>
-    </plurals>
-    <plurals name="label_discussion_unarchive_done">
-        <item quantity="one">Gesprek gedearchiveer</item>
-        <item quantity="other">%1$d gesprekke gedearchiveer</item>
-    </plurals>
-    <plurals name="label_message_unbookmark_done">
-        <item quantity="one">Boodskap ontboekmerk</item>
-        <item quantity="other">%1$d boodskappe ontboekmerk</item>
-    </plurals>
-    <plurals name="dialog_title_delete_discussions">
-        <item quantity="one">Geselekteerde gesprek verwyder?</item>
-        <item quantity="other">Geselekteerde gesprekke verwyder?</item>
-    </plurals>
-    <plurals name="dialog_title_delete_messages">
-        <item quantity="one">Geselekteerde boodskap verwyder?</item>
-        <item quantity="other">Geselekteerde boodskappe verwyder?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions">
-        <item quantity="one">Wil jy regtig die geselekteerde gesprek en al die boodskappe daarin verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
-        <item quantity="other">Wil jy regtig die %1$d geselekteerde gesprekke en al die boodskappe daarin verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions_choice">
-        <item quantity="one">Hoe wil jy die geselekteerde gesprek en al die boodskappe daarin verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
-        <item quantity="other">Hoe wil jy die %1$d geselekteerde gesprekke en al die boodskappe daarin verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages">
-        <item quantity="one">Wil jy regtig die geselekteerde boodskap verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
-        <item quantity="other">Wil jy regtig die %1$d geselekteerde boodskappe verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages_choice">
-        <item quantity="one">Hoe wil jy die geselekteerde boodskap verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
-        <item quantity="other">Hoe wil jy die %1$d geselekteerde boodskappe verwyder?\nHierdie aksie kan nie ongedaan gemaak word nie.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_messages_everywhere">
-        <item quantity="one">Jy is besig om **permanent** \'n boodskap vir **almal** in hierdie gesprek te verwyder. Maak seker dat dit regtig is wat jy wil doen.</item>
-        <item quantity="other">Jy is besig om **permanent** %1$d boodskappe vir **almal** in hierdie gesprek te verwyder. Maak seker dat dit regtig is wat jy wil doen.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_discussions_everywhere">
-        <item quantity="one">Jy is besig om **permanent** \'n gesprek en die boodskappe daarin vir **almal** in hierdie gesprek te verwyder. Maak seker dat dit regtig is wat jy wil doen.</item>
-        <item quantity="other">Jy is besig om **permanent** %1$d gesprekke en die boodskappe daarin vir **almal** in hierdie gesprekke te verwyder. Maak seker dat dit regtig is wat jy wil doen.</item>
-    </plurals>
-    <plurals name="dialog_message_invite_all_group_members">
-        <item quantity="one">Jy is besig om elke groeplid met wie jy \'n kanaal het (tans 1 lid) na \'n privaat gesprek te nooi.\nWil jy voortgaan?</item>
-        <item quantity="other">Jy is besig om elke groeplid met wie jy \'n kanaal het (tans %1$d lede) na \'n privaat gesprek te nooi.\nWil jy voortgaan?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_count">
-        <item quantity="one">1 gemeenskaplike groep</item>
-        <item quantity="other">%1$d gemeenskaplike groepe</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_end">
-        <item quantity="one">. Jy sal hierdie groep moet verlaat om voort te gaan.</item>
-        <item quantity="other">. Jy sal hierdie groepe moet verlaat om voort te gaan.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_with_pending_groups">
-        <item quantity="one">Jy is besig om %1$s van jou lys van ander gebruikers te verwyder.\n\nLet wel dat %1$s na %2$d groep waaraan jy behoort, genooi is. Hulle sal teruggevoeg word tot hierdie lys as hulle by die groep aansluit. Jy wil dalk hierdie groep verlaat om dit te vermy.\n\nVerwyder hierdie gebruiker regtig?</item>
-        <item quantity="other">Jy is besig om %1$s van jou lys van ander gebruikers te verwyder.\n\nLet wel dat %1$s na %2$d groepe waaraan jy behoort, genooi is. Hulle sal teruggevoeg word tot hierdie lys as hulle by een van hulle aansluit. Jy wil dalk hierdie groepe verlaat om dit te vermy.\n\nVerwyder hierdie gebruiker regtig?</item>
-    </plurals>
-    <plurals name="dialog_message_auto_join_pending_groups">
-        <item quantity="one">Deur hierdie instelling te verander, sal outomaties een hangende groepuitnodiging aanvaar word.\nDruk OK om jou keuse te bevestig en by hierdie groep aan te sluit.</item>
-        <item quantity="other">Deur hierdie instelling te verander, sal outomaties %1$d hangende groepuitnodigings aanvaar word.\nDruk OK om jou keuse te bevestig en by hierdie groepe aan te sluit.</item>
-    </plurals>
-    <plurals name="dialog_message_save_selected_attachments">
-        <item quantity="one">Wanneer gevra, kies asseblief die vouer waarin die geselekteerde aanhangsel gestoor moet word.\nLet wel dat toegang tot sommige vouers beperk kan wees.</item>
-        <item quantity="other">Wanneer gevra, kies asseblief die vouer waarin die %1$d geselekteerde aanhangsels gestoor moet word.\nLet wel dat toegang tot sommige vouers beperk kan wees.</item>
-    </plurals>
-    <plurals name="action_mode_title_storage">
-        <item quantity="one">%1$d gekies</item>
-        <item quantity="other">%1$d gekies</item>
-    </plurals>
-    <plurals name="dialog_message_delete_attachments">
-        <item quantity="one">Wil jy regtig die geselekteerde aanhangsel verwyder?</item>
-        <item quantity="other">Wil jy regtig die %1$d geselekteerde aanhangsels verwyder?</item>
-    </plurals>
-    <plurals name="text_app_uptime_days">
-        <item quantity="one">%1$d dag, %2$02d uur %3$02d min %4$02d sek</item>
-        <item quantity="other">%1$d dae, %2$02d uur %3$02d min %4$02d sek</item>
-    </plurals>
-    <plurals name="text_message_possibly_missing">
-        <item quantity="one">%1$d ontbrekende boodskap…</item>
-        <item quantity="other">%1$d ontbrekende boodskappe…</item>
-    </plurals>
-    <plurals name="text_outgoing_group_call_with_contacts">
-        <item quantity="one">Groeppraat met %2$s en een ander</item>
-        <item quantity="other">Groeppraat met %2$s en %1$d ander</item>
-    </plurals>
-    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
-        <item quantity="one">Onbeantwoorde groeppraat met %2$s en een ander</item>
-        <item quantity="other">Onbeantwoorde groeppraat met %2$s en %1$d ander</item>
-    </plurals>
-    <plurals name="text_failed_outgoing_group_call_with_contacts">
-        <item quantity="one">Misgeslaagde groeppraat met %2$s en een ander</item>
-        <item quantity="other">Misgeslaagde groeppraat met %2$s en %1$d ander</item>
-    </plurals>
-    <plurals name="text_busy_outgoing_group_call_with_contacts">
-        <item quantity="one">Groeppraat terwyl %2$s en een ander besig was</item>
-        <item quantity="other">Groeppraat terwyl %2$s en %1$d ander besig was</item>
-    </plurals>
-    <plurals name="text_rejected_outgoing_group_call_with_contacts">
-        <item quantity="one">Verwerpte groeppraat met %2$s en een ander</item>
-        <item quantity="other">Verwerpte groeppraat met %2$s en %1$d ander</item>
-    </plurals>
-    <plurals name="text_incoming_group_call_with_contacts">
-        <item quantity="one">Groeppraat van %2$s en een ander</item>
-        <item quantity="other">Groeppraat van %2$s en %1$d ander</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion">
-        <item quantity="one">%1$d gekies</item>
-        <item quantity="other">%1$d gekies</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion_list">
-        <item quantity="one">%1$d gekies</item>
-        <item quantity="other">%1$d gekies</item>
-    </plurals>
-    <plurals name="notification_public_title_new_messages">
-        <item quantity="one">%1$d nuwe boodskap</item>
-        <item quantity="other">%1$d nuwe boodskappe</item>
-    </plurals>
-    <plurals name="dialog_message_invite_group_members">
-        <item quantity="one">%3$s sal genooi word om by die groep %2$s aan te sluit.</item>
-        <item quantity="other">Die %1$d volgende lede sal genooi word om by die groep %2$s aan te sluit: %3$s.</item>
-    </plurals>
-    <plurals name="dialog_message_remove_group_members">
-        <item quantity="one">%3$s sal verwyder word van die groep %2$s.</item>
-        <item quantity="other">Die %1$d volgende groeplede sal verwyder word van %2$s: %3$s.</item>
-    </plurals>
-    <plurals name="text_unread_message_count">
-        <item quantity="one">%1$d nuwe boodskap</item>
-        <item quantity="other">%1$d nuwe boodskappe</item>
-    </plurals>
-    <plurals name="text_reply_attachment_count">
-        <item quantity="one">%1$d aanhangsel</item>
-        <item quantity="other">%1$d aanhangsels</item>
-    </plurals>
-    <plurals name="text_and_x_other">
-        <item quantity="one">En %1$d ander</item>
-        <item quantity="other">En %1$d ander</item>
-    </plurals>
-    <plurals name="text_contact_names_last_separator_x_other">
-        <item quantity="one"> &amp; %1$d ander</item>
-        <item quantity="other"> &amp; %1$d ander</item>
-    </plurals>
-    <plurals name="dialog_message_confirm_retention_policy">
-        <item quantity="one">Deur hierdie retensiebeleid toe te pas, sal \'n enkele boodskap verwyder word.\nWil jy voortgaan?</item>
-        <item quantity="other">Deur hierdie retensiebeleid toe te pas, sal %1$d boodskappe verwyder word.\nWil jy voortgaan?</item>
-    </plurals>
-    <plurals name="text_keycloak_missing_search_result">
-        <item quantity="one">… en een bykomende soekresultaat\nPas jou soekterm aan</item>
-        <item quantity="other">… en %1$d bykomende soekresultate\nPas jou soekterm aan</item>
-    </plurals>
-    <plurals name="duration_seconds">
-        <item quantity="one">1 sekonde</item>
-        <item quantity="other">%1$d sekondes</item>
-    </plurals>
-    <plurals name="duration_minutes">
-        <item quantity="one">1 minuut</item>
-        <item quantity="other">%1$d minute</item>
-    </plurals>
-    <plurals name="duration_hours">
-        <item quantity="one">1 uur</item>
-        <item quantity="other">%1$d ure</item>
-    </plurals>
-    <plurals name="duration_days">
-        <item quantity="one">1 dag</item>
-        <item quantity="other">%1$d dae</item>
-    </plurals>
-    <plurals name="duration_years">
-        <item quantity="one">1 jaar</item>
-        <item quantity="other">%1$d jaar</item>
-    </plurals>
-    <plurals name="other_members_count">
-        <item quantity="one">1 lid</item>
-        <item quantity="other">%1$d lede</item>
-    </plurals>
-    <plurals name="dialog_message_delete_remote_deleted_messages">
-        <item quantity="one">Jy het tans 1 verwyderde boodskap in jou gesprekke. Wil jy dit verwyder?</item>
-        <item quantity="other">Jy het tans %1$d verwyderde boodskappe in jou gesprekke. Wil jy al hierdie merkers verwyder?</item>
-    </plurals>
-    <plurals name="label_xxx_contacts_sharing_their_position">
-        <item quantity="one">1 kontak deel hul posisie</item>
-        <item quantity="other">%1$d kontakte deel hul posisie</item>
-    </plurals>
-    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
-        <item quantity="one">Jy en 1 ander deel hul posisie</item>
-        <item quantity="other">Jy en %1$d ander deel hul posisie</item>
-    </plurals>
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1156880361">Een van jou toestelle gaan verval en gedeaktiveer word in **minder as %1$d dag**.\nJy kan \'n **Olvid+** intekening aankoop om dit aktief te hou.</item>
+		<item quantity="other" state="needs_review" hash="-574658149">Een van jou toestelle gaan verval en gedeaktiveer word in **minder as %1$d dae**.\nJy kan \'n **Olvid+** intekening aankoop om dit aktief te hou.</item>
+	</plurals>
+	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-683497602">%1$s het by die groep aangesluit</item>
+		<item quantity="other" state="needs_review" hash="51603026">%1$s het by die groep aangesluit</item>
+	</plurals>
+	<plurals name="text_left_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="399208793">%1$s het die groep verlaat</item>
+		<item quantity="other" state="needs_review" hash="1945116549">%1$s het die groep verlaat</item>
+	</plurals>
+	<plurals name="label_poll_answers" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="1797058436">Geen antwoord</item>
+		<item quantity="one" state="needs_review" hash="-7151672">%1$d antwoord</item>
+		<item quantity="other" state="needs_review" hash="1394570044">%1$d antwoorde</item>
+	</plurals>
+	<plurals name="label_remove_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="312762041">Verwyder %1$d lid</item>
+		<item quantity="other" state="needs_review" hash="1816849257">Verwyder %1$d lede</item>
+	</plurals>
+	<plurals name="label_add_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1537484553">Voeg %1$d lid by</item>
+		<item quantity="other" state="needs_review" hash="1091232977">Voeg %1$d lede by</item>
+	</plurals>
+	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1131862199">\" op hierdie toestel sal jou vorige toestel hieronder gedeaktiveer word:</item>
+		<item quantity="other" state="needs_review" hash="-2011302529">\" op hierdie toestel sal jou ouer toestelle gedeaktiveer word:</item>
+	</plurals>
+	<plurals name="label_backups_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1088606803">%1$d rugsteun gevind</item>
+		<item quantity="other" state="needs_review" hash="-577868099">%1$d rugsteun gekry</item>
+	</plurals>
+	<plurals name="label_profiles_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1498976610">%1$d profiel gevind</item>
+		<item quantity="other" state="needs_review" hash="749391135">%1$d profiele gevind</item>
+	</plurals>
+	<plurals name="label_backup_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="-174007554">Geen groep</item>
+		<item quantity="one" state="needs_review" hash="237276495">%1$d groep</item>
+		<item quantity="other" state="needs_review" hash="900821953">%1$d groepe</item>
+	</plurals>
+	<plurals name="label_backup_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="246373927">Geen kontak</item>
+		<item quantity="one" state="needs_review" hash="-1671298344">%1$d kontak</item>
+		<item quantity="other" state="needs_review" hash="1022571360">%1$d kontakte</item>
+	</plurals>
+	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1772966333">Gesprek gearchiveer</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d gesprekke geargiveer</item>
+	</plurals>
+	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1312483800">Gesprek gede-argiveer</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d gesprekke gede-argiveer</item>
+	</plurals>
+	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2045500103">Boodskap is nie meer gemerk nie</item>
+		<item quantity="other" state="needs_review" hash="204728896">%1$d boodskappe is nie meer gemerk nie</item>
+	</plurals>
+	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-716893580">Geselekteerde gesprek verwyder?</item>
+		<item quantity="other" state="needs_review" hash="-15840526">Geselekteerde gesprekke uitvee?</item>
+	</plurals>
+	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-862879351">Kies boodskap uitvee?</item>
+		<item quantity="other" state="needs_review" hash="-2020248805">Kies boodskappe uitvee?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-931157230">Wil jy regtig die gekose gesprek en al die boodskappe wat dit bevat, uitvee?\nHierdie aksie kan nie ongedoen word nie.</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">Wil jy regtig die %1$d gekose gesprekke en al die boodskappe wat hulle bevat, uitvee?\nHierdie aksie kan nie ongedoen word nie.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2139168692">Hoe wil jy die gekose gesprek en al die boodskappe wat dit bevat, uitvee?\nHierdie aksie kan nie ongedoen word nie.</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">Hoe wil jy die %1$d gekose gesprekke en al die boodskappe wat hulle bevat, uitvee?\nHierdie aksie kan nie ongedoen word nie.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-947341357">Wil jy regtig die gekose boodskap uitvee?\nHierdie aksie kan nie ongedoen word nie.</item>
+		<item quantity="other" state="needs_review" hash="-752621695">Wil jy regtig die %1$d gekiesde boodskappe uitvee?\nHierdie aksie kan nie ongedoen word nie.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-474913536">Hoe wil jy die gekose boodskap uitvee?\nHierdie aksie kan nie ongedoen word nie.</item>
+		<item quantity="other" state="needs_review" hash="-895867176">Hoe wil jy die %1$d geselekteerde boodskappe verwyder?\nHierdie aksie kan nie ongedoen word nie.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-606769319">Jy is op die punt om \'n boodskap **permanent** vir **almal** in hierdie gesprek uit te vee. Maak asseblief seker dit is wat jy regtig wil doen.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">Jy is op die punt om %1$d boodskappe **permanent** vir **almal** in hierdie gesprek uit te vee. Maak asseblief seker dit is wat jy regtig wil doen.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118446236">Jy is op die punt om \'n gesprek en die boodskappe wat dit bevat **permanent** vir **almal** in hierdie gesprek uit te vee. Maak asseblief seker dat dit werklik is wat jy wil doen.</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">Jy is op die punt om %1$d gesprekke en die boodskappe wat hulle bevat **permanent** vir **almal** in hierdie gesprekke uit te vee. Maak asseblief seker dat dit werklik is wat jy wil doen.</item>
+	</plurals>
+	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1306576418">Jy is op die punt om elke groepslid waarmee jy \'n kanaal het (tans 1 lid) na \'n privaat gesprek te nooi.\nWil jy voortgaan?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Jy is op die punt om elke groepslid met wie jy \'n kanaal het (tans %1$d lede) na \'n privaat gesprek te nooi.\nWil jy voortgaan?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1699852572">1 gemeenskaplike groep</item>
+		<item quantity="other" state="needs_review" hash="-261780100">%1$d gemeenskaplike groepe</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1000092559">Jy moet hierdie groep verlaat om voort te gaan.</item>
+		<item quantity="other" state="needs_review" hash="-1973752801">Jy moet hierdie groepe verlaat om voort te gaan.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_with_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1290867480">Jy is op die punt om %1$s van jou lys van ander gebruikers te verwyder.\n\nLet daarop dat %1$s genooi is na die %2$d groep waaraan jy behoort. Hulle sal weer by hierdie lys gevoeg word as hulle by die groep aansluit. Moontlik wil jy hierdie groep verlaat om dit te vermy.\n\nWil jy hierdie gebruiker werklik verwyder?</item>
+		<item quantity="other" state="needs_review" hash="1544662217">Jy is op die punt om %1$s van jou lys van ander gebruikers te verwyder.\n\nLet daarop dat %1$s na %2$d groepe wat jy bygehoor het, genooi is. Hulle sal weer by hierdie lys gevoeg word as hulle by een van hulle aansluit. Jy wil dalk hierdie groepe verlaat om dit te vermy.\n\nWil jy hierdie gebruiker regtig verwyder?</item>
+	</plurals>
+	<plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-97256410">Die wysiging van hierdie instelling sal outomaties een hangende groepenooi aanvaar.\nDruk op OK om jou keuse te bevestig en by hierdie groep aan te sluit.</item>
+		<item quantity="other" state="needs_review" hash="1009007696">Die wysiging van hierdie instelling sal outomaties %1$d hangende groepuitnodigings aanvaar.\nDruk op OK om jou keuse te bevestig en by hierdie groepe aan te sluit.</item>
+	</plurals>
+	<plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1768885312">Wanneer gevra word, kies asseblief die vouer waarin om die gekose aanhegsel te stoor.\nLet wel dat toegang tot sommige vouers beperk kan wees.</item>
+		<item quantity="other" state="needs_review" hash="-1416662415">Wanneer gevra word, kies asseblief die vouer waarin om die %1$d gekose aangehegte lêers te stoor.\nLet wel dat toegang tot sommige vouers beperk mag wees.</item>
+	</plurals>
+	<plurals name="action_mode_title_storage" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d gekies</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d gekies</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1117804388">Wil jy regtig die gekose aanhangsel uitvee?</item>
+		<item quantity="other" state="needs_review" hash="-1540151013">Wil jy regtig die %1$d gekose aangehegde lêers verwyder?</item>
+	</plurals>
+	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1400550170">%1$d dag, %2$02dh %3$02dm %4$02ds</item>
+		<item quantity="other" state="needs_review" hash="-1847999182">%1$d dae, %2$02dh %3$02dm %4$02ds</item>
+	</plurals>
+	<plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1040869757">%1$d ontbrekende boodskap…</item>
+		<item quantity="other" state="needs_review" hash="-970055416">%1$d vermiste boodskappe…</item>
+	</plurals>
+	<plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="800251665">Groeppraatjie met %2$s en nog een</item>
+		<item quantity="other" state="needs_review" hash="-1654053808">Groeppraatjie met %2$s en %1$d ander(s)</item>
+	</plurals>
+	<plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1313506338">Onbeantwoorde groepskakeling met %2$s en nog een</item>
+		<item quantity="other" state="needs_review" hash="1027194941">Onbeantwoorde groepskakeling met %2$s en %1$d ander(s)</item>
+	</plurals>
+	<plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="575911091">Groepoproep met %2$s en nog een persoon het gefaal</item>
+		<item quantity="other" state="needs_review" hash="1768048524">Groepoproep met %2$s en %1$d ander(s) misluk</item>
+	</plurals>
+	<plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1115369211">Groepoproep terwyl %2$s en nog iemand besig was</item>
+		<item quantity="other" state="needs_review" hash="-332659300">Groepgesprek terwyl %2$s en %1$d ander besig was</item>
+	</plurals>
+	<plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1401449639">Gegroepte oproep van %2$s en nog een persoon geweier</item>
+		<item quantity="other" state="needs_review" hash="-150166810">Groepoproep van %2$s en %1$d ander(s) geweier</item>
+	</plurals>
+	<plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-366344569">Groepgesprek vanaf %2$s en nog een ander</item>
+		<item quantity="other" state="needs_review" hash="1471743578">Groepgesprek vanaf %2$s en %1$d ander(s)</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="461822174">%1$d gekies</item>
+		<item quantity="other" state="needs_review" hash="1431585621">%1$d gekies</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion_list" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d gekies</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d gekies</item>
+	</plurals>
+	<plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d nuwe boodskap</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d nuwe boodskappe</item>
+	</plurals>
+	<plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1495957123">%3$s sal genooi word om by die groep %2$s aan te sluit.</item>
+		<item quantity="other" state="needs_review" hash="-250521442">Die volgende %1$d kontakte sal genooi word om by die groep %2$s aan te sluit: %3$s.</item>
+	</plurals>
+	<plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1633684901">%3$s sal uit die groep %2$s verwyder word.</item>
+		<item quantity="other" state="needs_review" hash="2062819899">Die volgende groeplede sal van %2$s verwyder word: %3$s. %1$d</item>
+	</plurals>
+	<plurals name="text_unread_message_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d nuwe boodskap</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d nuwe boodskappe</item>
+	</plurals>
+	<plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118984743">%1$d aangehegte lêer</item>
+		<item quantity="other" state="needs_review" hash="1321323314">%1$d aangehegte lêers</item>
+	</plurals>
+	<plurals name="text_and_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-226443285">En %1$d ander</item>
+		<item quantity="other" state="needs_review" hash="-2101659023">En %1$d ander(s)</item>
+	</plurals>
+	<plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-970333"> &amp; %1$d ander</item>
+		<item quantity="other" state="needs_review" hash="1931856055"> &amp; %1$d ander(s)</item>
+	</plurals>
+	<plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-202072457">Die retensiemaatstaf wat jy pas gekies het, sal ãn enkele boodskap uitvee.\nIs jy seker dat jy wil voortgaan?</item>
+		<item quantity="other" state="needs_review" hash="-576713525">Die retensiemaatstawwe wat jy pas gekies het, sal %1$d boodskappe uitvee.\nIs jy seker dat jy wil voortgaan?</item>
+	</plurals>
+	<plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="812170692">… en een bykomende soekresultaat\nPas asseblief jou soektog aan</item>
+		<item quantity="other" state="needs_review" hash="1969873890">… en %1$d bykomende soekresultate\nPasse asseblief jou soektog aan</item>
+	</plurals>
+	<plurals name="duration_seconds" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="251130693">1 sekonde</item>
+		<item quantity="other" state="needs_review" hash="624952161">%1$d sekondes</item>
+	</plurals>
+	<plurals name="duration_minutes" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1053938976">1 minuut</item>
+		<item quantity="other" state="needs_review" hash="-1051808">%1$d minute</item>
+	</plurals>
+	<plurals name="duration_hours" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1004063951">1 uur</item>
+		<item quantity="other" state="needs_review" hash="1322950935">%1$d ure</item>
+	</plurals>
+	<plurals name="duration_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1264358968">1 dag</item>
+		<item quantity="other" state="needs_review" hash="-1170846734">%1$d dae</item>
+	</plurals>
+	<plurals name="duration_years" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="388401904">1 jaar</item>
+		<item quantity="other" state="needs_review" hash="298429520">%1$d jaar</item>
+	</plurals>
+	<plurals name="other_members_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1379655782">1 lid</item>
+		<item quantity="other" state="needs_review" hash="965402074">%1$d lede</item>
+	</plurals>
+	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1006155949">Jy het tans 1 verwyderde boodskap op afstand in jou gesprekke. Wil jy dit verwyder?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">Jy het tans %1$d afstand-geveeerde boodskappe in jou gesprekke. Wil jy al hierdie merkers verwyder?</item>
+	</plurals>
+	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1367750681">1 kontak deel hul ligging</item>
+		<item quantity="other" state="needs_review" hash="1164266856">%1$d kontakte deel hul ligging</item>
+	</plurals>
+	<plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1602016664">Jy en [PLACEHOLDER_1] ander deel jou ligging</item>
+		<item quantity="other" state="needs_review" hash="1789697147">Jy en %1$d ander mense deel hul ligging</item>
+	</plurals>
 </resources>

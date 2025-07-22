@@ -1,7 +1,6 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">連絡先の詳細</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">ユーザー詳細</string>
-	<string name="activity_title_create_group" state="needs_review" hash="323669209">グループを作成</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">グループ詳細</string>
 	<string name="activity_title_my_details" state="needs_review" hash="-1089973499">私のプロフィール</string>
 	<string name="activity_title_settings" state="needs_review" hash="-686438097">Olvid設定</string>
@@ -32,13 +31,12 @@
 	<string name="button_label_ignore" state="needs_review" hash="-806373746">無視する</string>
 	<string name="button_label_reject" state="needs_review" hash="-2094664161">拒否する</string>
 	<string name="button_label_introduce" state="needs_review" hash="193852909">紹介する</string>
-	<string name="button_label_invite_members" state="needs_review" hash="-118308632">メンバーを\n招待</string>
+	<string name="button_label_invite_members" state="needs_review" hash="-1063364436">メンバーを招待</string>
 	<string name="button_label_next" state="needs_review" hash="1158639077">次へ</string>
 	<string name="button_label_ok" state="needs_review" hash="2428088">了解</string>
-	<string name="button_label_previous" state="needs_review" hash="-1639666563">前へ</string>
 	<string name="button_label_proceed" state="needs_review" hash="-1224815476">続行</string>
 	<string name="button_label_publish" state="needs_review" hash="-1355390088">公開</string>
-	<string name="button_label_remove_members" state="needs_review" hash="707573877">メンバーを\n削除</string>
+	<string name="button_label_remove_members" state="needs_review" hash="1938722985">メンバーを削除</string>
 	<string name="button_label_remove_nickname" state="needs_review" hash="-1702159211">リセット</string>
 	<string name="button_label_update" state="needs_review" hash="648230638">アップデート</string>
 	<string name="button_label_validate" state="needs_review" hash="-521764973">確認</string>
@@ -90,7 +88,9 @@
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">今のところグループはありません</string>
 	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">「新しいグループ」を押して、最初のグループを作成してください。</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">グループマネージャーがグループカードを更新しました。古いバージョンと新しいバージョンは以下に表示されます。\n\n「更新」を押して、グループ情報を更新してください。</string>
-	<string name="explanation_new_group_v2_card" state="needs_review" hash="-224925220">グループの管理者がグループの詳細情報を更新しました。新しいバージョンは上記に表示されます。\n\nこの新しいバージョンを使用するには、「更新」を押してください。</string>
+	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">管理者がグループ名を変更しました：</string>
+	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">管理者がグループの説明を次のように変更しました:</string>
+	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">管理者がグループの写真を変更しました。</string>
 	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">あなたの連絡先がOlvidカードを更新しました。古いバージョンと新しいバージョンは以下に表示されます。\n\n「更新」を押して、連絡先の情報をこの新しいバージョンで更新してください。</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">安全なディスカッションチャンネルが現在確立されています。この処理が完了するまで、この連絡先とのディスカッションを開始することはできません。あなたと連絡先がオンラインであれば、このプロセスは数秒で完了するはずです。\n\nもし問題が発生したと思われる場合は、チャンネル確立を再開できます。</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">連絡先が見つかりませんでした</string>
@@ -159,7 +159,8 @@
 	<string name="label_group_card_published" state="needs_review" hash="-58328192">グループカード - 公開済み</string>
 	<string name="label_group_card_published_update" state="needs_review" hash="-1889428058">グループカード - 新規</string>
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">グループカード - 未公開ドラフト</string>
-	<string name="label_group_members" state="needs_review" hash="-2121490032">他のグループメンバー</string>
+	<string name="label_group_members" state="needs_review" hash="1460220752">グループメンバー</string>
+	<string name="label_other_group_members" state="needs_review" hash="-2121490032">他のグループメンバー</string>
 	<string name="label_groups" state="needs_review" hash="-990226727">グループ</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">招待を拒否しました</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">グループの詳細が更新されました</string>
@@ -190,7 +191,6 @@
 	<string name="menu_action_recreate_channels" state="needs_review" hash="39178988">安全なチャンネルを再作成</string>
 	<string name="menu_action_rename" state="needs_review" hash="-1795678977">名前変更</string>
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">連絡先の名前を変更</string>
-	<string name="menu_action_rename_group" state="needs_review" hash="1461324427">グループ名の変更</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">保存</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">設定</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">共有</string>
@@ -232,15 +232,16 @@
 	<string name="pref_text_QR_correction_low" state="needs_review" hash="-2013029312">低い</string>
 	<string name="pref_text_QR_correction_medium" state="needs_review" hash="-1685793941">普通</string>
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">非常に高い</string>
-	<string name="subtitle_choose_group_name" state="needs_review" hash="-631282661">グループ名を選択</string>
-	<string name="subtitle_select_group_members" state="needs_review" hash="1572094257">グループメンバーを選択</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">グループから退出しました</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">グループに再参加しました</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">グループに参加しました</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">%1$sによって管理されたグループ</string>
 	<string name="text_joined_group" state="needs_review" hash="369878021">グループに参加しました: %1$s</string>
-	<string name="text_joined_the_group" state="needs_review" hash="-683497602">%1$sがグループに参加しました</string>
-	<string name="text_left_the_group" state="needs_review" hash="399208793">%1$sがグループを退出しました</string>
+	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$sが%2$sをグループに追加しました</string>
+	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">%2$sをグループに追加しました</string>
+	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$sがグループから%2$sを削除しました</string>
+	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">%2$sをグループから削除しました</string>
+	<string name="text_unknown_member" state="needs_review" hash="-698194630">不明</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">誰も</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">下書き:</string>
 	<string name="text_inbound_group_message_prefix" state="needs_review" hash="1359425562">%1$s：</string>
@@ -549,8 +550,8 @@
 	<string name="webrtc_stop_screen_sharing" state="needs_review" hash="585626699">共有を停止</string>
 	<string name="webrtc_speaking_while_muted" state="needs_review" hash="1865652540">マイクはミュートされています</string>
 	<string name="webrtc_speaking_while_muted_action" state="needs_review" hash="-1839617181">ミュート解除</string>
-	<string name="content_description_reject_call_button" state="needs_review" hash="931620384">通話拒否ボタン</string>
-	<string name="content_description_accept_call_button" state="needs_review" hash="-1857614269">通話を受けるボタン</string>
+	<string name="content_description_reject_call_button" state="needs_review" hash="-332175555">通話を拒否する</string>
+	<string name="content_description_accept_call_button" state="needs_review" hash="-934081402">通話を受ける</string>
 	<string name="dialog_title_webrtc_kick_participant" state="needs_review" hash="389469769">通話から連絡先を除外しますか？</string>
 	<string name="webrtc_failed_kicked" state="needs_review" hash="-758835021">この通話から除外されました</string>
 	<string name="dialog_title_start_conference_call" state="needs_review" hash="-1418585505">会議通話を開始</string>
@@ -571,7 +572,7 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">ディスカッションタブ</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">連絡先</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">グループタブ</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="1038824704">連絡先を追加ボタン</string>
+	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">連絡先を追加</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">通知ドット</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">機密性の高いJPEGメタデータを削除</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">有効にすると、Olvidはインポートされた写真ファイルから機密性の高いメタデータを削除しようとします。\nこれには、GPSデータ、カメラのメーカー、作成日などが含まれます。</string>
@@ -777,7 +778,7 @@
 	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">メッセージ保持ポリシー</string>
 	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">以下の設定では、このチャットでの古いメッセージを自動的に削除できます。これらは、デフォルトの保持ポリシーよりも優先されます。</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">デフォルト設定を使用してください (%1$s)</string>
-	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1987562758">ボイスメッセージ録音ボタン</string>
+	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">ボイスメッセージを録音</string>
 	<string name="dialog_title_voice_message_explanation" state="needs_review" hash="943269997">Olvidボイスメッセージ</string>
 	<string name="dialog_message_voice_message_explanation" state="needs_review" hash="-1860729852">ボイスメッセージを録音する前に、Olvidにオーディオを録音する権限を付与してください。</string>
 	<string name="dialog_message_voice_message_explanation_blocked" state="needs_review" hash="-1293891432">ボイスメッセージを録音する前に、Olvidはオーディオを録音する許可を必要とします.\n\nこの許可がOlvidに永続的に拒否されているようです。この許可を手動で付与するには、アプリの設定を開いてください。</string>
@@ -1002,7 +1003,7 @@
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$sは、相手のデバイスに到達次第、連絡先に登録されます。</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s があなたの連絡先に登録されました 🙌！</string>
 	<string name="label_loading_contacts" state="needs_review" hash="-343348890">連絡先を読み込んでいます…</string>
-	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-916981123">ブラウザ選択ボタン</string>
+	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-934849519">ブラウザの選択</string>
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">インストールされているブラウザを照会できません</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">認証に使用するブラウザを選択してください</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">デフォルトブラウザ</string>
@@ -1122,7 +1123,7 @@
 	<string name="dialog_title_unable_to_load_backup_configuration" state="needs_review" hash="-718937548">バックアップ設定の読み込みに失敗しました</string>
 	<string name="dialog_message_unable_to_load_backup_configuration" state="needs_review" hash="1322112021">Olvidは、何度か試行しましたが、現在のバックアップ構成を読み込めませんでした。すでにOlvid/デバイスを完全に再起動しても、このエラーメッセージが表示される場合は、新しいバックアップキーを生成することをお勧めします。</string>
 	<string name="pref_reload_backup_configuration_title" state="needs_review" hash="2000428891">バックアップ設定を再読み込み</string>
-	<string name="content_description_back_button" state="needs_review" hash="-1902681195">戻るボタン</string>
+	<string name="content_description_back_button" state="needs_review" hash="48196338">戻る</string>
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">返信メッセージを削除</string>
 	<string name="content_description_remove_link_preview" state="needs_review" hash="-1085272528">リンクプレビューをクリア</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">このプロファイルでは通知がミュートされていることを示す表示</string>
@@ -1147,7 +1148,7 @@
 	<string name="dialog_message_delete_profile_multi" state="needs_review" hash="-2003495595">このプロファイルを削除すると、デバイス上のこのプロファイルに関連するすべての情報が削除されます。これには、連絡先、グループ、およびこのプロファイルのすべての会話（メッセージと添付ファイル）の内容が含まれます。他のプロファイルはこの操作の影響を受けません。\n\nこのプロファイルをどのように削除するか選択するには、「次へ」を押してください。</string>
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">プロフィールを削除すると、このプロフィールに関連するデバイス上のすべての情報が削除されます。これには、連絡先、グループ、およびこのプロフィールのすべての会話（メッセージと添付ファイル）の内容が含まれます。\n\n<b>これは唯一表示されているプロフィールであり、非表示のプロフィールがある場合は、それらも同時に削除されます。</b>\n\n「次へ」を押して、このプロフィールの削除方法を選択してください。</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">プロフィールを<b>完全に</b>削除</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1363713497">ここに「削除」と入力して続行してください</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">ここに「%1$s」と入力して進んでください</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">プロフィールを<b>すべて</b>削除する場合：\n -\nローカルに削除され、<b>さらに</b>連絡先のデバイスからも削除されます\n -\n参加したグループから退出します\n -\nあなたが管理しているグループは解散されます\n\nプロフィールを<b>すべて</b>削除しない場合、デバイスからローカルにのみ削除されます。別のデバイスでバックアップを復元する予定がない限り、連絡先はメッセージを送信し続け、これらのメッセージが配信できないことに気づかない可能性があります。</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">現在ご利用のプロファイルは非アクティブになっているようです。おそらく別のデバイスに転送されたのでしょう。もし別のデバイスでこのプロファイルを使い続ける予定であれば、ここで安全に削除できます。\n\nもしこのプロファイルを二度と使わない場合は、まずこのデバイスで再アクティブ化し、連絡先との安全なチャンネルの再作成を待ってから、このプロファイルを「すべて削除」オプションを選択して削除する必要があります。</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">あなたのプロフィールは現在、複数のデバイスで有効になっています。\n\nプロフィールを<b>すべての場所</b>で削除する場合：\n	- すべてのデバイス<b>と</b>連絡先のデバイスから削除されます\n	- 参加したグループから退出します\n	- 管理しているグループは解散されます\n\n<b>すべての場所</b>でプロフィールを削除しない場合、ローカルデバイスからのみ削除され、他のデバイスで通常通り使用できます。</string>
@@ -1201,7 +1202,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">ウィジェットを設定…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">ウィジェットの外観</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">ウィジェットタップ時のアクション</string>
-	<string name="label_discussion" state="needs_review" hash="301166224">ディスカッション</string>
+	<string name="label_discuss" state="needs_review" hash="422951553">話し合う</string>
 	<string name="label_message" state="needs_review" hash="809999904">メッセージ</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">送信するあらかじめ定義されたメッセージ</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">送信前に確認</string>
@@ -1241,6 +1242,7 @@
 	<string name="label_audio" state="needs_review" hash="-779820608">音声</string>
 	<string name="label_other" state="needs_review" hash="-543765264">その他</string>
 	<string name="label_all" state="needs_review" hash="752498555">すべて</string>
+	<string name="label_see_all" state="needs_review" hash="-1659641788">すべて表示</string>
 	<string name="menu_action_storage_management" state="needs_review" hash="2130982617">ストレージ管理</string>
 	<string name="menu_action_troubleshooting" state="needs_review" hash="-798155217">トラブルシューティング</string>
 	<string name="explanation_no_files" state="needs_review" hash="-1050005240">表示する添付ファイルがありません</string>
@@ -1345,11 +1347,10 @@
 	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">固定されたチャットは常にチャットリストの一番上に表示されます</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">表示サイズ</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">ディスカッションを開始</string>
-	<string name="label_read_only" state="needs_review" hash="-954957022">読み取り専用</string>
-	<string name="label_read_only_short" state="needs_review" hash="1635912872">読み取り専用</string>
+	<string name="label_read_only" state="needs_review" hash="1996439460">読み取り専用</string>
+	<string name="label_pending_read_only" state="needs_review" hash="649164855">読み込み中 (読み取り専用)</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">管理者</string>
-	<string name="label_pending_admin" state="needs_review" hash="-2032202913">保留中\n管理者</string>
-	<string name="label_not_admin" state="needs_review" hash="286893263">管理者ではありません</string>
+	<string name="label_pending_admin" state="needs_review" hash="-1074135173">保留中の管理者</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">このユーザーの名前を表示できません</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">名前のないグループ</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">ディスカッション通知</string>
@@ -1364,10 +1365,9 @@
 	<string name="notification_channel_discussion_name" state="needs_review" hash="588648320">議論 %1$d</string>
 	<string name="notification_channel_discussion_group_name" state="needs_review" hash="491497248">ディスカッション</string>
 	<string name="notification_channel_discussion_group_description" state="needs_review" hash="-1448542719">特定のOlvidのディスカッションに対するパーソナライズされた通知。</string>
-	<string name="button_label_edit_group_members" state="needs_review" hash="-1379721010">このグループを編集</string>
+	<string name="button_label_edit_group_members" state="needs_review" hash="1855939143">メンバーを編集</string>
 	<string name="button_label_add_members" state="needs_review" hash="-203515331">メンバーを追加</string>
 	<string name="label_group_update_in_progress_title" state="needs_review" hash="-2019791170">グループの同期が進行中です</string>
-	<string name="label_group_update_in_progress_title_for_creation" state="needs_review" hash="388073211">グループ作成中です</string>
 	<string name="explanation_group_update_in_progress" state="needs_review" hash="360407479">グループは現在同期中です。更新が完了すると、この画面が更新されます。</string>
 	<string name="toast_message_unable_to_update_group" state="needs_review" hash="-513468036">グループの更新に失敗しました。変更内容は失われました。もう一度お試しください。</string>
 	<string name="dialog_title_unable_to_leave_group" state="needs_review" hash="-297756627">グループから退出できません</string>
@@ -1484,7 +1484,7 @@
 	<string name="message_discussion_group_v2_updating" state="needs_review" hash="1490065684">グループメンバーの同期中です</string>
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">グループを作成中です</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">新しいグループ</string>
-	<string name="label_group_type" state="needs_review" hash="-1954959814">グループタイプ</string>
+	<string name="label_group_type" state="needs_review" hash="498463258">グループの種類</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">標準</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">すべてのグループメンバーは新しいメンバーを招待できます</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">制御された</string>
@@ -1493,7 +1493,6 @@
 	<string name="label_group_read_only_subtitle" state="needs_review" hash="-1941498988">管理者のみがメッセージを投稿できます</string>
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">高度な</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Olvidグループの真の力を解き放ちましょう！</string>
-	<string name="label_group_custom_settings" state="needs_review" hash="-1024799981">詳細設定</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">グループ管理者</string>
 	<string name="text_you_became_admin" state="needs_review" hash="-806884370">あなたはこれでグループの管理者です</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">あなたはもうグループ管理者ではありません</string>
@@ -1741,7 +1740,11 @@
 	<string name="troubleshooting_storage_valid_description" state="needs_review" hash="1144963725">%1$s のストレージ容量がデバイスで利用可能です。</string>
 	<string name="troubleshooting_storage_invalid_title" state="needs_review" hash="-854482374">デバイスのストレージ容量がほとんど一杯です</string>
 	<string name="troubleshooting_storage_invalid_description" state="needs_review" hash="-1018820796">デバイスのストレージ容量が残り %1$s しかありません.\n\nデバイスの空き容量が少なくなっています。Olvidでファイルを受信または送信する際に、予期しないエラーが発生する可能性があります.\n\nおそらく、これはデバイスの空き容量を増やすのに最適なタイミングです。</string>
-	<string name="troubleshooting_header" state="needs_review" hash="138020490">**アプリバージョン**: %1$s (ビルド %2$d)\n**デバイスモデル**: %3$s\n**Android API**: %4$s\n**アプリ実行時間**: %5$s</string>
+	<string name="troubleshooting_header_app_version" state="needs_review" hash="2096978646">**アプリのバージョン**: %1$s (ビルド %2$d)</string>
+	<string name="troubleshooting_header_device_model" state="needs_review" hash="911858141">**デバイスモデル**: %1$s</string>
+	<string name="troubleshooting_header_android_api" state="needs_review" hash="-1735136766">**Android API**: %1$s</string>
+	<string name="troubleshooting_header_app_running_time" state="needs_review" hash="1952701839">**アプリが起動してからの時間**: %1$s</string>
+	<string name="troubleshooting_header_app_install_date" state="needs_review" hash="1411458773">**アプリのインストール日**: %1$s</string>
 	<string name="troubleshooting_faq_description" state="needs_review" hash="1969820989">Olvid に関するヘルプが必要ですか？ FAQ をご覧ください。</string>
 	<string name="troubleshooting_faq_link" state="needs_review" hash="-353352916">https://olvid.io/faq</string>
 	<string name="troubleshooting_request_permission" state="needs_review" hash="-463634281">許可を要求</string>
@@ -1764,7 +1767,7 @@
 	<string name="dialog_title_invite_contact" state="needs_review" hash="1121224764">プライベートなディスカッションへの招待</string>
 	<string name="dialog_message_invite_contact" state="needs_review" hash="883261663">%1$sをプライベートなディスカッションに招待しますか？</string>
 	<string name="explanation_empty_other_contact_list" state="needs_review" hash="-121261312">今のところ誰もいません</string>
-	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="-510803038">まだ連絡先になっていないグループメンバーはここに表示されます。</string>
+	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="1669386057">まだ連絡先になっていないグループメンバーはここに表示されます。</string>
 	<string name="explanation_empty_directory" state="needs_review" hash="298073547">空のディレクトリ</string>
 	<string name="menu_action_invite_all_members" state="needs_review" hash="-1044752673">グループのすべてのメンバーを招待</string>
 	<string name="dialog_title_invite_all_group_members" state="needs_review" hash="2130589049">グループのすべてのメンバーを招待しますか？</string>
@@ -1830,7 +1833,6 @@
 	<string name="global_search_result_links" state="needs_review" hash="-579291596">リンク</string>
 	<string name="button_label_send_read_receipts" state="needs_review" hash="-1730457934">連絡先に通知する</string>
 	<string name="button_label_do_not_send" state="needs_review" hash="-1938459086">彼らに知らせないでください</string>
-	<string name="button_label_ask_later" state="needs_review" hash="-1104721203">後で聞いてください</string>
 	<string name="dialog_message_prompt_user_for_read_receipts" state="needs_review" hash="-1157866927">連絡先にメッセージを読んだことを知らせますか？</string>
 	<string name="dialog_title_prompt_user_for_read_receipts" state="needs_review" hash="-2045842725">既読レシート</string>
 	<string name="pref_app_icon_title" state="needs_review" hash="-1219448320">アプリケーションアイコン</string>
@@ -1922,7 +1924,7 @@
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Olvidのバックアップを管理する</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">今すぐバックアップを開始</string>
 	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/プロファイルのバックアップ/</string>
-	<string name="content_description_close_button" state="needs_review" hash="-1770116030">閉じるボタン</string>
+	<string name="content_description_close_button" state="needs_review" hash="1454843231">閉じる</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">オンラインバックアップ</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">リセット</string>
 	<string name="explanation_reset_backups" state="needs_review" hash="-594480541">リセットすると、すべてのバックアップが削除されます。</string>
@@ -1952,7 +1954,7 @@
 	<string name="enable_backups_title" state="needs_review" hash="-1103233135">プロフィールをバックアップ</string>
 	<string name="enable_backups_message_with_legacy" state="needs_review" hash="-508019994">現在、古いOlvidバックアップが有効になっています。このバックアップはまもなくサポートされなくなります。\nプロファイルと連絡先を復元できるように、新しいOlvidバックアップシステムに切り替えてください。</string>
 	<string name="enable_backups_message" state="needs_review" hash="1555907343">バックアップを有効にすると、デバイスを紛失した場合でも、プロフィールと連絡先を復元できます。</string>
-	<string name="content_description_contextual_actions" state="needs_review" hash="984380377">コンテキストアクションボタン</string>
+	<string name="content_description_contextual_actions" state="needs_review" hash="563463836">コンテキストメニュー</string>
 	<string name="label_backup_from" state="needs_review" hash="-1486363430">%1$sから</string>
 	<string name="label_backup_groups_and_contacts" state="needs_review" hash="1197923862">%1$s、%2$s</string>
 	<string name="label_this_device" state="needs_review" hash="273515292">このデバイス</string>
@@ -2025,6 +2027,8 @@
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">一部のパラメータがデバイスで正しく設定されておらず、Olvidでの体験に影響を与える可能性があります。</string>
 	<string name="button_label_this_way" state="needs_review" hash="747183939">こちら</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">コードがコピーされました</string>
+	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">このグループに追加する相手を選択してください。</string>
+	<string name="label_group_administration" state="needs_review" hash="871355986">グループ管理</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">通話拒否</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvidは、%1$d人を超える相手との通話を許可していません。</string>
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">繰り返し</string>
@@ -2036,4 +2040,51 @@
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Androidアプリの翻訳</string>
 	<string name="pref_app_language_category_title" state="needs_review" hash="1411591324">AIによる翻訳</string>
 	<string name="pref_app_language_category_summary" state="needs_review" hash="-1895843046">アプリの一部の翻訳はAIによって生成されており、不正確な場合があります。その場合は、<b>lang@olvid.io</b>までお知らせください。</string>
+	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">このPDFファイルを開くにはパスワードが必要です</string>
+	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">パスワード</string>
+	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">パスワードが間違っています</string>
+	<string name="label_poll_create" state="needs_review" hash="-1677246175">投票を作成する</string>
+	<string name="label_poll_question" state="needs_review" hash="-1615603188">質問</string>
+	<string name="hint_poll_question" state="needs_review" hash="1961289317">質問する</string>
+	<string name="label_poll_answers" state="needs_review" hash="-382063458">回答</string>
+	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">追加</string>
+	<string name="label_poll_see_answers" state="needs_review" hash="710858547">回答を見る</string>
+	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">相手の返信を待っています</string>
+	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">リマインド</string>
+	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">「%1$s」という回答を追加</string>
+	<string name="label_poll_options" state="needs_review" hash="-13216192">設定</string>
+	<string name="text_none_answer" state="needs_review" hash="560562575">上記のいずれでもありません</string>
+	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">複数の回答を許可する</string>
+	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">一つまたは複数の回答を選択してください</string>
+	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">クイズモード</string>
+	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">終了</string>
+	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">有効期限を追加</string>
+	<string name="label_poll_expiration" state="needs_review" hash="605126523">投票は%1$sで終了します</string>
+	<string name="label_poll_ended" state="needs_review" hash="415569292">投票が終了しました</string>
+	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">少なくとも2つの応答を追加してください</string>
+	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">この応答は既に存在します</string>
+	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">CSVとしてエクスポート</string>
+	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">CSV形式での投票のエクスポートに失敗しました。もう一度お試しください。</string>
+	<string name="toast_message_success_exporting_poll_csv" state="needs_review" hash="16134555">CSV形式での投票エクスポートが成功しました</string>
+	<string name="label_poll_answers_sorted_by" state="needs_review" hash="102938809">並び替え</string>
+	<string name="label_poll_answers_sorted_by_poll_order" state="needs_review" hash="685632215">投票の順序</string>
+	<string name="label_poll_answers_sorted_by_answer_count" state="needs_review" hash="516869301">回答数</string>
+	<string name="notification_public_title_new_poll_vote" state="needs_review" hash="-1901040080">あなたの投票への新しい回答</string>
+	<string name="toast_message_remove_none_answer" state="needs_review" hash="277924655">まず、回答 \"%1$s\" を削除してください</string>
+	<string name="text_poll" state="needs_review" hash="-153643506">投票</string>
+	<string name="poll_csv_headers" state="needs_review" hash="1869917931">投票の質問,投票者名,投票,日付</string>
+	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">まだ回答がありません</string>
+	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">デバイスのまもなくの無効化</string>
+	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">デバイスを管理</string>
+	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">オフラインデバイス</string>
+	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">あなたのデバイスの1つが**30日以上**オフラインになっています.\nもし使用しなくなった場合は、同期の問題を避けるために**削除する**ことをお勧めします。</string>
+	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">デバイスを管理</string>
+	<string name="tip_playstore_review_title" state="needs_review" hash="-1396782635">Olvidを楽しんでいますか？</string>
+	<string name="tip_playstore_email_message" state="needs_review" hash="-583394070">Olvidの改善をご希望の場合は、**feedback@olvid.io**までお知らせください。</string>
+	<string name="tip_playstore_email_subject" state="needs_review" hash="-1010646301">Androidアプリの評価: %1$d/5</string>
+	<string name="tip_playstore_review_message" state="needs_review" hash="-407660073">Olvidをお楽しみいただけましたら、Google Playで**レビューを残して**ください。</string>
+	<string name="tip_playstore_review_action" state="needs_review" hash="-271353090">Google Playで評価してください</string>
+	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">外部ビューアーで開く</string>
+	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Olvidの内部ビューアーでこのファイルを開けませんでした</string>
+	<string name="button_label_invited" state="needs_review" hash="2094724552">招待された</string>
 </resources>

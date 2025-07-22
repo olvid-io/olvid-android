@@ -53,6 +53,7 @@ public class NotificationActionService extends IntentService {
     public static final String ACTION_DISCUSSION_MARK_AS_READ = "mark_as_read";
     public static final String ACTION_MISSED_CALL_MESSAGE = "discussion_missed_call_message";
     public static final String ACTION_MESSAGE_REACTION_CLEAR = "message_reaction_clear";
+    public static final String ACTION_MESSAGE_POLL_VOTE_CLEAR = "message_poll_vote_clear";
     public static final String ACTION_DEVICE_TRUST = "device_trust";
 
     public static final String EXTRA_INVITATION_DIALOG_UUID = "dialog_uuid";
@@ -150,6 +151,13 @@ public class NotificationActionService extends IntentService {
                 final long messageId = intent.getLongExtra(EXTRA_MESSAGE_ID, -1);
                 if (messageId != -1) {
                     AndroidNotificationManager.clearMessageReactionsNotification(messageId);
+                }
+                break;
+            }
+            case ACTION_MESSAGE_POLL_VOTE_CLEAR: {
+                final long messageId = intent.getLongExtra(EXTRA_MESSAGE_ID, -1);
+                if (messageId != -1) {
+                    AndroidNotificationManager.clearMessagePollVoteNotification(messageId);
                 }
                 break;
             }

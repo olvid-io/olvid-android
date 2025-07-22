@@ -239,7 +239,7 @@ public interface IdentityDelegate {
     GroupV2.BlobKeys getGroupV2BlobKeys(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     HashSet<GroupV2.IdentityAndPermissions> getGroupV2OtherMembersAndPermissions(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
     boolean getGroupV2HasOtherAdminMember(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws Exception;
-    List<Identity> updateGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe) throws SQLException;
+    List<Identity> updateGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe, Identity updatedBy, List<Identity> leavers) throws SQLException;
     List<Identity> getGroupV2MembersAndPendingMembersFromNonce(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, byte[] groupMemberInvitationNonce) throws Exception;
     byte[] getGroupV2OwnGroupInvitationNonce(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     void moveGroupV2PendingMemberToMembers(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity groupMemberIdentity) throws Exception;

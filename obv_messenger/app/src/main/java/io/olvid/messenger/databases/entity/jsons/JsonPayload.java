@@ -19,6 +19,8 @@
 
 package io.olvid.messenger.databases.entity.jsons;
 
+import androidx.annotation.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -33,6 +35,7 @@ public class JsonPayload {
     JsonDeleteMessages jsonDeleteMessages;
     JsonDeleteDiscussion jsonDeleteDiscussion;
     JsonReaction jsonReaction;
+    JsonPollVote jsonPollVote;
     JsonScreenCaptureDetection jsonScreenCaptureDetection;
     JsonLimitedVisibilityMessageOpened jsonLimitedVisibilityMessageOpened;
     JsonDiscussionRead jsonDiscussionRead;
@@ -46,6 +49,7 @@ public class JsonPayload {
     }
 
     @JsonProperty("message")
+    @Nullable
     public JsonMessage getJsonMessage() {
         return jsonMessage;
     }
@@ -56,6 +60,7 @@ public class JsonPayload {
     }
 
     @JsonProperty("rr")
+    @Nullable
     public JsonReturnReceipt getJsonReturnReceipt() {
         return jsonReturnReceipt;
     }
@@ -66,6 +71,7 @@ public class JsonPayload {
     }
 
     @JsonProperty("rtc")
+    @Nullable
     public JsonWebrtcMessage getJsonWebrtcMessage() {
         return jsonWebrtcMessage;
     }
@@ -76,6 +82,7 @@ public class JsonPayload {
     }
 
     @JsonProperty("settings")
+    @Nullable
     public JsonSharedSettings getJsonSharedSettings() {
         return jsonSharedSettings;
     }
@@ -86,6 +93,7 @@ public class JsonPayload {
     }
 
     @JsonProperty("qss")
+    @Nullable
     public JsonQuerySharedSettings getJsonQuerySharedSettings() {
         return jsonQuerySharedSettings;
     }
@@ -96,6 +104,7 @@ public class JsonPayload {
     }
 
     @JsonProperty("upm")
+    @Nullable
     public JsonUpdateMessage getJsonUpdateMessage() {
         return jsonUpdateMessage;
     }
@@ -106,6 +115,7 @@ public class JsonPayload {
     }
 
     @JsonProperty("delm")
+    @Nullable
     public JsonDeleteMessages getJsonDeleteMessages() {
         return jsonDeleteMessages;
     }
@@ -116,6 +126,7 @@ public class JsonPayload {
     }
 
     @JsonProperty("deld")
+    @Nullable
     public JsonDeleteDiscussion getJsonDeleteDiscussion() {
         return jsonDeleteDiscussion;
     }
@@ -126,6 +137,7 @@ public class JsonPayload {
     }
 
     @JsonProperty("reacm")
+    @Nullable
     public JsonReaction getJsonReaction() {
         return jsonReaction;
     }
@@ -135,7 +147,19 @@ public class JsonPayload {
         this.jsonReaction = jsonReaction;
     }
 
+    @JsonProperty("pvm")
+    @Nullable
+    public JsonPollVote getJsonPollVote() {
+        return jsonPollVote;
+    }
+
+    @JsonProperty("pvm")
+    public void setJsonPollVote(JsonPollVote JsonPollVote) {
+        this.jsonPollVote = JsonPollVote;
+    }
+
     @JsonProperty("scd")
+    @Nullable
     public JsonScreenCaptureDetection getJsonScreenCaptureDetection() {
         return jsonScreenCaptureDetection;
     }
@@ -146,6 +170,7 @@ public class JsonPayload {
     }
 
     @JsonProperty("lvo")
+    @Nullable
     public JsonLimitedVisibilityMessageOpened getJsonLimitedVisibilityMessageOpened() {
         return jsonLimitedVisibilityMessageOpened;
     }
@@ -156,6 +181,7 @@ public class JsonPayload {
     }
 
     @JsonProperty("dr")
+    @Nullable
     public JsonDiscussionRead getJsonDiscussionRead() {
         return jsonDiscussionRead;
     }

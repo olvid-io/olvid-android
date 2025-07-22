@@ -28,6 +28,7 @@ import java.util.concurrent.Callable;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
@@ -317,7 +318,7 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                 }
                 new UpdateAllGroupMembersNames().run();
 
-                AppSingleton.reloadCachedDisplayNamesAndHues();
+                ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues();
             }
 
             if (appBackupPojo.settings != null) {

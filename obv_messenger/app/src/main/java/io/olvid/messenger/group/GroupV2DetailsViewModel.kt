@@ -20,34 +20,38 @@ package io.olvid.messenger.group
 
 import android.util.Pair
 import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
+import androidx.lifecycle.viewModelScope
 import io.olvid.engine.datatypes.containers.GroupV2.Permission
+import io.olvid.engine.engine.types.JsonGroupDetails
 import io.olvid.engine.engine.types.JsonGroupType
 import io.olvid.engine.engine.types.ObvBytesKey
 import io.olvid.engine.engine.types.identities.ObvGroupV2.ObvGroupV2ChangeSet
+import io.olvid.engine.engine.types.identities.ObvGroupV2.ObvGroupV2DetailsAndPhotos
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.dao.Group2MemberDao.Group2MemberOrPending
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Group2
-import io.olvid.messenger.group.GroupTypeModel.CustomGroup
-import io.olvid.messenger.group.GroupTypeModel.PrivateGroup
-import io.olvid.messenger.group.GroupTypeModel.ReadOnlyGroup
-import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting
 import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting.ADMINS
 import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting.EVERYONE
 import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting.NOBODY
-import io.olvid.messenger.group.GroupTypeModel.SimpleGroup
+import io.olvid.messenger.group.components.LoaderState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.math.min
 
 class GroupV2DetailsViewModel : ViewModel() {
@@ -68,17 +72,11 @@ class GroupV2DetailsViewModel : ViewModel() {
     var membersCount = 0
     var membersAndPendingCount = 0
 
-    var initialGroupType: GroupTypeModel? = null
-    var oldCustomGroupType: CustomGroup? = null
-    private val groupType = MutableLiveData<GroupTypeModel?>()
+    var initialGroupType by mutableStateOf<GroupTypeModel?>(null)
+    var groupType by mutableStateOf<GroupTypeModel>(SimpleGroup)
 
-    fun updateReadOnly(readOnly: Boolean) {
-        groupType.value = groupType.value?.clone()?.apply { readOnlySetting = readOnly }
-    }
-
-    fun updateRemoteDelete(remoteDelete: RemoteDeleteSetting) {
-        groupType.value = groupType.value?.clone()?.apply { remoteDeleteSetting = remoteDelete }
-    }
+    var loaderState by mutableStateOf(LoaderState.NONE)
+    var detailsAndPhotos by mutableStateOf<ObvGroupV2DetailsAndPhotos?>(null)
 
     init {
         changeSet = ChangeSet()
@@ -155,14 +153,7 @@ class GroupV2DetailsViewModel : ViewModel() {
                 )
             )
         }
-    }
-
-    fun setGroupType(value: GroupTypeModel) {
-        groupType.value = value
-    }
-
-    fun getGroupTypeLiveData(): LiveData<GroupTypeModel?> {
-        return groupType
+        fetchEngineGroupCards()
     }
 
     fun inferGroupType(members: List<Group2MemberOrPending>): GroupTypeModel {
@@ -196,6 +187,13 @@ class GroupV2DetailsViewModel : ViewModel() {
             readOnlySetting = readOnly,
             remoteDeleteSetting = remoteDelete
         )
+    }
+
+    fun fetchEngineGroupCards() {
+        viewModelScope.launch(Dispatchers.IO) {
+            detailsAndPhotos = AppSingleton.getEngine()
+                .getGroupV2DetailsAndPhotos(bytesOwnedIdentity, bytesGroupIdentifier)
+        }
     }
 
     fun getPermissions(
@@ -232,10 +230,6 @@ class GroupV2DetailsViewModel : ViewModel() {
                 }
             }
         }
-    }
-
-    fun isEditingGroupMembersLiveData(): LiveData<Boolean?> {
-        return editingGroupMembersLiveData
     }
 
     val groupMembers: LiveData<List<Group2MemberOrPending>?>
@@ -293,18 +287,16 @@ class GroupV2DetailsViewModel : ViewModel() {
                     memberOrPending.sortDisplayName = contact.sortDisplayName
                     memberOrPending.identityDetails = contact.identityDetails
                     memberOrPending.permissionAdmin = false
-                    getGroupTypeLiveData().value?.let {
-                        with(getPermissions(groupType = it, isAdmin = false)) {
-                            memberOrPending.permissionAdmin = contains(Permission.GROUP_ADMIN)
-                            memberOrPending.permissionChangeSettings =
-                                contains(Permission.CHANGE_SETTINGS)
-                            memberOrPending.permissionRemoteDeleteAnything =
-                                contains(Permission.REMOTE_DELETE_ANYTHING)
-                            memberOrPending.permissionEditOrRemoteDeleteOwnMessages =
-                                contains(Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES)
-                            memberOrPending.permissionSendMessage =
-                                contains(Permission.SEND_MESSAGE)
-                        }
+                    with(getPermissions(groupType = groupType, isAdmin = false)) {
+                        memberOrPending.permissionAdmin = contains(Permission.GROUP_ADMIN)
+                        memberOrPending.permissionChangeSettings =
+                            contains(Permission.CHANGE_SETTINGS)
+                        memberOrPending.permissionRemoteDeleteAnything =
+                            contains(Permission.REMOTE_DELETE_ANYTHING)
+                        memberOrPending.permissionEditOrRemoteDeleteOwnMessages =
+                            contains(Permission.EDIT_OR_REMOTE_DELETE_OWN_MESSAGES)
+                        memberOrPending.permissionSendMessage =
+                            contains(Permission.SEND_MESSAGE)
                     }
 
                     changeSet.membersAdded[key] = memberOrPending
@@ -430,8 +422,7 @@ class GroupV2DetailsViewModel : ViewModel() {
         val lostSend = ArrayList<String>()
 
         synchronized(changeSet) {
-            val type =
-                groupType.value ?: initialGroupType ?: CustomGroup()
+            val type = groupType
             adminPermissions = getPermissions(groupType = type, true)
             memberPermissions = getPermissions(groupType = type, false)
 
@@ -449,7 +440,7 @@ class GroupV2DetailsViewModel : ViewModel() {
                 val expectedPermissions = if (admin) adminPermissions else memberPermissions
 
                 if (groupMemberEntry.value.permissionAdmin != expectedPermissions.contains(Permission.GROUP_ADMIN)) {
-                    AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes)?.let {
+                    ContactCacheSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes)?.let {
                         if (expectedPermissions.contains(Permission.GROUP_ADMIN)) {
                             gainedAdmin.add(it)
                         } else {
@@ -459,7 +450,7 @@ class GroupV2DetailsViewModel : ViewModel() {
                 }
 
                 if (groupMemberEntry.value.permissionSendMessage != expectedPermissions.contains(Permission.SEND_MESSAGE)) {
-                    AppSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes)?.let {
+                    ContactCacheSingleton.getContactCustomDisplayName(groupMemberEntry.key.bytes)?.let {
                         if (expectedPermissions.contains(Permission.SEND_MESSAGE)) {
                             gainedSend.add(it)
                         } else {
@@ -523,7 +514,7 @@ class GroupV2DetailsViewModel : ViewModel() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 // an error occurred --> notify the user
-                App.toast(string.toast_message_error_retry, Toast.LENGTH_SHORT)
+                App.toast(R.string.toast_message_error_retry, Toast.LENGTH_SHORT)
                 publishingGroupMembers = false
             }
         }
@@ -545,7 +536,7 @@ class GroupV2DetailsViewModel : ViewModel() {
     }
 
     fun groupTypeChanged(): Boolean {
-        return groupType.value?.toJsonGroupType() != initialGroupType
+        return groupType.toJsonGroupType() != initialGroupType?.toJsonGroupType()
     }
 
     class ChangeSet {
@@ -605,9 +596,7 @@ class GroupV2DetailsViewModel : ViewModel() {
             if (!editingMembers) {
                 value = groupMembers
             } else {
-                val readOnly =
-                    groupType.value?.let { it == ReadOnlyGroup || (it is CustomGroup && it.readOnlySetting) }
-                        ?: false
+                val readOnly = groupType == ReadOnlyGroup || (groupType is CustomGroup && groupType.readOnlySetting)
 
                 val editedMembers = HashMap<BytesKey, Group2MemberOrPending>()
                 for (group2MemberOrPending in groupMembers) {
@@ -645,5 +634,35 @@ class GroupV2DetailsViewModel : ViewModel() {
                 value = editedMembersList
             }
         }
+    }
+
+    fun invite(contact: Contact) {
+        if (contact.hasChannelOrPreKey()) {
+            AppSingleton.getEngine().startOneToOneInvitationProtocol(
+                contact.bytesOwnedIdentity,
+                contact.bytesContactIdentity
+            )
+        }
+        if (contact.keycloakManaged) {
+            runCatching {
+                val jsonIdentityDetails = contact.getIdentityDetails()
+                if (jsonIdentityDetails != null && jsonIdentityDetails.signedUserDetails != null) {
+                    AppSingleton.getEngine().addKeycloakContact(
+                        contact.bytesOwnedIdentity,
+                        contact.bytesContactIdentity,
+                        jsonIdentityDetails.signedUserDetails
+                    )
+                }
+            }.onFailure { it.printStackTrace() }
+        }
+    }
+
+    fun getPublishedJsonDetails() : JsonGroupDetails? {
+        return (detailsAndPhotos?.serializedPublishedDetails ?: detailsAndPhotos?.serializedGroupDetails)?.let {
+            AppSingleton.getJsonObjectMapper().readValue(
+                it,
+                JsonGroupDetails::class.java
+            )
+        } ?: JsonGroupDetails()
     }
 }

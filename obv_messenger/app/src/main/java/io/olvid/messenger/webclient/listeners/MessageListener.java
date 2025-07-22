@@ -39,6 +39,7 @@ import io.olvid.engine.Logger;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
@@ -426,7 +427,7 @@ public class MessageListener {
                     messageBuilder.setImageCount(message.imageCount);
                 }
                 messageBuilder.setSenderIdentifier(ByteString.copyFrom(message.senderIdentifier));
-                String contactName = AppSingleton.getContactCustomDisplayName(message.senderIdentifier);
+                String contactName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(message.senderIdentifier);
                 if (contactName == null) {
                     messageBuilder.setSenderName(context.getString(R.string.text_deleted_contact));
                     messageBuilder.setSenderIsSelf(false);
@@ -450,7 +451,7 @@ public class MessageListener {
                         messageBuilder.setReplyMessageId(replyMessage.id);
                         messageBuilder.setReplyMessageAttachmentCount(replyMessage.totalAttachmentCount);
                         messageBuilder.setReplySenderIdentifier(ByteString.copyFrom(message.getJsonMessage().getJsonReply().getSenderIdentifier()));
-                        String replyContactName = AppSingleton.getContactCustomDisplayName(message.getJsonMessage().getJsonReply().getSenderIdentifier());
+                        String replyContactName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(message.getJsonMessage().getJsonReply().getSenderIdentifier());
                         if (replyContactName == null) {
                             messageBuilder.setReplyAuthor(context.getString(R.string.text_deleted_contact));
                             messageBuilder.setSenderIsSelf(false);

@@ -93,6 +93,7 @@ import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.tasks.PromptToDeleteContactTask
 import io.olvid.messenger.fragments.FilteredDiscussionListFragment
@@ -530,7 +531,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                             contact.bytesContactIdentity,
                             contact.photoUrl
                         )
-                        AppSingleton.updateCachedPhotoUrl(
+                        ContactCacheSingleton.updateCachedPhotoUrl(
                             contact.bytesContactIdentity,
                             contact.getCustomPhotoUrl()
                         )
@@ -688,7 +689,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                             contact.bytesContactIdentity,
                             contact.photoUrl
                         )
-                        AppSingleton.updateCachedPhotoUrl(
+                        ContactCacheSingleton.updateCachedPhotoUrl(
                             contact.bytesContactIdentity,
                             contact.getCustomPhotoUrl()
                         )

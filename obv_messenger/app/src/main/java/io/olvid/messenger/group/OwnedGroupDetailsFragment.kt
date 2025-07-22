@@ -21,7 +21,6 @@ package io.olvid.messenger.group
 
 import android.Manifest.permission
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -31,21 +30,15 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.textfield.TextInputLayout
 import io.olvid.engine.Logger
 import io.olvid.engine.engine.types.JsonGroupType
@@ -55,15 +48,12 @@ import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.TextChangeListener
-import io.olvid.messenger.customClasses.ifNull
-import io.olvid.messenger.group.GroupTypeModel.CustomGroup
-import io.olvid.messenger.group.GroupTypeModel.GroupType.CUSTOM
-import io.olvid.messenger.group.GroupTypeModel.PrivateGroup
-import io.olvid.messenger.group.GroupTypeModel.ReadOnlyGroup
 import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting
-import io.olvid.messenger.group.GroupTypeModel.SimpleGroup
+import io.olvid.messenger.group.GroupV2DetailsActivity.Companion.REQUEST_CODE_CHOOSE_IMAGE
+import io.olvid.messenger.group.GroupV2DetailsActivity.Companion.REQUEST_CODE_PERMISSION_CAMERA
+import io.olvid.messenger.group.GroupV2DetailsActivity.Companion.REQUEST_CODE_SELECT_ZONE
+import io.olvid.messenger.group.GroupV2DetailsActivity.Companion.REQUEST_CODE_TAKE_PICTURE
 import io.olvid.messenger.group.OwnedGroupDetailsViewModel.InitialViewContent
-import io.olvid.messenger.group.components.GroupTypeSelection
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoActivity
 import io.olvid.messenger.settings.SettingsActivity
 import java.io.File
@@ -75,16 +65,9 @@ import java.util.Locale
 class OwnedGroupDetailsFragment : Fragment() {
 
     private val viewModel: OwnedGroupDetailsViewModel by activityViewModels()
-    private val groupV2DetailsViewModel: GroupV2DetailsViewModel by activityViewModels()
-    private val groupCreationViewModel: GroupCreationViewModel by activityViewModels()
     private lateinit var groupNameLayout: TextInputLayout
     private lateinit var initialView: InitialView
-    private lateinit var groupTypeView: ComposeView
 
-    private var useDialogBackground = false
-    private var hidePersonalNote = false
-    private lateinit var initialGroupType : GroupTypeModel
-    private lateinit var initialCustomGroup : CustomGroup
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -102,13 +85,6 @@ class OwnedGroupDetailsFragment : Fragment() {
         val groupDescriptionEditText =
             view.findViewById<EditText>(R.id.group_details_group_description)
         val personalNoteEditText = view.findViewById<EditText>(R.id.personal_note_edit_text)
-        val cameraIcon = view.findViewById<ImageView>(R.id.camera_icon)
-        if (useDialogBackground) {
-            cameraIcon.setImageResource(R.drawable.ic_camera_bordered_dialog)
-        }
-        if (hidePersonalNote) {
-            view.findViewById<View>(R.id.personal_note_group).visibility = View.GONE
-        }
         initialView = view.findViewById(R.id.group_details_initial_view)
         if (SettingsActivity.useKeyboardIncognitoMode()) {
             groupNameEditText.imeOptions =
@@ -132,7 +108,7 @@ class OwnedGroupDetailsFragment : Fragment() {
                 }
             }
         })
-        groupNameEditText.setText(viewModel.getGroupName())
+        groupNameEditText.setText(viewModel.groupName.value)
         groupNameEditText.addTextChangedListener(object : TextChangeListener() {
             override fun afterTextChanged(s: Editable) {
                 viewModel.setGroupName(s.toString())
@@ -150,33 +126,6 @@ class OwnedGroupDetailsFragment : Fragment() {
                 viewModel.personalNote = s.toString()
             }
         })
-
-        if (viewModel.isGroupV2()) {
-            groupV2DetailsViewModel.getGroupTypeLiveData().value ifNull {
-                groupV2DetailsViewModel.setGroupType(initialGroupType)
-            }
-
-            groupTypeView = view.findViewById(R.id.group_type)
-            groupTypeView.setContent {
-                val selectedGroupType by groupV2DetailsViewModel.getGroupTypeLiveData().observeAsState()
-                AppCompatTheme {
-                    GroupTypeSelection(
-                            groupTypes = listOf(SimpleGroup, PrivateGroup, ReadOnlyGroup, initialCustomGroup),
-                            selectedGroupType = selectedGroupType
-                                    ?: initialGroupType, // the selectedGroupType should always be non null as we set it just before
-                            selectGroupType = {
-                                groupV2DetailsViewModel.setGroupType(it)
-                                groupCreationViewModel.setIsCustomGroup(it.type == CUSTOM)
-                            },
-                            isEditingCustomSettings = if (hidePersonalNote.not() && selectedGroupType is CustomGroup) {
-                                { isEditing ->
-                                    groupV2DetailsViewModel.isEditingGroupCustomSettingsLiveData.postValue(isEditing)
-                                    (activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(groupTypeView.windowToken, 0)
-                                }
-                            } else null)
-                }
-            }
-        }
 
         viewModel.getInitialViewContent()
             .observe(viewLifecycleOwner) { initialViewContent: InitialViewContent? ->
@@ -337,34 +286,10 @@ class OwnedGroupDetailsFragment : Fragment() {
                     takePictureIntent,
                     REQUEST_CODE_TAKE_PICTURE
                 )
-            } catch (e: IOException) {
+            } catch (_: IOException) {
                 Logger.w("Error creating photo capture file $photoFile")
             }
         }
-    }
-
-    fun setUseDialogBackground(useDialogBackground: Boolean) {
-        this.useDialogBackground = useDialogBackground
-    }
-
-    fun setInitialGroupType(initialGroupType : GroupTypeModel) {
-        this.initialGroupType = initialGroupType
-        this.initialCustomGroup = when(initialGroupType) {
-            is CustomGroup -> initialGroupType.clone() as CustomGroup
-            ReadOnlyGroup -> CustomGroup(readOnlySetting = true)
-            else -> CustomGroup()
-        }
-    }
-
-    fun setHidePersonalNote(hidePersonalNote: Boolean) {
-        this.hidePersonalNote = hidePersonalNote
-    }
-
-    companion object {
-        private const val REQUEST_CODE_PERMISSION_CAMERA = 8511
-        private const val REQUEST_CODE_CHOOSE_IMAGE = 8596
-        private const val REQUEST_CODE_TAKE_PICTURE = 8597
-        private const val REQUEST_CODE_SELECT_ZONE = 8598
     }
 }
 
@@ -375,12 +300,14 @@ fun JsonGroupType.toGroupCreationModel(): GroupTypeModel {
         JsonGroupType.TYPE_READ_ONLY -> ReadOnlyGroup
         JsonGroupType.TYPE_CUSTOM -> CustomGroup(
             readOnlySetting = readOnly ?: false,
-            remoteDeleteSetting = when(remoteDelete) {
+            remoteDeleteSetting = when (remoteDelete) {
                 JsonGroupType.REMOTE_DELETE_NOBODY -> RemoteDeleteSetting.NOBODY
                 JsonGroupType.REMOTE_DELETE_ADMINS -> RemoteDeleteSetting.ADMINS
                 JsonGroupType.REMOTE_DELETE_EVERYONE -> RemoteDeleteSetting.EVERYONE
                 else -> RemoteDeleteSetting.NOBODY
-            })
+            }
+        )
+
         else -> SimpleGroup
     }
 }

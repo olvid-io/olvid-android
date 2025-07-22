@@ -111,7 +111,7 @@ public abstract class ServerMethod {
         String pathPrefix = null;
         int pathPos = server.indexOf('/');
         if (pathPos != -1) {
-            pathPrefix = server.substring(pathPos + 1);
+            pathPrefix = server.substring(pathPos);
             server = server.substring(0, pathPos);
 
             // remove any trailing / from pathPrefix

@@ -65,8 +65,6 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
@@ -118,6 +116,8 @@ import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding.AudioServi
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatusTimestamped
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
@@ -798,21 +798,21 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
         onGoToMessage: () -> Unit,
         onShare: () -> Unit,
     ) {
-        DropdownMenu(expanded = menuOpened, onDismissRequest = onDismissRequest) {
+        OlvidDropdownMenu(expanded = menuOpened, onDismissRequest = onDismissRequest) {
             // go to message
-            DropdownMenuItem(onClick = {
-                onGoToMessage()
-                onDismissRequest()
-            }) {
-                Text(text = stringResource(id = R.string.menu_action_go_to_message))
-            }
+            OlvidDropdownMenuItem(
+                text = stringResource(id = R.string.menu_action_go_to_message),
+                onClick = {
+                    onGoToMessage()
+                    onDismissRequest()
+                })
             // share
-            DropdownMenuItem(onClick = {
-                onShare()
-                onDismissRequest()
-            }) {
-                Text(text = stringResource(id = R.string.menu_action_share))
-            }
+            OlvidDropdownMenuItem(
+                text = stringResource(id = R.string.menu_action_share),
+                onClick = {
+                    onShare()
+                    onDismissRequest()
+                })
         }
     }
 

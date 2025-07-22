@@ -91,7 +91,12 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_UNARCHIVE_SETTINGS);
                     editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED);
                     editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED);
-                    editor.remove(SettingsActivity.PREF_KEY_MUTE_TROUBLESHOOTING_TIP_UNTIL);
+                    editor.remove(SettingsActivity.PREF_KEY_LAST_TROUBLESHOOTING_TIP_TIMESTAMP);
+                    editor.remove(SettingsActivity.PREF_KEY_LAST_EXPIRING_DEVICE_TIP_TIMESTAMP);
+                    editor.remove(SettingsActivity.PREF_KEY_LAST_OFFLINE_DEVICE_TIP_TIMESTAMP);
+                    if (SettingsActivity.getLastReadReceiptTipTimestamp() != -1) {
+                        editor.remove(SettingsActivity.PREF_KEY_LAST_READ_RECEIPT_TIP_TIMESTAMP);
+                    }
                     try {
                         if (SettingsActivity.getBackupsV2Status() == SettingsActivity.PREF_KEY_BACKUPS_V2_STATUS_CONFIGURED
                                 && AppSingleton.getEngine().getDeviceBackupSeed() == null) {

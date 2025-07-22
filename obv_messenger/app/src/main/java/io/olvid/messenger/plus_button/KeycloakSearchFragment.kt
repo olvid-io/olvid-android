@@ -55,7 +55,6 @@ import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails
 import io.olvid.messenger.App
-import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.EmptyRecyclerView
 import io.olvid.messenger.customClasses.InitialView
@@ -66,6 +65,7 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.StringUtils2.Companion.computeHighlightRanges
 import io.olvid.messenger.customClasses.TextChangeListener
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.openid.KeycloakManager.KeycloakCallback
 import io.olvid.messenger.plus_button.KeycloakSearchFragment.SearchResultAdapter.SearchResultViewHolder
@@ -124,10 +124,13 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
 
         val ownedIdentity = viewModel.currentIdentity
         searchResultAdapter = if (ownedIdentity == null) {
-            SearchResultAdapter(null,
-               { userDetails: JsonKeycloakUserDetails -> this.onUserClick(userDetails) })
+            SearchResultAdapter(null) { userDetails: JsonKeycloakUserDetails ->
+                this.onUserClick(userDetails)
+            }
         } else {
-            SearchResultAdapter(ownedIdentity.bytesOwnedIdentity, { userDetails: JsonKeycloakUserDetails -> this.onUserClick(userDetails) })
+            SearchResultAdapter(ownedIdentity.bytesOwnedIdentity) { userDetails: JsonKeycloakUserDetails ->
+                this.onUserClick(userDetails)
+            }
         }
         viewModel.getKeycloakSearchResult().observe(
             viewLifecycleOwner,
@@ -146,10 +149,10 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
         searchResultRecyclerView.layoutManager = LinearLayoutManager(context)
         searchResultRecyclerView.addItemDecoration(ItemDecorationSimpleDivider(activity, 60, 12))
 
-        keycloakSearchEditText?.setOnEditorActionListener(OnEditorActionListener { v: TextView?, actionId: Int, event: KeyEvent? ->
+        keycloakSearchEditText?.setOnEditorActionListener { v: TextView?, actionId: Int, event: KeyEvent? ->
             startSearch()
             true
-        })
+        }
         keycloakSearchEditText?.addTextChangedListener(object : TextChangeListener() {
             override fun afterTextChanged(s: Editable) {
                 viewModel.keycloakSearchString = s.toString()
@@ -333,7 +336,7 @@ class KeycloakSearchFragment : Fragment(), OnClickListener {
                 )
                 matchAndHighlight(name, holder.keycloakUserNameTextView)
 
-                if (userDetails.identity != null && AppSingleton.getContactCustomDisplayName(
+                if (userDetails.identity != null && ContactCacheSingleton.getContactCustomDisplayName(
                         userDetails.identity
                     ) != null
                 ) {

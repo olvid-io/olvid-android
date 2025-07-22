@@ -23,7 +23,7 @@ package io.olvid.engine.datatypes;
 import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 44;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 45;
     public static final int SERVER_API_VERSION = 19;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
@@ -110,6 +110,7 @@ public abstract class Constants {
     public static final int DEFAULT_ATTACHMENT_CHUNK_LENGTH = 4*2048*1024;
     public static final int MAX_MESSAGE_EXTENDED_CONTENT_LENGTH = 50 * 1024;
     public static final int MAX_UPLOAD_MESSAGE_BATCH_SIZE = 50;
+    public static final int MAX_UPLOAD_MESSAGE_BATCH_HEADER_COUNT = 1_000;
     public static final int MAX_UPLOAD_RETURN_RECEIPT_BATCH_SIZE = 50;
     public static final int MAX_DELETE_MESSAGE_ON_SERVER_BATCH_SIZE = 50;
 

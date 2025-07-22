@@ -91,7 +91,7 @@ class BackupV2SecurityPreferenceFragment : Fragment() {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(colorResource(R.color.alwaysWhite))
+                        .background(colorResource(R.color.almostWhite))
                         .verticalScroll(rememberScrollState())
                         .padding(all = 16.dp),
                     verticalArrangement = spacedBy(24.dp),

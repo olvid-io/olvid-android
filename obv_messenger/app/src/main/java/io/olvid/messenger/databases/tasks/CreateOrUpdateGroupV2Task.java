@@ -47,6 +47,7 @@ import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.StringUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.dao.Group2MemberDao;
 import io.olvid.messenger.databases.dao.MessageRecipientInfoDao;
 import io.olvid.messenger.databases.entity.Contact;
@@ -58,20 +59,25 @@ import io.olvid.messenger.databases.entity.Group2PendingMember;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
+import io.olvid.messenger.databases.tasks.new_message.ProcessReadyToProcessOnHoldMessagesTask;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class CreateOrUpdateGroupV2Task implements Runnable {
     private final ObvGroupV2 groupV2;
     private final boolean groupWasJustCreatedByMe; // true only if I just created the group (on this device, or on another)
     private final boolean updatedByMe; // true if I just created the group, or if I updated the group
+    private final byte[] updatedBy; // identity bytes that updated the group
+    private final byte[][] groupLeavers; // array of identity bytes of users who left the group of their own will and should not be marked as removed by updateBy
     private final boolean createdOnOtherDevice; // true only if groupWasJustCreatedByMe is true and it was created on another device
     private final boolean synchronizeUpdateInProgressWithEngine;
     private final JsonExpiration jsonExpirationSettings;
 
-    public CreateOrUpdateGroupV2Task(ObvGroupV2 groupV2, boolean groupWasJustCreatedByMe, boolean updatedByMe, boolean createdOnOtherDevice, boolean synchronizeUpdateInProgressWithEngine, JsonExpiration jsonExpirationSettings) {
+    public CreateOrUpdateGroupV2Task(ObvGroupV2 groupV2, boolean groupWasJustCreatedByMe, boolean updatedByMe, boolean createdOnOtherDevice, boolean synchronizeUpdateInProgressWithEngine, JsonExpiration jsonExpirationSettings, byte[] updatedBy, byte[][] groupLeavers) {
         this.groupV2 = groupV2;
         this.groupWasJustCreatedByMe = groupWasJustCreatedByMe;
         this.updatedByMe = updatedByMe;
+        this.updatedBy = updatedBy;
+        this.groupLeavers = groupLeavers;
         this.createdOnOtherDevice = createdOnOtherDevice;
         this.synchronizeUpdateInProgressWithEngine = synchronizeUpdateInProgressWithEngine;
         this.jsonExpirationSettings = jsonExpirationSettings;
@@ -92,6 +98,13 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
 
                 byte[] bytesGroupIdentifier = groupV2.groupIdentifier.getBytes();
 
+                byte[] updateAuthor = updatedByMe ? groupV2.bytesOwnedIdentity : updatedBy;
+                HashSet<BytesKey> leavers = new HashSet<>();
+                if (groupLeavers != null) {
+                    for (byte[] leaver : groupLeavers) {
+                        leavers.add(new BytesKey(leaver));
+                    }
+                }
 
                 //////////
                 // check if published details should be accepted or not
@@ -408,8 +421,8 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         // for keycloak groups, only insert a left group message if the user's keycloakUserId actually left the group
                         if (!keycloakGroup || !addedKeycloakUserIds.contains(memberBytesIdentityToKeycloakUserIdMap.get(key))) {
                             messageInserted = true;
-                            Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2Member.bytesContactIdentity);
-                            db.messageDao().insert(groupLeftMessage);
+                            Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2Member.bytesContactIdentity, leavers.contains(key) ? null : updateAuthor);
+                            db.messageDao().upsert(groupLeftMessage);
                         }
 
                         // get all MessageRecipientInfo for this guy, delete them, and update message status
@@ -442,8 +455,8 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                             // for keycloak groups, only insert a joined group message if the user's keycloakUserId actually joined the group
                             if (!groupWasJoinedOrRejoined && (!keycloakGroup || !removedKeycloakUserIds.contains(memberBytesIdentityToKeycloakUserIdMap.get(key)))) {
                                 messageInserted = true;
-                                Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, key.bytes);
-                                db.messageDao().insert(groupJoinedMessage);
+                                Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, key.bytes, updateAuthor);
+                                db.messageDao().upsert(groupJoinedMessage);
                             }
                             membersWereAdded = true;
                         }
@@ -485,8 +498,8 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         // for keycloak groups, only insert a left group message if the user's keycloakUserId actually left the group
                         if (!keycloakGroup || !addedKeycloakUserIds.contains(pendingMemberBytesIdentityToKeycloakUserIdMap.get(key))) {
                             messageInserted = true;
-                            Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2PendingMember.bytesContactIdentity);
-                            db.messageDao().insert(groupLeftMessage);
+                            Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2PendingMember.bytesContactIdentity, leavers.contains(key) ? null : updateAuthor);
+                            db.messageDao().upsert(groupLeftMessage);
                         }
 
                         // get all MessageRecipientInfo for this guy, delete them, and update message status
@@ -502,7 +515,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         // if he is not a contact, also remove his name from cache
                         if (Arrays.equals(group2PendingMember.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())
                                 && db.contactDao().get(group2PendingMember.bytesOwnedIdentity, group2PendingMember.bytesContactIdentity) == null) {
-                            AppSingleton.updateCacheContactDeleted(group2PendingMember.bytesContactIdentity);
+                            ContactCacheSingleton.INSTANCE.updateCacheContactDeleted(group2PendingMember.bytesContactIdentity);
                         }
                     }
                 }
@@ -514,25 +527,33 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     Group2PendingMember group2PendingMember = new Group2PendingMember(groupV2.bytesOwnedIdentity, bytesGroupIdentifier, obvGroupV2PendingMember.bytesIdentity, obvGroupV2PendingMember.serializedDetails, obvGroupV2PendingMember.permissions);
                     db.group2PendingMemberDao().insert(group2PendingMember);
                     if (Arrays.equals(AppSingleton.getBytesCurrentIdentity(), groupV2.bytesOwnedIdentity)
-                            && AppSingleton.getContactCustomDisplayName(group2PendingMember.bytesContactIdentity) == null) {
-                        AppSingleton.updateCachedCustomDisplayName(group2PendingMember.bytesContactIdentity, group2PendingMember.displayName, group2PendingMember.getFirstName());
+                            && ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(group2PendingMember.bytesContactIdentity) == null) {
+                        ContactCacheSingleton.INSTANCE.updateCachedCustomDisplayName(group2PendingMember);
                     }
                     if (!membersToRemove.containsKey(key)) {
                         // for keycloak groups, only insert a joined group message if the user's keycloakUserId actually joined the group
                         if (!groupWasJoinedOrRejoined && (!keycloakGroup || !removedKeycloakUserIds.contains(pendingMemberBytesIdentityToKeycloakUserIdMap.get(key)))) {
                             messageInserted = true;
-                            Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, obvGroupV2PendingMember.bytesIdentity);
-                            db.messageDao().insert(groupJoinedMessage);
+                            Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, obvGroupV2PendingMember.bytesIdentity, updateAuthor);
+                            db.messageDao().upsert(groupJoinedMessage);
                         }
                         membersWereAdded = true;
                     }
                 }
 
-                if (membersWereAdded) {
-                    // after the commit, process all pending messages for this group as some messages
+                if (membersWereAdded || groupWasJoinedOrRejoined) {
+                    // during the transaction, mark as ready to process all pending messages for this group as some messages
                     // for this group (when first joining) or from new members (when updating) may be on hold
+                    int count = db.onHoldInboxMessageDao().markAsReadyToProcessForGroupV2Discussion(groupV2.bytesOwnedIdentity, bytesGroupIdentifier);
+                    if (count > 0) {
+                        Logger.i("⏸️ Marked " + count + " on hold messages as ready to process");
+                    }
+
                     runAfterTransaction.add(() -> {
-                        HandleNewMessageNotificationTask.processAllGroupV2MessagesOnHold(AppSingleton.getEngine(), groupV2.bytesOwnedIdentity, bytesGroupIdentifier);
+                        // once the transaction is committed, process on hold messages that are ready to process
+                        AppSingleton.getEngine().runTaskOnEngineNotificationQueue(
+                                new ProcessReadyToProcessOnHoldMessagesTask(AppSingleton.getEngine(), db, groupV2.bytesOwnedIdentity)
+                        );
                     });
                 }
 

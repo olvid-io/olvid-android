@@ -73,7 +73,7 @@ public class JsonGroupDetails {
             return null;
         }
         String out = in.trim();
-        if (out.length() == 0) {
+        if (out.isEmpty()) {
             return null;
         }
         return out;

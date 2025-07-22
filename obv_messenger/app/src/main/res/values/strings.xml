@@ -2,7 +2,6 @@
 <resources>
     <string name="activity_title_contact_details">Contact details</string>
     <string name="activity_title_user_details">User details</string>
-    <string name="activity_title_create_group">Create group</string>
     <string name="activity_title_group_details">Group details</string>
     <string name="activity_title_my_details">My profile</string>
     <string name="activity_title_settings">Olvid settings</string>
@@ -34,13 +33,12 @@
     <string name="button_label_ignore">Ignore</string>
     <string name="button_label_reject">Reject</string>
     <string name="button_label_introduce">Introduce</string>
-    <string name="button_label_invite_members">Invite\nmembers</string>
+    <string name="button_label_invite_members">Invite members</string>
     <string name="button_label_next">Next</string>
     <string name="button_label_ok">OK</string>
-    <string name="button_label_previous">Previous</string>
     <string name="button_label_proceed">Proceed</string>
     <string name="button_label_publish">Publish</string>
-    <string name="button_label_remove_members">Remove\nmembers</string>
+    <string name="button_label_remove_members">Remove members</string>
     <string name="button_label_remove_nickname">Reset</string>
     <string name="button_label_update">Update</string>
     <string name="button_label_validate">Validate</string>
@@ -92,7 +90,9 @@
     <string name="explanation_empty_group_list">No groups for now</string>
     <string name="explanation_empty_group_list_sub">Press \"New group\" to create your first group.</string>
     <string name="explanation_new_group_card">The group manager updated the Group Card. Both the old and new versions are shown below.\n\nPress \"update\" to update the group\'s information.</string>
-    <string name="explanation_new_group_v2_card">One of the group administrators updated the group details. The new version is shown above.\n\nPress \"update\" to use this new version.</string>
+    <string name="explanation_new_group_v2_card_name">An administrator changed the group name to:</string>
+    <string name="explanation_new_group_v2_card_description">An administrator changed the group description to:</string>
+    <string name="explanation_new_group_v2_card_photo">An administrator changed the group photo.</string>
     <string name="explanation_new_olvid_card">Your contact updated their Olvid Card. Both the old and new versions are shown below.\n\nPress \"update\" to update your contact\'s information with this new version.</string>
     <string name="explanation_no_channel">A secure discussion channel is currently being established. You cannot start any discussion with this contact until this is done. This process should take a few seconds if both you and your contact are online.\n\nIf you believe that something went wrong, you can restart the channel establishment.</string>
     <string name="explanation_no_contact_match_filter">No contact found</string>
@@ -161,7 +161,8 @@
     <string name="label_group_card_published">Group Card - Published</string>
     <string name="label_group_card_published_update">Group Card - New</string>
     <string name="label_group_card_unpublished_draft">Group Card - Unpublished Draft</string>
-    <string name="label_group_members">Other Group Members</string>
+    <string name="label_group_members">Group Members</string>
+    <string name="label_other_group_members">Other Group Members</string>
     <string name="label_groups">Groups</string>
     <string name="label_invitation_declined">Invitation\ndeclined</string>
     <string name="label_new_group_card">Group details updated</string>
@@ -192,7 +193,6 @@
     <string name="menu_action_recreate_channels">Recreate secure channels</string>
     <string name="menu_action_rename">Rename</string>
     <string name="menu_action_rename_contact">Rename contact</string>
-    <string name="menu_action_rename_group">Rename group</string>
     <string name="menu_action_save">Save</string>
     <string name="menu_action_settings">Settings</string>
     <string name="menu_action_share">Share</string>
@@ -238,8 +238,6 @@
     <string name="pref_text_QR_correction_low">Low</string>
     <string name="pref_text_QR_correction_medium">Medium</string>
     <string name="pref_text_QR_correction_veryhigh">Very High</string>
-    <string name="subtitle_choose_group_name">Choose Group Name</string>
-    <string name="subtitle_select_group_members">Select Group Members</string>
     <string name="text_contact_names_separator" translatable="false">", "</string>
     <string name="text_contact_names_last_separator" translatable="false">" \u0026 "</string>
     <string name="text_date_time_separator" translatable="false">" \u2022 "</string>
@@ -248,8 +246,11 @@
     <string name="text_group_joined">You joined the group</string>
     <string name="text_group_managed_by">Group managed by %1$s</string>
     <string name="text_joined_group">Joined group: %1$s</string>
-    <string name="text_joined_the_group">%1$s joined the group</string>
-    <string name="text_left_the_group">%1$s left the group</string>
+    <string name="text_joined_the_group_by">%1$s added %2$s to the group</string>
+    <string name="text_joined_the_group_by_you">You added %2$s to the group</string>
+    <string name="text_left_the_group_by">%1$s removed %2$s from the group</string>
+    <string name="text_left_the_group_by_you">You removed %2$s from the group</string>
+    <string name="text_unknown_member">unknown</string>
     <string name="text_nobody">Nobody</string>
     <string name="text_draft_message_prefix">"Draft: "</string>
     <string name="text_inbound_group_message_prefix">"%1$s: "</string>
@@ -560,8 +561,8 @@
     <string name="webrtc_stop_screen_sharing">Stop sharing</string>
     <string name="webrtc_speaking_while_muted">Your microphone is muted</string>
     <string name="webrtc_speaking_while_muted_action">Unmute</string>
-    <string name="content_description_reject_call_button">Reject call button</string>
-    <string name="content_description_accept_call_button">Accept call button</string>
+    <string name="content_description_reject_call_button">Reject call</string>
+    <string name="content_description_accept_call_button">Accept call</string>
     <string name="dialog_title_webrtc_kick_participant">Exclude contact from call?</string>
     <string name="webrtc_failed_kicked">You were excluded from this call</string>
     <string name="dialog_title_start_conference_call">Start conference call</string>
@@ -582,7 +583,7 @@
     <string name="content_description_discussions_tab">Discussions tab</string>
     <string name="content_description_contacts_tab">Contacts tab</string>
     <string name="content_description_groups_tab">Groups tab</string>
-    <string name="content_description_add_contact_button">Add contact button</string>
+    <string name="content_description_add_contact_button">Add contact</string>
     <string name="content_description_notification_dot">Notification dot</string>
     <string name="pref_exif_erase_title">Remove sensitive JPEG metadata</string>
     <string name="pref_exif_erase_summary">When activated, Olvid will attempt to remove sensitive metadata from imported photo files.\nThis includes GPS data, camera make, creation date…</string>
@@ -788,7 +789,7 @@
     <string name="pref_discussion_category_retention_policy_title">Discussion message retention policy</string>
     <string name="pref_discussion_category_retention_policy_summary">The settings below allow you to automatically delete old messages in this discussion. They have priority over your default retention policy.</string>
     <string name="pref_text_app_default_string">Use your default setting (%1$s)</string>
-    <string name="content_description_attach_voice_message_button">Record voice message button</string>
+    <string name="content_description_attach_voice_message_button">Record voice message</string>
     <string name="dialog_title_voice_message_explanation">Olvid voice messages</string>
     <string name="dialog_message_voice_message_explanation">Before recording voice messages, please grant Olvid the permission to record audio.</string>
     <string name="dialog_message_voice_message_explanation_blocked">Before recording voice messages, Olvid requires the permission to record audio.\n\nIt appears that this permission has been permanently denied to Olvid. You should open the App Settings to manually grant this permission.</string>
@@ -1013,7 +1014,7 @@
     <string name="text_explanation_mutual_scan_pending">%1$s will be added to your contacts once their device can be reached.</string>
     <string name="text_explanation_mutual_scan_success">%1$s was added to your contact 🙌!</string>
     <string name="label_loading_contacts">Loading contacts…</string>
-    <string name="content_description_authentication_browser_choice">Browser selection button</string>
+    <string name="content_description_authentication_browser_choice">Browser selection</string>
     <string name="toast_message_error_querying_for_available_browsers">Unable to query for installed browsers</string>
     <string name="dialog_title_choose_browser_for_authentication">Choose which browser to use for authentication</string>
     <string name="text_default_browser">Default browser</string>
@@ -1139,7 +1140,7 @@
     <string name="dialog_title_unable_to_load_backup_configuration">Unable to load backup configuration</string>
     <string name="dialog_message_unable_to_load_backup_configuration">After several attempts, Olvid was unable to load your current backup configuration. If you already tried fully restarting Olvid/your device and you still get this error message, it is recommended you generate a new backup key.</string>
     <string name="pref_reload_backup_configuration_title">Reload backup configuration</string>
-    <string name="content_description_back_button">Back button</string>
+    <string name="content_description_back_button">Back</string>
     <string name="content_description_remove_message_reply_to">Clear message reply</string>
     <string name="content_description_remove_link_preview">Clear link preview</string>
     <string name="content_description_notification_muted_indicator">Indicator that notifications are muted for this profile</string>
@@ -1164,7 +1165,7 @@
     <string name="dialog_message_delete_profile_multi">Deleting a profile will delete any information related to this profile on your device. This includes, your contacts and groups and the content of all your discussions (messages and attachments) for this profile. Your other profiles will not be affected by this operation.\n\nPress \"next\" to choose how this profile should be deleted.</string>
     <string name="dialog_message_delete_last_profile_multi">Deleting a profile will delete any information related to this profile on your device. This includes, your contacts and groups and the content of all your discussions (messages and attachments) for this profile.\n\n<b>This is your only visible profile and if you have any hidden profile, they will be deleted simultaneously.</b>\n\nPress \"next\" to choose how this profile should be deleted.</string>
     <string name="switch_label_delete_profile_everywhere">Delete profile <b>everywhere</b></string>
-    <string name="hint_type_delete_here_to_proceed">Type DELETE here to proceed</string>
+    <string name="hint_type_delete_here_to_proceed">Type \"%1$s\" here to proceed</string>
     <string name="explanation_delete_owned_identity">If you choose to delete your profile <b>everywhere</b>:\n\u00a0-\u00a0it will be deleted locally <b>and</b> on your contacts\'s devices\n\u00a0-\u00a0you will leave groups you joined\n\u00a0-\u00a0groups you manage will be disbanded\n\nIf you <b>do not</b> delete your profile everywhere it will only be deleted locally on your device. Unless you plan to restore a backup on another device, your contacts may still try sending you messages and might not realize these messages cannot be delivered.</string>
     <string name="explanation_delete_inactive_owned_identity">Your current profile appears to be inactive, meaning you probably transferred it to another device. If you plan to continue using this profile on your other device, you can safely delete it here.\n\nIf you do not want to use this profile ever again, you will need to reactivate it on this device first, wait for secure channels with your contacts to be recreated, and only then delete this profile choosing the \"delete everywhere\" option.</string>
     <string name="explanation_delete_owned_identity_multi">Your profile is currently enable on multiple devices.\n\nIf you choose to delete your profile <b>everywhere</b>:\n\u00a0-\u00a0it will be deleted from all your devices <b>and</b> on your contacts\'s devices\n\u00a0-\u00a0you will leave groups you joined\n\u00a0-\u00a0groups you manage will be disbanded\n\nIf you <b>do not</b> delete your profile everywhere it will only be deleted locally and you can continue using it normally on your other devices.</string>
@@ -1218,7 +1219,7 @@
     <string name="dialog_title_configure_widget">Configure widget…</string>
     <string name="label_widget_appearance">Widget appearance</string>
     <string name="label_widget_tap_action">Widget tap action</string>
-    <string name="label_discussion">Discussion</string>
+    <string name="label_discuss">Discuss</string>
     <string name="label_message">Message</string>
     <string name="hint_predefined_message_to_send">Predefined message to send</string>
     <string name="label_confirm_before_sending">Confirm before sending</string>
@@ -1259,6 +1260,7 @@
     <string name="label_audio">Audio</string>
     <string name="label_other">Other</string>
     <string name="label_all">All</string>
+    <string name="label_see_all">See all</string>
     <string name="menu_action_storage_management">Storage management</string>
     <string name="menu_action_troubleshooting">Troubleshooting</string>
     <string name="explanation_no_files">No attachment to display</string>
@@ -1366,10 +1368,9 @@
     <string name="pref_screen_scale">Display size</string>
     <string name="content_description_open_discussion">Open discussion</string>
     <string name="label_read_only">Read Only</string>
-    <string name="label_read_only_short">Read Only</string>
+    <string name="label_pending_read_only">Pending read Only</string>
     <string name="label_admin">Admin</string>
-    <string name="label_pending_admin">Pending\nadmin</string>
-    <string name="label_not_admin">Not admin</string>
+    <string name="label_pending_admin">Pending admin</string>
     <string name="text_unable_to_display_contact_name">Unable to display this user\'s name</string>
     <string name="text_unnamed_group">Unnamed group</string>
     <string name="pref_discussion_category_notifications_title">Discussion notifications</string>
@@ -1384,10 +1385,9 @@
     <string name="notification_channel_discussion_name">Discussion %1$d</string>
     <string name="notification_channel_discussion_group_name">Discussions</string>
     <string name="notification_channel_discussion_group_description">Personalized notifications for specific Olvid discussions.</string>
-    <string name="button_label_edit_group_members">Edit this group</string>
+    <string name="button_label_edit_group_members">Edit members</string>
     <string name="button_label_add_members">Add members</string>
     <string name="label_group_update_in_progress_title">Group synchronization in progress</string>
-    <string name="label_group_update_in_progress_title_for_creation">Group creation in progress</string>
     <string name="explanation_group_update_in_progress">The group is currently being synchronized. This screen will refresh once the update is complete.</string>
     <string name="toast_message_unable_to_update_group">Unable to update group. Your changes have been lost. Please try again.</string>
     <string name="dialog_title_unable_to_leave_group">Unable to leave group</string>
@@ -1501,7 +1501,7 @@
     <string name="message_discussion_group_v2_updating">Group members are currently being synchronized</string>
     <string name="message_discussion_group_v2_creating">Group is being created</string>
     <string name="button_label_new_group">New group</string>
-    <string name="label_group_type">Group Type</string>
+    <string name="label_group_type">Group type</string>
     <string name="label_group_simple_title">Standard</string>
     <string name="label_group_simple_subtitle">All group members can invite new members</string>
     <string name="label_group_private_title">Controlled</string>
@@ -1510,7 +1510,6 @@
     <string name="label_group_read_only_subtitle">Only administrators can post messages</string>
     <string name="label_group_custom_title">Advanced</string>
     <string name="label_group_custom_subtitle">Unleash the full power of Olvid groups!</string>
-    <string name="label_group_custom_settings">Advanced settings</string>
     <string name="label_group_choose_admins">Group admins</string>
     <string name="text_you_became_admin">You are now a group administrator</string>
     <string name="text_you_are_no_longer_admin">You are no longer a group administrator</string>
@@ -1569,9 +1568,6 @@
     <string name="text_setting_screen_lock">screen lock</string>
     <string name="text_setting_manual">manual</string>
     <string name="text_setting_background">background (%1$ds)</string>
-    <string name="value_group_remote_delete_setting_nobody" translatable="false">nobody</string>
-    <string name="value_group_remote_delete_setting_everyone" translatable="false">everyone</string>
-    <string name="value_group_remote_delete_setting_admins" translatable="false">admins</string>
     <string name="text_group_remote_delete_setting_nobody">Nobody</string>
     <string name="text_group_remote_delete_setting_everyone">Everyone</string>
     <string name="text_group_remote_delete_setting_admins">Admins only</string>
@@ -1764,7 +1760,11 @@
     <string name="troubleshooting_storage_valid_description">%1$s storage space available on your device.</string>
     <string name="troubleshooting_storage_invalid_title">Device storage almost full</string>
     <string name="troubleshooting_storage_invalid_description">Only %1$s storage space left on your device.\n\nYour device is running low on available space. Expect to run into unexpected errors when receiving or sending files with Olvid.\n\nThis is probably the right time to free up some space on your device.</string>
-    <string name="troubleshooting_header">**App version**: %1$s (build %2$d)\n**Device model**: %3$s\n**Android API**: %4$s\n**App running for**: %5$s</string>
+    <string name="troubleshooting_header_app_version">**App version**: %1$s (build %2$d)</string>
+    <string name="troubleshooting_header_device_model">**Device model**: %1$s</string>
+    <string name="troubleshooting_header_android_api">**Android API**: %1$s</string>
+    <string name="troubleshooting_header_app_running_time">**App running for**: %1$s</string>
+    <string name="troubleshooting_header_app_install_date">**App install date**: %1$s</string>
     <string name="troubleshooting_faq_description">Need help with Olvid? Please read our FAQ:</string>
     <string name="troubleshooting_faq_link">https://olvid.io/faq</string>
     <string name="troubleshooting_request_permission">Request permission</string>
@@ -1858,7 +1858,6 @@
     <string name="preference_filename_database" translatable="false">io.olvid.messenger.DATABASE_PREFERENCE_FILE</string>
     <string name="button_label_send_read_receipts">Inform my contacts</string>
     <string name="button_label_do_not_send">Do not inform them</string>
-    <string name="button_label_ask_later">Ask me later</string>
     <string name="dialog_message_prompt_user_for_read_receipts">Would you like your contacts to know when you read their messages?</string>
     <string name="dialog_title_prompt_user_for_read_receipts">Read receipts</string>
     <string name="pref_app_icon_title">Application icon</string>
@@ -1956,7 +1955,7 @@
     <string name="pref_manage_backups_title">Manage my Olvid backups</string>
     <string name="pref_initiate_backup_now_title">Initiate a backup now</string>
     <string name="backup_faq_link">https://olvid.io/faq/backup-your-profiles/</string>
-    <string name="content_description_close_button">Close button</string>
+    <string name="content_description_close_button">Close</string>
     <string name="dialog_title_your_online_backups">Your online backups</string>
     <string name="button_label_reset">Reset</string>
     <string name="explanation_reset_backups">Resetting will delete all your backups.</string>
@@ -1986,7 +1985,7 @@
     <string name="enable_backups_title">Backup your profile</string>
     <string name="enable_backups_message_with_legacy">You currently have legacy Olvid backups enabled, which will stop being supported soon.\nSwitch to the new Olvid backup system to make sure you can restore your profiles and contacts if you lose your device.</string>
     <string name="enable_backups_message">Enabling backups allows you to restore your profile and contacts, even if you lose your device.</string>
-    <string name="content_description_contextual_actions">Contextual actions button</string>
+    <string name="content_description_contextual_actions">Contextual actions</string>
     <string name="label_backup_from">From %1$s</string>
     <string name="label_backup_groups_and_contacts">%1$s, %2$s</string>
     <string name="label_this_device">This device</string>
@@ -2059,6 +2058,8 @@
     <string name="tip_troubleshooting_message">Some parameters are not properly configured on your device and may impact your experience with Olvid.</string>
     <string name="button_label_this_way">This way</string>
     <string name="toast_code_copied">Code copied</string>
+    <string name="explanation_choose_members">Please choose who to add to this group.</string>
+    <string name="label_group_administration">Group administration</string>
     <string name="dialog_title_call_blocked">Call blocked</string>
     <string name="dialog_message_call_blocked">Olvid does not allow starting a call with more than %1$d persons.</string>
     <string name="pref_emoji_animation_loop">Loop</string>
@@ -2070,4 +2071,51 @@
     <string name="mail_subject_olvid_translation">Android app translations</string>
     <string name="pref_app_language_category_title">AI-based translations</string>
     <string name="pref_app_language_category_summary">Some of the app\'s translations are generated using AI and may be inaccurate. If this is the case, do not hesitate to tell us at <b>lang@olvid.io</b>.</string>
+    <string name="pdf_viewer_password_required">A password is required to open this PDF file</string>
+    <string name="pdf_viewer_enter_password">Password</string>
+    <string name="pdf_viewer_incorrect_password">Incorrect password</string>
+    <string name="label_poll_create">Create a poll</string>
+    <string name="label_poll_question">Question</string>
+    <string name="hint_poll_question">Ask a question</string>
+    <string name="label_poll_answers">Answers</string>
+    <string name="hint_poll_answer_add">Add</string>
+    <string name="label_poll_see_answers">View answers</string>
+    <string name="label_poll_answer_pending">Waiting for their answer</string>
+    <string name="button_label_poll_answer_remind">Remind</string>
+    <string name="label_poll_include_none_answer">Add a \"%1$s\" answer</string>
+    <string name="label_poll_options">Options</string>
+    <string name="text_none_answer">None of the above</string>
+    <string name="label_poll_answer_multiple_choice">Allow multiple answers</string>
+    <string name="explanation_poll_answer_multiple_choice">Choose one or more answers</string>
+    <string name="label_poll_quiz_mode">Quiz mode</string>
+    <string name="label_poll_expiration_date">End</string>
+    <string name="label_poll_add_expiration_date">Add expiration date</string>
+    <string name="label_poll_expiration">Poll ends in %1$s</string>
+    <string name="label_poll_ended">Poll ended</string>
+    <string name="error_poll_minimum_answers">Add at least two responses</string>
+    <string name="error_poll_duplicate_answer">This response already exists</string>
+    <string name="label_poll_export_csv">Export as CSV</string>
+    <string name="toast_message_error_exporting_poll_csv">Error exporting poll as CSV. Please try again.</string>
+    <string name="toast_message_success_exporting_poll_csv">Poll CSV export successful</string>
+    <string name="label_poll_answers_sorted_by">Sorted by</string>
+    <string name="label_poll_answers_sorted_by_poll_order">Poll order</string>
+    <string name="label_poll_answers_sorted_by_answer_count">Answers count</string>
+    <string name="notification_public_title_new_poll_vote">New answer to your poll</string>
+    <string name="toast_message_remove_none_answer">Remove \"%1$s\" answer first</string>
+    <string name="text_poll">poll</string>
+    <string name="poll_csv_headers">Poll question,Voter name,Vote,Date</string>
+    <string name="label_poll_no_votes_yet">No answer yet</string>
+    <string name="tip_expiring_device_title">Upcoming device deactivation</string>
+    <string name="tip_expiring_device_action">Manage my devices</string>
+    <string name="tip_offline_device_title">Offline device</string>
+    <string name="tip_offline_device_message">One of your devices has been offline for **more than 30 days**.\nIf you are not using it anymore, we recommend **removing it** to avoid running into synchronization issues.</string>
+    <string name="tip_offline_device_action">Manage my devices</string>
+    <string name="tip_playstore_review_title">Are you enjoying Olvid?</string>
+    <string name="tip_playstore_email_message">If there are things you would like to see improved in Olvid, please let us know at **feedback@olvid.io**.</string>
+    <string name="tip_playstore_email_subject">Android app rating: %1$d/5</string>
+    <string name="tip_playstore_review_message">If you are enjoying Olvid, do not hesitate to **leave a review** on Google Play!</string>
+    <string name="tip_playstore_review_action">Rate us on Google Play</string>
+    <string name="button_label_open_in_external_viewer">Open in external viewer</string>
+    <string name="pdf_viewer_password_not_supported">Error opening this file in Olvid\'s internal viewer</string>
+    <string name="button_label_invited">Invited</string>
 </resources>

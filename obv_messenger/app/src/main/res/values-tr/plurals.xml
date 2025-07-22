@@ -1,213 +1,237 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <plurals name="explanation_backup_v2_device_expiration_end">
-        <item quantity="one">"Bu cihazda, aşağıdaki önceki cihazınız devre dışı bırakılacak:"</item>
-        <item quantity="other">"Bu cihazda, aşağıdaki cihazlarınız devre dışı bırakılacak:"</item>
-    </plurals>
-    <plurals name="label_backups_found">
-        <item quantity="one">%1$d yedekleme bulundu</item>
-        <item quantity="other">%1$d yedekleme bulundu</item>
-    </plurals>
-    <plurals name="label_profiles_found">
-        <item quantity="one">%1$d profil bulundu</item>
-        <item quantity="other">%1$d profil bulundu</item>
-    </plurals>
-    <plurals name="label_backup_groups">
-        <item quantity="zero">Grup yok</item>
-        <item quantity="one">%1$d grup</item>
-        <item quantity="other">%1$d grup</item>
-    </plurals>
-    <plurals name="label_backup_contacts">
-        <item quantity="zero">Kişi yok</item>
-        <item quantity="one">%1$d kişi</item>
-        <item quantity="other">%1$d kişi</item>
-    </plurals>
-    <plurals name="label_discussion_archive_done">
-        <item quantity="one">Konuşma arşivlendi</item>
-        <item quantity="other">%1$d konuşma arşivlendi</item>
-    </plurals>
-    <plurals name="label_discussion_unarchive_done">
-        <item quantity="one">Konuşma arşivden çıkarıldı</item>
-        <item quantity="other">%1$d konuşma arşivden çıkarıldı</item>
-    </plurals>
-    <plurals name="label_message_unbookmark_done">
-        <item quantity="one">Mesaj işaretlemesi kaldırıldı</item>
-        <item quantity="other">%1$d mesaj işaretlemesi kaldırıldı</item>
-    </plurals>
-    <plurals name="dialog_title_delete_discussions">
-        <item quantity="one">Seçili konuşmayı sil?</item>
-        <item quantity="other">Seçili konuşmaları sil?</item>
-    </plurals>
-    <plurals name="dialog_title_delete_messages">
-        <item quantity="one">Seçili mesajı sil?</item>
-        <item quantity="other">Seçili mesajları sil?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions">
-        <item quantity="one">Seçili konuşmayı ve içerdiği tüm mesajları silmek istediğinizden emin misiniz?\nBu işlem geri alınamaz.</item>
-        <item quantity="other">Seçili %1$d konuşmayı ve içerdiği tüm mesajları silmek istediğinizden emin misiniz?\nBu işlem geri alınamaz.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions_choice">
-        <item quantity="one">Seçili konuşmayı ve içerdiği tüm mesajları silmek için ne yapmak istiyorsunuz?\nBu işlem geri alınamaz.</item>
-        <item quantity="other">Seçili %1$d konuşmayı ve içerdiği tüm mesajları silmek için ne yapmak istiyorsunuz?\nBu işlem geri alınamaz.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages">
-        <item quantity="one">Seçili mesajı silmek istediğinizden emin misiniz?\nBu işlem geri alınamaz.</item>
-        <item quantity="other">Seçili %1$d mesajı silmek istediğinizden emin misiniz?\nBu işlem geri alınamaz.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages_choice">
-        <item quantity="one">Seçili mesajı silmek için ne yapmak istiyorsunuz?\nBu işlem geri alınamaz.</item>
-        <item quantity="other">Seçili %1$d mesajı silmek için ne yapmak istiyorsunuz?\nBu işlem geri alınamaz.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_messages_everywhere">
-        <item quantity="one">Bu konuşmadaki bir mesajı **kalıcı olarak** silmek üzeresiniz. Lütfen gerçekten istediğinizden emin olun.</item>
-        <item quantity="other">Bu konuşmadaki %1$d mesajı **kalıcı olarak** silmek üzeresiniz. Lütfen gerçekten istediğinizden emin olun.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_discussions_everywhere">
-        <item quantity="one">Bu konuşmayı ve içerdiği mesajları **kalıcı olarak** silmek üzeresiniz. Lütfen gerçekten istediğinizden emin olun.</item>
-        <item quantity="other">Bu konuşmaları ve içerdiği mesajları **kalıcı olarak** silmek üzeresiniz. Lütfen gerçekten istediğinizden emin olun.</item>
-    </plurals>
-    <plurals name="dialog_message_invite_all_group_members">
-        <item quantity="one">Gruptaki her üye (şu anda 1 üye) ile özel bir konuşmaya davet etmek üzeresiniz.\nDevam etmek istiyor musunuz?</item>
-        <item quantity="other">Gruptaki her üye (şu anda %1$d üye) ile özel bir konuşmaya davet etmek üzeresiniz.\nDevam etmek istiyor musunuz?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_count">
-        <item quantity="one">1 ortak grup</item>
-        <item quantity="other">%1$d ortak grup</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_end">
-        <item quantity="one">. Bu gruptan ayrılmanız gerekiyor.</item>
-        <item quantity="other">. Bu gruplardan ayrılmanız gerekiyor.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_with_pending_groups">
-        <item quantity="one">%1$s\'i diğer kullanıcılar listenizden silmek üzeresiniz.\n\n%1$s, ait olduğunuz %2$d gruba davet edildi. Gruba katılırsa bu listeye geri eklenecektir. Bunu önlemek için bu gruptan ayrılmak isteyebilirsiniz.\n\nBu kullanıcıyı gerçekten silmek istiyor musunuz?</item>
-        <item quantity="other">%1$s\'i diğer kullanıcılar listenizden silmek üzeresiniz.\n\n%1$s, ait olduğunuz %2$d gruba davet edildi. Bunlardan birine katılırsa bu listeye geri eklenecektir. Bunu önlemek için bu gruplardan ayrılmak isteyebilirsiniz.\n\nBu kullanıcıyı gerçekten silmek istiyor musunuz?</item>
-    </plurals>
-    <plurals name="dialog_message_auto_join_pending_groups">
-        <item quantity="one">Bu ayarı değiştirmek, bir bekleyen grup davetini otomatik olarak kabul edecektir.\nSeçiminizi onaylamak ve bu gruba katılmak için Tamam\'a basın.</item>
-        <item quantity="other">Bu ayarı değiştirmek, %1$d bekleyen grup davetini otomatik olarak kabul edecektir.\nSeçiminizi onaylamak ve bu gruplara katılmak için Tamam\'a basın.</item>
-    </plurals>
-    <plurals name="dialog_message_save_selected_attachments">
-        <item quantity="one">İstenildiğinde, seçilen eklemeyi kaydetmek için klasörü seçin.\nBazı klasörlere erişim kısıtlanmış olabilir.</item>
-        <item quantity="other">İstenildiğinde, %1$d seçilen eklemeyi kaydetmek için klasörü seçin.\nBazı klasörlere erişim kısıtlanmış olabilir.</item>
-    </plurals>
-    <plurals name="action_mode_title_storage">
-        <item quantity="one">%1$d seçildi</item>
-        <item quantity="other">%1$d seçildi</item>
-    </plurals>
-    <plurals name="dialog_message_delete_attachments">
-        <item quantity="one">Seçilen eklemeyi silmek istediğinizden emin misiniz?</item>
-        <item quantity="other">Seçilen %1$d eklemeyi silmek istediğinizden emin misiniz?</item>
-    </plurals>
-    <plurals name="text_app_uptime_days">
-        <item quantity="one">%1$d gün, %2$02dsa %3$02d dk %4$02ds</item>
-        <item quantity="other">%1$d gün, %2$02dsa %3$02d dk %4$02ds</item>
-    </plurals>
-    <plurals name="text_message_possibly_missing">
-        <item quantity="one">%1$d kayıp mesaj…</item>
-        <item quantity="other">%1$d kayıp mesaj…</item>
-    </plurals>
-    <plurals name="text_outgoing_group_call_with_contacts">
-        <item quantity="one">%2$s ve 1 kişi ile grup görüşmesi</item>
-        <item quantity="other">%2$s ve %1$d kişi ile grup görüşmesi</item>
-    </plurals>
-    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
-        <item quantity="one">%2$s ve 1 kişi ile grup görüşmesi yanıtlanmadı</item>
-        <item quantity="other">%2$s ve %1$d kişi ile grup görüşmesi yanıtlanmadı</item>
-    </plurals>
-    <plurals name="text_failed_outgoing_group_call_with_contacts">
-        <item quantity="one">%2$s ve 1 kişi ile grup görüşmesi başarısız oldu</item>
-        <item quantity="other">%2$s ve %1$d kişi ile grup görüşmesi başarısız oldu</item>
-    </plurals>
-    <plurals name="text_busy_outgoing_group_call_with_contacts">
-        <item quantity="one">%2$s ve 1 kişi meşguldü</item>
-        <item quantity="other">%2$s ve %1$d kişi meşguldü</item>
-    </plurals>
-    <plurals name="text_rejected_outgoing_group_call_with_contacts">
-        <item quantity="one">%2$s ve 1 kişi ile grup görüşmesi reddedildi</item>
-        <item quantity="other">%2$s ve %1$d kişi ile grup görüşmesi reddedildi</item>
-    </plurals>
-    <plurals name="text_incoming_group_call_with_contacts">
-        <item quantity="one">%2$s ve 1 kişi ile grup görüşmesi</item>
-        <item quantity="other">%2$s ve %1$d kişi ile grup görüşmesi</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion">
-        <item quantity="one">%1$d seçildi</item>
-        <item quantity="other">%1$d seçildi</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion_list">
-        <item quantity="one">%1$d seçildi</item>
-        <item quantity="other">%1$d seçildi</item>
-    </plurals>
-    <plurals name="notification_public_title_new_messages">
-        <item quantity="one">%1$d yeni mesaj</item>
-        <item quantity="other">%1$d yeni mesaj</item>
-    </plurals>
-    <plurals name="dialog_message_invite_group_members">
-        <item quantity="one">%3$s, %2$s grubuna davet edilecek.</item>
-        <item quantity="other">%1$d kişi, %2$s grubuna davet edilecek: %3$s.</item>
-    </plurals>
-    <plurals name="dialog_message_remove_group_members">
-        <item quantity="one">%3$s, %2$s grubundan çıkarılacak.</item>
-        <item quantity="other">%1$d kişi, %2$s grubundan çıkarılacak: %3$s.</item>
-    </plurals>
-    <plurals name="text_unread_message_count">
-        <item quantity="one">%1$d yeni mesaj</item>
-        <item quantity="other">%1$d yeni mesaj</item>
-    </plurals>
-    <plurals name="text_reply_attachment_count">
-        <item quantity="one">%1$d ek</item>
-        <item quantity="other">%1$d ek</item>
-    </plurals>
-    <plurals name="text_and_x_other">
-        <item quantity="one">ve %1$d kişi</item>
-        <item quantity="other">ve %1$d kişi</item>
-    </plurals>
-    <plurals name="text_contact_names_last_separator_x_other">
-        <item quantity="one"> &amp; %1$d kişi</item>
-        <item quantity="other"> &amp; %1$d kişi</item>
-    </plurals>
-    <plurals name="dialog_message_confirm_retention_policy">
-        <item quantity="one">Seçtiğiniz saklama ilkesi tek bir mesajı silecektir.\nDevam etmek istediğinizden emin misiniz?</item>
-        <item quantity="other">Seçtiğiniz saklama ilkesi %1$d mesajı silecektir.\nDevam etmek istediğinizden emin misiniz?</item>
-    </plurals>
-    <plurals name="text_keycloak_missing_search_result">
-        <item quantity="one">… ve 1 ek arama sonucu\nLütfen aramanızı hassaslaştırın</item>
-        <item quantity="other">… ve %1$d ek arama sonucu\nLütfen aramanızı hassaslaştırın</item>
-    </plurals>
-    <plurals name="duration_seconds">
-        <item quantity="one">1 saniye</item>
-        <item quantity="other">%1$d saniye</item>
-    </plurals>
-    <plurals name="duration_minutes">
-        <item quantity="one">1 dakika</item>
-        <item quantity="other">%1$d dakika</item>
-    </plurals>
-    <plurals name="duration_hours">
-        <item quantity="one">1 saat</item>
-        <item quantity="other">%1$d saat</item>
-    </plurals>
-    <plurals name="duration_days">
-        <item quantity="one">1 gün</item>
-        <item quantity="other">%1$d gün</item>
-    </plurals>
-    <plurals name="duration_years">
-        <item quantity="one">1 yıl</item>
-        <item quantity="other">%1$d yıl</item>
-    </plurals>
-    <plurals name="other_members_count">
-        <item quantity="one">1 üye</item>
-        <item quantity="other">%1$d üye</item>
-    </plurals>
-    <plurals name="dialog_message_delete_remote_deleted_messages">
-        <item quantity="one">Tartışmalarınızda 1 uzaktan silinmiş mesajınız var. Silmek istiyor musunuz?</item>
-        <item quantity="other">Tartışmalarınızda %1$d uzaktan silinmiş mesajınız var. Tüm bu işaretleri silmek istiyor musunuz?</item>
-    </plurals>
-    <plurals name="label_xxx_contacts_sharing_their_position">
-        <item quantity="one">1 kişi konumunu paylaşıyor</item>
-        <item quantity="other">%1$d kişi konumunu paylaşıyor</item>
-    </plurals>
-    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
-        <item quantity="one">Siz ve 1 kişi konumunuzu paylaşıyor</item>
-        <item quantity="other">Siz ve %1$d kişi konumunuzu paylaşıyor</item>
-    </plurals>
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1156880361">Cihazlarınızdan biri **%1$d günden** kısa bir süre içinde sona erecek ve devre dışı bırakılacak.\nOnu aktif tutmak için bir **Olvid+** aboneliği satın alabilirsiniz.</item>
+		<item quantity="other" state="needs_review" hash="-574658149">Cihazlarınızdan biri **%1$d günden kısa bir süre içinde** sona erecek ve devre dışı bırakılacak.\nOnu aktif tutmak için bir **Olvid+** aboneliği satın alabilirsiniz.</item>
+	</plurals>
+	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-683497602">%1$s gruba katıldı</item>
+		<item quantity="other" state="needs_review" hash="51603026">%1$s gruba katıldı</item>
+	</plurals>
+	<plurals name="text_left_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="399208793">%1$s gruptan ayrıldı</item>
+		<item quantity="other" state="needs_review" hash="1945116549">%1$s gruptan ayrıldı</item>
+	</plurals>
+	<plurals name="label_poll_answers" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="1797058436">Cevap yok</item>
+		<item quantity="one" state="needs_review" hash="-7151672">%1$d cevap</item>
+		<item quantity="other" state="needs_review" hash="1394570044">%1$d yanıtları</item>
+	</plurals>
+	<plurals name="label_remove_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="312762041">%1$d üyeyi kaldır</item>
+		<item quantity="other" state="needs_review" hash="1816849257">%1$d üyeyi kaldır</item>
+	</plurals>
+	<plurals name="label_add_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1537484553">%1$d üyeyi ekle</item>
+		<item quantity="other" state="needs_review" hash="1091232977">%1$d üye ekle</item>
+	</plurals>
+	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1131862199">\" bu cihazda, aşağıdaki önceki cihazınız devre dışı bırakılacak:</item>
+		<item quantity="other" state="needs_review" hash="-2011302529">\" bu cihazda, aşağıdaki cihazlarınız devre dışı bırakılacak:</item>
+	</plurals>
+	<plurals name="label_backups_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1088606803">%1$d yedekleme bulundu</item>
+		<item quantity="other" state="needs_review" hash="-577868099">%1$d yedekleme bulundu</item>
+	</plurals>
+	<plurals name="label_profiles_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1498976610">%1$d profil bulundu</item>
+		<item quantity="other" state="needs_review" hash="749391135">%1$d profil bulundu</item>
+	</plurals>
+	<plurals name="label_backup_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="-174007554">Grup yok</item>
+		<item quantity="one" state="needs_review" hash="237276495">%1$d grup</item>
+		<item quantity="other" state="needs_review" hash="900821953">%1$d gruplar</item>
+	</plurals>
+	<plurals name="label_backup_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="246373927">Rehberde kişi yok</item>
+		<item quantity="one" state="needs_review" hash="-1671298344">%1$d kişi</item>
+		<item quantity="other" state="needs_review" hash="1022571360">%1$d kişiler</item>
+	</plurals>
+	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1772966333">Konuşma arşivlendi</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d görüşmeler arşivlendi</item>
+	</plurals>
+	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1312483800">Konuşma arşivden çıkarıldı</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d tartışmalar arşivden çıkarıldı</item>
+	</plurals>
+	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2045500103">Mesaj favorilerden kaldırıldı</item>
+		<item quantity="other" state="needs_review" hash="204728896">%1$d mesajlar favorilerden kaldırıldı</item>
+	</plurals>
+	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-716893580">Seçili konuşmayı sil?</item>
+		<item quantity="other" state="needs_review" hash="-15840526">Seçili sohbetleri sil?</item>
+	</plurals>
+	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-862879351">Seçili mesajı silinsin mi?</item>
+		<item quantity="other" state="needs_review" hash="-2020248805">Seçili mesajları silmek istiyor musunuz?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-931157230">Seçilen konuşmayı ve içerdiği tüm mesajları gerçekten silmek istiyor musunuz?\nBu işlem geri alınamaz.</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">Seçili %1$d sohbetleri ve içerdiği tüm mesajları gerçekten silmek istiyor musunuz?\nBu işlem geri alınamaz.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2139168692">Seçilen konuşmayı ve içerdiği tüm mesajları nasıl silmek istiyorsunuz?\nBu işlem geri alınamaz.</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">Seçili %1$d sohbetleri ve içerdiği tüm mesajları nasıl silmek istiyorsunuz?\nBu işlem geri alınamaz.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-947341357">Seçili mesajı gerçekten silmek istiyor musunuz?\nBu işlem geri alınamaz.</item>
+		<item quantity="other" state="needs_review" hash="-752621695">Seçili %1$d mesajları gerçekten silmek istiyor musunuz?\nBu işlem geri alınamaz.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-474913536">Seçili mesajı silmek için ne yöntemi tercih ediyorsunuz?\nBu işlem geri alınamaz.</item>
+		<item quantity="other" state="needs_review" hash="-895867176">Seçili %1$d mesajları nasıl silmek istiyorsunuz?\nBu işlem geri alınamaz.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-606769319">Bu mesajı bu görüşmedeki **herkes** için **kalıcı olarak** silmek üzeresiniz. Bunun gerçekten yapmak istediğinizden emin olun.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">%1$d mesajı bu görüşmedeki **herkes** için **kalıcı olarak** silmek üzeresiniz. Bunun gerçekten yapmak istediğinizden emin olun.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118446236">Bu sohbeti ve içindeki mesajları **kalıcı olarak** **herkes** için silmek üzeresiniz. Bunun gerçekten yapmak istediğinizden emin olun.</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">%1$d sohbetlerini ve içerdikleri mesajları **kalıcı olarak** **herkes** için silmek üzeresiniz. Bunun gerçekten yapmak istediğinizden emin olun.</item>
+	</plurals>
+	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1306576418">Bu gruptaki ve sizinle kanalı olan her üye (şu anda 1 üye) ile özel bir tartışmaya davet edeceksiniz.\nDevam etmek istiyor musunuz?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Bu gruptaki ve sizinle bir kanalınız olan her üye ile (şu anda %1$d üye) özel bir sohbete davet edeceksiniz.\nDevam etmek istiyor musunuz?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1699852572">1 ortak grup</item>
+		<item quantity="other" state="needs_review" hash="-261780100">%1$d ortak gruplar</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1000092559">Devam etmek için bu gruptan ayrılmanız gerekiyor.</item>
+		<item quantity="other" state="needs_review" hash="-1973752801">Devam etmek için bu gruplardan çıkmanız gerekiyor.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_with_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1290867480">%1$s kişisini diğer kullanıcılar listenizden kaldırmak üzeresiniz.\n\nLütfen dikkat: %1$s, ait olduğunuz %2$d grubuna davet edilmişti. Gruba katılırsa bu listeye tekrar eklenecektir. Bunu önlemek için bu gruptan ayrılmayı düşünebilirsiniz.\n\nBu kullanıcıyı gerçekten silmek istiyor musunuz?</item>
+		<item quantity="other" state="needs_review" hash="1544662217">%1$s kişisini diğer kullanıcılar listenizden kaldırmak üzeresiniz.\n\nLütfen dikkat: %1$s, ait olduğunuz %2$d gruba davet edildi. Bu gruplardan birine katılırsa, bu listeye tekrar eklenecektir. Bunu önlemek için bu gruplardan ayrılmayı düşünebilirsiniz.\n\nBu kullanıcıyı gerçekten silmek istiyor musunuz?</item>
+	</plurals>
+	<plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-97256410">Bu ayarı değiştirmek, bekleyen bir grup davetini otomatik olarak kabul edecektir.\nBu seçiminizi onaylamak ve bu gruba katılmak için Tamam\'a basın.</item>
+		<item quantity="other" state="needs_review" hash="1009007696">Bu ayarı değiştirmeniz, %1$d bekleyen grup davetlerini otomatik olarak kabul edecektir.\nSeçiminizi onaylamak ve bu gruplara katılmak için Tamam\'a basın.</item>
+	</plurals>
+	<plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1768885312">İstenildiğinde, seçili ek dosyasını kaydetmek istediğiniz klasörü lütfen seçin.\nBazı klasörlere erişimin kısıtlanabileceğini unutmayın.</item>
+		<item quantity="other" state="needs_review" hash="-1416662415">İstenildiğinde, seçili %1$d eklerin kaydedileceği klasörü lütfen seçin.\nBazı klasörlere erişimin kısıtlanabileceğini unutmayın.</item>
+	</plurals>
+	<plurals name="action_mode_title_storage" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d seçildi</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d seçildi</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1117804388">Seçili eköyü silmek istediğinizden emin misiniz?</item>
+		<item quantity="other" state="needs_review" hash="-1540151013">Seçili %1$d ekleri silmek istediğinizden emin misiniz?</item>
+	</plurals>
+	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1400550170">%1$d gün, %2$02dsaat %3$02ddakika %4$02dsaniye</item>
+		<item quantity="other" state="needs_review" hash="-1847999182">%1$d gün, %2$02dsa %3$02ddk %4$02dsn</item>
+	</plurals>
+	<plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1040869757">%1$d eksik mesaj…</item>
+		<item quantity="other" state="needs_review" hash="-970055416">%1$d eksik mesajlar…</item>
+	</plurals>
+	<plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="800251665">%2$s ve bir başkasıyla grup görüşmesi</item>
+		<item quantity="other" state="needs_review" hash="-1654053808">%2$s ve %1$d diğer kişiyle grup görüşmesi</item>
+	</plurals>
+	<plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1313506338">%2$s ve bir başka kişiyle yanıtlanmayan grup araması</item>
+		<item quantity="other" state="needs_review" hash="1027194941">%2$s ve %1$d diğer kişiyle cevaplanmayan grup araması</item>
+	</plurals>
+	<plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="575911091">%2$s ve bir diğer kişiyle grup görüşmesi başarısız oldu</item>
+		<item quantity="other" state="needs_review" hash="1768048524">%2$s ve %1$d dahil diğer kişilerle grup görüşmesi başarısız oldu</item>
+	</plurals>
+	<plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1115369211">%2$s ve bir başkası meşgulken grup görüşmesi</item>
+		<item quantity="other" state="needs_review" hash="-332659300">%2$s ve %1$d kişi meşgulken grup araması</item>
+	</plurals>
+	<plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1401449639">%2$s ve bir başkasıyla grup çağrısı reddedildi</item>
+		<item quantity="other" state="needs_review" hash="-150166810">%2$s ve %1$d dahil olmak üzere grup çağrısı reddedildi</item>
+	</plurals>
+	<plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-366344569">%2$s ve bir diğerinden grup araması</item>
+		<item quantity="other" state="needs_review" hash="1471743578">%2$s ve %1$d diğer kişiden grup araması</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="461822174">%1$d seçildi</item>
+		<item quantity="other" state="needs_review" hash="1431585621">%1$d seçildi</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion_list" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d seçildi</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d seçildi</item>
+	</plurals>
+	<plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d yeni mesaj</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d yeni mesaj</item>
+	</plurals>
+	<plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1495957123">%3$s, %2$s grubuna davet edilecek.</item>
+		<item quantity="other" state="needs_review" hash="-250521442">Aşağıdaki %1$d kişi, %2$s grubuna davet edilecek: %3$s.</item>
+	</plurals>
+	<plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1633684901">%3$s, %2$s grubundan kaldırılacak.</item>
+		<item quantity="other" state="needs_review" hash="2062819899">Aşağıdaki %1$d grup üyesi %2$s grubundan kaldırılacak: %3$s.</item>
+	</plurals>
+	<plurals name="text_unread_message_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d yeni mesaj</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d yeni mesaj</item>
+	</plurals>
+	<plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118984743">%1$d ek</item>
+		<item quantity="other" state="needs_review" hash="1321323314">%1$d ekler</item>
+	</plurals>
+	<plurals name="text_and_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-226443285">Ve %1$d diğer</item>
+		<item quantity="other" state="needs_review" hash="-2101659023">Ve %1$d kişi daha</item>
+	</plurals>
+	<plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-970333"> &amp; %1$d diğer</item>
+		<item quantity="other" state="needs_review" hash="1931856055"> &amp; %1$d diğerleri</item>
+	</plurals>
+	<plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-202072457">Seçtiğiniz mesaj saklama politikası nedeniyle tek bir mesaj silinecek.\nDevam etmek istediğinizden emin misiniz?</item>
+		<item quantity="other" state="needs_review" hash="-576713525">Seçtiğiniz saklama politikası %1$d mesajı silecektir.\nDevam etmek istediğinizden emin misiniz?</item>
+	</plurals>
+	<plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="812170692">… ve bir ek arama sonucu\nLütfen aramanızı daraltın</item>
+		<item quantity="other" state="needs_review" hash="1969873890">… ve %1$d ek arama sonucu\nLütfen aramanızı daraltın</item>
+	</plurals>
+	<plurals name="duration_seconds" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="251130693">1 saniye</item>
+		<item quantity="other" state="needs_review" hash="624952161">%1$d saniye</item>
+	</plurals>
+	<plurals name="duration_minutes" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1053938976">1 dakika</item>
+		<item quantity="other" state="needs_review" hash="-1051808">%1$d dakika</item>
+	</plurals>
+	<plurals name="duration_hours" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1004063951">1 saat</item>
+		<item quantity="other" state="needs_review" hash="1322950935">%1$d saat</item>
+	</plurals>
+	<plurals name="duration_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1264358968">1 gün</item>
+		<item quantity="other" state="needs_review" hash="-1170846734">%1$d gün</item>
+	</plurals>
+	<plurals name="duration_years" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="388401904">1 yıl</item>
+		<item quantity="other" state="needs_review" hash="298429520">%1$d yıl</item>
+	</plurals>
+	<plurals name="other_members_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1379655782">1 üye</item>
+		<item quantity="other" state="needs_review" hash="965402074">%1$d üyeler</item>
+	</plurals>
+	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1006155949">Tartışmalarınızda şu anda 1 uzaktan silinmiş mesajınız var. Silmek istiyor musunuz?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">Tartışmalarınızda şu anda %1$d adet uzaktan silinmiş mesaj bulunuyor. Bu tür tüm işaretçileri silmek istiyor musunuz?</item>
+	</plurals>
+	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1367750681">1 kişi konumunu paylaşıyor</item>
+		<item quantity="other" state="needs_review" hash="1164266856">%1$d kişi konumunu paylaşıyor</item>
+	</plurals>
+	<plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1602016664">Sen ve 1 başka kişi konumunu paylaşıyor</item>
+		<item quantity="other" state="needs_review" hash="1789697147">Sen ve %1$d kişi daha konumunuzu paylaşıyor</item>
+	</plurals>
 </resources>

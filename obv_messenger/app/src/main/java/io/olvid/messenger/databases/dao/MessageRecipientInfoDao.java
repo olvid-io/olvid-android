@@ -32,6 +32,7 @@ import androidx.room.Update;
 
 import java.util.List;
 
+import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
@@ -139,6 +140,13 @@ public interface MessageRecipientInfoDao {
             " AND mri." + MessageRecipientInfo.TIMESTAMP_SENT + " IS NULL")
     List<MessageRecipientInfo> getAllUnsentForDiscussion(long discussionId);
 
+
+    @Query("SELECT c.* FROM " + MessageRecipientInfo.TABLE_NAME + " AS mri " +
+    " JOIN " + Contact.TABLE_NAME + " AS c " +
+    " ON c." + Contact.BYTES_CONTACT_IDENTITY + " = mri." + MessageRecipientInfo.BYTES_CONTACT_IDENTITY +
+    " WHERE c." + Contact.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+    " AND mri." + MessageRecipientInfo.MESSAGE_ID + " = :messageId")
+    LiveData<List<Contact>> getAllRecipientContactsForMessage(long messageId, @NonNull byte[] bytesOwnedIdentity);
 
     class MessageRecipientInfoAndMessage {
         @Embedded

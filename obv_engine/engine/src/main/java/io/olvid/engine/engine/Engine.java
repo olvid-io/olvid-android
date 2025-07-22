@@ -107,6 +107,7 @@ import io.olvid.engine.engine.types.ObvDeviceBackupForRestore;
 import io.olvid.engine.engine.types.ObvDeviceList;
 import io.olvid.engine.engine.types.ObvDeviceManagementRequest;
 import io.olvid.engine.engine.types.ObvDialog;
+import io.olvid.engine.engine.types.ObvMessage;
 import io.olvid.engine.engine.types.ObvOutboundAttachment;
 import io.olvid.engine.engine.types.ObvPostMessageOutput;
 import io.olvid.engine.engine.types.ObvProfileBackupsForRestore;
@@ -402,6 +403,12 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         notificationWorker.stop();
     }
 
+    public void runTaskOnEngineNotificationQueue(Runnable runnable) {
+        HashMap<String, Object> userInfo = new HashMap<>();
+        userInfo.put(NotificationWorker.SYNCHRONIZED_TASK, runnable);
+        postEngineNotification(NotificationWorker.SYNCHRONIZED_TASK, userInfo);
+    }
+
     private void removeNotificationListener(String notificationName, long notificationListenerRegistrationNumber) {
         listenersLock.lock();
         HashMap<Long, ListenerAndPriority> notificationObservers = listeners.get(notificationName);
@@ -422,6 +429,8 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     private class NotificationWorker {
+        public static final String SYNCHRONIZED_TASK = "synchronized_task";
+
         private boolean started = false;
         private Thread thread = null;
 
@@ -442,6 +451,18 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                         continue;
                     }
 
+                    if (engineNotification.notificationName.equals(SYNCHRONIZED_TASK)) {
+                        try {
+                            Object task = engineNotification.userInfo.get(SYNCHRONIZED_TASK);
+                            if (task instanceof Runnable) {
+                                ((Runnable) task).run();
+                            }
+                        } catch (Exception e) {
+                            Logger.e("Exception while running App task on engine notification queue");
+                            Logger.x(e);
+                        }
+                        continue;
+                    }
                     listenersLock.lock();
                     HashMap<Long, ListenerAndPriority> notificationObservers = listeners.get(engineNotification.notificationName);
                     if (notificationObservers != null) {
@@ -2379,6 +2400,25 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         }
     }
 
+    @Override
+    public void markMessageAsOnHold(byte[] bytesOwnedIdentity, byte[] messageIdentifier) {
+        UID messageUid = new UID(messageIdentifier);
+        Identity ownedIdentity;
+        try {
+            ownedIdentity = Identity.of(bytesOwnedIdentity);
+        } catch (DecodingException e) {
+            Logger.e("Error parsing bytesOwnedIdentity in Engine.markMessageAsOnHold");
+            Logger.x(e);
+            return;
+        }
+        try (EngineSession engineSession = getSession()) {
+            fetchManager.markMessageAsOnHold(engineSession.session, ownedIdentity, messageUid);
+            engineSession.session.commit();
+        } catch (SQLException e) {
+            Logger.x(e);
+        }
+    }
+
     private void markAttachmentForDeletion(Identity ownedIdentity, UID messageUid, int attachmentNumber) {
         if (ownedIdentity == null || messageUid == null) {
             return;
@@ -2432,6 +2472,15 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
         fetchManager.retryScheduledNetworkTasks();
         sendManager.retryScheduledNetworkTasks();
         backupManager.retryScheduledNetworkTasks();
+    }
+
+    @Override
+    public ObvMessage getOnHoldMessage(byte[] bytesOwnedIdentity, byte[] messageIdentifier) throws Exception {
+        UID messageUid = new UID(messageIdentifier);
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        try (EngineSession engineSession = getSession()) {
+            return fetchManager.getOnHoldMessage(engineSession.session, ownedIdentity, messageUid);
+        }
     }
 
     // endregion

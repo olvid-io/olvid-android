@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
+import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.settings.SettingsActivity
 
@@ -78,33 +78,31 @@ fun ArchiveSettingsContent(
                 style = OlvidTypography.body1
             )
             Spacer(modifier = Modifier.height(24.dp))
-            TextButton(modifier = Modifier.fillMaxWidth(), onClick = {
-                SettingsActivity.setUnarchiveDiscussionOnNotification(
-                    unarchive = true,
-                    propagate = true
-                )
-                onOptionChosen()
-            }) {
-                Text(
-                    text = stringResource(R.string.dialog_unarchive_setting_button_notified),
-                    color = colorResource(R.color.olvid_gradient_light),
-                    style = OlvidTypography.body1
-                )
-            }
+            OlvidTextButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.dialog_unarchive_setting_button_notified),
+                large = true,
+                onClick = {
+                    SettingsActivity.setUnarchiveDiscussionOnNotification(
+                        unarchive = true,
+                        propagate = true
+                    )
+                    onOptionChosen()
+                }
+            )
             Spacer(modifier = Modifier.height(4.dp))
-            TextButton(modifier = Modifier.fillMaxWidth(), onClick = {
-                SettingsActivity.setUnarchiveDiscussionOnNotification(
-                    unarchive = false,
-                    propagate = true
-                )
-                onOptionChosen()
-            }) {
-                Text(
-                    text = stringResource(R.string.dialog_unarchive_setting_button_never),
-                    color = colorResource(R.color.olvid_gradient_light),
-                    style = OlvidTypography.body1
-                )
-            }
+            OlvidTextButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.dialog_unarchive_setting_button_never),
+                onClick = {
+                    SettingsActivity.setUnarchiveDiscussionOnNotification(
+                        unarchive = false,
+                        propagate = true
+                    )
+                    onOptionChosen()
+                },
+                large = true
+            )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 modifier = Modifier.fillMaxWidth(),

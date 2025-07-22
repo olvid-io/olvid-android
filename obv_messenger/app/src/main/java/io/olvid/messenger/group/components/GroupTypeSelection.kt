@@ -19,152 +19,217 @@
 
 package io.olvid.messenger.group.components
 
+import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
-import androidx.compose.material.RadioButtonDefaults
-import androidx.compose.material.Text
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
-import io.olvid.messenger.R.color
-import io.olvid.messenger.R.string
+import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
+import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.designsystem.components.OlvidActionButton
+import io.olvid.messenger.designsystem.theme.OlvidTypography
+import io.olvid.messenger.group.CustomGroup
 import io.olvid.messenger.group.GroupTypeModel
 import io.olvid.messenger.group.GroupTypeModel.GroupType.CUSTOM
-import io.olvid.messenger.group.GroupTypeModel.GroupType.PRIVATE
-import io.olvid.messenger.group.GroupTypeModel.GroupType.READ_ONLY
-import io.olvid.messenger.group.GroupTypeModel.GroupType.SIMPLE
+import io.olvid.messenger.group.PrivateGroup
+import io.olvid.messenger.group.ReadOnlyGroup
+import io.olvid.messenger.group.SimpleGroup
 
 @Composable
 fun GroupTypeSelection(
     groupTypes: List<GroupTypeModel>,
     selectedGroupType: GroupTypeModel,
     selectGroupType: (groupTypeModel: GroupTypeModel) -> Unit,
-    isEditingCustomSettings: ((Boolean) -> Unit)? = null,
+    content: @Composable () -> Unit = {},
+    updateReadOnly: ((Boolean) -> Unit)? = null,
+    updateRemoteDelete: ((GroupTypeModel.RemoteDeleteSetting) -> Unit)? = null,
+    showTitle: Boolean = true,
+    validationLabel: String,
+    getPermissionsChanges: () -> String,
+    initialGroupType: GroupTypeModel?,
+    onValidate: (() -> Unit)? = null,
 ) {
-    Column(
-        modifier = Modifier.padding(
-            start = 6.dp,
-            end = 6.dp,
-            top = 16.dp,
-            bottom = 8.dp
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+    val context = LocalContext.current
+
+    Box {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            Text(
-                text = stringResource(id = string.label_group_type),
-                fontSize = 18.sp,
-                lineHeight = 20.sp,
-                color = colorResource(
-                    id = color.accent
-                )
-            )
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-
-            groupTypes.forEach { group ->
-                Row(
+            content()
+            if (showTitle) {
+                Text(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(
-                            border = BorderStroke(
-                                width = 1.dp,
-                                color = colorResource(
-                                    id = if (selectedGroupType.type == group.type) color.olvid_gradient_light else color.lightGrey
-                                )
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .then(
-                            if (selectedGroupType.type == group.type) Modifier.background(
-                                color = colorResource(id = color.lightGrey),
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, bottom = 6.dp),
+                    text = stringResource(R.string.label_group_type),
+                    style = OlvidTypography.h3.copy(color = colorResource(R.color.almostBlack)),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } else {
+                Spacer(Modifier.height(16.dp))
+            }
+
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 64.dp)
+                    .safeDrawingPadding(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                groupTypes.forEach { group ->
+                    val interactionSource = remember { MutableInteractionSource() }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(
+                                border = BorderStroke(
+                                    width = 1.dp,
+                                    color = colorResource(
+                                        id = if (selectedGroupType.type == group.type) R.color.olvid_gradient_light else R.color.lightGrey
+                                    )
+                                ),
                                 shape = RoundedCornerShape(12.dp)
-                            ) else Modifier
-                        )
-                        .selectable(
+                            )
+                            .then(
+                                if (selectedGroupType.type == group.type) Modifier.background(
+                                    color = colorResource(id = R.color.lighterGrey),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) else Modifier
+                            )
+                            .selectable(
+                                selected = selectedGroupType.type == group.type,
+                                onClick = { selectGroupType(group) },
+                                role = Role.RadioButton,
+                                interactionSource = interactionSource,
+                                indication = null,
+                            )
+                            .padding(horizontal = 12.dp, vertical = 12.dp)
+                    ) {
+                        RadioButton(
+                            modifier = Modifier.size(20.dp),
                             selected = selectedGroupType.type == group.type,
                             onClick = { selectGroupType(group) },
-                            role = Role.RadioButton
-                        )
-                        .padding(horizontal = 12.dp, vertical = 12.dp)
-                ) {
-                    RadioButton(
-                        modifier = Modifier.size(20.dp),
-                        selected = selectedGroupType.type == group.type,
-                        onClick = { selectGroupType(group) },
-                        colors = RadioButtonDefaults.colors(
-                            selectedColor = colorResource(
-                                id = color.olvid_gradient_light
-                            )
-                        )
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Box(modifier = Modifier.weight(1f)) {
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = group.title,
-                                    style = MaterialTheme.typography.body1
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = colorResource(
+                                    id = R.color.olvid_gradient_light
                                 )
-                            }
-
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = group.subtitle,
-                                style = MaterialTheme.typography.body2.copy(
-                                    color = colorResource(
-                                        id = color.greyTint
-                                    )
-                                )
-                            )
-                        }
-                        if (group.type == CUSTOM) {
-                            isEditingCustomSettings?.let {
-                                IconButton(
-                                    modifier = Modifier.align(Alignment.TopEnd).size(24.dp),
-                                    onClick = { it.invoke(true) }) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_pencil),
-                                        tint = colorResource(
-                                            id = color.greyTint
-                                        ),
-                                        contentDescription = "Edit"
+                            ),
+                            interactionSource = interactionSource
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Box(modifier = Modifier.weight(1f)) {
+                            Column {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = stringResource(group.title),
+                                        style = OlvidTypography.body1
                                     )
                                 }
+
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = stringResource(group.subtitle),
+                                    style = OlvidTypography.body2.copy(
+                                        color = colorResource(
+                                            id = R.color.greyTint
+                                        )
+                                    )
+                                )
+                                AnimatedVisibility(
+                                    visible = group.type == CUSTOM && selectedGroupType.type == CUSTOM
+                                ) {
+                                    GroupCustomSettings(
+                                        groupType = selectedGroupType,
+                                        updateReadOnly = {
+                                            updateReadOnly?.invoke(it)
+                                        },
+                                        updateRemoteDelete = {
+                                            updateRemoteDelete?.invoke(it)
+                                        })
+                                }
                             }
+                        }
+                    }
+                }
+            }
+        }
+        onValidate?.let {
+            AnimatedVisibility(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter),
+                visible = selectedGroupType != initialGroupType,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(colorResource(R.color.whiteOverlay)),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    OlvidActionButton(
+                        modifier = Modifier
+                            .widthIn(max = 400.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .safeDrawingPadding(),
+                        text = validationLabel,
+                    ) {
+                        val changes = getPermissionsChanges()
+                        if (changes.isEmpty().not()) {
+                            SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                                .setTitle(context.getString(R.string.dialog_permissions_change_title))
+                                .setMessage(changes.formatMarkdown())
+                                .setPositiveButton(context.getString(R.string.button_label_ok)) { _, _ ->
+                                    onValidate()
+                                }
+                                .setNegativeButton(
+                                    context.getString(R.string.button_label_cancel),
+                                    null
+                                )
+                                .show()
+                        } else {
+                            onValidate()
                         }
                     }
                 }
@@ -173,22 +238,28 @@ fun GroupTypeSelection(
     }
 }
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun GroupTypeSelectionPreview() {
-    AppCompatTheme {
-        val groupTypes = listOf(
-            GroupTypeModel(SIMPLE, "Public", "Public"),
-            GroupTypeModel(PRIVATE, "Private", "Private"),
-            GroupTypeModel(READ_ONLY, "ReadOnly", "ReadOnly"),
-            GroupTypeModel(CUSTOM, "Custom", "Custom"),
-        )
-        var groupType by remember {
-            mutableStateOf(groupTypes.first())
-        }
+    val groupTypes = listOf(
+        SimpleGroup,
+        PrivateGroup,
+        ReadOnlyGroup,
+        CustomGroup(),
+    )
+
+    Box(Modifier
+        .background(colorResource(R.color.almostWhite))
+        .consumeWindowInsets(WindowInsets.safeDrawing)) {
         GroupTypeSelection(
             groupTypes = groupTypes,
-            selectedGroupType = groupType,
-            selectGroupType = { groupCreationModel -> groupType = groupCreationModel })
+            selectedGroupType = PrivateGroup,
+            validationLabel = "Validate",
+            initialGroupType = SimpleGroup,
+            getPermissionsChanges = { "" },
+            selectGroupType = { },
+            onValidate = {},
+        )
     }
 }

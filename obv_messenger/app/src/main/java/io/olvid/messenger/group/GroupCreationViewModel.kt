@@ -18,67 +18,31 @@
  */
 package io.olvid.messenger.group
 
-import android.util.Pair
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.olvid.messenger.databases.entity.Contact
 
 class GroupCreationViewModel : ViewModel() {
-    var selectedContacts: List<Contact>? = null
+    var selectedContacts = mutableStateOf(emptyList<Contact>())
         set(selectedContacts) {
             field = selectedContacts
-            if (selectedContacts == null) {
-                selectedContactCount.postValue(0)
-            } else {
-                selectedContactCount.postValue(selectedContacts.size)
-            }
+            selectedContactCount.postValue(selectedContacts.value.size)
             admins.postValue(
                 admins.value?.apply {
-                    retainAll((selectedContacts ?: emptyList()).toSet())
+                    retainAll(selectedContacts.value.toSet())
                 }
             )
         }
-    val selectedContactCount = MutableLiveData<Int>(0)
-    private val customGroup = MutableLiveData(false)
-    val chooseAdmins = MutableLiveData(false)
+    val selectedContactCount = MutableLiveData(0)
     val admins = MutableLiveData<HashSet<Contact>>(hashSetOf())
+}
 
-    private val selectedTab = MutableLiveData<Int>()
-    val subtitleLiveData = SubtitleLiveData(selectedContactCount, selectedTab)
-
-    fun isCustomGroup(): LiveData<Boolean> {
-        return customGroup
-    }
-
-    fun setIsCustomGroup(custom: Boolean) {
-        customGroup.postValue(custom)
-    }
-    fun setSelectedTab(selectedTab: Int) {
-        this.selectedTab.postValue(selectedTab)
-    }
-
-    class SubtitleLiveData(
-        selectedContactCount: MutableLiveData<Int>,
-        selectedTab: MutableLiveData<Int>
-    ) : MediatorLiveData<Pair<Int?, Int?>?>() {
-        private var selectedContactCount = 0
-        private var selectedTab = GroupCreationActivity.CONTACTS_SELECTION_TAB
-
-        init {
-            addSource(selectedContactCount, ::selectedContactCountChanged)
-            addSource(selectedTab, ::selectedTabChanged)
-        }
-
-        private fun selectedContactCountChanged(selectedContactCount: Int?) {
-            this.selectedContactCount = selectedContactCount ?: 0
-            postValue(Pair(selectedTab, this.selectedContactCount))
-        }
-
-        private fun selectedTabChanged(selectedTab: Int?) {
-            this.selectedTab = selectedTab ?: GroupCreationActivity.CONTACTS_SELECTION_TAB
-            postValue(Pair(this.selectedTab, selectedContactCount))
-        }
+object GroupClone {
+    var preselectedGroupMembers: List<Contact> = emptyList()
+    var preselectedGroupAdminMembers: List<Contact> = emptyList()
+    fun clear() {
+        preselectedGroupMembers = emptyList()
+        preselectedGroupAdminMembers = emptyList()
     }
 }

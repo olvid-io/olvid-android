@@ -20,6 +20,7 @@
 package io.olvid.engine.engine;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.olvid.engine.Logger;
@@ -87,6 +88,9 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                     Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_OWNED_IDENTITY_KEY);
                     GroupV2.Identifier groupIdentifier = (GroupV2.Identifier) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_GROUP_IDENTIFIER_KEY);
                     Boolean updatedByMe = (Boolean) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_BY_ME_KEY);
+                    Identity updatedBy = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_BY_KEY);
+                    //noinspection unchecked
+                    List<Identity> groupLeavers = (List<Identity>) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_UPDATED_GROUP_LEAVERS_KEY);
                     if (ownedIdentity == null || groupIdentifier == null || updatedByMe == null) {
                         break;
                     }
@@ -100,6 +104,14 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_GROUP_KEY, obvGroupV2);
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_NEW_GROUP_KEY, false);
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_BY_ME_KEY, updatedByMe);
+                    engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_BY_KEY, updatedBy == null ? null : updatedBy.getBytes());
+                    if (groupLeavers != null) {
+                        byte[][] leavers = new byte[groupLeavers.size()][];
+                        for (int i = 0; i<groupLeavers.size(); i++) {
+                            leavers[i] = groupLeavers.get(i).getBytes();
+                        }
+                        engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_GROUP_LEAVERS_KEY, leavers);
+                    }
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_CREATED_ON_OTHER_DEVICE, false);
                     engine.postEngineNotification(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED, engineInfo);
                 } catch (Exception e) {

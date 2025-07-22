@@ -80,12 +80,13 @@ import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.MessageMetadata
 import io.olvid.messenger.databases.entity.MessageRecipientInfo
 import io.olvid.messenger.discussion.message.MessageDetailsActivity.RecipientInfosAdapter.ViewHolder
-import io.olvid.messenger.main.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.viewModels.MessageDetailsViewModel
@@ -431,7 +432,7 @@ class MessageDetailsActivity : LockableActivity() {
             }
             val messageRecipientInfo = messageRecipientInfos!![position]
             holder.recipientNameTextView.text =
-                AppSingleton.getContactCustomDisplayName(messageRecipientInfo.bytesContactIdentity)
+                ContactCacheSingleton.getContactCustomDisplayName(messageRecipientInfo.bytesContactIdentity)
             if (messageRecipientInfo.timestampRead != null) {
                 holder.recipientInfoTimestampTextView.text =
                     StringUtils.getPreciseAbsoluteDateString(
@@ -758,7 +759,7 @@ class MessageDetailsActivity : LockableActivity() {
                             holder.metadataDescriptionTextView.setText(R.string.label_metadata_kind_remote_deleted_by_you)
                         } else {
                             val contactName =
-                                AppSingleton.getContactCustomDisplayName(metadata.bytesRemoteIdentity)
+                                ContactCacheSingleton.getContactCustomDisplayName(metadata.bytesRemoteIdentity)
                             if (contactName == null) {
                                 holder.metadataDescriptionTextView.setText(R.string.label_metadata_kind_remote_deleted)
                             } else {

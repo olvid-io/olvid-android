@@ -87,6 +87,7 @@ import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -221,7 +222,7 @@ class TroubleshootingActivity : AppCompatActivity() {
                         startActivity(
                             Intent(
                                 Intent.ACTION_VIEW,
-                                Uri.parse("https://olvid.io/faq/")
+                                "https://olvid.io/faq/".toUri()
                             )
                         )
                     },
@@ -556,8 +557,8 @@ class TroubleshootingActivity : AppCompatActivity() {
                             }
                             val connectivityState by AppSingleton.getWebsocketConnectivityStateLiveData()
                                 .observeAsState()
-                            PingListener(connectivityState == 2) {
-                                ping = when (it) {
+                            PingListener(connectivityState == 2) { pingValue ->
+                                ping = when (pingValue) {
                                     -1L -> {
                                         getString(R.string.label_over_max_ping_delay, 5)
                                     }
@@ -567,7 +568,7 @@ class TroubleshootingActivity : AppCompatActivity() {
                                     }
 
                                     else -> {
-                                        getString(R.string.label_ping_delay, it)
+                                        getString(R.string.label_ping_delay, pingValue)
                                     }
                                 }
                             }

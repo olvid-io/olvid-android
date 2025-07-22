@@ -43,6 +43,7 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.databases.tasks.PromptToDeleteContactTask
@@ -124,7 +125,7 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                 }
 
                 KEYCLOAK -> if (contactOrKeycloakDetails.keycloakUserDetails != null
-                    && AppSingleton.getContactCacheInfo(contactOrKeycloakDetails.keycloakUserDetails.identity) == null) {
+                    && ContactCacheSingleton.getContactCacheInfo(contactOrKeycloakDetails.keycloakUserDetails.identity) == null) {
                     try {
                         val name = contactOrKeycloakDetails.getAnnotatedName()
                         val builder: Builder = SecureAlertDialogBuilder(

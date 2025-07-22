@@ -161,15 +161,15 @@ public class NotificationListenerGroups implements NotificationListener {
                 break;
             }
             case IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED: {
-                byte[] groupUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED_GROUP_UID_KEY);
+                byte[] groupOwnerAndUid = (byte[]) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED_GROUP_OWNER_AND_UID_KEY);
                 Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED_OWNED_IDENTITY_KEY);
                 Identity contactIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_MEMBER_ADDED_CONTACT_IDENTITY_KEY);
-                if (groupUid == null || ownedIdentity == null || contactIdentity == null) {
+                if (groupOwnerAndUid == null || ownedIdentity == null || contactIdentity == null) {
                     break;
                 }
 
                 HashMap<String, Object> engineInfo = new HashMap<>();
-                engineInfo.put(EngineNotifications.GROUP_MEMBER_ADDED_BYTES_GROUP_UID_KEY, groupUid);
+                engineInfo.put(EngineNotifications.GROUP_MEMBER_ADDED_BYTES_GROUP_UID_KEY, groupOwnerAndUid);
                 engineInfo.put(EngineNotifications.GROUP_MEMBER_ADDED_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
                 engineInfo.put(EngineNotifications.GROUP_MEMBER_ADDED_BYTES_CONTACT_IDENTITY_KEY, contactIdentity.getBytes());
 

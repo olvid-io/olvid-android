@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <plurals name="tip_expiring_device_message">
+        <item quantity="one">One of your devices will expire and get deactivated in **less than %1$d day**.\nYou may purchase an **Olvid+** subscription to keep it active.</item>
+        <item quantity="other">One of your devices will expire and get deactivated in **less than %1$d days**.\nYou may purchase an **Olvid+** subscription to keep it active.</item>
+    </plurals>
+    <plurals name="text_joined_the_group">
+        <item quantity="one">%1$s joined the group</item>
+        <item quantity="other">%1$s joined the group</item>
+    </plurals>
+    <plurals name="text_left_the_group">
+        <item quantity="one">%1$s left the group</item>
+        <item quantity="other">%1$s left the group</item>
+    </plurals>
+    <plurals name="label_poll_answers">
+        <item quantity="zero">No answer</item>
+        <item quantity="one">%1$d answer</item>
+        <item quantity="other">%1$d answers</item>
+    </plurals>
+    <plurals name="label_remove_members">
+        <item quantity="one">Remove %1$d member</item>
+        <item quantity="other">Remove %1$d members</item>
+    </plurals>
+    <plurals name="label_add_members">
+        <item quantity="one">Add %1$d member</item>
+        <item quantity="other">Add %1$d members</item>
+    </plurals>
     <plurals name="explanation_backup_v2_device_expiration_end">
         <item quantity="one">\" on this device, your previous device below will be deactivated:</item>
         <item quantity="other">\" on this device, your devices below will be deactivated:</item>

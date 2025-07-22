@@ -187,7 +187,7 @@ public class ObvGroupV2 {
         }
 
         public String getNullIfEmptyPhotoUrl() {
-            if ((photoUrl == null) || (photoUrl.length() == 0)) {
+            if ((photoUrl == null) || (photoUrl.isEmpty())) {
                 return null;
             } else {
                 return photoUrl;
@@ -195,7 +195,7 @@ public class ObvGroupV2 {
         }
 
         public String getNullIfEmptyPublishedPhotoUrl() {
-            if ((publishedPhotoUrl == null) || (publishedPhotoUrl.length() == 0)) {
+            if ((publishedPhotoUrl == null) || (publishedPhotoUrl.isEmpty())) {
                 return null;
             } else {
                 return publishedPhotoUrl;

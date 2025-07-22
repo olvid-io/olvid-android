@@ -62,9 +62,9 @@ class SelectDetailsPhotoViewModel : ViewModel() {
             this.rotation = 0
             var orientation = ExifInterface.ORIENTATION_NORMAL
             try {
-                val `is` = contentResolver.openInputStream(photoUri)
-                if (`is` != null) {
-                    val exifInterface = ExifInterface(`is`)
+                val ist = contentResolver.openInputStream(photoUri)
+                if (ist != null) {
+                    val exifInterface = ExifInterface(ist)
                     orientation = exifInterface.getAttributeInt(
                         ExifInterface.TAG_ORIENTATION,
                         ExifInterface.ORIENTATION_NORMAL

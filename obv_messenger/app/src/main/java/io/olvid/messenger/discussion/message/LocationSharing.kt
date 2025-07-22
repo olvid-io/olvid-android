@@ -79,12 +79,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
-import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.customClasses.LockableActivity.CLIPBOARD_SERVICE
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
@@ -196,7 +196,7 @@ fun LocationSharing(
                     messages.filter { it.messageType != Message.TYPE_OUTBOUND_MESSAGE }.forEach {
                         DropdownMenuItem(text = {
                             Text(
-                                text = AppSingleton.getContactCustomDisplayName(it.senderIdentifier)
+                                text = ContactCacheSingleton.getContactCustomDisplayName(it.senderIdentifier)
                                     ?: stringResource(
                                         id = R.string.text_unknown_sender
                                     ),

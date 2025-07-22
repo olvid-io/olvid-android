@@ -29,9 +29,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Icon
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -46,9 +46,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 
 
 @Composable
@@ -59,21 +59,25 @@ fun SoundWave(sample: SampleAndTicker, stop: () -> Unit) {
             .requiredHeight(36.dp)
     ) {
         Row(modifier = Modifier.padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(modifier = Modifier
-                    .requiredSize(24.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple(bounded = false, radius = 16.dp)
-                    ) { stop() },
-                    tint = colorResource(id = R.color.olvid_gradient_light),
-                    painter = painterResource(id = R.drawable.ic_stop),
-                    contentDescription = stringResource(
-                        id = R.string.button_label_cancel
-                    )
+            Icon(modifier = Modifier
+                .requiredSize(24.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(bounded = false, radius = 16.dp, color = colorResource(R.color.olvid_gradient_light))
+                ) { stop() },
+                tint = colorResource(id = R.color.olvid_gradient_light),
+                painter = painterResource(id = R.drawable.ic_stop),
+                contentDescription = stringResource(
+                    id = R.string.button_label_cancel
                 )
+            )
             Text(
                 modifier = Modifier.padding(4.dp),
-                text = AudioAttachmentServiceBinding.timeFromMs(sample.size * VoiceMessageRecorder.SAMPLE_INTERVAL)
+                text = AudioAttachmentServiceBinding.timeFromMs(sample.size * VoiceMessageRecorder.SAMPLE_INTERVAL),
+                maxLines = 1,
+                style = OlvidTypography.body1.copy(
+                    color = colorResource(R.color.almostBlack)
+                )
             )
 
             Canvas(
@@ -111,7 +115,5 @@ fun SoundWave(sample: SampleAndTicker, stop: () -> Unit) {
 @Preview(widthDp = 400)
 @Composable
 fun SoundWavePreview() {
-    AppCompatTheme {
-        SoundWave(SampleAndTicker(samples = mutableListOf(1f, .5f))) {}
-    }
+    SoundWave(SampleAndTicker(samples = mutableListOf(1f, .5f, 0f, .7f))) {}
 }

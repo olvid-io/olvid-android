@@ -50,16 +50,22 @@ public class JsonLocation {
     public int type;
     public long timestamp; // location timestamp
     // -- sharing message fields --
+    @Nullable
     public Long count; // null if not sharing
+    @Nullable
     public Integer quality; // one of QUALITY_PRECISE, QUALITY_BALANCED, or QUALITY_POWER_SAVE for sharing. Null for TYPE_SEND
 //    public Long sharingInterval; // null if not sharing (else in ms)
+@Nullable
     public Long sharingExpiration; // can be null if endless sharing (else in ms)
     // -- location --
     public double latitude;
     public double longitude;
     // -- optional metadata --
+    @Nullable
     public Double altitude; // meters (default value null)
+    @Nullable
     public Float precision; // meters (default value null)
+    @Nullable
     public String address; // (default value empty string or null)
 
     public JsonLocation() {

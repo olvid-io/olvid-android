@@ -1,213 +1,237 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <plurals name="explanation_backup_v2_device_expiration_end">
-        <item quantity="one">"Tällä laitteella aiempi laitteesi alla deaktivoidaan:"</item>
-        <item quantity="other">"Tällä laitteella laitteesi alla deaktivoidaan:"</item>
-    </plurals>
-    <plurals name="label_backups_found">
-        <item quantity="one">%1$d varmuuskopio löytyi</item>
-        <item quantity="other">%1$d varmuuskopiota löytyi</item>
-    </plurals>
-    <plurals name="label_profiles_found">
-        <item quantity="one">%1$d profiili löytyi</item>
-        <item quantity="other">%1$d profiilia löytyi</item>
-    </plurals>
-    <plurals name="label_backup_groups">
-        <item quantity="zero">Ei ryhmiä</item>
-        <item quantity="one">%1$d ryhmä</item>
-        <item quantity="other">%1$d ryhmää</item>
-    </plurals>
-    <plurals name="label_backup_contacts">
-        <item quantity="zero">Ei yhteyshenkilöitä</item>
-        <item quantity="one">%1$d yhteyshenkilö</item>
-        <item quantity="other">%1$d yhteyshenkilöä</item>
-    </plurals>
-    <plurals name="label_discussion_archive_done">
-        <item quantity="one">Keskustelu arkistoitu</item>
-        <item quantity="other">%1$d keskustelua arkistoitu</item>
-    </plurals>
-    <plurals name="label_discussion_unarchive_done">
-        <item quantity="one">Keskustelu poistettu arkistosta</item>
-        <item quantity="other">%1$d keskustelua poistettu arkistosta</item>
-    </plurals>
-    <plurals name="label_message_unbookmark_done">
-        <item quantity="one">Viesti poistettu kirjanmerkeistä</item>
-        <item quantity="other">%1$d viestiä poistettu kirjanmerkeistä</item>
-    </plurals>
-    <plurals name="dialog_title_delete_discussions">
-        <item quantity="one">Poistetaanko valittu keskustelu?</item>
-        <item quantity="other">Poistetaanko valitut keskustelut?</item>
-    </plurals>
-    <plurals name="dialog_title_delete_messages">
-        <item quantity="one">Poistetaanko valittu viesti?</item>
-        <item quantity="other">Poistetaanko valitut viestit?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions">
-        <item quantity="one">Haluatko todella poistaa valitun keskustelun ja kaikki sen sisältämät viestit?\nTätä toimintoa ei voi peruuttaa.</item>
-        <item quantity="other">Haluatko todella poistaa %1$d valittua keskustelua ja kaikki niiden sisältämät viestit?\nTätä toimintoa ei voi peruuttaa.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions_choice">
-        <item quantity="one">Miten haluat poistaa valitun keskustelun ja kaikki sen sisältämät viestit?\nTätä toimintoa ei voi peruuttaa.</item>
-        <item quantity="other">Miten haluat poistaa %1$d valittua keskustelua ja kaikki niiden sisältämät viestit?\nTätä toimintoa ei voi peruuttaa.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages">
-        <item quantity="one">Haluatko todella poistaa valitun viestin?\nTätä toimintoa ei voi peruuttaa.</item>
-        <item quantity="other">Haluatko todella poistaa %1$d valittua viestiä?\nTätä toimintoa ei voi peruuttaa.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages_choice">
-        <item quantity="one">Miten haluat poistaa valitun viestin?\nTätä toimintoa ei voi peruuttaa.</item>
-        <item quantity="other">Miten haluat poistaa %1$d valittua viestiä?\nTätä toimintoa ei voi peruuttaa.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_messages_everywhere">
-        <item quantity="one">Olet poistamassa viestin **pysyvästi** kaikilta tässä keskustelussa. Varmista, että tämä on todella mitä haluat tehdä.</item>
-        <item quantity="other">Olet poistamassa %1$d viestiä **pysyvästi** kaikilta tässä keskustelussa. Varmista, että tämä on todella mitä haluat tehdä.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_discussions_everywhere">
-        <item quantity="one">Olet poistamassa keskustelun ja sen sisältämät viestit **pysyvästi** kaikilta tässä keskustelussa. Varmista, että tämä on todella mitä haluat tehdä.</item>
-        <item quantity="other">Olet poistamassa %1$d keskustelua ja niiden sisältämät viestit **pysyvästi** näistä keskusteluista. Varmista, että tämä on todella mitä haluat tehdä.</item>
-    </plurals>
-    <plurals name="dialog_message_invite_all_group_members">
-        <item quantity="one">Olet kutsumassa jokaista ryhmän jäsentä, jolla on kanava (tällä hetkellä 1 jäsen), yksityiseen keskusteluun.\nJatkaako?</item>
-        <item quantity="other">Olet kutsumassa jokaista ryhmän jäsentä, jolla on kanava (tällä hetkellä %1$d jäsentä), yksityiseen keskusteluun.\nJatkaako?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_count">
-        <item quantity="one">1 yhteinen ryhmä</item>
-        <item quantity="other">%1$d yhteistä ryhmää</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_end">
-        <item quantity="one">. Sinun täytyy poistua tästä ryhmästä jatkaaksesi.</item>
-        <item quantity="other">. Sinun täytyy poistua näistä ryhmistä jatkaaksesi.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_with_pending_groups">
-        <item quantity="one">Olet poistamassa %1$s muista käyttäjistäsi.\n\nHuomaa, että %1$s on kutsuttu %2$d ryhmään, johon kuulut. Hän lisätään takaisin tähän luetteloon, jos hän liittyy siihen. Voit halutessasi poistua tästä ryhmästä välttääksesi tämän.\nPoistetaanko tämä käyttäjä todella?</item>
-        <item quantity="other">Olet poistamassa %1$s muista käyttäjistäsi.\n\nHuomaa, että %1$s on kutsuttu %2$d ryhmään, johon kuulut. Hän lisätään takaisin tähän luetteloon, jos hän liittyy johonkin niistä. Voit halutessasi poistua näistä ryhmistä välttääksesi tämän.\nPoistetaanko tämä käyttäjä todella?</item>
-    </plurals>
-    <plurals name="dialog_message_auto_join_pending_groups">
-        <item quantity="one">Tämän asetuksen muuttaminen hyväksyy automaattisesti yhden odottavan ryhmäkutsun.\nPaina OK vahvistaaksesi valintasi ja liittyäksesi tähän ryhmään.</item>
-        <item quantity="other">Tämän asetuksen muuttaminen hyväksyy automaattisesti %1$d odottavaa ryhmäkutsun.\nPaina OK vahvistaaksesi valintasi ja liittyäksesi näihin ryhmiin.</item>
-    </plurals>
-    <plurals name="dialog_message_save_selected_attachments">
-        <item quantity="one">Kun sinua pyydetään, valitse kansio, johon haluat tallentaa valitun liitteen.\nJoihinkin kansioihin pääsy voi olla rajoitettua.</item>
-        <item quantity="other">Kun sinua pyydetään, valitse kansio, johon haluat tallentaa %1$d valittua liitettä.\nJoihinkin kansioihin pääsy voi olla rajoitettua.</item>
-    </plurals>
-    <plurals name="action_mode_title_storage">
-        <item quantity="one">%1$d valittu</item>
-        <item quantity="other">%1$d valittua</item>
-    </plurals>
-    <plurals name="dialog_message_delete_attachments">
-        <item quantity="one">Haluatko todella poistaa valitun liitteen?</item>
-        <item quantity="other">Haluatko todella poistaa %1$d valittua liitettä?</item>
-    </plurals>
-    <plurals name="text_app_uptime_days">
-        <item quantity="one">%1$d\u00a0päivää,\u00a0%2$02dt\u00a0%3$02dm\u00a0%4$02ds</item>
-        <item quantity="other">%1$d\u00a0päivää,\u00a0%2$02dt\u00a0%3$02dm\u00a0%4$02ds</item>
-    </plurals>
-    <plurals name="text_message_possibly_missing">
-        <item quantity="one">%1$d puuttuva viesti…</item>
-        <item quantity="other">%1$d puuttuvaa viestiä…</item>
-    </plurals>
-    <plurals name="text_outgoing_group_call_with_contacts">
-        <item quantity="one">Ryhmäpuhelu %2$s:n ja yhden muun kanssa</item>
-        <item quantity="other">Ryhmäpuhelu %2$s:n ja %1$d muun kanssa</item>
-    </plurals>
-    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
-        <item quantity="one">Vastaamaton ryhmäpuhelu %2$s:n ja yhden muun kanssa</item>
-        <item quantity="other">Vastaamaton ryhmäpuhelu %2$s:n ja %1$d muun kanssa</item>
-    </plurals>
-    <plurals name="text_failed_outgoing_group_call_with_contacts">
-        <item quantity="one">Epäonnistunut ryhmäpuhelu %2$s:n ja yhden muun kanssa</item>
-        <item quantity="other">Epäonnistunut ryhmäpuhelu %2$s:n ja %1$d muun kanssa</item>
-    </plurals>
-    <plurals name="text_busy_outgoing_group_call_with_contacts">
-        <item quantity="one">Ryhmäpuhelu, kun %2$s ja yksi muu olivat varattuja</item>
-        <item quantity="other">Ryhmäpuhelu, kun %2$s ja %1$d muuta olivat varattuja</item>
-    </plurals>
-    <plurals name="text_rejected_outgoing_group_call_with_contacts">
-        <item quantity="one">Hylätty ryhmäpuhelu %2$s:n ja yhden muun kanssa</item>
-        <item quantity="other">Hylätty ryhmäpuhelu %2$s:n ja %1$d muun kanssa</item>
-    </plurals>
-    <plurals name="text_incoming_group_call_with_contacts">
-        <item quantity="one">Ryhmäpuhelu %2$s:ltä ja yhdeltä muulta</item>
-        <item quantity="other">Ryhmäpuhelu %2$s:ltä ja %1$d muulta</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion">
-        <item quantity="one">%1$d valittu</item>
-        <item quantity="other">%1$d valittua</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion_list">
-        <item quantity="one">%1$d valittu</item>
-        <item quantity="other">%1$d valittua</item>
-    </plurals>
-    <plurals name="notification_public_title_new_messages">
-        <item quantity="one">%1$d uusi viesti</item>
-        <item quantity="other">%1$d uutta viestiä</item>
-    </plurals>
-    <plurals name="dialog_message_invite_group_members">
-        <item quantity="one">%3$s kutsutaan liittymään ryhmään %2$s.</item>
-        <item quantity="other">Seuraavat %1$d kontaktia kutsutaan liittymään ryhmään %2$s: %3$s.</item>
-    </plurals>
-    <plurals name="dialog_message_remove_group_members">
-        <item quantity="one">%3$s poistetaan ryhmästä %2$s.</item>
-        <item quantity="other">Seuraavat %1$d ryhmän jäsentä poistetaan ryhmästä %2$s: %3$s.</item>
-    </plurals>
-    <plurals name="text_unread_message_count">
-        <item quantity="one">%1$d uutta viestiä</item>
-        <item quantity="other">%1$d uutta viestiä</item>
-    </plurals>
-    <plurals name="text_reply_attachment_count">
-        <item quantity="one">%1$d liite</item>
-        <item quantity="other">%1$d liitettä</item>
-    </plurals>
-    <plurals name="text_and_x_other">
-        <item quantity="one">Ja %1$d muu</item>
-        <item quantity="other">Ja %1$d muuta</item>
-    </plurals>
-    <plurals name="text_contact_names_last_separator_x_other">
-        <item quantity="one"> &amp; %1$d muu</item>
-        <item quantity="other"> &amp; %1$d muuta</item>
-    </plurals>
-    <plurals name="dialog_message_confirm_retention_policy">
-        <item quantity="one">Tämän säilytyskäytännön soveltaminen poistaisi yhden viestin.\nOletko varma, että haluat jatkaa?</item>
-        <item quantity="other">Tämän säilytyskäytännön soveltaminen poistaisi %1$d viestiä.\nOletko varma, että haluat jatkaa?</item>
-    </plurals>
-    <plurals name="text_keycloak_missing_search_result">
-        <item quantity="one">… ja yksi lisätulos\nPuhdista hakusi</item>
-        <item quantity="other">… ja %1$d lisätulosta\nPuhdista hakusi</item>
-    </plurals>
-    <plurals name="duration_seconds">
-        <item quantity="one">1\u00a0sekunti</item>
-        <item quantity="other">%1$d\u00a0sekuntia</item>
-    </plurals>
-    <plurals name="duration_minutes">
-        <item quantity="one">1\u00a0minuutti</item>
-        <item quantity="other">%1$d\u00a0minuuttia</item>
-    </plurals>
-    <plurals name="duration_hours">
-        <item quantity="one">1\u00a0tunti</item>
-        <item quantity="other">%1$d\u00a0tuntia</item>
-    </plurals>
-    <plurals name="duration_days">
-        <item quantity="one">1\u00a0päivä</item>
-        <item quantity="other">%1$d\u00a0päivää</item>
-    </plurals>
-    <plurals name="duration_years">
-        <item quantity="one">1\u00a0vuosi</item>
-        <item quantity="other">%1$d\u00a0vuotta</item>
-    </plurals>
-    <plurals name="other_members_count">
-        <item quantity="one">1\u00a0jäsen</item>
-        <item quantity="other">%1$d\u00a0jäsentä</item>
-    </plurals>
-    <plurals name="dialog_message_delete_remote_deleted_messages">
-        <item quantity="one">Sinulla on tällä hetkellä 1 etänä poistettu viesti keskusteluissasi. Haluatko poistaa sen?</item>
-        <item quantity="other">Sinulla on tällä hetkellä %1$d etänä poistettua viestiä keskusteluissasi. Haluatko poistaa kaikki tällaiset merkinnät?</item>
-    </plurals>
-    <plurals name="label_xxx_contacts_sharing_their_position">
-        <item quantity="one">1 yhteyshenkilö jakaa sijaintinsa</item>
-        <item quantity="other">%1$d yhteyshenkilöä jakaa sijaintinsa</item>
-    </plurals>
-    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
-        <item quantity="one">Sinä ja 1 muu jakavat sijaintinsa</item>
-        <item quantity="other">Sinä ja %1$d muuta jakavat sijaintinsa</item>
-    </plurals>
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1156880361">Yksi laitteistasi vanhenee ja deaktivoidaan **alle %1$d päivän**.\nVoit ostaa **Olvid+**-tilauksen pitääksesi sen aktiivisena.</item>
+		<item quantity="other" state="needs_review" hash="-574658149">Yksi laitteistasi vanhenee ja deaktivoidaan **alle %1$d päivän** sisällä.\nVoit ostaa **Olvid+**-tilauksen pitääksesi sen aktiivisena.</item>
+	</plurals>
+	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-683497602">%1$s liittyi ryhmään</item>
+		<item quantity="other" state="needs_review" hash="51603026">%1$s liittyi ryhmään</item>
+	</plurals>
+	<plurals name="text_left_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="399208793">%1$s poistui ryhmästä</item>
+		<item quantity="other" state="needs_review" hash="1945116549">%1$s lähti ryhmästä</item>
+	</plurals>
+	<plurals name="label_poll_answers" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="1797058436">Ei vastausta</item>
+		<item quantity="one" state="needs_review" hash="-7151672">%1$d vastaus</item>
+		<item quantity="other" state="needs_review" hash="1394570044">%1$d vastaukset</item>
+	</plurals>
+	<plurals name="label_remove_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="312762041">Poista käyttäjä %1$d</item>
+		<item quantity="other" state="needs_review" hash="1816849257">Poista %1$d jäsentä</item>
+	</plurals>
+	<plurals name="label_add_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1537484553">Lisää %1$d jäsen</item>
+		<item quantity="other" state="needs_review" hash="1091232977">Lisää %1$d jäsentä</item>
+	</plurals>
+	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1131862199">» Tällä laitteella edellinen laitteesi deaktivoidaan:</item>
+		<item quantity="other" state="needs_review" hash="-2011302529">» Tällä laitteella alla olevat laitteesi deaktivoidaan:</item>
+	</plurals>
+	<plurals name="label_backups_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1088606803">%1$d -varmuuskopio löydetty</item>
+		<item quantity="other" state="needs_review" hash="-577868099">%1$d varmuuskopiota löytyi</item>
+	</plurals>
+	<plurals name="label_profiles_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1498976610">%1$d profiili löytyi</item>
+		<item quantity="other" state="needs_review" hash="749391135">%1$d profiilia löydetty</item>
+	</plurals>
+	<plurals name="label_backup_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="-174007554">Ei ryhmiä</item>
+		<item quantity="one" state="needs_review" hash="237276495">%1$d -ryhmä</item>
+		<item quantity="other" state="needs_review" hash="900821953">%1$d -ryhmät</item>
+	</plurals>
+	<plurals name="label_backup_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="246373927">Ei yhteystietoja</item>
+		<item quantity="one" state="needs_review" hash="-1671298344">%1$d yhteyshenkilö</item>
+		<item quantity="other" state="needs_review" hash="1022571360">%1$d kontaktit</item>
+	</plurals>
+	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1772966333">Keskustelu arkistoitu</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d arkistoidut keskustelut</item>
+	</plurals>
+	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1312483800">Keskustelu on poistettu arkistosta</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d arkistoidut keskustelut palautettu</item>
+	</plurals>
+	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2045500103">Viesti poistettu kirjanmerkeistä</item>
+		<item quantity="other" state="needs_review" hash="204728896">%1$d viestiä poistettu kirjanmerkeistä</item>
+	</plurals>
+	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-716893580">Haluatko poistaa valitun keskustelun?</item>
+		<item quantity="other" state="needs_review" hash="-15840526">Haluatko poistaa valitut keskustelut?</item>
+	</plurals>
+	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-862879351">Haluatko poistaa valitun viestin?</item>
+		<item quantity="other" state="needs_review" hash="-2020248805">Haluatko poistaa valitut viestit?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-931157230">Haluatko todella poistaa valitun keskustelun ja kaikki sen sisältämät viestit?\nToimintoa ei voi peruuttaa.</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">Haluatko todella poistaa valitut %1$d keskustelut ja kaikki niiden sisältämät viestit?\nTätä toimintoa ei voi peruuttaa.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2139168692">Miten haluat poistaa valitun keskustelun ja kaikki sen sisältämät viestit?\nTätä toimintoa ei voi peruuttaa.</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">Miten haluat poistaa valitsemasi %1$d keskustelut ja kaikki niiden sisältämät viestit?\nTätä toimintoa ei voi peruuttaa.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-947341357">Haluatko todella poistaa valitun viestin?\nToimintoa ei voi peruuttaa.</item>
+		<item quantity="other" state="needs_review" hash="-752621695">Haluatko todella poistaa valitut %1$d viestit?\nTätä toimintoa ei voi peruuttaa.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-474913536">Miten haluat poistaa valitun viestin?\nTätä toimintoa ei voi peruuttaa.</item>
+		<item quantity="other" state="needs_review" hash="-895867176">Kuinka haluat poistaa valitut %1$d viestit?\nTätä toimintoa ei voi peruuttaa.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-606769319">Olet aikeissa poistaa viestin **pysyvästi** **kaikilta** tästä keskustelusta. Varmista, että tämä on todella haluamasi toimenpide.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">Olet aikeissa poistaa %1$d viestiä **kaikilta** tästä keskustelusta **pysyvästi**. Varmista, että tämä on todella haluamasi toimenpide.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118446236">Olet aikeissa poistaa tämän keskustelun ja sen sisältämät viestit **pysyvästi** **kaikilta** keskustelun osallistujilta. Varmista, että tämä on todella haluamasi toimenpide.</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">Olet aikeissa poistaa **pysyvästi** %1$d keskustelua ja niiden sisältämät viestit **kaikilta** keskustelun osapuolilta. Varmista, että tämä on todella haluamasi toimenpide.</item>
+	</plurals>
+	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1306576418">Olet aikeissa kutsua jokaisen ryhmän jäsenen, jonka kanssa sinulla on kanava (tällä hetkellä 1 jäsen) yksityiseen keskusteluun.\nHalutako jatkaa?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Olet aikeissa kutsua jokaisen ryhmän jäsenen, jonka kanssa sinulla on kanava (tällä hetkellä %1$d jäsentä) yksityiseen keskusteluun.\nHaluatko jatkaa?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1699852572">1 yhteinen ryhmä</item>
+		<item quantity="other" state="needs_review" hash="-261780100">%1$d yhteiset ryhmät</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1000092559">Jatkaaksesi sinun täytyy poistua tästä ryhmästä.</item>
+		<item quantity="other" state="needs_review" hash="-1973752801">Jotta voit jatkaa, sinun on poistuttava näistä ryhmistä.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_with_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1290867480">Olet poistamassa %1$s käyttäjien listaltasi.\n\nHuomaa, että %1$s on kutsuttu %2$d -ryhmään, johon kuulut. Jos hän liittyy ryhmään uudelleen, hänet lisätään takaisin tälle listalle. Voit välttää tämän poistumalla ryhmästä.\n\nHaluatko todella poistaa tämän käyttäjän?</item>
+		<item quantity="other" state="needs_review" hash="1544662217">Olet poistamassa %1$s käyttäjäluettelostasi.\n\nHuomaa, että %1$s on kutsuttu %2$d ryhmään, johon kuulut. Jos hän liittyy johonkin niistä, hänet lisätään takaisin tähän luetteloon. Voit välttää tämän poistumalla näistä ryhmistä.\n\nHaluatko todella poistaa tämän käyttäjän?</item>
+	</plurals>
+	<plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-97256410">Tämän asetuksen muuttaminen hyväksyy automaattisesti yhden odottavan ryhmäkutsun.\nPaina OK vahvistaaksesi valintasi ja liittyäksesi tähän ryhmään.</item>
+		<item quantity="other" state="needs_review" hash="1009007696">Tämän asetuksen muuttaminen hyväksyy automaattisesti %1$d odottavat ryhmäkutsut.\nPaina OK vahvistaaksesi valintasi ja liittyäksesi näihin ryhmiin.</item>
+	</plurals>
+	<plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1768885312">Kun sinua pyydetään, valitse kansio, johon haluat tallentaa valitun liitteen.\nHuomaa, että pääsy joihinkin kansioihin voi olla rajoitettu.</item>
+		<item quantity="other" state="needs_review" hash="-1416662415">Kun sinua pyydetään, valitse kansio, johon haluat tallentaa valitut %1$d liitteet.\nHuomaa, että pääsy joihinkin kansioihin voi olla rajoitettu.</item>
+	</plurals>
+	<plurals name="action_mode_title_storage" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d valittu</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d valittu</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1117804388">Haluatko todella poistaa valitun liitteen?</item>
+		<item quantity="other" state="needs_review" hash="-1540151013">Haluatko todella poistaa valitut %1$d liitteet?</item>
+	</plurals>
+	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1400550170">%1$d päivää, %2$02dt %3$02dmin %4$02ds</item>
+		<item quantity="other" state="needs_review" hash="-1847999182">%1$d päivää, %2$02dt %3$02dmin %4$02ds</item>
+	</plurals>
+	<plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1040869757">%1$d viesti puuttuu…</item>
+		<item quantity="other" state="needs_review" hash="-970055416">%1$d puuttuvat viestit…</item>
+	</plurals>
+	<plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="800251665">Ryhmäpuhelu käyttäjän %2$s ja yhden muun kanssa</item>
+		<item quantity="other" state="needs_review" hash="-1654053808">Ryhmäpuhelu käyttäjien %2$s ja %1$d kanssa</item>
+	</plurals>
+	<plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1313506338">Vastaamaton ryhmäpuhelu käyttäjän %2$s ja yhden muun kanssa</item>
+		<item quantity="other" state="needs_review" hash="1027194941">Vastaamaton ryhmäpuhelu käyttäjien %2$s ja %1$d kanssa</item>
+	</plurals>
+	<plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="575911091">Ryhmäpuhelu %2$s:n ja yhden muun kanssa epäonnistui</item>
+		<item quantity="other" state="needs_review" hash="1768048524">Ryhmäpuhelu %2$s:n ja %1$d:n kanssa epäonnistui</item>
+	</plurals>
+	<plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1115369211">Ryhmäpuhelu, kun %2$s ja toinen henkilö olivat varattuja</item>
+		<item quantity="other" state="needs_review" hash="-332659300">Ryhmäpuhelu, kun %2$s ja %1$d muuta olivat varattuja</item>
+	</plurals>
+	<plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1401449639">Ryhmäpuheluun ei vastattu käyttäjältä %2$s ja yhdeltä muulta.</item>
+		<item quantity="other" state="needs_review" hash="-150166810">Ryhmäpuhelu hylätty käyttäjältä %2$s ja %1$d muulta käyttäjältä</item>
+	</plurals>
+	<plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-366344569">Ryhmäpuhelu käyttäjältä %2$s ja yhdeltä muulta</item>
+		<item quantity="other" state="needs_review" hash="1471743578">Ryhmäpuhelu käyttäjältä %2$s ja %1$d muuta</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="461822174">%1$d valittu</item>
+		<item quantity="other" state="needs_review" hash="1431585621">%1$d valittu</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion_list" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d valittu</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d valittu</item>
+	</plurals>
+	<plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d uusi viesti</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d uutta viestiä</item>
+	</plurals>
+	<plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1495957123">%3$s kutsutaan liittymään ryhmään %2$s.</item>
+		<item quantity="other" state="needs_review" hash="-250521442">Seuraavat %1$d yhteyshenkilöä kutsutaan liittymään ryhmään %2$s: %3$s.</item>
+	</plurals>
+	<plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1633684901">%3$s poistetaan ryhmästä %2$s.</item>
+		<item quantity="other" state="needs_review" hash="2062819899">Seuraavat %1$d jäsentä poistetaan ryhmästä %2$s: %3$s.</item>
+	</plurals>
+	<plurals name="text_unread_message_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d uusi viesti</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d uutta viestiä</item>
+	</plurals>
+	<plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118984743">%1$d liite</item>
+		<item quantity="other" state="needs_review" hash="1321323314">%1$d liitteet</item>
+	</plurals>
+	<plurals name="text_and_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-226443285">Ja %1$d toinen</item>
+		<item quantity="other" state="needs_review" hash="-2101659023">Ja %1$d muuta</item>
+	</plurals>
+	<plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-970333"> &amp; %1$d toinen</item>
+		<item quantity="other" state="needs_review" hash="1931856055"> &amp; %1$d muuta</item>
+	</plurals>
+	<plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-202072457">Valitsemasi viestien säilytyskäytäntö poistaisi yhden viestin.\nOletko varma, että haluat jatkaa?</item>
+		<item quantity="other" state="needs_review" hash="-576713525">Valitsemasi viestien säilytyskäytäntö poistaisi %1$d viestiä.\nOletko varma, että haluat jatkaa?</item>
+	</plurals>
+	<plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="812170692">… ja yksi lisähakutulos\nTarkenna hakua</item>
+		<item quantity="other" state="needs_review" hash="1969873890">… ja %1$d lisähakutulosta\nTarkenna hakua</item>
+	</plurals>
+	<plurals name="duration_seconds" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="251130693">1 sekunti</item>
+		<item quantity="other" state="needs_review" hash="624952161">%1$d sekuntia</item>
+	</plurals>
+	<plurals name="duration_minutes" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1053938976">1 minuutti</item>
+		<item quantity="other" state="needs_review" hash="-1051808">%1$d minuuttia</item>
+	</plurals>
+	<plurals name="duration_hours" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1004063951">1 tunti</item>
+		<item quantity="other" state="needs_review" hash="1322950935">%1$d tuntia</item>
+	</plurals>
+	<plurals name="duration_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1264358968">1 päivä</item>
+		<item quantity="other" state="needs_review" hash="-1170846734">%1$d päivää</item>
+	</plurals>
+	<plurals name="duration_years" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="388401904">1 vuosi</item>
+		<item quantity="other" state="needs_review" hash="298429520">%1$d vuotta</item>
+	</plurals>
+	<plurals name="other_members_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1379655782">1 jäsen</item>
+		<item quantity="other" state="needs_review" hash="965402074">%1$d jäsentä</item>
+	</plurals>
+	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1006155949">Sinulla on tällä hetkellä 1 poistettu viesti keskusteluissasi. Haluatko poistaa sen?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">Sinulla on tällä hetkellä %1$d etänä poistettua viestiä keskusteluissasi. Haluatko poistaa kaikki nämä merkinnät?</item>
+	</plurals>
+	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1367750681">1 yhteyshenkilö jakaa sijaintiaan</item>
+		<item quantity="other" state="needs_review" hash="1164266856">%1$d kontaktisi jakavat sijaintinsa</item>
+	</plurals>
+	<plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1602016664">Sinä ja 1 muu henkilö jakavat sijaintinne</item>
+		<item quantity="other" state="needs_review" hash="1789697147">Sinä ja %1$d muuta jaatte sijaintinne</item>
+	</plurals>
 </resources>

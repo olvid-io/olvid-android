@@ -26,9 +26,9 @@ import androidx.annotation.Nullable;
 import java.text.Collator;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
-import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -80,7 +80,7 @@ public class ContactDisplayNameFormatChangedTask implements Runnable {
 
             new UpdateAllGroupMembersNames().run();
 
-            AppSingleton.reloadCachedDisplayNamesAndHues();
+            ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues();
         }
     }
 

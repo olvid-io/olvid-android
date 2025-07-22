@@ -1,22 +1,3 @@
-/*
- *  Olvid for Android
- *  Copyright © 2019-2025 Olvid SAS
- *
- *  This file is part of Olvid for Android.
- *
- *  Olvid is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Affero General Public License, version 3,
- *  as published by the Free Software Foundation.
- *
- *  Olvid is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *
- *  You should have received a copy of the GNU Affero General Public License
- *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package io.olvid.messenger.customClasses;
 
 public class EmojiList {
@@ -78,6 +59,7 @@ public class EmojiList {
 		{"😪"},
 		{"🤤"},
 		{"😴"},
+		{"🫩"},
 		{"😷"},
 		{"🤒"},
 		{"🤕"},
@@ -574,6 +556,7 @@ public class EmojiList {
 		{"🧑‍🧒"},
 		{"🧑‍🧒‍🧒"},
 		{"👣"},
+		{"🫆"},
 		{"🐵"},
 		{"🐒"},
 		{"🦍"},
@@ -683,6 +666,11 @@ public class EmojiList {
 		{"🐚"},
 		{"🪸"},
 		{"🪼"},
+		{"🦀"},
+		{"🦞"},
+		{"🦐"},
+		{"🦑"},
+		{"🦪"},
 		{"🐌"},
 		{"🦋"},
 		{"🐛"},
@@ -727,6 +715,7 @@ public class EmojiList {
 		{"🪹"},
 		{"🪺"},
 		{"🍄"},
+		{"🪾"},
 		{"🍇"},
 		{"🍈"},
 		{"🍉"},
@@ -765,6 +754,7 @@ public class EmojiList {
 		{"🫚"},
 		{"🫛"},
 		{"🍄‍🟫"},
+		{"🫜"},
 		{"🍞"},
 		{"🥐"},
 		{"🥖"},
@@ -816,11 +806,6 @@ public class EmojiList {
 		{"🥟"},
 		{"🥠"},
 		{"🥡"},
-		{"🦀"},
-		{"🦞"},
-		{"🦐"},
-		{"🦑"},
-		{"🦪"},
 		{"🍦"},
 		{"🍧"},
 		{"🍨"},
@@ -1241,6 +1226,7 @@ public class EmojiList {
 		{"🪘"},
 		{"🪇"},
 		{"🪈"},
+		{"🪉"},
 		{"📱"},
 		{"📲"},
 		{"☎️"},
@@ -1379,6 +1365,7 @@ public class EmojiList {
 		{"🧰"},
 		{"🧲"},
 		{"🪜"},
+		{"🪏"},
 		{"⚗️"},
 		{"🧪"},
 		{"🧫"},
@@ -1564,6 +1551,7 @@ public class EmojiList {
 		{"©️"},
 		{"®️"},
 		{"™️"},
+		{"🫟"},
 		{"#️⃣"},
 		{"*️⃣"},
 		{"0️⃣"},
@@ -1709,6 +1697,7 @@ public class EmojiList {
 		{"🇨🇳"},
 		{"🇨🇴"},
 		{"🇨🇵"},
+		{"🇨🇶"},
 		{"🇨🇷"},
 		{"🇨🇺"},
 		{"🇨🇻"},
@@ -1938,21 +1927,21 @@ public class EmojiList {
 			case SMILEYS_EMOTION:
 				return 0;
 			case PEOPLE_BODY:
-				return 168;
+				return 169;
 			case ANIMALS_NATURE:
-				return 553;
+				return 555;
 			case FOOD_DRINK:
-				return 706;
+				return 714;
 			case TRAVEL_PLACES:
-				return 841;
+				return 845;
 			case ACTIVITIES:
-				return 1059;
+				return 1063;
 			case OBJECTS:
-				return 1144;
+				return 1148;
 			case SYMBOLS:
-				return 1406;
+				return 1412;
 			case FLAGS:
-				return 1629;
+				return 1636;
 		}
 		return -1;
 	}

@@ -56,6 +56,7 @@ import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.dao.MessageDao;
 import io.olvid.messenger.databases.entity.jsons.JsonDeleteDiscussion;
@@ -68,6 +69,7 @@ import io.olvid.messenger.databases.entity.jsons.JsonMessage;
 import io.olvid.messenger.databases.entity.jsons.JsonMessageReference;
 import io.olvid.messenger.databases.entity.jsons.JsonOneToOneMessageIdentifier;
 import io.olvid.messenger.databases.entity.jsons.JsonPayload;
+import io.olvid.messenger.databases.entity.jsons.JsonPoll;
 import io.olvid.messenger.databases.entity.jsons.JsonQuerySharedSettings;
 import io.olvid.messenger.databases.entity.jsons.JsonReaction;
 import io.olvid.messenger.databases.entity.jsons.JsonReturnReceipt;
@@ -129,7 +131,8 @@ public class Message {
     public static final String EXPIRATION_START_TIMESTAMP = "expiration_start_timestamp"; // set when the message is first marked as sent --> this is when expirations are started. Only set for message with an expiration
     public static final String LIMITED_VISIBILITY = "limited_visibility"; // true for read_once messages and messages with a visibility_duration
     public static final String LINK_PREVIEW_FYLE_ID = "link_preview_fyle_id"; // id of attached link preview
-    public static final String JSON_MENTIONS = "json_mentions";
+    public static final String JSON_MENTIONS = "json_mentions"; // this is also used to store the list of group members that were added/removed from a group
+    public static final String JSON_POLL = "json_poll";
 
 
 
@@ -301,12 +304,16 @@ public class Message {
     @Nullable
     public String jsonMentions;
 
+    @ColumnInfo(name = JSON_POLL)
+    @Nullable
+    public String jsonPoll;
+
     public boolean hasAttachments() {
         return totalAttachmentCount > 0;
     }
 
     // default constructor required by Room
-    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, @Nullable String jsonLocation, int locationType, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, @Nullable byte[] inboundMessageEngineIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, int edited, boolean forwarded, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount, long expirationStartTimestamp, boolean limitedVisibility, @Nullable Long linkPreviewFyleId, @Nullable String jsonMentions, boolean mentioned) {
+    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, @Nullable String jsonLocation, int locationType, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, @Nullable byte[] inboundMessageEngineIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, int edited, boolean forwarded, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount, long expirationStartTimestamp, boolean limitedVisibility, @Nullable Long linkPreviewFyleId, @Nullable String jsonMentions, boolean mentioned, @Nullable String jsonPoll) {
         this.senderSequenceNumber = senderSequenceNumber;
         this.contentBody = contentBody;
         this.jsonReply = jsonReply;
@@ -336,6 +343,7 @@ public class Message {
         this.linkPreviewFyleId = linkPreviewFyleId;
         this.jsonMentions = jsonMentions;
         this.mentioned = mentioned;
+        this.jsonPoll = jsonPoll;
     }
 
 
@@ -449,11 +457,75 @@ public class Message {
                 false,
                 null,
                 null,
-                false
+                false,
+                null
         );
     }
 
-    private static Message createInfoMessage(AppDatabase db, int messageType, long discussionId, byte[] senderIdentity, long timestamp, boolean useActualTimestampForSorting) {
+    // a zero-length senderIdentity indicates no one is responsible for this member entering/leaving the group
+    private static Message createOrMergeInfoMessage(AppDatabase db, int messageType, long discussionId, @NonNull byte[] senderIdentity, @NonNull byte[] mention, long timestamp) {
+        String jsonMention = null;
+
+        if (messageType == TYPE_GROUP_MEMBER_JOINED || messageType == TYPE_GROUP_MEMBER_LEFT) {
+            // Consolidate added or removed members messages
+            Message lastMessage = db.messageDao().getLastDiscussionMessage(discussionId);
+            try {
+                if (lastMessage != null
+                        && lastMessage.messageType == messageType
+                        && lastMessage.jsonMentions != null
+                        && Arrays.equals(senderIdentity, lastMessage.senderIdentifier)
+                ) {
+                    List<JsonUserMention> mentions = AppSingleton.getJsonObjectMapper().readValue(lastMessage.jsonMentions, new TypeReference<>() { });
+                    mentions.add(new JsonUserMention(mention, 0, 0));
+                    jsonMention = AppSingleton.getJsonObjectMapper().writeValueAsString(mentions);
+                    lastMessage.jsonMentions = jsonMention;
+                    lastMessage.timestamp = timestamp; // also update the message timestamp
+                    return lastMessage;
+                } else {
+                    jsonMention = AppSingleton.getJsonObjectMapper().writeValueAsString(new JsonUserMention[]{new JsonUserMention(mention, 0, 0)});
+                }
+            } catch (Exception ignored) { }
+        }
+
+        if (jsonMention == null) {
+            // if jsonMention cannot be build, revert to the traditional info message type
+            return createInfoMessage(db, messageType, discussionId, mention, timestamp, false);
+        }
+
+        return new Message(
+                0,
+                null,
+                null,
+                null,
+                null,
+                null,
+                LOCATION_TYPE_NONE,
+                timestamp,
+                timestamp,
+                STATUS_READ,
+                WIPE_STATUS_NONE,
+                messageType,
+                discussionId,
+                null,
+                senderIdentity,
+                new UUID(0, 0),
+                0, 0, 0,
+                EDITED_NONE,
+                false,
+                null,
+                null,
+                0,
+                0,
+                false,
+                null,
+                jsonMention,
+                false,
+                null
+        );
+    }
+
+
+    private static Message createInfoMessage(AppDatabase db, int messageType, long discussionId, @NonNull byte[] senderIdentity, long timestamp, boolean useActualTimestampForSorting) {
         Message message = new Message(
                 0,
                 null,
@@ -481,7 +553,8 @@ public class Message {
                 false,
                 null,
                 null,
-                false
+                false,
+                null
         );
         if (!useActualTimestampForSorting) {
             message.computeOutboundSortIndex(db);
@@ -489,55 +562,55 @@ public class Message {
         return message;
     }
 
-    public static Message createMemberJoinedGroupMessage(AppDatabase db, long discussionId, byte[] bytesMemberIdentity) {
-        return createInfoMessage(db, TYPE_GROUP_MEMBER_JOINED, discussionId, bytesMemberIdentity, System.currentTimeMillis(), false);
+    public static Message createMemberJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesMemberIdentity, @Nullable byte[] addedBy) {
+            return createOrMergeInfoMessage(db, TYPE_GROUP_MEMBER_JOINED, discussionId, (addedBy == null) ? new byte[0] : addedBy, bytesMemberIdentity, System.currentTimeMillis());
     }
 
-    public static Message createMemberLeftGroupMessage(AppDatabase db, long discussionId, byte[] bytesMemberIdentity) {
-        return createInfoMessage(db, TYPE_GROUP_MEMBER_LEFT, discussionId, bytesMemberIdentity, System.currentTimeMillis(), false);
+    public static Message createMemberLeftGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesMemberIdentity, @Nullable byte[] removedBy) {
+        return createOrMergeInfoMessage(db, TYPE_GROUP_MEMBER_LEFT, discussionId, (removedBy == null) ? new byte[0] : removedBy,  bytesMemberIdentity, System.currentTimeMillis());
     }
 
-    public static Message createLeftGroupMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+    public static Message createLeftGroupMessage(@NonNull AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
         return createInfoMessage(db, TYPE_LEFT_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createContactDeletedMessage(AppDatabase db, long discussionId, byte[] bytesContactIdentity) {
+    public static Message createContactDeletedMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesContactIdentity) {
         return createInfoMessage(db, TYPE_CONTACT_DELETED, discussionId, bytesContactIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createContactReAddedMessage(AppDatabase db, long discussionId, byte[] bytesContactIdentity) {
+    public static Message createContactReAddedMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesContactIdentity) {
         return createInfoMessage(db, TYPE_CONTACT_RE_ADDED, discussionId, bytesContactIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createReJoinedGroupMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+    public static Message createReJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
         return createInfoMessage(db, TYPE_RE_JOINED_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createJoinedGroupMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+    public static Message createJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
         return createInfoMessage(db, TYPE_JOINED_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createGainedGroupAdminMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+    public static Message createGainedGroupAdminMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
         return createInfoMessage(db, TYPE_GAINED_GROUP_ADMIN, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createLostGroupAdminMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+    public static Message createLostGroupAdminMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
         return createInfoMessage(db, TYPE_LOST_GROUP_ADMIN, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createGainedGroupSendMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+    public static Message createGainedGroupSendMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
         return createInfoMessage(db, TYPE_GAINED_GROUP_SEND_MESSAGE, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createLostGroupSendMessage(AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
+    public static Message createLostGroupSendMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
         return createInfoMessage(db, TYPE_LOST_GROUP_SEND_MESSAGE, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createScreenShotDetectedMessage(AppDatabase db, long discussionId, byte[] bytesIdentity, long serverTimestamp) {
+    public static Message createScreenShotDetectedMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesIdentity, long serverTimestamp) {
         return createInfoMessage(db, TYPE_SCREEN_SHOT_DETECTED, discussionId, bytesIdentity, serverTimestamp, false);
     }
 
-    public static Message createMediatorInvitationMessage(AppDatabase db, int type, long discussionId, byte[] bytesOwnedIdentity, String displayName, long serverTimestamp) {
+    public static Message createMediatorInvitationMessage(@NonNull AppDatabase db, int type, long discussionId, @NonNull byte[] bytesOwnedIdentity, @NonNull String displayName, long serverTimestamp) {
         Message message = createInfoMessage(db, type, discussionId, bytesOwnedIdentity, serverTimestamp, false);
         message.contentBody = displayName;
         return message;
@@ -545,7 +618,7 @@ public class Message {
 
     ///////
     // phoneCallStatus uses the call statuses from CallLogItem
-    public static Message createPhoneCallMessage(AppDatabase db, long discussionId, byte[] bytesContactIdentity, CallLogItem callLogItem) {
+    public static Message createPhoneCallMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesContactIdentity, @NonNull CallLogItem callLogItem) {
         boolean unread = (callLogItem.callType == CallLogItem.TYPE_INCOMING) && (callLogItem.callStatus == CallLogItem.STATUS_MISSED || callLogItem.callStatus == CallLogItem.STATUS_BUSY);
 
         Message message = createInfoMessage(db, TYPE_PHONE_CALL, discussionId, bytesContactIdentity, callLogItem.timestamp, true);
@@ -1415,6 +1488,7 @@ public class Message {
         return false;
     }
 
+    @Nullable
     public byte[] getAssociatedBytesOwnedIdentity() {
         return AppDatabase.getInstance().discussionDao().getBytesOwnedIdentityForDiscussionId(discussionId);
     }
@@ -1446,6 +1520,16 @@ public class Message {
                 return context.getString(R.string.text_message_location_sent);
             } else {
                 return context.getString(R.string.text_message_location_received);
+            }
+        } else if (jsonPoll != null) {
+            try {
+                //noinspection DataFlowIssue
+                return "📊 " + getPoll().question;
+            } catch (Exception ignored) {
+                if (contentBody == null) {
+                    return "";
+                }
+                return contentBody;
             }
         } else if (messageType == Message.TYPE_LEFT_GROUP) {
             return context.getString(R.string.text_group_left);
@@ -1490,7 +1574,7 @@ public class Message {
                 return context.getString(R.string.text_you_captured_sensitive_message);
             } else {
                 String displayName =
-                        AppSingleton.getContactCustomDisplayName(senderIdentifier);
+                        ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(senderIdentifier);
                 if (displayName != null) {
                     return context.getString(R.string.text_xxx_captured_sensitive_message, displayName);
                 } else {
@@ -1558,6 +1642,10 @@ public class Message {
         return jsonLocation != null;
     }
 
+    public boolean isPollMessage() {
+        return jsonPoll != null;
+    }
+
     public boolean isCurrentSharingOutboundLocationMessage() {
         return messageType == Message.TYPE_OUTBOUND_MESSAGE
                 && locationType == Message.LOCATION_TYPE_SHARE
@@ -1567,7 +1655,8 @@ public class Message {
     public boolean isForwardable() {
         return (messageType == Message.TYPE_INBOUND_MESSAGE || messageType == Message.TYPE_OUTBOUND_MESSAGE)
                 && wipeStatus == Message.WIPE_STATUS_NONE
-                && !limitedVisibility;
+                && !limitedVisibility
+                && !isPollMessage();
     }
 
     public boolean isBookmarkableAndDetailable() {
@@ -1579,14 +1668,18 @@ public class Message {
     // return true if message expired and update locationType field
     public boolean isSharingExpired() {
         if (this.jsonLocation != null && this.locationType == LOCATION_TYPE_SHARE) {
-            Long expiration = getJsonLocation().sharingExpiration;
-            if (expiration != null) {
-                return expiration < System.currentTimeMillis();
+            JsonLocation jsonLocation = getJsonLocation();
+            if (jsonLocation != null) {
+                Long expiration = jsonLocation.sharingExpiration;
+                if (expiration != null) {
+                    return expiration < System.currentTimeMillis();
+                }
             }
         }
         return false;
     }
 
+    @NonNull
     public byte[] getMessagePayloadAsBytes(int discussionType, byte[] bytesOwnedIdentity, byte[] bytesDiscussionIdentifier, byte[] returnReceiptNonce, byte[] returnReceiptKey, Long originalServerTimestamp) throws Exception {
         JsonMessage jsonMessage = getJsonMessage();
         switch (discussionType) {
@@ -1607,6 +1700,7 @@ public class Message {
         return AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
     }
 
+    @NonNull
     public byte[] getDiscussionSettingsUpdatePayloadAsBytes(int discussionType, byte[] bytesOwnedIdentity, byte[] bytesDiscussionIdentifier) throws Exception {
         JsonSharedSettings jsonSharedSettings = AppSingleton.getJsonObjectMapper().readValue(contentBody, JsonSharedSettings.class);
         switch (discussionType) {
@@ -1626,6 +1720,7 @@ public class Message {
         return AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
     }
 
+    @NonNull
     public static byte[] getDiscussionQuerySharedSettingsPayloadAsBytes(Discussion discussion, Integer knownSharedSettingsVersion, JsonExpiration knownSharedExpiration) throws Exception {
         JsonQuerySharedSettings jsonQuerySharedSettings = JsonQuerySharedSettings.of(discussion);
         jsonQuerySharedSettings.setKnownSharedSettingsVersion(knownSharedSettingsVersion);
@@ -1636,6 +1731,7 @@ public class Message {
         return AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload);
     }
 
+    @Nullable
     public JsonLocation getJsonLocation() {
         if (this.jsonLocation != null) {
             try {
@@ -1647,6 +1743,7 @@ public class Message {
         return null;
     }
 
+    @NonNull
     public JsonMessage getJsonMessage() {
         JsonMessage jsonMessage = new JsonMessage();
         jsonMessage.body = contentBody;
@@ -1693,6 +1790,7 @@ public class Message {
             }
         }
         jsonMessage.jsonUserMentions = getMentions();
+        jsonMessage.jsonPoll = getPoll();
         return jsonMessage;
     }
 
@@ -1749,8 +1847,17 @@ public class Message {
                 jsonMentions = null;
             }
         }
+        if (jsonMessage.jsonPoll != null) {
+            try {
+                jsonPoll = AppSingleton.getJsonObjectMapper().writeValueAsString(jsonMessage.jsonPoll);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                jsonPoll = null;
+            }
+        }
     }
 
+    @Nullable
     public JsonReturnReceipt getJsonReturnReceipt() {
         if (jsonReturnReceipt != null) {
             try {
@@ -1762,12 +1869,25 @@ public class Message {
         return null;
     }
 
+    @Nullable
     public List<JsonUserMention> getMentions() {
         if (jsonMentions != null) {
             try {
                 return AppSingleton.getJsonObjectMapper().readValue(jsonMentions, new TypeReference<>() { });
             } catch (Exception e) {
-                Logger.w("Error decoding a return receipt!\n" + jsonReturnReceipt);
+                Logger.w("Error decoding mentions!\n" + jsonMentions);
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public JsonPoll getPoll() {
+        if (jsonPoll != null) {
+            try {
+                return AppSingleton.getJsonObjectMapper().readValue(jsonPoll, JsonPoll.class);
+            } catch (Exception e) {
+                Logger.w("Error decoding a poll!\n" + jsonPoll);
             }
         }
         return null;
@@ -1890,9 +2010,11 @@ public class Message {
             reactions = null;
             imageResolutions = null;
             jsonMentions = null;
+            jsonPoll = null;
             limitedVisibility = false;
             db.messageDao().updateWipe(id, WIPE_STATUS_WIPED);
             db.reactionDao().deleteAllForMessage(id);
+            db.pollVoteDao().deleteAllForMessage(id);
             db.messageMetadataDao().insert(new MessageMetadata(id, MessageMetadata.KIND_WIPED, System.currentTimeMillis()));
             db.messageExpirationDao().deleteWipeExpiration(id);
             UnreadCountsSingleton.INSTANCE.removeLocationSharingMessage(discussionId, id);
@@ -1910,9 +2032,11 @@ public class Message {
         reactions = null;
         imageResolutions = null;
         jsonMentions = null;
+        jsonPoll = null;
         limitedVisibility = false;
         db.messageDao().updateWipe(id, WIPE_STATUS_REMOTE_DELETED);
         db.reactionDao().deleteAllForMessage(id);
+        db.pollVoteDao().deleteAllForMessage(id);
         if (messageType == TYPE_INBOUND_EPHEMERAL_MESSAGE) {
             messageType = TYPE_INBOUND_MESSAGE;
             db.messageDao().updateMessageType(id, messageType);
@@ -1923,7 +2047,7 @@ public class Message {
     }
 
 
-    private static final Message EMPTY_MESSAGE = new Message(0, null, null, null, null, null, 0, 0, 0, 0, 0, 0, 0, null, new byte[0], UUID.randomUUID(), 0, 0, 0, 0, false, null, null, 0, 0, false, null, null, false);
+    private static final Message EMPTY_MESSAGE = new Message(0, null, null, null, null, null, 0, 0, 0, 0, 0, 0, 0, null, new byte[0], UUID.randomUUID(), 0, 0, 0, 0, false, null, null, 0, 0, false, null, null, false, null);
     public static Message emptyMessage() {
         return EMPTY_MESSAGE;
     }

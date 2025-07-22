@@ -1,7 +1,6 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">연락처 세부 정보</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">사용자 세부 정보</string>
-	<string name="activity_title_create_group" state="needs_review" hash="323669209">그룹 만들기</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">그룹 세부 정보</string>
 	<string name="activity_title_my_details" state="needs_review" hash="-1089973499">내 프로필</string>
 	<string name="activity_title_settings" state="needs_review" hash="-686438097">Olvid 설정</string>
@@ -32,13 +31,12 @@
 	<string name="button_label_ignore" state="needs_review" hash="-806373746">무시하다</string>
 	<string name="button_label_reject" state="needs_review" hash="-2094664161">거부하다</string>
 	<string name="button_label_introduce" state="needs_review" hash="193852909">소개하다</string>
-	<string name="button_label_invite_members" state="needs_review" hash="-118308632">멤버\n초대하기</string>
+	<string name="button_label_invite_members" state="needs_review" hash="-1063364436">멤버 초대하기</string>
 	<string name="button_label_next" state="needs_review" hash="1158639077">다음</string>
 	<string name="button_label_ok" state="needs_review" hash="2428088">알겠습니다</string>
-	<string name="button_label_previous" state="needs_review" hash="-1639666563">이전</string>
 	<string name="button_label_proceed" state="needs_review" hash="-1224815476">계속 진행</string>
 	<string name="button_label_publish" state="needs_review" hash="-1355390088">게시</string>
-	<string name="button_label_remove_members" state="needs_review" hash="707573877">멤버\n삭제</string>
+	<string name="button_label_remove_members" state="needs_review" hash="1938722985">멤버 삭제</string>
 	<string name="button_label_remove_nickname" state="needs_review" hash="-1702159211">초기화</string>
 	<string name="button_label_update" state="needs_review" hash="648230638">업데이트</string>
 	<string name="button_label_validate" state="needs_review" hash="-521764973">확인</string>
@@ -90,7 +88,9 @@
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">현재 그룹이 없습니다</string>
 	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">"새 그룹"을 눌러 첫 번째 그룹을 만드세요.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">그룹 관리자가 그룹 카드를 업데이트했습니다. 이전 버전과 새 버전이 아래에 표시됩니다.\n\n"업데이트"를 눌러 그룹 정보를 업데이트하세요.</string>
-	<string name="explanation_new_group_v2_card" state="needs_review" hash="-224925220">그룹 관리자 중 한 명이 그룹 세부 정보를 업데이트했습니다. 새 버전은 위에 표시됩니다.\n\n이 새 버전을 사용하려면 "업데이트"를 누르세요.</string>
+	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">관리자가 그룹 이름을 다음으로 변경했습니다:</string>
+	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">관리자가 그룹 설명을 다음으로 변경했습니다:</string>
+	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">관리자가 그룹 사진을 변경했습니다.</string>
 	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">귀하의 연락처가 Olvid 카드를 업데이트했습니다. 이전 버전과 새 버전이 아래에 표시됩니다.\n\n"업데이트"를 눌러 연락처 정보를 새 버전으로 업데이트하세요.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">안전한 토론 채널이 현재 설정되고 있습니다. 이 과정이 완료될 때까지 해당 연락처와 토론을 시작할 수 없습니다. 본인과 연락처가 모두 온라인 상태라면 이 과정은 몇 초 정도 소요될 것입니다.\n\n문제가 발생했다고 생각되면 채널 설정을 다시 시작할 수 있습니다.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">연락처를 찾을 수 없습니다</string>
@@ -159,7 +159,8 @@
 	<string name="label_group_card_published" state="needs_review" hash="-58328192">그룹 카드 - 게시됨</string>
 	<string name="label_group_card_published_update" state="needs_review" hash="-1889428058">그룹 카드 - 새</string>
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">그룹 카드 - 미발행 초안</string>
-	<string name="label_group_members" state="needs_review" hash="-2121490032">다른 그룹 멤버</string>
+	<string name="label_group_members" state="needs_review" hash="1460220752">그룹 멤버</string>
+	<string name="label_other_group_members" state="needs_review" hash="-2121490032">다른 그룹 멤버</string>
 	<string name="label_groups" state="needs_review" hash="-990226727">그룹</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">초대 거절됨</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">그룹 세부 정보가 업데이트되었습니다.</string>
@@ -190,7 +191,6 @@
 	<string name="menu_action_recreate_channels" state="needs_review" hash="39178988">안전한 채널을 다시 만들기</string>
 	<string name="menu_action_rename" state="needs_review" hash="-1795678977">이름 변경</string>
 	<string name="menu_action_rename_contact" state="needs_review" hash="15923258">연락처 이름 변경</string>
-	<string name="menu_action_rename_group" state="needs_review" hash="1461324427">그룹 이름 변경</string>
 	<string name="menu_action_save" state="needs_review" hash="-830163709">저장</string>
 	<string name="menu_action_settings" state="needs_review" hash="816823498">설정</string>
 	<string name="menu_action_share" state="needs_review" hash="1907715749">공유</string>
@@ -232,15 +232,16 @@
 	<string name="pref_text_QR_correction_low" state="needs_review" hash="-2013029312">낮음</string>
 	<string name="pref_text_QR_correction_medium" state="needs_review" hash="-1685793941">보통</string>
 	<string name="pref_text_QR_correction_veryhigh" state="needs_review" hash="-1291811094">매우 높음</string>
-	<string name="subtitle_choose_group_name" state="needs_review" hash="-631282661">그룹 이름 선택</string>
-	<string name="subtitle_select_group_members" state="needs_review" hash="1572094257">그룹 멤버 선택</string>
 	<string name="text_group_left" state="needs_review" hash="-1226070602">그룹을 떠났습니다</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">그룹에 다시 참여하셨습니다.</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">그룹에 참여하셨습니다</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">%1$s가 관리하는 그룹</string>
 	<string name="text_joined_group" state="needs_review" hash="369878021">그룹에 참여했습니다: %1$s</string>
-	<string name="text_joined_the_group" state="needs_review" hash="-683497602">%1$s님이 그룹에 참여했습니다</string>
-	<string name="text_left_the_group" state="needs_review" hash="399208793">%1$s님이 그룹을 나갔습니다</string>
+	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s님이 %2$s를 그룹에 추가했습니다</string>
+	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">%2$s 님을 그룹에 추가했습니다.</string>
+	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s님이 그룹에서 %2$s님을 삭제했습니다</string>
+	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">%2$s 님을 그룹에서 삭제했습니다.</string>
+	<string name="text_unknown_member" state="needs_review" hash="-698194630">알 수 없음</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">아무도</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">초안:</string>
 	<string name="text_inbound_group_message_prefix" state="needs_review" hash="1359425562">%1$s：</string>
@@ -549,8 +550,8 @@
 	<string name="webrtc_stop_screen_sharing" state="needs_review" hash="585626699">공유 중지</string>
 	<string name="webrtc_speaking_while_muted" state="needs_review" hash="1865652540">마이크가 음소거되었습니다.</string>
 	<string name="webrtc_speaking_while_muted_action" state="needs_review" hash="-1839617181">음소거 해제</string>
-	<string name="content_description_reject_call_button" state="needs_review" hash="931620384">통화 거부 버튼</string>
-	<string name="content_description_accept_call_button" state="needs_review" hash="-1857614269">통화 수락 버튼</string>
+	<string name="content_description_reject_call_button" state="needs_review" hash="-332175555">통화 거절</string>
+	<string name="content_description_accept_call_button" state="needs_review" hash="-934081402">통화 수락</string>
 	<string name="dialog_title_webrtc_kick_participant" state="needs_review" hash="389469769">통화에서 연락처 제외하시겠습니까?</string>
 	<string name="webrtc_failed_kicked" state="needs_review" hash="-758835021">이 통화에서 제외되었습니다.</string>
 	<string name="dialog_title_start_conference_call" state="needs_review" hash="-1418585505">컨퍼런스 콜 시작</string>
@@ -571,7 +572,7 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">대화 탭</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">연락처</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">그룹 탭</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="1038824704">연락처 추가 버튼</string>
+	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">연락처 추가</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">알림 점</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">민감한 JPEG 메타데이터 제거</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">활성화되면 Olvid는 가져온 사진 파일에서 민감한 메타데이터를 제거하려고 시도합니다.\n여기에는 GPS 데이터, 카메라 제조사, 생성 날짜 등이 포함됩니다.</string>
@@ -777,7 +778,7 @@
 	<string name="pref_discussion_category_retention_policy_title" state="needs_review" hash="-345008488">메시지 보존 정책</string>
 	<string name="pref_discussion_category_retention_policy_summary" state="needs_review" hash="-1047094603">아래 설정은 이 대화에서 오래된 메시지를 자동으로 삭제할 수 있도록 합니다. 이 설정은 기본 보존 정책보다 우선합니다.</string>
 	<string name="pref_text_app_default_string" state="needs_review" hash="-1921282000">기본 설정을 사용하세요 (%1$s)</string>
-	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1987562758">음성 메시지 녹음 버튼</string>
+	<string name="content_description_attach_voice_message_button" state="needs_review" hash="1349151852">음성 메시지 녹음</string>
 	<string name="dialog_title_voice_message_explanation" state="needs_review" hash="943269997">Olvid 음성 메시지</string>
 	<string name="dialog_message_voice_message_explanation" state="needs_review" hash="-1860729852">음성 메시지를 녹음하기 전에 Olvid에게 오디오 녹음 권한을 부여하십시오.</string>
 	<string name="dialog_message_voice_message_explanation_blocked" state="needs_review" hash="-1293891432">음성 메시지를 녹음하기 전에 Olvid는 오디오를 녹음할 권한이 필요합니다.\n\n이 권한이 Olvid에 영구적으로 거부된 것으로 보입니다. 이 권한을 수동으로 부여하려면 앱 설정을 열어야 합니다.</string>
@@ -1002,7 +1003,7 @@
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s는 상대방의 기기에 연결되면 연락처에 추가됩니다.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s 님이 연락처에 추가되었습니다 🙌!</string>
 	<string name="label_loading_contacts" state="needs_review" hash="-343348890">연락처 불러오는 중…</string>
-	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-916981123">브라우저 선택 버튼</string>
+	<string name="content_description_authentication_browser_choice" state="needs_review" hash="-934849519">브라우저 선택</string>
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">설치된 브라우저를 쿼리할 수 없습니다</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">인증에 사용할 브라우저를 선택하세요.</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">기본 브라우저</string>
@@ -1122,7 +1123,7 @@
 	<string name="dialog_title_unable_to_load_backup_configuration" state="needs_review" hash="-718937548">백업 구성 로드 실패</string>
 	<string name="dialog_message_unable_to_load_backup_configuration" state="needs_review" hash="1322112021">Olvid은 여러 차례 시도했지만 현재 백업 구성을 로드할 수 없었습니다. 이미 Olvid/기기를 완전히 재시작했는데도 이 오류 메시지가 계속 표시되면 새 백업 키를 생성하는 것이 좋습니다.</string>
 	<string name="pref_reload_backup_configuration_title" state="needs_review" hash="2000428891">백업 구성 다시 로드</string>
-	<string name="content_description_back_button" state="needs_review" hash="-1902681195">뒤로 버튼</string>
+	<string name="content_description_back_button" state="needs_review" hash="48196338">뒤로</string>
 	<string name="content_description_remove_message_reply_to" state="needs_review" hash="-794585802">답장 메시지 삭제</string>
 	<string name="content_description_remove_link_preview" state="needs_review" hash="-1085272528">링크 미리보기를 지우세요</string>
 	<string name="content_description_notification_muted_indicator" state="needs_review" hash="1618439334">이 프로필의 알림이 음소거되었음을 나타내는 표시</string>
@@ -1148,7 +1149,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">프로필을 삭제하면 이 프로필과 관련된 기기의 모든 정보가 삭제됩니다. 여기에는 연락처, 그룹, 그리고 이 프로필의 모든 대화(메시지 및 첨부 파일) 내용이 포함됩니다.\n\n<b>이것은 유일하게 보이는 프로필이며, 숨겨진 프로필이 있는 경우 동시에 삭제됩니다.</b>\n\n\"다음\"을 눌러 이 프로필을 삭제하는 방법을 선택하세요.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">
 		<b>모든 곳</b>에서 프로필 삭제</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1363713497">여기 \"삭제\"를 입력하여 진행하세요</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">여기서 \"%1$s\"을 입력하여 진행하세요</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">프로필을 <b>모든 곳</b>에서 삭제하는 경우:\n -\n로컬에서 삭제되고, <b>또한</b> 연락처의 기기에서도 삭제됩니다.\n -\n가입한 그룹에서 나가게 됩니다.\n -\n관리하는 그룹은 해산됩니다.\n\n프로필을 <b>모든 곳</b>에서 삭제하지 않으면 기기에서 로컬로만 삭제됩니다. 다른 기기에서 백업을 복원할 계획이 없다면 연락처는 여전히 메시지를 보내려고 할 수 있으며 메시지가 전달될 수 없다는 것을 깨닫지 못할 수 있습니다.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">현재 프로필이 비활성 상태인 것 같습니다. 아마 다른 기기로 전송되었을 것입니다. 다른 기기에서 이 프로필을 계속 사용하려는 경우 안전하게 삭제할 수 있습니다.\n\n이 프로필을 더 이상 사용하지 않으려면 먼저 이 기기에서 다시 활성화하고, 연락처와의 보안 채널이 다시 생성될 때까지 기다린 다음, "모든 곳에서 삭제" 옵션을 선택하여 이 프로필을 삭제해야 합니다.</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">현재 프로필이 여러 기기에서 활성화되어 있습니다.\n\n프로필을 <b>모든 곳</b>에서 삭제하는 경우:\n	- 모든 기기<b>와</b> 연락처의 기기에서 삭제됩니다.\n	- 가입한 그룹에서 나가게 됩니다.\n	- 관리하는 그룹은 해산됩니다.\n\n<b>모든 곳</b>에서 프로필을 삭제하지 않으면 로컬에서만 삭제되며 다른 기기에서 정상적으로 계속 사용할 수 있습니다.</string>
@@ -1202,7 +1203,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">위젯 구성…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">위젯 모양</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">위젯 탭 동작</string>
-	<string name="label_discussion" state="needs_review" hash="301166224">토론</string>
+	<string name="label_discuss" state="needs_review" hash="422951553">토론하기</string>
 	<string name="label_message" state="needs_review" hash="809999904">메시지</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">보낼 미리 정의된 메시지</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">보내기 전에 확인</string>
@@ -1242,6 +1243,7 @@
 	<string name="label_audio" state="needs_review" hash="-779820608">오디오</string>
 	<string name="label_other" state="needs_review" hash="-543765264">기타</string>
 	<string name="label_all" state="needs_review" hash="752498555">모두</string>
+	<string name="label_see_all" state="needs_review" hash="-1659641788">모두 보기</string>
 	<string name="menu_action_storage_management" state="needs_review" hash="2130982617">저장 공간 관리</string>
 	<string name="menu_action_troubleshooting" state="needs_review" hash="-798155217">문제 해결</string>
 	<string name="explanation_no_files" state="needs_review" hash="-1050005240">표시할 첨부 파일이 없습니다</string>
@@ -1346,11 +1348,10 @@
 	<string name="pref_discussion_pin_summary" state="needs_review" hash="1341220899">고정된 대화는 항상 대화 목록 맨 위에 유지됩니다.</string>
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">표시 크기</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">토론 시작</string>
-	<string name="label_read_only" state="needs_review" hash="-954957022">읽기 전용</string>
-	<string name="label_read_only_short" state="needs_review" hash="1635912872">읽기 전용</string>
+	<string name="label_read_only" state="needs_review" hash="1996439460">읽기 전용</string>
+	<string name="label_pending_read_only" state="needs_review" hash="649164855">읽기 전용 보류 중</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">관리자</string>
-	<string name="label_pending_admin" state="needs_review" hash="-2032202913">보류 중\n관리자</string>
-	<string name="label_not_admin" state="needs_review" hash="286893263">관리자가 아님</string>
+	<string name="label_pending_admin" state="needs_review" hash="-1074135173">보류 중인 관리자</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">이 사용자의 이름을 표시할 수 없습니다</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">이름 없는 그룹</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">대화 알림</string>
@@ -1365,10 +1366,9 @@
 	<string name="notification_channel_discussion_name" state="needs_review" hash="588648320">대화 %1$d</string>
 	<string name="notification_channel_discussion_group_name" state="needs_review" hash="491497248">대화</string>
 	<string name="notification_channel_discussion_group_description" state="needs_review" hash="-1448542719">특정 Olvid 토론에 대한 맞춤 알림.</string>
-	<string name="button_label_edit_group_members" state="needs_review" hash="-1379721010">이 그룹 수정하기</string>
+	<string name="button_label_edit_group_members" state="needs_review" hash="1855939143">멤버 수정</string>
 	<string name="button_label_add_members" state="needs_review" hash="-203515331">멤버 추가</string>
 	<string name="label_group_update_in_progress_title" state="needs_review" hash="-2019791170">그룹 동기화 진행 중</string>
-	<string name="label_group_update_in_progress_title_for_creation" state="needs_review" hash="388073211">그룹 생성이 진행 중입니다</string>
 	<string name="explanation_group_update_in_progress" state="needs_review" hash="360407479">그룹이 현재 동기화 중입니다. 업데이트가 완료되면 이 화면이 새로 고쳐집니다.</string>
 	<string name="toast_message_unable_to_update_group" state="needs_review" hash="-513468036">그룹 업데이트에 실패했습니다. 변경 사항이 손실되었습니다. 다시 시도하십시오.</string>
 	<string name="dialog_title_unable_to_leave_group" state="needs_review" hash="-297756627">그룹을 떠날 수 없습니다</string>
@@ -1487,7 +1487,7 @@
 	<string name="message_discussion_group_v2_updating" state="needs_review" hash="1490065684">그룹 멤버 동기화 중입니다.</string>
 	<string name="message_discussion_group_v2_creating" state="needs_review" hash="-1687771028">그룹이 생성 중입니다</string>
 	<string name="button_label_new_group" state="needs_review" hash="-455272498">새 그룹</string>
-	<string name="label_group_type" state="needs_review" hash="-1954959814">그룹 유형</string>
+	<string name="label_group_type" state="needs_review" hash="498463258">그룹 종류</string>
 	<string name="label_group_simple_title" state="needs_review" hash="1554045114">기본</string>
 	<string name="label_group_simple_subtitle" state="needs_review" hash="1993735728">모든 그룹 멤버는 새 멤버를 초대할 수 있습니다</string>
 	<string name="label_group_private_title" state="needs_review" hash="1364531701">제어된</string>
@@ -1496,7 +1496,6 @@
 	<string name="label_group_read_only_subtitle" state="needs_review" hash="-1941498988">관리자만 메시지를 게시할 수 있습니다</string>
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">고급</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Olvid 그룹의 진정한 힘을 발휘하세요!</string>
-	<string name="label_group_custom_settings" state="needs_review" hash="-1024799981">고급 설정</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">그룹 관리자</string>
 	<string name="text_you_became_admin" state="needs_review" hash="-806884370">이제 그룹 관리자가 되었습니다.</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">더 이상 그룹 관리자가 아닙니다</string>
@@ -1744,7 +1743,11 @@
 	<string name="troubleshooting_storage_valid_description" state="needs_review" hash="1144963725">기기에서 %1$s의 저장 공간을 사용할 수 있습니다.</string>
 	<string name="troubleshooting_storage_invalid_title" state="needs_review" hash="-854482374">기기 저장 공간이 거의 가득 찼습니다.</string>
 	<string name="troubleshooting_storage_invalid_description" state="needs_review" hash="-1018820796">기기에 %1$s의 저장 공간만 남아 있습니다.\n\n기기의 사용 가능한 저장 공간이 부족합니다. Olvid를 사용하여 파일을 보내거나 받을 때 예기치 않은 오류가 발생할 수 있습니다.\n\n아마도 지금이 기기의 공간을 확보할 적절한 시기일 것입니다.</string>
-	<string name="troubleshooting_header" state="needs_review" hash="138020490">**앱 버전**: %1$s (빌드 %2$d)\n**기기 모델**: %3$s\n**Android API**: %4$s\n**앱 실행 시간**: %5$s</string>
+	<string name="troubleshooting_header_app_version" state="needs_review" hash="2096978646">**앱 버전**: %1$s (빌드 %2$d)</string>
+	<string name="troubleshooting_header_device_model" state="needs_review" hash="911858141">**기기 모델**: %1$s</string>
+	<string name="troubleshooting_header_android_api" state="needs_review" hash="-1735136766">**Android API**: %1$s</string>
+	<string name="troubleshooting_header_app_running_time" state="needs_review" hash="1952701839">**앱 실행 시간**: %1$s</string>
+	<string name="troubleshooting_header_app_install_date" state="needs_review" hash="1411458773">**앱 설치일**: %1$s</string>
 	<string name="troubleshooting_faq_description" state="needs_review" hash="1969820989">Olvid에 대한 도움이 필요하신가요? FAQ를 참조하십시오.</string>
 	<string name="troubleshooting_faq_link" state="needs_review" hash="-353352916">https://olvid.io/faq</string>
 	<string name="troubleshooting_request_permission" state="needs_review" hash="-463634281">권한 요청</string>
@@ -1767,7 +1770,7 @@
 	<string name="dialog_title_invite_contact" state="needs_review" hash="1121224764">개인 토론 초대</string>
 	<string name="dialog_message_invite_contact" state="needs_review" hash="883261663">%1$s 님을 개인 토론에 초대하시겠습니까?</string>
 	<string name="explanation_empty_other_contact_list" state="needs_review" hash="-121261312">지금은 아무도 없습니다</string>
-	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="-510803038">아직 연락처가 아닌 그룹 멤버는 여기에 표시됩니다.</string>
+	<string name="explanation_empty_other_contact_list_sub" state="needs_review" hash="1669386057">아직 연락처에 없는 그룹 멤버는 여기에 표시됩니다.</string>
 	<string name="explanation_empty_directory" state="needs_review" hash="298073547">빈 디렉터리</string>
 	<string name="menu_action_invite_all_members" state="needs_review" hash="-1044752673">그룹의 모든 멤버 초대하기</string>
 	<string name="dialog_title_invite_all_group_members" state="needs_review" hash="2130589049">그룹의 모든 멤버를 초대하시겠습니까?</string>
@@ -1833,7 +1836,6 @@
 	<string name="global_search_result_links" state="needs_review" hash="-579291596">링크</string>
 	<string name="button_label_send_read_receipts" state="needs_review" hash="-1730457934">내 연락처에 알림</string>
 	<string name="button_label_do_not_send" state="needs_review" hash="-1938459086">그들에게 알리지 마세요</string>
-	<string name="button_label_ask_later" state="needs_review" hash="-1104721203">나중에 물어보세요</string>
 	<string name="dialog_message_prompt_user_for_read_receipts" state="needs_review" hash="-1157866927">연락처에 메시지를 읽었는지 알리시겠습니까?</string>
 	<string name="dialog_title_prompt_user_for_read_receipts" state="needs_review" hash="-2045842725">읽음 확인</string>
 	<string name="pref_app_icon_title" state="needs_review" hash="-1219448320">애플리케이션 아이콘</string>
@@ -1925,7 +1927,7 @@
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">내 Olvid 백업 관리하기</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">지금 백업 시작</string>
 	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/프로필-백업/</string>
-	<string name="content_description_close_button" state="needs_review" hash="-1770116030">닫기 버튼</string>
+	<string name="content_description_close_button" state="needs_review" hash="1454843231">닫기</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">온라인 백업</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">초기화</string>
 	<string name="explanation_reset_backups" state="needs_review" hash="-594480541">초기화하면 모든 백업이 삭제됩니다.</string>
@@ -1955,7 +1957,7 @@
 	<string name="enable_backups_title" state="needs_review" hash="-1103233135">프로필을 백업하세요</string>
 	<string name="enable_backups_message_with_legacy" state="needs_review" hash="-508019994">현재 레거시 Olvid 백업이 활성화되어 있으며, 곧 지원이 중단됩니다.\n기기를 분실했을 때 프로필과 연락처를 복구할 수 있도록 새로운 Olvid 백업 시스템으로 전환하십시오.</string>
 	<string name="enable_backups_message" state="needs_review" hash="1555907343">백업을 사용하면 기기를 분실하더라도 프로필과 연락처를 복원할 수 있습니다.</string>
-	<string name="content_description_contextual_actions" state="needs_review" hash="984380377">컨텍스트 작업 버튼</string>
+	<string name="content_description_contextual_actions" state="needs_review" hash="563463836">상황별 동작</string>
 	<string name="label_backup_from" state="needs_review" hash="-1486363430">%1$s에서</string>
 	<string name="label_backup_groups_and_contacts" state="needs_review" hash="1197923862">%1$s, %2$s</string>
 	<string name="label_this_device" state="needs_review" hash="273515292">이 장치</string>
@@ -2028,6 +2030,8 @@
 	<string name="tip_troubleshooting_message" state="needs_review" hash="-935493349">일부 매개변수가 장치에서 제대로 구성되지 않아 Olvid 사용 경험에 영향을 줄 수 있습니다.</string>
 	<string name="button_label_this_way" state="needs_review" hash="747183939">이쪽으로</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">코드가 복사되었습니다</string>
+	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">이 그룹에 추가할 대상을 선택하세요.</string>
+	<string name="label_group_administration" state="needs_review" hash="871355986">그룹 관리</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">통화 차단됨</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid는 %1$d명 이상의 사용자와의 통화를 허용하지 않습니다.</string>
 	<string name="pref_emoji_animation_loop" state="needs_review" hash="2009074503">반복</string>
@@ -2039,4 +2043,51 @@
 	<string name="mail_subject_olvid_translation" state="needs_review" hash="1302087510">Android 앱 번역</string>
 	<string name="pref_app_language_category_title" state="needs_review" hash="1411591324">AI 기반 번역</string>
 	<string name="pref_app_language_category_summary" state="needs_review" hash="-1895843046">앱의 일부 번역은 AI를 사용하여 생성되었으며 부정확할 수 있습니다. 그런 경우 <b>lang@olvid.io</b>로 알려주시기 바랍니다.</string>
+	<string name="pdf_viewer_password_required" state="needs_review" hash="1826144635">이 PDF 파일을 열려면 비밀번호가 필요합니다.</string>
+	<string name="pdf_viewer_enter_password" state="needs_review" hash="872962494">비밀번호</string>
+	<string name="pdf_viewer_incorrect_password" state="needs_review" hash="582128542">비밀번호가 잘못되었습니다.</string>
+	<string name="label_poll_create" state="needs_review" hash="-1677246175">투표 만들기</string>
+	<string name="label_poll_question" state="needs_review" hash="-1615603188">질문</string>
+	<string name="hint_poll_question" state="needs_review" hash="1961289317">질문하기</string>
+	<string name="label_poll_answers" state="needs_review" hash="-382063458">답변</string>
+	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">추가</string>
+	<string name="label_poll_see_answers" state="needs_review" hash="710858547">답변 보기</string>
+	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">답변을 기다리고 있습니다</string>
+	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">알림</string>
+	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">\"%1$s\" 답변 추가하기</string>
+	<string name="label_poll_options" state="needs_review" hash="-13216192">옵션</string>
+	<string name="text_none_answer" state="needs_review" hash="560562575">위에 해당 없음</string>
+	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">다중 답변 허용</string>
+	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">하나 또는 여러 개의 답변을 선택하세요</string>
+	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">퀴즈 모드</string>
+	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">종료</string>
+	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">만료 날짜 추가</string>
+	<string name="label_poll_expiration" state="needs_review" hash="605126523">투표는 %1$s에 종료됩니다.</string>
+	<string name="label_poll_ended" state="needs_review" hash="415569292">투표 종료</string>
+	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">최소 두 개의 응답을 추가하세요</string>
+	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">이 응답은 이미 존재합니다</string>
+	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">CSV로 내보내기</string>
+	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">투표를 CSV로 내보내는 데 오류가 발생했습니다. 다시 시도해주세요.</string>
+	<string name="toast_message_success_exporting_poll_csv" state="needs_review" hash="16134555">설문조사 CSV 내보내기 성공</string>
+	<string name="label_poll_answers_sorted_by" state="needs_review" hash="102938809">정렬 기준</string>
+	<string name="label_poll_answers_sorted_by_poll_order" state="needs_review" hash="685632215">설문조사 순서</string>
+	<string name="label_poll_answers_sorted_by_answer_count" state="needs_review" hash="516869301">답변 수</string>
+	<string name="notification_public_title_new_poll_vote" state="needs_review" hash="-1901040080">투표에 대한 새 답변</string>
+	<string name="toast_message_remove_none_answer" state="needs_review" hash="277924655">먼저 \"%1$s\" 답변을 삭제하세요.</string>
+	<string name="text_poll" state="needs_review" hash="-153643506">투표</string>
+	<string name="poll_csv_headers" state="needs_review" hash="1869917931">투표 질문,투표자 이름,투표,날짜</string>
+	<string name="label_poll_no_votes_yet" state="needs_review" hash="-981251817">아직 답변이 없습니다</string>
+	<string name="tip_expiring_device_title" state="needs_review" hash="860805686">다가오는 기기 비활성화</string>
+	<string name="tip_expiring_device_action" state="needs_review" hash="-1447953199">내 기기 관리하기</string>
+	<string name="tip_offline_device_title" state="needs_review" hash="1064124480">오프라인 기기</string>
+	<string name="tip_offline_device_message" state="needs_review" hash="1810405781">**30일 이상** 오프라인 상태인 기기가 있습니다.\n더 이상 사용하지 않는 경우 동기화 문제를 방지하기 위해 **기기를 삭제**하는 것이 좋습니다.</string>
+	<string name="tip_offline_device_action" state="needs_review" hash="-1447953199">내 기기 관리하기</string>
+	<string name="tip_playstore_review_title" state="needs_review" hash="-1396782635">Olvid 사용이 만족스러우신가요?</string>
+	<string name="tip_playstore_email_message" state="needs_review" hash="-583394070">Olvid에 개선되었으면 하는 점이 있다면 **feedback@olvid.io**로 알려주세요.</string>
+	<string name="tip_playstore_email_subject" state="needs_review" hash="-1010646301">Android 앱 평점: %1$d/5</string>
+	<string name="tip_playstore_review_message" state="needs_review" hash="-407660073">Olvid를 즐기고 계신다면 Google Play에 **리뷰를 남겨주세요**!</string>
+	<string name="tip_playstore_review_action" state="needs_review" hash="-271353090">Google Play에서 평점 남겨주세요</string>
+	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">외부 뷰어에서 열기</string>
+	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Olvid 내부 뷰어에서 이 파일을 열 수 없습니다.</string>
+	<string name="button_label_invited" state="needs_review" hash="2094724552">초대받음</string>
 </resources>

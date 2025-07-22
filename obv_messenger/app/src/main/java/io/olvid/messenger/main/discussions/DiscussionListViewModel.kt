@@ -49,6 +49,7 @@ import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.customClasses.formatSingleLineMarkdown
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.dao.DiscussionDao.DiscussionAndLastMessage
 import io.olvid.messenger.databases.dao.DiscussionDao.SimpleDiscussionAndLastMessage
 import io.olvid.messenger.databases.entity.CallLogItem
@@ -298,6 +299,7 @@ class DiscussionListViewModel : ViewModel() {
             Handler(Looper.getMainLooper()).post { builder.create().show() }
         }
     }
+
     fun muteSelectedDiscussions(
         context: Context,
         discussionsAndLastMessage: List<DiscussionAndLastMessage>,
@@ -333,7 +335,8 @@ class DiscussionListViewModel : ViewModel() {
                                                     muteExceptMentioned
                                             })
                                     }
-                                    AppSingleton.getEngine().profileBackupNeeded(selected.discussion.bytesOwnedIdentity)
+                                    AppSingleton.getEngine()
+                                        .profileBackupNeeded(selected.discussion.bytesOwnedIdentity)
                                 }
                                 discussionsAndLastMessage.map { it.discussion }
                                     .propagateMuteSettings(
@@ -364,10 +367,11 @@ class DiscussionListViewModel : ViewModel() {
                                                     prefMuteNotifications = false
                                                 })
                                         }
-                                        AppSingleton.getEngine().profileBackupNeeded(selected.discussion.bytesOwnedIdentity)
+                                        AppSingleton.getEngine()
+                                            .profileBackupNeeded(selected.discussion.bytesOwnedIdentity)
                                     }
                                     discussionsAndLastMessage.map { it.discussion }
-                                    .propagateMuteSettings(false, null, false)
+                                        .propagateMuteSettings(false, null, false)
                                 }
                             }
                             .setNegativeButton(string.button_label_cancel, null)
@@ -378,6 +382,7 @@ class DiscussionListViewModel : ViewModel() {
         }
     }
 }
+
 fun Discussion.getAnnotatedTitle(context: Context): AnnotatedString {
     return buildAnnotatedString {
         if (title.isNullOrEmpty()) {
@@ -428,34 +433,120 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                 }
 
                 Message.TYPE_GROUP_MEMBER_JOINED -> {
-                    val displayName =
-                        AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                    val byYou = bytesOwnedIdentity.contentEquals(message.senderIdentifier)
+                    var displayName =
+                        ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                    val mention = message.jsonMentions?.let {
+                        message.mentions?.let { mentions ->
+                            when (mentions.size) {
+                                0 -> null
+                                1 -> ContactCacheSingleton.getContactCustomDisplayName(mentions.first().userIdentifier) ?: run {
+                                    displayName = null // reset the displayName to null too
+                                    null
+                                }
+                                else -> context.resources.getQuantityString(R.plurals.other_members_count, mentions.size, mentions.size)
+                            }
+                        } ?: run {
+                            displayName = null // reset the displayName to null too
+                            null
+                        }
+                    }
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(
-                            if (displayName != null) context.getString(
-                                string.text_joined_the_group,
-                                displayName
-                            ) else context.getString(string.text_unknown_member_joined_the_group)
+                            if (mention != null) {
+                                if (displayName != null) {
+                                    if (byYou) {
+                                        context.getString(
+                                            string.text_joined_the_group_by_you,
+                                            displayName,
+                                            mention
+                                        )
+                                    } else {
+                                        context.getString(
+                                            string.text_joined_the_group_by,
+                                            displayName,
+                                            mention
+                                        )
+                                    }
+                                } else {
+                                    context.resources.getQuantityString(
+                                        R.plurals.text_joined_the_group,
+                                        2,
+                                        mention
+                                    )
+                                }
+                            } else if (displayName != null) {
+                                context.resources.getQuantityString(
+                                    R.plurals.text_joined_the_group,
+                                    1,
+                                    displayName
+                                )
+                            } else {
+                                context.getString(string.text_unknown_member_joined_the_group)
+                            }
                         )
                     }
                 }
 
                 Message.TYPE_GROUP_MEMBER_LEFT -> {
-                    val displayName =
-                        AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                    val byYou = bytesOwnedIdentity.contentEquals(message.senderIdentifier)
+                    var displayName =
+                        ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                    val mention = message.jsonMentions?.let {
+                        message.mentions?.let { mentions ->
+                            when (mentions.size) {
+                                0 -> null
+                                1 -> ContactCacheSingleton.getContactCustomDisplayName(mentions.first().userIdentifier) ?: run {
+                                    displayName = null // reset the displayName to null too
+                                    null
+                                }
+                                else -> context.resources.getQuantityString(R.plurals.other_members_count, mentions.size, mentions.size)
+                            }
+                        } ?: run {
+                            displayName = null // reset the displayName to null too
+                            null
+                        }
+                    }
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(
-                            if (displayName != null) context.getString(
-                                string.text_left_the_group,
-                                displayName
-                            ) else context.getString(string.text_unknown_member_left_the_group)
+                            if (mention != null) {
+                                if (displayName != null) {
+                                    if (byYou) {
+                                        context.getString(
+                                            string.text_left_the_group_by_you,
+                                            displayName,
+                                            mention
+                                        )
+                                    } else {
+                                        context.getString(
+                                            string.text_left_the_group_by,
+                                            displayName,
+                                            mention
+                                        )
+                                    }
+                                } else {
+                                    context.resources.getQuantityString(
+                                        R.plurals.text_left_the_group,
+                                        2,
+                                        mention
+                                    )
+                                }
+                            } else if (displayName != null) {
+                                context.resources.getQuantityString(
+                                    R.plurals.text_left_the_group,
+                                    1,
+                                    displayName
+                                )
+                            } else {
+                                context.getString(string.text_unknown_member_left_the_group)
+                            }
                         )
                     }
                 }
 
                 Message.TYPE_DISCUSSION_REMOTELY_DELETED -> {
                     val displayName =
-                        AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                        ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(
                             if (displayName != null)
@@ -612,7 +703,7 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                                 context.getString(string.text_you_captured_sensitive_message)
                             } else {
                                 val displayName =
-                                    AppSingleton.getContactCustomDisplayName(
+                                    ContactCacheSingleton.getContactCustomDisplayName(
                                         message.senderIdentifier
                                     )
                                 if (displayName != null) {
@@ -670,9 +761,9 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                 else -> {
                     if (discussionType == Discussion.TYPE_GROUP || discussionType == Discussion.TYPE_GROUP_V2) {
                         (if (SettingsActivity.allowContactFirstName)
-                            AppSingleton.getContactFirstName(message.senderIdentifier)
+                            ContactCacheSingleton.getContactFirstName(message.senderIdentifier)
                         else
-                            AppSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                            ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
                                 )?.let {
                                 append(
                                     context.getString(

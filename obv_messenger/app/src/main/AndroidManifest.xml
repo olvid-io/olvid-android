@@ -427,10 +427,14 @@
             android:label="@string/activity_title_contact_details" />
         <activity
             android:name=".group.GroupDetailsActivity"
+            android:windowSoftInputMode="adjustResize"
             android:label="@string/activity_title_group_details" />
         <activity android:name=".group.GroupV2DetailsActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/AppTheme.NoActionBar"
             android:label="@string/activity_title_group_details" />
         <activity android:name=".group.GroupCreationActivity"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".gallery.GalleryActivity"
             android:configChanges="orientation|screenSize|screenLayout"
@@ -587,7 +591,12 @@
             android:stateNotNeeded="true" />
         <activity android:name=".activities.storage_manager.StorageManagerActivity"
             android:theme="@style/AppTheme.NoActionBar.ActionModeOverlay" />
-
+        <activity android:name=".discussion.poll.PollCreationActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".discussion.poll.PollResultActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"/>
 
         <service android:name=".notifications.NotificationActionService"
             android:exported="false"/>

@@ -22,7 +22,6 @@ package io.olvid.messenger.main.groups
 import io.olvid.messenger.databases.dao.Group2Dao.GroupOrGroup2
 
 interface GroupMenu {
-    fun rename(groupOrGroup2: GroupOrGroup2)
     fun clone(groupOrGroup2: GroupOrGroup2)
     fun leave(groupOrGroup2: GroupOrGroup2)
     fun disband(groupOrGroup2: GroupOrGroup2)

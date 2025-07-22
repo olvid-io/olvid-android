@@ -35,10 +35,12 @@ import org.json.JSONException;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -177,6 +179,13 @@ public class KeycloakManager {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static Set<BytesKey> getAuthenticationRequiredOwnedIdentities() {
+        if (INSTANCE != null) {
+            return INSTANCE.authenticationRequiredOwnedIdentities;
+        }
+        return Collections.emptySet();
     }
 
     public static void showAuthenticationRequiredNotificationForSelectedIdentityIfNeeded(byte[] bytesOwnedIdentity) {

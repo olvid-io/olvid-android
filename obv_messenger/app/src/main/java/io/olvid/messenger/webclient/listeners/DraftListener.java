@@ -31,9 +31,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import io.olvid.engine.Logger;
-import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.webclient.WebClientManager;
 import io.olvid.messenger.webclient.protobuf.ColissimoOuterClass;
@@ -135,18 +135,18 @@ public class DraftListener {
                     messageBuilder.setImageCount(message.imageCount);
                 }
                 messageBuilder.setSenderIdentifier(ByteString.copyFrom(message.senderIdentifier));
-                String contactName = AppSingleton.getContactCustomDisplayName(message.senderIdentifier);
+                String contactName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(message.senderIdentifier);
                 if (contactName == null) {
                     contactName = context.getString(R.string.text_deleted_contact);
                 }
                 messageBuilder.setSenderName(contactName);
-                if(message.getJsonMessage() != null && message.getJsonMessage().getJsonReply() != null && !message.isContentHidden()) {
+                if(message.getJsonMessage().getJsonReply() != null && !message.isContentHidden()) {
                     Message replyMessage = AppDatabase.getInstance().messageDao().getBySenderSequenceNumber(message.getJsonMessage().getJsonReply().getSenderSequenceNumber(), message.getJsonMessage().getJsonReply().getSenderThreadIdentifier(), message.getJsonMessage().getJsonReply().getSenderIdentifier(), message.discussionId);
                     if (replyMessage != null) {
                         messageBuilder.setReplyMessageId(replyMessage.id);
                         messageBuilder.setReplyMessageAttachmentCount(replyMessage.totalAttachmentCount);
                         messageBuilder.setReplySenderIdentifier(ByteString.copyFrom(message.getJsonMessage().getJsonReply().getSenderIdentifier()));
-                        String replyContactName = AppSingleton.getContactCustomDisplayName(message.getJsonMessage().getJsonReply().getSenderIdentifier());
+                        String replyContactName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(message.getJsonMessage().getJsonReply().getSenderIdentifier());
                         if (replyContactName == null) {
                             messageBuilder.setReplyAuthor(context.getString(R.string.text_deleted_contact));
                             messageBuilder.setSenderIsSelf(false);

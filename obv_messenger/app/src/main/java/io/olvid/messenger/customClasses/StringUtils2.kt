@@ -19,21 +19,82 @@
 
 package io.olvid.messenger.customClasses
 
+import android.content.Context
 import android.icu.lang.UCharacter
 import android.os.Build
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.URLSpan
 import android.text.util.Linkify
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation.Url
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.util.PatternsCompat
 import androidx.emoji2.text.EmojiCompat
 import androidx.emoji2.text.EmojiSpan
 import io.olvid.messenger.customClasses.StringUtils.isEmojiCodepoint
+import io.olvid.engine.engine.types.JsonIdentityDetails
+import io.olvid.messenger.App
+import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils.unAccentPattern
 import java.text.Normalizer
 import java.util.BitSet
 import java.util.Locale
+
+fun String.linkify(context: Context): AnnotatedString {
+    val spannableString = SpannableString(this)
+    LinkifyCompat.addLinks(
+        spannableString,
+        PatternsCompat.WEB_URL,
+        "https://",
+        { s: CharSequence?, start: Int, _: Int ->
+            s?.let {
+                (start == 0) || (it[start - 1] != '@')
+            } ?: false
+        },
+        null
+    )
+    return buildAnnotatedString {
+        append(spannableString)
+        spannableString.getSpans(0, spannableString.length, URLSpan::class.java).forEach {
+            addLink(
+                url = Url(
+                    url = it.url,
+                    styles = TextLinkStyles(
+                        style =
+                            SpanStyle(
+                                color = Color(
+                                    ContextCompat.getColor(
+                                        context,
+                                        R.color.olvid_gradient_light
+                                    )
+                                ),
+                                textDecoration = TextDecoration.Underline
+                            )
+                    ),
+                    linkInteractionListener = { annotation ->
+                        (annotation as? Url)?.let {
+                            App.openLink(
+                                context,
+                                it.url.toUri()
+                            )
+                        }
+                    }
+                ),
+                start = spannableString.getSpanStart(it),
+                end = spannableString.getSpanEnd(it),
+            )
+        }
+    }
+}
 
 
 class StringUtils2 {
@@ -77,13 +138,24 @@ class StringUtils2 {
 
         fun normalize(source: CharSequence?): String {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                UCharacter.toLowerCase(unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFKD)).replaceAll(""))
+                UCharacter.toLowerCase(
+                    unAccentPattern.matcher(
+                        Normalizer.normalize(
+                            source,
+                            Normalizer.Form.NFKD
+                        )
+                    ).replaceAll("")
+                )
             } else {
-                unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFKD)).replaceAll("").lowercase(Locale.getDefault())
+                unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFKD))
+                    .replaceAll("").lowercase(Locale.getDefault())
             }
         }
 
-        fun computeHighlightRanges(input: String, unaccentedRegexes: List<Regex>): List<Pair<Int, Int>> {
+        fun computeHighlightRanges(
+            input: String,
+            unaccentedRegexes: List<Regex>
+        ): List<Pair<Int, Int>> {
             val normalizedInput: String = normalize(input)
             val positionMapping = PositionsMapping(input)
 
@@ -92,7 +164,10 @@ class StringUtils2 {
                 regex.findAll(normalizedInput).forEach {
                     highlighted.set(
                         positionMapping.getIndex(it.range.first, true),
-                        positionMapping.getIndex(it.range.last, false) + 1 // range.last is inclusive!
+                        positionMapping.getIndex(
+                            it.range.last,
+                            false
+                        ) + 1 // range.last is inclusive!
                     )
                 }
             }
@@ -132,6 +207,7 @@ fun SpannableString.linkify(): SpannableString {
         }
     }
 }
+
 fun List<String>.fullTextSearchEscape(): String {
     return this.joinToString(separator = " ", transform = {
         "$it*"
@@ -252,4 +328,12 @@ fun String.getShortEmojis(maxLength: Int): List<String> {
         }
     }
     return emptyList()
+}
+
+
+fun String.jsonIdentityDetails() : JsonIdentityDetails? {
+    return runCatching {
+        AppSingleton.getJsonObjectMapper()
+            .readValue(this, JsonIdentityDetails::class.java)
+    }.getOrNull()
 }

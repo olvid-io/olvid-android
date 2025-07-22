@@ -3,6 +3,7 @@
     <item name="attach_image" type="id"/>
     <item name="attach_file" type="id"/>
     <item name="attach_video" type="id"/>
+    <item name="attach_poll" type="id"/>
     <item name="attach_camera" type="id"/>
     <item name="attach_timer" type="id"/>
     <item name="attach_emoji" type="id"/>

@@ -71,14 +71,6 @@ import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.R.anim
-import io.olvid.messenger.R.color
-import io.olvid.messenger.R.dimen
-import io.olvid.messenger.R.drawable
-import io.olvid.messenger.R.id
-import io.olvid.messenger.R.layout
-import io.olvid.messenger.R.string
-import io.olvid.messenger.R.style
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.EmptyRecyclerView
 import io.olvid.messenger.customClasses.InitialView
@@ -107,7 +99,7 @@ import io.olvid.messenger.webrtc.WebrtcCallService
 class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotificationListener {
     private val groupDetailsViewModel: GroupDetailsViewModel by viewModels()
     private var mainConstraintLayout: ConstraintLayout? = null
-    private val groupInitialView: InitialView by lazy { findViewById(id.group_details_initial_view) }
+    private val groupInitialView: InitialView by lazy { findViewById(R.id.group_details_initial_view) }
     private var groupNameTextView: TextView? = null
     private var groupOwnerTextView: TextView? = null
     private var groupPersonalNoteTextView: TextView? = null
@@ -116,8 +108,8 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
     private var secondDetailsCardView: CardView? = null
     private var firstDetailsTextViews: LinearLayout? = null
     private var secondDetailsTextViews: LinearLayout? = null
-    private val firstDetailsInitialView: InitialView by lazy { findViewById(id.first_details_initial_view) }
-    private val secondDetailsInitialView: InitialView by lazy { findViewById(id.second_details_initial_view) }
+    private val firstDetailsInitialView: InitialView by lazy { findViewById(R.id.first_details_initial_view) }
+    private val secondDetailsInitialView: InitialView by lazy { findViewById(R.id.second_details_initial_view) }
     private var firstDetailsTitle: TextView? = null
     private var secondDetailsTitle: TextView? = null
     private var firstDetailsButtons: LinearLayout? = null
@@ -129,12 +121,12 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
     private val groupMembersHashMap = HashMap<BytesKey, Contact>()
     private var animationsSet = false
     private var groupIsOwned = false
-    private var showEditDetails = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        setContentView(layout.activity_group_details)
+        setContentView(R.layout.activity_group_details)
         findViewById<CoordinatorLayout>(R.id.group_details_coordinatorLayout)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
                 val insets =
@@ -156,7 +148,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
             )
             if (fullScreenImageFragment != null) {
                 supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(0, anim.fade_out)
+                    .setCustomAnimations(0, R.anim.fade_out)
                     .remove(fullScreenImageFragment)
                     .commit()
             } else {
@@ -168,40 +160,40 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
         }
         val actionBar = supportActionBar
         actionBar?.setDisplayHomeAsUpEnabled(true)
-        mainConstraintLayout = findViewById(id.group_details_main_constraint_layout)
-        val discussionButton = findViewById<FloatingActionButton>(id.group_discussion_button)
+        mainConstraintLayout = findViewById(R.id.group_details_main_constraint_layout)
+        val discussionButton = findViewById<FloatingActionButton>(R.id.group_discussion_button)
         discussionButton.setOnClickListener(this)
         groupInitialView.setOnClickListener(this)
-        groupNameTextView = findViewById(id.group_name_text_view)
-        groupOwnerTextView = findViewById(id.group_owner_text_view)
-        groupPersonalNoteTextView = findViewById(id.group_personal_note_text_view)
-        groupManagementButtons = findViewById(id.group_management_buttons)
-        val addMembersButton = findViewById<Button>(id.group_management_add_members_button)
+        groupNameTextView = findViewById(R.id.group_name_text_view)
+        groupOwnerTextView = findViewById(R.id.group_owner_text_view)
+        groupPersonalNoteTextView = findViewById(R.id.group_personal_note_text_view)
+        groupManagementButtons = findViewById(R.id.group_management_buttons)
+        val addMembersButton = findViewById<Button>(R.id.group_management_add_members_button)
         addMembersButton.setOnClickListener(this)
-        val removeMembersButton = findViewById<Button>(id.group_management_remove_members_button)
+        val removeMembersButton = findViewById<Button>(R.id.group_management_remove_members_button)
         removeMembersButton.setOnClickListener(this)
-        val cloneGroupButton = findViewById<Button>(id.clone_to_v2_button)
+        val cloneGroupButton = findViewById<Button>(R.id.clone_to_v2_button)
         cloneGroupButton.setOnClickListener(this)
 
         // detail cards
-        acceptUpdateCardView = findViewById(id.group_accept_update_cardview)
-        val updateButton = findViewById<Button>(id.button_update)
+        acceptUpdateCardView = findViewById(R.id.group_accept_update_cardview)
+        val updateButton = findViewById<Button>(R.id.button_update)
         updateButton.setOnClickListener(this)
-        firstDetailsTitle = findViewById(id.first_details_title)
-        firstDetailsTextViews = findViewById(id.first_details_textviews)
+        firstDetailsTitle = findViewById(R.id.first_details_title)
+        firstDetailsTextViews = findViewById(R.id.first_details_textviews)
         firstDetailsInitialView.setOnClickListener(this)
-        firstDetailsButtons = findViewById(id.first_details_buttons)
-        secondDetailsCardView = findViewById(id.second_details_cardview)
-        secondDetailsTitle = findViewById(id.second_details_title)
-        secondDetailsTextViews = findViewById(id.second_details_textviews)
+        firstDetailsButtons = findViewById(R.id.first_details_buttons)
+        secondDetailsCardView = findViewById(R.id.second_details_cardview)
+        secondDetailsTitle = findViewById(R.id.second_details_title)
+        secondDetailsTextViews = findViewById(R.id.second_details_textviews)
         secondDetailsInitialView.setOnClickListener(this)
-        val publishButton = findViewById<Button>(id.button_publish)
+        val publishButton = findViewById<Button>(R.id.button_publish)
         publishButton.setOnClickListener(this)
-        val discardButton = findViewById<Button>(id.button_discard)
+        val discardButton = findViewById<Button>(R.id.button_discard)
         discardButton.setOnClickListener(this)
-        val groupMembersEmptyView = findViewById<TextView>(id.group_members_empty_view)
+        val groupMembersEmptyView = findViewById<TextView>(R.id.group_members_empty_view)
         val groupMembersRecyclerView =
-            findViewById<EmptyRecyclerView>(id.group_members_recycler_view)
+            findViewById<EmptyRecyclerView>(R.id.group_members_recycler_view)
         val layoutManager = LinearLayoutManager(this)
         groupMembersRecyclerView.layoutManager = layoutManager
         groupMembersAdapter = GroupMembersAdapter()
@@ -209,16 +201,16 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
         groupMembersRecyclerView.adapter = groupMembersAdapter
         groupMembersRecyclerView.addItemDecoration(ItemDecorationSimpleDivider(this, 68, 12))
         val pendingGroupMembersEmptyView =
-            findViewById<TextView>(id.pending_group_members_empty_view)
+            findViewById<TextView>(R.id.pending_group_members_empty_view)
         val pendingGroupMembersRecyclerView =
-            findViewById<EmptyRecyclerView>(id.pending_group_members_recycler_view)
+            findViewById<EmptyRecyclerView>(R.id.pending_group_members_recycler_view)
         val pendingLayoutManager = LinearLayoutManager(this)
         pendingGroupMembersRecyclerView.layoutManager = pendingLayoutManager
         pendingGroupMembersAdapter = PendingGroupMembersAdapter()
         pendingGroupMembersRecyclerView.setEmptyView(pendingGroupMembersEmptyView)
         pendingGroupMembersRecyclerView.adapter = pendingGroupMembersAdapter
         pendingGroupMembersRecyclerView.addItemDecoration(ItemDecorationSimpleDivider(this, 68, 12))
-        primary700 = ContextCompat.getColor(this, color.primary700)
+        primary700 = ContextCompat.getColor(this, R.color.primary700)
         registrationNumber = null
         AppSingleton.getEngine().addNotificationListener(EngineNotifications.NEW_GROUP_PHOTO, this)
         AppSingleton.getEngine()
@@ -251,7 +243,6 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
         val bytesGroupOwnerAndUid = intent.getByteArrayExtra(
             BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA
         )
-        showEditDetails = intent.getBooleanExtra(EDIT_DETAILS_INTENT_EXTRA, false)
         if (bytesOwnedIdentity == null || bytesGroupOwnerAndUid == null) {
             finish()
             Logger.w("Missing owned identity or group id in intent.")
@@ -277,7 +268,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
             try {
                 AppSingleton.getEngine()
                     .queryGroupOwnerForLatestGroupMembers(bytesGroupOwnerAndUid, bytesOwnedIdentity)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // nothing to do, an exception is thrown when you are the owner of the group and this is normal
             }
         }
@@ -320,9 +311,9 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 acceptUpdateCardView!!.visibility = View.GONE
                 secondDetailsCardView!!.visibility = View.GONE
                 firstDetailsButtons!!.visibility = View.GONE
-                firstDetailsTitle!!.setText(string.label_group_card)
+                firstDetailsTitle!!.setText(R.string.label_group_card)
                 firstDetailsTitle!!.background =
-                    ContextCompat.getDrawable(this, drawable.background_identity_title)
+                    ContextCompat.getDrawable(this, R.drawable.background_identity_title)
                 firstDetailsTextViews!!.removeAllViews()
                 publishedDetails = jsons[0]
                 latestDetails = publishedDetails
@@ -368,10 +359,10 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 firstDetailsTextViews!!.removeAllViews()
                 secondDetailsTextViews!!.removeAllViews()
                 if (group.bytesGroupOwnerIdentity == null) {
-                    firstDetailsTitle!!.setText(string.label_group_card_unpublished_draft)
+                    firstDetailsTitle!!.setText(R.string.label_group_card_unpublished_draft)
                     firstDetailsTitle!!.background =
-                        ContextCompat.getDrawable(this, drawable.background_identity_title_new)
-                    secondDetailsTitle!!.setText(string.label_group_card_published)
+                        ContextCompat.getDrawable(this, R.drawable.background_identity_title_new)
+                    secondDetailsTitle!!.setText(R.string.label_group_card_published)
                     acceptUpdateCardView!!.visibility = View.GONE
                     firstDetailsButtons!!.visibility = View.VISIBLE
                     publishedDetails = jsons[0]
@@ -439,10 +430,10 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                         }
                     }
                 } else {
-                    firstDetailsTitle!!.setText(string.label_group_card_published_update)
+                    firstDetailsTitle!!.setText(R.string.label_group_card_published_update)
                     firstDetailsTitle!!.background =
-                        ContextCompat.getDrawable(this, drawable.background_identity_title_new)
-                    secondDetailsTitle!!.setText(string.label_group_card)
+                        ContextCompat.getDrawable(this, R.drawable.background_identity_title_new)
+                    secondDetailsTitle!!.setText(R.string.label_group_card)
                     acceptUpdateCardView!!.visibility = View.VISIBLE
                     firstDetailsButtons!!.visibility = View.GONE
                     val trustedDetails = jsons[1]
@@ -531,7 +522,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 0,
                 0,
                 0,
-                resources.getDimensionPixelSize(dimen.identity_details_margin)
+                resources.getDimensionPixelSize(R.dimen.identity_details_margin)
             )
             tv.layoutParams = params
             return tv
@@ -561,7 +552,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
             val groupOwner = groupMembersHashMap[key]
             if (groupOwner != null) {
                 groupOwnerTextView!!.text =
-                    getString(string.text_group_managed_by, groupOwner.getCustomDisplayName())
+                    getString(R.string.text_group_managed_by, groupOwner.getCustomDisplayName())
             }
         }
     }
@@ -669,7 +660,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 if (photoUrl != null) {
                     val fullScreenImageFragment = FullScreenImageFragment.newInstance(photoUrl)
                     supportFragmentManager.beginTransaction()
-                        .setCustomAnimations(anim.fade_in, 0)
+                        .setCustomAnimations(R.anim.fade_in, 0)
                         .replace(
                             R.id.overlay,
                             fullScreenImageFragment,
@@ -688,7 +679,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
             )
             if (fullScreenImageFragment != null) {
                 supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(0, anim.fade_out)
+                    .setCustomAnimations(0, R.anim.fade_out)
                     .remove(fullScreenImageFragment)
                     .commit()
             }
@@ -699,14 +690,14 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if (groupIsOwned) {
             menuInflater.inflate(R.menu.menu_group_details_owned, menu)
-            val deleteItem = menu.findItem(id.action_disband)
+            val deleteItem = menu.findItem(R.id.action_disband)
             if (deleteItem != null) {
                 val spannableString = SpannableString(deleteItem.title)
                 spannableString.setSpan(
                     ForegroundColorSpan(
                         ContextCompat.getColor(
                             this,
-                            color.red
+                            R.color.red
                         )
                     ), 0, spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
@@ -714,23 +705,19 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
             }
         } else {
             menuInflater.inflate(R.menu.menu_group_details_joined, menu)
-            val deleteItem = menu.findItem(id.action_leave_group)
+            val deleteItem = menu.findItem(R.id.action_leave_group)
             if (deleteItem != null) {
                 val spannableString = SpannableString(deleteItem.title)
                 spannableString.setSpan(
                     ForegroundColorSpan(
                         ContextCompat.getColor(
                             this,
-                            color.red
+                            R.color.red
                         )
                     ), 0, spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
                 deleteItem.title = spannableString
             }
-        }
-        if (showEditDetails) {
-            showEditDetails = false
-            menu.performIdentifierAction(id.action_rename, 0)
         }
         return true
     }
@@ -741,18 +728,18 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 onBackPressedDispatcher.onBackPressed()
                 return true
             }
-            id.action_call -> {
+            R.id.action_call -> {
                 if (groupDetailsViewModel.group == null) {
                     return true
                 }
                 val group = groupDetailsViewModel.group?.value ?: return true
                 val contactAndTimestamps = groupDetailsViewModel.groupMembers?.value
                 if (contactAndTimestamps != null) {
-                    val bytesContactIdentities: List<BytesKey>?
+                    val bytesContactIdentities: ArrayList<BytesKey>?
                     if (contactAndTimestamps.size > WebrtcCallService.MAX_GROUP_SIZE_TO_SELECT_ALL_BY_DEFAULT) {
                         bytesContactIdentities = null
                     } else {
-                        bytesContactIdentities = ArrayList<BytesKey>(contactAndTimestamps.size)
+                        bytesContactIdentities = ArrayList(contactAndTimestamps.size)
                         for (contactAndTimestamp in contactAndTimestamps) {
                             bytesContactIdentities.add(BytesKey(contactAndTimestamp.contact.bytesContactIdentity))
                         }
@@ -766,7 +753,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 }
                 return true
             }
-            id.action_rename -> {
+            R.id.action_rename -> {
                 if (groupDetailsViewModel.group == null) {
                     return true
                 }
@@ -778,8 +765,10 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                         group.bytesGroupOwnerAndUid,
                         latestDetails!!,
                         group.personalNote
-                    ) { val reGroup = AppDatabase.getInstance().groupDao()[group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid]
-                        runOnUiThread { displayGroupDetails(reGroup) } }
+                    ) {
+                        val reGroup = AppDatabase.getInstance().groupDao()[group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid]
+                        runOnUiThread { displayGroupDetails(reGroup) }
+                    }
                     dialogFragment.show(supportFragmentManager, "dialog")
                 } else {
                     val editNameAndPhotoDialogFragment =
@@ -788,21 +777,21 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 }
                 return true
             }
-            id.action_disband -> {
+            R.id.action_disband -> {
                 if (groupDetailsViewModel.group == null) {
                     return true
                 }
                 val group = groupDetailsViewModel.group?.value ?: return true
                 if (groupIsOwned) {
-                    val builder = SecureAlertDialogBuilder(this, style.CustomAlertDialog)
-                        .setTitle(string.dialog_title_disband_group)
+                    val builder = SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_disband_group)
                         .setMessage(
                             getString(
-                                string.dialog_message_disband_group,
+                                R.string.dialog_message_disband_group,
                                 group.getCustomName()
                             )
                         )
-                        .setPositiveButton(string.button_label_ok) { _, _ ->
+                        .setPositiveButton(R.string.button_label_ok) { _, _ ->
                             if ((groupDetailsViewModel.groupMembers?.value == null || groupDetailsViewModel.groupMembers?.value?.size == 0) &&
                                 (groupDetailsViewModel.pendingGroupMembers?.value == null || groupDetailsViewModel.pendingGroupMembers?.value?.size == 0)
                             ) {
@@ -812,7 +801,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                                         group.bytesOwnedIdentity,
                                         group.bytesGroupOwnerAndUid
                                     )
-                                    App.toast(string.toast_message_group_disbanded, Toast.LENGTH_SHORT)
+                                    App.toast(R.string.toast_message_group_disbanded, Toast.LENGTH_SHORT)
                                     onBackPressedDispatcher.onBackPressed()
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -821,18 +810,18 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                                 // group is not empty, second confirmation
                                 val confirmationBuilder = SecureAlertDialogBuilder(
                                     this@GroupDetailsActivity,
-                                    style.CustomAlertDialog
+                                    R.style.CustomAlertDialog
                                 )
-                                    .setTitle(string.dialog_title_disband_group)
+                                    .setTitle(R.string.dialog_title_disband_group)
                                     .setMessage(
                                         getString(
-                                            string.dialog_message_disband_non_empty_group_confirmation,
+                                            R.string.dialog_message_disband_non_empty_group_confirmation,
                                             group.getCustomName(),
                                             groupDetailsViewModel.groupMembers?.value?.size ?: 0,
                                             groupDetailsViewModel.pendingGroupMembers?.value?.size ?: 0
                                         )
                                     )
-                                    .setPositiveButton(string.button_label_ok) { _, _ ->
+                                    .setPositiveButton(R.string.button_label_ok) { _, _ ->
                                         // delete group
                                         try {
                                             AppSingleton.getEngine().disbandGroup(
@@ -840,7 +829,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                                                 group.bytesGroupOwnerAndUid
                                             )
                                             App.toast(
-                                                string.toast_message_group_disbanded,
+                                                R.string.toast_message_group_disbanded,
                                                 Toast.LENGTH_SHORT
                                             )
                                             onBackPressedDispatcher.onBackPressed()
@@ -848,41 +837,41 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                                             e.printStackTrace()
                                         }
                                     }
-                                    .setNegativeButton(string.button_label_cancel, null)
+                                    .setNegativeButton(R.string.button_label_cancel, null)
                                 confirmationBuilder.create().show()
                             }
                         }
-                        .setNegativeButton(string.button_label_cancel, null)
+                        .setNegativeButton(R.string.button_label_cancel, null)
                     builder.create().show()
                 }
                 return true
             }
-            id.action_leave_group -> {
+            R.id.action_leave_group -> {
                 if (groupDetailsViewModel.group == null) {
                     return true
                 }
                 val group = groupDetailsViewModel.group?.value ?: return true
                 // you can only leave groups you do not own
                 if (group.bytesGroupOwnerIdentity != null) {
-                    val builder = SecureAlertDialogBuilder(this, style.CustomAlertDialog)
-                        .setTitle(string.dialog_title_leave_group)
-                        .setMessage(getString(string.dialog_message_leave_group, group.getCustomName()))
-                        .setPositiveButton(string.button_label_ok) { _, _ ->
+                    val builder = SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_leave_group)
+                        .setMessage(getString(R.string.dialog_message_leave_group, group.getCustomName()))
+                        .setPositiveButton(R.string.button_label_ok) { _, _ ->
                             try {
                                 AppSingleton.getEngine()
                                     .leaveGroup(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid)
-                                App.toast(string.toast_message_leaving_group, Toast.LENGTH_SHORT)
+                                App.toast(R.string.toast_message_leaving_group, Toast.LENGTH_SHORT)
                                 onBackPressedDispatcher.onBackPressed()
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
                         }
-                        .setNegativeButton(string.button_label_cancel, null)
+                        .setNegativeButton(R.string.button_label_cancel, null)
                     builder.create().show()
                 }
                 return true
             }
-            id.action_clone_group -> {
+            R.id.action_clone_group -> {
                 val group = groupDetailsViewModel.group?.value ?: return true
                 App.runThread {
                     val clonabilityOutput = GroupCloningTasks.getClonability(group)
@@ -917,7 +906,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupMemberViewHolder {
-            val view = inflater.inflate(layout.item_view_group_member, parent, false)
+            val view = inflater.inflate(R.layout.item_view_group_member, parent, false)
             return GroupMemberViewHolder(view)
         }
 
@@ -936,7 +925,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 val contact = contacts!![position]
                 holder.groupMemberNameTextView.text = contact!!.contact.getCustomDisplayName()
                 holder.groupMemberJoinTimestampTextView.text = getString(
-                    string.text_joined_group,
+                    R.string.text_joined_group,
                     StringUtils.getNiceDateString(this@GroupDetailsActivity, contact.timestamp)
                 )
                 holder.groupMemberInitialView.setContact(contact.contact)
@@ -963,7 +952,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                     holder.shouldAnimateChannelImageView = true
                     holder.groupMemberEstablishingChannelGroup.visibility = View.VISIBLE
                     val animated =
-                        AnimatedVectorDrawableCompat.create(App.getContext(), drawable.dots)
+                        AnimatedVectorDrawableCompat.create(App.getContext(), R.drawable.dots)
                     if (animated != null) {
                         animated.registerAnimationCallback(object : AnimationCallback() {
                             override fun onAnimationEnd(drawable: Drawable) {
@@ -1002,19 +991,19 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
             init {
                 itemView.setOnClickListener(this)
                 shouldAnimateChannelImageView = false
-                groupMemberNameTextView = itemView.findViewById(id.group_member_name_text_view)
+                groupMemberNameTextView = itemView.findViewById(R.id.group_member_name_text_view)
                 groupMemberJoinTimestampTextView =
-                    itemView.findViewById(id.group_member_join_timestamp_text_view)
-                groupMemberInitialView = itemView.findViewById(id.group_member_initial_view)
+                    itemView.findViewById(R.id.group_member_join_timestamp_text_view)
+                groupMemberInitialView = itemView.findViewById(R.id.group_member_initial_view)
                 groupMemberOwnerCrownImageView =
-                    itemView.findViewById(id.group_member_owner_crown_image_view)
+                    itemView.findViewById(R.id.group_member_owner_crown_image_view)
                 groupMemberEstablishingChannelGroup =
-                    itemView.findViewById(id.group_member_establishing_channel_group)
+                    itemView.findViewById(R.id.group_member_establishing_channel_group)
                 groupMemberEstablishingChannelImageView =
-                    itemView.findViewById(id.group_member_establishing_channel_image_view)
-                newPublishedDetailsGroup = itemView.findViewById(id.new_published_details_group)
+                    itemView.findViewById(R.id.group_member_establishing_channel_image_view)
+                newPublishedDetailsGroup = itemView.findViewById(R.id.new_published_details_group)
                 newUnseenPublishedDetailsDot =
-                    itemView.findViewById(id.new_unseen_published_details_dot)
+                    itemView.findViewById(R.id.new_unseen_published_details_dot)
             }
 
             override fun onClick(view: View) {
@@ -1046,7 +1035,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
             parent: ViewGroup,
             viewType: Int
         ): PendingGroupMemberViewHolder {
-            val view = inflater.inflate(layout.item_view_pending_group_member, parent, false)
+            val view = inflater.inflate(R.layout.item_view_pending_group_member, parent, false)
             return PendingGroupMemberViewHolder(view)
         }
 
@@ -1086,10 +1075,10 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
             init {
                 itemView.setOnClickListener(this)
                 pendingGroupMemberNameTextView =
-                    itemView.findViewById(id.pending_group_member_name_text_view)
+                    itemView.findViewById(R.id.pending_group_member_name_text_view)
                 pendingGroupMemberInitialView =
-                    itemView.findViewById(id.pending_group_member_initial_view)
-                invitationDeclinedTextView = itemView.findViewById(id.invitation_declined_textview)
+                    itemView.findViewById(R.id.pending_group_member_initial_view)
+                invitationDeclinedTextView = itemView.findViewById(R.id.invitation_declined_textview)
             }
 
             override fun onClick(view: View) {
@@ -1098,28 +1087,28 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 }
                 val position = this.layoutPosition
                 val pendingGroupMemberAndContact = pendingGroupMembers!![position]
-                val builder = SecureAlertDialogBuilder(view.context, style.CustomAlertDialog)
-                    .setTitle(string.dialog_title_group_reinvite)
+                val builder = SecureAlertDialogBuilder(view.context, R.style.CustomAlertDialog)
+                    .setTitle(R.string.dialog_title_group_reinvite)
                     .setMessage(
                         getString(
-                            string.dialog_message_group_reinvite,
+                            R.string.dialog_message_group_reinvite,
                             pendingGroupMemberAndContact!!.pendingGroupMember.displayName,
                             groupDetailsViewModel.group?.value?.getCustomName()
                         )
                     )
-                    .setPositiveButton(string.button_label_ok) { _, _ ->
+                    .setPositiveButton(R.string.button_label_ok) { _, _ ->
                         try {
                             AppSingleton.getEngine().reinvitePendingToGroup(
                                 pendingGroupMemberAndContact.pendingGroupMember.bytesOwnedIdentity,
                                 pendingGroupMemberAndContact.pendingGroupMember.bytesGroupOwnerAndUid,
                                 pendingGroupMemberAndContact.pendingGroupMember.bytesIdentity
                             )
-                            App.toast(string.toast_message_invite_sent, Toast.LENGTH_SHORT)
+                            App.toast(R.string.toast_message_invite_sent, Toast.LENGTH_SHORT)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
                     }
-                    .setNegativeButton(string.button_label_cancel, null)
+                    .setNegativeButton(R.string.button_label_cancel, null)
                 builder.create().show()
             }
         }
@@ -1128,7 +1117,6 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
     companion object {
         const val BYTES_OWNED_IDENTITY_INTENT_EXTRA = "bytes_owned_identity"
         const val BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA = "group_id"
-        const val EDIT_DETAILS_INTENT_EXTRA = "edit_details"
         const val FULL_SCREEN_IMAGE_FRAGMENT_TAG = "full_screen_image"
     }
 }

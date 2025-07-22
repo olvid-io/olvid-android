@@ -141,6 +141,7 @@ import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.OwnedIdentity
@@ -1582,7 +1583,7 @@ fun CallParticipant(
         }
         if (largeLayout) {
             (callParticipant?.displayName
-                ?: AppSingleton.getContactCustomDisplayName(
+                ?: ContactCacheSingleton.getContactCustomDisplayName(
                     bytesOwnedIdentity ?: byteArrayOf()
                 ))?.let { name ->
                 Text(
@@ -1903,13 +1904,11 @@ private fun formatDuration(duration: Int): String {
 @Preview
 @Composable
 private fun CallScreenPreview() {
-    AppCompatTheme {
-        CallScreen(
-            webrtcCallService = WebrtcCallService(),
-            contactListViewModel = viewModel(),
-            addingParticipant = false,
-            onCallAction = {})
-    }
+    CallScreen(
+        webrtcCallService = null,
+        contactListViewModel = viewModel(),
+        addingParticipant = false,
+        onCallAction = {})
 }
 
 

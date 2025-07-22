@@ -96,7 +96,9 @@ import io.olvid.messenger.webrtc.WebrtcCallActivity;
 public class AndroidNotificationManager {
     private static final String DISCUSSION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "discussion_";
     private static final String MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "message_reaction_";
+    private static final String MESSAGE_POLL_VOTE_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "message_poll_vote_";
     private static final String DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "discussion_reaction_";
+    private static final String DISCUSSION_MESSAGE_POLL_VOTE_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX = "discussion_poll_vote_";
     private static final String KEY_MESSAGE_NOTIFICATION_CHANNEL_VERSION = "message_channel_version";
     private static final String KEY_DISCUSSION_NOTIFICATION_CHANNEL_VERSION_PREFIX = "discussion_channel_version_";
 
@@ -743,6 +745,7 @@ public class AndroidNotificationManager {
     public static void remoteDeleteMessageNotification(@NonNull Discussion discussion, long messageId) {
         executor.execute(() -> {
             clearMessageReactionsNotification(messageId);
+            clearMessagePollVoteNotification(messageId);
 
             JsonPojoDiscussionNotification discussionNotification = loadDiscussionNotification(discussion.id);
             if (discussionNotification == null) {
@@ -771,6 +774,7 @@ public class AndroidNotificationManager {
     public static void expireMessageNotification(long discussionId, long messageId) {
         executor.execute(() -> {
             clearMessageReactionsNotification(messageId);
+            clearMessagePollVoteNotification(messageId);
 
             JsonPojoDiscussionNotification discussionNotification = loadDiscussionNotification(discussionId);
             if (discussionNotification == null) {
@@ -1072,9 +1076,156 @@ public class AndroidNotificationManager {
         return builder;
     }
 
+    @SuppressLint("MissingPermission")
+    public static void displayPollVoteNotification(OwnedIdentity ownedIdentity, Discussion discussion, Message message, UUID voteId) {
+        executor.execute(() -> {
+            DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
+            if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications()) {
+                return;
+            }
+            if (ownedIdentity != null && ownedIdentity.shouldMuteNotifications()) {
+                return;
+            }
+            if (SettingsActivity.isNotificationContentHidden()) {
+                return;
+            }
+
+            SharedPreferences sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE);
+
+            try {
+                if (sharedPreferences.getString(MESSAGE_POLL_VOTE_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + message.id, null) != null) {
+                    return;
+                }
+            } catch (Exception ignored) { }
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            JsonDiscussionMessagesNotification jsonDiscussionMessagesNotification = null;
+
+            String discussionMessageIdString = sharedPreferences.getString(DISCUSSION_MESSAGE_POLL_VOTE_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussion.id, null);
+            if (discussionMessageIdString != null) {
+                try {
+                    jsonDiscussionMessagesNotification = AppSingleton.getJsonObjectMapper().readValue(discussionMessageIdString, JsonDiscussionMessagesNotification.class);
+                    if (jsonDiscussionMessagesNotification.messageIds == null) {
+                        jsonDiscussionMessagesNotification.messageIds = new ArrayList<>();
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+            if (jsonDiscussionMessagesNotification == null) {
+                jsonDiscussionMessagesNotification = new JsonDiscussionMessagesNotification();
+                jsonDiscussionMessagesNotification.messageIds = new ArrayList<>();
+            }
+            jsonDiscussionMessagesNotification.messageIds.add(message.id);
+            try {
+                editor.putString(DISCUSSION_MESSAGE_POLL_VOTE_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussion.id, AppSingleton.getJsonObjectMapper().writeValueAsString(jsonDiscussionMessagesNotification));
+                editor.apply();
+            } catch (Exception ignored) {
+            }
+
+            try {
+                editor.putString(MESSAGE_POLL_VOTE_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + message.id, voteId.toString());
+                editor.apply();
+            } catch (Exception ignored) { }
+
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            String channelId = getChannelId(notificationManager, discussionCustomization);
+
+            NotificationCompat.Builder publicBuilder = new NotificationCompat.Builder(App.getContext(), channelId)
+                    .setSmallIcon(R.drawable.ic_o)
+                    .setContentTitle(App.getContext().getString(R.string.notification_public_title_new_poll_vote));
+
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(App.getContext(), channelId)
+                    .setSmallIcon(R.drawable.ic_o)
+                    .setColor(ContextCompat.getColor(App.getContext(), R.color.olvid_gradient_dark))
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setPublicVersion(publicBuilder.build())
+                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                    .setVibrate(new long[0]);
+
+            String colorString;
+            if (discussionCustomization == null || !discussionCustomization.prefUseCustomMessageNotification) {
+                colorString = SettingsActivity.getMessageLedColor();
+            } else {
+                colorString = discussionCustomization.prefMessageNotificationLedColor;
+            }
+            if (colorString != null) {
+                int color = 0xff000000 + Integer.parseInt(colorString.substring(1), 16);
+                builder.setLights(color, 500, 2000);
+            }
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                if (discussionCustomization == null || !discussionCustomization.prefUseCustomMessageNotification) {
+                    builder.setSound(SettingsActivity.getMessageRingtone());
+                } else {
+                    try {
+                        Uri uri = Uri.parse(discussionCustomization.prefMessageNotificationRingtone);
+                        builder.setSound(uri);
+                    } catch (Exception e) {
+                        builder.setSound(SettingsActivity.getMessageRingtone());
+                    }
+                }
+            }
+
+            InitialView initialView = new InitialView(App.getContext());
+            int size = App.getContext().getResources().getDimensionPixelSize(R.dimen.notification_icon_size);
+            initialView.setSize(size, size);
+            initialView.setDiscussion(discussion);
+            Bitmap largeIcon = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+            initialView.drawOnCanvas(new Canvas(largeIcon));
+            builder.setLargeIcon(largeIcon);
+
+            String messageContent = message.getStringContent(App.getContext());
+            if (message.jsonExpiration != null) {
+                try {
+                    JsonExpiration jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(message.jsonExpiration, JsonExpiration.class);
+                    if (jsonExpiration != null) {
+                        if ((jsonExpiration.getReadOnce() != null && jsonExpiration.getReadOnce()) || jsonExpiration.getVisibilityDuration() != null) {
+                            messageContent = App.getContext().getString(R.string.text_message_content_hidden);
+                        }
+                    }
+                } catch (Exception e) {
+                    messageContent = "";
+                }
+            }
+
+            builder.setContentTitle(App.getContext().getString(R.string.notification_public_title_new_poll_vote));
+            builder.setContentText(Markdown.formatMarkdown(SpannableString.valueOf(messageContent), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE));
+
+            int notificationId = getPollVoteNotificationId(message.id);
+
+            // CONTENT INTENT
+            Intent contentIntent = new Intent(App.getContext(), MainActivity.class);
+            contentIntent.setAction(MainActivity.FORWARD_ACTION);
+            contentIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
+            contentIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, discussion.bytesOwnedIdentity);
+            contentIntent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, discussion.id);
+            contentIntent.putExtra(DiscussionActivity.MESSAGE_ID_INTENT_EXTRA, message.id);
+            PendingIntent contentPendingIntent = PendingIntent.getActivity(App.getContext(), notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            builder.setContentIntent(contentPendingIntent);
+
+            // DISMISS INTENT
+            Intent dismissIntent = new Intent(App.getContext(), NotificationActionService.class);
+            dismissIntent.setAction(NotificationActionService.ACTION_MESSAGE_POLL_VOTE_CLEAR);
+            dismissIntent.putExtra(NotificationActionService.EXTRA_MESSAGE_ID, message.id);
+            PendingIntent dismissPendingIntent = PendingIntent.getService(App.getContext(), notificationId, dismissIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            builder.setDeleteIntent(dismissPendingIntent);
+
+            if (ownedIdentity != null && ownedIdentity.isHidden()) {
+                hiddenIdentityNotificationIdsToClear.add(notificationId);
+            }
+
+            notificationManager.notify(notificationId, builder.build());
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                vibrate(discussionCustomization);
+            }
+        });
+    }
 
     @SuppressLint("MissingPermission")
-    public static void displayReactionNotification(OwnedIdentity ownedIdentity, Discussion discussion, Message message, @Nullable String emoji, Contact contact) {
+    public static void displayReactionNotification(@Nullable OwnedIdentity ownedIdentity, @NonNull Discussion discussion, @NonNull Message message, @Nullable String emoji, @NonNull Contact contact) {
         executor.execute(() -> {
             DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
             if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications()) {
@@ -1136,25 +1287,25 @@ public class AndroidNotificationManager {
                 notificationManager.cancel(getReactionNotificationId(message.id));
                 return;
             } else if (jsonMessageReactionsNotification.reactions.size() == 1 && !found) {
-                JsonDiscussionMessageReactionsNotification jsonDiscussionMessageReactionsNotification = null;
+                JsonDiscussionMessagesNotification jsonDiscussionMessagesNotification = null;
 
                 String discussionMessageIdString = sharedPreferences.getString(DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussion.id, null);
                 if (discussionMessageIdString != null) {
                     try {
-                        jsonDiscussionMessageReactionsNotification = AppSingleton.getJsonObjectMapper().readValue(discussionMessageIdString, JsonDiscussionMessageReactionsNotification.class);
-                        if (jsonDiscussionMessageReactionsNotification.messageIds == null) {
-                            jsonDiscussionMessageReactionsNotification.messageIds = new ArrayList<>();
+                        jsonDiscussionMessagesNotification = AppSingleton.getJsonObjectMapper().readValue(discussionMessageIdString, JsonDiscussionMessagesNotification.class);
+                        if (jsonDiscussionMessagesNotification.messageIds == null) {
+                            jsonDiscussionMessagesNotification.messageIds = new ArrayList<>();
                         }
                     } catch (Exception ignored) {
                     }
                 }
-                if (jsonDiscussionMessageReactionsNotification == null) {
-                    jsonDiscussionMessageReactionsNotification = new JsonDiscussionMessageReactionsNotification();
-                    jsonDiscussionMessageReactionsNotification.messageIds = new ArrayList<>();
+                if (jsonDiscussionMessagesNotification == null) {
+                    jsonDiscussionMessagesNotification = new JsonDiscussionMessagesNotification();
+                    jsonDiscussionMessagesNotification.messageIds = new ArrayList<>();
                 }
-                jsonDiscussionMessageReactionsNotification.messageIds.add(message.id);
+                jsonDiscussionMessagesNotification.messageIds.add(message.id);
                 try {
-                    editor.putString(DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussion.id, AppSingleton.getJsonObjectMapper().writeValueAsString(jsonDiscussionMessageReactionsNotification));
+                    editor.putString(DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussion.id, AppSingleton.getJsonObjectMapper().writeValueAsString(jsonDiscussionMessagesNotification));
                     editor.apply();
                 } catch (Exception ignored) {
                 }
@@ -1287,10 +1438,22 @@ public class AndroidNotificationManager {
             String discussionReactionMessageIds = sharedPreferences.getString(DISCUSSION_MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId, null);
             if (discussionReactionMessageIds != null) {
                 try {
-                    JsonDiscussionMessageReactionsNotification jsonDiscussionMessageReactionsNotification = AppSingleton.getJsonObjectMapper().readValue(discussionReactionMessageIds, JsonDiscussionMessageReactionsNotification.class);
-                    if (jsonDiscussionMessageReactionsNotification.messageIds != null) {
-                        for (long messageId : jsonDiscussionMessageReactionsNotification.messageIds) {
+                    JsonDiscussionMessagesNotification jsonDiscussionMessagesNotification = AppSingleton.getJsonObjectMapper().readValue(discussionReactionMessageIds, JsonDiscussionMessagesNotification.class);
+                    if (jsonDiscussionMessagesNotification.messageIds != null) {
+                        for (long messageId : jsonDiscussionMessagesNotification.messageIds) {
                             clearMessageReactionsNotification(messageId);
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+            String discussionPollVoteMessageIds = sharedPreferences.getString(DISCUSSION_MESSAGE_POLL_VOTE_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + discussionId, null);
+            if (discussionPollVoteMessageIds != null) {
+                try {
+                    JsonDiscussionMessagesNotification jsonDiscussionMessagesNotification = AppSingleton.getJsonObjectMapper().readValue(discussionPollVoteMessageIds, JsonDiscussionMessagesNotification.class);
+                    if (jsonDiscussionMessagesNotification.messageIds != null) {
+                        for (long messageId : jsonDiscussionMessagesNotification.messageIds) {
+                            clearMessagePollVoteNotification(messageId);
                         }
                     }
                 } catch (Exception ignored) {
@@ -1306,6 +1469,17 @@ public class AndroidNotificationManager {
             SharedPreferences sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.remove(MESSAGE_REACTION_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + messageId);
+            editor.apply();
+        });
+    }
+
+    public static void clearMessagePollVoteNotification(final long messageId) {
+        executor.execute(() -> {
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(App.getContext());
+            notificationManager.cancel(getPollVoteNotificationId(messageId));
+            SharedPreferences sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_notifications), Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove(MESSAGE_POLL_VOTE_NOTIFICATION_SHARED_PREFERENCE_KEY_PREFIX + messageId);
             editor.apply();
         });
     }
@@ -1995,6 +2169,9 @@ public class AndroidNotificationManager {
     private static int getDeviceExpirationNotificationId(@NonNull byte[] deviceUid) {
         return (0xfffffff & Arrays.hashCode(deviceUid) | 0x90000000) ;
     }
+    private static int getPollVoteNotificationId(long messageId) {
+        return (int) (0xfffffff & messageId) | 0xa0000000;
+    }
 
     private static void vibrate(@Nullable DiscussionCustomization discussionCustomization) {
         Vibrator v = (Vibrator) App.getContext().getSystemService(Context.VIBRATOR_SERVICE);
@@ -2025,7 +2202,7 @@ public class AndroidNotificationManager {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class JsonDiscussionMessageReactionsNotification {
+    private static class JsonDiscussionMessagesNotification {
         public List<Long> messageIds;
     }
 

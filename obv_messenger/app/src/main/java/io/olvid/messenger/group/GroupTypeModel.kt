@@ -19,8 +19,8 @@
 
 package io.olvid.messenger.group
 
+import androidx.annotation.StringRes
 import io.olvid.engine.engine.types.JsonGroupType
-import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.group.GroupTypeModel.GroupType.CUSTOM
 import io.olvid.messenger.group.GroupTypeModel.GroupType.PRIVATE
@@ -30,8 +30,8 @@ import io.olvid.messenger.group.GroupTypeModel.RemoteDeleteSetting.NOBODY
 
 open class GroupTypeModel(
     val type: GroupType,
-    val title: String,
-    val subtitle: String,
+    @StringRes val title: Int,
+    @StringRes val subtitle: Int,
     var readOnlySetting: Boolean = false,
     var remoteDeleteSetting: RemoteDeleteSetting = NOBODY
 ) {
@@ -43,9 +43,9 @@ open class GroupTypeModel(
     }
 
     enum class RemoteDeleteSetting(val value: String) {
-        NOBODY(App.getContext().getString(R.string.value_group_remote_delete_setting_nobody)),
-        ADMINS(App.getContext().getString(R.string.value_group_remote_delete_setting_admins)),
-        EVERYONE(App.getContext().getString(R.string.value_group_remote_delete_setting_everyone));
+        NOBODY("nobody"),
+        ADMINS("admins"),
+        EVERYONE("everyone");
 
         override fun toString(): String {
             return value
@@ -58,42 +58,11 @@ open class GroupTypeModel(
                 EVERYONE -> JsonGroupType.REMOTE_DELETE_EVERYONE
             }
         }
-
-        companion object {
-            fun byString(value: String): RemoteDeleteSetting {
-                return entries.find { it.value == value } ?: NOBODY
-            }
-        }
     }
 
-    object SimpleGroup : GroupTypeModel(
-        type = SIMPLE,
-        title = App.getContext().getString(R.string.label_group_simple_title),
-        subtitle = App.getContext().getString(R.string.label_group_simple_subtitle),
-    )
-
-    object PrivateGroup : GroupTypeModel(
-        type = PRIVATE,
-        title = App.getContext().getString(R.string.label_group_private_title),
-        subtitle = App.getContext().getString(R.string.label_group_private_subtitle)
-    )
-
-    object ReadOnlyGroup : GroupTypeModel(
-        type = READ_ONLY,
-        title = App.getContext().getString(R.string.label_group_read_only_title),
-        subtitle = App.getContext().getString(R.string.label_group_read_only_subtitle)
-    )
-
-    class CustomGroup(
-        readOnlySetting: Boolean = false,
-        remoteDeleteSetting: RemoteDeleteSetting = NOBODY
-    ) : GroupTypeModel (
-        type = CUSTOM,
-        title = App.getContext().getString(R.string.label_group_custom_title),
-        subtitle = App.getContext().getString(R.string.label_group_custom_subtitle),
-        readOnlySetting = readOnlySetting,
-        remoteDeleteSetting = remoteDeleteSetting
-    )
+    fun areNonAdminsReadOnly(): Boolean {
+        return type == READ_ONLY || (type == CUSTOM && readOnlySetting)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other !is GroupTypeModel) {
@@ -103,7 +72,41 @@ open class GroupTypeModel(
                 ((type != CUSTOM)
                         || (readOnlySetting == other.readOnlySetting && remoteDeleteSetting == other.remoteDeleteSetting))
     }
+
+    override fun hashCode(): Int {
+        return javaClass.hashCode()
+    }
 }
+
+object SimpleGroup : GroupTypeModel(
+    type = SIMPLE,
+    title = R.string.label_group_simple_title,
+    subtitle = R.string.label_group_simple_subtitle,
+)
+
+object PrivateGroup : GroupTypeModel(
+    type = PRIVATE,
+    title = R.string.label_group_private_title,
+    subtitle = R.string.label_group_private_subtitle
+)
+
+object ReadOnlyGroup : GroupTypeModel(
+    type = READ_ONLY,
+    title = R.string.label_group_read_only_title,
+    subtitle = R.string.label_group_read_only_subtitle
+)
+
+class CustomGroup(
+    readOnlySetting: Boolean = false,
+    remoteDeleteSetting: RemoteDeleteSetting = NOBODY
+) : GroupTypeModel(
+    type = CUSTOM,
+    title = R.string.label_group_custom_title,
+    subtitle = R.string.label_group_custom_subtitle,
+    readOnlySetting = readOnlySetting,
+    remoteDeleteSetting = remoteDeleteSetting
+)
+
 
 fun GroupTypeModel.toJsonGroupType() : JsonGroupType {
     return when(type) {
@@ -116,7 +119,7 @@ fun GroupTypeModel.toJsonGroupType() : JsonGroupType {
 
 fun GroupTypeModel.clone() : GroupTypeModel {
     return when(type) {
-        CUSTOM -> GroupTypeModel.CustomGroup(
+        CUSTOM -> CustomGroup(
             readOnlySetting = readOnlySetting,
             remoteDeleteSetting = remoteDeleteSetting
         )

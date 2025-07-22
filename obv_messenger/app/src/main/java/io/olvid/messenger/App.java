@@ -36,7 +36,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Parcelable;
 import android.text.Spannable;
 import android.util.DisplayMetrics;
 import android.view.ContextThemeWrapper;
@@ -66,7 +65,6 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.media3.common.util.UnstableApi;
 import androidx.preference.PreferenceManager;
 
 import com.google.zxing.BarcodeFormat;
@@ -79,7 +77,6 @@ import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -122,12 +119,14 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonWebrtcMessage;
+import io.olvid.messenger.databases.tasks.new_message.ProcessReadyToProcessOnHoldMessagesTask;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.discussion.message.MessageDetailsActivity;
 import io.olvid.messenger.discussion.message.attachments.RenderablePdfPage;
 import io.olvid.messenger.discussion.message.attachments.RenderablePdfPageFetcher;
 import io.olvid.messenger.discussion.message.attachments.RenderablePdfPageKeyer;
 import io.olvid.messenger.gallery.GalleryActivity;
+import io.olvid.messenger.group.GroupClone;
 import io.olvid.messenger.group.GroupCreationActivity;
 import io.olvid.messenger.group.GroupDetailsActivity;
 import io.olvid.messenger.group.GroupV2DetailsActivity;
@@ -339,7 +338,6 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    @UnstableApi
     public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId, boolean ascending, boolean showTextBlocks) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
@@ -350,7 +348,6 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    @UnstableApi
     public static void openDraftGalleryActivity(Context activityContext, long draftMessageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DRAFT_INTENT_EXTRA, true);
@@ -359,7 +356,6 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    @UnstableApi
     public static void openMessageGalleryActivity(Context activityContext, long messageId, long fyleId, boolean showTextBlocks) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DRAFT_INTENT_EXTRA, false);
@@ -369,7 +365,6 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    @UnstableApi
     public static void openOwnedIdentityGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, @Nullable String sortOrder, boolean ascending, long messageId, long fyleId) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
@@ -382,7 +377,6 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    @UnstableApi
     public static void openDiscussionMediaGalleryActivity(Context activityContext, long discussionId) {
         Intent intent = new Intent(getContext(), io.olvid.messenger.discussion.gallery.DiscussionMediaGalleryActivity.class);
         intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
@@ -406,19 +400,12 @@ public class App extends Application implements DefaultLifecycleObserver {
         if (serializedGroupType != null) {
             intent.putExtra(GroupCreationActivity.SERIALIZED_GROUP_TYPE_INTENT_EXTRA, serializedGroupType);
         }
+        GroupClone.INSTANCE.clear();
         if (preselectedGroupMembers != null) {
-            ArrayList<Parcelable> parcelables = new ArrayList<>(preselectedGroupMembers.size());
-            for (Contact contact : preselectedGroupMembers) {
-                parcelables.add(new BytesKey(contact.bytesContactIdentity));
-            }
-            intent.putParcelableArrayListExtra(GroupCreationActivity.PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA, parcelables);
+            GroupClone.INSTANCE.setPreselectedGroupMembers(preselectedGroupMembers);
         }
         if (preselectedGroupAdminMembers != null) {
-            ArrayList<Parcelable> parcelables = new ArrayList<>(preselectedGroupAdminMembers.size());
-            for (Contact contact : preselectedGroupAdminMembers) {
-                parcelables.add(new BytesKey(contact.bytesContactIdentity));
-            }
-            intent.putParcelableArrayListExtra(GroupCreationActivity.PRESELECTED_GROUP_ADMIN_MEMBERS_INTENT_EXTRA, parcelables);
+            GroupClone.INSTANCE.setPreselectedGroupAdminMembers(preselectedGroupAdminMembers);
         }
         activityContext.startActivity(intent);
     }
@@ -543,26 +530,10 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openGroupDetailsActivityForEditDetails(Context activityContext, byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid) {
-        Intent intent = new Intent(getContext(), GroupDetailsActivity.class);
-        intent.putExtra(GroupDetailsActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
-        intent.putExtra(GroupDetailsActivity.BYTES_GROUP_OWNER_AND_UID_INTENT_EXTRA, bytesGroupOwnerAndUid);
-        intent.putExtra(GroupDetailsActivity.EDIT_DETAILS_INTENT_EXTRA, true);
-        activityContext.startActivity(intent);
-    }
-
     public static void openGroupV2DetailsActivity(Context activityContext, byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) {
         Intent intent = new Intent(getContext(), GroupV2DetailsActivity.class);
         intent.putExtra(GroupV2DetailsActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         intent.putExtra(GroupV2DetailsActivity.BYTES_GROUP_IDENTIFIER_INTENT_EXTRA, bytesGroupIdentifier);
-        activityContext.startActivity(intent);
-    }
-
-    public static void openGroupV2DetailsActivityForEditDetails(Context activityContext, byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier) {
-        Intent intent = new Intent(getContext(), GroupV2DetailsActivity.class);
-        intent.putExtra(GroupV2DetailsActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
-        intent.putExtra(GroupV2DetailsActivity.BYTES_GROUP_IDENTIFIER_INTENT_EXTRA, bytesGroupIdentifier);
-        intent.putExtra(GroupV2DetailsActivity.EDIT_DETAILS_INTENT_EXTRA, true);
         activityContext.startActivity(intent);
     }
 
@@ -1051,24 +1022,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         showDialog(null, AppDialogShowActivity.DIALOG_INTRODUCING_MULTI_DEVICE, new HashMap<>());
     }
 
-    public static void openAppDialogPromptUserForReadReceiptsIfRelevant() {
-        if (SettingsActivity.getDefaultSendReadReceipt()) {
-            // if read receipt are active, do not prompt
-            return;
-        }
-        long lastReadReceiptAnswer = SettingsActivity.getLastReadReceiptPromptAnswerTimestamp();
-        if (lastReadReceiptAnswer == -1 || (System.currentTimeMillis() - lastReadReceiptAnswer < 2 * 86_400_000L)) {
-            // if user already answered, or answered less than 2 days ago, do not prompt
-            return;
-        }
-        App.runThread(() -> {
-            if (AppDatabase.getInstance().contactDao().countAll() == 0) {
-                // if user has no contacts, do not prompt
-                return;
-            }
-            showDialog(null, AppDialogShowActivity.DIALOG_PROMPT_USER_FOR_READ_RECEIPTS, new HashMap<>());
-        });
-    }
+    
 
     private static void showDialog(@Nullable byte[] bytesDialogOwnedIdentity, String dialogTag, HashMap<String, Object> dialogParameters) {
         dialogsToShowLock.lock();
@@ -1354,6 +1308,13 @@ public class App extends Application implements DefaultLifecycleObserver {
                 } catch (Exception ignored) {
                 }
             }
+
+            //////////////////////
+            // Process all ready-to-process on hold messages
+            /////////////////////
+            AppSingleton.getEngine().runTaskOnEngineNotificationQueue(
+                    new ProcessReadyToProcessOnHoldMessagesTask(AppSingleton.getEngine(), AppDatabase.getInstance(), null)
+            );
         }
     }
 }

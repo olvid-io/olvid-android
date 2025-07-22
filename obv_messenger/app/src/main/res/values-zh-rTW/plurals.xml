@@ -1,213 +1,237 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <plurals name="explanation_backup_v2_device_expiration_end">
-        <item quantity="one">「在此裝置上，您之前裝置將會停用：</item>
-        <item quantity="other">「在此裝置上，您的裝置將會停用：</item>
-    </plurals>
-    <plurals name="label_backups_found">
-        <item quantity="one">%1$d 個備份</item>
-        <item quantity="other">%1$d 個備份</item>
-    </plurals>
-    <plurals name="label_profiles_found">
-        <item quantity="one">%1$d 個個人檔案</item>
-        <item quantity="other">%1$d 個個人檔案</item>
-    </plurals>
-    <plurals name="label_backup_groups">
-        <item quantity="zero">沒有群組</item>
-        <item quantity="one">%1$d 個群組</item>
-        <item quantity="other">%1$d 個群組</item>
-    </plurals>
-    <plurals name="label_backup_contacts">
-        <item quantity="zero">沒有聯絡人</item>
-        <item quantity="one">%1$d 個聯絡人</item>
-        <item quantity="other">%1$d 個聯絡人</item>
-    </plurals>
-    <plurals name="label_discussion_archive_done">
-        <item quantity="one">已封存對話</item>
-        <item quantity="other">%1$d 個對話已封存</item>
-    </plurals>
-    <plurals name="label_discussion_unarchive_done">
-        <item quantity="one">已解封對話</item>
-        <item quantity="other">%1$d 個對話已解封</item>
-    </plurals>
-    <plurals name="label_message_unbookmark_done">
-        <item quantity="one">已取消訊息書籤</item>
-        <item quantity="other">%1$d 則訊息已取消書籤</item>
-    </plurals>
-    <plurals name="dialog_title_delete_discussions">
-        <item quantity="one">刪除選取的對話？</item>
-        <item quantity="other">刪除選取的對話？</item>
-    </plurals>
-    <plurals name="dialog_title_delete_messages">
-        <item quantity="one">刪除選取的訊息？</item>
-        <item quantity="other">刪除選取的訊息？</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions">
-        <item quantity="one">您確定要刪除選取的對話及其所有訊息嗎？\n此動作無法復原。</item>
-        <item quantity="other">您確定要刪除 %1$d 個選取的對話及其所有訊息嗎？\n此動作無法復原。</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions_choice">
-        <item quantity="one">您要如何刪除選取的對話及其所有訊息？\n此動作無法復原。</item>
-        <item quantity="other">您要如何刪除 %1$d 個選取的對話及其所有訊息？\n此動作無法復原。</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages">
-        <item quantity="one">您確定要刪除選取的訊息嗎？\n此動作無法復原。</item>
-        <item quantity="other">您確定要刪除 %1$d 個選取的訊息嗎？\n此動作無法復原。</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages_choice">
-        <item quantity="one">您要如何刪除選取的訊息？\n此動作無法復原。</item>
-        <item quantity="other">您要如何刪除 %1$d 個選取的訊息？\n此動作無法復原。</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_messages_everywhere">
-        <item quantity="one">您即將**永久**刪除此對話中的一則訊息，所有人都會看到。請確認您確實要這樣做。</item>
-        <item quantity="other">您即將**永久**刪除此對話中的 %1$d 則訊息，所有人都會看到。請確認您確實要這樣做。</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_discussions_everywhere">
-        <item quantity="one">您即將**永久**刪除一個對話及其訊息，所有人都會看到。請確認您確實要這樣做。</item>
-        <item quantity="other">您即將**永久**刪除 %1$d 個對話及其訊息，所有人都會看到。請確認您確實要這樣做。</item>
-    </plurals>
-    <plurals name="dialog_message_invite_all_group_members">
-        <item quantity="one">您即將邀請群組中與您有頻道 (目前 1 位成員) 的所有成員加入私人對話。\n您要繼續嗎？</item>
-        <item quantity="other">您即將邀請群組中與您有頻道 (目前 %1$d 位成員) 的所有成員加入私人對話。\n您要繼續嗎？</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_count">
-        <item quantity="one">1 個共同群組</item>
-        <item quantity="other">%1$d 個共同群組</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_end">
-        <item quantity="one">。您需要離開此群組才能繼續。</item>
-        <item quantity="other">。您需要離開這些群組才能繼續。</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_with_pending_groups">
-        <item quantity="one">您即將從其他使用者列表中移除 %1$s。\n\n請注意，%1$s 已被邀請加入您所屬的 %2$d 個群組。如果他們加入，他們會被重新加入此列表。您可能需要離開這些群組以避免此情況。\n\n真的要刪除此使用者嗎？</item>
-        <item quantity="other">您即將從其他使用者列表中移除 %1$s。\n\n請注意，%1$s 已被邀請加入您所屬的 %2$d 個群組。如果他們加入其中一個，他們會被重新加入此列表。您可能需要離開這些群組以避免此情況。\n\n真的要刪除此使用者嗎？</item>
-    </plurals>
-    <plurals name="dialog_message_auto_join_pending_groups">
-        <item quantity="one">修改此設定會自動接受一則待處理的群組邀請。\n按一下「確定」以確認您的選擇並加入此群組。</item>
-        <item quantity="other">修改此設定會自動接受 %1$d 則待處理的群組邀請。\n按一下「確定」以確認您的選擇並加入這些群組。</item>
-    </plurals>
-    <plurals name="dialog_message_save_selected_attachments">
-        <item quantity="one">當出現提示時，請選取要儲存選取的附件的資料夾。\n請注意，對某些資料夾的存取權可能受到限制。</item>
-        <item quantity="other">當出現提示時，請選取要儲存 %1$d 個選取的附件的資料夾。\n請注意，對某些資料夾的存取權可能受到限制。</item>
-    </plurals>
-    <plurals name="action_mode_title_storage">
-        <item quantity="one">%1$d 個已選取</item>
-        <item quantity="other">%1$d 個已選取</item>
-    </plurals>
-    <plurals name="dialog_message_delete_attachments">
-        <item quantity="one">您確定要刪除選取的附件嗎？</item>
-        <item quantity="other">您確定要刪除 %1$d 個選取的附件嗎？</item>
-    </plurals>
-    <plurals name="text_app_uptime_days">
-        <item quantity="one">%1$d 天、%2$02d 小時 %3$02d 分 %4$02d 秒</item>
-        <item quantity="other">%1$d 天、%2$02d 小時 %3$02d 分 %4$02d 秒</item>
-    </plurals>
-    <plurals name="text_message_possibly_missing">
-        <item quantity="one">%1$d 則訊息遺失…</item>
-        <item quantity="other">%1$d 則訊息遺失…</item>
-    </plurals>
-    <plurals name="text_outgoing_group_call_with_contacts">
-        <item quantity="one">與 %2$s 和 1 位其他人的群組通話</item>
-        <item quantity="other">與 %2$s 和 %1$d 位其他人的群組通話</item>
-    </plurals>
-    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
-        <item quantity="one">未接聽的群組通話，與 %2$s 和 1 位其他人</item>
-        <item quantity="other">未接聽的群組通話，與 %2$s 和 %1$d 位其他人</item>
-    </plurals>
-    <plurals name="text_failed_outgoing_group_call_with_contacts">
-        <item quantity="one">失敗的群組通話，與 %2$s 和 1 位其他人</item>
-        <item quantity="other">失敗的群組通話，與 %2$s 和 %1$d 位其他人</item>
-    </plurals>
-    <plurals name="text_busy_outgoing_group_call_with_contacts">
-        <item quantity="one">群組通話，%2$s 和 1 位其他人正在忙線中</item>
-        <item quantity="other">群組通話，%2$s 和 %1$d 位其他人正在忙線中</item>
-    </plurals>
-    <plurals name="text_rejected_outgoing_group_call_with_contacts">
-        <item quantity="one">拒接的群組通話，與 %2$s 和 1 位其他人</item>
-        <item quantity="other">拒接的群組通話，與 %2$s 和 %1$d 位其他人</item>
-    </plurals>
-    <plurals name="text_incoming_group_call_with_contacts">
-        <item quantity="one">來自 %2$s 和 1 位其他人的群組通話</item>
-        <item quantity="other">來自 %2$s 和 %1$d 位其他人的群組通話</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion">
-        <item quantity="one">%1$d 個已選取</item>
-        <item quantity="other">%1$d 個已選取</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion_list">
-        <item quantity="one">%1$d 個已選取</item>
-        <item quantity="other">%1$d 個已選取</item>
-    </plurals>
-    <plurals name="notification_public_title_new_messages">
-        <item quantity="one">%1$d 則新訊息</item>
-        <item quantity="other">%1$d 則新訊息</item>
-    </plurals>
-    <plurals name="dialog_message_invite_group_members">
-        <item quantity="one">%3$s 即將被邀請加入群組 %2$s。</item>
-        <item quantity="other">下列 %1$d 位聯絡人即將被邀請加入群組 %2$s：%3$s。</item>
-    </plurals>
-    <plurals name="dialog_message_remove_group_members">
-        <item quantity="one">%3$s 即將從群組 %2$s 中移除。</item>
-        <item quantity="other">下列 %1$d 位群組成員即將從 %2$s 中移除：%3$s。</item>
-    </plurals>
-    <plurals name="text_unread_message_count">
-        <item quantity="one">%1$d 則新訊息</item>
-        <item quantity="other">%1$d 則新訊息</item>
-    </plurals>
-    <plurals name="text_reply_attachment_count">
-        <item quantity="one">%1$d 個附件</item>
-        <item quantity="other">%1$d 個附件</item>
-    </plurals>
-    <plurals name="text_and_x_other">
-        <item quantity="one">和 %1$d 位其他人</item>
-        <item quantity="other">和 %1$d 位其他人</item>
-    </plurals>
-    <plurals name="text_contact_names_last_separator_x_other">
-        <item quantity="one">和 %1$d 位其他人</item>
-        <item quantity="other">和 %1$d 位其他人</item>
-    </plurals>
-    <plurals name="dialog_message_confirm_retention_policy">
-        <item quantity="one">套用您剛選取的保留原則會刪除一則訊息。\n您確定要繼續嗎？</item>
-        <item quantity="other">套用您剛選取的保留原則會刪除 %1$d 則訊息。\n您確定要繼續嗎？</item>
-    </plurals>
-    <plurals name="text_keycloak_missing_search_result">
-        <item quantity="one">…和 1 個額外的搜尋結果\n請重新調整您的搜尋</item>
-        <item quantity="other">…和 %1$d 個額外的搜尋結果\n請重新調整您的搜尋</item>
-    </plurals>
-    <plurals name="duration_seconds">
-        <item quantity="one">1 秒</item>
-        <item quantity="other">%1$d 秒</item>
-    </plurals>
-    <plurals name="duration_minutes">
-        <item quantity="one">1 分鐘</item>
-        <item quantity="other">%1$d 分鐘</item>
-    </plurals>
-    <plurals name="duration_hours">
-        <item quantity="one">1 小時</item>
-        <item quantity="other">%1$d 小時</item>
-    </plurals>
-    <plurals name="duration_days">
-        <item quantity="one">1 天</item>
-        <item quantity="other">%1$d 天</item>
-    </plurals>
-    <plurals name="duration_years">
-        <item quantity="one">1 年</item>
-        <item quantity="other">%1$d 年</item>
-    </plurals>
-    <plurals name="other_members_count">
-        <item quantity="one">1 位成員</item>
-        <item quantity="other">%1$d 位成員</item>
-    </plurals>
-    <plurals name="dialog_message_delete_remote_deleted_messages">
-        <item quantity="one">您目前在對話中看到 1 則遠端刪除的訊息。您要刪除它嗎？</item>
-        <item quantity="other">您目前在對話中看到 %1$d 則遠端刪除的訊息。您要刪除所有這些標記嗎？</item>
-    </plurals>
-    <plurals name="label_xxx_contacts_sharing_their_position">
-        <item quantity="one">1 位聯絡人正在分享他們的位置</item>
-        <item quantity="other">%1$d 位聯絡人正在分享他們的位置</item>
-    </plurals>
-    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
-        <item quantity="one">您和 1 位其他人正在分享他們的位置</item>
-        <item quantity="other">您和 %1$d 位其他人正在分享他們的位置</item>
-    </plurals>
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1156880361">您的其中一臺裝置將在**少於%1$d天**內過期並停用。\n您可以購買**Olvid+**訂閱以使其保持活躍。</item>
+		<item quantity="other" state="needs_review" hash="-574658149">您的其中一臺裝置將在 **少於 %1$d 天** 後過期並停用。\n您可以購買 **Olvid+** 訂閱以使其保持活躍。</item>
+	</plurals>
+	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-683497602">%1$s 加入了群組</item>
+		<item quantity="other" state="needs_review" hash="51603026">%1$s 加入了群組</item>
+	</plurals>
+	<plurals name="text_left_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="399208793">%1$s 離開了群組</item>
+		<item quantity="other" state="needs_review" hash="1945116549">%1$s 離開了群組</item>
+	</plurals>
+	<plurals name="label_poll_answers" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="1797058436">沒有回覆</item>
+		<item quantity="one" state="needs_review" hash="-7151672">%1$d 回覆</item>
+		<item quantity="other" state="needs_review" hash="1394570044">%1$d 的回覆</item>
+	</plurals>
+	<plurals name="label_remove_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="312762041">移除 %1$d 成員</item>
+		<item quantity="other" state="needs_review" hash="1816849257">移除 %1$d 位成員</item>
+	</plurals>
+	<plurals name="label_add_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1537484553">新增成員 %1$d</item>
+		<item quantity="other" state="needs_review" hash="1091232977">新增 %1$d 位成員</item>
+	</plurals>
+	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1131862199">「在此裝置上，您之前的裝置（如下所示）將會停用：」</item>
+		<item quantity="other" state="needs_review" hash="-2011302529">» 在此裝置上，您之前的裝置將會停用：</item>
+	</plurals>
+	<plurals name="label_backups_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1088606803">已找到 %1$d 備份</item>
+		<item quantity="other" state="needs_review" hash="-577868099">找到 %1$d 個備份</item>
+	</plurals>
+	<plurals name="label_profiles_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1498976610">找到 %1$d 個人資料</item>
+		<item quantity="other" state="needs_review" hash="749391135">找到 %1$d 個個人檔案</item>
+	</plurals>
+	<plurals name="label_backup_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="-174007554">無群組</item>
+		<item quantity="one" state="needs_review" hash="237276495">%1$d 群組</item>
+		<item quantity="other" state="needs_review" hash="900821953">%1$d 群組</item>
+	</plurals>
+	<plurals name="label_backup_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="246373927">無聯絡人</item>
+		<item quantity="one" state="needs_review" hash="-1671298344">%1$d 聯絡人</item>
+		<item quantity="other" state="needs_review" hash="1022571360">%1$d 聯絡人</item>
+	</plurals>
+	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1772966333">對話已封存</item>
+		<item quantity="other" state="needs_review" hash="1402495414">已封存 %1$d 則討論</item>
+	</plurals>
+	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1312483800">對話已取消封存</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">已恢復 %1$d 個討論</item>
+	</plurals>
+	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2045500103">訊息已取消收藏</item>
+		<item quantity="other" state="needs_review" hash="204728896">%1$d 則訊息已取消書籤</item>
+	</plurals>
+	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-716893580">刪除選定的對話？</item>
+		<item quantity="other" state="needs_review" hash="-15840526">刪除選定的對話？</item>
+	</plurals>
+	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-862879351">刪除選定的訊息？</item>
+		<item quantity="other" state="needs_review" hash="-2020248805">刪除選定的訊息？</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-931157230">您確定要刪除選定的對話以及其中包含的所有訊息嗎？\n此動作無法撤銷。</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">您真的要刪除選定的 %1$d 對話和其中包含的所有訊息嗎？\n此動作無法撤銷。</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2139168692">您想如何刪除選定的對話以及其中包含的所有訊息？\n此動作無法撤銷。</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">您希望如何刪除選定的 %1$d 對話以及其中包含的所有訊息？\n此動作無法撤銷。</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-947341357">您真的要刪除選定的訊息嗎？\n此動作無法撤銷。</item>
+		<item quantity="other" state="needs_review" hash="-752621695">您確定要刪除選定的 %1$d 條訊息嗎？\n此動作無法撤銷。</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-474913536">您想如何刪除選定的訊息？\n此動作無法撤銷。</item>
+		<item quantity="other" state="needs_review" hash="-895867176">您想如何刪除選定的 %1$d 條訊息？\n此動作無法撤銷。</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-606769319">您即將**永久**刪除此對話中**所有人的**訊息。請確認您確實想要這麼做。</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">您即將**永久**刪除此對話中**所有人的** %1$d 條訊息。請確認您確實想要這麼做。</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118446236">您即將**永久**刪除本次對話以及其中包含的訊息，對**所有**參與者可見。請確認您確實希望這麼做。</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">您即將**永久**刪除 %1$d 則對話以及其中包含的訊息，對這些對話中的**所有人**可見。請確認您確實想要這麼做。</item>
+	</plurals>
+	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1306576418">您即將邀請您擁有頻道（目前 1 名成員）的每個群組成員參與私人討論。\n您想繼續嗎？</item>
+		<item quantity="other" state="needs_review" hash="-994717142">您即將邀請您擁有頻道（目前 %1$d 位成員）的每個群組成員參與私人討論。\n您要繼續嗎？</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1699852572">1 個共同群組</item>
+		<item quantity="other" state="needs_review" hash="-261780100">%1$d 共同群組</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1000092559">\. 您需要離開此群組才能繼續。</item>
+		<item quantity="other" state="needs_review" hash="-1973752801">\. 您需要退出這些群組才能繼續。</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_with_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1290867480">您即將從您的其他使用者列表中移除 %1$s。\n\n請注意，%1$s 曾被邀請加入您所屬的 %2$d 群組。如果他們加入該群組，他們將會重新被加入到此列表中。您可以透過退出該群組來避免這個情況。\n\n您確定要刪除此使用者嗎？</item>
+		<item quantity="other" state="needs_review" hash="1544662217">您即將從您的其他使用者列表中移除 %1$s。\n\n請注意，%1$s 曾被邀請加入您所屬的 %2$d 個群組。如果他們加入其中任何一個群組，他們將會重新添加到此列表中。您可能需要退出這些群組以避免這種情況。\n\n您確定要刪除此使用者嗎？</item>
+	</plurals>
+	<plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-97256410">修改此設定將自動接受一個待處理的群組邀請。\n按確定確認您的選擇並加入該群組。</item>
+		<item quantity="other" state="needs_review" hash="1009007696">修改此設定將自動接受 %1$d 個待處理的群組邀請。\n按一下「確定」以確認您的選擇並加入這些群組。</item>
+	</plurals>
+	<plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1768885312">當系統提示時，請選擇儲存所選附件的資料夾。\n請注意，存取某些資料夾可能會受到限制。</item>
+		<item quantity="other" state="needs_review" hash="-1416662415">請在提示時選擇用於儲存選取的附件 %1$d 的資料夾。\n請注意，存取某些資料夾可能會受到限制。</item>
+	</plurals>
+	<plurals name="action_mode_title_storage" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d 已選擇</item>
+		<item quantity="other" state="needs_review" hash="1429480972">已選擇 %1$d</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1117804388">您確定要刪除選取的附件嗎？</item>
+		<item quantity="other" state="needs_review" hash="-1540151013">您確定要刪除選取的 %1$d 個附件嗎？</item>
+	</plurals>
+	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1400550170">%1$d天，%2$02d小時%3$02d分%4$02d秒</item>
+		<item quantity="other" state="needs_review" hash="-1847999182">%1$d天，%2$02d小時%3$02d分%4$02d秒</item>
+	</plurals>
+	<plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1040869757">%1$d 訊息遺失…</item>
+		<item quantity="other" state="needs_review" hash="-970055416">%1$d 遺失的訊息…</item>
+	</plurals>
+	<plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="800251665">與 %2$s 和另一個人進行群組通話</item>
+		<item quantity="other" state="needs_review" hash="-1654053808">與 %2$s 和其他 %1$d 人群組通話</item>
+	</plurals>
+	<plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1313506338">與 %2$s 以及另一個人未接聽的群組通話</item>
+		<item quantity="other" state="needs_review" hash="1027194941">與 %2$s 和其他 %1$d 人未接聽的群組通話</item>
+	</plurals>
+	<plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="575911091">與 %2$s 以及另一個人發起的群組通話失敗</item>
+		<item quantity="other" state="needs_review" hash="1768048524">與 %2$s 和其他 %1$d 人群組通話失敗</item>
+	</plurals>
+	<plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1115369211">%2$s 和另一個人忙線時的群組通話</item>
+		<item quantity="other" state="needs_review" hash="-332659300">通話時，%2$s和%1$d人正在忙線中</item>
+	</plurals>
+	<plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1401449639">拒絕與%2$s和其他一位聯絡人的群組通話</item>
+		<item quantity="other" state="needs_review" hash="-150166810">拒絕與 %2$s 和其他 %1$d 人之間的群組通話</item>
+	</plurals>
+	<plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-366344569">來自 %2$s 和另一個人的群組通話</item>
+		<item quantity="other" state="needs_review" hash="1471743578">來自 %2$s 和 %1$d 位其他使用者的群組通話</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="461822174">已選取 %1$d</item>
+		<item quantity="other" state="needs_review" hash="1431585621">已選取 %1$d</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion_list" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">已選取 %1$d</item>
+		<item quantity="other" state="needs_review" hash="1429480972">已選取 %1$d</item>
+	</plurals>
+	<plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d 新訊息</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d 新訊息</item>
+	</plurals>
+	<plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1495957123">%3$s 即將被邀請加入群組 %2$s。</item>
+		<item quantity="other" state="needs_review" hash="-250521442">以下 %1$d 位聯絡人將被邀請加入群組 %2$s：%3$s。</item>
+	</plurals>
+	<plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1633684901">%3$s 即將從群組 %2$s 移除。</item>
+		<item quantity="other" state="needs_review" hash="2062819899">以下 %1$d 位群組成員將從 %2$s 移除：%3$s 。</item>
+	</plurals>
+	<plurals name="text_unread_message_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d 新訊息</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d 新訊息</item>
+	</plurals>
+	<plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118984743">%1$d 附件</item>
+		<item quantity="other" state="needs_review" hash="1321323314">%1$d 附件</item>
+	</plurals>
+	<plurals name="text_and_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-226443285">還有 %1$d 其他</item>
+		<item quantity="other" state="needs_review" hash="-2101659023">還有 %1$d 人</item>
+	</plurals>
+	<plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-970333"> &amp; %1$d 其他</item>
+		<item quantity="other" state="needs_review" hash="1931856055"> &amp; %1$d 其他人</item>
+	</plurals>
+	<plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-202072457">您所選擇的訊息保留政策將會刪除單一訊息。\n您確定要繼續嗎？</item>
+		<item quantity="other" state="needs_review" hash="-576713525">套用您剛才選擇的保留政策會刪除 %1$d 則訊息。\n您確定要繼續嗎？</item>
+	</plurals>
+	<plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="812170692">… 以及一個額外的搜尋結果\n請重新調整您的搜尋</item>
+		<item quantity="other" state="needs_review" hash="1969873890">… 以及 %1$d 個額外搜尋結果\n請調整您的搜尋條件</item>
+	</plurals>
+	<plurals name="duration_seconds" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="251130693">1 秒</item>
+		<item quantity="other" state="needs_review" hash="624952161">%1$d内键</item>
+	</plurals>
+	<plurals name="duration_minutes" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1053938976">1 分鐘</item>
+		<item quantity="other" state="needs_review" hash="-1051808">%1$d 分鐘</item>
+	</plurals>
+	<plurals name="duration_hours" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1004063951">1 小時</item>
+		<item quantity="other" state="needs_review" hash="1322950935">%1$d 小時</item>
+	</plurals>
+	<plurals name="duration_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1264358968">1天</item>
+		<item quantity="other" state="needs_review" hash="-1170846734">%1$d 天</item>
+	</plurals>
+	<plurals name="duration_years" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="388401904">1年</item>
+		<item quantity="other" state="needs_review" hash="298429520">%1$d年</item>
+	</plurals>
+	<plurals name="other_members_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1379655782">1 位成員</item>
+		<item quantity="other" state="needs_review" hash="965402074">%1$d 位成員</item>
+	</plurals>
+	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1006155949">您目前在對話中有一則遠端刪除的訊息。您要刪除它嗎？</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">您目前在對話中擁有 %1$d 則遠端刪除的訊息。您是否要刪除所有這些標記？</item>
+	</plurals>
+	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1367750681">1 位聯絡人正在分享他們的位置</item>
+		<item quantity="other" state="needs_review" hash="1164266856">%1$d 位聯絡人正在分享他們的位置</item>
+	</plurals>
+	<plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1602016664">您和另 1 人正在分享彼此的位置</item>
+		<item quantity="other" state="needs_review" hash="1789697147">您和 %1$d 位其他人正在分享您的位置</item>
+	</plurals>
 </resources>

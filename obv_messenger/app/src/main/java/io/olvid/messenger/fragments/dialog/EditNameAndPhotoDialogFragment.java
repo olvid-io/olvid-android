@@ -168,6 +168,7 @@ public class EditNameAndPhotoDialogFragment extends DialogFragment implements Vi
             Window window = dialog.getWindow();
             if (window != null) {
                 window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+                window.setBackgroundDrawableResource(android.R.color.transparent);
                 window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
         }

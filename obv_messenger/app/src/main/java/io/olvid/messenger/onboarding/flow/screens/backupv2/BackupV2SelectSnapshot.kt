@@ -23,6 +23,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Column
@@ -85,6 +86,7 @@ import io.olvid.messenger.settings.composables.getPlatformResource
 fun NavGraphBuilder.backupV2SelectSnapshot(
     backupSnapshotsFetchState: MutableState<BackupSnapshotsFetchState>,
     profileSnapshots: MutableState<List<ProfileBackupSnapshot>>,
+    initiallySelectedProfile: ProfileBackupSnapshot? = null,
     onRetry: () -> Unit,
     onRestore: (ProfileBackupSnapshot) -> Unit,
     onBack: () -> Unit,
@@ -98,7 +100,7 @@ fun NavGraphBuilder.backupV2SelectSnapshot(
         popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End) }
     ) {
         val context = LocalContext.current
-        var selectedProfile : ProfileBackupSnapshot? by remember { mutableStateOf(null) }
+        var selectedProfile : ProfileBackupSnapshot? by remember { mutableStateOf(initiallySelectedProfile) }
 
         OnboardingScreen(
             step = OnboardingStep(
@@ -115,6 +117,8 @@ fun NavGraphBuilder.backupV2SelectSnapshot(
                     colors = ButtonDefaults.buttonColors(
                         contentColor = colorResource(R.color.alwaysWhite),
                         containerColor = colorResource(R.color.olvid_gradient_light),
+                        disabledContainerColor = colorResource(R.color.lightGrey),
+                        disabledContentColor = colorResource(R.color.greyTint),
                     ),
                     onClick = {
                         selectedProfile?.let {
@@ -227,7 +231,7 @@ fun NavGraphBuilder.backupV2SelectSnapshot(
                                 contentPadding = PaddingValues(0.dp),
                                 elevation = null,
                                 border = if (selectedProfile == profileBackupSnapshot)
-                                    BorderStroke(1.dp, colorResource(R.color.greyTint))
+                                    BorderStroke(1.dp, colorResource(R.color.olvid_gradient_light))
                                 else
                                     null,
                                 colors = ButtonDefaults.buttonColors(
@@ -248,9 +252,29 @@ fun NavGraphBuilder.backupV2SelectSnapshot(
                                             .size(40.dp)
                                             .clip(RoundedCornerShape(12.dp))
                                             .background(colorResource(R.color.almostWhite))
+                                            .then(
+                                                if (selectedProfile == profileBackupSnapshot)
+                                                    Modifier.border(
+                                                        width = 1.dp,
+                                                        color = colorResource(R.color.olvid_gradient_light),
+                                                        shape = RoundedCornerShape(12.dp)
+                                                    )
+                                                else
+                                                    Modifier
+                                            )
                                             .padding(all = 10.dp),
-                                        painter = painterResource(profileBackupSnapshot.platform.getPlatformResource()),
-                                        colorFilter = ColorFilter.tint(colorResource(R.color.almostBlack)),
+                                        painter = painterResource(
+                                            if (selectedProfile == profileBackupSnapshot)
+                                                R.drawable.ic_check
+                                            else
+                                                profileBackupSnapshot.platform.getPlatformResource()
+                                        ),
+                                        colorFilter = ColorFilter.tint(colorResource(
+                                            if (selectedProfile == profileBackupSnapshot)
+                                                R.color.olvid_gradient_light
+                                            else
+                                                R.color.almostBlack
+                                        )),
                                         contentDescription = null,
                                     )
                                     Column(
@@ -321,22 +345,24 @@ fun SelectSnapshotPreview() {
         navController = rememberNavController(),
         startDestination = OnboardingRoutes.BACKUP_V2_SELECT_SNAPSHOT,
     ) {
+        val selected = ProfileBackupSnapshot(
+            threadId = ByteArray(5),
+            version = 2,
+            timestamp = 1647465878365,
+            thisDevice = false,
+            deviceName = "Lapin un nom très long pour le couper",
+            platform = "android",
+            contactCount = 77,
+            groupCount = 12,
+            keycloakStatus = ObvProfileBackupsForRestore.KeycloakStatus.UNMANAGED,
+            keycloakInfo = null,
+            snapshot = ObvSyncSnapshot.get(null)
+        )
+
         backupV2SelectSnapshot(
-            mutableStateOf(BackupSnapshotsFetchState.NONE),
-            mutableStateOf(listOf(
-                ProfileBackupSnapshot(
-                    threadId = ByteArray(5),
-                    version = 2,
-                    timestamp = 1647465878365,
-                    thisDevice = false,
-                    deviceName = "Lapin un nom très long pour le couper",
-                    platform = "android",
-                    contactCount = 77,
-                    groupCount = 12,
-                    keycloakStatus = ObvProfileBackupsForRestore.KeycloakStatus.UNMANAGED,
-                    keycloakInfo = null,
-                    snapshot = ObvSyncSnapshot.get(null)
-                ),
+            backupSnapshotsFetchState = mutableStateOf(value = BackupSnapshotsFetchState.NONE),
+            profileSnapshots = mutableStateOf(listOf(
+                selected,
                 ProfileBackupSnapshot(
                     threadId = ByteArray(5),
                     version = 2,
@@ -364,10 +390,11 @@ fun SelectSnapshotPreview() {
                     snapshot = ObvSyncSnapshot.get(null)
                 ),
             )),
-            {},
-            {},
-            {},
-            {}
+            initiallySelectedProfile = selected,
+            onRetry = {},
+            onRestore = {},
+            onBack = {},
+            onClose = {}
         )
     }
 }

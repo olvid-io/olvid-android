@@ -1,213 +1,237 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <plurals name="explanation_backup_v2_device_expiration_end">
-        <item quantity="one">„Na tomto zařízení bude vaše předchozí zařízení níže deaktivováno:"</item>
-        <item quantity="other">„Na tomto zařízení budou vaše zařízení níže deaktivována:"</item>
-    </plurals>
-    <plurals name="label_backups_found">
-        <item quantity="one">Nalezeno %1$d zálohování</item>
-        <item quantity="other">Nalezeno %1$d zálohování</item>
-    </plurals>
-    <plurals name="label_profiles_found">
-        <item quantity="one">Nalezeno %1$d profil</item>
-        <item quantity="other">Nalezeno %1$d profilů</item>
-    </plurals>
-    <plurals name="label_backup_groups">
-        <item quantity="zero">Žádná skupina</item>
-        <item quantity="one">%1$d skupina</item>
-        <item quantity="other">%1$d skupin</item>
-    </plurals>
-    <plurals name="label_backup_contacts">
-        <item quantity="zero">Žádný kontakt</item>
-        <item quantity="one">%1$d kontakt</item>
-        <item quantity="other">%1$d kontaktů</item>
-    </plurals>
-    <plurals name="label_discussion_archive_done">
-        <item quantity="one">Diskuze archivována</item>
-        <item quantity="other">%1$d diskuzí archivováno</item>
-    </plurals>
-    <plurals name="label_discussion_unarchive_done">
-        <item quantity="one">Diskuze odarchivována</item>
-        <item quantity="other">%1$d diskuzí odarchivováno</item>
-    </plurals>
-    <plurals name="label_message_unbookmark_done">
-        <item quantity="one">Zpráva odebrána ze záložek</item>
-        <item quantity="other">%1$d zpráv odebráno ze záložek</item>
-    </plurals>
-    <plurals name="dialog_title_delete_discussions">
-        <item quantity="one">Smazat vybranou diskuzi?</item>
-        <item quantity="other">Smazat vybrané diskuse?</item>
-    </plurals>
-    <plurals name="dialog_title_delete_messages">
-        <item quantity="one">Smazat vybranou zprávu?</item>
-        <item quantity="other">Smazat vybrané zprávy?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions">
-        <item quantity="one">Skutečně chcete smazat vybranou diskuzi a všechny zprávy v ní obsažené?\nTato akce nelze vrátit.</item>
-        <item quantity="other">Skutečně chcete smazat %1$d vybraných diskuzí a všechny zprávy v nich obsažené?\nTato akce nelze vrátit.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_discussions_choice">
-        <item quantity="one">Jak chcete smazat vybranou diskuzi a všechny zprávy v ní obsažené?\nTato akce nelze vrátit.</item>
-        <item quantity="other">Jak chcete smazat %1$d vybraných diskuzí a všechny zprávy v nich obsažené?\nTato akce nelze vrátit.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages">
-        <item quantity="one">Skutečně chcete smazat vybranou zprávu?\nTato akce nelze vrátit.</item>
-        <item quantity="other">Skutečně chcete smazat %1$d vybraných zpráv?\nTato akce nelze vrátit.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_messages_choice">
-        <item quantity="one">Jak chcete smazat vybranou zprávu?\nTato akce nelze vrátit.</item>
-        <item quantity="other">Jak chcete smazat %1$d vybraných zpráv?\nTato akce nelze vrátit.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_messages_everywhere">
-        <item quantity="one">Chystáte se **trvale** smazat zprávu pro **všechny** účastníky této diskuze. Ujistěte se, že to opravdu chcete udělat.</item>
-        <item quantity="other">Chystáte se **trvale** smazat %1$d zpráv pro **všechny** účastníky této diskuze. Ujistěte se, že to opravdu chcete udělat.</item>
-    </plurals>
-    <plurals name="dialog_warning_delete_discussions_everywhere">
-        <item quantity="one">Chystáte se **trvale** smazat diskuzi a zprávy v ní obsažené pro **všechny** účastníky této diskuze. Ujistěte se, že to opravdu chcete udělat.</item>
-        <item quantity="other">Chystáte se **trvale** smazat %1$d diskuzí a zprávy v nich obsažené pro **všechny** účastníky těchto diskuzí. Ujistěte se, že to opravdu chcete udělat.</item>
-    </plurals>
-    <plurals name="dialog_message_invite_all_group_members">
-        <item quantity="one">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (aktuálně 1 člen), do soukromé diskuze.\nChcete pokračovat?</item>
-        <item quantity="other">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (aktuálně %1$d členů), do soukromé diskuze.\nChcete pokračovat?</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_count">
-        <item quantity="one">1 společná skupina</item>
-        <item quantity="other">%1$d společných skupin</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_impossible_end">
-        <item quantity="one">. Budete muset opustit tuto skupinu, abyste mohli pokračovat.</item>
-        <item quantity="other">. Budete muset opustit tyto skupiny, abyste mohli pokračovat.</item>
-    </plurals>
-    <plurals name="dialog_message_delete_user_with_pending_groups">
-        <item quantity="one">Chystáte se odstranit %1$s ze seznamu ostatních uživatelů.\n\nPoznámka: %1$s byl pozván do %2$d skupiny, do kterých patříte. Pokud se k nim připojí, bude znovu přidán do tohoto seznamu. Možná budete chtít opustit tyto skupiny, abyste tomu zabránili.\n\nSkutečně chcete odstranit tohoto uživatele?</item>
-        <item quantity="other">Chystáte se odstranit %1$s ze seznamu ostatních uživatelů.\n\nPoznámka: %1$s byl pozván do %2$d skupin, do kterých patříte. Pokud se k jedné z nich připojí, bude znovu přidán do tohoto seznamu. Možná budete chtít opustit tyto skupiny, abyste tomu zabránili.\n\nSkutečně chcete odstranit tohoto uživatele?</item>
-    </plurals>
-    <plurals name="dialog_message_auto_join_pending_groups">
-        <item quantity="one">Změna tohoto nastavení automaticky přijme jeden čekající pozvánku do skupiny.\nStiskněte OK a potvrďte svou volbu a připojte se k této skupině.</item>
-        <item quantity="other">Změna tohoto nastavení automaticky přijme %1$d čekajících pozvánek do skupiny.\nStiskněte OK a potvrďte svou volbu a připojte se k těmto skupinám.</item>
-    </plurals>
-    <plurals name="dialog_message_save_selected_attachments">
-        <item quantity="one">Až budete vyzváni, vyberte složku, do které chcete uložit vybraný příloh.</item>
-        <item quantity="other">Až budete vyzváni, vyberte složku, do které chcete uložit %1$d vybraných příloh.</item>
-    </plurals>
-    <plurals name="action_mode_title_storage">
-        <item quantity="one">%1$d vybráno</item>
-        <item quantity="other">%1$d vybráno</item>
-    </plurals>
-    <plurals name="dialog_message_delete_attachments">
-        <item quantity="one">Skutečně chcete smazat vybranou přílohu?</item>
-        <item quantity="other">Skutečně chcete smazat %1$d vybraných příloh?</item>
-    </plurals>
-    <plurals name="text_app_uptime_days">
-        <item quantity="one">%1$d\u00a0den,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
-        <item quantity="other">%1$d\u00a0dnů,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>
-    </plurals>
-    <plurals name="text_message_possibly_missing">
-        <item quantity="one">%1$d chybějící zpráva…</item>
-        <item quantity="other">%1$d chybějících zpráv…</item>
-    </plurals>
-    <plurals name="text_outgoing_group_call_with_contacts">
-        <item quantity="one">Skupinový hovor s %2$s a jedním dalším</item>
-        <item quantity="other">Skupinový hovor s %2$s a %1$d dalšími</item>
-    </plurals>
-    <plurals name="text_unanswered_outgoing_group_call_with_contacts">
-        <item quantity="one">Nezodpovězený skupinový hovor s %2$s a jedním dalším</item>
-        <item quantity="other">Nezodpovězený skupinový hovor s %2$s a %1$d dalšími</item>
-    </plurals>
-    <plurals name="text_failed_outgoing_group_call_with_contacts">
-        <item quantity="one">Neúspěšný skupinový hovor s %2$s a jedním dalším</item>
-        <item quantity="other">Neúspěšný skupinový hovor s %2$s a %1$d dalšími</item>
-    </plurals>
-    <plurals name="text_busy_outgoing_group_call_with_contacts">
-        <item quantity="one">Skupinový hovor, zatímco %2$s a jeden další byli zaneprázdněni</item>
-        <item quantity="other">Skupinový hovor, zatímco %2$s a %1$d dalších byli zaneprázdněni</item>
-    </plurals>
-    <plurals name="text_rejected_outgoing_group_call_with_contacts">
-        <item quantity="one">Odmítnutý skupinový hovor s %2$s a jedním dalším</item>
-        <item quantity="other">Odmítnutý skupinový hovor s %2$s a %1$d dalšími</item>
-    </plurals>
-    <plurals name="text_incoming_group_call_with_contacts">
-        <item quantity="one">Skupinový hovor od %2$s a jednoho dalšího</item>
-        <item quantity="other">Skupinový hovor od %2$s a %1$d dalších</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion">
-        <item quantity="one">%1$d vybráno</item>
-        <item quantity="other">%1$d vybráno</item>
-    </plurals>
-    <plurals name="action_mode_title_discussion_list">
-        <item quantity="one">%1$d vybráno</item>
-        <item quantity="other">%1$d vybráno</item>
-    </plurals>
-    <plurals name="notification_public_title_new_messages">
-        <item quantity="one">%1$d nová zpráva</item>
-        <item quantity="other">%1$d nových zpráv</item>
-    </plurals>
-    <plurals name="dialog_message_invite_group_members">
-        <item quantity="one">%3$s bude pozván do skupiny %2$s.</item>
-        <item quantity="other">Následujících %1$d kontaktů bude pozváno do skupiny %2$s: %3$s.</item>
-    </plurals>
-    <plurals name="dialog_message_remove_group_members">
-        <item quantity="one">%3$s bude odebrán ze skupiny %2$s.</item>
-        <item quantity="other">Následujících %1$d členů skupiny bude odebráno ze skupiny %2$s: %3$s.</item>
-    </plurals>
-    <plurals name="text_unread_message_count">
-        <item quantity="one">%1$d nová zpráva</item>
-        <item quantity="other">%1$d nových zpráv</item>
-    </plurals>
-    <plurals name="text_reply_attachment_count">
-        <item quantity="one">%1$d příloha</item>
-        <item quantity="other">%1$d příloh</item>
-    </plurals>
-    <plurals name="text_and_x_other">
-        <item quantity="one">a %1$d další</item>
-        <item quantity="other">a %1$d dalších</item>
-    </plurals>
-    <plurals name="text_contact_names_last_separator_x_other">
-        <item quantity="one"> &amp; %1$d další</item>
-        <item quantity="other"> &amp; %1$d dalších</item>
-    </plurals>
-    <plurals name="dialog_message_confirm_retention_policy">
-        <item quantity="one">Použití nastavené zásady uchovávání dat by smazalo jednu zprávu.\nJste si jisti, že chcete pokračovat?</item>
-        <item quantity="other">Použití nastavené zásady uchovávání dat by smazalo %1$d zpráv.\nJste si jisti, že chcete pokračovat?</item>
-    </plurals>
-    <plurals name="text_keycloak_missing_search_result">
-        <item quantity="one">… a jeden další výsledek vyhledávání\nUpřesněte své vyhledávání</item>
-        <item quantity="other">… a %1$d dalších výsledků vyhledávání\nUpřesněte své vyhledávání</item>
-    </plurals>
-    <plurals name="duration_seconds">
-        <item quantity="one">1\u00a0sekunda</item>
-        <item quantity="other">%1$d\u00a0sekund</item>
-    </plurals>
-    <plurals name="duration_minutes">
-        <item quantity="one">1\u00a0minuta</item>
-        <item quantity="other">%1$d\u00a0minut</item>
-    </plurals>
-    <plurals name="duration_hours">
-        <item quantity="one">1\u00a0hodina</item>
-        <item quantity="other">%1$d\u00a0hodin</item>
-    </plurals>
-    <plurals name="duration_days">
-        <item quantity="one">1\u00a0den</item>
-        <item quantity="other">%1$d\u00a0dnů</item>
-    </plurals>
-    <plurals name="duration_years">
-        <item quantity="one">1\u00a0rok</item>
-        <item quantity="other">%1$d\u00a0roků</item>
-    </plurals>
-    <plurals name="other_members_count">
-        <item quantity="one">1\u00a0člen</item>
-        <item quantity="other">%1$d\u00a0členů</item>
-    </plurals>
-    <plurals name="dialog_message_delete_remote_deleted_messages">
-        <item quantity="one">Máte aktuálně 1 vzdáleně smazanou zprávu ve svých diskuzích. Chcete ji smazat?</item>
-        <item quantity="other">Máte aktuálně %1$d vzdáleně smazaných zpráv ve svých diskuzích. Chcete smazat všechny takové markery?</item>
-    </plurals>
-    <plurals name="label_xxx_contacts_sharing_their_position">
-        <item quantity="one">1 kontakt sdílí svou polohu</item>
-        <item quantity="other">%1$d kontaktů sdílí svou polohu</item>
-    </plurals>
-    <plurals name="label_you_and_xxx_contacts_sharing_their_location">
-        <item quantity="one">Vy a 1 další sdílíte svou polohu</item>
-        <item quantity="other">Vy a %1$d dalších sdílíte svou polohu</item>
-    </plurals>
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1156880361">Jedno z vašich zařízení vyprší a bude deaktivováno za **méně než %1$d den**.\nMůžete si zakoupit předplatné **Olvid+** a udržet jej aktivní.</item>
+		<item quantity="other" state="needs_review" hash="-574658149">Jedno z vašich zařízení vyprší a bude deaktivováno za **méně než %1$d dní**.\nMůžete si zakoupit předplatné **Olvid+** a udržet jej aktivní.</item>
+	</plurals>
+	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-683497602">%1$s přidal/a se do skupiny</item>
+		<item quantity="other" state="needs_review" hash="51603026">%1$s se připojil ke skupině</item>
+	</plurals>
+	<plurals name="text_left_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="399208793">%1$s opustil skupinu</item>
+		<item quantity="other" state="needs_review" hash="1945116549">%1$s opustil skupinu</item>
+	</plurals>
+	<plurals name="label_poll_answers" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="1797058436">Žádná odpověď</item>
+		<item quantity="one" state="needs_review" hash="-7151672">%1$d odpověď</item>
+		<item quantity="other" state="needs_review" hash="1394570044">%1$d odpovědi</item>
+	</plurals>
+	<plurals name="label_remove_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="312762041">Odstranit %1$d člena</item>
+		<item quantity="other" state="needs_review" hash="1816849257">Odebrat %1$d členů</item>
+	</plurals>
+	<plurals name="label_add_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1537484553">Přidejte člena %1$d</item>
+		<item quantity="other" state="needs_review" hash="1091232977">Přidejte %1$d členů</item>
+	</plurals>
+	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1131862199">\" na tomto zařízení bude vaše předchozí zařízení níže deaktivováno:</item>
+		<item quantity="other" state="needs_review" hash="-2011302529">\" na tomto zařízení budou vaše starší zařízení deaktivovány:</item>
+	</plurals>
+	<plurals name="label_backups_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1088606803">%1$d záloha nalezena</item>
+		<item quantity="other" state="needs_review" hash="-577868099">%1$d nalezené zálohy</item>
+	</plurals>
+	<plurals name="label_profiles_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1498976610">%1$d profil nalezen</item>
+		<item quantity="other" state="needs_review" hash="749391135">Nalezeno %1$d profilů</item>
+	</plurals>
+	<plurals name="label_backup_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="-174007554">Žádná skupina</item>
+		<item quantity="one" state="needs_review" hash="237276495">%1$d skupina</item>
+		<item quantity="other" state="needs_review" hash="900821953">%1$d skupiny</item>
+	</plurals>
+	<plurals name="label_backup_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="246373927">Žádný kontakt</item>
+		<item quantity="one" state="needs_review" hash="-1671298344">%1$d kontakt</item>
+		<item quantity="other" state="needs_review" hash="1022571360">%1$d kontakty</item>
+	</plurals>
+	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1772966333">Konverzace archivována</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d archivované konverzace</item>
+	</plurals>
+	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1312483800">Konverzace byla obnovena</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d konverzace obnoveny</item>
+	</plurals>
+	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2045500103">Zpráva byla odstraněna ze záložek</item>
+		<item quantity="other" state="needs_review" hash="204728896">%1$d zprávy byly odstraněny ze záložek</item>
+	</plurals>
+	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-716893580">Smazat vybranou konverzaci?</item>
+		<item quantity="other" state="needs_review" hash="-15840526">Smazat vybrané konverzace?</item>
+	</plurals>
+	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-862879351">Smazat vybranou zprávu?</item>
+		<item quantity="other" state="needs_review" hash="-2020248805">Smazat vybrané zprávy?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-931157230">Opravdu chcete smazat vybranou konverzaci a všechny zprávy, které obsahuje?\nTuto akci nelze vrátit zpět.</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">Opravdu chcete smazat %1$d vybrané konverzace a všechny zprávy, které obsahují?\nTuto akci nelze zrušit.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2139168692">Jak chcete smazat vybranou konverzaci a všechny zprávy, které obsahuje?\nTuto akci nelze vrátit zpět.</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">Jak chcete smazat %1$d vybrané konverzace a všechny zprávy, které obsahují?\nTuto akci nelze vrátit zpět.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-947341357">Opravdu chcete smazat vybranou zprávu?\nTuto akci nelze vrátit zpět.</item>
+		<item quantity="other" state="needs_review" hash="-752621695">Opravdu chcete smazat vybrané %1$d zprávy?\nTuto akci nelze vrátit zpět.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-474913536">Jak chcete smazat vybranou zprávu?\nTuto akci nelze vrátit zpět.</item>
+		<item quantity="other" state="needs_review" hash="-895867176">Jak chcete smazat vybrané %1$d zprávy?\nTuto akci nelze vrátit zpět.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-606769319">Chystáte se **trvale** smazat zprávu pro **všechny** účastníky této konverzace. Ujistěte se, že to opravdu chcete udělat.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">Chystáte se **trvale** smazat %1$d zprávy pro **všechny** účastníky této konverzace. Ujistěte se, že je to opravdu to, co chcete udělat.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118446236">Chystáte se **trvale** smazat konverzaci a všechny zprávy, které obsahuje, pro **všechny** účastníky této konverzace. Ujistěte se, že to opravdu chcete udělat.</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">Chystáte se **trvale** smazat %1$d konverzace a zprávy, které obsahují, pro **všechny** účastníky těchto konverzací. Ujistěte se, že to je skutečně to, co chcete udělat.</item>
+	</plurals>
+	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1306576418">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (v současné době 1 člen), do soukromé diskuze.\nChcete pokračovat?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (v současné době %1$d členů), do soukromé diskuze.\nChcete pokračovat?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1699852572">1 společná skupina</item>
+		<item quantity="other" state="needs_review" hash="-261780100">%1$d společné skupiny</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1000092559">Musíte opustit tuto skupinu, abyste mohli pokračovat.</item>
+		<item quantity="other" state="needs_review" hash="-1973752801">Abyste mohli pokračovat, musíte tyto skupiny opustit.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_with_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1290867480">Chystáte se odebrat %1$s ze svého seznamu ostatních uživatelů.\n\nUpozorňujeme, že %1$s byl pozván do skupiny %2$d, do které patříte. Pokud se k ní připojí, bude znovu přidán do tohoto seznamu. Možná budete chtít tuto skupinu opustit, abyste tomu zabránili.\n\nChcete tohoto uživatele skutečně smazat?</item>
+		<item quantity="other" state="needs_review" hash="1544662217">Chystáte se odebrat %1$s ze svého seznamu ostatních uživatelů.\n\nUpozorňujeme, že %1$s byl pozván do %2$d skupin, do kterých patříte. Pokud se k některé z nich připojí, bude znovu přidán do tohoto seznamu. Můžete se tomu vyhnout opuštěním těchto skupin.\n\nOpravdu chcete tohoto uživatele smazat?</item>
+	</plurals>
+	<plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-97256410">Změna tohoto nastavení automaticky přijme pozvánku do čekající skupiny.\nStiskněte OK a potvrďte svou volbu a připojte se k této skupině.</item>
+		<item quantity="other" state="needs_review" hash="1009007696">Změna tohoto nastavení automaticky přijme čekající pozvánky do skupin %1$d.\nStiskněte OK a potvrďte svou volbu a připojte se k těmto skupinám.</item>
+	</plurals>
+	<plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1768885312">Až budete vyzváni, vyberte prosím složku, do které chcete uložit vybraný soubor.\nUpozorňujeme, že přístup k některým složkám může být omezen.</item>
+		<item quantity="other" state="needs_review" hash="-1416662415">Po zobrazení výzvy vyberte složku, do které chcete uložit vybrané přílohy %1$d.\nUpozorňujeme, že přístup k některým složkám může být omezen.</item>
+	</plurals>
+	<plurals name="action_mode_title_storage" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d vybrán</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d vybrány</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1117804388">Opravdu chcete smazat vybraný soubor?</item>
+		<item quantity="other" state="needs_review" hash="-1540151013">Opravdu chcete smazat vybrané přílohy %1$d?</item>
+	</plurals>
+	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1400550170">%1$d den, %2$02dh %3$02dm %4$02ds</item>
+		<item quantity="other" state="needs_review" hash="-1847999182">%1$d dnů, %2$02dh %3$02dm %4$02ds</item>
+	</plurals>
+	<plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1040869757">%1$d chybějící zpráva…</item>
+		<item quantity="other" state="needs_review" hash="-970055416">%1$d chybějící zprávy…</item>
+	</plurals>
+	<plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="800251665">Skupinový hovor s %2$s a ještě jedním</item>
+		<item quantity="other" state="needs_review" hash="-1654053808">Skupinový hovor s %2$s a %1$d dalšími</item>
+	</plurals>
+	<plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1313506338">Nezodpovězený skupinový hovor s %2$s a další osobou</item>
+		<item quantity="other" state="needs_review" hash="1027194941">Nezvedený skupinový hovor s %2$s a %1$d dalšími</item>
+	</plurals>
+	<plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="575911091">Skupinový hovor s %2$s a jedním dalším se nezdařil</item>
+		<item quantity="other" state="needs_review" hash="1768048524">Selhalo skupinové volání s %2$s a %1$d dalšími</item>
+	</plurals>
+	<plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1115369211">Skupinový hovor, když byl %2$s a ještě jeden zaneprázdněn</item>
+		<item quantity="other" state="needs_review" hash="-332659300">Skupinový hovor, když bylo %2$s a %1$d dalších zaneprázdněných</item>
+	</plurals>
+	<plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1401449639">Skupinový hovor odmítnut %2$s a jedním dalším uživatelem</item>
+		<item quantity="other" state="needs_review" hash="-150166810">Skupinový hovor odmítnut s %2$s a %1$d dalšími</item>
+	</plurals>
+	<plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-366344569">Skupinový hovor od %2$s a další osoby</item>
+		<item quantity="other" state="needs_review" hash="1471743578">Skupinový hovor od %2$s a %1$d dalších</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="461822174">%1$d vybrán</item>
+		<item quantity="other" state="needs_review" hash="1431585621">Vybráno %1$d</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion_list" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d vybráno</item>
+		<item quantity="other" state="needs_review" hash="1429480972">Vybráno %1$d</item>
+	</plurals>
+	<plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d nová zpráva</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d nové zprávy</item>
+	</plurals>
+	<plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1495957123">%3$s bude pozván/a do skupiny %2$s.</item>
+		<item quantity="other" state="needs_review" hash="-250521442">Následující %1$d kontakty budou pozváni ke vstupu do skupiny %2$s: %3$s.</item>
+	</plurals>
+	<plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1633684901">%3$s bude odebrán/a ze skupiny %2$s.</item>
+		<item quantity="other" state="needs_review" hash="2062819899">Následující členové skupiny %2$s budou odebráni: %3$s (%1$d).</item>
+	</plurals>
+	<plurals name="text_unread_message_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d nová zpráva</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d nové zprávy</item>
+	</plurals>
+	<plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118984743">%1$d příloha</item>
+		<item quantity="other" state="needs_review" hash="1321323314">%1$d přílohy</item>
+	</plurals>
+	<plurals name="text_and_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-226443285">A %1$d další</item>
+		<item quantity="other" state="needs_review" hash="-2101659023">A %1$d další</item>
+	</plurals>
+	<plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-970333">&amp; %1$d ostatní</item>
+		<item quantity="other" state="needs_review" hash="1931856055"> &amp; %1$d další</item>
+	</plurals>
+	<plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-202072457">Použití nastavené zásady uchovávání zpráv by smazalo jednu zprávu.\nJste si jisti, že chcete pokračovat?</item>
+		<item quantity="other" state="needs_review" hash="-576713525">Použití nastavené zásady uchovávání zpráv by smazalo %1$d zpráv.\nJste si jisti, že chcete pokračovat?</item>
+	</plurals>
+	<plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="812170692">… a další výsledky vyhledávání\nUpřesněte prosím své vyhledávání</item>
+		<item quantity="other" state="needs_review" hash="1969873890">… a %1$d dalších výsledků\nUpřesněte prosím své vyhledávání</item>
+	</plurals>
+	<plurals name="duration_seconds" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="251130693">1 sekunda</item>
+		<item quantity="other" state="needs_review" hash="624952161">%1$d sekund</item>
+	</plurals>
+	<plurals name="duration_minutes" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1053938976">1 minuta</item>
+		<item quantity="other" state="needs_review" hash="-1051808">%1$d minut</item>
+	</plurals>
+	<plurals name="duration_hours" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1004063951">1 hodina</item>
+		<item quantity="other" state="needs_review" hash="1322950935">%1$d hodin</item>
+	</plurals>
+	<plurals name="duration_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1264358968">1 den</item>
+		<item quantity="other" state="needs_review" hash="-1170846734">%1$d dnů</item>
+	</plurals>
+	<plurals name="duration_years" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="388401904">1 rok</item>
+		<item quantity="other" state="needs_review" hash="298429520">%1$d let</item>
+	</plurals>
+	<plurals name="other_members_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1379655782">1 člen</item>
+		<item quantity="other" state="needs_review" hash="965402074">%1$d členů</item>
+	</plurals>
+	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1006155949">Máte aktuálně 1 vzdáleně smazanou zprávu ve vašich konverzacích. Chcete ji smazat?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">Aktuálně máte ve svých konverzacích %1$d vzdáleně smazané zprávy. Chcete všechny tyto značky smazat?</item>
+	</plurals>
+	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1367750681">1 kontakt sdílí svou polohu</item>
+		<item quantity="other" state="needs_review" hash="1164266856">%1$d kontaktů sdílí svou polohu</item>
+	</plurals>
+	<plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1602016664">Vy a [PLACEHOLDER_1] další sdílíte svou polohu</item>
+		<item quantity="other" state="needs_review" hash="1789697147">Vy a %1$d dalších uživatelů sdílíte svou polohu</item>
+	</plurals>
 </resources>

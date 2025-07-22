@@ -2600,8 +2600,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
                             ///////////////
                             // process the received log to remove people who left the group (including myself sometimes...)
-                            serverBlob.consolidateWithLogEntries(startState.groupIdentifier, receivedMessage.logEntries);
-
+                            List<Identity> leavers = serverBlob.consolidateWithLogEntries(startState.groupIdentifier, receivedMessage.logEntries);
 
                             // check whether I am indeed part of the group
                             GroupV2.IdentityAndPermissionsAndDetails ownIdentityAndPermissions = null;
@@ -2656,7 +2655,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
                             if (protocolManagerSession.identityDelegate.getGroupV2Version(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier) != null) {
                                 // update the group from what we downloaded, and retrieve the list of new members to "ping"
-                                List<Identity> newGroupMembers = protocolManagerSession.identityDelegate.updateGroupV2WithNewBlob(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, serverBlob, blobKeys, false);
+                                List<Identity> newGroupMembers = protocolManagerSession.identityDelegate.updateGroupV2WithNewBlob(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, serverBlob, blobKeys, false, signerIdentity, leavers);
 
                                 if (newGroupMembers == null) {
                                     // We were not able to update the group, return null to retry...
@@ -4083,7 +4082,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
             // validate integrity of the chain so that the IdentityManager accepts it
             startState.updatedBlob.administratorsChain.withCheckedIntegrity(startState.groupIdentifier.groupUid, null, protocolManagerSession.identityDelegate.getGroupV2AdministratorsChain(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier));
-            List<Identity> updateOutput = protocolManagerSession.identityDelegate.updateGroupV2WithNewBlob(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, startState.updatedBlob, startState.updatedBlobKeys, true);
+            List<Identity> updateOutput = protocolManagerSession.identityDelegate.updateGroupV2WithNewBlob(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, startState.updatedBlob, startState.updatedBlobKeys, true, null, null);
 
             if (updateOutput == null) {
                 // update failed, return null to try again

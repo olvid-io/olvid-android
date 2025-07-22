@@ -491,8 +491,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             arrayOf("❤️", "👍", "👎", "😂", "😮", "😢")
 
 
-        const val PREF_KEY_MUTE_TROUBLESHOOTING_TIP_UNTIL: String = "pref_key_mute_troubleshooting_tip_until"
+        const val PREF_KEY_LAST_TROUBLESHOOTING_TIP_TIMESTAMP: String = "pref_key_mute_troubleshooting_tip_until"
+        const val PREF_KEY_LAST_EXPIRING_DEVICE_TIP_TIMESTAMP: String = "pref_key_mute_offline_device_tip_until"
+        const val PREF_KEY_LAST_OFFLINE_DEVICE_TIP_TIMESTAMP: String = "pref_key_mute_offline_device_tip_until"
         const val PREF_KEY_MUTE_NEW_TRANSLATIONS_TIP: String = "pref_key_mute_new_translations_tip"
+
+        const val PREF_KEY_LAST_RATING_TIP_TIMESTAMP: String = "pref_key_last_rating_tip_timestamp"
+        const val PREF_KEY_LAST_RATING: String = "pref_key_last_rating"
 
         // BETA
         const val PREF_KEY_ENABLE_BETA_FEATURES: String = "pref_key_enable_beta_features"
@@ -580,8 +585,8 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
 
         // PRIVACY
-        const val PREF_KEY_LAST_READ_RECEIPT_PROMPT_ANSWER_TIMESTAMP: String =
-            "pref_key_last_read_receipt_prompt_answer_timestamp"
+        const val PREF_KEY_LAST_READ_RECEIPT_TIP_TIMESTAMP: String =
+            "pref_key_last_read_receipt_tip_timestamp"
         const val PREF_KEY_READ_RECEIPT: String = "pref_key_send_read_receipt"
         const val PREF_KEY_READ_RECEIPT_DEFAULT: Boolean = false
 
@@ -1298,21 +1303,15 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         }
 
         @JvmStatic
-        var lastReadReceiptPromptAnswerTimestamp: Long
+        var lastReadReceiptTipTimestamp: Long
             get() {
                 return PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                    .getLong(
-                        PREF_KEY_LAST_READ_RECEIPT_PROMPT_ANSWER_TIMESTAMP,
-                        0
-                    )
+                    .getLong(PREF_KEY_LAST_READ_RECEIPT_TIP_TIMESTAMP, 0)
             }
             set(timestampOrMinusOne) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
                     .edit {
-                        putLong(
-                            PREF_KEY_LAST_READ_RECEIPT_PROMPT_ANSWER_TIMESTAMP,
-                            timestampOrMinusOne
-                        )
+                        putLong(PREF_KEY_LAST_READ_RECEIPT_TIP_TIMESTAMP, timestampOrMinusOne)
                     }
             }
 
@@ -2360,16 +2359,68 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 }
             }
 
-        var muteTroubleshootingTipUntil: Long
+        var lastTroubleshootingTipTimestamp: Long
             get() {
                 return PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                    .getLong(PREF_KEY_MUTE_TROUBLESHOOTING_TIP_UNTIL, 0)
+                    .getLong(PREF_KEY_LAST_TROUBLESHOOTING_TIP_TIMESTAMP, 0)
             }
             set(timestamp) {
                 PreferenceManager
                     .getDefaultSharedPreferences(App.getContext())
                     .edit {
-                        putLong(PREF_KEY_MUTE_TROUBLESHOOTING_TIP_UNTIL, timestamp)
+                        putLong(PREF_KEY_LAST_TROUBLESHOOTING_TIP_TIMESTAMP, timestamp)
+                    }
+            }
+
+        var lastRatingTipTimestamp: Long
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getLong(PREF_KEY_LAST_RATING_TIP_TIMESTAMP, 0)
+            }
+            set(timestamp) {
+                PreferenceManager
+                    .getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putLong(PREF_KEY_LAST_RATING_TIP_TIMESTAMP, timestamp)
+                    }
+            }
+
+        var lastRating: Int
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getInt(PREF_KEY_LAST_RATING, -1)
+            }
+            set(rating) {
+                PreferenceManager
+                    .getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putInt(PREF_KEY_LAST_RATING, rating)
+                    }
+            }
+
+        var lastExpiringDeviceTipTimestamp: Long
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getLong(PREF_KEY_LAST_EXPIRING_DEVICE_TIP_TIMESTAMP, 0)
+            }
+            set(timestamp) {
+                PreferenceManager
+                    .getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putLong(PREF_KEY_LAST_EXPIRING_DEVICE_TIP_TIMESTAMP, timestamp)
+                    }
+            }
+
+        var lastOfflineDeviceTipTimestamp: Long
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getLong(PREF_KEY_LAST_OFFLINE_DEVICE_TIP_TIMESTAMP, 0)
+            }
+            set(timestamp) {
+                PreferenceManager
+                    .getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putLong(PREF_KEY_LAST_OFFLINE_DEVICE_TIP_TIMESTAMP, timestamp)
                     }
             }
 
@@ -2873,16 +2924,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                         if (icons == null) {
                             remove(PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER)
                         } else {
-                            val iconSb: StringBuilder = StringBuilder()
-                            for (icon: Int in icons) {
-                                if (iconSb.isNotEmpty()) {
-                                    iconSb.append(",")
-                                }
-                                iconSb.append(icon)
-                            }
                             putString(
                                 PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER,
-                                iconSb.toString()
+                                icons.joinToString(separator = ",")
                             )
                         }
                     }

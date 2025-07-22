@@ -278,6 +278,7 @@ public class ColissimoMessageQueue {
                                     discussionId,
                                     false,
                                     null,
+                                    null,
                                     null
                             ));
                         }

@@ -18,38 +18,44 @@
  */
 package io.olvid.messenger.group
 
-import android.content.res.Configuration
+import android.Manifest.permission
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.text.InputType
-import android.util.Pair
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.View.OnClickListener
-import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.provider.MediaStore
+import android.widget.Toast
+import androidx.activity.SystemBarStyle
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.widget.Toolbar
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.inputmethod.EditorInfoCompat
-import androidx.core.view.updateLayoutParams
-import androidx.core.view.updateMargins
-import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentPagerAdapter
-import androidx.lifecycle.switchMap
-import androidx.viewpager.widget.ViewPager
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener
-import com.google.android.material.tabs.TabLayout
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.containers.GroupV2.Permission
 import io.olvid.engine.engine.types.EngineNotificationListener
@@ -62,61 +68,65 @@ import io.olvid.engine.engine.types.identities.ObvGroup
 import io.olvid.engine.engine.types.identities.ObvGroupV2
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
+import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.onBackPressed
-import io.olvid.messenger.databases.AppDatabase
-import io.olvid.messenger.databases.entity.Contact
-import io.olvid.messenger.databases.entity.OwnedIdentity
-import io.olvid.messenger.databases.entity.jsons.JsonExpiration
-import io.olvid.messenger.discussion.compose.EphemeralViewModel
-import io.olvid.messenger.fragments.FilteredContactListFragment
-import io.olvid.messenger.group.GroupTypeModel.CustomGroup
-import io.olvid.messenger.group.GroupTypeModel.SimpleGroup
-import io.olvid.messenger.settings.SettingsActivity
+import io.olvid.messenger.designsystem.components.OlvidTopAppBar
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
+import io.olvid.messenger.designsystem.theme.OlvidTypography
+import io.olvid.messenger.group.GroupTypeModel.GroupType
+import io.olvid.messenger.group.GroupV2DetailsActivity.Companion.REQUEST_CODE_CHOOSE_IMAGE
+import io.olvid.messenger.group.GroupV2DetailsActivity.Companion.REQUEST_CODE_PERMISSION_CAMERA
+import io.olvid.messenger.group.GroupV2DetailsActivity.Companion.REQUEST_CODE_SELECT_ZONE
+import io.olvid.messenger.group.GroupV2DetailsActivity.Companion.REQUEST_CODE_TAKE_PICTURE
+import io.olvid.messenger.group.components.MembersRow
+import io.olvid.messenger.group.components.Routes
+import io.olvid.messenger.group.components.addMembers
+import io.olvid.messenger.group.components.chooseNewGroupAdmins
+import io.olvid.messenger.group.components.editGroupDetails
+import io.olvid.messenger.group.components.groupType
+import io.olvid.messenger.group.components.toGroupMember
+import io.olvid.messenger.owneddetails.SelectDetailsPhotoActivity
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-class GroupCreationActivity : LockableActivity(), OnClickListener {
-    private val viewPager: ViewPager by lazy { findViewById(R.id.group_creation_view_pager) }
+class GroupCreationActivity : LockableActivity() {
     private val groupCreationViewModel: GroupCreationViewModel by viewModels()
-    private val groupDetailsViewModel: OwnedGroupDetailsViewModel by viewModels()
+    private val ownedGroupDetailsViewModel: OwnedGroupDetailsViewModel by viewModels()
     private val groupV2DetailsViewModel: GroupV2DetailsViewModel by viewModels()
-    private val ephemeralViewModel: EphemeralViewModel by viewModels()
-    private val nextButton: Button by lazy { findViewById(R.id.button_next_tab) }
-    private val previousButton: Button by lazy { findViewById(R.id.button_previous_tab) }
-    private val confirmationButton: Button by lazy { findViewById(R.id.button_confirmation) }
-    private var subtitleTextView: TextView? = null
-    var contactsSelectionFragment: ContactsSelectionFragment? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        groupDetailsViewModel.valid.observe(this) { ready: Boolean? ->
-            confirmationButton.isEnabled = ready ?: false
-        }
-        if (savedInstanceState == null) {
-            groupDetailsViewModel.setBytesGroupOwnerAndUidOrIdentifier(ByteArray(0))
-            ephemeralViewModel.setDiscussionId(null, true)
 
-            // ephemeral settings
-            ephemeralViewModel.setReadOnce(SettingsActivity.defaultDiscussionReadOnce)
-            ephemeralViewModel.setVisibility(SettingsActivity.defaultDiscussionVisibilityDuration)
-            ephemeralViewModel.setExistence(SettingsActivity.defaultDiscussionExistenceDuration)
+    @OptIn(ExperimentalMaterial3Api::class)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+        )
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) {
+            ownedGroupDetailsViewModel.setBytesGroupOwnerAndUidOrIdentifier(ByteArray(0))
 
             // only look at intent when first creating the activity
             val intent = intent
-            groupDetailsViewModel.setGroupV2(groupV2)
+            ownedGroupDetailsViewModel.setGroupV2(CREATE_GROUPS_AS_V2)
             if (intent.hasExtra(SERIALIZED_GROUP_DETAILS_INTENT_EXTRA)) {
+                ownedGroupDetailsViewModel.cloning.value = true
                 try {
                     val groupDetails = AppSingleton.getJsonObjectMapper().readValue(
                         intent.getStringExtra(SERIALIZED_GROUP_DETAILS_INTENT_EXTRA),
                         JsonGroupDetails::class.java
                     )
                     if (groupDetails.name.isNullOrEmpty().not()) {
-                        groupDetailsViewModel.setGroupName(getString(R.string.text_copy_of_prefix) + groupDetails.name)
+                        ownedGroupDetailsViewModel.setGroupName(getString(R.string.text_copy_of_prefix) + groupDetails.name)
                     }
-                    groupDetailsViewModel.groupDescription = groupDetails.description
-                } catch (_: Exception) {
-                }
+                    ownedGroupDetailsViewModel.groupDescription = groupDetails.description
+                } catch (_: Exception) { }
             }
             if (intent.hasExtra(SERIALIZED_GROUP_TYPE_INTENT_EXTRA)) {
                 try {
@@ -125,291 +135,181 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                         JsonGroupType::class.java
                     )
                     if (groupType != null) {
-                        groupV2DetailsViewModel.setGroupType(groupType.toGroupCreationModel())
-                        groupCreationViewModel.setIsCustomGroup(groupType.type == JsonGroupType.TYPE_CUSTOM)
+                        groupV2DetailsViewModel.groupType = groupType.toGroupCreationModel()
                     }
-                } catch (_: Exception) {
-                }
+                } catch (_: Exception) { }
             }
             if (intent.hasExtra(ABSOLUTE_PHOTO_URL_INTENT_EXTRA)) {
-                groupDetailsViewModel.setAbsolutePhotoUrl(
+                ownedGroupDetailsViewModel.cloning.value = true
+                ownedGroupDetailsViewModel.setAbsolutePhotoUrl(
                     intent.getStringExtra(
                         ABSOLUTE_PHOTO_URL_INTENT_EXTRA
                     )
                 )
             }
-            val preselectedContactAdminBytesKeys = intent.getParcelableArrayListExtra<BytesKey>(
-                PRESELECTED_GROUP_ADMIN_MEMBERS_INTENT_EXTRA
-            ) ?: arrayListOf<BytesKey>()
-            val preselectedContactNonAdminBytesKeys =
-                intent.getParcelableArrayListExtra<BytesKey>(PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA)
-                    ?: arrayListOf<BytesKey>()
-            val preselectedContactBytesKeys = preselectedContactAdminBytesKeys + preselectedContactNonAdminBytesKeys
-            if (preselectedContactBytesKeys.isNotEmpty()) {
-                App.runThread {
-                    val admins : HashSet<Contact> = hashSetOf()
-                    val preselectedContacts: MutableList<Contact> = ArrayList()
-                    for (bytesKey in preselectedContactBytesKeys) {
-                        AppSingleton.getBytesCurrentIdentity()?.let { bytesOwnedIdentity ->
-                            val contact = AppDatabase.getInstance()
-                                .contactDao()[bytesOwnedIdentity, bytesKey.bytes]
-                            if (contact != null) {
-                                preselectedContacts.add(contact)
-                                if (preselectedContactAdminBytesKeys.contains(bytesKey)) {
-                                    admins.add(contact)
-                                }
-                            }
-                        }
-                    }
-                    if (preselectedContacts.isNotEmpty()) {
-                        runOnUiThread {
-                            groupCreationViewModel.admins.value = admins
-                            groupCreationViewModel.selectedContacts = preselectedContacts
-                            contactsSelectionFragment?.setInitiallySelectedContacts(
-                                preselectedContacts
-                            )
-                        }
-                    }
-                }
-            }
+            groupCreationViewModel.admins.value =
+                GroupClone.preselectedGroupAdminMembers.toHashSet()
+            groupCreationViewModel.selectedContacts.value =
+                GroupClone.preselectedGroupMembers + GroupClone.preselectedGroupAdminMembers
+            GroupClone.clear()
         }
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        setContentView(R.layout.activity_group_creation)
+
         onBackPressed {
-            val position = viewPager.currentItem
-            if (position > 0) {
-                viewPager.currentItem = position - 1
-            } else {
-                finish()
-            }
+            finish()
         }
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        subtitleTextView = toolbar.findViewById(R.id.subtitle)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowTitleEnabled(false)
-            elevation = 0f
-        }
-        findViewById<CoordinatorLayout>(R.id.root_coordinator)?.let {
-            ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets =
-                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
-                toolbar.updatePadding(top = insets.top)
-                findViewById<ViewPager>(R.id.group_creation_view_pager)?.updatePadding(
-                    left = insets.left,
-                    right = insets.right
-                )
-                view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    updateMargins(bottom = insets.bottom)
-                }
-                WindowInsetsCompat.CONSUMED
-            }
-        }
-        groupCreationViewModel.subtitleLiveData.observe(this) { tabAndSelectedContactCount: Pair<Int?, Int?>? ->
-            if (subtitleTextView == null || tabAndSelectedContactCount == null || tabAndSelectedContactCount.first == null || tabAndSelectedContactCount.second == null) {
-                return@observe
-            }
-            when (tabAndSelectedContactCount.first) {
-                CONTACTS_SELECTION_TAB -> if (tabAndSelectedContactCount.second == 0) {
-                    subtitleTextView!!.text = getString(R.string.subtitle_select_group_members)
-                } else {
-                    subtitleTextView!!.text = resources.getQuantityString(
-                        R.plurals.other_members_count,
-                        tabAndSelectedContactCount.second!!,
-                        tabAndSelectedContactCount.second
+
+        setContent {
+            val navController = rememberNavController()
+            val currentDestination by navController.currentBackStackEntryAsState()
+            Scaffold(
+                containerColor = colorResource(R.color.almostWhite),
+                contentColor = colorResource(R.color.almostBlack),
+                topBar = {
+                    OlvidTopAppBar(
+                        titleText = when (currentDestination?.destination?.route) {
+                            Routes.EDIT_GROUP_DETAILS -> stringResource(R.string.dialog_title_edit_group_details)
+                            Routes.ADD_GROUP_MEMBERS -> stringResource(R.string.button_label_new_group)
+                            Routes.CHOOSE_NEW_GROUP_ADMINS -> stringResource(R.string.label_group_choose_admins)
+                            Routes.GROUP_TYPE -> stringResource(R.string.label_group_type)
+                            else -> stringResource(R.string.activity_title_group_details)
+                        },
+                        onBackPressed = onBackPressedDispatcher::onBackPressed
                     )
-                }
-
-                GROUP_NAME_TAB -> subtitleTextView!!.text =
-                    getString(R.string.subtitle_choose_group_name)
-
-                GROUP_SETTINGS_TAB -> subtitleTextView!!.text =
-                    getString(R.string.label_group_custom_settings)
-            }
-        }
-
-        val fragmentPagerAdapter: FragmentPagerAdapter = object : FragmentPagerAdapter(
-            supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
-        ) {
-            override fun getItem(position: Int): Fragment {
-                return when (position) {
-                    CONTACTS_SELECTION_TAB -> ContactsSelectionFragment()
-                    GROUP_NAME_TAB -> GroupNameFragment()
-                    else -> GroupCustomSettingsPreferenceFragment(isGroupCreation = true)
-                }
-            }
-
-            override fun instantiateItem(container: ViewGroup, position: Int): Any {
-                val fragment = super.instantiateItem(container, position) as Fragment
-                when (position) {
-                    CONTACTS_SELECTION_TAB -> {
-                        contactsSelectionFragment = fragment as ContactsSelectionFragment
-                        contactsSelectionFragment!!.setGroupV2(groupDetailsViewModel.isGroupV2())
-                        contactsSelectionFragment!!.setInitiallySelectedContacts(
-                            groupCreationViewModel.selectedContacts
+                }) { contentPadding ->
+                Box(modifier = Modifier
+                    .padding(top = contentPadding.calculateTopPadding())
+                    .cutoutHorizontalPadding()
+                    .systemBarsHorizontalPadding()
+                    .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
+                ) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = Routes.ADD_GROUP_MEMBERS
+                    ) {
+                        addMembers(
+                            groupV2DetailsViewModel = groupV2DetailsViewModel,
+                            groupCreationViewModel = groupCreationViewModel,
+                            onValidate = {
+                                if (it.isEmpty()) {
+                                    groupCreationViewModel.selectedContacts.value = emptyList()
+                                    navController.navigate(
+                                        route = Routes.EDIT_GROUP_DETAILS
+                                    )
+                                } else {
+                                    groupCreationViewModel.selectedContacts.value =
+                                        it.mapNotNull { it.contact }
+                                    navController.navigate(
+                                        route = Routes.GROUP_TYPE
+                                    )
+                                }
+                            })
+                        groupType(
+                            groupV2DetailsViewModel = groupV2DetailsViewModel,
+                            content = {
+                                groupCreationViewModel.selectedContacts.value.takeIf { it.isNotEmpty() }?.let {
+                                    Column {
+                                        Text(
+                                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 6.dp),
+                                            text = pluralStringResource(
+                                                R.plurals.other_members_count,
+                                                it.size,
+                                                it.size
+                                            ),
+                                            style = OlvidTypography.h3.copy(color = colorResource(R.color.almostBlack)),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                        MembersRow(members = it.map { it.toGroupMember() })
+                                    }
+                                }
+                            },
+                            showTitle = true,
+                            validationLabel = getString(R.string.button_label_next),
+                            onValidate = {
+                                if (groupV2DetailsViewModel.groupType.type != GroupType.SIMPLE) {
+                                    navController.navigate(
+                                        route = Routes.CHOOSE_NEW_GROUP_ADMINS,
+                                    )
+                                } else {
+                                    navController.navigate(
+                                        route = Routes.EDIT_GROUP_DETAILS
+                                    )
+                                }
+                            })
+                        chooseNewGroupAdmins(
+                            groupCreationViewModel = groupCreationViewModel,
+                            onValidate = {
+                                navController.navigate(
+                                    route = Routes.EDIT_GROUP_DETAILS
+                                )
+                            })
+                        editGroupDetails(
+                            groupV2DetailsViewModel = groupV2DetailsViewModel,
+                            editGroupDetailsViewModel = ownedGroupDetailsViewModel,
+                            onTakePicture = ::onTakePicture,
+                            isGroupCreation = true,
+                            isGroupV2 = CREATE_GROUPS_AS_V2,
+                            content = {
+                                groupCreationViewModel.selectedContacts.value.takeIf { it.isNotEmpty() }?.let {
+                                    Column {
+                                        Text(
+                                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 6.dp),
+                                            text = pluralStringResource(
+                                                R.plurals.other_members_count,
+                                                it.size,
+                                                it.size
+                                            ),
+                                            style = OlvidTypography.h3.copy(color = colorResource(R.color.almostBlack)),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                        MembersRow(members = it.map { it.toGroupMember() })
+                                    }
+                                }
+                            },
+                            onValidate = {
+                                onValidateGroupCreation()
+                            }
                         )
                     }
-
-                    GROUP_NAME_TAB -> {}
-                }
-                return fragment
-            }
-
-            override fun getCount(): Int {
-                return if (java.lang.Boolean.TRUE == groupCreationViewModel.isCustomGroup().value) 3 else 2
-            }
-        }
-        viewPager.adapter = fragmentPagerAdapter
-        viewPager.offscreenPageLimit = 2
-        val tabLayout = findViewById<TabLayout>(R.id.group_creation_tab_dots)
-        tabLayout.setupWithViewPager(viewPager, true)
-        groupCreationViewModel.isCustomGroup().observe(this) { custom: Boolean ->
-            fragmentPagerAdapter.notifyDataSetChanged()
-            if (viewPager.currentItem == GROUP_NAME_TAB) {
-                if (custom) {
-                    nextButton.visibility = View.VISIBLE
-                    confirmationButton.visibility = View.GONE
-                } else {
-                    nextButton.visibility = View.GONE
-                    confirmationButton.visibility = View.VISIBLE
                 }
             }
         }
-        nextButton.setOnClickListener(this)
-        previousButton.setOnClickListener(this)
-        confirmationButton.setOnClickListener(this)
-        val pageChangeListener: OnPageChangeListener = object : OnPageChangeListener {
-            override fun onPageScrolled(
-                position: Int,
-                positionOffset: Float,
-                positionOffsetPixels: Int
-            ) {
-            }
-
-            override fun onPageScrollStateChanged(state: Int) {}
-            override fun onPageSelected(position: Int) {
-                groupCreationViewModel.setSelectedTab(position)
-                when (position) {
-                    CONTACTS_SELECTION_TAB -> {
-                        previousButton.visibility = View.GONE
-                        nextButton.visibility = View.VISIBLE
-                        confirmationButton.visibility = View.GONE
-                    }
-
-                    GROUP_NAME_TAB -> if (java.lang.Boolean.TRUE == groupCreationViewModel.isCustomGroup().value) {
-                        previousButton.visibility = View.VISIBLE
-                        nextButton.visibility = View.VISIBLE
-                        confirmationButton.visibility = View.GONE
-                    } else {
-                        previousButton.visibility = View.VISIBLE
-                        nextButton.visibility = View.GONE
-                        confirmationButton.visibility = View.VISIBLE
-                    }
-
-                    GROUP_SETTINGS_TAB -> {
-                        previousButton.visibility = View.VISIBLE
-                        nextButton.visibility = View.GONE
-                        confirmationButton.visibility = View.VISIBLE
-                    }
-                }
-                invalidateOptionsMenu()
-            }
-        }
-        viewPager.addOnPageChangeListener(pageChangeListener)
-        pageChangeListener.onPageSelected(0)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        if (viewPager.currentItem == CONTACTS_SELECTION_TAB) {
-            menuInflater.inflate(R.menu.menu_group_creation_contact_selection, menu)
-            val searchItem = menu.findItem(R.id.action_search)
-            val searchView = searchItem.actionView as? EditText
-            if (searchView != null) {
-                val expandListener = object : MenuItem.OnActionExpandListener {
-                    override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                        searchView.requestFocus()
-                        Handler(Looper.getMainLooper()).postDelayed({ (getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager)?.showSoftInput(searchView, InputMethodManager.SHOW_IMPLICIT) }, 200)
-                        return true
-                    }
-
-                    override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                        searchView.text = null
-                        return true
-                    }
+    private fun onValidateGroupCreation() {
+        if (groupCreationViewModel.selectedContacts.value.isEmpty()) {
+            val builder = SecureAlertDialogBuilder(this@GroupCreationActivity, R.style.CustomAlertDialog)
+                .setTitle(R.string.dialog_title_create_empty_group)
+                .setMessage(R.string.dialog_message_create_empty_group)
+                .setPositiveButton(R.string.button_label_ok) { _, _ ->
+                    initiateGroupCreationProtocol()
                 }
-                searchItem.setOnActionExpandListener(expandListener)
-
-                searchView.layoutParams = ViewGroup.LayoutParams(-1, -1)
-                searchView.background = null
-                searchView.hint = getString(R.string.hint_search_contact_name)
-                if (SettingsActivity.useKeyboardIncognitoMode()) {
-                    searchView.imeOptions =
-                        searchView.imeOptions or EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
-                }
-                searchView.inputType =
-                    InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or InputType.TYPE_TEXT_VARIATION_FILTER
-                contactsSelectionFragment?.setContactFilterEditText(searchView)
-            }
-        }
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) {
-            onBackPressed()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    override fun onClick(view: View) {
-        val id = view.id
-        if (id == R.id.button_next_tab) {
-            val position = viewPager.currentItem
-            if (position < 2) {
-                viewPager.currentItem = position + 1
-            }
-        } else if (id == R.id.button_previous_tab) {
-            val position = viewPager.currentItem
-            if (position > 0) {
-                viewPager.currentItem = position - 1
-            }
-        } else if (id == R.id.button_confirmation) {
-            if (groupCreationViewModel.selectedContacts.isNullOrEmpty()) {
-                val builder = SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                    .setTitle(R.string.dialog_title_create_empty_group)
-                    .setMessage(R.string.dialog_message_create_empty_group)
-                    .setPositiveButton(R.string.button_label_ok) { _, _ ->
-                        confirmationButton.isEnabled = false
-                        initiateGroupCreationProtocol()
-                    }
-                    .setNegativeButton(R.string.button_label_cancel, null)
-                builder.create().show()
-            } else {
-                confirmationButton.isEnabled = false
-                initiateGroupCreationProtocol()
-            }
+                .setNegativeButton(R.string.button_label_cancel, null)
+            builder.create().show()
+        } else {
+            initiateGroupCreationProtocol()
         }
     }
 
     private fun initiateGroupCreationProtocol() {
-        if (groupDetailsViewModel.isGroupV2()) {
+        // uncomment to create a V1 group
+        // ownedGroupDetailsViewModel.setGroupV2(false)
+        if (ownedGroupDetailsViewModel.isGroupV2()) {
             val bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity() ?: return
-            val selectedContacts = groupCreationViewModel.selectedContacts ?: emptyList()
 
-            val groupAbsolutePhotoUrl = groupDetailsViewModel.getAbsolutePhotoUrl()
-            val groupName = groupDetailsViewModel.getGroupName() ?: ""
-            val groupDescription = groupDetailsViewModel.groupDescription?.trim()
+            val groupAbsolutePhotoUrl = ownedGroupDetailsViewModel.getAbsolutePhotoUrl()
+            val groupName = ownedGroupDetailsViewModel.groupName
+            val groupDescription = ownedGroupDetailsViewModel.groupDescription?.trim()
 
-            val jsonGroupDetails = JsonGroupDetails(groupName.trim(), groupDescription)
-            val groupType = groupV2DetailsViewModel.getGroupTypeLiveData().value ?: SimpleGroup
+            val jsonGroupDetails = JsonGroupDetails(groupName.value?.trim(), groupDescription)
+            val groupType = groupV2DetailsViewModel.groupType
             val otherGroupMembers = HashMap<ObvBytesKey, HashSet<Permission>>()
-            for (contact in selectedContacts) {
+            for (contact in groupCreationViewModel.selectedContacts.value) {
                 val permissions = groupV2DetailsViewModel.getPermissions(
                     groupType,
-                    groupCreationViewModel.admins.value?.contains(contact) == true)
+                    groupCreationViewModel.admins.value?.contains(contact) == true
+                )
                 otherGroupMembers[ObvBytesKey(contact.bytesContactIdentity)] = permissions
             }
             try {
@@ -417,15 +317,6 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                     AppSingleton.getJsonObjectMapper().writeValueAsString(jsonGroupDetails)
                 val serializedGroupType = AppSingleton.getJsonObjectMapper()
                     .writeValueAsString((groupType).toJsonGroupType())
-                // set tmp ephemeral settings for just created group
-                AppSingleton.setCreatedGroupEphemeralSettings(
-                    JsonExpiration().takeIf { groupV2DetailsViewModel.getGroupTypeLiveData().value is CustomGroup }
-                        ?.apply {
-                            readOnce = ephemeralViewModel.getReadOnce()
-                            visibilityDuration = ephemeralViewModel.getVisibility()
-                            existenceDuration = ephemeralViewModel.getExistence()
-                        }
-                )
 
                 val ownPermissions = Permission.DEFAULT_ADMIN_PERMISSIONS.toHashSet().apply {
                     if (groupType is CustomGroup && groupType.remoteDeleteSetting != GroupTypeModel.RemoteDeleteSetting.NOBODY)
@@ -449,7 +340,7 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                             Thread {
                                 try {
                                     Thread.sleep(3000)
-                                } catch (e: InterruptedException) {
+                                } catch (_: InterruptedException) {
                                     Logger.i("Group creation listener timer interrupted")
                                 }
                                 AppSingleton.getEngine().removeNotificationListener(
@@ -501,19 +392,19 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
             }
         } else {
             val bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity() ?: return
-            val selectedContacts = groupCreationViewModel.selectedContacts ?: emptyList()
+            val selectedContacts = groupCreationViewModel.selectedContacts.value
 
-            val groupAbsolutePhotoUrl = groupDetailsViewModel.getAbsolutePhotoUrl()
-            val groupName = groupDetailsViewModel.getGroupName()
-            val groupDescription = groupDetailsViewModel.groupDescription?.trim()
-            if (groupName == null || groupName.trim().isEmpty()) {
+            val groupAbsolutePhotoUrl = ownedGroupDetailsViewModel.getAbsolutePhotoUrl()
+            val groupName = ownedGroupDetailsViewModel.groupName
+            val groupDescription = ownedGroupDetailsViewModel.groupDescription?.trim()
+            if (groupName.value?.trim().isNullOrEmpty()) {
                 return
             }
 
             val jsonGroupDetailsWithVersionAndPhoto = JsonGroupDetailsWithVersionAndPhoto()
             jsonGroupDetailsWithVersionAndPhoto.version = 0
             jsonGroupDetailsWithVersionAndPhoto.groupDetails =
-                JsonGroupDetails(groupName.trim(), groupDescription)
+                JsonGroupDetails(groupName.value?.trim(), groupDescription)
             val bytesContactIdentities = arrayOfNulls<ByteArray>(selectedContacts.size)
             for ((i, contact) in selectedContacts.withIndex()) {
                 bytesContactIdentities[i] = contact.bytesContactIdentity
@@ -539,7 +430,7 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
                             Thread {
                                 try {
                                     Thread.sleep(3000)
-                                } catch (e: InterruptedException) {
+                                } catch (_: InterruptedException) {
                                     Logger.i("Group creation listener timer interrupted")
                                 }
                                 AppSingleton.getEngine().removeNotificationListener(
@@ -592,125 +483,123 @@ class GroupCreationActivity : LockableActivity(), OnClickListener {
         }
     }
 
-    class ContactsSelectionFragment : Fragment() {
-        private val filteredContactListFragment: FilteredContactListFragment by lazy { FilteredContactListFragment() }
-        private var initiallySelectedContacts: List<Contact>? = null
-        private var groupV2 = false
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-            if (initiallySelectedContacts != null) {
-                filteredContactListFragment.setInitiallySelectedContacts(
-                    initiallySelectedContacts
-                )
-                initiallySelectedContacts = null
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            REQUEST_CODE_CHOOSE_IMAGE -> {
+                if (resultCode == RESULT_OK && data != null) {
+                    if (StringUtils.validateUri(data.data)) {
+                        startActivityForResult(
+                            Intent(
+                                null,
+                                data.data,
+                                App.getContext(),
+                                SelectDetailsPhotoActivity::class.java
+                            ), REQUEST_CODE_SELECT_ZONE
+                        )
+                    }
+                }
             }
-            filteredContactListFragment.setSelectable(true)
-            if (groupV2) {
-                filteredContactListFragment.setUnfilteredContacts(
-                    AppSingleton.getCurrentIdentityLiveData()
-                        .switchMap { ownedIdentity: OwnedIdentity? ->
-                            if (ownedIdentity == null) {
-                                return@switchMap null
-                            }
-                            AppDatabase.getInstance().contactDao()
-                                .getAllForOwnedIdentityWithChannelAndGroupV2Capability(
-                                    ownedIdentity.bytesOwnedIdentity
-                                )
-                        })
-            } else {
-                filteredContactListFragment.setUnfilteredContacts(
-                    AppSingleton.getCurrentIdentityLiveData()
-                        .switchMap { ownedIdentity: OwnedIdentity? ->
-                            if (ownedIdentity == null) {
-                                return@switchMap null
-                            }
-                            AppDatabase.getInstance().contactDao()
-                                .getAllForOwnedIdentityWithChannel(ownedIdentity.bytesOwnedIdentity)
-                        })
+
+            REQUEST_CODE_TAKE_PICTURE -> {
+                if (resultCode == RESULT_OK && ownedGroupDetailsViewModel.takePictureUri != null) {
+                    startActivityForResult(
+                        Intent(
+                            null,
+                            ownedGroupDetailsViewModel.takePictureUri,
+                            App.getContext(),
+                            SelectDetailsPhotoActivity::class.java
+                        ), REQUEST_CODE_SELECT_ZONE
+                    )
+                }
             }
-            filteredContactListFragment.setSelectedContactsObserver { contacts: List<Contact>? ->
-                val activity = activity as GroupCreationActivity?
-                if (activity != null) {
-                    activity.groupCreationViewModel.selectedContacts = contacts
+
+            REQUEST_CODE_SELECT_ZONE -> {
+                if (resultCode == RESULT_OK) {
+                    if (data != null) {
+                        val absolutePhotoUrl =
+                            data.getStringExtra(SelectDetailsPhotoActivity.CROPPED_JPEG_RETURN_INTENT_EXTRA)
+                        if (absolutePhotoUrl != null) {
+                            ownedGroupDetailsViewModel.setAbsolutePhotoUrl(absolutePhotoUrl)
+                        }
+                    }
                 }
             }
         }
+    }
 
-        override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View {
-            val rootView =
-                inflater.inflate(
-                    R.layout.fragment_group_creation_contact_selection,
-                    container,
-                    false
-                )
-            val transaction = childFragmentManager.beginTransaction()
-            transaction.replace(
-                R.id.filtered_contact_list_placeholder,
-                filteredContactListFragment
-            )
-            transaction.commit()
-            return rootView
-        }
-
-        fun setInitiallySelectedContacts(selectedContacts: List<Contact>?) {
-            if (selectedContacts != null) {
-                filteredContactListFragment.setInitiallySelectedContacts(selectedContacts)
+    private fun onTakePicture() {
+        runCatching {
+            if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        permission.CAMERA
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(permission.CAMERA),
+                        REQUEST_CODE_PERMISSION_CAMERA
+                    )
+                } else {
+                    takePicture(
+                        activity = this@GroupCreationActivity,
+                        viewModel = ownedGroupDetailsViewModel
+                    )
+                }
             } else {
-                initiallySelectedContacts = null
+                App.toast(
+                    R.string.toast_message_device_has_no_camera,
+                    Toast.LENGTH_SHORT
+                )
             }
         }
-
-        fun setContactFilterEditText(contactNameFilter: EditText?) {
-            filteredContactListFragment.setContactFilterEditText(contactNameFilter)
-        }
-
-        fun setGroupV2(groupV2: Boolean) {
-            this.groupV2 = groupV2
-        }
     }
 
-    class GroupNameFragment : Fragment() {
-        override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View {
-            val rootView =
-                inflater.inflate(R.layout.fragment_group_creation_group_name, container, false)
-
-            val ownedGroupDetailsFragment = OwnedGroupDetailsFragment()
-            ownedGroupDetailsFragment.setHidePersonalNote(true)
-            ownedGroupDetailsFragment.setInitialGroupType(SimpleGroup)
-
-            val transaction = childFragmentManager.beginTransaction()
-            transaction.replace(
-                R.id.fragment_group_details_placeholder,
-                ownedGroupDetailsFragment
+    @Throws(IllegalStateException::class)
+    private fun takePicture(activity: AppCompatActivity, viewModel: OwnedGroupDetailsViewModel) {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        viewModel.takePictureUri = null
+        if (takePictureIntent.resolveActivity(activity.packageManager) != null) {
+            val photoDir = File(activity.cacheDir, App.CAMERA_PICTURE_FOLDER)
+            val photoFile = File(
+                photoDir,
+                SimpleDateFormat(App.TIMESTAMP_FILE_NAME_FORMAT, Locale.ENGLISH).format(
+                    Date()
+                ) + ".jpg"
             )
-            transaction.commit()
-            return rootView
+            try {
+                photoDir.mkdirs()
+                if (!photoFile.createNewFile()) {
+                    return
+                }
+                val photoUri = FileProvider.getUriForFile(
+                    activity,
+                    BuildConfig.APPLICATION_ID + ".PICTURE_FILES_PROVIDER",
+                    photoFile
+                )
+                viewModel.takePictureUri = photoUri
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                App.startActivityForResult(
+                    activity,
+                    takePictureIntent,
+                    REQUEST_CODE_TAKE_PICTURE
+                )
+            } catch (_: IOException) {
+                Logger.w("Error creating photo capture file $photoFile")
+            }
         }
     }
+
 
     companion object {
         // this boolean controls whether groups are created in v2 format or not
-        const val groupV2 = true
-        const val CONTACTS_SELECTION_TAB = 0
-        const val GROUP_NAME_TAB = 1
-        const val GROUP_SETTINGS_TAB = 2
+        const val CREATE_GROUPS_AS_V2 = true
         const val ABSOLUTE_PHOTO_URL_INTENT_EXTRA =
             "photo_url" // String with absolute path to photo
         const val SERIALIZED_GROUP_DETAILS_INTENT_EXTRA =
             "serialized_group_details" // String with serialized JsonGroupDetails
         const val SERIALIZED_GROUP_TYPE_INTENT_EXTRA =
             "serialized_group_type" // String with serialized JsonGroupType
-        const val PRESELECTED_GROUP_MEMBERS_INTENT_EXTRA =
-            "preselected_group_members" // Array of BytesKey
-        const val PRESELECTED_GROUP_ADMIN_MEMBERS_INTENT_EXTRA =
-            "preselected_group_admin_members" // Array of BytesKey
     }
 }

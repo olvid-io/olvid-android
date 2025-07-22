@@ -44,6 +44,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.activities.ObvLinkActivity
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.OwnedIdentity
 
 class InvitationScannedFragment : Fragment(), OnClickListener {
@@ -175,7 +176,7 @@ class InvitationScannedFragment : Fragment(), OnClickListener {
         val contactShortName =
             StringUtils.removeCompanyFromDisplayName(contactUrlIdentity.displayName)
         contactNameTextView!!.text = contactUrlIdentity.displayName
-        val contactCacheInfo = AppSingleton.getContactCacheInfo(contactUrlIdentity.bytesIdentity)
+        val contactCacheInfo = ContactCacheSingleton.getContactCacheInfo(contactUrlIdentity.bytesIdentity)
 
         if (contactCacheInfo != null) {
             contactInitialView!!.setFromCache(contactUrlIdentity.bytesIdentity)

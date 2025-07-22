@@ -342,6 +342,8 @@ public abstract class EngineNotifications {
     public static final String GROUP_V2_CREATED_OR_UPDATED_GROUP_KEY = "group"; // ObvGroupV2
     public static final String GROUP_V2_CREATED_OR_UPDATED_NEW_GROUP_KEY = "new_group"; // boolean --> if true, the group was created by be (as opposed to joined groups created by someone else)
     public static final String GROUP_V2_CREATED_OR_UPDATED_BY_ME_KEY = "by_me"; // boolean
+    public static final String GROUP_V2_CREATED_OR_UPDATED_BY_KEY = "by"; // byte[]
+    public static final String GROUP_V2_CREATED_OR_UPDATED_GROUP_LEAVERS_KEY = "group_leavers"; // byte[][]
     public static final String GROUP_V2_CREATED_OR_UPDATED_CREATED_ON_OTHER_DEVICE = "created_on_other_device"; // boolean --> only meaningful for new groups created by be ("new_group" == true). true if created on another device, false if created on this device
 
     public static final String GROUP_V2_PHOTO_CHANGED = "engine_notification_group_v2_photo_changed";

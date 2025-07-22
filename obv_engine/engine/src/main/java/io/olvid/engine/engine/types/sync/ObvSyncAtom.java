@@ -54,6 +54,7 @@ public class ObvSyncAtom {
     public static final int TYPE_ARCHIVED_DISCUSSIONS_CHANGE = 18;
     public static final int TYPE_DISCUSSIONS_MUTE_CHANGE = 19;
     public static final int TYPE_SETTING_UNARCHIVE_ON_NOTIFICATION = 20;
+    public static final int TYPE_SETTING_LAST_RATING = 21;
 
 
     public final int syncType;
@@ -166,6 +167,10 @@ public class ObvSyncAtom {
         return new ObvSyncAtom(TYPE_SETTING_UNARCHIVE_ON_NOTIFICATION, null, null, null, null, null, unarchiveOnNotification, null, null, null);
     }
 
+    public static ObvSyncAtom createSettingLastRating(int lastRating, long lastRatingTimestamp) {
+        return new ObvSyncAtom(TYPE_SETTING_LAST_RATING, null, null, null, Long.toString(lastRatingTimestamp), lastRating, null, null, null, null);
+    }
+
     public boolean isAppSyncItem() {
         switch (syncType) {
             case TYPE_CONTACT_NICKNAME_CHANGE:
@@ -185,6 +190,7 @@ public class ObvSyncAtom {
             case TYPE_BOOKMARKED_MESSAGE_CHANGE:
             case TYPE_ARCHIVED_DISCUSSIONS_CHANGE:
             case TYPE_DISCUSSIONS_MUTE_CHANGE:
+            case TYPE_SETTING_LAST_RATING:
             case TYPE_SETTING_UNARCHIVE_ON_NOTIFICATION:
                 return true;
             case TYPE_TRUST_CONTACT_DETAILS:
@@ -359,6 +365,11 @@ public class ObvSyncAtom {
                 encodeds.add(muteNotification.encode());
                 break;
             }
+            case TYPE_SETTING_LAST_RATING: {
+                encodeds.add(Encoded.of(integerValue));
+                encodeds.add(Encoded.of(stringValue));
+                break;
+            }
             default: {
                 return null;
             }
@@ -473,6 +484,9 @@ public class ObvSyncAtom {
                     discussionIdentifiers.add(DiscussionIdentifier.of(encodedDiscussionIdentifier));
                 }
                 return new ObvSyncAtom(syncType, null, null, null, null, null, null, discussionIdentifiers, null, MuteNotification.of(encodeds[2]));
+            }
+            case TYPE_SETTING_LAST_RATING: {
+                return new ObvSyncAtom(syncType, null, null, null, encodeds[2].decodeString(), (int) encodeds[1].decodeLong(), null, null, null, null);
             }
         }
         throw new DecodingException();

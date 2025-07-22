@@ -23,6 +23,7 @@ import java.util.Arrays;
 
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Contact;
 
 public class UpdateContactActiveTask implements Runnable {
@@ -46,7 +47,7 @@ public class UpdateContactActiveTask implements Runnable {
             db.discussionDao().updateActive(contact.bytesOwnedIdentity, contact.bytesContactIdentity, contact.active);
             
             if (Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                AppSingleton.updateContactCachedInfo(contact);
+                ContactCacheSingleton.INSTANCE.updateContactCachedInfo(contact);
             }
         }
     }

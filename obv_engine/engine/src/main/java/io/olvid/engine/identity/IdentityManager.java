@@ -3293,7 +3293,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public List<Identity> updateGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe) throws SQLException {
+    public List<Identity> updateGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe, Identity updatedBy, List<Identity> leavers) throws SQLException {
         if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) || (serverBlob == null) || (blobKeys == null)) {
             return null;
         }
@@ -3305,7 +3305,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         session.addSessionCommitListener(backupNeededSessionCommitListener);
         session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
 
-        return groupV2.updateWithNewBlob(serverBlob, blobKeys, updatedByMe);
+        return groupV2.updateWithNewBlob(serverBlob, blobKeys, updatedByMe, updatedBy, leavers);
     }
 
     @Override

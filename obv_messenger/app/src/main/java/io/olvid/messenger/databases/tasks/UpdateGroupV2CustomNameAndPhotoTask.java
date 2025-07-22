@@ -19,6 +19,9 @@
 
 package io.olvid.messenger.databases.tasks;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -40,14 +43,14 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Group2;
 
 public class UpdateGroupV2CustomNameAndPhotoTask implements Runnable {
-    private final byte[] bytesOwnedIdentity;
-    private final byte[] bytesGroupIdentifier;
-    private final String customName;
-    private final String absoluteCustomPhotoUrl;
-    private final String personalNote;
+    @NonNull private final byte[] bytesOwnedIdentity;
+    @NonNull private final byte[] bytesGroupIdentifier;
+    @Nullable private final String customName;
+    @Nullable private final String absoluteCustomPhotoUrl;
+    @Nullable private final String personalNote;
     private final boolean propagated;
 
-    public UpdateGroupV2CustomNameAndPhotoTask(byte[] bytesOwnedIdentity, byte[] bytesGroupIdentifier, String customName, String absoluteCustomPhotoUrl, String personalNote, boolean propagated) {
+    public UpdateGroupV2CustomNameAndPhotoTask(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier, @Nullable String customName, @Nullable String absoluteCustomPhotoUrl, @Nullable String personalNote, boolean propagated) {
         this.bytesGroupIdentifier = bytesGroupIdentifier;
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.customName = customName;
@@ -104,7 +107,7 @@ public class UpdateGroupV2CustomNameAndPhotoTask implements Runnable {
                     }
                 }
 
-                if (absoluteCustomPhotoUrl == null || "".equals(absoluteCustomPhotoUrl)) {
+                if (absoluteCustomPhotoUrl == null || absoluteCustomPhotoUrl.isEmpty()) {
                     // custom photo was reset or removed
                     group.customPhotoUrl = absoluteCustomPhotoUrl;
                 } else {

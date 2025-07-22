@@ -74,6 +74,7 @@ import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.PreviewUtilsWithDrawables;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
@@ -221,11 +222,11 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
             spannableString.setSpan(new StyleSpan(Typeface.BOLD), spannableString.length() - fyleAndOrigin.discussion.title.length(), spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             holder.senderTextView.setText(spannableString);
         } else {
-            String displayName = AppSingleton.getContactCustomDisplayName(fyleAndOrigin.message.senderIdentifier);
+            String displayName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(fyleAndOrigin.message.senderIdentifier);
             if (displayName != null) {
                 SpannableString spannableString = new SpannableString(activity.getString(R.string.text_sent_by_xx, displayName));
                 spannableString.setSpan(new StyleSpan(Typeface.BOLD), spannableString.length() - displayName.length(), spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                spannableString.setSpan(new ForegroundColorSpan(InitialView.getTextColor(activity, fyleAndOrigin.message.senderIdentifier, AppSingleton.getContactCustomHue(fyleAndOrigin.message.senderIdentifier))), spannableString.length() - displayName.length(), spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannableString.setSpan(new ForegroundColorSpan(InitialView.getTextColor(activity, fyleAndOrigin.message.senderIdentifier, ContactCacheSingleton.INSTANCE.getContactCustomHue(fyleAndOrigin.message.senderIdentifier))), spannableString.length() - displayName.length(), spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 holder.senderTextView.setText(spannableString);
             } else {
                 SpannableString spannableString = new SpannableString(activity.getString(R.string.text_unknown_sender));

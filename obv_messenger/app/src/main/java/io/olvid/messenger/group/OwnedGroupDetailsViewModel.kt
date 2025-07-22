@@ -19,12 +19,20 @@
 package io.olvid.messenger.group
 
 import android.net.Uri
+import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.olvid.engine.engine.types.JsonGroupDetails
 import io.olvid.engine.engine.types.JsonGroupDetailsWithVersionAndPhoto
+import io.olvid.engine.engine.types.identities.ObvGroupV2.ObvGroupV2ChangeSet
 import io.olvid.messenger.App
+import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.R
+import io.olvid.messenger.databases.tasks.UpdateGroupV2CustomNameAndPhotoTask
 
 class OwnedGroupDetailsViewModel : ViewModel() {
     private var oldDetails: JsonGroupDetails? = null
@@ -34,11 +42,13 @@ class OwnedGroupDetailsViewModel : ViewModel() {
     lateinit var bytesOwnedIdentity: ByteArray
     private var bytesGroupOwnerAndUidOrIdentifier: ByteArray? = null
 
-    private var groupName: String? = null
-    var groupDescription: String? = null
-    var personalNote: String? = null
-    private var absolutePhotoUrl // absolute path photoUrl
-            : String? = null
+    var cloning = mutableStateOf(false)
+    var groupName = mutableStateOf<String?>(null)
+    var groupDescription: String? by mutableStateOf(null)
+    var personalNote: String? by mutableStateOf(null)
+    // absolute path photoUrl
+    private var absPhotoUrl: String? by mutableStateOf(null)
+
     var takePictureUri: Uri? = null
     val valid = MutableLiveData(false)
     private val initialViewContent = MutableLiveData<InitialViewContent?>(null)
@@ -51,7 +61,7 @@ class OwnedGroupDetailsViewModel : ViewModel() {
         initialViewContent.postValue(
             InitialViewContent(
                 bytesGroupOwnerAndUidOrIdentifier,
-                absolutePhotoUrl
+                absPhotoUrl
             )
         )
     }
@@ -102,17 +112,13 @@ class OwnedGroupDetailsViewModel : ViewModel() {
         return initialViewContent
     }
 
-    fun getGroupName(): String? {
-        return groupName
-    }
-
     fun setGroupName(groupName: String?) {
-        this.groupName = groupName
+        this.groupName.value = groupName
         checkValid()
     }
 
     fun getAbsolutePhotoUrl(): String? {
-        return absolutePhotoUrl
+        return absPhotoUrl
     }
 
     fun setAbsolutePhotoUrl(absolutePhotoUrl: String?) {
@@ -123,7 +129,7 @@ class OwnedGroupDetailsViewModel : ViewModel() {
                     absolutePhotoUrl
                 )
             )
-        } else if (this.absolutePhotoUrl != null) {
+        } else if (this.absPhotoUrl != null) {
             initialViewContent.postValue(
                 InitialViewContent(
                     bytesGroupOwnerAndUidOrIdentifier,
@@ -131,11 +137,61 @@ class OwnedGroupDetailsViewModel : ViewModel() {
                 )
             )
         }
-        this.absolutePhotoUrl = absolutePhotoUrl
+        this.absPhotoUrl = absolutePhotoUrl
+    }
+
+    fun publish() {
+        App.runThread {
+            var changed = false
+
+            val obvChangeSet = ObvGroupV2ChangeSet()
+            if (detailsChanged()) {
+                try {
+                    obvChangeSet.updatedSerializedGroupDetails =
+                        AppSingleton.getJsonObjectMapper().writeValueAsString(
+                            jsonGroupDetails
+                        )
+                    changed = true
+                } catch (_: Exception) { }
+            }
+            if (photoChanged()) {
+                obvChangeSet.updatedPhotoUrl = getAbsolutePhotoUrl().orEmpty()
+                changed = true
+            }
+            if (changed) {
+                runCatching {
+                    AppSingleton.getEngine().initiateGroupV2Update(
+                        bytesOwnedIdentity,
+                        getBytesGroupOwnerAndUidOrIdentifier(),
+                        obvChangeSet
+                    )
+                    UpdateGroupV2CustomNameAndPhotoTask(
+                        bytesOwnedIdentity,
+                        getBytesGroupOwnerAndUidOrIdentifier() ?: ByteArray(0),
+                        null,
+                        null,
+                        personalNote?.trim().takeUnless { it.isNullOrEmpty() },
+                        false
+                    ).run()
+                }.onFailure {
+                    it.printStackTrace()
+                    App.toast(R.string.toast_message_error_retry, Toast.LENGTH_SHORT)
+                }
+            } else if (personalNoteChanged()) {
+                UpdateGroupV2CustomNameAndPhotoTask(
+                    bytesOwnedIdentity,
+                    getBytesGroupOwnerAndUidOrIdentifier() ?: ByteArray(0),
+                    null,
+                    null,
+                    personalNote?.trim().takeUnless { it.isNullOrEmpty() },
+                    false
+                ).run()
+            }
+        }
     }
 
     private fun checkValid() {
-        val newValid = groupV2 || groupName?.trim().isNullOrEmpty().not()
+        val newValid = groupV2 || groupName.value?.trim().isNullOrEmpty().not()
         val oldValid = valid.value
         if (oldValid == null || oldValid xor newValid) {
             valid.postValue(newValid)
@@ -147,17 +203,17 @@ class OwnedGroupDetailsViewModel : ViewModel() {
     }
 
     fun photoChanged(): Boolean {
-        return absolutePhotoUrl != App.absolutePathFromRelative(oldPhotoUrl)
+        return absPhotoUrl != App.absolutePathFromRelative(oldPhotoUrl)
     }
 
     fun personalNoteChanged(): Boolean {
-        return personalNote != oldPersonalNote
+        return personalNote?.trim().takeUnless { it.isNullOrEmpty() } != oldPersonalNote
     }
 
     val jsonGroupDetails: JsonGroupDetails
         get() = JsonGroupDetails(
-            if (groupName == null) null else groupName!!.trim(),
-            groupDescription
+            groupName.value?.trim(),
+            groupDescription?.trim()
         )
 
     class InitialViewContent(bytesGroupOwnerAndUid: ByteArray?, absolutePhotoUrl: String?) {

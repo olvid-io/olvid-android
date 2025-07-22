@@ -35,6 +35,7 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonLocation;
 import io.olvid.messenger.databases.entity.jsons.JsonMessage;
+import io.olvid.messenger.databases.entity.jsons.JsonPoll;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 public class ForwardMessagesTask implements Runnable {
@@ -148,6 +149,10 @@ public class ForwardMessagesTask implements Runnable {
             }
             if (jsonExpiration != null) {
                jsonMessage.setJsonExpiration(jsonExpiration);
+            }
+            JsonPoll jsonPoll = message.getPoll();
+            if (jsonPoll != null) {
+               jsonMessage.setJsonPoll(jsonPoll);
             }
 
             db.runInTransaction(() -> {

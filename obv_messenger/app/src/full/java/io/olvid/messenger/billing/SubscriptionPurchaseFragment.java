@@ -43,9 +43,11 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.PendingPurchasesParams;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryProductDetailsResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -133,7 +135,7 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
 
     private void initiateQuery() {
         billingClient = BillingClient.newBuilder(activity)
-                .enablePendingPurchases()
+                .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
                 .setListener(this::purchaseUpdated)
                 .build();
 
@@ -256,7 +258,8 @@ public class SubscriptionPurchaseFragment extends Fragment implements EngineNoti
         }
     }
 
-    private void productDetailsReceived(BillingResult billingResult, List<ProductDetails> productDetailsList) {
+    private void productDetailsReceived(BillingResult billingResult, QueryProductDetailsResult queryProductResult) {
+        List<ProductDetails> productDetailsList = queryProductResult.getProductDetailsList();
         Logger.d("💲 Product details received:\n" + productDetailsList);
 
         if (timeoutSubscriptionTimerTask != null) {

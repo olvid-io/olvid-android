@@ -587,6 +587,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
             deleteButton.setText(if (checked) R.string.button_label_delete_everywhere else R.string.button_label_delete)
         }
         val typeDeleteEditText = dialogView.findViewById<EditText>(R.id.type_delete_edit_text)
+        typeDeleteEditText.setHint(getString(R.string.hint_type_delete_here_to_proceed, getString(R.string.text_delete_capitalized)))
         typeDeleteEditText.addTextChangedListener(object : TextChangeListener() {
             val target: String = getString(R.string.text_delete_capitalized)
 

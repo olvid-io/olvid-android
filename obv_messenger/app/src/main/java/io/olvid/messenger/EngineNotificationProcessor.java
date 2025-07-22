@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import io.olvid.engine.Logger;
+import io.olvid.engine.datatypes.containers.OwnedIdentitySynchronizationStatus;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.engine.engine.types.EngineNotificationListener;
@@ -40,10 +42,12 @@ import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.billing.BillingUtils;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.OnHoldInboxMessage;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.tasks.ApplySyncAtomTask;
 import io.olvid.messenger.databases.tasks.DeleteOwnedIdentityAndEverythingRelatedToItTask;
@@ -91,6 +95,8 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 EngineNotifications.KEYCLOAK_SYNCHRONIZATION_REQUIRED,
                 EngineNotifications.CONTACT_INTRODUCTION_INVITATION_SENT,
                 EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE,
+
+                EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER,
         }) {
             engine.addNotificationListener(notificationName, this);
         }
@@ -382,7 +388,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                     }
 
                                     if (Arrays.equals(appOwnedIdentity.bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                                        AppSingleton.updateContactCachedInfo(appOwnedIdentity);
+                                        ContactCacheSingleton.INSTANCE.updateContactCachedInfo(appOwnedIdentity);
                                     }
                                 }
                             }
@@ -409,7 +415,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         db.ownedIdentityDao().updateIdentityDetailsAndPhoto(ownedIdentity.bytesOwnedIdentity, ownedIdentity.identityDetails, ownedIdentity.displayName, ownedIdentity.photoUrl);
 
                         if (Arrays.equals(bytesOwnedIdentity, AppSingleton.getBytesCurrentIdentity())) {
-                            AppSingleton.updateCachedPhotoUrl(bytesOwnedIdentity, photoUrl);
+                            ContactCacheSingleton.INSTANCE.updateCachedPhotoUrl(bytesOwnedIdentity, photoUrl);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -583,6 +589,33 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 ).run();
                 break;
             }
+            case EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_BYTES_OWNED_IDENTITY_KEY);
+                OwnedIdentitySynchronizationStatus status = (OwnedIdentitySynchronizationStatus) userInfo.get(EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_STATUS_KEY);
+                if (bytesOwnedIdentity == null || status == null) {
+                    break;
+                }
+
+                // we finished processing a non-truncated listing
+                if (status == OwnedIdentitySynchronizationStatus.SYNCHRONIZED) {
+                    App.runThread(() -> {
+                        int count = db.onHoldInboxMessageDao().setExpirationOfAllWithoutExpiration(bytesOwnedIdentity, System.currentTimeMillis() + OnHoldInboxMessage.TTL);
+                        if (count > 0) {
+                            Logger.i("⏸️ Set expiration time for " + count + " on hold messages");
+                        }
+                        List<OnHoldInboxMessage> list = db.onHoldInboxMessageDao().getAllExpired(bytesOwnedIdentity, System.currentTimeMillis());
+                        if (!list.isEmpty()) {
+                            Logger.i("⏸️ " + list.size() + " on hold messages have expired --> deleting them");
+                            for (OnHoldInboxMessage onHoldInboxMessage : list) {
+                                engine.deleteMessageAndAttachments(bytesOwnedIdentity, onHoldInboxMessage.messageEngineIdentifier);
+                                db.onHoldInboxMessageDao().delete(onHoldInboxMessage);
+                            }
+                        }
+                    });
+                }
+
+                break;
+            }
         }
     }
 
@@ -669,7 +702,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 displayName = dialog.getCategory().getContactDisplayNameOrSerializedDetails();
             }
             if (displayName == null) {
-                displayName = AppSingleton.getContactCustomDisplayName(dialog.getCategory().getBytesContactIdentity());
+                displayName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(dialog.getCategory().getBytesContactIdentity());
             }
 
             Discussion discussion = null;
