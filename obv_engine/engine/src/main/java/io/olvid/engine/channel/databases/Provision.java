@@ -43,38 +43,38 @@ public class Provision implements ObvDatabase {
 
     private final ChannelManagerSession channelManagerSession;
 
-    private int fullRatchetingCount;
+    private final int fullRatchetingCount;
     static final String FULL_RATCHETING_COUNT = "full_ratcheting_count";
     private int selfRatchetingCount;
     static final String SELF_RATCHETING_COUNT = "self_ratcheting_count";
     private Seed seedForNextProvisionedReceiveKey;
     static final String SEED_FOR_NEXT_PROVISIONED_RECEIVE_KEY = "seed_for_next_provisioned_receive_key";
-    private int obliviousEngineVersion;
+    private final int obliviousEngineVersion;
     static final String OBLIVIOUS_ENGINE_VERSION = "oblivious_engine_version";
 
     // foreign key for an ObliviousChannel
-    private UID obliviousChannelCurrentDeviceUid;
+    private final UID obliviousChannelCurrentDeviceUid;
     static final String OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID = "oblivious_channel_current_device_uid";
-    private UID obliviousChannelRemoteDeviceUid;
+    private final UID obliviousChannelRemoteDeviceUid;
     static final String OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID = "oblivious_channel_remote_device_uid";
-    private Identity obliviousChannelRemoteIdentity;
+    private final Identity obliviousChannelRemoteIdentity;
     static final String OBLIVIOUS_CHANNEL_REMOTE_IDENTITY = "oblivious_channel_remote_identity";
 
     public int getFullRatchetingCount() {
         return fullRatchetingCount;
     }
 
-    public int getSelfRatchetingCount() {
-        return selfRatchetingCount;
-    }
+//    public int getSelfRatchetingCount() {
+//        return selfRatchetingCount;
+//    }
 
-    public Seed getSeedForNextProvisionedReceiveKey() {
-        return seedForNextProvisionedReceiveKey;
-    }
+//    public Seed getSeedForNextProvisionedReceiveKey() {
+//        return seedForNextProvisionedReceiveKey;
+//    }
 
-    public int getObliviousEngineVersion() {
-        return obliviousEngineVersion;
-    }
+//    public int getObliviousEngineVersion() {
+//        return obliviousEngineVersion;
+//    }
 
     public UID getObliviousChannelCurrentDeviceUid() {
         return obliviousChannelCurrentDeviceUid;
@@ -93,6 +93,10 @@ public class Provision implements ObvDatabase {
         // First generate all the new Key Material
         for (int i=0; i<count; i++) {
             RatchetingOutput ratchetingOutput = ObliviousChannel.computeSelfRatchet(seedForNextProvisionedReceiveKey, obliviousEngineVersion);
+            if (ratchetingOutput == null) {
+                Logger.e("ObliviousChannel.computeSelfRatchet() returned null, this should never happen!");
+                continue;
+            }
             seedForNextProvisionedReceiveKey = ratchetingOutput.getRatchetedSeed();
             ProvisionedKeyMaterial.create(channelManagerSession, ratchetingOutput.getKeyId(), ratchetingOutput.getAuthEncKey(), selfRatchetingCount, this);
             selfRatchetingCount++;
@@ -278,28 +282,28 @@ public class Provision implements ObvDatabase {
     }
 
 
-    public static Provision[] getAll(ChannelManagerSession channelManagerSession, UID obliviousChannelCurrentDeviceUid, UID obliviousChannelRemoteDeviceUid, Identity obliviousChannelRemoteIdentity) {
-        if ((obliviousChannelCurrentDeviceUid == null) || (obliviousChannelRemoteDeviceUid == null) || (obliviousChannelRemoteIdentity == null)) {
-            return new Provision[0];
-        }
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
-                OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ? AND " +
-                OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + " = ? AND " +
-                OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + " = ?;")) {
-            statement.setBytes(1, obliviousChannelCurrentDeviceUid.getBytes());
-            statement.setBytes(2, obliviousChannelRemoteDeviceUid.getBytes());
-            statement.setBytes(3, obliviousChannelRemoteIdentity.getBytes());
-            try (ResultSet res = statement.executeQuery()) {
-                List<Provision> list = new ArrayList<>();
-                while (res.next()) {
-                    list.add(new Provision(channelManagerSession, res));
-                }
-                return list.toArray(new Provision[0]);
-            }
-        } catch (SQLException e) {
-            return new Provision[0];
-        }
-    }
+//    public static Provision[] getAll(ChannelManagerSession channelManagerSession, UID obliviousChannelCurrentDeviceUid, UID obliviousChannelRemoteDeviceUid, Identity obliviousChannelRemoteIdentity) {
+//        if ((obliviousChannelCurrentDeviceUid == null) || (obliviousChannelRemoteDeviceUid == null) || (obliviousChannelRemoteIdentity == null)) {
+//            return new Provision[0];
+//        }
+//        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
+//                OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ? AND " +
+//                OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + " = ? AND " +
+//                OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + " = ?;")) {
+//            statement.setBytes(1, obliviousChannelCurrentDeviceUid.getBytes());
+//            statement.setBytes(2, obliviousChannelRemoteDeviceUid.getBytes());
+//            statement.setBytes(3, obliviousChannelRemoteIdentity.getBytes());
+//            try (ResultSet res = statement.executeQuery()) {
+//                List<Provision> list = new ArrayList<>();
+//                while (res.next()) {
+//                    list.add(new Provision(channelManagerSession, res));
+//                }
+//                return list.toArray(new Provision[0]);
+//            }
+//        } catch (SQLException e) {
+//            return new Provision[0];
+//        }
+//    }
 
 
     @Override

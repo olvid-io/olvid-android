@@ -48,23 +48,23 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
 
     private final ChannelManagerSession channelManagerSession;
 
-    private KeyId keyId;
+    private final KeyId keyId;
     static final String KEY_ID = "key_id";
-    private AuthEncKey authEncKey;
+    private final AuthEncKey authEncKey;
     static final String AUTH_ENC_KEY = "auth_enc_key";
-    private Long expirationTimestamp;
+    private final Long expirationTimestamp;
     static final String EXPIRATION_TIMESTAMP = "expiration_timestamp";
-    private int selfRatchetingCount;
+    private final int selfRatchetingCount;
     static final String SELF_RATCHETING_COUNT = "self_ratcheting_count";
 
     // foreign key for a Provision
-    private int provisionFullRatchetingCount;
+    private final int provisionFullRatchetingCount;
     static final String PROVISION_FULL_RATCHETING_COUNT = "provision_full_ratcheting_count";
-    private UID provisionObliviousChannelCurrentDeviceUid;
+    private final UID provisionObliviousChannelCurrentDeviceUid;
     static final String PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID = "provision_oblivious_channel_current_device_uid";
-    private UID provisionObliviousChannelRemoteDeviceUid;
+    private final UID provisionObliviousChannelRemoteDeviceUid;
     static final String PROVISION_OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID = "provision_oblivious_channel_remote_device_uid";
-    private Identity provisionObliviousChannelRemoteIdentity;
+    private final Identity provisionObliviousChannelRemoteIdentity;
     static final String PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY = "provision_oblivious_channel_remote_identity";
 
 
@@ -92,9 +92,9 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
         return provisionObliviousChannelRemoteIdentity;
     }
 
-    public Provision getProvision() {
-        return Provision.get(channelManagerSession, provisionFullRatchetingCount, provisionObliviousChannelCurrentDeviceUid, provisionObliviousChannelRemoteDeviceUid, provisionObliviousChannelRemoteIdentity);
-    }
+//    public Provision getProvision() {
+//        return Provision.get(channelManagerSession, provisionFullRatchetingCount, provisionObliviousChannelCurrentDeviceUid, provisionObliviousChannelRemoteDeviceUid, provisionObliviousChannelRemoteIdentity);
+//    }
 
     ObliviousChannel getObliviousChannel() {
         return ObliviousChannel.get(channelManagerSession, provisionObliviousChannelCurrentDeviceUid, provisionObliviousChannelRemoteDeviceUid, provisionObliviousChannelRemoteIdentity, false);
@@ -172,11 +172,13 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
     private ProvisionedKeyMaterial(ChannelManagerSession channelManagerSession, ResultSet res) throws SQLException {
         this.channelManagerSession = channelManagerSession;
         this.keyId = new KeyId(res.getBytes(KEY_ID));
+        AuthEncKey key = null;
         try {
-            this.authEncKey = (AuthEncKey) new Encoded(res.getBytes(AUTH_ENC_KEY)).decodeSymmetricKey();
+            key = (AuthEncKey) new Encoded(res.getBytes(AUTH_ENC_KEY)).decodeSymmetricKey();
         } catch (DecodingException e) {
             Logger.x(e);
         }
+        this.authEncKey = key;
         this.expirationTimestamp = res.getLong(EXPIRATION_TIMESTAMP);
         this.selfRatchetingCount = res.getInt(SELF_RATCHETING_COUNT);
         this.provisionFullRatchetingCount = res.getInt(PROVISION_FULL_RATCHETING_COUNT);

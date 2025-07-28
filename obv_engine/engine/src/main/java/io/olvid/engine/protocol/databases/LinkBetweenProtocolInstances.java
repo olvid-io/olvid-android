@@ -45,17 +45,17 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
 
     private final ProtocolManagerSession protocolManagerSession;
 
-    private UID childProtocolInstanceUid;
+    private final UID childProtocolInstanceUid;
     static final String CHILD_PROTOCOL_INSTANCE_UID = "child_protocol_instance_uid";
-    private Identity ownedIdentity;
+    private final Identity ownedIdentity;
     static final String OWNED_IDENTITY = "owned_identity";
-    private int expectedChildStateId;
+    private final int expectedChildStateId;
     static final String EXPECTED_CHILD_STATE_ID = "expected_child_state_id";
-    private UID parentProtocolInstanceUid;
+    private final UID parentProtocolInstanceUid;
     static final String PARENT_PROTOCOL_INSTANCE_UID = "parent_protocol_instance_uid";
-    private int parentProtocolId;
+    private final int parentProtocolId;
     static final String PARENT_PROTOCOL_ID = "parent_protocol_id";
-    private int messageToSendId;
+    private final int messageToSendId;
     static final String MESSAGE_TO_SEND_ID = "message_to_send_id";
 
     public UID getChildProtocolInstanceUid() {
@@ -244,7 +244,6 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
                 parentProtocolInstance.getUid(),
                 linkBetweenProtocolInstances.messageToSendId,
                 inputs,
-                false,
                 false);
     }
 

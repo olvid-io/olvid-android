@@ -54,6 +54,7 @@ import io.olvid.engine.protocol.protocol_engine.ProtocolStep;
 public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
     public ContactMutualIntroductionProtocol(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, int currentStateId, Encoded encodedCurrentState, Identity ownedIdentity, PRNGService prng, ObjectMapper jsonObjectMapper) throws Exception {
         super(protocolManagerSession, protocolInstanceUid, currentStateId, encodedCurrentState, ownedIdentity, prng, jsonObjectMapper);
+        requiresProtocolInstanceToBeInsertedBeforeInitialStep = true;
     }
 
     @Override
@@ -661,7 +662,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             {
                 // post an invitation message to contact A
                 String serializedDetailsB = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentityB);
-                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentityA, getOwnedIdentity()), getProtocolId(), getProtocolInstanceUid(), false, true);
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentityA, getOwnedIdentity()), getProtocolId(), getProtocolInstanceUid(), true);
                 ChannelMessageToSend messageToSend = new MediatorInvitationMessage(coreProtocolMessage, receivedMessage.contactIdentityB, serializedDetailsB).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
@@ -669,7 +670,7 @@ public class ContactMutualIntroductionProtocol extends ConcreteProtocol {
             {
                 // post an invitation message to contact B
                 String serializedDetailsA = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfContactIdentity(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.contactIdentityA);
-                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentityB, getOwnedIdentity()), getProtocolId(), getProtocolInstanceUid(), false, true);
+                CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createAllConfirmedObliviousChannelsOrPreKeysInfo(receivedMessage.contactIdentityB, getOwnedIdentity()), getProtocolId(), getProtocolInstanceUid(), true);
                 ChannelMessageToSend messageToSend = new MediatorInvitationMessage(coreProtocolMessage, receivedMessage.contactIdentityA, serializedDetailsA).generateChannelProtocolMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }

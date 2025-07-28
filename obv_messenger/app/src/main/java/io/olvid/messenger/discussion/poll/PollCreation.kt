@@ -86,6 +86,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -188,7 +189,10 @@ fun PollCreationScreen(
                             fontSize = 18.sp,
                             color = colorResource(R.color.almostBlack)
                         ),                        onValueChange = { pollViewModel.updateQuestion(it) },
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                            imeAction = ImeAction.Next
+                        ),
                         colors = olvidGreyBackgroundTextFieldColors()
                     )
                 }
@@ -224,7 +228,10 @@ fun PollCreationScreen(
                         },
                         enabled = answer.uuid != NONE_ANSWER.uuid,
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                            imeAction = ImeAction.Next
+                        ),
                         onValueChange = { value ->
                             pollViewModel.updateAnswerText(answer.uuid, value)
                         },

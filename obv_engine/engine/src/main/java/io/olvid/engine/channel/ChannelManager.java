@@ -105,20 +105,6 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
         }
 
         try (ChannelManagerSession channelManagerSession = getSession()) {
-            // re-provision all existing channels
-            ObliviousChannel[] obliviousChannels = ObliviousChannel.getAllConfirmed(channelManagerSession);
-            for (ObliviousChannel obliviousChannel : obliviousChannels) {
-                Provision latestProvision = obliviousChannel.getLatestProvision();
-                if (latestProvision != null) {
-                    latestProvision.selfRatchetIfRequired();
-                }
-            }
-            channelManagerSession.session.commit();
-        } catch (Exception e) {
-            Logger.x(e);
-        }
-
-        try (ChannelManagerSession channelManagerSession = getSession()) {
             HashMap<UID, Identity> ownedIdentityFromDeviceUid = new HashMap<>();
             // clear all channels with deviceUids of contacts that do not exist
             // at the same time, try to detect contact devices without a channel

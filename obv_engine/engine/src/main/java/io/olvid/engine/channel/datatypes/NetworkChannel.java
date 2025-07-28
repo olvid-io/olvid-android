@@ -154,7 +154,7 @@ public abstract class NetworkChannel extends Channel {
 
                 AuthEncKey messageKey = authEnc.generateMessageKey(prng, paddedPlaintext);
 
-                MessageToSend.Header[] headers = generateHeaders(networkChannels, channelProtocolMessageToSend.isPartOfFullRatchetProtocolOfTheSendSeed(), messageKey, prng);
+                MessageToSend.Header[] headers = generateHeaders(networkChannels, true, messageKey, prng);
 
                 // check that all headers are for the same server
                 String server = getServer(headers);
@@ -172,10 +172,10 @@ public abstract class NetworkChannel extends Channel {
         return messageUid;
     }
 
-    private static MessageToSend.Header[] generateHeaders(NetworkChannel[] networkChannels, boolean partOfFullRatchetProtocol, AuthEncKey messageKey, PRNGService prng) {
+    private static MessageToSend.Header[] generateHeaders(NetworkChannel[] networkChannels, boolean protocolMessage, AuthEncKey messageKey, PRNGService prng) {
         MessageToSend.Header[] headers = new MessageToSend.Header[networkChannels.length];
         for (int i=0; i<networkChannels.length; i++) {
-            headers[i] = networkChannels[i].wrapMessageKey(messageKey, prng, partOfFullRatchetProtocol);
+            headers[i] = networkChannels[i].wrapMessageKey(messageKey, prng, protocolMessage);
         }
 
         return headers;

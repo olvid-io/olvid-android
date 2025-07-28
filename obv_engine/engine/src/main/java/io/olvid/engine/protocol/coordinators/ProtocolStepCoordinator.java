@@ -76,7 +76,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
 
             ReceivedMessage[] receivedMessages = ReceivedMessage.getAll(protocolManagerSession);
             if (receivedMessages.length > 0) {
-                Logger.d("Found " + receivedMessages.length + " ReceivedMessage to (attempt to) process.");
+                Logger.i("Found " + receivedMessages.length + " ReceivedMessage to (attempt to) process.");
                 for (ReceivedMessage receivedMessage : receivedMessages) {
                     queueNewProtocolOperation(receivedMessage.getUid());
                 }
@@ -106,7 +106,6 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
             for (ReceivedMessage receivedMessage : ReceivedMessage.getAll(protocolManagerSession, protocolInstanceUid, protocolOwnedIdentity)) {
                 protocolManagerSession.protocolReceivedMessageProcessorDelegate.processReceivedMessage(receivedMessage.getUid());
             }
-            protocolManagerSession.session.commit();
         } catch (SQLException e) {
             Logger.x(e);
         }

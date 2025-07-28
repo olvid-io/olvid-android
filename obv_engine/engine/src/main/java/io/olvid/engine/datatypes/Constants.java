@@ -23,7 +23,7 @@ package io.olvid.engine.datatypes;
 import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 45;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 46;
     public static final int SERVER_API_VERSION = 19;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
@@ -54,13 +54,12 @@ public abstract class Constants {
 
 
     // full ratcheting thresholds
-    public static final int THRESHOLD_NUMBER_OF_DECRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE = 20;
-    public static final long THRESHOLD_TIME_INTERVAL_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE = 86_400_000L; // restart the full ratchet after 24 hours without response
+    public static final long THRESHOLD_TIME_INTERVAL_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE = 86_400_000L * 30; // restart the full ratchet after 30 days if it did not finish
     public static final int THRESHOLD_NUMBER_OF_ENCRYPTED_MESSAGES_PER_FULL_RATCHET = 500; // do a full ratchet after 500 messages
     public static final long FULL_RATCHET_TIME_INTERVAL_VALIDITY = 86_400_000L * 30; // do a full ratchet every month
 
     public static final int REPROVISIONING_THRESHOLD = 50;
-    public static final long PROVISIONED_KEY_MATERIAL_EXPIRATION_DELAY = 86_400_000L * 2; // expire old ProvisionedKeyMaterial after 2 days
+    public static final long PROVISIONED_KEY_MATERIAL_EXPIRATION_DELAY = 86_400_000L * 60; // expire old ProvisionedKeyMaterial after 60 days (same as server expiration)
 
     public static final long OUTBOX_MESSAGE_MAX_SEND_DELAY = 86_400_000L * 30; // after 30 days without being able to upload a message, delete it
     public static final long PROTOCOL_RECEIVED_MESSAGE_EXPIRATION_DELAY = 86_400_000L * 15; // expire ReceivedMessage after 15 days
@@ -71,7 +70,7 @@ public abstract class Constants {
     public static final long WELL_KNOWN_REFRESH_INTERVAL = 3_600_000L * 6; // 6 hours
 
     // download message
-    public static final long RELIST_DELAY = 10_000; // 10 seconds
+//    public static final long RELIST_DELAY = 10_000; // 10 seconds
     public static final long MINIMUM_URL_REFRESH_INTERVAL = 3_600_000L; // 1 hour
 
     // backups
@@ -96,7 +95,7 @@ public abstract class Constants {
     public static final long NO_DEVICE_CONTACT_DEVICE_DISCOVERY_INTERVAL = 3 * 86_400_000L;
     public static final long CONTACT_DEVICE_DISCOVERY_INTERVAL = 7 * 86_400_000L;
     public static final long OWNED_DEVICE_DISCOVERY_INTERVAL = 86_400_000L;
-    public static final long CHANNEL_CREATION_PING_INTERVAL = 3 * 86_400_000L;
+    public static final long CHANNEL_CREATION_PING_INTERVAL = 30 * 86_400_000L;
 
     public static final int SERVER_SESSION_NONCE_LENGTH = 32;
     public static final int SERVER_SESSION_CHALLENGE_LENGTH = 32;

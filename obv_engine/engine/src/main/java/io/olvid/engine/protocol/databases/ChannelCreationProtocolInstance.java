@@ -41,13 +41,13 @@ public class ChannelCreationProtocolInstance implements ObvDatabase {
 
     private final ProtocolManagerSession protocolManagerSession;
 
-    private UID contactDeviceUid;
+    private final UID contactDeviceUid;
     static final String CONTACT_DEVICE_UID = "contact_device_uid";
-    private Identity contactIdentity;
+    private final Identity contactIdentity;
     static final String CONTACT_IDENTITY = "contact_identity";
-    private Identity ownedIdentity;
+    private final Identity ownedIdentity;
     static final String OWNED_IDENTITY = "owned_identity";
-    private UID protocolInstanceUid;
+    private final UID protocolInstanceUid;
     static final String PROTOCOL_INSTANCE_UID = "protocol_instance_uid";
 
     public UID getProtocolInstanceUid() {

@@ -45,30 +45,31 @@ import io.olvid.engine.protocol.protocol_engine.ConcreteProtocol;
 
 public class ReceivedMessage implements ObvDatabase {
     static final String TABLE_NAME = "received_message";
+    static final String GET_ALL_INDEX_NAME = "received_message_get_all_index";
 
     private final ProtocolManagerSession protocolManagerSession;
 
-    private UID uid;
+    private final UID uid;
     static final String UID_ = "uid";
-    private Identity toIdentity;
+    private final Identity toIdentity;
     static final String TO_IDENTITY = "to_identity";
-    private Encoded[] inputs;
+    private final Encoded[] inputs;
     static final String INPUTS = "inputs";
-    private UUID userDialogUuid;
+    private final UUID userDialogUuid;
     static final String USER_DIALOG_UUID = "user_dialog_uuid";
-    private Encoded encodedResponse;
+    private final Encoded encodedResponse;
     static final String ENCODED_RESPONSE = "encoded_response";
-    private UID protocolInstanceUid;
+    private final UID protocolInstanceUid;
     static final String PROTOCOL_INSTANCE_UID = "protocol_instance_uid";
-    private int protocolMessageId;
+    private final int protocolMessageId;
     static final String PROTOCOL_MESSAGE_ID = "protocol_message_id";
-    private int protocolId;
+    private final int protocolId;
     static final String PROTOCOL_ID = "protocol_id";
-    private ReceptionChannelInfo receptionChannelInfo;
+    private final ReceptionChannelInfo receptionChannelInfo;
     static final String RECEPTION_CHANNEL_INFO = "reception_channel_info";
-    private long expirationTimestamp;
+    private final long expirationTimestamp;
     static final String EXPIRATION_TIMESTAMP = "expiration_timestamp";
-    private long serverTimestamp;
+    private final long serverTimestamp;
     static final String SERVER_TIMESTAMP = "server_timestamp";
 
     public ProtocolManagerSession getProtocolManagerSession() {
@@ -182,11 +183,11 @@ public class ReceivedMessage implements ObvDatabase {
         } catch (DecodingException e) {
             throw new SQLException();
         }
-        String uduuid = res.getString(USER_DIALOG_UUID);
-        if (uduuid == null) {
+        String uuid = res.getString(USER_DIALOG_UUID);
+        if (uuid == null) {
             this.userDialogUuid = null;
         } else {
-            this.userDialogUuid = UUID.fromString(uduuid);
+            this.userDialogUuid = UUID.fromString(uuid);
         }
         byte[] udr = res.getBytes(ENCODED_RESPONSE);
         if (udr == null) {
@@ -226,9 +227,11 @@ public class ReceivedMessage implements ObvDatabase {
                     PROTOCOL_MESSAGE_ID + " INT NOT NULL, " +
                     PROTOCOL_ID + " INT NOT NULL, " +
                     RECEPTION_CHANNEL_INFO + " BLOB NOT NULL, " +
-
                     EXPIRATION_TIMESTAMP + " BIGINT NOT NULL, " +
+
                     SERVER_TIMESTAMP + " BIGINT NOT NULL);");
+
+            statement.execute("CREATE INDEX IF NOT EXISTS " + GET_ALL_INDEX_NAME + " ON " + TABLE_NAME + "(" + TO_IDENTITY + ", " + PROTOCOL_INSTANCE_UID + ")");
         }
     }
 
@@ -253,6 +256,13 @@ public class ReceivedMessage implements ObvDatabase {
                 statement.execute("ALTER TABLE `received_message` DROP COLUMN `associated_owned_identity`");
             }
             oldVersion = 32;
+        }
+        if (oldVersion < 46 && newVersion >= 46) {
+            try (Statement statement = session.createStatement()) {
+                Logger.d("MIGRATING `received_message` DATABASE FROM VERSION " + oldVersion + " TO 46");
+                statement.execute("CREATE INDEX IF NOT EXISTS `received_message_get_all_index` ON `received_message` (`to_identity`, `protocol_instance_uid`)");
+            }
+            oldVersion = 46;
         }
     }
 
@@ -340,9 +350,9 @@ public class ReceivedMessage implements ObvDatabase {
     }
 
     public static ReceivedMessage[] getAll(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + PROTOCOL_INSTANCE_UID + " = ? AND " + TO_IDENTITY + " = ?;")) {
-            statement.setBytes(1, protocolInstanceUid.getBytes());
-            statement.setBytes(2, ownedIdentity.getBytes());
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + TO_IDENTITY + " = ? AND " + PROTOCOL_INSTANCE_UID + " = ?;")) {
+            statement.setBytes(1, ownedIdentity.getBytes());
+            statement.setBytes(2, protocolInstanceUid.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 List<ReceivedMessage> list = new ArrayList<>();
                 while (res.next()) {

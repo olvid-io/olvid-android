@@ -101,11 +101,13 @@ public final class ProtocolOperation extends Operation {
                 protocolManagerSession.session.startTransaction();
 
                 ProtocolInstance protocolInstance = null;
+                boolean protocolInstanceNeedsToBeInserted = false;
                 ConcreteProtocol protocol = null;
                 try {
                     protocolInstance = ProtocolInstance.get(protocolManagerSession, protocolInstanceUid, protocolOwnedIdentity);
                     if (protocolInstance == null) {
-                        protocolInstance = ProtocolInstance.create(protocolManagerSession, protocolInstanceUid, protocolOwnedIdentity, protocolId, new InitialProtocolState());
+                        protocolInstance = ProtocolInstance.createNotInDb(protocolManagerSession, protocolInstanceUid, protocolOwnedIdentity, protocolId, new InitialProtocolState());
+                        protocolInstanceNeedsToBeInserted = true;
                         if (protocolInstance != null) {
                             protocol = ConcreteProtocol.getConcreteProtocolInInitialState(protocolManagerSession, protocolId, protocolInstanceUid, protocolOwnedIdentity, prng, jsonObjectMapper);
                         }
@@ -143,6 +145,17 @@ public final class ProtocolOperation extends Operation {
                     return;
                 }
 
+                if (protocol.requiresProtocolInstanceToBeInsertedBeforeInitialStep && protocolInstanceNeedsToBeInserted) {
+                    try {
+                        protocolInstance.insert();
+                        protocolInstanceNeedsToBeInserted = false;
+                    } catch (SQLException e) {
+                        Logger.x(e);
+                        cancel(RFC_UNABLE_TO_RECONSTRUCT_PROTOCOL);
+                        return;
+                    }
+                }
+
 
                 // run the step
                 Logger.d("Executing step " + stepToExecute.getClass().getName() + "\n  - state: " + protocol.currentState.getClass().getName() + "\n  - message: " + concreteProtocolMessage.getClass().getName());
@@ -160,27 +173,30 @@ public final class ProtocolOperation extends Operation {
                 Logger.d("Finished step " + stepToExecute.getClass().getName() + ". It reached state " + stepToExecute.getEndState().getClass().getName());
 
                 ConcreteProtocolState endState = stepToExecute.getEndState();
-                protocolInstance.updateCurrentState(endState);
                 protocol.updateCurrentState(endState);
 
                 // Notify linked parent protocol
-                GenericProtocolMessageToSend parentNotificationMessage = LinkBetweenProtocolInstances.getGenericProtocolMessageToSendWhenChildProtocolInstanceReachesAState(
-                        protocolManagerSession,
-                        protocol.getProtocolInstanceUid(),
-                        protocol.getOwnedIdentity(),
-                        protocol.getCurrentState()
-                );
-                if (parentNotificationMessage != null) {
-                    if (protocolManagerSession.channelDelegate == null) {
-                        Logger.w("Unable to run notify parent protocol as the ChannelDelegate is not set yet.");
-                        throw new Exception();
+                if (protocol.mayBeRunAsLinkedChildProtocol) {
+                    GenericProtocolMessageToSend parentNotificationMessage = LinkBetweenProtocolInstances.getGenericProtocolMessageToSendWhenChildProtocolInstanceReachesAState(
+                            protocolManagerSession,
+                            protocol.getProtocolInstanceUid(),
+                            protocol.getOwnedIdentity(),
+                            protocol.getCurrentState()
+                    );
+                    if (parentNotificationMessage != null) {
+                        if (protocolManagerSession.channelDelegate == null) {
+                            Logger.w("Unable to run notify parent protocol as the ChannelDelegate is not set yet.");
+                            throw new Exception();
+                        }
+                        protocolManagerSession.channelDelegate.post(protocolManagerSession.session, parentNotificationMessage.generateChannelProtocolMessageToSend(), prng);
                     }
-                    protocolManagerSession.channelDelegate.post(protocolManagerSession.session, parentNotificationMessage.generateChannelProtocolMessageToSend(), prng);
                 }
 
                 if (protocol.hasReachedFinalState()) {
-                    // Delete the associated ProtocolInstance
-                    protocolInstance.delete();
+                    // Delete the associated ProtocolInstance (unless it was not yet inserted)
+                    if (!protocolInstanceNeedsToBeInserted) {
+                        protocolInstance.delete();
+                    }
 
                     // Delete all remaining ReceivedMessage for this protocol
                     if (protocol.eraseReceivedMessagesAfterReachingAFinalState) {
@@ -188,6 +204,8 @@ public final class ProtocolOperation extends Operation {
                             receivedMessage.delete();
                         }
                     }
+                } else {
+                    protocolInstance.updateCurrentState(endState, protocolInstanceNeedsToBeInserted);
                 }
 
                 message.delete();

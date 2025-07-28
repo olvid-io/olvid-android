@@ -56,6 +56,7 @@ import io.olvid.engine.protocol.protocol_engine.ProtocolStep;
 public class KeycloakContactAdditionProtocol extends ConcreteProtocol {
     public KeycloakContactAdditionProtocol(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, int currentStateId, Encoded encodedCurrentState, Identity ownedIdentity, PRNGService prng, ObjectMapper jsonObjectMapper) throws Exception {
         super(protocolManagerSession, protocolInstanceUid, currentStateId, encodedCurrentState, ownedIdentity, prng, jsonObjectMapper);
+        requiresProtocolInstanceToBeInsertedBeforeInitialStep = true;
     }
 
     @Override

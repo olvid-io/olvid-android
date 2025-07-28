@@ -102,6 +102,8 @@ public abstract class ConcreteProtocol {
     protected ConcreteProtocolState currentState;
 
     public boolean eraseReceivedMessagesAfterReachingAFinalState = true;
+    public boolean mayBeRunAsLinkedChildProtocol = false;
+    public boolean requiresProtocolInstanceToBeInsertedBeforeInitialStep = false;
 
     public UID getProtocolInstanceUid() {
         return protocolInstanceUid;

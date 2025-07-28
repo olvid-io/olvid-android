@@ -37,9 +37,9 @@ public class MutualScanSignatureReceived implements ObvDatabase {
 
     private final ProtocolManagerSession protocolManagerSession;
 
-    private Identity ownedIdentity;
+    private final Identity ownedIdentity;
     static final String OWNED_IDENTITY = "owned_identity";
-    private byte[] signature;
+    private final byte[] signature;
     static final String SIGNATURE = "signature";
 
 

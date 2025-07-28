@@ -1492,7 +1492,6 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
                 CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
                         ConcreteProtocol.FULL_RATCHET_PROTOCOL_ID,
                         protocolInstanceUid,
-                        true,
                         false);
 
                 ChannelMessageToSend message = new FullRatchetProtocol.InitialMessage(coreProtocolMessage, remoteIdentity, remoteDeviceUid).generateChannelProtocolMessageToSend();

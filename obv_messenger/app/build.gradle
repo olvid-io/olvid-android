@@ -26,8 +26,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 21
         targetSdk 35
-        versionCode 273
-        versionName "3.8"
+        versionCode 274
+        versionName "3.8.1"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr', 'af', 'ar', 'ca', 'cs', 'da', 'de', 'el', 'es', 'fa', 'fi', 'hi', 'hr', 'hu', 'it', 'iw', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-rBR', 'ro', 'ru', 'sk', 'sl', 'sv', 'tr', 'uk', 'vi', 'zh', 'zh-rTW']

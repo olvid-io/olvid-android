@@ -37,9 +37,9 @@ public class TrustEstablishmentCommitmentReceived implements ObvDatabase {
 
     private final ProtocolManagerSession protocolManagerSession;
 
-    private Identity ownedIdentity;
+    private final Identity ownedIdentity;
     static final String OWNED_IDENTITY = "owned_identity";
-    private byte[] commitment;
+    private final byte[] commitment;
     static final String COMMITMENT = "commitment";
 
 

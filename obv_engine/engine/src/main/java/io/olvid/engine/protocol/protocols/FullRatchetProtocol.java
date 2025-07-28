@@ -28,6 +28,7 @@ import io.olvid.engine.crypto.PublicKeyEncryption;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
@@ -500,9 +501,14 @@ public class FullRatchetProtocol extends ConcreteProtocol {
                 throw new Exception();
             }
 
-            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), true, false);
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), false);
             ChannelMessageToSend messageToSend = new AliceEphemeralKeyMessage(coreProtocolMessage, (EncryptionPublicKey) keyPair.getPublicKey(), restartCounter).generateChannelProtocolMessageToSend();
-            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            try {
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            } catch (NoAcceptableChannelException e) {
+                // the oblivious channel no longer exists, no need for a full ratchet!
+                return new CancelledState();
+            }
 
             return new AliceWaitingForK1State(receivedMessage.contactIdentity, receivedMessage.contactDeviceUid, (EncryptionPrivateKey) keyPair.getPrivateKey(), restartCounter);
         }
@@ -546,9 +552,15 @@ public class FullRatchetProtocol extends ConcreteProtocol {
                 throw new Exception();
             }
 
-            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), true, false);
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.contactIdentity, getOwnedIdentity(), new UID[]{receivedMessage.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), false);
             ChannelMessageToSend messageToSend = new AliceEphemeralKeyMessage(coreProtocolMessage, (EncryptionPublicKey) keyPair.getPublicKey(), restartCounter).generateChannelProtocolMessageToSend();
-            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+
+            try {
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            } catch (NoAcceptableChannelException e) {
+                // the oblivious channel no longer exists, no need for a full ratchet!
+                return new CancelledState();
+            }
 
             return new AliceWaitingForK1State(receivedMessage.contactIdentity, receivedMessage.contactDeviceUid, (EncryptionPrivateKey) keyPair.getPrivateKey(), restartCounter);
         }
@@ -602,7 +614,12 @@ public class FullRatchetProtocol extends ConcreteProtocol {
 
             CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), getOwnedIdentity(), new UID[]{receivedMessage.getReceptionChannelInfo().getRemoteDeviceUid()}, true));
             ChannelMessageToSend messageToSend = new BobEphemeralKeyAndK1Message(coreProtocolMessage, (EncryptionPublicKey) keyPair.getPublicKey(), c1, receivedMessage.restartCounter).generateChannelProtocolMessageToSend();
-            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            try {
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            } catch (NoAcceptableChannelException e) {
+                // the oblivious channel no longer exists, no need for a full ratchet!
+                return new CancelledState();
+            }
 
             return new BobWaitingForK2State(receivedMessage.getReceptionChannelInfo().getRemoteIdentity(), receivedMessage.getReceptionChannelInfo().getRemoteDeviceUid(), (EncryptionPrivateKey) keyPair.getPrivateKey(), k1, receivedMessage.restartCounter);
         }
@@ -646,9 +663,14 @@ public class FullRatchetProtocol extends ConcreteProtocol {
             Seed seed = Seed.of(k1, k2);
 
 
-            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(startState.contactIdentity, getOwnedIdentity(), new UID[]{startState.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), true, false);
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createObliviousChannelInfo(startState.contactIdentity, getOwnedIdentity(), new UID[]{startState.contactDeviceUid}, true), getProtocolId(), getProtocolInstanceUid(), false);
             ChannelMessageToSend messageToSend = new AliceK2Message(coreProtocolMessage, c2, startState.restartCounter).generateChannelProtocolMessageToSend();
-            protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            try {
+                protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+            } catch (NoAcceptableChannelException e) {
+                // the oblivious channel no longer exists, no need for a full ratchet!
+                return new CancelledState();
+            }
 
             return new AliceWaitingForAckState(startState.contactIdentity, startState.contactDeviceUid, seed, startState.restartCounter);
         }

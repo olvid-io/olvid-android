@@ -1,3 +1,9 @@
+# Build 274 (3.8.1)
+2025-07-28
+
+- Rework of the full-ratchet protocol triggers
+- Some protocol execution optimisations
+
 # Build 273 (3.8)
 2025-07-22
 
@@ -18,7 +24,6 @@
 2025-05-14
 
 - Fix image viewer that was broken by a removed id
-
 
 # ~~Build 270 (3.7.1)~~
 2025-05-12

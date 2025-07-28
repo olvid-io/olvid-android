@@ -24,9 +24,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Identity;
@@ -48,11 +45,11 @@ public class ProtocolInstance implements ObvDatabase {
     // To improve: add an expiration timestamp, updated each time a new state is written
     //  --> this timestamp should depend on the protocol type (infinite for group management)
 
-    private UID uid;
+    private final UID uid;
     static final String UID_ = "uid";
-    private Identity ownedIdentity;
+    private final Identity ownedIdentity;
     static final String OWNED_IDENTITY = "owned_identity";
-    private int protocolId;
+    private final int protocolId;
     static final String PROTOCOL_ID = "protocol_id";
     private int currentStateId;
     static final String CURRENT_STATE_ID = "current_state_id";
@@ -84,46 +81,43 @@ public class ProtocolInstance implements ObvDatabase {
     }
 
 
-    public void updateCurrentState(ConcreteProtocolState newState) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
-                CURRENT_STATE_ID + " = ?, " +
-                ENCODED_CURRENT_STATE + " = ? " +
-                " WHERE " + UID_ + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
-            this.currentStateId = newState.id;
-            this.encodedCurrentState = newState.encode();
-            statement.setInt(1, this.currentStateId);
-            if (this.encodedCurrentState != null) {
-                statement.setBytes(2, this.encodedCurrentState.getBytes());
-            } else {
-                statement.setNull(2, Types.BLOB);
+    public void updateCurrentState(ConcreteProtocolState newState, boolean protocolInstanceNeedsToBeInserted) throws SQLException {
+        this.currentStateId = newState.id;
+        this.encodedCurrentState = newState.encode();
+        if (protocolInstanceNeedsToBeInserted) {
+            insert();
+        } else {
+            try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+                    CURRENT_STATE_ID + " = ?, " +
+                    ENCODED_CURRENT_STATE + " = ? " +
+                    " WHERE " + UID_ + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
+                statement.setInt(1, this.currentStateId);
+                if (this.encodedCurrentState != null) {
+                    statement.setBytes(2, this.encodedCurrentState.getBytes());
+                } else {
+                    statement.setNull(2, Types.BLOB);
+                }
+                statement.setBytes(3, uid.getBytes());
+                statement.setBytes(4, ownedIdentity.getBytes());
+                statement.executeUpdate();
             }
-            statement.setBytes(3, uid.getBytes());
-            statement.setBytes(4, ownedIdentity.getBytes());
-            statement.executeUpdate();
         }
     }
 
 
 
-    public static ProtocolInstance create(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, Identity ownedIdentity, int protocolId, ConcreteProtocolState protocolState) {
+    public static ProtocolInstance createNotInDb(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, Identity ownedIdentity, int protocolId, ConcreteProtocolState protocolState) {
         if ((protocolInstanceUid == null) || (ownedIdentity == null) || (protocolState == null)) {
             return null;
         }
-        try {
-            ProtocolInstance protocolInstance = new ProtocolInstance(
-                    protocolManagerSession,
-                    protocolInstanceUid,
-                    ownedIdentity,
-                    protocolId,
-                    protocolState.id,
-                    protocolState.encode()
-            );
-            protocolInstance.insert();
-            return protocolInstance;
-        } catch (SQLException e) {
-            Logger.x(e);
-            return null;
-        }
+        return new ProtocolInstance(
+                protocolManagerSession,
+                protocolInstanceUid,
+                ownedIdentity,
+                protocolId,
+                protocolState.id,
+                protocolState.encode()
+        );
     }
 
     private ProtocolInstance(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, Identity ownedIdentity, int protocolId, int currentStateId, Encoded encodedCurrentState) {
@@ -232,38 +226,38 @@ public class ProtocolInstance implements ObvDatabase {
         }
     }
 
-    public static List<ProtocolInstance> getAllForProtocolId(ProtocolManagerSession protocolManagerSession, int protocolId) {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + PROTOCOL_ID + " = ?;")) {
-            statement.setInt(1, protocolId);
-            try (ResultSet res = statement.executeQuery()) {
-                List<ProtocolInstance> list = new ArrayList<>();
-                while (res.next()) {
-                    list.add(new ProtocolInstance(protocolManagerSession, res));
-                }
-                return list;
-            }
-        } catch (SQLException e) {
-            return Collections.emptyList();
-        }
-    }
-
-    public static List<ProtocolInstance> getAllForOwnedIdentityProtocolId(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity, int protocolId) {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
-                " WHERE " + PROTOCOL_ID + " = ? " +
-                " AND " + OWNED_IDENTITY + " = ?;")) {
-            statement.setInt(1, protocolId);
-            statement.setBytes(2, ownedIdentity.getBytes());
-            try (ResultSet res = statement.executeQuery()) {
-                List<ProtocolInstance> list = new ArrayList<>();
-                while (res.next()) {
-                    list.add(new ProtocolInstance(protocolManagerSession, res));
-                }
-                return list;
-            }
-        } catch (SQLException e) {
-            return Collections.emptyList();
-        }
-    }
+//    public static List<ProtocolInstance> getAllForProtocolId(ProtocolManagerSession protocolManagerSession, int protocolId) {
+//        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + PROTOCOL_ID + " = ?;")) {
+//            statement.setInt(1, protocolId);
+//            try (ResultSet res = statement.executeQuery()) {
+//                List<ProtocolInstance> list = new ArrayList<>();
+//                while (res.next()) {
+//                    list.add(new ProtocolInstance(protocolManagerSession, res));
+//                }
+//                return list;
+//            }
+//        } catch (SQLException e) {
+//            return Collections.emptyList();
+//        }
+//    }
+//
+//    public static List<ProtocolInstance> getAllForOwnedIdentityProtocolId(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity, int protocolId) {
+//        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+//                " WHERE " + PROTOCOL_ID + " = ? " +
+//                " AND " + OWNED_IDENTITY + " = ?;")) {
+//            statement.setInt(1, protocolId);
+//            statement.setBytes(2, ownedIdentity.getBytes());
+//            try (ResultSet res = statement.executeQuery()) {
+//                List<ProtocolInstance> list = new ArrayList<>();
+//                while (res.next()) {
+//                    list.add(new ProtocolInstance(protocolManagerSession, res));
+//                }
+//                return list;
+//            }
+//        } catch (SQLException e) {
+//            return Collections.emptyList();
+//        }
+//    }
 
     public static void deleteAllForOwnedIdentity(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity, UID excludedProtocolInstanceUid) throws SQLException {
         if (excludedProtocolInstanceUid == null) {

@@ -85,7 +85,7 @@ public class ExponentialBackoffRepeatingScheduler<T> {
     public void schedule(T key, Runnable runnable, String tag, long delay) {
         synchronized (lock) {
             if (tag != null) {
-                Logger.i("Scheduling a " + tag + " for " + key.toString() + " in " + delay + "ms.");
+                Logger.d("Scheduling a " + tag + " for " + key.toString() + " in " + delay + "ms.");
             }
             scheduler.schedule(runnable, delay, TimeUnit.MILLISECONDS);
         }

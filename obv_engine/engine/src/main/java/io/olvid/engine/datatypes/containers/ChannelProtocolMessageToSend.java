@@ -25,13 +25,11 @@ import io.olvid.engine.encoder.Encoded;
 public class ChannelProtocolMessageToSend implements ChannelMessageToSend {
     private final SendChannelInfo sendChannelInfo;
     private final Encoded encodedElements;
-    private final boolean partOfFullRatchetProtocolOfTheSendSeed;
     private final boolean hasUserContent;
 
-    public ChannelProtocolMessageToSend(SendChannelInfo sendChannelInfo, Encoded encodedElements, boolean partOfFullRatchetProtocolOfTheSendSeed, boolean hasUserContent) {
+    public ChannelProtocolMessageToSend(SendChannelInfo sendChannelInfo, Encoded encodedElements, boolean hasUserContent) {
         this.sendChannelInfo = sendChannelInfo;
         this.encodedElements = encodedElements;
-        this.partOfFullRatchetProtocolOfTheSendSeed = partOfFullRatchetProtocolOfTheSendSeed;
         this.hasUserContent = hasUserContent;
     }
 
@@ -47,10 +45,6 @@ public class ChannelProtocolMessageToSend implements ChannelMessageToSend {
 
     public Encoded getEncodedElements() {
         return encodedElements;
-    }
-
-    public boolean isPartOfFullRatchetProtocolOfTheSendSeed() {
-        return partOfFullRatchetProtocolOfTheSendSeed;
     }
 
     public boolean hasUserContent() {

@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -54,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.App
 import io.olvid.messenger.R
@@ -154,6 +156,7 @@ fun EditGroupDetailsScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = olvidDefaultTextFieldColors(),
                 onValueChange = { editGroupDetailsViewModel.setGroupName(it) },
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 maxLines = 1,
                 label = {
                     Text(stringResource(R.string.hint_group_name))
@@ -167,6 +170,7 @@ fun EditGroupDetailsScreen(
                     .padding(horizontal = 16.dp),
                 value = editGroupDetailsViewModel.groupDescription.orEmpty(),
                 onValueChange = { editGroupDetailsViewModel.groupDescription = it },
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                 shape = RoundedCornerShape(12.dp),
                 colors = olvidDefaultTextFieldColors(),
                 minLines = 3,
@@ -186,6 +190,7 @@ fun EditGroupDetailsScreen(
                             .padding(horizontal = 16.dp),
                         value = editGroupDetailsViewModel.personalNote.orEmpty(),
                         onValueChange = { editGroupDetailsViewModel.personalNote = it },
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                         shape = RoundedCornerShape(12.dp),
                         colors = olvidDefaultTextFieldColors(),
                         minLines = 3,

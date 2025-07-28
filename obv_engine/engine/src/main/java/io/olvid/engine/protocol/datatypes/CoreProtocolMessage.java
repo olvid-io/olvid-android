@@ -32,7 +32,6 @@ public class CoreProtocolMessage {
     private final Identity toIdentity;
     private final int protocolId;
     private final UID protocolInstanceUid;
-    private final boolean partOfFullRatchetProtocolOfTheSendSeed;
     private final boolean hasUserContent;
     private final long serverTimestamp;
 
@@ -42,7 +41,6 @@ public class CoreProtocolMessage {
         this.toIdentity = message.getToIdentity();
         this.protocolId = message.getProtocolId();
         this.protocolInstanceUid = message.getProtocolInstanceUid();
-        this.partOfFullRatchetProtocolOfTheSendSeed = false;
         this.hasUserContent = false;
         this.serverTimestamp = message.getServerTimestamp();
     }
@@ -53,18 +51,16 @@ public class CoreProtocolMessage {
         this.toIdentity = null;
         this.protocolId = protocolId;
         this.protocolInstanceUid = protocolInstanceUid;
-        this.partOfFullRatchetProtocolOfTheSendSeed = false;
         this.hasUserContent = false;
         this.serverTimestamp = System.currentTimeMillis();
     }
 
-    public CoreProtocolMessage(SendChannelInfo sendChannelInfo, int protocolId, UID protocolInstanceUid, boolean partOfFullRatchetProtocolOfTheSendSeed, boolean hasUserContent) {
+    public CoreProtocolMessage(SendChannelInfo sendChannelInfo, int protocolId, UID protocolInstanceUid, boolean hasUserContent) {
         this.sendChannelInfo = sendChannelInfo;
         this.receptionChannelInfo = null;
         this.toIdentity = null;
         this.protocolId = protocolId;
         this.protocolInstanceUid = protocolInstanceUid;
-        this.partOfFullRatchetProtocolOfTheSendSeed = partOfFullRatchetProtocolOfTheSendSeed;
         this.hasUserContent = hasUserContent;
         this.serverTimestamp = System.currentTimeMillis();
     }
@@ -87,10 +83,6 @@ public class CoreProtocolMessage {
 
     public UID getProtocolInstanceUid() {
         return protocolInstanceUid;
-    }
-
-    public boolean isPartOfFullRatchetProtocolOfTheSendSeed() {
-        return partOfFullRatchetProtocolOfTheSendSeed;
     }
 
     public boolean hasUserContent() {

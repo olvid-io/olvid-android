@@ -53,7 +53,6 @@ import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
-import io.olvid.engine.datatypes.containers.ChannelProtocolMessageToSend;
 import io.olvid.engine.datatypes.containers.MessageToSend;
 import io.olvid.engine.datatypes.containers.MessageType;
 import io.olvid.engine.datatypes.containers.NetworkReceivedMessage;
@@ -94,10 +93,6 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
     static final String NUMBER_OF_ENCRYPTED_MESSAGES = "number_of_encrypted_messages";
     private int numberOfEncryptedMessagesAtTheTimeOfTheLastFullRatchet;
     static final String NUMBER_OF_ENCRYPTED_MESSAGES_AT_THE_TIME_OF_THE_LAST_FULL_RATCHET = "number_of_encrypted_messages_at_the_time_of_the_last_full_ratchet";
-    private int numberOfEncryptedMessagesSinceLastFullRatchetSentMessage;
-    static final String NUMBER_OF_ENCRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE = "number_of_encrypted_messages_since_last_full_ratchet_sent_message";
-    private int numberOfDecryptedMessagesSinceLastFullRatchetSentMessage;
-    static final String NUMBER_OF_DECRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE = "number_of_decrypted_messages_since_last_full_ratchet_sent_message";
     private long timestampOfLastFullRatchet;
     static final String TIMESTAMP_OF_LAST_FULL_RATCHET = "timestamp_of_last_full_ratchet";
     private long timestampOfLastFullRatchetSentMessage;
@@ -106,11 +101,11 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
     static final String FULL_RATCHET_OF_THE_SEND_SEED_IN_PROGRESS = "full_ratchet_of_the_send_seed_in_progress";
 
     // info for GKMV2
-    private boolean supportsGKMV2;
+    private final boolean supportsGKMV2;
     static final String SUPPORTS_GKMV_2 = "supports_gkmv_2";
-    private int fullRatchetingCountForGkmv2Support;
+    private final int fullRatchetingCountForGkmv2Support;
     static final String FULL_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT = "full_ratcheting_count_with_gkmv_2_support";
-    private int selfRatchetingCountForGkmv2Support;
+    private final int selfRatchetingCountForGkmv2Support;
     static final String SELF_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT = "self_ratcheting_count_with_gkmv_2_support";
 
 
@@ -140,25 +135,12 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         return numberOfEncryptedMessages - numberOfEncryptedMessagesAtTheTimeOfTheLastFullRatchet;
     }
 
+    @SuppressWarnings("RedundantIfStatement")
     public boolean requiresFullRatchet() {
         if (fullRatchetOfTheSendSeedInProgress) {
-            // 1. If we received too many messages since the last full ratchet protocol message that we sent,
-            // it means that the other end of the channel will probably never send an answer to our last protocol message.
-            // In that case, we decide to start the full ratchet protocol all over again.
-            if (numberOfDecryptedMessagesSinceLastFullRatchetSentMessage >= Constants.THRESHOLD_NUMBER_OF_DECRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE) {
-                return true;
-            }
-
-            // 2. If too much time passed since the time we sent a message related to the full ratcheting protocol in progress,
+            // 1. If too much time passed since the time we sent a message related to the full ratcheting protocol in progress,
             // we decide to start the protocol all over again.
             if (System.currentTimeMillis() - timestampOfLastFullRatchetSentMessage >= Constants.THRESHOLD_TIME_INTERVAL_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE) {
-                return true;
-            }
-
-            // 3. If the number of messages sent since the last sent message related to the full ratcheting protocol
-            // is larger than the reprovisioning threshold, we must restart the protocol since the recipient could end up
-            // not being able to decrypt an old message arriving after the end of the full ratcheting.
-            if (numberOfEncryptedMessagesSinceLastFullRatchetSentMessage >= Constants.REPROVISIONING_THRESHOLD) {
                 return true;
             }
         } else {
@@ -177,16 +159,14 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         return false;
     }
 
-    public Provision getLatestProvision() {
-        return Provision.get(channelManagerSession, fullRatchetingCountOfLastProvision, currentDeviceUid, remoteDeviceUid, remoteIdentity);
-    }
+//    public Provision getLatestProvision() {
+//        return Provision.get(channelManagerSession, fullRatchetingCountOfLastProvision, currentDeviceUid, remoteDeviceUid, remoteIdentity);
+//    }
 
 
     public void aSendSeedFullRatchetMessageWasSent() {
         try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
                 FULL_RATCHET_OF_THE_SEND_SEED_IN_PROGRESS + " = 1, " +
-                NUMBER_OF_ENCRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE + " = 0, " +
-                NUMBER_OF_DECRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE + " = 0, " +
                 TIMESTAMP_OF_LAST_FULL_RATCHET_SENT_MESSAGE + " = ? " +
                 " WHERE " + CURRENT_DEVICE_UID + " = ? AND " + REMOTE_DEVICE_UID + " = ? AND " + REMOTE_IDENTITY + " = ?;")) {
             long now = System.currentTimeMillis();
@@ -196,9 +176,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             statement.setBytes(4, remoteIdentity.getBytes());
             statement.executeUpdate();
             this.fullRatchetOfTheSendSeedInProgress = true;
-            this.numberOfDecryptedMessagesSinceLastFullRatchetSentMessage = 0;
-            this.numberOfEncryptedMessagesSinceLastFullRatchetSentMessage = 0;
-            this.timestampOfLastFullRatchet = now;
+            this.timestampOfLastFullRatchetSentMessage = now;
         } catch (SQLException ignored) {}
     }
 
@@ -339,14 +317,11 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         this.fullRatchetingCountOfLastProvision = 0;
         this.numberOfEncryptedMessages = 0;
         this.numberOfEncryptedMessagesAtTheTimeOfTheLastFullRatchet= 0;
-        this.numberOfEncryptedMessagesSinceLastFullRatchetSentMessage = 0;
-
-        this.numberOfDecryptedMessagesSinceLastFullRatchetSentMessage = 0;
         this.timestampOfLastFullRatchet = System.currentTimeMillis();
+
         this.timestampOfLastFullRatchetSentMessage = this.timestampOfLastFullRatchet;
         this.fullRatchetOfTheSendSeedInProgress = false;
         this.supportsGKMV2 = false;
-
         this.fullRatchetingCountForGkmv2Support = -1;
         this.selfRatchetingCountForGkmv2Support = -1;
     }
@@ -368,14 +343,11 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         this.fullRatchetingCountOfLastProvision = res.getInt(FULL_RATCHETING_COUNT_OF_LAST_PROVISION);
         this.numberOfEncryptedMessages = res.getInt(NUMBER_OF_ENCRYPTED_MESSAGES);
         this.numberOfEncryptedMessagesAtTheTimeOfTheLastFullRatchet= res.getInt(NUMBER_OF_ENCRYPTED_MESSAGES_AT_THE_TIME_OF_THE_LAST_FULL_RATCHET);
-        this.numberOfEncryptedMessagesSinceLastFullRatchetSentMessage = res.getInt(NUMBER_OF_ENCRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE);
-
-        this.numberOfDecryptedMessagesSinceLastFullRatchetSentMessage = res.getInt(NUMBER_OF_DECRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE);
         this.timestampOfLastFullRatchet = res.getLong(TIMESTAMP_OF_LAST_FULL_RATCHET);
+
         this.timestampOfLastFullRatchetSentMessage = res.getLong(TIMESTAMP_OF_LAST_FULL_RATCHET_SENT_MESSAGE);
         this.fullRatchetOfTheSendSeedInProgress = res.getBoolean(FULL_RATCHET_OF_THE_SEND_SEED_IN_PROGRESS);
         this.supportsGKMV2 = res.getBoolean(SUPPORTS_GKMV_2);
-
         this.fullRatchetingCountForGkmv2Support = res.getInt(FULL_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT);
         this.selfRatchetingCountForGkmv2Support = res.getInt(SELF_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT);
     }
@@ -394,8 +366,6 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                     FULL_RATCHETING_COUNT_OF_LAST_PROVISION + " INT NOT NULL, " +
                     NUMBER_OF_ENCRYPTED_MESSAGES + " INT NOT NULL, " +
                     NUMBER_OF_ENCRYPTED_MESSAGES_AT_THE_TIME_OF_THE_LAST_FULL_RATCHET + " INT NOT NULL, " +
-                    NUMBER_OF_ENCRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE + " INT NOT NULL, " +
-                    NUMBER_OF_DECRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE + " INT NOT NULL, " +
                     TIMESTAMP_OF_LAST_FULL_RATCHET + " BIGINT NOT NULL, " +
                     TIMESTAMP_OF_LAST_FULL_RATCHET_SENT_MESSAGE + " BIGINT NOT NULL, " +
                     FULL_RATCHET_OF_THE_SEND_SEED_IN_PROGRESS + " BIT NOT NULL, " +
@@ -416,11 +386,19 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             }
             oldVersion = 39;
         }
+        if (oldVersion < 46 && newVersion >= 46) {
+            Logger.d("MIGRATING `oblivious_channel` DATABASE FROM VERSION " + oldVersion + " TO 46");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE oblivious_channel DROP COLUMN `number_of_encrypted_messages_since_last_full_ratchet_sent_message`");
+                statement.execute("ALTER TABLE oblivious_channel DROP COLUMN `number_of_decrypted_messages_since_last_full_ratchet_sent_message`");
+            }
+            oldVersion = 46;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?);")) {
             statement.setBytes(1, currentDeviceUid.getBytes());
             statement.setBytes(2, remoteDeviceUid.getBytes());
             statement.setBytes(3, remoteIdentity.getBytes());
@@ -431,16 +409,13 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             statement.setInt(7, fullRatchetingCountOfLastProvision);
             statement.setInt(8, numberOfEncryptedMessages);
             statement.setInt(9, numberOfEncryptedMessagesAtTheTimeOfTheLastFullRatchet);
-            statement.setInt(10, numberOfEncryptedMessagesSinceLastFullRatchetSentMessage);
+            statement.setLong(10, timestampOfLastFullRatchet);
 
-            statement.setInt(11, numberOfDecryptedMessagesSinceLastFullRatchetSentMessage);
-            statement.setLong(12, timestampOfLastFullRatchet);
-            statement.setLong(13, timestampOfLastFullRatchetSentMessage);
-            statement.setBoolean(14, fullRatchetOfTheSendSeedInProgress);
-            statement.setBoolean(15, supportsGKMV2);
-
-            statement.setInt(16, fullRatchetingCountForGkmv2Support);
-            statement.setInt(17, selfRatchetingCountForGkmv2Support);
+            statement.setLong(11, timestampOfLastFullRatchetSentMessage);
+            statement.setBoolean(12, fullRatchetOfTheSendSeedInProgress);
+            statement.setBoolean(13, supportsGKMV2);
+            statement.setInt(14, fullRatchetingCountForGkmv2Support);
+            statement.setInt(15, selfRatchetingCountForGkmv2Support);
             statement.executeUpdate();
         }
     }
@@ -496,20 +471,20 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
     }
 
 
-    public static ObliviousChannel[] getAllConfirmed(ChannelManagerSession channelManagerSession) {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
-                " WHERE " + CONFIRMED + " = 1;")) {
-            try (ResultSet res = statement.executeQuery()) {
-                List<ObliviousChannel> list = new ArrayList<>();
-                while (res.next()) {
-                    list.add(new ObliviousChannel(channelManagerSession, res));
-                }
-                return list.toArray(new ObliviousChannel[0]);
-            }
-        } catch (SQLException e) {
-            return new ObliviousChannel[0];
-        }
-    }
+//    public static ObliviousChannel[] getAllConfirmed(ChannelManagerSession channelManagerSession) {
+//        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+//                " WHERE " + CONFIRMED + " = 1;")) {
+//            try (ResultSet res = statement.executeQuery()) {
+//                List<ObliviousChannel> list = new ArrayList<>();
+//                while (res.next()) {
+//                    list.add(new ObliviousChannel(channelManagerSession, res));
+//                }
+//                return list.toArray(new ObliviousChannel[0]);
+//            }
+//        } catch (SQLException e) {
+//            return new ObliviousChannel[0];
+//        }
+//    }
 
     public static ObliviousChannel[] getMany(ChannelManagerSession channelManagerSession, UID currentDeviceUid, UID[] remoteDeviceUids, Identity remoteIdentity, boolean necessarilyConfirmed) {
         if ((currentDeviceUid == null) || (remoteDeviceUids == null) || (remoteDeviceUids.length == 0) || (remoteIdentity == null)) {
@@ -606,24 +581,22 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
 
     private long commitHookBits = 0;
-    private static final long HOOK_BIT_MIGHT_NEED_FULL_RATCHET = 0x1;
+    private static final long HOOK_BIT_NEED_FULL_RATCHET = 0x1;
     private static final long HOOK_BIT_CHANNEL_CONFIRMED = 0x2;
     private static final long HOOK_BIT_CHANNEL_DELETED = 0x4;
 
     @Override
     public void wasCommitted() {
-        if ((commitHookBits & HOOK_BIT_MIGHT_NEED_FULL_RATCHET) != 0) {
-            if (requiresFullRatchet()) {
-                if (channelManagerSession.fullRatchetProtocolStarterDelegate != null) {
-                    try {
-                        channelManagerSession.fullRatchetProtocolStarterDelegate.startFullRatchetProtocolForObliviousChannel(currentDeviceUid, remoteDeviceUid, remoteIdentity);
-                    } catch (Exception e) {
-                        // no need to do anything, the next message will try to restart the full ratchet
-                        Logger.x(e);
-                    }
-                } else {
-                    Logger.w("Full ratchet required, but no FullRatchetProtocolStarterDelegate is set.");
+        if ((commitHookBits & HOOK_BIT_NEED_FULL_RATCHET) != 0) {
+            if (channelManagerSession.fullRatchetProtocolStarterDelegate != null) {
+                try {
+                    channelManagerSession.fullRatchetProtocolStarterDelegate.startFullRatchetProtocolForObliviousChannel(currentDeviceUid, remoteDeviceUid, remoteIdentity);
+                } catch (Exception e) {
+                    // no need to do anything, the next message will try to restart the full ratchet
+                    Logger.x(e);
                 }
+            } else {
+                Logger.w("Full ratchet required, but no FullRatchetProtocolStarterDelegate is set.");
             }
         }
         if ((commitHookBits & HOOK_BIT_CHANNEL_CONFIRMED) != 0) {
@@ -706,16 +679,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 remoteDeviceUidSet.retainAll(Arrays.asList(message.getSendChannelInfo().getRemoteDeviceUids()));
                 UID currentDeviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getFromIdentity());
 
-                ObliviousChannel[] channels = ObliviousChannel.getAcceptableObliviousChannels(channelManagerSession, currentDeviceUid, remoteDeviceUidSet.toArray(new UID[0]), message.getSendChannelInfo().getToIdentity(), message.getSendChannelInfo().getNecessarilyConfirmed()).toArray(new ObliviousChannel[0]);
-
-                if (message.getMessageType() == MessageType.PROTOCOL_MESSAGE_TYPE) {
-                    if (((ChannelProtocolMessageToSend) message).isPartOfFullRatchetProtocolOfTheSendSeed()) {
-                        for (ObliviousChannel channel : channels) {
-                            channel.aSendSeedFullRatchetMessageWasSent();
-                        }
-                    }
-                }
-                return channels;
+                return ObliviousChannel.getAcceptableObliviousChannels(channelManagerSession, currentDeviceUid, remoteDeviceUidSet.toArray(new UID[0]), message.getSendChannelInfo().getToIdentity(), message.getSendChannelInfo().getNecessarilyConfirmed()).toArray(new ObliviousChannel[0]);
             }
             case SendChannelInfo.ALL_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_ON_SAME_SERVER_TYPE: {
                 List<NetworkChannel> acceptableChannels = new ArrayList<>();
@@ -831,7 +795,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
     }
 
     @Override
-    public MessageToSend.Header wrapMessageKey(AuthEncKey messageKey, PRNGService prng, boolean partOfFullRatchetProtocol) {
+    public MessageToSend.Header wrapMessageKey(AuthEncKey messageKey, PRNGService prng, boolean protocolMessage) {
         RatchetingOutput ratchetingOutput = ObliviousChannel.computeSelfRatchet(seedForNextSendKey, obliviousEngineVersion);
         if (ratchetingOutput == null) {
             return null;
@@ -852,21 +816,20 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         MessageToSend.Header header = new MessageToSend.Header(remoteDeviceUid, remoteIdentity, new EncryptedBytes(headerBytes));
         try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
                 SEED_FOR_NEXT_SEND_KEY + " = ?, " +
-                NUMBER_OF_ENCRYPTED_MESSAGES + " = ?, " +
-                NUMBER_OF_ENCRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE + " = ? " +
+                NUMBER_OF_ENCRYPTED_MESSAGES + " = ? " +
                 " WHERE " + CURRENT_DEVICE_UID + " = ? AND " + REMOTE_DEVICE_UID + " = ? AND " + REMOTE_IDENTITY + " = ?;")) {
             statement.setBytes(1, ratchetingOutput.getRatchetedSeed().getBytes());
             statement.setInt(2, numberOfEncryptedMessages + 1);
-            statement.setInt(3, numberOfEncryptedMessagesSinceLastFullRatchetSentMessage + 1);
-            statement.setBytes(4, currentDeviceUid.getBytes());
-            statement.setBytes(5, remoteDeviceUid.getBytes());
-            statement.setBytes(6, remoteIdentity.getBytes());
+            statement.setBytes(3, currentDeviceUid.getBytes());
+            statement.setBytes(4, remoteDeviceUid.getBytes());
+            statement.setBytes(5, remoteIdentity.getBytes());
             statement.executeUpdate();
             this.seedForNextSendKey = ratchetingOutput.getRatchetedSeed();
             this.numberOfEncryptedMessages++;
-            this.numberOfEncryptedMessagesSinceLastFullRatchetSentMessage++;
-            if (!partOfFullRatchetProtocol) {
-                commitHookBits |= HOOK_BIT_MIGHT_NEED_FULL_RATCHET;
+            if (!protocolMessage && requiresFullRatchet()) {
+                aSendSeedFullRatchetMessageWasSent();
+
+                commitHookBits |= HOOK_BIT_NEED_FULL_RATCHET;
                 channelManagerSession.session.addSessionCommitListener(this);
             }
         } catch (SQLException e) {
@@ -916,24 +879,6 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                     }
                 }
 
-                if (obliviousChannel.fullRatchetOfTheSendSeedInProgress) {
-                    try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
-                            " SET " + NUMBER_OF_DECRYPTED_MESSAGES_SINCE_LAST_FULL_RATCHET_SENT_MESSAGE + " = ? " +
-                            " WHERE " + CURRENT_DEVICE_UID + " = ? " +
-                            " AND " + REMOTE_DEVICE_UID + " = ? " +
-                            " AND " + REMOTE_IDENTITY + " = ?;")) {
-                        statement.setInt(1, obliviousChannel.numberOfDecryptedMessagesSinceLastFullRatchetSentMessage + 1);
-                        statement.setBytes(2, obliviousChannel.currentDeviceUid.getBytes());
-                        statement.setBytes(3, obliviousChannel.remoteDeviceUid.getBytes());
-                        statement.setBytes(4, obliviousChannel.remoteIdentity.getBytes());
-                        statement.executeUpdate();
-                        obliviousChannel.numberOfDecryptedMessagesSinceLastFullRatchetSentMessage++;
-                        obliviousChannel.commitHookBits |= HOOK_BIT_MIGHT_NEED_FULL_RATCHET;
-                        channelManagerSession.session.addSessionCommitListener(obliviousChannel);
-                    } catch (SQLException e) {
-                        Logger.x(e);
-                    }
-                }
                 try {
                     provisionedKey.delete();
                     if (!obliviousChannel.confirmed) {
@@ -946,9 +891,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 // add information about GKMV2 in receptionChannelInfo
                 receptionChannelInfo.enrichWithGKMV2Info(provisionedKey.getProvisionFullRatchetingCount(), provisionedKey.getSelfRatchetingCount(), obliviousChannel.supportsGKMV2(provisionedKey.getProvisionFullRatchetingCount(), provisionedKey.getSelfRatchetingCount()));
                 return new AuthEncKeyAndChannelInfo(messageKey, receptionChannelInfo);
-            } catch (InvalidKeyException | DecryptionException | DecodingException | ClassCastException e) {
-                // nothing to do
-            }
+            } catch (InvalidKeyException | DecryptionException | DecodingException | ClassCastException ignored) { }
         }
         return null;
     }

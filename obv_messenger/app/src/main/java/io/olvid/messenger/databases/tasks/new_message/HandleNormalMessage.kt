@@ -233,6 +233,8 @@ fun handleNormalMessage(
             for (i in 0..<obvMessage.attachments.size) {
                 try {
                     val metadata = AppSingleton.getJsonObjectMapper().readValue(obvMessage.attachments[i].metadata, JsonMetadata::class.java)
+                    attachmentMetadatas[i] = metadata
+
                     val mimeType = PreviewUtils.getNonNullMimeType(metadata.type, metadata.fileName)
                     // correct the received mime type in case it was invalid
                     metadata.type = mimeType
@@ -242,8 +244,8 @@ fun handleNormalMessage(
                         imageCount++
                     }
                     attachmentCount++
-                    attachmentMetadatas[i] = metadata
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    Logger.x(e)
                     attachmentMetadatas[i] = null
                 }
             }

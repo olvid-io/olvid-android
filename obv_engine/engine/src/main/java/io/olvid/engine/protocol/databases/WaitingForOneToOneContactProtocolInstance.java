@@ -43,15 +43,15 @@ public class WaitingForOneToOneContactProtocolInstance implements ObvDatabase {
 
     private final ProtocolManagerSession protocolManagerSession;
 
-    private UID protocolUid;
+    private final UID protocolUid;
     static final String PROTOCOL_UID = "protocol_uid";
-    private Identity ownedIdentity;
+    private final Identity ownedIdentity;
     static final String OWNED_IDENTITY = "owned_identity";
-    private Identity contactIdentity;
+    private final Identity contactIdentity;
     static final String CONTACT_IDENTITY = "contact_identity";
-    private int protocolId;
+    private final int protocolId;
     static final String PROTOCOL_ID = "protocol_id";
-    private int messageId;
+    private final int messageId;
     static final String MESSAGE_ID = "message_id";
 
     public UID getProtocolUid() {
@@ -260,7 +260,6 @@ public class WaitingForOneToOneContactProtocolInstance implements ObvDatabase {
                 protocolUid,
                 messageId,
                 new Encoded[]{Encoded.of(contactIdentity)},
-                false,
                 false);
     }
 

@@ -658,7 +658,7 @@ public class KeycloakManager {
 
                 @Override
                 public void failed(int rfc) {
-                    Logger.d("Fail downloaded owned details " + rfc);
+                    Logger.d("Failed to download Keycloak owned details, rfc: " + rfc);
                     currentlySyncingOwnedIdentities.remove(identityBytesKey);
 
                     switch (rfc) {

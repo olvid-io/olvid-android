@@ -30,13 +30,11 @@ import io.olvid.engine.encoder.Encoded;
 public class GenericProtocolMessageToSend {
     private final SendChannelInfo sendChannelInfo;
     private final Encoded encodedElements;
-    private final boolean partOfFullRatchetProtocolOfTheSendSeed;
     private final boolean hasUserContent;
 
-    public GenericProtocolMessageToSend(SendChannelInfo sendChannelInfo, int protocolId, UID protocolInstanceUid, int protocolMessageId, Encoded[] inputs, boolean partOfFullRatchetProtocolOfTheSendSeed, boolean hasUserContent) {
+    public GenericProtocolMessageToSend(SendChannelInfo sendChannelInfo, int protocolId, UID protocolInstanceUid, int protocolMessageId, Encoded[] inputs, boolean hasUserContent) {
         this.sendChannelInfo = sendChannelInfo;
         this.encodedElements = encode(protocolId, protocolInstanceUid, protocolMessageId, inputs);
-        this.partOfFullRatchetProtocolOfTheSendSeed = partOfFullRatchetProtocolOfTheSendSeed;
         this.hasUserContent = hasUserContent;
     }
 
@@ -58,7 +56,7 @@ public class GenericProtocolMessageToSend {
             case SendChannelInfo.ASYMMETRIC_BROADCAST_CHANNEL_TYPE:
             case SendChannelInfo.ALL_OWNED_CONFIRMED_OBLIVIOUS_CHANNELS_OR_PRE_KEY_TYPE:
             case SendChannelInfo.OBLIVIOUS_CHANNEL_OR_PRE_KEY_TYPE:
-                return new ChannelProtocolMessageToSend(sendChannelInfo, encodedElements, partOfFullRatchetProtocolOfTheSendSeed, hasUserContent);
+                return new ChannelProtocolMessageToSend(sendChannelInfo, encodedElements, hasUserContent);
             default:
                 return null;
         }

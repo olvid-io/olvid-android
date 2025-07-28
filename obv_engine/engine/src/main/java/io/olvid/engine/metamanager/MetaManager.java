@@ -55,7 +55,7 @@ public class MetaManager {
             }
             throw new Exception();
         }
-        Logger.d("Initialisation complete. All managers have their requested delegates set.");
+        Logger.i("✔️✔️✔️✔️ Engine initialisation complete. All managers have their requested delegates set.");
         new Thread(() -> {
             try {
                 Thread.sleep(300);
@@ -79,7 +79,7 @@ public class MetaManager {
     }
 
     public void requestDelegate(ObvManager manager, Class<?> interfaceClass) {
-        Logger.d("Manager " + manager.getClass() + " requesting delegate " + interfaceClass);
+//        Logger.d("Manager " + manager.getClass() + " requesting delegate " + interfaceClass);
         String interfaceName = interfaceClass.getName();
 
         registeredManagers.add(manager);
@@ -88,14 +88,14 @@ public class MetaManager {
         Object delegate = registeredInterfaceImplementations.get(interfaceName);
         // first check whether this interface is already registered
         if (delegate != null) {
-            Logger.d("A delegate of " + delegate.getClass() + " was already cached for " + interfaceName);
+//            Logger.d("A delegate of " + delegate.getClass() + " was already cached for " + interfaceName);
             setManagerDelegate(manager, delegate, interfaceName);
         } else {
             // the interface was never registered
             // check if any of the registered delegates implements it:
             for (Object registeredDelegate: registeredDelegates) {
                 if (interfaceClass.isInstance(registeredDelegate)) {
-                    Logger.d("Found " + registeredDelegate.getClass() + " implementing " + interfaceName);
+//                    Logger.d("Found " + registeredDelegate.getClass() + " implementing " + interfaceName);
                     registeredInterfaceImplementations.put(interfaceName, registeredDelegate);
                     setManagerDelegate(manager, registeredDelegate, interfaceName);
                     lockOnInterfaceImplementations.unlock();
@@ -103,7 +103,7 @@ public class MetaManager {
                 }
             }
             // no registered delegate implements the interface, add the manager to the list of waiting managers
-            Logger.d("No delegate found implementing " + interfaceName);
+//            Logger.d("No delegate found implementing " + interfaceName);
             ArrayList<ObvManager> waitingManagers = managersAwaitingInterfaceImplementations.get(interfaceName);
             if (waitingManagers == null) {
                 waitingManagers = new ArrayList<>();
@@ -116,7 +116,7 @@ public class MetaManager {
 
     private void setManagerDelegate(ObvManager manager, Object delegate, String interfaceName) {
         try {
-            Logger.d("Setting delegate " + delegate.getClass() + " as " + interfaceName + " for manager " + manager.getClass());
+//            Logger.d("Setting delegate " + delegate.getClass() + " as " + interfaceName + " for manager " + manager.getClass());
             Method method = manager.getClass().getMethod("setDelegate", Class.forName(interfaceName));
             method.invoke(manager, delegate);
         } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException e) {
