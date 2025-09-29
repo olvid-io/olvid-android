@@ -82,10 +82,12 @@ fun GroupTypeSelection(
     updateReadOnly: ((Boolean) -> Unit)? = null,
     updateRemoteDelete: ((GroupTypeModel.RemoteDeleteSetting) -> Unit)? = null,
     showTitle: Boolean = true,
+    isGroupCreation: Boolean = false,
     validationLabel: String,
     getPermissionsChanges: () -> String,
     initialGroupType: GroupTypeModel?,
     onValidate: (() -> Unit)? = null,
+    onSelectAdmins: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
 
@@ -197,7 +199,7 @@ fun GroupTypeSelection(
             AnimatedVisibility(
                 modifier = Modifier
                     .align(Alignment.BottomCenter),
-                visible = selectedGroupType != initialGroupType,
+                visible = isGroupCreation || selectedGroupType != initialGroupType,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -207,29 +209,35 @@ fun GroupTypeSelection(
                         .background(colorResource(R.color.whiteOverlay)),
                     contentAlignment = Alignment.BottomCenter
                 ) {
+                    val fromSimpleToAdmin = !isGroupCreation && initialGroupType?.type == SimpleGroup.type && selectedGroupType.type != SimpleGroup.type
+
                     OlvidActionButton(
                         modifier = Modifier
                             .widthIn(max = 400.dp)
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                             .safeDrawingPadding(),
-                        text = validationLabel,
+                        text = if (fromSimpleToAdmin) stringResource(id = R.string.label_group_choose_admins) else validationLabel,
                     ) {
-                        val changes = getPermissionsChanges()
-                        if (changes.isEmpty().not()) {
-                            SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
-                                .setTitle(context.getString(R.string.dialog_permissions_change_title))
-                                .setMessage(changes.formatMarkdown())
-                                .setPositiveButton(context.getString(R.string.button_label_ok)) { _, _ ->
-                                    onValidate()
-                                }
-                                .setNegativeButton(
-                                    context.getString(R.string.button_label_cancel),
-                                    null
-                                )
-                                .show()
+                        if (fromSimpleToAdmin) {
+                            onSelectAdmins?.invoke()
                         } else {
-                            onValidate()
+                            val changes = getPermissionsChanges()
+                            if (changes.isEmpty().not()) {
+                                SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                                    .setTitle(context.getString(R.string.dialog_permissions_change_title))
+                                    .setMessage(changes.formatMarkdown())
+                                    .setPositiveButton(context.getString(R.string.button_label_ok)) { _, _ ->
+                                        onValidate()
+                                    }
+                                    .setNegativeButton(
+                                        context.getString(R.string.button_label_cancel),
+                                        null
+                                    )
+                                    .show()
+                            } else {
+                                onValidate()
+                            }
                         }
                     }
                 }
@@ -260,6 +268,7 @@ private fun GroupTypeSelectionPreview() {
             getPermissionsChanges = { "" },
             selectGroupType = { },
             onValidate = {},
+            onSelectAdmins = {},
         )
     }
 }

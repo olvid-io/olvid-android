@@ -64,7 +64,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -72,7 +71,6 @@ import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.containers.GroupV2.Identifier
 import io.olvid.engine.encoder.DecodingException
 import io.olvid.engine.engine.types.JsonGroupType
-import io.olvid.engine.engine.types.identities.ObvGroupV2.ObvGroupV2ChangeSet
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
@@ -102,12 +100,11 @@ import io.olvid.messenger.group.components.editGroupMembers
 import io.olvid.messenger.group.components.fullGroupMembers
 import io.olvid.messenger.group.components.groupDetails
 import io.olvid.messenger.group.components.groupType
+import io.olvid.messenger.group.components.inviteGroupMembers
 import io.olvid.messenger.group.components.removeMembers
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoActivity
 import io.olvid.messenger.webrtc.WebrtcCallService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -153,7 +150,10 @@ class GroupV2DetailsActivity : LockableActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+            navigationBarStyle = SystemBarStyle.light(
+                Color.Transparent.toArgb(),
+                ContextCompat.getColor(this, R.color.blackOverlay)
+            )
         )
         super.onCreate(savedInstanceState)
         onBackPressed {
@@ -201,6 +201,7 @@ class GroupV2DetailsActivity : LockableActivity() {
                         titleText = when (currentDestination?.destination?.route) {
                             Routes.GROUP_DETAILS -> stringResource(R.string.activity_title_group_details)
                             Routes.FULL_GROUP_MEMBERS -> stringResource(R.string.label_group_members)
+                            Routes.INVITE_GROUP_MEMBERS -> stringResource(R.string.button_label_invite_members)
                             Routes.EDIT_GROUP_DETAILS -> stringResource(R.string.dialog_title_edit_group_details)
                             Routes.EDIT_GROUP_MEMBERS -> stringResource(R.string.button_label_edit_group_members)
                             Routes.ADD_GROUP_MEMBERS -> stringResource(R.string.button_label_add_members)
@@ -211,52 +212,78 @@ class GroupV2DetailsActivity : LockableActivity() {
                         },
                         onBackPressed = onBackPressedDispatcher::onBackPressed,
                         actions = {
-                            if (currentDestination?.destination?.route == Routes.GROUP_DETAILS) {
-                                IconButton(onClick = {
-                                    if (groupAdmin) {
-                                        navController.navigate(Routes.EDIT_GROUP_DETAILS)
-                                    } else {
-                                        groupDetailsViewModel.group.value?.let {
-                                            val editNameAndPhotoDialogFragment =
-                                                EditNameAndPhotoDialogFragment.newInstance(this@GroupV2DetailsActivity, it)
-                                            editNameAndPhotoDialogFragment.show(supportFragmentManager, "dialog")
+                            when (currentDestination?.destination?.route) {
+                                Routes.GROUP_DETAILS -> {
+                                    IconButton(onClick = {
+                                        if (groupAdmin) {
+                                            navController.navigate(Routes.EDIT_GROUP_DETAILS)
+                                        } else {
+                                            groupDetailsViewModel.group.value?.let {
+                                                val editNameAndPhotoDialogFragment =
+                                                    EditNameAndPhotoDialogFragment.newInstance(
+                                                        this@GroupV2DetailsActivity,
+                                                        it
+                                                    )
+                                                editNameAndPhotoDialogFragment.show(
+                                                    supportFragmentManager,
+                                                    "dialog"
+                                                )
+                                            }
+                                        }
+                                    }) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_pencil),
+                                            tint = colorResource(id = R.color.alwaysWhite),
+                                            contentDescription = stringResource(R.string.menu_action_edit_group_details)
+                                        )
+                                    }
+                                    var mainMenuOpened by remember {
+                                        mutableStateOf(false)
+                                    }
+                                    IconButton(onClick = {
+                                        mainMenuOpened = true
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.MoreVert,
+                                            tint = colorResource(id = R.color.alwaysWhite),
+                                            contentDescription = "menu"
+                                        )
+                                        OlvidDropdownMenu(
+                                            expanded = mainMenuOpened,
+                                            onDismissRequest = { mainMenuOpened = false }
+                                        ) {
+                                            getGroupMenu().forEach { menuItem ->
+                                                OlvidDropdownMenuItem(
+                                                    text = stringResource(menuItem.label),
+                                                    onClick = {
+                                                        mainMenuOpened = false
+                                                        menuItem.onClick()
+                                                    },
+                                                    textColor = if (menuItem.action in listOf(
+                                                            MenuItem.Action.LEAVE,
+                                                            MenuItem.Action.DISBAND
+                                                        )
+                                                    )
+                                                        colorResource(R.color.red)
+                                                    else
+                                                        null
+                                                )
+                                            }
                                         }
                                     }
-                                }) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_pencil),
-                                        tint = colorResource(id = R.color.alwaysWhite),
-                                        contentDescription = stringResource(R.string.menu_action_edit_group_details)
-                                    )
                                 }
-                                var mainMenuOpened by remember {
-                                    mutableStateOf(false)
-                                }
-                                IconButton(onClick = {
-                                    mainMenuOpened = true
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.MoreVert,
-                                        tint = colorResource(id = R.color.alwaysWhite),
-                                        contentDescription = "menu"
-                                    )
-                                    OlvidDropdownMenu(
-                                        expanded = mainMenuOpened,
-                                        onDismissRequest = { mainMenuOpened = false }
-                                    ) {
-                                        getGroupMenu().forEach { menuItem ->
-                                            OlvidDropdownMenuItem(
-                                                text = stringResource(menuItem.label),
-                                                onClick = {
-                                                    mainMenuOpened = false
-                                                    menuItem.onClick()
-                                                },
-                                                textColor = if (menuItem.action in listOf(
-                                                        MenuItem.Action.LEAVE,
-                                                        MenuItem.Action.DISBAND))
-                                                    colorResource(R.color.red)
-                                                else
-                                                    null
+
+                                Routes.EDIT_ADMINS -> {
+                                    if (groupDetailsViewModel.isEditingAdminsAfterTypeChange.not()) {
+                                        IconButton(
+                                            onClick = {
+                                                groupDetailsViewModel.isEditingAdmins =
+                                                    !groupDetailsViewModel.isEditingAdmins
+                                            }) {
+                                            Icon(
+                                                painter = painterResource(id = if (groupDetailsViewModel.isEditingAdmins) R.drawable.ic_close else R.drawable.ic_pencil),
+                                                tint = colorResource(id = R.color.alwaysWhite),
+                                                contentDescription = stringResource(R.string.label_group_choose_admins)
                                             )
                                         }
                                     }
@@ -265,11 +292,12 @@ class GroupV2DetailsActivity : LockableActivity() {
                         }
                     )
                 }) { contentPadding ->
-                Box(modifier = Modifier
-                    .padding(top = contentPadding.calculateTopPadding())
-                    .cutoutHorizontalPadding()
-                    .systemBarsHorizontalPadding()
-                    .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
+                Box(
+                    modifier = Modifier
+                        .padding(top = contentPadding.calculateTopPadding())
+                        .cutoutHorizontalPadding()
+                        .systemBarsHorizontalPadding()
+                        .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
                 ) {
                     NavHost(
                         navController = navController,
@@ -279,17 +307,13 @@ class GroupV2DetailsActivity : LockableActivity() {
                             groupV2DetailsViewModel = groupDetailsViewModel,
                             call = ::call,
                             imageClick = ::onPhotoClicked,
-                            onFullMembersList = {
-//                                if (groupDetailsViewModel.group.value?.ownPermissionAdmin == true) {
-//                                    navController.navigate(Routes.EDIT_GROUP_MEMBERS)
-//                                } else {
-                                    navController.navigate(Routes.FULL_GROUP_MEMBERS)
-//                                }
-                            },
-                            inviteAllMembers = ::inviteAllMembers,
+                            onFullMembersList = { navController.navigate(Routes.FULL_GROUP_MEMBERS) },
+                            onInviteMembers = { navController.navigate(Routes.INVITE_GROUP_MEMBERS) },
                             onEditMembers = { navController.navigate(Routes.EDIT_GROUP_MEMBERS) },
                             onGroupType = { navController.navigate(Routes.GROUP_TYPE) },
                             onEditAdmins = {
+                                groupDetailsViewModel.isEditingAdmins = false
+                                groupDetailsViewModel.isEditingAdminsAfterTypeChange = false
                                 navController.navigate(Routes.EDIT_ADMINS)
                             }
                         )
@@ -297,10 +321,15 @@ class GroupV2DetailsActivity : LockableActivity() {
                             groupV2DetailsViewModel = groupDetailsViewModel,
                             onBack = { navController.popBackStack() }
                         )
+                        inviteGroupMembers(
+                            groupV2DetailsViewModel = groupDetailsViewModel,
+                            onBack = { navController.popBackStack() }
+                        )
                         editGroupDetails(
                             groupV2DetailsViewModel = groupDetailsViewModel,
                             editGroupDetailsViewModel = ownedGroupDetailsViewModel,
                             onTakePicture = ::onTakePicture,
+                            onBack = { navController.popBackStack() },
                             onValidate = {
                                 ownedGroupDetailsViewModel.publish()
                                 navController.popBackStack()
@@ -337,43 +366,27 @@ class GroupV2DetailsActivity : LockableActivity() {
                             groupV2DetailsViewModel = groupDetailsViewModel,
                             onValidate = {
                                 groupDetailsViewModel.publishGroupEdits()
-                                navController.popBackStack()
+                                navController.popBackStack(
+                                    route = Routes.GROUP_DETAILS,
+                                    inclusive = false
+                                )
                             }
                         )
                         groupType(
                             groupV2DetailsViewModel = groupDetailsViewModel,
                             validationLabel = getString(R.string.button_label_publish),
+                            onSelectAdmins = {
+                                groupDetailsViewModel.isEditingAdmins = true
+                                groupDetailsViewModel.isEditingAdminsAfterTypeChange = true
+                                navController.navigate(Routes.EDIT_ADMINS)
+                            },
+                            onBack = { navController.popBackStack() },
                             onValidate = {
-                                publishGroupTypeChanged()
+                                groupDetailsViewModel.publishGroupTypeChanged()
                                 navController.popBackStack()
                             }
                         )
                     }
-                }
-            }
-        }
-    }
-
-    private fun publishGroupTypeChanged() {
-        groupDetailsViewModel.viewModelScope.launch(Dispatchers.IO) {
-            var changed = false
-            val obvChangeSet: ObvGroupV2ChangeSet
-            if (groupDetailsViewModel.groupTypeChanged()) {
-                groupDetailsViewModel.createGroupeTypeChangeSet(groupDetailsViewModel.groupType.toJsonGroupType())
-                obvChangeSet = groupDetailsViewModel.getObvChangeSet()
-                changed = true
-            } else {
-                obvChangeSet = ObvGroupV2ChangeSet()
-            }
-            if (changed) {
-                try {
-                    AppSingleton.getEngine().initiateGroupV2Update(
-                        groupDetailsViewModel.bytesOwnedIdentity,
-                        groupDetailsViewModel.bytesGroupIdentifier,
-                        obvChangeSet
-                    )
-                } catch (_: Exception) {
-                    App.toast(R.string.toast_message_error_retry, Toast.LENGTH_SHORT)
                 }
             }
         }
@@ -641,7 +654,8 @@ class GroupV2DetailsActivity : LockableActivity() {
                     .getGroupV2Version(group2.bytesOwnedIdentity, group2.bytesGroupIdentifier)
                 sb.append(getString(R.string.debug_label_group_version)).append(" ")
                     .append(version).append("\n\n")
-            } catch (_: Exception) {  }
+            } catch (_: Exception) {
+            }
             try {
                 val groupIdentifier = Identifier.of(group2.bytesGroupIdentifier)
                 when (groupIdentifier.category) {
@@ -665,7 +679,8 @@ class GroupV2DetailsActivity : LockableActivity() {
                 }
                 sb.append(getString(R.string.debug_label_server)).append(" ")
                 sb.append(groupIdentifier.serverUrl).append("\n\n")
-            } catch (_: DecodingException) { }
+            } catch (_: DecodingException) {
+            }
             val textView = TextView(this)
             val sixteenDp = (16 * resources.displayMetrics.density).toInt()
             textView.setPadding(sixteenDp, sixteenDp, sixteenDp, sixteenDp)
@@ -678,42 +693,6 @@ class GroupV2DetailsActivity : LockableActivity() {
                 .setView(textView)
                 .setPositiveButton(R.string.button_label_ok, null)
             builder.create().show()
-        }
-    }
-
-    private fun inviteAllMembers() {
-        val group = groupDetailsViewModel.group.value ?: return
-        if (group.updateInProgress == Group2.UPDATE_NONE) {
-            groupDetailsViewModel.groupMembers.value?.mapNotNull { group2MemberOrPending ->
-                group2MemberOrPending.contact?.let { contact ->
-                    if ((contact.hasChannelOrPreKey() || contact.keycloakManaged) && contact.active && contact.oneToOne.not()) {
-                        contact
-                    } else {
-                        null
-                    }
-                }
-            }?.let { contacts ->
-                if (contacts.isEmpty()) {
-                    App.toast(R.string.toast_message_no_member_can_be_invited, Toast.LENGTH_SHORT)
-                } else {
-                    val builder = SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                        .setTitle(R.string.dialog_title_invite_all_group_members)
-                        .setMessage(
-                            resources.getQuantityString(
-                                R.plurals.dialog_message_invite_all_group_members,
-                                contacts.size,
-                                contacts.size
-                            )
-                        )
-                        .setPositiveButton(R.string.button_label_proceed) { _, _ ->
-                            contacts.forEach { contact ->
-                                groupDetailsViewModel.invite(contact)
-                            }
-                        }
-                        .setNegativeButton(R.string.button_label_cancel, null)
-                    builder.create().show()
-                }
-            }
         }
     }
 

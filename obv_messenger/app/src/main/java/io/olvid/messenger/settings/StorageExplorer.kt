@@ -31,6 +31,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
@@ -41,7 +43,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -52,21 +53,33 @@ import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.StringUtils
 import java.io.File
 import java.io.FileInputStream
-import java.util.Collections
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 class StorageExplorer : LockableActivity() {
-    var viewModel: ExplorerViewModel? = null
+    private val viewModel: ExplorerViewModel by viewModels<ExplorerViewModel>()
 
+    @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        viewModel = ViewModelProvider(this).get(ExplorerViewModel::class.java)
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             finish()
             return
         }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (viewModel.getPath().isEmpty()) {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                } else {
+                    viewModel.getPath().lastIndexOf(File.separatorChar).takeIf { it != -1 }?.let { pos ->
+                        viewModel.setPath(viewModel.getPath().substring(0, pos))
+                    }
+                }
+            }
+        })
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
@@ -93,7 +106,7 @@ class StorageExplorer : LockableActivity() {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true)
             actionBar.setTitle(R.string.pref_storage_explorer_title)
-            viewModel!!.getPathLiveData().observe(this) { path: String ->
+            viewModel.getPathLiveData().observe(this) { path: String ->
                 if ("" == path) {
                     actionBar.subtitle = "/"
                 } else {
@@ -110,25 +123,15 @@ class StorageExplorer : LockableActivity() {
                 this.onItemClicked(element)
             }
             it.setAdapter(adapter)
-            viewModel!!.listing.observe(this, adapter)
+            viewModel.listing.observe(this, adapter)
         }
 
-    }
-
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onBackPressed() {
-        if ("" == viewModel!!.getPath()) {
-            super.onBackPressed()
-        } else {
-            val pos = viewModel!!.getPath().lastIndexOf(File.separatorChar)
-            viewModel!!.setPath(viewModel!!.getPath().substring(0, pos))
-        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val itemId = item.itemId
         if (itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
             return true
         }
         return false
@@ -137,8 +140,8 @@ class StorageExplorer : LockableActivity() {
     private var elementToSave: ExplorerElement? = null
 
     private fun onItemClicked(element: ExplorerElement) {
-        if (element.type == ELEMENT_TYPE.FOLDER) {
-            viewModel!!.setPath(element.path)
+        if (element.type == ElementType.FOLDER) {
+            viewModel.setPath(element.path)
         } else {
             try {
                 elementToSave = element
@@ -178,7 +181,7 @@ class StorageExplorer : LockableActivity() {
                             }
                             App.toast(R.string.toast_message_file_saved, Toast.LENGTH_SHORT)
                         }
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         App.toast(R.string.toast_message_failed_to_save_file, Toast.LENGTH_SHORT)
                     }
                 }
@@ -203,7 +206,7 @@ class StorageExplorer : LockableActivity() {
 
                 holder.fileNameTextView.text = element.name
 
-                if (element.type == ELEMENT_TYPE.FOLDER) {
+                if (element.type == ElementType.FOLDER) {
                     holder.folderChevronImageView.visibility = View.VISIBLE
                     holder.sizeTextView.visibility = View.GONE
                 } else {
@@ -245,12 +248,12 @@ class StorageExplorer : LockableActivity() {
     }
 
 
-    enum class ELEMENT_TYPE {
+    enum class ElementType {
         FILE,
         FOLDER,
     }
 
-    class ExplorerElement(val path: String, val name: String, val size: Long, val modificationTimestamp: Long, val type: ELEMENT_TYPE)
+    class ExplorerElement(val path: String, val name: String, val size: Long, val modificationTimestamp: Long, val type: ElementType)
 
     class ExplorerViewModel : ViewModel() {
         private var path = ""
@@ -271,18 +274,19 @@ class StorageExplorer : LockableActivity() {
                                         fileName,
                                         file.length(),
                                         file.lastModified(),
-                                        if (file.isDirectory) ELEMENT_TYPE.FOLDER else ELEMENT_TYPE.FILE
+                                        if (file.isDirectory) ElementType.FOLDER else ElementType.FILE
                                     )
                                 )
                             }
-                            Collections.sort(list) { o1: ExplorerElement, o2: ExplorerElement ->
-                                if ((o1.type == ELEMENT_TYPE.FOLDER) && (o2.type != ELEMENT_TYPE.FOLDER)) {
-                                    return@sort -1
-                                } else if ((o2.type == ELEMENT_TYPE.FOLDER) && (o1.type != ELEMENT_TYPE.FOLDER)) {
-                                    return@sort 1
+                            list.sortWith(Comparator { o1: ExplorerElement, o2: ExplorerElement ->
+                                if ((o1.type == ElementType.FOLDER) && (o2.type != ElementType.FOLDER)) {
+                                    -1
+                                } else if ((o2.type == ElementType.FOLDER) && (o1.type != ElementType.FOLDER)) {
+                                    1
+                                } else {
+                                    o1.name.compareTo(o2.name)
                                 }
-                                o1.name.compareTo(o2.name)
-                            }
+                            })
                             return@map list
                         }
                     }

@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">Jelenleg nincs beszélgetés</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">A kapcsolataid és csoportbeszélgetéseid itt jelennek meg.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">Jelenleg nincsenek csoportok</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Nyomd meg az \"Új csoport\" gombot az első csoportod létrehozásához.</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">Nyomja meg az alábbi kék + jelet az első csoport létrehozásához.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">A csoport adminisztrátora frissítette a Csoportkártyát. Mind a régi, mind az új verzió látható alább.\n\nNyomja meg az \"frissítés\" gombot a csoport információinak frissítéséhez.</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Egy rendszergazda megváltoztatta a csoport nevét erre:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Egy rendszergazda megváltoztatta a csoport leírását erre:</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Üzenetek küldése és fogadása</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Ha bekapcsolják, az egyszer olvasható üzenetek és a korlátozott láthatósági időtartammal rendelkező üzenetek automatikusan megnyílnak, amint belép a beszélgetésbe. Ellenkező esetben kattintásra van szükség.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Ha bekapcsolja, a törölt kimenő üzenetek megőrzésre kerülnek, így láthatja, mikor kerültek kézbesítésre vagy elolvasásra. Ellenkező esetben törlődnek.</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">Webes kliens</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Webes kliens</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">Frissített beállítások</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Hiba a beállítások frissítési hivatkozásának elemzése közben</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Üzenetek küldése és fogadása</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">ID létrehozási lehetőségek</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">Konfiguráció vizsgálata</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">Hivatkozás importálása a vágólapról</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Az Olvid naprakész</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Ön rendelkezik az Olvid legújabb verziójával</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Frissítés elérhető</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Az Olvid újabb verziója elérhető a Google Playen.\n\nKérjük, frissítsen, hogy kihasználhassa a legújabb funkciókat.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">A hívás indítása nem sikerült</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Az Olvid nem tudta feltölteni az Olvid azonosítóját a vállalat identitásszolgáltatójához. A háttérben megpróbálja újra.</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">Identitásszolgáltató hiba</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">Az identitásszolgáltatója jelzi, hogy egy másik Olvid azonosító van társítva a bejelentkezett felhasználóhoz, és nincs joga frissíteni azt.\nKérjük, vegye fel a kapcsolatot a rendszergazdájával a részletekért.</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s hozzáadva a kontaktjaidhoz</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">%1$s hozzá lett adva a kontaktjaidhoz</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Az Olvid azonosítód jelenleg a vállalatod identitásszolgáltatója által kezelik. Nem tudsz manuálisan aktiválni egy Olvid licencet.\n\nVedd fel a kapcsolatot a rendszergazdáddal a részletekért.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Elveszett hívás</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Kapcsolattartó adatok frissítve</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">A felhőszolgáltató bejelentkezése szükséges</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Konfigurálta az Olvidot, hogy automatikus biztonsági másolatokat használjon egy felhőszolgáltatóhoz, de a munkamenete lejárt. Újra kell jelentkeznie ehhez a szolgáltatóhoz.\n\nHa már nem szeretné az automatikus biztonsági másolatokat, letilthatja azokat az Alkalmazásbeállításokban. Ne feledje, hogy az automatikus biztonsági másolatok az egyetlen módja annak, hogy elkerülje a kontaktusok elvesztését, ha elveszíti vagy megrongolja a készülékét.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Bejelentkezés</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">Lépjen kapcsolatba távolról</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Lépjen kapcsolatba távolról</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s már a kontaktjaid között szerepel.</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s szerepel a ismert felhasználók listájában, de még nincs a kapcsolataid között.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Új</string>
@@ -1186,6 +1188,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Színes pont az Olvid logó „i”-jén</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Diszkrét vonal a beszélgetési lista tetején</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Teljes kapcsolati állapot a beszélgetési lista tetején</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Soha ne mutass semmilyen jelzést, még a kapcsolat megszakadása esetén sem</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">Kapcsolat: NINCS</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">Kapcsolat: CSATLAKOZÁS…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Kapcsolat: CSATLAKOZTATVA</string>
@@ -1202,7 +1205,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Widget konfigurálása…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Widget megjelenése</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Widget megérintésének művelete</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">Beszélgess</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">Beszélgess</string>
 	<string name="label_message" state="needs_review" hash="809999904">Üzenet</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Előre meghatározott üzenet küldéséhez</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Megerősítés küldés előtt</string>
@@ -1348,9 +1351,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Megjelenítési méret</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Beszélgetés megnyitása</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">Csak olvasás</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">Függőben lévő olvasás</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Függőben\ncsak olvasható</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Adminisztrátor</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Függő adminisztrátor</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Várakozó adminisztrátor</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Nem lehet megjeleníteni ezen felhasználó nevét</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Névtelen csoport</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Beszélgetésértesítések</string>
@@ -1381,7 +1384,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">Csoporttagok/összesen meghívottak:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">Csoport verzió:</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">Csoport típusa:</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">felhasználók által kezelve</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">felhasználó által kezelt</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">a könyvtár által kezelve</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">Még nem küldve</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">Ez a csoport jelenleg szinkronizálódik. A szinkronizálás befejezése után elfogadhatja ezt a meghívást.</string>
@@ -1390,7 +1393,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">Nem lehet klónozni ezt a csoportot</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">A(z) %1$s csoport nem klónozható, mert a csoport egyes tagjai elavult Olvid verziót használnak, amely nem támogatja a v2 csoportokat. Kérjük, tudassák velük, hogy elérhető egy újabb Olvid verzió!\n\nElavult felhasználók:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">Figyelem: részleges klónozás</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">A(z) %1$s csoport olyan tagokat tartalmaz, akikkel még nincs biztonságos csatornád. Nem tudod őket meghívni az új csoportba.\n\nÉrintett felhasználók:%2$s\n\nSzeretnéd folytatni a hiányos csoporttal?</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">A %1$s csoport olyan tagokat tartalmaz, akikkel még nincs biztonságos csatornád. Nem tudod őket meghívni az új csoportba.\n\nÉrintett felhasználók:%2$s\n\nSzeretnél egy hiányos csoporttal továbbhaladni?</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">másolata</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Helyzet küldve</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Helyzet fogadva</string>
@@ -1474,7 +1477,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02dm</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">Ha bekapcsolja, a helytelen PIN-kód/jelszó 3 egymás utáni megadása csendben törli az egyszer megtekintett és a korlátozott láthatóságú üzeneteket.</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">Érzékeny üzenetek törlése 3 helytelen PIN-kód után</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">Aktiválja ezt a lehetőséget egy \"vészhelyzeti\" PIN-kód/jelszó meghatározásához, amely feloldja az alkalmazást, de csendben törli az összes rejtett profilt, egyszer megtekinthető és korlátozott láthatóságú üzeneteket. Ennek a PIN-kódnak a beírása kikapcsolja ezt a lehetőséget is.</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">Kapcsolja be ezt a lehetőséget egy \"vészhelyzeti\" PIN-kód/jelszó meghatározásához, amely feloldja az alkalmazást, de csendben törli az összes elrejtett profilt, egyszer megtekintett és korlátozott láthatóságú üzeneteket. Ennek a PIN-kódnak a beírása kikapcsolja ezt a lehetőséget is.</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">Vész PIN-kód</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">Válasszon egy vészhelyzeti PIN-kódot</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">Ennek a vészhelyzeti PIN-kódnak a megadása az Olvid zárlapján feloldja az Olvidot, de csendben törli az esetleges rejtett profilokat.</string>
@@ -1602,8 +1605,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Kapcsolja be ezt a lehetőséget a tanúsítványváltozás-érzékelés letiltásához a link előnézetének lekérésekor. Egyes weboldalak minden kapcsolatnál más tanúsítványt jeleníthetnek meg, és ha ez a lehetőség ki van kapcsolva, gyakori értesítéseket kaphat.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Használja a régebbi ZXing könyvtárat QR-kódok beolvasásához</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">Alapértelmezés szerint az ML Kit-et használjuk QR-kódok beolvasásához. Kapcsolja be ezt a lehetőséget, ha problémái vannak a QR-kódok Olvidben történő beolvasásával.</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">Belső PDF-néző használata (kísérleti)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">Alapértelmezés szerint a PDF-mellékletek külső nézőben nyílnak meg. Kapcsolja be ezt a lehetőséget az (egyszerű) belső néző használatához.</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Használja az integrált PDF-nézegetőt</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Alapértelmezés szerint a PDF-mellékletek egy (alap) belső nézegetőben nyílnak meg. Tiltsa le ezt a beállítást, ha egy külső nézegetőt szeretne használni helyette.</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">Eszközeim</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Eszköz %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Ez az eszköz</string>
@@ -1659,7 +1662,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">Addja meg a másik eszközön megjelenő kódot</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">Indítsa el az Olvidot a másik eszközén. Érintse meg a profilképét a bal felső sarokban. Válassza ki az importálni kívánt profilt, és érintse meg a „Kezelés” gombot. Érintse meg a „Eszköz hozzáadása” lehetőséget a kód megjelenítéséhez.</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">Addja meg ezt a kódot a másik eszközén</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">Van egy több eszközös előfizetésed</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">Ön rendelkezik egy több eszközös előfizetéssel</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">Itt van a jelenlegi eszközeinek listája</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">Válassza ki azt az eszközt, amelyet aktívként szeretne megtartani</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">Más eszközök 30 napon belül deaktiválódnak</string>
@@ -1884,7 +1887,6 @@
 	<string name="dialog_title_authentication_failed_time_offset" state="needs_review" hash="-170194947">Lehetséges óraeltérés?</string>
 	<string name="dialog_message_authentication_failed_time_offset" state="needs_review" hash="300612997">Sajnáljuk, az azonosítás sikertelen volt.\n\nEgy lehetséges ok lehet, hogy **több mint 10 perces** eltérés van a készülék órája és a szerver órája között.\n\nKérjük, ellenőrizze, hogy a készülék időpontja, dátuma és időzónája helyes-e, majd próbálja meg újra az azonosítást.\n\n*Ha a probléma továbbra is fennáll, kérjük, vegye fel a kapcsolatot a rendszergazdájával.*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">Óra beállításai</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">Kapcsolatfelvétel</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">Beszélgess %1$s-szel</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">Profilátvitel korlátozása</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">Fontos</string>
@@ -2002,7 +2004,7 @@
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">Sikertelen volt a profilod visszaállítása. Kérlek, próbáld meg újra.</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">Profilom visszaállítása</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Tartsd meg mindet az Olvid+ segítségével</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">A profil helyreállítása után kiválaszthatja, melyik eszközt szeretné aktívként tartani a profilbeállításokban.</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">Miután a profilod visszaállítva lett, a profilbeállításaidból kiválaszthatod, melyik eszközt szeretnéd aktívként tartani.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">A profilod visszaállításával «</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Nem található biztonsági mentési kulcs</string>
@@ -2089,4 +2091,29 @@
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Megnyitás külső alkalmazásban</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Hiba a fájl megnyitása közben az Olvid belső nézegetőjében</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Meghívott</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">Új üzenet</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Új kapcsolat</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Keresés</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Szemtől szemben</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Távközlön</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Mégsem</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Olvassátok be egymás QR-kódjait</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Most végezd el a saját szkennelésed</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Kód beolvasva!</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Nem tudod beolvasni a kódot?</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Hívjad meg őket más módon</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">Oszd meg a profilodat</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">Letöltés</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">QR-kód mentve</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">A QR-kód mentése sikertelen</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">Másolva a vágólapra</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">QR-kód szöveg</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Add hozzá az első kontaktot</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">Beszélgetés</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Kamera váltása</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Szeretnél kapcsolatba lépni %1$s-gyel?</string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Az alábbi névjegyek ebbe a csoportba tartoznak, de még nem folytattak veled privát beszélgetést.</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">Csoportadminisztrátorok</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" egy közös csoport</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">A magánélet védelme érdekében az Olvidnak **nincs nyilvános vagy központi felhasználói névkönyve**. A neved csak azok láthatják, akikkel kapcsolatba lépsz.</string>
 </resources>

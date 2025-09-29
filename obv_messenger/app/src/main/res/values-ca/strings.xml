@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">No hi ha converses per ara</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">Els teus contactes i converses de grup apareixeran aquí.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">No hi ha grups per ara</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Prem \"Nou grup\" per crear el teu primer grup.</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">Prem el signe + blau a continuació per crear el teu primer grup.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">L\'administrador del grup ha actualitzat la Targeta del Grup. Es mostren a continuació tant la versió antiga com la nova.\n\nPrem \"actualitzar\" per actualitzar la informació del grup.</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Un administrador ha canviat el nom del grup a:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Un administrador ha canviat la descripció del grup a:</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Enviar i rebre missatges</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Quan s\'activa, els missatges de lectura única i els missatges amb la durada de visibilitat limitada predeterminada s\'obren tan aviat com entres a la conversa. Altrament, es requereix un clic.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Quan s\'activa, els missatges sortints esborrats es conserven perquè puguis veure quan es lliuren o es llegeixen. Altrament, es suprimeixen.</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">Client web</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Client web</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">Configuració actualitzada</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Error analitzant l\'enllaç d\'actualització de configuració</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Enviament i recepció de missatges</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">Opcions de creació d\'ID</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">Escanejar configuració</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">Importar enllaç del portallapis</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid està actualitzat</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Tens la versió més recent d\'Olvid instal·lada.</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Actualització disponible</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Hi ha una versió més recent d\'Olvid disponible a Google Play.\n\nSi us plau, actualitza per gaudir de les últimes funcions.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">No s\'ha pogut iniciar la trucada</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Olvid no ha pogut carregar el teu ID d\'Olvid al proveïdor d\'identitat de la teva empresa. Es tornarà a provar en segon pla.</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">Error del proveïdor d\'identitat</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">El vostre proveïdor d\'identitat indica que un ID de Olvid diferent està associat a l\'usuari amb el qual heu iniciat sessió i no teniu permís per actualitzar-lo.\nSi us plau, poseu-vos en contacte amb el vostre administrador per obtenir més detalls.</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s afegit als teus contactes</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">%1$s s\'ha afegit als teus contactes</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">El vostre ID d\'Olvid està gestionat actualment pel proveïdor d\'identitat de la vostra empresa. No podeu activar manualment una llicència d\'Olvid.\n\nSi us plau, poseu-vos en contacte amb el vostre administrador per obtenir més detalls.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Trucada perduda</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Detalls del contacte actualitzats</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">S\'requereix iniciar sessió al proveïdor de núvols</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Has configurat Olvid per utilitzar còpies de seguretat automàtiques a un proveïdor del núvol, però la teva sessió ha caducat. Necessites iniciar sessió en aquest proveïdor de nou.\n\nSi ja no vols utilitzar còpies de seguretat automàtiques, pots desactivar-les a la Configuració de l\'aplicació. Tingues en compte que les còpies de seguretat automàtiques són l\'única manera d\'evitar la pèrdua dels teus contactes si perds o es danya el teu dispositiu.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Inicia sessió</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">Posa\'t en contact de forma remota</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Posa\'t en contact de forma remota</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s ja forma part dels teus contactes.</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s és a la teva llista d\'usuaris coneguts però encara no és als teus contactes.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Nou</string>
@@ -1187,6 +1189,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Punt de color a la \"i\" del logotip d\'Olvid</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Línia discreta a la part superior de la llista de converses</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Estatut de connexió complet a la part superior de la llista de xats</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Mai mostrar cap indicador, ni tan sols en cas de pèrdua de connexió</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">Connectivitat: CAP</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">Connectivitat: CONNECTANT…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Connectivitat: CONNECTAT</string>
@@ -1203,7 +1206,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Configurar el widget…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Aparença del widget</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Acció al tocar el widget</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">Debat</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">Debat</string>
 	<string name="label_message" state="needs_review" hash="809999904">Missatge</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Missatge predefinit per enviar</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Confirma abans d\'enviar</string>
@@ -1349,9 +1352,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Mida de visualització</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Obrir la conversa</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">Només lectura</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">Lectura només pendent</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Pendent\nnomés lectura</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Administrador</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Administrador pendent</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Pendent\nadministrador</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">No es possible mostrar el nom d\'aquest usuari</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Grup sense nom</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Notificacions de conversa</string>
@@ -1382,7 +1385,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">Membres del grup/total convidats:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">Versió del grup:</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">Tipus de grup:</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">gestionat pels usuaris</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">gestionat pels usuaris</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">gestionat pel seu directori</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">Encara no s\'ha enviat</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">Aquest grup s\'està sincronitzant actualment. Un cop finalitzat, podràs acceptar aquesta invitació.</string>
@@ -1391,7 +1394,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">No s\'ha pogut clonar aquest grup</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">El grup %1$s no es pot clonar perquè alguns membres d\'aquest grup utilitzen una versió obsoleta d\'Olvid que no admet grups v2. Si us plau, informa\'ls que hi ha una versió més recent d\'Olvid disponible.\n\nUsuaris desactualitzats:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">Avís: clonació parcial</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">El grup %1$s conté membres amb els quals encara no tens un canal segur. No els pots convidar al nou grup.\n\nUsuaris afectats:%2$s\n\nVols continuar amb un grup incomplet?</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">El grup %1$s conté membres amb els quals encara no tens un canal segur. No els pots convidar al nou grup.\n\nUsuaris afectats:%2$s\n\nVols continuar amb un grup incomplet?</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Còpia de</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Ubicació enviada</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Ubicació rebuda</string>
@@ -1474,7 +1477,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02ds</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">Quan s\'activa, introduir un PIN/contrasenya incorrecta 3 vegades seguides suprimirà silenciosament tots els missatges de visualització única i de visibilitat limitada.</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">Esborra els missatges sensibles després de 3 PINs incorrectes</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">Activa aquesta opció per definir un PIN/contrasenya d\'\"emergència\" que desbloqueja l\'aplicació, però elimina silenciosament tots els perfils ocults i els missatges d\'un sol ús o de visibilitat limitada. Introduir aquest PIN també desactivarà aquesta opció.</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">Activeu aquesta opció per definir un PIN/contrasenya d\'\"emergència\" que desbloqueja l\'aplicació, però elimina silenciosament tots els perfils ocults i els missatges amb visibilitat limitada. Introduir aquest PIN també desactiva aquesta opció.</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">PIN d\'emergència</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">Tria un PIN d\'emergència</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">Introduir aquest PIN d\'emergència a la pantalla de bloqueig d\'Olvid desbloquejarà Olvid, però suprimirà silenciosament qualsevol perfil ocult que puguis tenir.</string>
@@ -1602,8 +1605,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Activa aquesta opció per desactivar la detecció de canvis de certificat quan s\'obté una previsualització d\'un enllaç. Alguns llocs web poden presentar un certificat diferent a cada connexió i pots rebre notificacions freqüents si desactives aquesta opció.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Utilitzar la biblioteca ZXing antiga per escanejar codis QR</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">Per defecte, Olvid utilitza ML Kit per escanejar codis QR. Activa aquesta opció si tens problemes per escanejar codis QR dins d\'Olvid.</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">Utilitzar el visualitzador PDF intern (experimental)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">Per defecte, els fitxers adjunts PDF s\'obren en un visor extern. Activa aquesta opció per utilitzar el visor intern (bàsic) en comptes.</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Utilitza el visor de PDF intern</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Per defecte, els adjunts PDF s\'obren en un visor intern (bàsic). Desactiva aquesta opció per utilitzar un visor extern en lloc d\'això.</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">Els meus dispositius</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Dispositiu %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Aquest dispositiu</string>
@@ -1659,7 +1662,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">Introdueix el codi que es mostra al teu altre dispositiu</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">Inicia Olvid al teu altre dispositiu.\nToca la teva foto de perfil a l\'esquerra superior.\nSelecciona el perfil que vols importar i toca el botó \"Gestionar\".\nToca \"Afegir un dispositiu\" per mostrar el codi.</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">Introdueix aquest codi al teu altre dispositiu</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">Tens una subscripció multi-dispositiu</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">Tens una subscripció multi-dispositiu</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">Aquí teniu la vostra llista d\'aparells actuals</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">Tria quin dispositiu vols mantenir actiu</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">Altres dispositius es desactivaran en 30 dies</string>
@@ -1884,7 +1887,6 @@
 	<string name="dialog_title_authentication_failed_time_offset" state="needs_review" hash="-170194947">Possible desviació horària?</string>
 	<string name="dialog_message_authentication_failed_time_offset" state="needs_review" hash="300612997">Malauradament, l\'autenticació ha fallat.\n\nUna possible raó podria ser una diferència de **més de 10 minuts** entre el rellotge del teu dispositiu i el del servidor.\n\nSi us plau, comprova que l\'hora, la data i la zona horària del teu dispositiu siguin correctes i torna a provar d\'autenticar-te.\n\n*Si el problema persisteix, si us plau, contacta amb el teu administrador.*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">Configuració del rellotge</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">Posar-se en contacte</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">Xerrar amb %1$s</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">Restricció de transferència de perfil</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">Important</string>
@@ -2002,7 +2004,7 @@
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">No s\'ha pogut restaurar el teu perfil. Si us plau, torna-ho a provar.</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">Restaurar el meu perfil</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Guarda-los tots amb Olvid+</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Un cop restaurat el teu perfil, podràs triar quin dispositiu mantenir actiu des de la configuració del teu perfil.</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">Un cop restaurat el teu perfil, podràs triar quin dispositiu mantenir actiu des de la configuració del teu perfil.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">En restaurar el teu perfil «</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">No s\'ha trobat cap clau de seguretat</string>
@@ -2089,4 +2091,29 @@
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Obre a un visor extern</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Error al obrir aquest fitxer amb el visor intern d\'Olvid</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Convidat</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">Missatge nou</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Nou contacte</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Cerca</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Cara a cara</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">A distància</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Cancel·lar</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Escanegeu els codis QR de l\'altre</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Ara fes escanejar el teu</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Codi escanejat!</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">No es pot escanejar el codi?</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Convida\'ls d\'una altra manera</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">Comparteix el teu perfil</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">Descarregar</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">Codi QR desat</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">No s\'ha pogut desar el codi QR.</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">Copiat al portapapers</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">Text del codi QR</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Afegeix el teu primer contacte</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">Discussió</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Canviar de càmera</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Vols posar-te en contacte amb %1$s?</string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Els contactes següents formen part d\'aquest grup, però encara no tenen una conversa privada amb tu.</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">Administradors del grup</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" és un grup comú</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Per protegir la teva privacitat, Olvid **no té un directori públic o centralitzat d\'usuaris**. El teu nom només el veuran les persones amb les quals et connectis.</string>
 </resources>

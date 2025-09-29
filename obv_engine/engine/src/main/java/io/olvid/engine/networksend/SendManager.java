@@ -78,6 +78,11 @@ public class SendManager implements NetworkSendDelegate, SendManagerSessionFacto
     }
 
     @Override
+    public int initialQueueingPriority() {
+        return 10;
+    }
+
+    @Override
     public void initialisationComplete() {
         sendMessageCoordinator.initialQueueing();
         sendAttachmentCoordinator.initialQueueing();

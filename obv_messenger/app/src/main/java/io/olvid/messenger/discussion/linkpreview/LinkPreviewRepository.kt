@@ -23,6 +23,7 @@ import android.graphics.Bitmap
 import android.util.Log
 import android.util.LruCache
 import io.olvid.engine.encoder.Encoded
+import io.olvid.engine.engine.types.HttpHelper
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.decodeSampledBitmapFromBytes
@@ -34,7 +35,6 @@ import okhttp3.Authenticator
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.internal.toHostHeader
 import java.io.ByteArrayOutputStream
 import java.io.FileInputStream
 import java.io.IOException
@@ -79,7 +79,7 @@ class LinkPreviewRepository {
                         } else Request.Builder()
                             .url(route.address.url)
                             .method("CONNECT", null)
-                            .header("Host", route.address.url.toHostHeader(true))
+                            .header("Host", HttpHelper.toHostHeader(route.address.url))
                             .header("Proxy-Connection", "Keep-Alive")
                             .header("User-Agent", systemUserAgent)
                             .build()

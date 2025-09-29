@@ -52,6 +52,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -114,8 +115,10 @@ data class GroupMemberAction(
 @Composable
 fun MembersScreenContainer(
     members: List<GroupMember>,
+    ownGroupMember: GroupMember? = null,
     preselectedMembers: List<ByteArray> = emptyList(),
     keycloakCertified: Boolean,
+    nonAdminsReadOnly: Boolean,
     groupMemberAction: GroupMemberAction? = null,
     allowEmptyGroup: Boolean = false,
     content: @Composable (groupMembersViewModel: GroupMembersViewModel) -> Unit = {}
@@ -128,7 +131,7 @@ fun MembersScreenContainer(
         groupMembersViewModel.setMembers(members)
     }
     LaunchedEffect(preselectedMembers) {
-        groupMembersViewModel.setSelectedMembers(preselectedMembers)
+        groupMembersViewModel.setSelectedMembers(preselectedMembers, true)
     }
     LaunchedEffect(groupMembersViewModel.currentFilter) {
         if (groupMembersViewModel.currentFilter == null) {
@@ -148,7 +151,8 @@ fun MembersScreenContainer(
             placeholderText = stringResource(R.string.hint_search_contact_name),
             onSearchTextChanged = { groupMembersViewModel.setSearchFilter(it) },
             onClearClick = { groupMembersViewModel.setSearchFilter(null) },
-            selectAllBeacon = selectAllBeacon)
+            selectAllBeacon = selectAllBeacon
+        )
 
         Column(
             modifier = Modifier
@@ -156,29 +160,29 @@ fun MembersScreenContainer(
         ) {
             content(groupMembersViewModel)
 
-            groupMembersViewModel.filteredMembers.takeIf { it.isNotEmpty() }?.let {
-                Box(modifier = Modifier.weight(1f)) {
+            Box(modifier = Modifier.weight(1f)) {
+                groupMembersViewModel.filteredMembers.takeIf { it.isNotEmpty() }?.let {
                     LazyColumn(
                         contentPadding = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
                             .asPaddingValues() + PaddingValues(bottom = if (groupMemberAction == null) 16.dp else 64.dp)
                     ) {
-                        items(
-                            items = it,
-                            key = { it.bytesIdentity }) { member ->
+                        itemsIndexed(
+                            items = ownGroupMember?.let { listOf(it)}.orEmpty() + it,
+                            key = {_, member -> member.bytesIdentity }) { index, member ->
                             ContactListItem(
                                 modifier = Modifier
                                     .animateItem()
                                     .then(
-                                        if (member.bytesIdentity.contentEquals(it.firstOrNull()?.bytesIdentity))
+                                        if (index == 0)
                                             Modifier.clip(
                                                 RoundedCornerShape(
                                                     topStart = 16.dp,
                                                     topEnd = 16.dp,
-                                                    bottomStart = if (it.size == 1) 16.dp else 0.dp,
-                                                    bottomEnd = if (it.size == 1) 16.dp else 0.dp,
+                                                    bottomStart = if (it.isEmpty()) 16.dp else 0.dp,
+                                                    bottomEnd = if (it.isEmpty()) 16.dp else 0.dp,
                                                 )
                                             )
-                                        else if (member.bytesIdentity.contentEquals(it.lastOrNull()?.bytesIdentity))
+                                        else if (index == it.size)
                                             Modifier.clip(
                                                 RoundedCornerShape(
                                                     bottomStart = 16.dp,
@@ -222,23 +226,31 @@ fun MembersScreenContainer(
                                     selectAllBeacon++
                                 },
                                 initialViewSetup = { initialView ->
-                                    member.contact?.let { contact -> initialView.setContact(contact) }
-                                        ?: run {
-                                            member.jsonIdentityDetails?.let {
-                                                initialView.setInitial(
-                                                    member.bytesIdentity,
-                                                    StringUtils.getInitial(
-                                                        it.formatDisplayName(
-                                                            SettingsActivity.contactDisplayNameFormat,
-                                                            SettingsActivity.uppercaseLastName
+                                    if (member.isYou) {
+                                        initialView.setFromCache(member.bytesIdentity)
+                                    } else {
+                                        member.contact?.let { contact ->
+                                            initialView.setContact(
+                                                contact
+                                            )
+                                        }
+                                            ?: run {
+                                                member.jsonIdentityDetails?.let {
+                                                    initialView.setInitial(
+                                                        member.bytesIdentity,
+                                                        StringUtils.getInitial(
+                                                            it.formatDisplayName(
+                                                                SettingsActivity.contactDisplayNameFormat,
+                                                                SettingsActivity.uppercaseLastName
+                                                            )
                                                         )
                                                     )
-                                                )
-                                            } ifNull {
-                                                initialView.setUnknown()
+                                                } ifNull {
+                                                    initialView.setUnknown()
+                                                }
+                                                initialView.setKeycloakCertified(keycloakCertified = keycloakCertified)
                                             }
-                                            initialView.setKeycloakCertified(keycloakCertified = keycloakCertified)
-                                        }
+                                    }
                                 },
                                 startContent = {
                                     if (groupMemberAction?.onActionClick != null && groupMemberAction.startGravity) {
@@ -270,61 +282,66 @@ fun MembersScreenContainer(
                                             color = groupMemberAction.actionColor
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
+                                    } else {
+                                        AdminEndLabel(
+                                            admin = member.isAdmin,
+                                            pending = member.pending,
+                                            nonAdminsReadOnly = nonAdminsReadOnly
+                                        )
                                     }
                                 }
                             )
                         }
                     }
-                    androidx.compose.animation.AnimatedVisibility(
+                } ?: run {
+                    Text(
                         modifier = Modifier
-                            .align(Alignment.BottomCenter),
-                        visible = groupMembersViewModel.allMembers.any { it.selected } || allowEmptyGroup,
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        val count = groupMembersViewModel.allMembers.count { it.selected }
-                        val text = if (allowEmptyGroup && count == 0) {
-                            stringResource(R.string.text_empty_group)
-                        } else {
-                            groupMemberAction?.actionPluralRes?.let {
-                                pluralStringResource(it, count, count)
-                            } ?: stringResource(R.string.button_label_done)
-                        }
-                        groupMemberAction?.let {
-                            Box(
+                            .fillMaxWidth()
+                            .background(
+                                color = colorResource(R.color.lighterGrey),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(vertical = 20.dp),
+                        text = stringResource(R.string.explanation_no_contact_match_filter),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                androidx.compose.animation.AnimatedVisibility(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter),
+                    visible = groupMembersViewModel.allMembers.any { it.selected } || allowEmptyGroup,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    val count = groupMembersViewModel.allMembers.count { it.selected }
+                    val text = if (allowEmptyGroup && count == 0) {
+                        stringResource(R.string.text_empty_group)
+                    } else {
+                        groupMemberAction?.actionPluralRes?.let {
+                            pluralStringResource(it, count, count)
+                        } ?: stringResource(R.string.button_label_done)
+                    }
+                    groupMemberAction?.let {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(colorResource(R.color.whiteOverlay)),
+                            contentAlignment = Alignment.BottomCenter
+                        ) {
+                            OlvidActionButton(
                                 modifier = Modifier
+                                    .widthIn(max = 400.dp)
                                     .fillMaxWidth()
-                                    .background(colorResource(R.color.whiteOverlay)),
-                                contentAlignment = Alignment.BottomCenter
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .safeDrawingPadding(),
+                                text = text,
+                                containerColor = groupMemberAction.actionColor
                             ) {
-                                OlvidActionButton(
-                                    modifier = Modifier
-                                        .widthIn(max = 400.dp)
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                                        .safeDrawingPadding(),
-                                    text = text,
-                                    containerColor = groupMemberAction.actionColor
-                                ) {
-                                    groupMemberAction.onActionClick?.invoke(groupMembersViewModel.allMembers.filter { it.selected })
-                                }
+                                groupMemberAction.onActionClick?.invoke(groupMembersViewModel.allMembers.filter { it.selected })
                             }
                         }
                     }
                 }
-            } ?: run {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = colorResource(R.color.lighterGrey),
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .padding(vertical = 20.dp)
-                    ,
-                    text = stringResource(R.string.explanation_no_contact_match_filter),
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }
@@ -415,7 +432,11 @@ fun MembersRow(
                                             .offset(x = 6.dp, y = -(6.dp))
                                             .clickable(
                                                 interactionSource = remember { MutableInteractionSource() },
-                                                indication = ripple(bounded = false, radius = 16.dp, color = colorResource(R.color.red))
+                                                indication = ripple(
+                                                    bounded = false,
+                                                    radius = 16.dp,
+                                                    color = colorResource(R.color.red)
+                                                )
                                             ) {
                                                 onMemberRemoved(member)
                                             }
@@ -486,6 +507,7 @@ fun AddMembersScreen(
         },
         preselectedMembers = preselectedContacts.map { it.bytesContactIdentity },
         keycloakCertified = group?.keycloakManaged == true,
+        nonAdminsReadOnly = groupV2DetailsViewModel.groupType.areNonAdminsReadOnly(),
         allowEmptyGroup = allowEmptyGroup,
         groupMemberAction = GroupMemberAction(
             actionPluralRes = R.plurals.label_add_members,
@@ -519,6 +541,7 @@ fun RemoveMembersScreen(
     MembersScreenContainer(
         members = groupV2DetailsViewModel.groupMembers.value?.map { it.toGroupMember() }.orEmpty(),
         keycloakCertified = groupV2DetailsViewModel.group.value?.keycloakManaged == true,
+        nonAdminsReadOnly = groupV2DetailsViewModel.groupType.areNonAdminsReadOnly(),
         groupMemberAction = GroupMemberAction(
             actionPluralRes = R.plurals.label_remove_members,
             actionColor = colorResource(R.color.red),
@@ -582,12 +605,26 @@ fun MembersMainScreen(
     contacts: List<GroupMember>,
     groupAdmin: Boolean,
     keycloakCertified: Boolean,
+    nonAdminsReadOnly: Boolean,
     gotoAddMembers: () -> Unit,
     gotoRemoveMembers: () -> Unit
 ) {
     MembersScreenContainer(
         members = contacts,
+        ownGroupMember = AppSingleton.getCurrentIdentityLiveData().value?.let { ownedIdentity->
+            GroupMember(
+                bytesIdentity = ownedIdentity.bytesOwnedIdentity,
+                contact = null,
+                jsonIdentityDetails = ownedIdentity.getIdentityDetails(),
+                fullSearchDisplayName = "",
+                isAdmin = groupAdmin,
+                isYou = true,
+                pending = false,
+                selected = false
+            )
+        },
         keycloakCertified = keycloakCertified,
+        nonAdminsReadOnly = nonAdminsReadOnly,
     ) {
         if (groupAdmin) {
             EditMembersNavigationRow(

@@ -60,6 +60,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material.icons.Icons.Rounded
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -144,6 +145,7 @@ import io.olvid.messenger.databases.entity.jsons.JsonPoll
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
 import io.olvid.messenger.designsystem.components.AnimatedEmoji
+import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionViewModel
 import io.olvid.messenger.discussion.linkpreview.LinkPreview
@@ -363,7 +365,9 @@ fun Message(
                 }
 
                 if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
-                    Spacer(modifier = Modifier.requiredWidth(40.dp))
+                    if (discussionViewModel?.discussion?.value?.discussionType != Discussion.TYPE_CONTACT) {
+                        Spacer(modifier = Modifier.requiredWidth(24.dp))
+                    }
                     if (messageExpiration != null || message.limitedVisibility || message.bookmarked) {
                         EphemeralTimer(
                             expiration = messageExpiration,
@@ -398,43 +402,43 @@ fun Message(
                                 onLongClick = if (message.isLocationMessage) onLocationLongClick else onLongClick
                             )
                             .then(
-                                if (message.jsonPoll != null) {
-                                    Modifier
+                                when (message.messageType) {
+                                    Message.TYPE_OUTBOUND_MESSAGE -> Modifier
+                                        .widthIn(max = maxWidth)
+                                        .align(Alignment.End)
+
+                                    Message.TYPE_INBOUND_MESSAGE -> Modifier
+                                        .widthIn(max = maxWidth)
+
+                                    Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> Modifier
                                         .fillMaxWidth()
                                         .widthIn(max = maxWidth)
-                                } else {
-                                    when (message.messageType) {
-                                        Message.TYPE_OUTBOUND_MESSAGE -> Modifier
-                                            .widthIn(max = maxWidth)
-                                            .align(Alignment.End)
 
-                                        Message.TYPE_INBOUND_MESSAGE -> Modifier
-                                            .widthIn(max = maxWidth)
-
-                                        Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> Modifier
-                                            .fillMaxWidth()
-                                            .widthIn(max = maxWidth)
-
-                                        else -> Modifier
-                                            .fillMaxWidth()
-                                            .widthIn(max = maxWidth)
-                                            .padding(2.dp)
-                                            .background(
-                                                color = colorResource(id = R.color.almostWhite),
-                                                shape = RoundedCornerShape(8.dp)
-                                            )
-                                            .border(
-                                                width = 1.dp,
-                                                color = colorResource(
-                                                    id = if (message.messageType == Message.TYPE_SCREEN_SHOT_DETECTED) R.color.red else R.color.primary400_90
-                                                ),
-                                                shape = RoundedCornerShape(8.dp)
-                                            )
-                                    }
+                                    else -> Modifier
+                                        .fillMaxWidth()
+                                        .widthIn(max = maxWidth)
+                                        .padding(2.dp)
+                                        .background(
+                                            color = colorResource(id = R.color.almostWhite),
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .border(
+                                            width = 1.dp,
+                                            color = colorResource(
+                                                id = if (message.messageType == Message.TYPE_SCREEN_SHOT_DETECTED) R.color.red else R.color.primary400_90
+                                            ),
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
                                 }
                             )
-                            .padding(6.dp),
-                        noAutoWidth = message.hasAttachments() || message.isLocationMessage
+                            .then(
+                                if (message.isPollMessage) {
+                                    Modifier.padding(top = 6.dp, start = 6.dp, end = 6.dp)
+                                } else {
+                                    Modifier.padding(6.dp)
+                                }
+                            ),
+                        noAutoWidth = message.hasAttachments() || message.isLocationMessage || message.isPollMessage
                     ) {
 
                         // Sender
@@ -519,7 +523,7 @@ fun Message(
                         )
 
                         // LinkPreview
-                        if (!message.isLocationMessage) {
+                        if (!message.isLocationMessage && !message.isPollMessage) {
                             LinkPreview(
                                 message = message,
                                 discussionViewModel = discussionViewModel,
@@ -570,9 +574,6 @@ fun Message(
                         )
                     } else {
                         Spacer(modifier = Modifier.requiredWidth(32.dp))
-                    }
-                    if (!showSender) {
-                        Spacer(modifier = Modifier.requiredWidth(40.dp))
                     }
                 }
             }
@@ -646,8 +647,15 @@ private fun MessageFooter(
     pollVoters: Int? = null,
     context: Context
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
+    val row = Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(
+                if (pollVoters != null)
+                    Modifier.padding(bottom = 6.dp)
+                else
+                    Modifier
+            ),
         verticalAlignment = CenterVertically
     ) {
         // direct delete
@@ -702,33 +710,6 @@ private fun MessageFooter(
             )
         }
 
-        pollVoters?.let { voters ->
-            // View Answers Button
-            Text(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple(color = colorResource(R.color.olvid_gradient_light))
-                    ) {
-                        context.startActivity(
-                            Intent(
-                                context,
-                                PollResultActivity::class.java
-                            ).apply {
-                                putExtra(
-                                    PollResultActivity.MESSAGE_ID_INTENT_EXTRA,
-                                    message.id
-                                )
-                            })
-                    }
-                    .padding(vertical = 2.dp, horizontal = 4.dp),
-                text = stringResource(R.string.label_poll_see_answers) + if (voters == 0) "" else " ($voters)",
-                style = OlvidTypography.body2.copy(fontWeight = FontWeight.Medium),
-                color = colorResource(R.color.olvid_gradient_light)
-            )
-        }
-
         Spacer(modifier = Modifier.weight(1f, true))
 
         // timestamp
@@ -740,6 +721,34 @@ private fun MessageFooter(
         // outbound status
         OutboundMessageStatus(modifier = Modifier.padding(start = 4.dp), message = message)
     }
+
+    pollVoters?.also { voters ->
+        Column {
+            row
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = colorResource(R.color.lightGrey)
+            )
+            OlvidTextButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp),
+                text = stringResource(R.string.label_poll_see_answers) + if (voters == 0) "" else " ($voters)",
+                contentColor = colorResource(R.color.olvid_gradient_light)
+            ) {
+                context.startActivity(
+                    Intent(
+                        context,
+                        PollResultActivity::class.java
+                    ).apply {
+                        putExtra(
+                            PollResultActivity.MESSAGE_ID_INTENT_EXTRA,
+                            message.id
+                        )
+                    })
+            }
+        }
+    } ?: row
 }
 
 @Composable

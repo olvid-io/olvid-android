@@ -151,6 +151,11 @@ public class BackupManager implements BackupDelegate, BackupV2Delegate, BackupMa
     }
 
     @Override
+    public int initialQueueingPriority() {
+        return 40;
+    }
+
+    @Override
     public void initialisationComplete() {
         // clear obsolete backups
         try (BackupManagerSession backupManagerSession = getSession()) {

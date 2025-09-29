@@ -75,7 +75,6 @@ import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.ContactCacheSingleton;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
-import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.tasks.ContactDisplayNameFormatChangedTask;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
@@ -387,7 +386,7 @@ public class AppSingleton {
                     if (ownedIdentity.isKeycloakManaged() && ownedIdentity.isActive()) {
                         ObvKeycloakState keycloakState = this.engine.getOwnedIdentityKeycloakState(ownedIdentity.getBytesIdentity());
                         if (keycloakState != null) {
-                            KeycloakManager.getInstance().registerKeycloakManagedIdentity(
+                            KeycloakManager.registerKeycloakManagedIdentity(
                                     ownedIdentity,
                                     keycloakState.keycloakServer,
                                     keycloakState.clientId,
@@ -408,12 +407,6 @@ public class AppSingleton {
                 e.printStackTrace();
             }
         });
-    }
-
-    public static void setCreatedGroupEphemeralSettings(JsonExpiration jsonExpiration) {
-        if (instance.engineNotificationProcessorForGroupsV2 != null) {
-            instance.engineNotificationProcessorForGroupsV2.setCreatedGroupEphemeralSettings(jsonExpiration);
-        }
     }
 
     public static LiveData<Integer> getWebsocketConnectivityStateLiveData() {
@@ -589,7 +582,7 @@ public class AppSingleton {
                                 ObvIdentity obvIdentity = getEngine().getOwnedIdentity(ownedIdentity.bytesOwnedIdentity);
                                 ObvKeycloakState keycloakState = getEngine().getOwnedIdentityKeycloakState(ownedIdentity.bytesOwnedIdentity);
                                 if (obvIdentity != null && keycloakState != null) {
-                                    KeycloakManager.getInstance().registerKeycloakManagedIdentity(
+                                    KeycloakManager.registerKeycloakManagedIdentity(
                                             obvIdentity,
                                             keycloakState.keycloakServer,
                                             keycloakState.clientId,
@@ -648,7 +641,7 @@ public class AppSingleton {
 
             if (obvOwnedIdentity != null) {
                 if (keycloakState != null) {
-                    KeycloakManager.getInstance().registerKeycloakManagedIdentity(obvOwnedIdentity, keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, keycloakTransferRestricted, null, 0, 0, true);
+                    KeycloakManager.registerKeycloakManagedIdentity(obvOwnedIdentity, keycloakServer, clientId, clientSecret, jwks, signatureKey, serializedKeycloakState, keycloakTransferRestricted, null, 0, 0, true);
                 }
 
                 OwnedIdentity ownedIdentity;
@@ -775,7 +768,7 @@ public class AppSingleton {
                                 try {
                                     ObvKeycloakState keycloakState = engine.getOwnedIdentityKeycloakState(obvOwnedIdentity.getBytesIdentity());
                                     if (keycloakState != null) {
-                                        KeycloakManager.getInstance().registerKeycloakManagedIdentity(
+                                        KeycloakManager.registerKeycloakManagedIdentity(
                                                 obvOwnedIdentity,
                                                 keycloakState.keycloakServer,
                                                 keycloakState.clientId,

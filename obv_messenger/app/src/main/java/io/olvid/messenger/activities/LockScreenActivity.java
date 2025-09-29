@@ -48,6 +48,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -138,6 +139,13 @@ public class LockScreenActivity extends AppCompatActivity {
         if (window != null) {
             window.setStatusBarColor(ContextCompat.getColor(this, isNeutral ? R.color.black : R.color.olvid_gradient_light));
         }
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                moveTaskToBack(true);
+            }
+        });
 
         pinInput = findViewById(R.id.pin_input);
         pinInput.setEnabled(false);
@@ -465,12 +473,6 @@ public class LockScreenActivity extends AppCompatActivity {
                 }
             }
         }
-    }
-
-    @SuppressLint("MissingSuperCall")
-    @Override
-    public void onBackPressed() {
-        moveTaskToBack(true);
     }
 
     class UnlockEventBroadcastReceiver extends BroadcastReceiver {

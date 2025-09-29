@@ -31,6 +31,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
@@ -70,6 +71,13 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
         super.onCreate(savedInstanceState);
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                closeActivity();
+            }
+        });
 
         webrtcServiceConnection = new WebrtcServiceConnection();
         Intent serviceBindIntent = new Intent(this, WebrtcCallService.class);
@@ -151,12 +159,6 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
                 }
             }
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        closeActivity();
     }
 
     private void closeActivity() {

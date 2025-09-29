@@ -22,6 +22,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build.VERSION
@@ -39,8 +40,9 @@ import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -50,9 +52,9 @@ import androidx.appcompat.widget.Toolbar
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,10 +62,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.Insets
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -74,17 +79,13 @@ import androidx.core.view.updateMargins
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.switchMap
+import androidx.preference.PreferenceManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.ObvBase64
-import io.olvid.engine.engine.types.EngineNotificationListener
-import io.olvid.engine.engine.types.EngineNotifications
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
@@ -100,11 +101,13 @@ import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog.OnInte
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.OpenHiddenProfileDialog
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
+import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.DiscussionActivity.Companion.FULL_SCREEN_MAP_FRAGMENT_TAG
 import io.olvid.messenger.discussion.location.FullscreenMapDialogFragment
+import io.olvid.messenger.fragments.dialog.CallContactDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment.OnOwnedIdentitySelectedListener
 import io.olvid.messenger.main.calls.CallLogFragment
@@ -118,42 +121,32 @@ import io.olvid.messenger.onboarding.OnboardingActivity
 import io.olvid.messenger.onboarding.flow.OnboardingFlowActivity
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity
-import io.olvid.messenger.plus_button.PlusButtonActivity
+import io.olvid.messenger.plus_button.PlusButtonContainer
+import io.olvid.messenger.plus_button.scan.ScanActivity
 import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum
-import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator
-import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.DOT
-import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.FULL
-import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.LINE
-import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.NONE
 import io.olvid.messenger.troubleshooting.TroubleshootingActivity
 import io.olvid.messenger.webrtc.CallNotificationManager
 import io.olvid.messenger.webrtc.components.CallNotification
 import kotlinx.coroutines.delay
 
 
-class MainActivity : LockableActivity(), OnClickListener {
+class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
     private val globalSearchViewModel by viewModels<GlobalSearchViewModel>()
     private val tipsViewModel by viewModels<TipsViewModel>()
-    private var root: CoordinatorLayout? = null
     private val ownInitialView: InitialView by lazy { findViewById(R.id.owned_identity_initial_view) }
-    private var pingConnectivityDot: View? = null
-    private var pingConnectivityLine: View? = null
-    private var pingConnectivityFull: View? = null
-    private var pingConnectivityFullTextView: TextView? = null
-    private var pingConnectivityFullPingTextView: TextView? = null
     private var tabsPagerAdapter: TabsPagerAdapter? = null
     private val viewPager: ViewPager2 by lazy { findViewById(R.id.view_pager_container) }
     private var mainActivityPageChangeListener: MainActivityPageChangeListener? = null
-    private val pingListener: PingListener by lazy { PingListener() }
-    private var pingRed = 0
-    private var pingGolden = 0
-    private var pingGreen = 0
+    private var connectivityIndicator: ConnectivityIndicator? = null
     internal var contactListFragment: ContactListFragment? = null
     private lateinit var tabImageViews: Array<ImageView?>
     private var showLocationSharing: Boolean = false
-
+    private var showPlusButton by mutableStateOf(true)
+    private var insets by mutableStateOf(Insets.NONE)
+    
+    
     @JvmField
     var requestNotificationPermission = registerForActivityResult(
         RequestPermission()
@@ -161,6 +154,8 @@ class MainActivity : LockableActivity(), OnClickListener {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .registerOnSharedPreferenceChangeListener(this)
         App.runThread {
             val identityCount: Int = try {
                 AppSingleton.getEngine().ownedIdentities.size
@@ -188,69 +183,88 @@ class MainActivity : LockableActivity(), OnClickListener {
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
             false
 
+        onBackPressed {
+            if (!moveTaskToBack(true)) {
+                finishAndRemoveTask()
+            }
+        }
+
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+        )
+
         setContentView(R.layout.activity_main)
-        root = findViewById(R.id.root_coordinator)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        val root : CoordinatorLayout = findViewById(R.id.root_coordinator)
+        val bottomButtonSpacer : View = findViewById(R.id.bottom_button_spacer)
+        bottomButtonSpacer.setOnClickListener {  } // disable touch events below the buttons
+        val toolbar : Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        toolbar?.let {
-            val density = it.resources.displayMetrics.density
-            ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
-                val insets =
-                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
-                view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    updateMargins(top = insets.top)
-                }
-                root?.let { rootLayout ->
-                    rootLayout.updatePadding(
-                        rootLayout.paddingLeft,
-                        rootLayout.paddingTop,
-                        rootLayout.paddingRight,
-                        insets.bottom
-                    )
-                }
-                toolbar.updatePadding(
-                    left = insets.left + (16 * density).toInt(),
-                    right = insets.right
-                )
-                WindowInsetsCompat.CONSUMED
+        val density = root.resources.displayMetrics.density
+        ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
+            insets =
+                windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
+            toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                updateMargins(top = insets.top)
             }
+            root.updatePadding(
+                root.paddingLeft,
+                root.paddingTop,
+                root.paddingRight,
+                0
+            )
+            bottomButtonSpacer.updateLayoutParams {
+                height = insets.bottom
+            }
+            toolbar.updatePadding(
+                left = insets.left + (16 * density).toInt(),
+                right = insets.right
+            )
+            windowInsets
         }
 
         val composeOverlay = findViewById<ComposeView>(R.id.compose_overlay)
         composeOverlay?.setContent {
-            AppCompatTheme {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .systemBarsPadding(),
-                    verticalArrangement = Arrangement.Bottom,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    var cachedCallData by remember { mutableStateOf(CallNotificationManager.currentCallData) }
-                    LaunchedEffect(CallNotificationManager.currentCallData) {
-                        if (CallNotificationManager.currentCallData != null) {
-                            cachedCallData = CallNotificationManager.currentCallData
-                        } else {
-                            delay(500)
-                            cachedCallData = null
-                        }
+            PlusButtonContainer(
+                plusButtonVisible = showPlusButton,
+                callButtonVisible = !showPlusButton,
+                onCallClicked = {
+                    val callContactDialogFragment = CallContactDialogFragment.newInstance()
+                    callContactDialogFragment.show(supportFragmentManager, "dialog")
+                },
+                insetsForOldAndroid = insets,
+            )
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                var cachedCallData by remember { mutableStateOf(CallNotificationManager.currentCallData) }
+                LaunchedEffect(CallNotificationManager.currentCallData) {
+                    if (CallNotificationManager.currentCallData != null) {
+                        cachedCallData = CallNotificationManager.currentCallData
+                    } else {
+                        delay(500)
+                        cachedCallData = null
                     }
-                    AnimatedVisibility(
-                        // visibility is the && otherwise when currentCallData becomes non-null,
-                        // cachedCallData is still null and the animation applies to a empty CallNotification
-                        visible = cachedCallData != null && CallNotificationManager.currentCallData != null
-                    ) {
-                        cachedCallData?.let {
-                            CallNotification(
-                                modifier = Modifier
-                                    .padding(
-                                        top = 8.dp,
-                                        bottom = 48.dp
-                                    ),
-                                callData = it)
-                        }
+                }
+                AnimatedVisibility(
+                    // visibility is the && otherwise when currentCallData becomes non-null,
+                    // cachedCallData is still null and the animation applies to a empty CallNotification
+                    visible = cachedCallData != null && CallNotificationManager.currentCallData != null
+                ) {
+                    cachedCallData?.let {
+                        CallNotification(
+                            modifier = Modifier
+                                .padding(
+                                    top = 8.dp,
+                                    bottom = 48.dp
+                                ),
+                            callData = it
+                        )
                     }
                 }
             }
@@ -286,15 +300,10 @@ class MainActivity : LockableActivity(), OnClickListener {
                 event!!
             )
         }
-        pingConnectivityDot = findViewById(R.id.ping_indicator_dot)
-        pingConnectivityLine = findViewById(R.id.ping_indicator_line)
-        pingConnectivityFull = findViewById(R.id.ping_indicator_full)
-        pingConnectivityFullTextView = findViewById(R.id.ping_indicator_full_text_view)
-        pingConnectivityFullPingTextView = findViewById(R.id.ping_indicator_full_ping_text_view)
-        pingRed = ContextCompat.getColor(this, R.color.red)
-        pingGolden = ContextCompat.getColor(this, R.color.golden)
-        pingGreen = ContextCompat.getColor(this, R.color.green)
-        AppSingleton.getWebsocketConnectivityStateLiveData().observe(this, pingListener)
+        connectivityIndicator = ConnectivityIndicator(this)
+        connectivityIndicator?.let {
+            AppSingleton.getWebsocketConnectivityStateLiveData().observe(this, it)
+        }
         tabsPagerAdapter = TabsPagerAdapter(
             this,
             findViewById(R.id.tab_discussions_notification_dot),
@@ -314,10 +323,7 @@ class MainActivity : LockableActivity(), OnClickListener {
         viewPager.adapter = tabsPagerAdapter
         viewPager.isUserInputEnabled = false
         viewPager.registerOnPageChangeCallback(mainActivityPageChangeListener!!)
-        viewPager.setPageTransformer(MarginPageTransformer(resources.getDimensionPixelSize(R.dimen.main_activity_page_margin)))
         viewPager.offscreenPageLimit = 3
-        val addContactButton = findViewById<ImageView>(R.id.tab_plus_button)
-        addContactButton.setOnClickListener(this)
         val focusHugger = findViewById<View>(R.id.focus_hugger)
         focusHugger.requestFocus()
 
@@ -350,6 +356,7 @@ class MainActivity : LockableActivity(), OnClickListener {
             }
         }
 
+        @Suppress("KotlinConstantConditions")
         if (BuildConfig.USE_BILLING_LIB) {
             BillingUtils.initializeBillingClient(baseContext)
         }
@@ -420,8 +427,14 @@ class MainActivity : LockableActivity(), OnClickListener {
                 requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+    }
 
-        
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
+        when (key) {
+            SettingsActivity.PREF_KEY_LATEST_APP_VERSION,
+            SettingsActivity.PREF_KEY_MIN_APP_VERSION,
+            SettingsActivity.PREF_KEY_UPDATE_AVAILABLE_TIP_DISMISSED -> App.runThread { tipsViewModel.refreshTipToShow(this) }
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -567,10 +580,10 @@ class MainActivity : LockableActivity(), OnClickListener {
                                                 .selectIdentity(bytesOwnedIdentity) {
                                                     val plusIntent = Intent(
                                                         this@MainActivity,
-                                                        PlusButtonActivity::class.java
+                                                        ScanActivity::class.java
                                                     )
                                                     plusIntent.putExtra(
-                                                        PlusButtonActivity.LINK_URI_INTENT_EXTRA,
+                                                        LINK_URI_INTENT_EXTRA,
                                                         uri
                                                     )
                                                     startActivity(plusIntent)
@@ -583,7 +596,7 @@ class MainActivity : LockableActivity(), OnClickListener {
                                                 OnboardingActivity::class.java
                                             )
                                                 .putExtra(
-                                                    PlusButtonActivity.LINK_URI_INTENT_EXTRA,
+                                                    LINK_URI_INTENT_EXTRA,
                                                     uri
                                                 )
                                             startActivity(onboardingIntent)
@@ -612,10 +625,10 @@ class MainActivity : LockableActivity(), OnClickListener {
                                             .selectIdentity(bytesOwnedIdentity) {
                                                 val plusIntent = Intent(
                                                     this@MainActivity,
-                                                    PlusButtonActivity::class.java
+                                                    ScanActivity::class.java
                                                 )
                                                 plusIntent.putExtra(
-                                                    PlusButtonActivity.LINK_URI_INTENT_EXTRA,
+                                                    LINK_URI_INTENT_EXTRA,
                                                     uri
                                                 )
                                                 startActivity(plusIntent)
@@ -650,10 +663,10 @@ class MainActivity : LockableActivity(), OnClickListener {
                                             .selectIdentity(bytesOwnedIdentity) {
                                                 val plusIntent = Intent(
                                                     this@MainActivity,
-                                                    PlusButtonActivity::class.java
+                                                    ScanActivity::class.java
                                                 )
                                                     .putExtra(
-                                                        PlusButtonActivity.LINK_URI_INTENT_EXTRA,
+                                                        LINK_URI_INTENT_EXTRA,
                                                         uri
                                                     )
                                                 startActivity(plusIntent)
@@ -697,6 +710,8 @@ class MainActivity : LockableActivity(), OnClickListener {
         tabsPagerAdapter = null
         contactListFragment = null
         Utils.dialogShowing = false
+        PreferenceManager.getDefaultSharedPreferences(this)
+            .unregisterOnSharedPreferenceChangeListener(this)
     }
 
     inner class TabsPagerAdapter internal constructor(
@@ -749,75 +764,21 @@ class MainActivity : LockableActivity(), OnClickListener {
         }
     }
 
-    private var previousPingConnectivityIndicator = NONE
-    private fun showPingIndicator(pingConnectivityIndicator: PingConnectivityIndicator) {
-        if (pingConnectivityIndicator == previousPingConnectivityIndicator) {
-            return
-        }
-        previousPingConnectivityIndicator = pingConnectivityIndicator
-        when (pingConnectivityIndicator) {
-            NONE -> {
-                pingConnectivityDot!!.visibility = View.GONE
-                pingConnectivityLine!!.visibility = View.GONE
-                pingConnectivityFull!!.visibility = View.GONE
-            }
 
-            DOT -> {
-                pingConnectivityDot!!.visibility = View.VISIBLE
-                pingConnectivityLine!!.visibility = View.GONE
-                pingConnectivityFull!!.visibility = View.GONE
-            }
-
-            LINE -> {
-                pingConnectivityDot!!.visibility = View.GONE
-                pingConnectivityLine!!.visibility = View.VISIBLE
-                pingConnectivityFull!!.visibility = View.GONE
-            }
-
-            FULL -> {
-                pingConnectivityDot!!.visibility = View.GONE
-                pingConnectivityLine!!.visibility = View.GONE
-                pingConnectivityFull!!.visibility = View.VISIBLE
-                pingConnectivityFullPingTextView?.text = null
-            }
-        }
-    }
 
     override fun onPause() {
         super.onPause()
         Utils.stopPinging()
-        if (previousPingConnectivityIndicator != NONE) {
-            AppSingleton.getEngine()
-                .removeNotificationListener(EngineNotifications.PING_LOST, pingListener)
-            AppSingleton.getEngine()
-                .removeNotificationListener(EngineNotifications.PING_RECEIVED, pingListener)
-        }
+        connectivityIndicator?.onPause()
     }
 
     override fun onResume() {
         super.onResume()
         App.runThread { tipsViewModel.refreshTipToShow(this@MainActivity) }
-        mainActivityPageChangeListener!!.onPageSelected(viewPager.currentItem)
-        val pingSetting = SettingsActivity.pingConnectivityIndicator
-        if (previousPingConnectivityIndicator != NONE || pingSetting != NONE) {
-            showPingIndicator(pingSetting)
-            if (pingSetting != NONE) {
-                pingListener.refresh()
-                Utils.startPinging()
-                AppSingleton.getEngine()
-                    .addNotificationListener(EngineNotifications.PING_LOST, pingListener)
-                AppSingleton.getEngine()
-                    .addNotificationListener(EngineNotifications.PING_RECEIVED, pingListener)
-            }
-        }
+        mainActivityPageChangeListener?.onPageSelected(viewPager.currentItem)
+        connectivityIndicator?.onResume()
     }
 
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
-        if (!moveTaskToBack(true)) {
-            finishAndRemoveTask()
-        }
-    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         when (viewPager.currentItem) {
@@ -832,11 +793,11 @@ class MainActivity : LockableActivity(), OnClickListener {
                         searchView.imeOptions =
                             searchView.imeOptions or EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
                     }
-                    searchView.setOnSearchClickListener(OnClickListener {
+                    searchView.setOnSearchClickListener {
                         if (contactListFragment != null) {
                             contactListFragment!!.bindToSearchView(searchView)
                         }
-                    })
+                    }
                 }
             }
 
@@ -854,7 +815,7 @@ class MainActivity : LockableActivity(), OnClickListener {
                         searchView.imeOptions =
                             searchView.imeOptions or EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
                     }
-                    searchView.setOnSearchClickListener(OnClickListener { _ ->
+                    searchView.setOnSearchClickListener { _ ->
                         searchView.setOnQueryTextListener(object : OnQueryTextListener {
                             override fun onQueryTextSubmit(query: String): Boolean {
                                 return true
@@ -870,11 +831,11 @@ class MainActivity : LockableActivity(), OnClickListener {
                                 return true
                             }
                         })
-                        searchView.setOnCloseListener(SearchView.OnCloseListener {
+                        searchView.setOnCloseListener {
                             globalSearchViewModel.clear()
                             false
-                        })
-                    })
+                        }
+                    }
                 }
                 menu.findItem(R.id.action_search)
                     ?.setOnActionExpandListener(object : OnActionExpandListener {
@@ -974,10 +935,6 @@ class MainActivity : LockableActivity(), OnClickListener {
 
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.tab_plus_button -> {
-                startActivity(Intent(this, PlusButtonActivity::class.java))
-            }
-
             R.id.tab_discussions_button -> {
                 viewPager.currentItem = DISCUSSIONS_TAB
             }
@@ -993,92 +950,6 @@ class MainActivity : LockableActivity(), OnClickListener {
             R.id.tab_calls_button -> {
                 viewPager.currentItem = CALLS_TAB
             }
-        }
-    }
-
-    internal inner class PingListener : EngineNotificationListener, Observer<Int> {
-        private var registrationNumber: Long? = null
-        private var websocketConnectionState = 0
-        private var lastPing: Long = 0
-        fun refresh() {
-            onChanged(websocketConnectionState)
-        }
-
-        override fun onChanged(value: Int) {
-            if (value != this.websocketConnectionState) {
-                lastPing = 0
-            }
-            this.websocketConnectionState = value
-            val stateColor: Int = if (value == 0 || lastPing == -1L) {
-                pingRed
-            } else if (value == 1 || lastPing > 3000) {
-                pingGolden
-            } else {
-                pingGreen
-            }
-            when (previousPingConnectivityIndicator) {
-                NONE -> {}
-                DOT -> pingConnectivityDot!!.setBackgroundColor(stateColor)
-                LINE -> pingConnectivityLine!!.setBackgroundColor(stateColor)
-                FULL -> {
-                    pingConnectivityFull!!.setBackgroundColor(stateColor)
-                    when (value) {
-                        1 -> pingConnectivityFullTextView!!.setText(
-                            R.string.label_ping_connectivity_connecting
-                        )
-
-                        2 -> pingConnectivityFullTextView!!.setText(R.string.label_ping_connectivity_connected)
-                        0 -> pingConnectivityFullTextView!!.setText(R.string.label_ping_connectivity_none)
-                        else -> pingConnectivityFullTextView!!.setText(R.string.label_ping_connectivity_none)
-                    }
-                    when (lastPing) {
-                        -1L -> {
-                            pingConnectivityFullPingTextView!!.text =
-                                getString(R.string.label_over_max_ping_delay, 5)
-                        }
-
-                        0L -> {
-                            pingConnectivityFullPingTextView!!.text = "-"
-                        }
-
-                        else -> {
-                            pingConnectivityFullPingTextView!!.text =
-                                getString(R.string.label_ping_delay, lastPing)
-                        }
-                    }
-                }
-            }
-        }
-
-        override fun callback(notificationName: String, userInfo: HashMap<String, Any>) {
-            if (previousPingConnectivityIndicator != FULL) {
-                return
-            }
-            when (notificationName) {
-                EngineNotifications.PING_LOST -> {
-                    lastPing = -1
-                    runOnUiThread { refresh() }
-                }
-
-                EngineNotifications.PING_RECEIVED -> {
-                    (userInfo[EngineNotifications.PING_RECEIVED_DELAY_KEY] as Long?)?.let {
-                        lastPing = it
-                        runOnUiThread { refresh() }
-                    }
-                }
-            }
-        }
-
-        override fun setEngineNotificationListenerRegistrationNumber(registrationNumber: Long) {
-            this.registrationNumber = registrationNumber
-        }
-
-        override fun getEngineNotificationListenerRegistrationNumber(): Long {
-            return registrationNumber ?: 0
-        }
-
-        override fun hasEngineNotificationListenerRegistrationNumber(): Boolean {
-            return registrationNumber != null
         }
     }
 
@@ -1099,7 +970,10 @@ class MainActivity : LockableActivity(), OnClickListener {
                 invalidateOptionsMenu()
             }
             if (position == CALLS_TAB) {
+                showPlusButton = false
                 AndroidNotificationManager.clearAllMissedCallNotifications()
+            } else {
+                showPlusButton = true
             }
             currentPosition = position
         }
@@ -1159,7 +1033,7 @@ class MainActivity : LockableActivity(), OnClickListener {
             listOf(
                 DiscussionActivity::class.java.name,
                 OwnedIdentityDetailsActivity::class.java.name,
-                PlusButtonActivity::class.java.name,
+                ScanActivity::class.java.name,
                 OnboardingActivity::class.java.name,
                 ContactDetailsActivity::class.java.name,
                 SettingsActivity::class.java.name

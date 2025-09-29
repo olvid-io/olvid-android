@@ -91,9 +91,6 @@ import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.BASI
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.MAPS
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.OSM
-import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.DOT
-import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.FULL
-import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.LINE
 import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.NONE
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
@@ -124,6 +121,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         DOT,
         LINE,
         FULL,
+        NEVER,
     }
 
     enum class BlockUntrustedCertificate {
@@ -381,7 +379,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             return true
         } else if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -498,6 +496,23 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         const val PREF_KEY_LAST_RATING_TIP_TIMESTAMP: String = "pref_key_last_rating_tip_timestamp"
         const val PREF_KEY_LAST_RATING: String = "pref_key_last_rating"
+
+        const val PREF_KEY_LATEST_APP_VERSION: String = "pref_key_latest_app_version"
+        const val PREF_KEY_MIN_APP_VERSION: String = "pref_key_min_app_version"
+        const val PREF_KEY_UPDATE_AVAILABLE_TIP_DISMISSED: String = "pref_key_update_available_tip_dismissed"
+
+        fun isUpdateAvailable(): Boolean {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())
+            val latestVersion = prefs.getInt(PREF_KEY_LATEST_APP_VERSION, 0)
+            return latestVersion > BuildConfig.VERSION_CODE
+        }
+
+        @JvmStatic
+        fun isVersionOutdated(): Boolean {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())
+            val minimumVersion = prefs.getInt(PREF_KEY_MIN_APP_VERSION, 0)
+            return minimumVersion > BuildConfig.VERSION_CODE
+        }
 
         // BETA
         const val PREF_KEY_ENABLE_BETA_FEATURES: String = "pref_key_enable_beta_features"
@@ -1367,9 +1382,10 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                             PREF_KEY_PING_CONNECTIVITY_INDICATOR_DEFAULT
                         )!!
                 when (pingConnectivityIndicator) {
-                    "dot" -> return DOT
-                    "line" -> return LINE
-                    "full" -> return FULL
+                    "dot" -> return PingConnectivityIndicator.DOT
+                    "line" -> return PingConnectivityIndicator.LINE
+                    "full" -> return PingConnectivityIndicator.FULL
+                    "never" -> return PingConnectivityIndicator.NEVER
                 }
                 return NONE
             }
@@ -1377,7 +1393,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         @JvmStatic
         fun setPingConnectivityIndicator(indicatorString: String) {
             val pingConnectivityIndicatorString: String? = when (indicatorString) {
-                "dot", "line", "full" -> indicatorString
+                "dot", "line", "full", "never" -> indicatorString
                 else -> null
             }
             PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
@@ -2421,6 +2437,20 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     .getDefaultSharedPreferences(App.getContext())
                     .edit {
                         putLong(PREF_KEY_LAST_OFFLINE_DEVICE_TIP_TIMESTAMP, timestamp)
+                    }
+            }
+
+        @JvmStatic
+        var isUpdateAvailableTipDismissed: Boolean
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getBoolean(PREF_KEY_UPDATE_AVAILABLE_TIP_DISMISSED, false)
+            }
+            set(dismissed) {
+                PreferenceManager
+                    .getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(PREF_KEY_UPDATE_AVAILABLE_TIP_DISMISSED, dismissed)
                     }
             }
 

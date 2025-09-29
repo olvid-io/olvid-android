@@ -37,11 +37,6 @@ class EngineNotificationProcessorForGroupsV2 internal constructor(engine: Engine
     private val db: AppDatabase = AppDatabase.getInstance()
     private var registrationNumber: Long? = null
 
-    private var createdGroupEphemeralSettings: JsonExpiration? = null
-    fun setCreatedGroupEphemeralSettings(jsonExpiration: JsonExpiration?) {
-        this.createdGroupEphemeralSettings = jsonExpiration
-    }
-
     init {
         for (notificationName in arrayOf(
             EngineNotifications.GROUP_V2_CREATED_OR_UPDATED,
@@ -68,22 +63,12 @@ class EngineNotificationProcessorForGroupsV2 internal constructor(engine: Engine
                     return
                 }
 
-                val jsonExpirationSettings : JsonExpiration?
-                if (groupWasJustCreatedByMe && !createdOnOtherDevice) {
-                    jsonExpirationSettings = createdGroupEphemeralSettings
-                    // reset temp settings
-                    createdGroupEphemeralSettings = null
-                } else {
-                    jsonExpirationSettings = null
-                }
-
                 CreateOrUpdateGroupV2Task(
                     groupV2,
                     groupWasJustCreatedByMe,
                     updatedByMe,
                     createdOnOtherDevice,
                     false,
-                    jsonExpirationSettings,
                     updatedBy,
                     groupLeavers
                 ).run()

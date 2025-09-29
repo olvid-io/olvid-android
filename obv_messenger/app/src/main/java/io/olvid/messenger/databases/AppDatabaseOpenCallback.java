@@ -803,7 +803,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                         if (subMap != null) {
                             subMap.remove(new BytesKey(obvGroupV2.groupIdentifier.getBytes()));
                         }
-                        new CreateOrUpdateGroupV2Task(obvGroupV2, false, false, false,true, null, null, null).run();
+                        new CreateOrUpdateGroupV2Task(obvGroupV2, false, false, false,true, null, null).run();
                     }
 
                     if (subMap != null && subMap.isEmpty()) {

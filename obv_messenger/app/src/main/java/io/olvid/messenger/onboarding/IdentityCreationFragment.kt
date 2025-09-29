@@ -136,7 +136,7 @@ class IdentityCreationFragment : Fragment() {
         }
 
         view.findViewById<View>(R.id.back_button)
-            .setOnClickListener { activity.onBackPressed() }
+            .setOnClickListener { activity.onBackPressedDispatcher.onBackPressed() }
 
         focusHugger = view.findViewById(R.id.focus_hugger)
 
@@ -310,7 +310,7 @@ class IdentityCreationFragment : Fragment() {
 
     private fun identityCreatedCallback(obvIdentity: ObvIdentity) {
         if (viewModel.keycloakSerializedAuthState != null) {
-            KeycloakManager.getInstance().uploadOwnIdentity(
+            KeycloakManager.uploadOwnIdentity(
                 obvIdentity.bytesIdentity,
                 object : KeycloakCallback<Void?> {
                     override fun success(result: Void?) {

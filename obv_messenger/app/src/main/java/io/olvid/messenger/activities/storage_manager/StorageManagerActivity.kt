@@ -168,7 +168,7 @@ class StorageManagerActivity : LockScreenOrNotActivity() {
         }
 
         val backButton = findViewById<ImageView>(R.id.back_button)
-        backButton.setOnClickListener { v: View? -> onBackPressed() }
+        backButton.setOnClickListener { v: View? -> onBackPressedDispatcher.onBackPressed() }
 
         //////////////
         // current identity

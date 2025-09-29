@@ -47,6 +47,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -93,6 +94,12 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
     private String previousPin = "";
     private int failedPinCount = 0;
     private boolean deleting = false;
+    private final OnBackPressedCallback lockedOnBackPressed = new OnBackPressedCallback(false) {
+        @Override
+        public void handleOnBackPressed() {
+            moveTaskToBack(true);
+        }
+    };
 
     @Override
     protected void attachBaseContext(Context baseContext) {
@@ -108,6 +115,8 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
                 window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
             }
         }
+
+        getOnBackPressedDispatcher().addCallback(this, lockedOnBackPressed);
 
         if (UnifiedForegroundService.LockSubService.isApplicationLocked()) {
             boolean isNeutral = SettingsActivity.lockScreenNeutral();
@@ -208,16 +217,6 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
         if (unlockEventBroadcastReceiver != null) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(unlockEventBroadcastReceiver);
             unlockEventBroadcastReceiver = null;
-        }
-    }
-
-    @SuppressLint("MissingSuperCall")
-    @Override
-    public void onBackPressed() {
-        if (UnifiedForegroundService.LockSubService.isApplicationLocked()) {
-            moveTaskToBack(true);
-        } else {
-            finish();
         }
     }
 
@@ -369,6 +368,8 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        lockedOnBackPressed.setEnabled(UnifiedForegroundService.LockSubService.isApplicationLocked());
+
         if (UnifiedForegroundService.LockSubService.isApplicationLocked()) {
             if (pinInput == null || fingerprintButton == null || biometryDisabledTextview == null || pinUnlockTimerGroup == null || pinUnlockTimer == null) {
                 // may happen if onCreate was called while app was unlocked but onResume is called after it was locked

@@ -84,7 +84,7 @@ public class FullScreenImageFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.setOnClickListener(v -> activity.onBackPressed());
+        view.setOnClickListener(v -> activity.getOnBackPressedDispatcher().onBackPressed());
 
         imageView = view.findViewById(R.id.image_view);
 

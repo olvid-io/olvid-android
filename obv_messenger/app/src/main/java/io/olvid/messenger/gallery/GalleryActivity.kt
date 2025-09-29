@@ -777,7 +777,7 @@ class GalleryActivity : LockableActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         } else if (item.itemId == R.id.action_open) {
             val fyleAndStatus = galleryAdapter.getItemAt(viewPager.currentItem)
             if (fyleAndStatus != null) {

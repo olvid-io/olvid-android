@@ -63,8 +63,6 @@ import io.olvid.messenger.discussion.message.INLINE_CONTENT_TAG
 import io.olvid.messenger.discussion.message.MENTION_ANNOTATION_TAG
 import io.olvid.messenger.discussion.message.QUOTE_BLOCK_START_ANNOTATION
 import io.olvid.messenger.settings.SettingsActivity
-import okhttp3.internal.indexOfFirstNonAsciiWhitespace
-import okhttp3.internal.indexOfLastNonAsciiWhitespace
 import org.commonmark.ext.gfm.strikethrough.Strikethrough
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.node.AbstractVisitor
@@ -73,6 +71,7 @@ import org.commonmark.node.BulletList
 import org.commonmark.node.Code
 import org.commonmark.node.CustomNode
 import org.commonmark.node.Delimited
+import org.commonmark.node.Document
 import org.commonmark.node.Emphasis
 import org.commonmark.node.FencedCodeBlock
 import org.commonmark.node.Heading
@@ -323,7 +322,8 @@ class Visitor(val editable: Editable, private val highlightColor: Int, private v
 
     override fun visit(blockQuote: BlockQuote) {
         super.visit(blockQuote)
-        if (blockQuote.sourceSpans.first().length > 1) {
+        if (blockQuote.parent is Document // we check the parent is document to avoid nested blockquotes (they tend to crash the app 🤭)
+            && blockQuote.sourceSpans.first().length > 1) {
             editable.setMarkdownSpanFromNode(
                 MarkdownQuote(),
                 blockQuote,
@@ -600,12 +600,34 @@ private fun Editable.setMarkdownSpanFromNode(
 fun String.indexOfFirstWhitespace(startIndex: Int = 0): Int {
     for (i in startIndex until length) {
         when (this[i]) {
-            '\t', '\u000C', ' ' -> return i
+            '\t', '\n', '\u000C', '\r', ' ' -> return i
             else -> Unit
         }
     }
     return length
 }
+
+
+fun String.indexOfFirstNonAsciiWhitespace(startIndex: Int = 0): Int {
+    for (i in startIndex until length) {
+        when (this[i]) {
+            '\t', '\u000C', ' ' -> Unit
+            else -> return i
+        }
+    }
+    return length
+}
+
+fun String.indexOfLastNonAsciiWhitespace(startIndex: Int = 0, endIndex: Int = length): Int {
+    for (i in endIndex - 1 downTo startIndex) {
+        when (this[i]) {
+            '\t', '\n', '\u000C', '\r', ' ' -> Unit
+            else -> return i + 1
+        }
+    }
+    return startIndex
+}
+
 
 fun String.formatMarkdown(spanFlag: Int = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE): SpannableStringBuilder {
     return SpannableStringBuilder(this).apply {

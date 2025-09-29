@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">Καμία συζήτηση προς το παρόν</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">Οι επαφές και οι ομαδικές συζητήσεις θα εμφανίζονται εδώ.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">Δεν υπάρχουν ομάδες προς το παρόν</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Πατήστε \"Νέα ομάδα\" για να δημιουργήσετε την πρώτη σας ομάδα.</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">Πατήστε το μπλε + παρακάτω για να δημιουργήσετε την πρώτη σας ομάδα.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">Ο διαχειριστής της ομάδας ενημέρωσε την Κάρτα Ομάδας. Τόσο η παλιά όσο και η νέα έκδοση εμφανίζονται παρακάτω.\n\nΠατήστε \"ενημέρωση\" για να ενημερώσετε τις πληροφορίες της ομάδας.</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Ένας διαχειριστής άλλαξε το όνομα της ομάδας σε:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Ένας διαχειριστής άλλαξε την περιγραφή της ομάδας σε:</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Αποστολή και λήψη μηνυμάτων</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Όταν είναι ενεργοποιημένη, τα μηνύματα μιας ανάγνωσης και τα μηνύματα με τη προεπιλεγμένη περιορισμένη διάρκεια ορατότητας ανοίγουν μόλις εισέλθετε στη συζήτηση. Διαφορετικά, απαιτείται ένα κλικ.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Όταν ενεργοποιηθεί, τα διαγραμμένα εξερχόμενα μηνύματα διατηρούνται ώστε να μπορείτε να δείτε πότε παραδόθηκαν ή διαβάστηκαν. Διαφορετικά, διαγράφονται.</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">Πελάτης Ιστού</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Πελάτης Ιστού</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">Ενημερωμένες ρυθμίσεις</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Σφάλμα κατά την ανάλυση του συνδέσμου ενημέρωσης ρυθμίσεων</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Αποστολή και λήψη μηνυμάτων</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">Επιλογές δημιουργίας ID</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">Σάρωση διαμόρφωσης</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">Εισαγωγή συνδέσμου από το πρόχειρο</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Το Olvid είναι ενημερωμένο</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Έχετε εγκατεστημένη την τελευταία έκδοση του Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Διαθέσιμη ενημέρωση</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Μια νεότερη έκδοση του Olvid είναι διαθέσιμη στο Google Play.\n\nΠαρακαλώ ενημερώστε για να επωφεληθείτε από τις τελευταίες λειτουργίες.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Δεν είναι δυνατή η έναρξη της κλήσης</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Το Olvid δεν μπόρεσε να ανεβάσει το Olvid ID σας στον πάροχο ταυτότητας της εταιρείας σας. Θα γίνει εκ νέου προσπάθεια στο παρασκήνιο.</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">Σφάλμα παρόχου ταυτότητας</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">Ο πάροχος ταυτότητας σας υποδεικνύει ότι ένα διαφορετικό Olvid ID είναι συσχετισμένο με τον χρήστη με τον οποίο συνδεθήκατε και δεν έχετε άδεια να το ενημερώσετε.\nΕπικοινωνήστε με τον διαχειριστή σας για περισσότερες λεπτομέρειες.</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s προστέθηκε στις επαφές σας</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">Ο/Η %1$s προστέθηκε στις επαφές σας</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Το Olvid ID σου διαχειρίζεται επί του παρόντος ο πάροχος ταυτότητας της εταιρείας σου. Δεν μπορείς να ενεργοποιήσεις χειροκίνητα μια άδεια Olvid.\n\nΕπικοινώνησε με τον διαχειριστή σου για περισσότερες λεπτομέρειες.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Χαμένη κλήση</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Λεπτομέρειες επαφής ενημερώθηκαν</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Απαιτείται σύνδεση στον πάροχο cloud</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Έχετε διαμορφώσει το Olvid για να χρησιμοποιεί αυτόματα αντίγραφα ασφαλείας σε έναν πάροχο cloud, αλλά η συνεδρία σας έχει λήξει. Πρέπει να συνδεθείτε ξανά σε αυτόν τον πάροχο.\n\nΕάν δεν θέλετε πλέον αυτόματα αντίγραφα ασφαλείας, μπορείτε να τα απενεργοποιήσετε στις Ρυθμίσεις της Εφαρμογής. Λάβετε υπόψη ότι τα αυτόματα αντίγραφα ασφαλείας είναι ο μόνος τρόπος για να αποφύγετε την απώλεια των επαφών σας εάν η συσκευή σας χαθεί ή καταστραφεί.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Σύνδεση</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">Επικοινωνήστε εξ αποστάσεως</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Επικοινωνήστε εξ αποστάσεως</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">Το %1$s είναι ήδη στις επαφές σας.</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">Το %1$s είναι στη λίστα των γνωστών χρηστών σας, αλλά δεν είναι ακόμη στις επαφές σας.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Νέο</string>
@@ -1187,6 +1189,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Χρωματιστή τελεία στο «i» του λογοτύπου Olvid</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Διακριτική γραμμή στην κορυφή της λίστας συνομιλιών</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Πλήρης κατάσταση σύνδεσης στην κορυφή της λίστας συνομιλιών</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Μην εμφανίζεις ποτέ κάποια ένδειξη, ούτε καν σε περίπτωση απώλειας σύνδεσης</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">Συνδεσιμότητα: ΚΑΝΕΝΑ</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">Συνδεσιμότητα: ΣΥΝΔΕΟΜΑΙ…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Συνδεσιμότητα: ΣΥΝΔΕΔΕΜΕΝΟ</string>
@@ -1203,7 +1206,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Διαμόρφωση widget…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Εμφάνιση widget</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Ενέργεια κατά το άγγιγμα του widget</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">Συζητήστε</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">Συζητήστε</string>
 	<string name="label_message" state="needs_review" hash="809999904">Μήνυμα</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Προκαθορισμένο μήνυμα για αποστολή</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Επιβεβαιώστε πριν στείλετε</string>
@@ -1349,9 +1352,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Μέγεθος εμφάνισης</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Άνοιγμα συζήτησης</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">Μόνο για ανάγνωση</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">Εκκρεμεί η ανάγνωση μόνο</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Εκκρεμεί\nμόνο για ανάγνωση</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Διαχειριστής</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Εκκρεμής διαχειριστής</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Εκκρεμής\nδιαχειριστής</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Δεν είναι δυνατή η εμφάνιση του ονόματος αυτού του χρήστη</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Αγνώστυμη ομάδα</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Ειδοποιήσεις συζητήσεων</string>
@@ -1382,7 +1385,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">Μέλη ομάδας/σύνολο προσκεκλημένων:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">Ομαδική έκδοση:</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">Τύπος ομάδας:</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">διαχειριζόμενο από τους χρήστες</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">διαχειριζόμενο από τους χρήστες</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">διαχειρίζεται από τον κατάλογό σας</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">Δεν έχει σταλεί ακόμα</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">Αυτή η ομάδα συγχρονίζεται αυτήν τη στιγμή. Μόλις ολοκληρωθεί, θα μπορείτε να αποδεχτείτε αυτή την πρόσκληση.</string>
@@ -1391,7 +1394,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">Δεν είναι δυνατή η κλωνοποίηση αυτής της ομάδας</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">Η ομάδα %1$s δεν μπορεί να κλωνοποιηθεί επειδή ορισμένα μέλη αυτής της ομάδας χρησιμοποιούν μια παλαιότερη έκδοση του Olvid που δεν υποστηρίζει ομάδες v2. Παρακαλώ ενημερώστε τους ότι είναι διαθέσιμη μια νεότερη έκδοση του Olvid!\n\nΕνημερωμένοι χρήστες:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">Προειδοποίηση: μερική κλωνοποίηση</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">Η ομάδα %1$s περιέχει μέλη με τα οποία δεν έχετε ακόμη ασφαλές κανάλι. Δεν μπορείτε να τους προσκαλέσετε στη νέα ομάδα.\n\nΕπηρεαζόμενοι χρήστες:%2$s\n\nΕπιθυμείτε να συνεχίσετε με μια ελλιπή ομάδα;</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">Η ομάδα %1$s περιέχει μέλη με τα οποία δεν έχετε ακόμη ένα ασφαλές κανάλι. Δεν μπορείτε να τους προσκαλέσετε στη νέα ομάδα.\n\nΕπηρεαζόμενοι χρήστες:%2$s\n\nΕπιθυμείτε να συνεχίσετε με μια ατελή ομάδα;</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Αντίγραφο του\u0020</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Έχουν σταλεί οι συντεταγμένες</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Λήφθηκε η τοποθεσία</string>
@@ -1474,7 +1477,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02ds</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">Όταν ενεργοποιηθεί, η εισαγωγή λανθασμένου PIN/κωδικού πρόσβασης 3 φορές στη σειρά θα διαγράψει αθόρυβα όλα τα μηνύματα που έχουν διαβαστεί μία φορά και τα μηνύματα με περιορισμένη ορατότητα.</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">Διαγραφή ευαίσθητων μηνυμάτων μετά από 3 λανθασμένους κωδικούς PIN</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">Ενεργοποιήστε αυτήν την επιλογή για να ορίσετε έναν PIN/κωδικό πρόσβασης \"έκτακτης ανάγκης\" που ξεκλειδώνει την εφαρμογή, αλλά διαγράφει σιωπηλά όλα τα κρυφά προφίλ, τα μηνύματα που διαβάζονται μία φορά και τα μηνύματα με περιορισμένη προβολή. Η εισαγωγή αυτού του PIN θα απενεργοποιήσει επίσης αυτήν την επιλογή.</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">Ενεργοποιήστε αυτήν την επιλογή για να ορίσετε έναν κωδικό PIN/κωδικό πρόσβασης \"έκτακτης ανάγκης\" που ξεκλειδώνει την εφαρμογή, αλλά διαγράφει σιωπηλά όλα τα κρυφά προφίλ, τα μηνύματα που διαβάζονται μία φορά και τα μηνύματα με περιορισμένη ορατότητα. Η εισαγωγή αυτού του PIN απενεργοποιεί επίσης αυτήν την επιλογή.</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">Κωδικός PIN έκτακτης ανάγκης</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">Επιλέξτε έναν PIN έκτακτης ανάγκης</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">Η εισαγωγή αυτού του PIN έκτακτης ανάγκης στην οθόνη κλειδώματος του Olvid θα ξεκλειδώσει το Olvid, αλλά θα διαγράψει σιωπηλά οποιοδήποτε κρυφό προφίλ μπορεί να έχετε.</string>
@@ -1602,8 +1605,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Ενεργοποιήστε αυτήν την επιλογή για να απενεργοποιήσετε τον έλεγχο αλλαγής πιστοποιητικού κατά τη λήψη μιας προεπισκόπησης συνδέσμου. Ορισμένες ιστοσελίδες ενδέχεται να παρουσιάζουν διαφορετικό πιστοποιητικό σε κάθε σύνδεση και ενδέχεται να λαμβάνετε συχνές ειδοποιήσεις εάν αυτή η επιλογή είναι απενεργοποιημένη.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Χρησιμοποιήστε την παλαιότερη βιβλιοθήκη ZXing για σάρωση QR κωδικών</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">Από προεπιλογή, το ML Kit χρησιμοποιείται για τη σάρωση QR κωδικών. Ενεργοποιήστε αυτήν την επιλογή εάν αντιμετωπίζετε προβλήματα με τη σάρωση QR κωδικών εντός του Olvid.</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">Χρήση ενσωματωμένου προγράμματος προβολής PDF (πειραματικό)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">Από προεπιλογή, τα συνημμένα PDF ανοίγουν σε έναν εξωτερικό θεατή. Ενεργοποιήστε αυτήν την επιλογή για να χρησιμοποιήσετε τον (βασικό) εσωτερικό θεατή αντί αυτού.</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Χρήση ενσωματωμένου προγράμματος προβολής PDF</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Από προεπιλογή, τα συνημμένα PDF ανοίγουν σε έναν (βασικό) εσωτερικό προβολέα. Απενεργοποιήστε αυτήν την επιλογή για να χρησιμοποιήσετε έναν εξωτερικό προβολέα αντί αυτού.</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">Οι συσκευές μου</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Συσκευή %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Αυτή η συσκευή</string>
@@ -1659,7 +1662,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">Εισαγάγετε τον κωδικό που εμφανίζεται στην άλλη συσκευή σας</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">Ξεκινήστε το Olvid στην άλλη συσκευή σας. Πατήστε την φωτογραφία προφίλ σας στην πάνω αριστερή γωνία. Επιλέξτε το προφίλ που θέλετε να εισαγάγετε και πατήστε το κουμπί «Διαχείριση». Πατήστε «Προσθήκη συσκευής» για να εμφανίσετε τον κωδικό.</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">Εισαγάγετε αυτόν τον κωδικό στην άλλη συσκευή σας</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">Έχετε συνδρομή για πολλές συσκευές</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">Έχετε μια συνδρομή για πολλές συσκευές</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">Εδώ είναι η λίστα των τρεχουσών συσκευών σας</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">Επιλέξτε τη συσκευή που θέλετε να παραμείνει ενεργή</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">Άλλες συσκευές θα απενεργοποιηθούν εντός 30 ημερών</string>
@@ -1884,7 +1887,6 @@
 	<string name="dialog_title_authentication_failed_time_offset" state="needs_review" hash="-170194947">Πιθανή απόκλιση ώρας;</string>
 	<string name="dialog_message_authentication_failed_time_offset" state="needs_review" hash="300612997">Δυστυχώς, η αυθεντικοποίηση απέτυχε.\n\nΈνας πιθανός λόγος θα μπορούσε να είναι μια απόκλιση **μεγαλύτερη των 10 λεπτών** μεταξύ της ώρας της συσκευής σας και της ώρας του διακομιστή.\n\nΕλέγξτε ότι η ώρα, η ημερομηνία και η ζώνη ώρας της συσκευής σας είναι ακριβείς και δοκιμάστε να αυθεντικοποιηθείτε ξανά.\n\n*Εάν το πρόβλημα επιμένει, επικοινωνήστε με τον διαχειριστή σας.*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">Ρυθμίσεις ώρας</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">Επικοινωνία</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">Συζήτηση με %1$s</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">Περιορισμός μεταφοράς προφίλ</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">Σημαντικό</string>
@@ -2002,7 +2004,7 @@
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">Απέτυχε η επαναφορά του προφίλ σας. Παρακαλώ προσπαθήστε ξανά.</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">Επαναφορά προφίλ μου</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Διατηρήστε τα όλα με το Olvid+</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Αφού επαναφέρετε το προφίλ σας, μπορείτε να επιλέξετε ποια συσκευή θα παραμείνει ενεργή από τις ρυθμίσεις του προφίλ σας.</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">Αφού επαναφερθεί το προφίλ σου, μπορείς να επιλέξεις ποια συσκευή θα παραμείνει ενεργή από τις ρυθμίσεις του προφίλ σου.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Επαναφέροντας το προφίλ σας «</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Δεν βρέθηκε κανένα κλειδί δημιουργίας αντιγράφων ασφαλείας</string>
@@ -2089,4 +2091,29 @@
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Άνοιγμα σε εξωτερικό πρόγραμμα προβολής</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Σφάλμα κατά το άνοιγμα του αρχείου στον εσωτερικό προβολέα του Olvid</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Προσκεκλημένος</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">Νέο μήνυμα</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Νέα επαφή</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Αναζήτηση</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Από κοντά</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Εξ αποστάσεως</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Ακύρωση</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Σκανάρετε τους QR κωδικούς του άλλου</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Σάρωσε και το δικό σου τώρα</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Κωδικός σαρώθηκε!</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Δεν μπορείτε να σαρώσετε τον κώδικα;</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Προσκαλέστε τους με άλλο τρόπο</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">Κοινοποίηση προφίλ</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">Λήψη</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">Αποθηκεύτηκε ο κωδικός QR</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">Αποτυχία αποθήκευσης του QR Code</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">Αντιγράφηκε στα πρόχειρα</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">Κείμενο QR code</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Προσθήκη της πρώτης σας επαφής</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">Συζήτηση</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Αλλαγή κάμερας</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Θέλετε να επικοινωνήσετε με το %1$s;</string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Οι επαφές που εμφανίζονται παρακάτω είναι μέλη αυτής της ομάδας, αλλά δεν έχουν ακόμη ξεκινήσει ιδιωτική συνομιλία μαζί σας.</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">Διαχειριστές ομάδας</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" είναι μια κοινή ομάδα</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Για να προστατεύσετε την ιδιωτικότητά σας, το Olvid **δεν διαθέτει δημόσιο ή κεντρικό κατάλογο χρηστών**. Το όνομά σας θα είναι ορατό μόνο στους ανθρώπους με τους οποίους συνδέεστε.</string>
 </resources>

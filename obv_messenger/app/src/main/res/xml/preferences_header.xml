@@ -47,19 +47,9 @@
         android:icon="@drawable/ic_pref_call"
         android:widgetLayout="@layout/preference_widget_header_chevron" />
     <Preference
-        android:title="@string/pref_category_camera_title"
-        android:fragment="io.olvid.messenger.settings.CameraPreferenceFragment"
-        android:icon="@drawable/ic_pref_camera"
-        android:widgetLayout="@layout/preference_widget_header_chevron" />
-    <Preference
         android:title="@string/pref_category_backup_title"
         android:key="pref_header_key_backup"
         android:icon="@drawable/ic_pref_manual_backup"
-        android:widgetLayout="@layout/preference_widget_header_chevron" />
-    <Preference
-        android:title="@string/pref_category_webclient"
-        android:fragment="io.olvid.messenger.settings.WebClientPreferenceFragment"
-        android:icon="@drawable/ic_pref_webclient"
         android:widgetLayout="@layout/preference_widget_header_chevron" />
     <Preference
         android:title="@string/pref_category_other_title"

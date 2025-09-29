@@ -75,13 +75,13 @@
         android:icon="@drawable/ic_pref_emoji_animated"
         android:order="15"
         />
-
-    <SwitchPreference
-        android:key="pref_key_use_internal_image_viewer"
-        android:defaultValue="true"
-        android:title="@string/pref_use_internal_image_viewer_title"
-        android:summary="@string/pref_use_internal_image_viewer_summary"
-        android:icon="@drawable/ic_pref_image"
-        android:order="16" />
-
+    <DropDownPreference
+        android:key="pref_key_ping_connectivity_indicator"
+        android:title="@string/pref_ping_connectivity_indicator_title"
+        app:useSimpleSummaryProvider="true"
+        android:defaultValue="null"
+        android:entries="@array/ping_connectivity_indicator"
+        android:entryValues="@array/ping_connectivity_indicator_value"
+        android:icon="@drawable/ic_pref_ping_indicator"
+        android:order="30" />
 </PreferenceScreen>

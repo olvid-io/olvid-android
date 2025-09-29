@@ -158,7 +158,7 @@ public class WebClientManager {
         this.attachmentListener = new AttachmentListener(this);
         this.draftAttachmentListener = new DraftAttachmentListener(this);
 
-        this.sasCodeLiveData = new MutableLiveData<>();
+        this.sasCodeLiveData = new MutableLiveData<>("");
 
         this.closeConnection = new TimerTask() {
             @Override

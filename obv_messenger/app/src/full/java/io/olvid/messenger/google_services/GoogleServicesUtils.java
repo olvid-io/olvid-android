@@ -22,6 +22,7 @@ package io.olvid.messenger.google_services;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
@@ -35,8 +36,6 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
 import com.google.android.gms.tasks.Task;
 import com.google.api.services.drive.DriveScopes;
-
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import io.olvid.messenger.R;
 

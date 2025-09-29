@@ -41,7 +41,7 @@ public class ChannelReceivedMessage {
     private final ReceptionChannelInfo receptionChannelInfo;
     private final NetworkReceivedMessage message;
 
-    public ChannelReceivedMessage(ChannelManagerSession channelManagerSession, NetworkReceivedMessage message, AuthEncKey messageKey, ReceptionChannelInfo receptionChannelInfo) throws Exception {
+    public ChannelReceivedMessage(NetworkReceivedMessage message, AuthEncKey messageKey, ReceptionChannelInfo receptionChannelInfo) throws Exception {
         try {
             // decrypt
             AuthEnc authEnc = Suite.getAuthEnc(messageKey);
@@ -49,23 +49,8 @@ public class ChannelReceivedMessage {
 
             // verify the messageKey is properly formatted
             boolean messageKeyCheckPassed = authEnc.verifyMessageKey(messageKey, decryptedMessage.getBytes());
-            Logger.d("MessageKey check: " + (messageKeyCheckPassed ? "PASSED" : "FAILED"));
-            if (receptionChannelInfo.getChannelType() == ReceptionChannelInfo.OBLIVIOUS_CHANNEL_TYPE) {
-                // check the GKMV2 info in receptionChannelInfo
-                if (receptionChannelInfo.obliviousChannelsSupportsGKMV2() && !messageKeyCheckPassed) {
-                    Logger.e("Received a message not passing the messageKey check on an oblivious channel that supports GKMV2. Discarding it!!!!");
-                    throw new Exception();
-                } else if (messageKeyCheckPassed && !receptionChannelInfo.obliviousChannelsSupportsGKMV2()) {
-                    // received a message that passes the GKMV2 messageKey check --> tag the ObliviousChannel
-                    UID currentDeviceUid = channelManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(channelManagerSession.session, message.getHeader().getOwnedIdentity());
-                    if (currentDeviceUid != null) {
-                        Logger.i("Tagging an oblivious channel as supporting GKMV2");
-                        ObliviousChannel.setSupportsGKMV2(channelManagerSession, currentDeviceUid, receptionChannelInfo.getRemoteDeviceUid(), receptionChannelInfo.getRemoteIdentity(), receptionChannelInfo.getFullRatchetCount(), receptionChannelInfo.getSelfRatchetCount());
-                    }
-                }
-            } else if (receptionChannelInfo.getChannelType() == ReceptionChannelInfo.PRE_KEY_CHANNEL_TYPE
-                    && !messageKeyCheckPassed) {
-                Logger.e("Received a message not passing the messageKey check encrypted with a pre key. Discarding it!!!!");
+            if (!messageKeyCheckPassed) {
+                Logger.e("Received a message not passing the messageKey check. Discarding it!!!!");
                 throw new Exception();
             }
 

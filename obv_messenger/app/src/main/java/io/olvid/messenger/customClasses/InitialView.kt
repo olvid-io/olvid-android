@@ -86,6 +86,7 @@ class InitialView : View {
     private var bitmap: Bitmap? = null
     private var insideX = 0f
     private var insideY = 0f
+    private var showBadges = true
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
@@ -108,6 +109,9 @@ class InitialView : View {
         defStyleRes: Int
     ) : super(context, attrs, defStyleAttr, defStyleRes)
 
+    fun setShowBadges(showBadges: Boolean) {
+        this.showBadges = showBadges
+    }
     fun setContact(contact: Contact) {
         var changed = false
         if (!contact.bytesContactIdentity.contentEquals(bytes)) {
@@ -692,96 +696,125 @@ class InitialView : View {
                             roundedDrawable.colorFilter = ColorMatrixColorFilter(colorMatrix)
                         }
                         roundedDrawable.draw(canvas)
-                        if (contactTrustLevel != null && contactTrustLevel != -1 && SettingsActivity.showTrustLevels()) {
-                            val dotSize = (.3f * size).toInt()
-                            val clearPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-                            clearPaint.color = Color.TRANSPARENT
-                            clearPaint.xfermode = PorterDuffXfermode(CLEAR)
-                            canvas.drawOval(
-                                RectF(
-                                    (size - dotSize).toFloat(),
-                                    (size - dotSize).toFloat(),
-                                    size.toFloat(),
-                                    size.toFloat()
-                                ), clearPaint
-                            )
-                            val dotPaint = getTrustPaint(context, contactTrustLevel!!)
-                            canvas.drawOval(
-                                RectF(
-                                    size - .875f * dotSize,
-                                    size - .875f * dotSize,
-                                    size - .125f * dotSize,
-                                    size - .125f * dotSize
-                                ), dotPaint
-                            )
-                            if (notOneToOne) {
+                        if (showBadges) {
+                            if (contactTrustLevel != null
+                                && contactTrustLevel != -1
+                                && SettingsActivity.showTrustLevels()) {
+                                val dotSize = (.3f * size).toInt()
+                                val clearPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+                                clearPaint.color = Color.TRANSPARENT
+                                clearPaint.xfermode = PorterDuffXfermode(CLEAR)
                                 canvas.drawOval(
                                     RectF(
-                                        size - .65f * dotSize,
-                                        size - .65f * dotSize,
-                                        size - .35f * dotSize,
-                                        size - .35f * dotSize
+                                        (size - dotSize).toFloat(),
+                                        (size - dotSize).toFloat(),
+                                        size.toFloat(),
+                                        size.toFloat()
                                     ), clearPaint
                                 )
+                                val dotPaint = getTrustPaint(context, contactTrustLevel!!)
+                                canvas.drawOval(
+                                    RectF(
+                                        size - .875f * dotSize,
+                                        size - .875f * dotSize,
+                                        size - .125f * dotSize,
+                                        size - .125f * dotSize
+                                    ), dotPaint
+                                )
+                                if (notOneToOne) {
+                                    canvas.drawOval(
+                                        RectF(
+                                            size - .65f * dotSize,
+                                            size - .65f * dotSize,
+                                            size - .35f * dotSize,
+                                            size - .35f * dotSize
+                                        ), clearPaint
+                                    )
+                                }
                             }
-                        }
-                        if (locked) {
-                            val lockSize = (.3f * size).toInt()
-                            val keycloakBitmap = Bitmap.createBitmap(lockSize, lockSize, ARGB_8888)
-                            val keycloakCanvas = Canvas(keycloakBitmap)
-                            val lockDrawable =
-                                ResourcesCompat.getDrawable(resources, drawable.ic_lock_circled, null)
-                            if (lockDrawable != null) {
-                                lockDrawable.setBounds(0, 0, lockSize, lockSize)
-                                lockDrawable.draw(keycloakCanvas)
+                            if (locked) {
+                                val lockSize = (.3f * size).toInt()
+                                val keycloakBitmap =
+                                    Bitmap.createBitmap(lockSize, lockSize, ARGB_8888)
+                                val keycloakCanvas = Canvas(keycloakBitmap)
+                                val lockDrawable =
+                                    ResourcesCompat.getDrawable(
+                                        resources,
+                                        drawable.ic_lock_circled,
+                                        null
+                                    )
+                                if (lockDrawable != null) {
+                                    lockDrawable.setBounds(0, 0, lockSize, lockSize)
+                                    lockDrawable.draw(keycloakCanvas)
+                                }
+                                canvas.drawBitmap(
+                                    keycloakBitmap,
+                                    (size - lockSize).toFloat(),
+                                    0f,
+                                    null
+                                )
+                            } else if (inactive) {
+                                val blockedSize = (.8f * size).toInt()
+                                val blockedBitmap =
+                                    Bitmap.createBitmap(blockedSize, blockedSize, ARGB_8888)
+                                val blockedCanvas = Canvas(blockedBitmap)
+                                val blockedDrawable =
+                                    ResourcesCompat.getDrawable(
+                                        resources,
+                                        drawable.ic_block_outlined,
+                                        null
+                                    )
+                                if (blockedDrawable != null) {
+                                    blockedDrawable.setBounds(0, 0, blockedSize, blockedSize)
+                                    blockedDrawable.draw(blockedCanvas)
+                                }
+                                canvas.drawBitmap(
+                                    blockedBitmap,
+                                    (size - blockedSize) / 2f,
+                                    (size - blockedSize) / 2f,
+                                    null
+                                )
+                            } else if (keycloakCertified) {
+                                val keycloakSize = (.3f * size).toInt()
+                                val keycloakBitmap =
+                                    Bitmap.createBitmap(keycloakSize, keycloakSize, ARGB_8888)
+                                val keycloakCanvas = Canvas(keycloakBitmap)
+                                val keycloakDrawable = ResourcesCompat.getDrawable(
+                                    resources,
+                                    drawable.ic_keycloak_certified,
+                                    null
+                                )
+                                if (keycloakDrawable != null) {
+                                    keycloakDrawable.setBounds(0, 0, keycloakSize, keycloakSize)
+                                    keycloakDrawable.draw(keycloakCanvas)
+                                }
+                                canvas.drawBitmap(
+                                    keycloakBitmap,
+                                    (size - keycloakSize).toFloat(),
+                                    0f,
+                                    null
+                                )
+                            } else if (!recentlyOnline) {
+                                val asleepSize = (.3f * size).toInt()
+                                val asleepBitmap =
+                                    Bitmap.createBitmap(asleepSize, asleepSize, ARGB_8888)
+                                val asleepCanvas = Canvas(asleepBitmap)
+                                val asleepDrawable = ResourcesCompat.getDrawable(
+                                    resources,
+                                    drawable.ic_snooze,
+                                    null
+                                )
+                                if (asleepDrawable != null) {
+                                    asleepDrawable.setBounds(0, 0, asleepSize, asleepSize)
+                                    asleepDrawable.draw(asleepCanvas)
+                                }
+                                canvas.drawBitmap(
+                                    asleepBitmap,
+                                    (size - asleepSize).toFloat(),
+                                    0f,
+                                    null
+                                )
                             }
-                            canvas.drawBitmap(keycloakBitmap, (size - lockSize).toFloat(), 0f, null)
-                        } else if (inactive) {
-                            val blockedSize = (.8f * size).toInt()
-                            val blockedBitmap = Bitmap.createBitmap(blockedSize, blockedSize, ARGB_8888)
-                            val blockedCanvas = Canvas(blockedBitmap)
-                            val blockedDrawable =
-                                ResourcesCompat.getDrawable(resources, drawable.ic_block_outlined, null)
-                            if (blockedDrawable != null) {
-                                blockedDrawable.setBounds(0, 0, blockedSize, blockedSize)
-                                blockedDrawable.draw(blockedCanvas)
-                            }
-                            canvas.drawBitmap(
-                                blockedBitmap,
-                                (size - blockedSize) / 2f,
-                                (size - blockedSize) / 2f,
-                                null
-                            )
-                        } else if (keycloakCertified) {
-                            val keycloakSize = (.3f * size).toInt()
-                            val keycloakBitmap =
-                                Bitmap.createBitmap(keycloakSize, keycloakSize, ARGB_8888)
-                            val keycloakCanvas = Canvas(keycloakBitmap)
-                            val keycloakDrawable = ResourcesCompat.getDrawable(
-                                resources,
-                                drawable.ic_keycloak_certified,
-                                null
-                            )
-                            if (keycloakDrawable != null) {
-                                keycloakDrawable.setBounds(0, 0, keycloakSize, keycloakSize)
-                                keycloakDrawable.draw(keycloakCanvas)
-                            }
-                            canvas.drawBitmap(keycloakBitmap, (size - keycloakSize).toFloat(), 0f, null)
-                        } else if (!recentlyOnline) {
-                            val asleepSize = (.3f * size).toInt()
-                            val asleepBitmap =
-                                Bitmap.createBitmap(asleepSize, asleepSize, ARGB_8888)
-                            val asleepCanvas = Canvas(asleepBitmap)
-                            val asleepDrawable = ResourcesCompat.getDrawable(
-                                resources,
-                                drawable.ic_snooze,
-                                null
-                            )
-                            if (asleepDrawable != null) {
-                                asleepDrawable.setBounds(0, 0, asleepSize, asleepSize)
-                                asleepDrawable.draw(asleepCanvas)
-                            }
-                            canvas.drawBitmap(asleepBitmap, (size - asleepSize).toFloat(), 0f, null)
                         }
                     }
                     return
@@ -907,48 +940,61 @@ class InitialView : View {
                 } else if (initial != null) {
                     bitmapCanvas.drawText(initial!!, insideX, insideY, insidePaint!!)
                 }
-                if (inactive) {
-                    val blockedSize = (.8f * size).toInt()
-                    val blockedBitmap = Bitmap.createBitmap(blockedSize, blockedSize, ARGB_8888)
-                    val blockedCanvas = Canvas(blockedBitmap)
-                    val blockedDrawable =
-                        ResourcesCompat.getDrawable(resources, drawable.ic_block_outlined, null)
-                    if (blockedDrawable != null) {
-                        blockedDrawable.setBounds(0, 0, blockedSize, blockedSize)
-                        blockedDrawable.draw(blockedCanvas)
+                if (showBadges) {
+                    if (inactive) {
+                        val blockedSize = (.8f * size).toInt()
+                        val blockedBitmap = Bitmap.createBitmap(blockedSize, blockedSize, ARGB_8888)
+                        val blockedCanvas = Canvas(blockedBitmap)
+                        val blockedDrawable =
+                            ResourcesCompat.getDrawable(resources, drawable.ic_block_outlined, null)
+                        if (blockedDrawable != null) {
+                            blockedDrawable.setBounds(0, 0, blockedSize, blockedSize)
+                            blockedDrawable.draw(blockedCanvas)
+                        }
+                        bitmapCanvas.drawBitmap(
+                            blockedBitmap,
+                            (size - blockedSize) / 2f,
+                            (size - blockedSize) / 2f,
+                            null
+                        )
+                    } else if (keycloakCertified) {
+                        val keycloakSize = (.3f * size).toInt()
+                        val keycloakBitmap =
+                            Bitmap.createBitmap(keycloakSize, keycloakSize, ARGB_8888)
+                        val keycloakCanvas = Canvas(keycloakBitmap)
+                        val keycloakDrawable =
+                            ResourcesCompat.getDrawable(
+                                resources,
+                                drawable.ic_keycloak_certified,
+                                null
+                            )
+                        if (keycloakDrawable != null) {
+                            keycloakDrawable.setBounds(0, 0, keycloakSize, keycloakSize)
+                            keycloakDrawable.draw(keycloakCanvas)
+                        }
+                        bitmapCanvas.drawBitmap(
+                            keycloakBitmap,
+                            (size - keycloakSize).toFloat(),
+                            0f,
+                            null
+                        )
+                    } else if (!recentlyOnline) {
+                        val asleepSize = (.3f * size).toInt()
+                        val asleepBitmap = Bitmap.createBitmap(asleepSize, asleepSize, ARGB_8888)
+                        val asleepCanvas = Canvas(asleepBitmap)
+                        val asleepDrawable =
+                            ResourcesCompat.getDrawable(resources, drawable.ic_snooze, null)
+                        if (asleepDrawable != null) {
+                            asleepDrawable.setBounds(0, 0, asleepSize, asleepSize)
+                            asleepDrawable.draw(asleepCanvas)
+                        }
+                        bitmapCanvas.drawBitmap(
+                            asleepBitmap,
+                            (size - asleepSize).toFloat(),
+                            0f,
+                            null
+                        )
                     }
-                    bitmapCanvas.drawBitmap(
-                        blockedBitmap,
-                        (size - blockedSize) / 2f,
-                        (size - blockedSize) / 2f,
-                        null
-                    )
-                } else if (keycloakCertified) {
-                    val keycloakSize = (.3f * size).toInt()
-                    val keycloakBitmap = Bitmap.createBitmap(keycloakSize, keycloakSize, ARGB_8888)
-                    val keycloakCanvas = Canvas(keycloakBitmap)
-                    val keycloakDrawable =
-                        ResourcesCompat.getDrawable(resources, drawable.ic_keycloak_certified, null)
-                    if (keycloakDrawable != null) {
-                        keycloakDrawable.setBounds(0, 0, keycloakSize, keycloakSize)
-                        keycloakDrawable.draw(keycloakCanvas)
-                    }
-                    bitmapCanvas.drawBitmap(
-                        keycloakBitmap,
-                        (size - keycloakSize).toFloat(),
-                        0f,
-                        null
-                    )
-                } else if (!recentlyOnline) {
-                    val asleepSize = (.3f * size).toInt()
-                    val asleepBitmap = Bitmap.createBitmap(asleepSize, asleepSize, ARGB_8888)
-                    val asleepCanvas = Canvas(asleepBitmap)
-                    val asleepDrawable = ResourcesCompat.getDrawable(resources, drawable.ic_snooze, null)
-                    if (asleepDrawable != null) {
-                        asleepDrawable.setBounds(0, 0, asleepSize, asleepSize)
-                        asleepDrawable.draw(asleepCanvas)
-                    }
-                    bitmapCanvas.drawBitmap(asleepBitmap, (size - asleepSize).toFloat(), 0f, null)
                 }
                 bitmap = localBitmap
             }

@@ -95,6 +95,11 @@ public class ChannelManager implements ChannelDelegate, ProcessDownloadedMessage
     }
 
     @Override
+    public int initialQueueingPriority() {
+        return 30;
+    }
+
+    @Override
     public void initialisationComplete() {
         try (ChannelManagerSession channelManagerSession = getSession()) {
             // clean expired provisions

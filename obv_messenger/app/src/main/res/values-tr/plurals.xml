@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" ve 1 ortak grup</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" ve %2$d diğer ortak gruplar</item>
+	</plurals>
 	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1156880361">Cihazlarınızdan biri **%1$d günden** kısa bir süre içinde sona erecek ve devre dışı bırakılacak.\nOnu aktif tutmak için bir **Olvid+** aboneliği satın alabilirsiniz.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Cihazlarınızdan biri **%1$d günden kısa bir süre içinde** sona erecek ve devre dışı bırakılacak.\nOnu aktif tutmak için bir **Olvid+** aboneliği satın alabilirsiniz.</item>
@@ -93,6 +97,10 @@
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">Bu gruptaki ve sizinle kanalı olan her üye (şu anda 1 üye) ile özel bir tartışmaya davet edeceksiniz.\nDevam etmek istiyor musunuz?</item>
 		<item quantity="other" state="needs_review" hash="-994717142">Bu gruptaki ve sizinle bir kanalınız olan her üye ile (şu anda %1$d üye) özel bir sohbete davet edeceksiniz.\nDevam etmek istiyor musunuz?</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">1 grup üyesi özel bir sohbete davet edilebilir</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d grup üyeleri özel bir sohbete davet edilebilir</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 ortak grup</item>

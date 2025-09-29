@@ -70,8 +70,16 @@ public interface MessageRecipientInfoDao {
             " AND mri." + MessageRecipientInfo.ENGINE_MESSAGE_IDENTIFIER + " = :engineIdentifier")
     List<MessageRecipientInfo> getAllByEngineMessageIdentifier(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] engineIdentifier);
 
-    @Query("SELECT * FROM " + MessageRecipientInfo.TABLE_NAME + " WHERE " + MessageRecipientInfo.MESSAGE_ID + " = :messageId")
+    @Query( "SELECT * FROM " + MessageRecipientInfo.TABLE_NAME +
+            " WHERE " + MessageRecipientInfo.MESSAGE_ID + " = :messageId")
     List<MessageRecipientInfo> getAllByMessageId(long messageId);
+
+    @Query( "SELECT * FROM " + MessageRecipientInfo.TABLE_NAME +
+            " WHERE " + MessageRecipientInfo.MESSAGE_ID + " = :messageId " +
+            " AND " + MessageRecipientInfo.RETURN_RECEIPT_NONCE + " IS NOT NULL " +
+            " AND " + MessageRecipientInfo.RETURN_RECEIPT_KEY + " IS NOT NULL " +
+            " LIMIT 1 ")
+    @Nullable MessageRecipientInfo getFirstWithNonceAndKeyForMessage(long messageId);
 
     @Query("SELECT * FROM " + MessageRecipientInfo.TABLE_NAME +
             " WHERE " + MessageRecipientInfo.MESSAGE_ID + " = :messageId " +

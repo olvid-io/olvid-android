@@ -318,12 +318,14 @@
         <item>@string/pref_text_ping_connectivity_indicator_dot</item>
         <item>@string/pref_text_ping_connectivity_indicator_line</item>
         <item>@string/pref_text_ping_connectivity_indicator_full</item>
+        <item>@string/pref_text_ping_connectivity_indicator_never</item>
     </string-array>
     <string-array name="ping_connectivity_indicator_value">
         <item>null</item>
         <item>dot</item>
         <item>line</item>
         <item>full</item>
+        <item>never</item>
     </string-array>
 
     <string-array name="auto_join_groups">

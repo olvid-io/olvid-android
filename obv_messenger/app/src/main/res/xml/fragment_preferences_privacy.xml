@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
         <SwitchPreference
             android:defaultValue="false"
             android:key="pref_key_hide_notification_contents"
@@ -47,6 +48,13 @@
             tools:summary="@string/pref_hidden_profile_close_policy_summary_not_set"
             android:order="45"
             />
+        <SwitchPreference
+            android:key="pref_key_remove_metadata"
+            android:title="@string/pref_exif_erase_title"
+            android:summary="@string/pref_exif_erase_summary"
+            android:icon="@drawable/ic_pref_metadata"
+            android:defaultValue="false"
+            android:order="47" />
         <io.olvid.messenger.customClasses.NoClickSwitchPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_pref_disable_push_notifications"
@@ -61,4 +69,32 @@
             android:title="@string/pref_permanent_websocket_title"
             android:icon="@drawable/ic_pref_websocket"
             android:order="52" />
+        <SwitchPreference
+            android:key="pref_key_notify_certificate_change"
+            android:defaultValue="false"
+            android:summary="@string/pref_notify_certificate_change_summary"
+            android:title="@string/pref_notify_certificate_change_title"
+            android:icon="@drawable/ic_pref_certificate"
+            android:order="64" />
+        <ListPreference
+            android:key="pref_key_block_untrusted_certificate"
+            android:defaultValue="issuer"
+            app:useSimpleSummaryProvider="true"
+            app:singleLineTitle="false"
+            android:title="@string/pref_block_untrusted_certificate_title"
+            android:entries="@array/block_untrusted_certificate"
+            android:entryValues="@array/block_untrusted_certificate_values"
+            android:icon="@drawable/ic_pref_block_untrusted"
+            android:dependency="pref_key_notify_certificate_change"
+            android:shouldDisableView="true"
+            android:order="65" />
+        <SwitchPreference
+            android:key="pref_key_no_notify_certificate_change_for_previews"
+            android:defaultValue="false"
+            android:summary="@string/pref_no_notify_certificate_change_for_previews_summary"
+            android:title="@string/pref_no_notify_certificate_change_for_previews_title"
+            android:icon="@drawable/ic_pref_preview"
+            android:dependency="pref_key_notify_certificate_change"
+            android:shouldDisableView="true"
+            android:order="66" />
 </PreferenceScreen>

@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" וקבוצה נוספת אחת במשותף</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" ו-%2$d קבוצות נוספות במשותף</item>
+	</plurals>
 	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1156880361">אחד מהמכשירים שלך יפוג ויושבת בתוך **פחות מ-%1$d יום**.\nתוכל לרכוש מנוי **Olvid+** כדי לשמור אותו פעיל.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">אחד מהמכשירים שלך יפוג ויושבת בתוך **פחות מ-%1$d ימים**.\nתוכל לרכוש מנוי **Olvid+** כדי לשמור אותו פעיל.</item>
@@ -93,6 +97,10 @@
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">אתה עומד להזמין כל חבר בקבוצה שאיתו יש לך ערוץ (כרגע חבר אחד) לדיון פרטי.\nהאם תרצה להמשיך?</item>
 		<item quantity="other" state="needs_review" hash="-994717142">אתה עומד להזמין כל חבר בקבוצה שאיתו יש לך ערוץ (כרגע %1$d חברים) לדיון פרטי.\nהאם תרצה להמשיך?</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">ניתן להזמין חבר אחד מהקבוצה לדיון פרטי</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d חברי הקבוצה יכולים להיות מוזמנים לדיון פרטי</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 קבוצה משותפת</item>

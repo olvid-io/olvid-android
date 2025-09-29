@@ -84,7 +84,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.BUTTON
@@ -546,40 +545,36 @@ private fun BoxedChar(
 @Preview(showBackground = true)
 @Composable
 fun OnboardingPreview() {
-    AppCompatTheme {
-        OnboardingScreen(
-            step = OnboardingStep(
-                title = "Bien le bonjour !",
-                subtitle = "Est-ce qu'on se connaît ?",
-                actions = listOf(
-                    OnboardingAction(label = AnnotatedString("J'ai un profil Olvid")) {},
-                    OnboardingAction(label = AnnotatedString("Je n'ai pas encore de profil Olvid")) {},
-                )
-            ),
-            onBack = {},
-            onClose = {}
-        )
-    }
+    OnboardingScreen(
+        step = OnboardingStep(
+            title = "Bien le bonjour !",
+            subtitle = "Est-ce qu'on se connaît ?",
+            actions = listOf(
+                OnboardingAction(label = AnnotatedString("J'ai un profil Olvid")) {},
+                OnboardingAction(label = AnnotatedString("Je n'ai pas encore de profil Olvid")) {},
+            )
+        ),
+        onBack = {},
+        onClose = {}
+    )
 }
 
 @Preview()
 @Composable
 fun OnboardingPreview2() {
-    AppCompatTheme {
-        OnboardingScreen(
-            step = OnboardingStep(
-                title = "Other onboarding screen",
-                actions = listOf(
-                    OnboardingAction(label = AnnotatedString("Button 1"), type = BUTTON_OUTLINED) {},
-                    OnboardingAction(label = AnnotatedString("Button 2"), type = BUTTON) {},
-                )
-            ),
-            onBack = {},
-            onClose = {},
-            footer = {
+    OnboardingScreen(
+        step = OnboardingStep(
+            title = "Other onboarding screen",
+            actions = listOf(
+                OnboardingAction(label = AnnotatedString("Button 1"), type = BUTTON_OUTLINED) {},
+                OnboardingAction(label = AnnotatedString("Button 2"), type = BUTTON) {},
+            )
+        ),
+        onBack = {},
+        onClose = {},
+        footer = {
 
-            }
-        )
-    }
+        }
+    )
 }
 

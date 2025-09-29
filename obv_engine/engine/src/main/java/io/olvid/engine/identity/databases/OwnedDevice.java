@@ -192,7 +192,7 @@ public class OwnedDevice implements ObvDatabase {
         if (res.wasNull()) {
             this.lastRegistrationTimestamp = null;
         }
-        this.latestChannelCreationPingTimestamp = res.getByte(LATEST_CHANNEL_CREATION_PING_TIMESTAMP);
+        this.latestChannelCreationPingTimestamp = res.getLong(LATEST_CHANNEL_CREATION_PING_TIMESTAMP);
         byte[] preKeyIdBytes = res.getBytes(PRE_KEY_ID);
         this.preKeyId = (preKeyIdBytes == null) ? null : new KeyId(preKeyIdBytes);
         byte[] preKeyEncodedPublicKeyBytes = res.getBytes(PRE_KEY_ENCRYPTION_PUBLIC_KEY);

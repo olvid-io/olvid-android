@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">אין שיחות כרגע</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">שיחות האנשים וקבוצות הקישור שלך יופיעו כאן.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">אין קבוצות כרגע</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">לחץ על "קבוצה חדשה" כדי ליצור את הקבוצה הראשונה שלך.</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">לחץ על ה-+ הכחול למטה כדי ליצור את הקבוצה הראשונה שלך.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">מנהל הקבוצה עדכן את כרטיס הקבוצה. שתי הגרסאות, הישנה והחדשה, מוצגות להלן.\n\nלחץ על "עדכן" כדי לעדכן את פרטי הקבוצה.</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">מנהל שינה את שם הקבוצה ל:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">מנהל שינה את תיאור הקבוצה ל:</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">שליחה וקבלה של הודעות</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">כאשר מופעל, הודעות שנצפות פעם אחת והודעות עם משך הנראות המוגבל כברירת מחדל נפתחות ברגע שאתה נכנס לדיון. אחרת, נדרשת לחיצה.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">כאשר מופעל, הודעות יוצאות שנמחקו נשמרות כך שתוכל לראות מתי הן נמסרו או נקראו. אחרת, הן יימחקו.</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">לקוח ווב</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">לקוח ווב</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">הגדרות מעודכנות</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">שגיאה בניתוח קישור עדכון ההגדרות</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">שליחה וקבלה של הודעות</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">אפשרויות יצירת מזהה</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">סריקת הגדרות</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">ייבא קישור מלוח הגזירים</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid מעודכן</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">מותקנת אצלך הגרסה האחרונה של Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">עדכון זמין</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">גרסה חדשה יותר של Olvid זמינה ב-Google Play.\n\nאנא עדכנו כדי ליהנות מהתכונות החדשות ביותר.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">לא ניתן להתחיל שיחה</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Olvid לא הצליחה להעלות את מזהה Olvid שלך לספק הזהויות של החברה שלך. תתבצע ניסיון חוזר ברקע.</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">שגיאת ספק זהויות</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">ספק הזהות שלך מציין ש-ID Olvid שונה מקושר למשתמש שאיתו התחברת, ואין לך הרשאה לעדכן אותו.\nאנא צור קשר עם המנהל שלך לקבלת פרטים נוספים.</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s נוסף/ה לרשימת האנשי קשר שלך</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">%1$s נוסף/ה לאנשי הקשר שלך</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">מזהה Olvid שלך מנוהל כעת על ידי ספק הזהות של החברה שלך. אינך יכול להפעיל באופן ידני רישיון Olvid.\n\nאנא צור קשר עם המנהל שלך לקבלת פרטים נוספים.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">שיחה שלא נענתה</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">פרטי הקשר עודכנו</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">נדרש התחברות לספק הענן שלך</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">הגדרת את Olvid לשימוש בגיבויים אוטומטיים לספק ענן, אך הפגישה שלך פגה. עליך להתחבר מחדש לספק זה.\n\nאם אינך רוצה עוד גיבויים אוטומטיים, תוכל לכבות אותם בהגדרות האפליקציה. זכור שגיבויים אוטומטיים הם הדרך היחידה למנוע אובדן אנשי הקשר שלך אם המכשיר שלך אבד או ניזוק.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">התחברות</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">צור קשר מרחוק</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">צור קשר מרחוק</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s כבר נמצא באנשי הקשר שלך.</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s נמצא ברשימת המשתמשים הידועים שלך אך עדיין לא באנשי הקשר שלך.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">חדש</string>
@@ -1187,6 +1189,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">נקודה צבעונית על האות "i" בלוגו של Olvid</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">שורת הפרדה עדינה בראש רשימת השיחות</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">סטטוס חיבור מלא בחלק העליון של רשימת השיחות</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">לעולם אל תציג אינדיקטור, אפילו במקרה של אובדן חיבור</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">אין חיבור</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">קישוריות: מתחבר…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">קישוריות: מחובר</string>
@@ -1203,7 +1206,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">הגדרת ווידג\'ט…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">מראה הווידג\'ט</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">פעולת הקשה על הווידג\'ט</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">דון</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">דון</string>
 	<string name="label_message" state="needs_review" hash="809999904">הודעה</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">הודעה מוגדרת מראש לשליחה</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">אמת לפני שליחה</string>
@@ -1349,9 +1352,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">גודל תצוגה</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">פתח דיון</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">קריאה בלבד</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">בהמתנה לקריאה בלבד</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">בהמתנה\nלקריאה בלבד</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">מנהל</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">מנהל ממתין</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">מנהל\nבהמתנה</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">לא ניתן להציג את שם המשתמש הזה</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">קבוצה ללא שם</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">התראות שיחה</string>
@@ -1382,7 +1385,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">חברי הקבוצה/סך המוזמנים:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">גרסת קבוצה:</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">סוג קבוצה:</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">מנוהל על ידי המשתמש</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">מנוהל על ידי משתמשים</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">מנוהל על ידי ספריית האנשיים שלך</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">עוד לא נשלח</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">קבוצה זו מסונכרנת כעת. לאחר השלמת התהליך, תוכלו לקבל את ההזמנה הזו.</string>
@@ -1391,7 +1394,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">לא ניתן לשכפל קבוצה זו</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">לא ניתן לשכפל את הקבוצה %1$s מכיוון שחלק מחברי הקבוצה הזו משתמשים בגרסה מיושנת של Olvid שאינה תומכת בקבוצות v2. אנא הודע להם שגרסה חדשה יותר של Olvid זמינה!\n\nמשתמשים מיושנים:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">אזהרה: שיבוט חלקי</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">הקבוצה %1$s מכילה חברים שאין לך איתם ערוץ מאובטח עדיין. לא תוכל להזמין אותם לקבוצה החדשה.\n\nמשתמשים מושפעים:%2$s\n\nהאם תרצה להמשיך עם קבוצה לא שלמה?</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">הקבוצה %1$s מכילה חברים שאיתם עדיין אין לך ערוץ מאובטח. אינך יכול להזמין אותם לקבוצה החדשה.\n\nמשתמשים מושפעים:%2$s\n\nהאם תרצה להמשיך עם קבוצה לא שלמה?</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">עותק של</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">מיקום נשלח</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">מיקום התקבל</string>
@@ -1475,7 +1478,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02ds</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">כאשר אפשרות זו מופעלת, הזנת קוד PIN/סיסמה שגוי 3 פעמים ברציפות תמחק בשקט את כל ההודעות שנצפו פעם אחת והודעות עם נראות מוגבלת.</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">מחק הודעות רגישות לאחר 3 ניסיונות שגויים של קוד PIN</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">הפעל אפשרות זו כדי להגדיר קוד PIN/סיסמה "חירום" שפותח את האפליקציה, אך מוחק בשקט את כל הפרופילים הנסתרים וההודעות בעלות נראות מוגבלת. הזנת קוד PIN זה תבטל גם אפשרות זו.</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">הפעל אפשרות זו כדי להגדיר קוד PIN/סיסמה \"חירום\" שיפתח את האפליקציה, אך ימחק בשקט את כל הפרופילים הנסתרים, הודעות שנצפו פעם אחת והודעות עם נראות מוגבלת. הזנת ה-PIN הזה גם תבטל אפשרות זו.</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">מספר PIN לחירום</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">בחר מספר PIN חירום</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">הזנת קוד ה-PIN החירום הזה במסך הנעילה של Olvid תפתח את Olvid, אך תמחק בשקט כל פרופיל מוסתר שייתכן שיש לך.</string>
@@ -1603,8 +1606,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">הפעל אפשרות זו כדי להשבית זיהוי שינוי תעודה בעת אחזור תצוגה מקדימה של קישור. אתרים מסוימים עשויים להציג תעודה שונה בכל חיבור, וייתכן שתקבל התראות תכופות אם אפשרות זו כבויה.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">השתמש בספריית ZXing הישנה לסריקת קודי QR</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">כברירת מחדל, Olvid משתמש ב-ML Kit לסריקת קודי QR. הפעל אפשרות זו אם יש לך בעיות בסריקת קודי QR מתוך Olvid.</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">השתמש בצופה PDF פנימי (ניסיוני)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">כברירת מחדל, קבצי PDF מצורפים נפתחים בצופה חיצוני. הפעל אפשרות זו כדי להשתמש בצופה הפנימי (הבסיסי) במקום זאת.</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">השתמש בצופה PDF פנימי</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">כברירת מחדל, קבצי PDF מצורפים נפתחים בצופה פנימי (בסיסי). השבת אפשרות זו כדי להשתמש בצופה חיצוני במקום זאת.</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">המכשירים שלי</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">מכשיר %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">המכשיר הזה</string>
@@ -1660,7 +1663,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">הזן את הקוד המוצג במכשיר השני שלך</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">התחל את Olvid במכשיר השני שלך.\nהקש על תמונת הפרופיל שלך בפינה השמאלית העליונה.\nבחר את הפרופיל שברצונך לייבא והקש על כפתור "ניהול".\nהקש על "הוסף מכשיר" כדי להציג את הקוד.</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">הזן קוד זה במכשיר השני שלך</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">יש לך מנוי מרובה מכשירים</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">יש לך מנוי מרובה מכשירים</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">זוהי רשימת המכשירים הנוכחיים שלך</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">בחר את המכשיר שברצונך לשמור פעיל</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">התקנים אחרים יושבתו תוך 30 יום.</string>
@@ -1885,7 +1888,6 @@
 	<string name="dialog_title_authentication_failed_time_offset" state="needs_review" hash="-170194947">האם ייתכן שיש הבדל בזמן השעון?</string>
 	<string name="dialog_message_authentication_failed_time_offset" state="needs_review" hash="300612997">לצערנו, האימות נכשל.\n\nסיבה אפשרית לכך יכולה להיות סטייה של **יותר מ-10 דקות** בין שעון המכשיר שלך לשעון השרת.\n\nאנא ודא שזמן, תאריך ואזור הזמן של המכשיר שלך מדויקים ונסה להתאמת שוב.\n\n*אם הבעיה נמשכת, אנא צור קשר עם המנהל שלך.*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">הגדרות שעון</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">צור קשר</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">דון עם %1$s</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">הגבלת העברת פרופיל</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">חשוב</string>
@@ -2003,7 +2005,7 @@
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">שחזור הפרופיל שלך נכשל. אנא נסה שוב.</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">שחזר את הפרופיל שלי</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">שמור אותם כולם עם Olvid+</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">לאחר שחזור הפרופיל שלך, תוכל לבחור באיזה מכשיר להשאיר פעיל מהגדרות הפרופיל שלך.</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">לאחר שחזור הפרופיל שלך, תוכל לבחור איזה מכשיר לשמור פעיל בהגדרות הפרופיל שלך.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">על ידי שחזור הפרופיל שלך \"</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">לא נמצא מפתח גיבוי.</string>
@@ -2090,4 +2092,29 @@
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">פתח בצופה חיצוני</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">שגיאה בפתיחת הקובץ בצפייה הפנימית של Olvid</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">מוזמן</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">הודעה חדשה</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">איש קשר חדש</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">חיפוש</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">פנים אל פנים</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">מרחוק</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">בטל</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">סרקו את קודי ה-QR אחד של השני</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">סרוק גם שלך</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">קוד נסרק!</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">לא מצליח לסרוק את הקוד?</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">הזמן אותם בדרך אחרת</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">שתף את הפרופיל שלך</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">הורד</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">קוד QR נשמר</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">נכשל שמירת קוד ה-QR</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">הועתק ללוח הגזירים</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">טקסט קוד QR</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">הוסף את איש הקשר הראשון שלך</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">שיחה</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">החלף מצלמה</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">האם תרצה ליצור קשר עם %1$s?</string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">האנשי קשר למטה הם חלק מהקבוצה הזו, אך עדיין אין לכם שיחה פרטית איתם.</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">מנהלי הקבוצה</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" היא קבוצה משותפת</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">כדי להגן על הפרטיות שלך, ל-Olvid **אין ספרייה ציבורית או מרכזית של משתמשים**. השם שלך ייראה רק לאנשים איתם אתה מתחבר.</string>
 </resources>

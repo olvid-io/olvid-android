@@ -59,6 +59,7 @@ import io.olvid.engine.datatypes.containers.OwnedIdentitySynchronizationStatus;
 import io.olvid.engine.datatypes.notifications.DownloadNotifications;
 import io.olvid.engine.datatypes.notifications.IdentityNotifications;
 import io.olvid.engine.encoder.DecodingException;
+import io.olvid.engine.engine.types.HttpHelper;
 import io.olvid.engine.metamanager.NotificationListeningDelegate;
 import io.olvid.engine.metamanager.NotificationPostingDelegate;
 import io.olvid.engine.networkfetch.databases.ServerSession;
@@ -203,7 +204,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                     return new Request.Builder()
                             .url(route.address().url())
                             .method("CONNECT", null)
-                            .header("Host", okhttp3.internal.Util.toHostHeader(route.address().url(), true))
+                            .header("Host", HttpHelper.toHostHeader(route.address().url()))
                             .header("Proxy-Connection", "Keep-Alive")
                             .header("User-Agent", userAgentProperty)
                             .build();

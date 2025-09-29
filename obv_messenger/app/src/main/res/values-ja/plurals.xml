@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\"と1つの共通のグループ</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\"と%2$dの共通のグループ</item>
+	</plurals>
 	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1156880361">あなたのデバイスのいずれかが**%1$d日以内**に期限切れとなり、無効になります。\n**Olvid+**サブスクリプションを購入して、アクティブ状態を維持できます。</item>
 		<item quantity="other" state="needs_review" hash="-574658149">あなたのデバイスのいずれかが**%1$d日以内**に期限切れとなり、無効になります。\n**Olvid+**サブスクリプションを購入して、アクティブ状態を維持できます。</item>
@@ -93,6 +97,10 @@
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">チャンネルでやり取りしているグループメンバー（現在1名）全員を、プライベートなディスカッションに招待しようとしています。\n続行しますか？</item>
 		<item quantity="other" state="needs_review" hash="-994717142">現在、チャンネルでやり取りしているグループメンバー全員（現在%1$d人）を、プライベートなディスカッションに招待しようとしています。\n続行しますか？</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">グループのメンバー1人がプライベートな議論に招待できます</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d グループメンバーは、プライベートなディスカッションに招待できます</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1つの共通グループ</item>

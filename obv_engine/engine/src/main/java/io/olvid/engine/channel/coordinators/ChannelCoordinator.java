@@ -102,7 +102,7 @@ public class ChannelCoordinator {
         }
         ChannelReceivedMessage channelReceivedMessage;
         try {
-            channelReceivedMessage = new ChannelReceivedMessage(channelManagerSession, networkReceivedMessage, authEncKeyAndChannelInfo.getAuthEncKey(), authEncKeyAndChannelInfo.getReceptionChannelInfo());
+            channelReceivedMessage = new ChannelReceivedMessage(networkReceivedMessage, authEncKeyAndChannelInfo.getAuthEncKey(), authEncKeyAndChannelInfo.getReceptionChannelInfo());
         } catch (Exception e) {
             channelManagerSession.networkFetchDelegate.deleteMessageAndAttachments(channelManagerSession.session, networkReceivedMessage.getOwnedIdentity(), networkReceivedMessage.getMessageUid());
             return;

@@ -167,14 +167,16 @@ fun NavGraphBuilder.targetKeycloakAuthenticationRequired(
                                                                             sessionNumber
                                                                         ),
                                                                         object :
-                                                                            KeycloakManager.KeycloakCallback<String> {
+                                                                            KeycloakManager.KeycloakCallback<String?> {
                                                                             override fun success(
-                                                                                authenticationProof: String
+                                                                                authenticationProof: String?
                                                                             ) {
-                                                                                onAuthenticated(
-                                                                                    authState,
-                                                                                    authenticationProof
-                                                                                )
+                                                                                authenticationProof?.let { p2 ->
+                                                                                    onAuthenticated(
+                                                                                        authState,
+                                                                                        p2
+                                                                                    )
+                                                                                }
                                                                                 clicked = false
                                                                             }
 

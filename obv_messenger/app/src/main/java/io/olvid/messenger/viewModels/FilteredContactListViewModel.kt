@@ -150,6 +150,14 @@ class FilteredContactListViewModel : ViewModel() {
                     list.add(SelectableContact(contact, selectedContactsHashSet.contains(contact)))
                 }
             }
+            val filter = filterPatterns!!.firstOrNull()?.toString()?.removePrefix("\\Q")?.removeSuffix("\\E")
+            filter?.let {
+                list.sortByDescending { contact -> 1 /
+                        StringUtils.unAccent(contact.contact.customDisplayName.orEmpty() + " " + contact.contact.displayName).trim().split(
+                        " "
+                    ).indexOfFirst { it.startsWith(filter) }.toFloat()
+                }
+            }
             filteredContacts.postValue(list)
         }
     }

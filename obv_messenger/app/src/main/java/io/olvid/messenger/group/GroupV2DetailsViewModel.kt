@@ -18,6 +18,7 @@
  */
 package io.olvid.messenger.group
 
+import android.content.Context
 import android.util.Pair
 import android.widget.Toast
 import androidx.compose.runtime.getValue
@@ -30,6 +31,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.containers.GroupV2.Permission
 import io.olvid.engine.engine.types.JsonGroupDetails
 import io.olvid.engine.engine.types.JsonGroupType
@@ -40,6 +42,7 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.BytesKey
+import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.ContactCacheSingleton
@@ -63,6 +66,8 @@ class GroupV2DetailsViewModel : ViewModel() {
     private var editingGroupMembers: Boolean
     private val editingGroupMembersLiveData: MutableLiveData<Boolean?>
     val isEditingGroupCustomSettingsLiveData: MutableLiveData<Boolean>
+    var isEditingAdmins by mutableStateOf(false)
+    var isEditingAdminsAfterTypeChange by mutableStateOf(false)
     private var publishingGroupMembers: Boolean
     val changeSet: ChangeSet
     private val changeSetLiveData: MutableLiveData<ChangeSet>
@@ -74,6 +79,7 @@ class GroupV2DetailsViewModel : ViewModel() {
 
     var initialGroupType by mutableStateOf<GroupTypeModel?>(null)
     var groupType by mutableStateOf<GroupTypeModel>(SimpleGroup)
+    var selectedGroupType by mutableStateOf<GroupTypeModel?>(null)
 
     var loaderState by mutableStateOf(LoaderState.NONE)
     var detailsAndPhotos by mutableStateOf<ObvGroupV2DetailsAndPhotos?>(null)
@@ -331,9 +337,11 @@ class GroupV2DetailsViewModel : ViewModel() {
         return true
     }
 
-    fun createGroupeTypeChangeSet(jsonGroupType: JsonGroupType?) {
+    fun createGroupTypeChangeSet(jsonGroupType: JsonGroupType?) {
         synchronized(changeSet) {
-            changeSet.adminChanges.clear()
+            if (!isEditingAdmins) {
+                changeSet.adminChanges.clear()
+            }
             changeSet.membersAdded.clear()
             changeSet.membersRemoved.clear()
             changeSet.jsonGroupType = jsonGroupType
@@ -498,6 +506,9 @@ class GroupV2DetailsViewModel : ViewModel() {
             return
         }
         publishingGroupMembers = true
+        if (groupTypeChanged()) {
+            createGroupTypeChangeSet(groupType.toJsonGroupType())
+        }
         val obvChangeSet = getObvChangeSet()
 
 
@@ -516,6 +527,31 @@ class GroupV2DetailsViewModel : ViewModel() {
                 // an error occurred --> notify the user
                 App.toast(R.string.toast_message_error_retry, Toast.LENGTH_SHORT)
                 publishingGroupMembers = false
+            }
+        }
+    }
+
+    fun publishGroupTypeChanged() {
+        viewModelScope.launch(Dispatchers.IO) {
+            var changed = false
+            val obvChangeSet: ObvGroupV2ChangeSet
+            if (groupTypeChanged()) {
+                createGroupTypeChangeSet(groupType.toJsonGroupType())
+                obvChangeSet = getObvChangeSet()
+                changed = true
+            } else {
+                obvChangeSet = ObvGroupV2ChangeSet()
+            }
+            if (changed) {
+                try {
+                    AppSingleton.getEngine().initiateGroupV2Update(
+                        bytesOwnedIdentity,
+                        bytesGroupIdentifier,
+                        obvChangeSet
+                    )
+                } catch (_: Exception) {
+                    App.toast(R.string.toast_message_error_retry, Toast.LENGTH_SHORT)
+                }
             }
         }
     }
@@ -653,7 +689,43 @@ class GroupV2DetailsViewModel : ViewModel() {
                         jsonIdentityDetails.signedUserDetails
                     )
                 }
-            }.onFailure { it.printStackTrace() }
+            }.onFailure { Logger.x(it) }
+        }
+    }
+
+    fun inviteAllMembers(context: Context) {
+        val group = group.value ?: return
+        if (group.updateInProgress == Group2.UPDATE_NONE) {
+            groupMembers.value?.mapNotNull { group2MemberOrPending ->
+                group2MemberOrPending.contact?.let { contact ->
+                    if ((contact.hasChannelOrPreKey() || contact.keycloakManaged) && contact.active && contact.oneToOne.not()) {
+                        contact
+                    } else {
+                        null
+                    }
+                }
+            }?.let { contacts ->
+                if (contacts.isEmpty()) {
+                    App.toast(R.string.toast_message_no_member_can_be_invited, Toast.LENGTH_SHORT)
+                } else {
+                    val builder = SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                        .setTitle(R.string.dialog_title_invite_all_group_members)
+                        .setMessage(
+                            context.resources.getQuantityString(
+                                R.plurals.dialog_message_invite_all_group_members,
+                                contacts.size,
+                                contacts.size
+                            )
+                        )
+                        .setPositiveButton(R.string.button_label_proceed) { _, _ ->
+                            contacts.forEach { contact ->
+                                invite(contact)
+                            }
+                        }
+                        .setNegativeButton(R.string.button_label_cancel, null)
+                    builder.create().show()
+                }
+            }
         }
     }
 

@@ -16,6 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:itemCount="5"
-        tools:listitem="@layout/item_view_storage_explorer_element"/>
+        tools:listitem="@layout/item_view_storage_explorer_element"
+        android:background="@color/almostWhite"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

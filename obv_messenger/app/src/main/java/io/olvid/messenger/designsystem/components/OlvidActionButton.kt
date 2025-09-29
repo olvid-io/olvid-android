@@ -20,6 +20,7 @@
 package io.olvid.messenger.designsystem.components
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Column
@@ -28,14 +29,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -53,16 +55,27 @@ fun OlvidActionButton(
     contentColor: Color = colorResource(R.color.alwaysWhite),
     @DrawableRes icon: Int? = null,
     text: String,
+    outlinedColor: Color? = null,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
-    Button(
+    OutlinedButton(
         modifier = modifier,
         onClick = onClick,
         enabled = enabled,
+        border = outlinedColor?.let {
+            BorderStroke(
+                width = 1.dp,
+                brush = SolidColor(outlinedColor.copy(
+                    alpha = if (enabled) outlinedColor.alpha else .5f*outlinedColor.alpha
+                )),
+            )
+        },
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
-            contentColor = contentColor
+            contentColor = contentColor,
+            disabledContainerColor = containerColor.copy(alpha = .5f*containerColor.alpha),
+            disabledContentColor = contentColor.copy(alpha = .5f*contentColor.alpha),
         ),
         shape = RoundedCornerShape(8.dp)
     ) {
@@ -94,6 +107,7 @@ fun OlvidTextButton(
     contentColor: Color = colorResource(R.color.olvid_gradient_light),
     enabled: Boolean = true,
     large: Boolean = false,
+    fill: Boolean = false,
     onClick: () -> Unit
 ) {
     TextButton(
@@ -115,7 +129,7 @@ fun OlvidTextButton(
             Spacer(modifier = Modifier.width(8.dp))
         }
         Text(
-            modifier = Modifier.weight(1f, false),
+            modifier = Modifier.weight(1f, fill),
             text = text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -139,7 +153,7 @@ fun OlvidActionButtonPreview() {
     ) {
         OlvidActionButton(
             icon = R.drawable.ic_message,
-            text = stringResource(R.string.label_discuss)
+            text = stringResource(R.string.button_label_discuss)
         ) {}
 
         OlvidTextButton(

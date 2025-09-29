@@ -4,7 +4,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.11.1'
+        classpath 'com.android.tools.build:gradle:8.13.0'
     }
 }
 
@@ -16,7 +16,7 @@ repositories {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdk 35
+    compileSdk = 35
 
     defaultConfig {
         minSdkVersion 21
@@ -38,6 +38,6 @@ dependencies {
 }
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }

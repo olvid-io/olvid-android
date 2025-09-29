@@ -163,4 +163,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bottom_bar"/>
+
+    <View
+        android:id="@+id/top_black_overlay"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:background="@color/blackOverlay"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/top_bar"/>
 </androidx.constraintlayout.motion.widget.MotionLayout>

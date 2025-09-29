@@ -100,14 +100,6 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
     private boolean fullRatchetOfTheSendSeedInProgress;
     static final String FULL_RATCHET_OF_THE_SEND_SEED_IN_PROGRESS = "full_ratchet_of_the_send_seed_in_progress";
 
-    // info for GKMV2
-    private final boolean supportsGKMV2;
-    static final String SUPPORTS_GKMV_2 = "supports_gkmv_2";
-    private final int fullRatchetingCountForGkmv2Support;
-    static final String FULL_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT = "full_ratcheting_count_with_gkmv_2_support";
-    private final int selfRatchetingCountForGkmv2Support;
-    static final String SELF_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT = "self_ratcheting_count_with_gkmv_2_support";
-
 
     public UID getCurrentDeviceUid() {
         return currentDeviceUid;
@@ -123,12 +115,6 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
     public ReceptionChannelInfo getReceptionChannelInfo() {
         return ReceptionChannelInfo.createObliviousChannelInfo(remoteDeviceUid, remoteIdentity);
-    }
-
-    private boolean supportsGKMV2(int fullRatchetingCount, int selfRatchetingCount) {
-        return  supportsGKMV2
-                && (fullRatchetingCount > fullRatchetingCountForGkmv2Support
-                || (fullRatchetingCount == fullRatchetingCountForGkmv2Support && selfRatchetingCount > selfRatchetingCountForGkmv2Support));
     }
 
     public int getNumberOfEncryptedMessagesSinceLastFullRatchet() {
@@ -196,28 +182,6 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             this.confirmed = true;
             commitHookBits |= HOOK_BIT_CHANNEL_CONFIRMED;
             channelManagerSession.session.addSessionCommitListener(this);
-        }
-    }
-
-    public static void setSupportsGKMV2(ChannelManagerSession channelManagerSession, UID currentDeviceUid, UID remoteDeviceUid, Identity remoteIdentity, int fullRatchetingCount, int selfRatchetingCount) throws SQLException {
-        ObliviousChannel obliviousChannel = get(channelManagerSession, currentDeviceUid, remoteDeviceUid, remoteIdentity, false);
-        if (obliviousChannel.supportsGKMV2(fullRatchetingCount, selfRatchetingCount)) {
-            // the oblivious channel is already tagged as supporting GKMV2 at an older full/self ratcheting count
-            return;
-        }
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
-                SUPPORTS_GKMV_2 + " = 1, " +
-                FULL_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT + " = ?," +
-                SELF_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT + " = ? " +
-                " WHERE " + CURRENT_DEVICE_UID + " = ? " +
-                " AND " + REMOTE_DEVICE_UID + " = ? " +
-                " AND " + REMOTE_IDENTITY + " = ?;")) {
-            statement.setInt(1, fullRatchetingCount);
-            statement.setInt(2, selfRatchetingCount);
-            statement.setBytes(3, currentDeviceUid.getBytes());
-            statement.setBytes(4, remoteDeviceUid.getBytes());
-            statement.setBytes(5, remoteIdentity.getBytes());
-            statement.executeUpdate();
         }
     }
 
@@ -321,9 +285,6 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
         this.timestampOfLastFullRatchetSentMessage = this.timestampOfLastFullRatchet;
         this.fullRatchetOfTheSendSeedInProgress = false;
-        this.supportsGKMV2 = false;
-        this.fullRatchetingCountForGkmv2Support = -1;
-        this.selfRatchetingCountForGkmv2Support = -1;
     }
 
     private ObliviousChannel(ChannelManagerSession channelManagerSession, ResultSet res) throws SQLException {
@@ -347,9 +308,6 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
         this.timestampOfLastFullRatchetSentMessage = res.getLong(TIMESTAMP_OF_LAST_FULL_RATCHET_SENT_MESSAGE);
         this.fullRatchetOfTheSendSeedInProgress = res.getBoolean(FULL_RATCHET_OF_THE_SEND_SEED_IN_PROGRESS);
-        this.supportsGKMV2 = res.getBoolean(SUPPORTS_GKMV_2);
-        this.fullRatchetingCountForGkmv2Support = res.getInt(FULL_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT);
-        this.selfRatchetingCountForGkmv2Support = res.getInt(SELF_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT);
     }
 
 
@@ -369,9 +327,6 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                     TIMESTAMP_OF_LAST_FULL_RATCHET + " BIGINT NOT NULL, " +
                     TIMESTAMP_OF_LAST_FULL_RATCHET_SENT_MESSAGE + " BIGINT NOT NULL, " +
                     FULL_RATCHET_OF_THE_SEND_SEED_IN_PROGRESS + " BIT NOT NULL, " +
-                    SUPPORTS_GKMV_2 + " BIT NOT NULL, " +
-                    FULL_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT + " INT NOT NULL, " +
-                    SELF_RATCHETING_COUNT_FOR_GKMV_2_SUPPORT + " INT NOT NULL, " +
                     "CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + CURRENT_DEVICE_UID + ", " + REMOTE_DEVICE_UID +", " + REMOTE_IDENTITY + "));");
         }
     }
@@ -394,11 +349,20 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             }
             oldVersion = 46;
         }
+        if (oldVersion < 47 && newVersion >= 47) {
+            Logger.d("MIGRATING `oblivious_channel` DATABASE FROM VERSION " + oldVersion + " TO 47");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE oblivious_channel DROP COLUMN `supports_gkmv_2`");
+                statement.execute("ALTER TABLE oblivious_channel DROP COLUMN `full_ratcheting_count_with_gkmv_2_support`");
+                statement.execute("ALTER TABLE oblivious_channel DROP COLUMN `self_ratcheting_count_with_gkmv_2_support`");
+            }
+            oldVersion = 47;
+        }
     }
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?);")) {
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
             statement.setBytes(1, currentDeviceUid.getBytes());
             statement.setBytes(2, remoteDeviceUid.getBytes());
             statement.setBytes(3, remoteIdentity.getBytes());
@@ -413,9 +377,6 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
             statement.setLong(11, timestampOfLastFullRatchetSentMessage);
             statement.setBoolean(12, fullRatchetOfTheSendSeedInProgress);
-            statement.setBoolean(13, supportsGKMV2);
-            statement.setInt(14, fullRatchetingCountForGkmv2Support);
-            statement.setInt(15, selfRatchetingCountForGkmv2Support);
             statement.executeUpdate();
         }
     }
@@ -887,10 +848,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
                 } catch (SQLException e) {
                     Logger.x(e);
                 }
-                ReceptionChannelInfo receptionChannelInfo = obliviousChannel.getReceptionChannelInfo();
-                // add information about GKMV2 in receptionChannelInfo
-                receptionChannelInfo.enrichWithGKMV2Info(provisionedKey.getProvisionFullRatchetingCount(), provisionedKey.getSelfRatchetingCount(), obliviousChannel.supportsGKMV2(provisionedKey.getProvisionFullRatchetingCount(), provisionedKey.getSelfRatchetingCount()));
-                return new AuthEncKeyAndChannelInfo(messageKey, receptionChannelInfo);
+                return new AuthEncKeyAndChannelInfo(messageKey, obliviousChannel.getReceptionChannelInfo());
             } catch (InvalidKeyException | DecryptionException | DecodingException | ClassCastException ignored) { }
         }
         return null;

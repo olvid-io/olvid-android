@@ -25,6 +25,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.MenuItem
 import android.view.ViewGroup.MarginLayoutParams
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.ViewCompat
@@ -40,12 +41,55 @@ import androidx.preference.PreferenceFragmentCompat.OnPreferenceStartFragmentCal
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
+import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.discussion.compose.EphemeralViewModel
 
 class DiscussionSettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
     private val discussionSettingsViewModel: DiscussionSettingsViewModel by viewModels()
     private val ephemeralViewModel: EphemeralViewModel by viewModels()
+
+    private val backPressCallback: OnBackPressedCallback = object : OnBackPressedCallback(enabled = true) {
+        override fun handleOnBackPressed() {
+            if (discussionSettingsViewModel.isMessageNotificationModified) {
+                discussionSettingsViewModel.saveCustomMessageNotification()
+            }
+            if (true == ephemeralViewModel.getDefaultsLoaded().value
+                && true == ephemeralViewModel.getSettingsModified().value
+                && !discussionSettingsViewModel.isLocked
+                && !discussionSettingsViewModel.isNonAdminGroupDiscussion
+            ) {
+                val builder = SecureAlertDialogBuilder(this@DiscussionSettingsActivity, R.style.CustomAlertDialog)
+                    .setTitle(R.string.dialog_title_shared_ephemeral_settings_modified)
+                    .setMessage(R.string.dialog_message_shared_ephemeral_settings_modified)
+                    .setNegativeButton(R.string.button_label_discard) { dialog: DialogInterface?, which: Int ->
+                        ephemeralViewModel.reset()
+                        isEnabled = false
+                        setTitle(R.string.activity_title_discussion_settings)
+                        onBackPressedDispatcher.onBackPressed()
+                        isEnabled = true
+                    }
+                    .setPositiveButton(R.string.button_label_update) { dialog: DialogInterface?, which: Int ->
+                        discussionSettingsViewModel.saveEphemeralSettingsAndNotifyPeers(
+                            ephemeralViewModel.getReadOnce(),
+                            ephemeralViewModel.getVisibility(),
+                            ephemeralViewModel.getExistence()
+                        )
+                        ephemeralViewModel.discardDefaults()
+                        isEnabled = false
+                        setTitle(R.string.activity_title_discussion_settings)
+                        onBackPressedDispatcher.onBackPressed()
+                        isEnabled = true
+                    }
+                builder.create().show()
+            } else {
+                setTitle(R.string.activity_title_discussion_settings)
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+                isEnabled = true
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         delegate.onCreate(savedInstanceState)
@@ -56,6 +100,8 @@ class DiscussionSettingsActivity : LockableActivity(), OnPreferenceStartFragment
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.elevation = 0f
+
+        onBackPressedDispatcher.addCallback(this, backPressCallback)
 
         setContentView(R.layout.activity_settings)
 
@@ -146,43 +192,10 @@ class DiscussionSettingsActivity : LockableActivity(), OnPreferenceStartFragment
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
             return true
         }
         return super.onOptionsItemSelected(item)
-    }
-
-
-    override fun onBackPressed() {
-        setTitle(R.string.activity_title_discussion_settings)
-        if (discussionSettingsViewModel.isMessageNotificationModified) {
-            discussionSettingsViewModel.saveCustomMessageNotification()
-        }
-        if (java.lang.Boolean.TRUE == ephemeralViewModel.getDefaultsLoaded().value
-            && java.lang.Boolean.TRUE == ephemeralViewModel.getSettingsModified().value
-            && !discussionSettingsViewModel.isLocked
-            && !discussionSettingsViewModel.isNonAdminGroupDiscussion
-        ) {
-            val builder = SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                .setTitle(R.string.dialog_title_shared_ephemeral_settings_modified)
-                .setMessage(R.string.dialog_message_shared_ephemeral_settings_modified)
-                .setNegativeButton(R.string.button_label_discard) { dialog: DialogInterface?, which: Int ->
-                    ephemeralViewModel.reset()
-                    super.onBackPressed()
-                }
-                .setPositiveButton(R.string.button_label_update) { dialog: DialogInterface?, which: Int ->
-                    discussionSettingsViewModel.saveEphemeralSettingsAndNotifyPeers(
-                        ephemeralViewModel.getReadOnce(),
-                        ephemeralViewModel.getVisibility(),
-                        ephemeralViewModel.getExistence()
-                    )
-                    ephemeralViewModel.discardDefaults()
-                    super.onBackPressed()
-                }
-            builder.create().show()
-        } else {
-            super.onBackPressed()
-        }
     }
 
 

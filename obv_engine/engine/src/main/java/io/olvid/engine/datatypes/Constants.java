@@ -23,7 +23,7 @@ package io.olvid.engine.datatypes;
 import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
-    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 46;
+    public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 47;
     public static final int SERVER_API_VERSION = 19;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 

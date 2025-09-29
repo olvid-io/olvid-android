@@ -99,7 +99,7 @@ object ContactCacheSingleton {
                 active = ownedIdentity.active,
                 oneToOne = true,
                 recentlyOnline = true,
-                trustLevel = 0
+                trustLevel = -1
             )
 
         getInstance().group2PendingMemberDao().getAll(ownedIdentity.bytesOwnedIdentity).forEach { pendingMember ->

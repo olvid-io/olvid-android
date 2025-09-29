@@ -24,9 +24,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.olvid.engine.Logger;
@@ -62,7 +65,10 @@ public class MetaManager {
             } catch (InterruptedException e) {
                 // do nothing
             }
-            for (ObvManager manager: registeredManagers) {
+            PriorityQueue<ObvManager> sortedManagers = new PriorityQueue<>(registeredManagers.size(), Comparator.comparingInt(ObvManager::initialQueueingPriority));
+            sortedManagers.addAll(registeredManagers);
+
+            for (ObvManager manager: sortedManagers) {
                 try {
                     manager.initialisationComplete();
                 } catch (Exception e) {

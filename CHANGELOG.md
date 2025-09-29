@@ -1,8 +1,26 @@
+# Build 276 (4.0)
+2025-09-29
+
+- Fix a few inconsistencies in the previous release
+- Fix compilation of nogoogle version
+
+# ~~Build 275 (4.0)~~
+2025-09-25
+
+- Complete rework of the "+" button to invite new contacts:
+  - more obvious access to the "double scan" method,
+  - direct access to contacts without a private discussion yet,
+  - new "share your profile" sheet.
+- Improvements to the group creation and group administration UX.
+- Update WebRTC to the latest version.
+- Target the Android SDK version 36.
+- Reorganization of application settings.
+
 # Build 274 (3.8.1)
 2025-07-28
 
-- Rework of the full-ratchet protocol triggers
-- Some protocol execution optimisations
+- Rework of the full-ratchet protocol triggers.
+- Some protocol execution optimisations.
 
 # Build 273 (3.8)
 2025-07-22
@@ -18,44 +36,44 @@
 # Build 272 (3.7.2)
 2025-05-28
 
-- Added 5 more translations
+- Added 5 more translations.
 
 # Build 271 (3.7.1)
 2025-05-14
 
-- Fix image viewer that was broken by a removed id
+- Fix image viewer that was broken by a removed id.
 
 # ~~Build 270 (3.7.1)~~
 2025-05-12
 
-- Fix tip dismiss icon color in dark mode
-- Clean up unused resources and strings
+- Fix tip dismiss icon color in dark mode.
+- Clean up unused resources and strings.
 
 # ~~Build 269 (3.7.1)~~
 2025-05-11
 
-- Remove "use system emojis" preference
+- Remove "use system emojis" preference.
 
 # ~~Build 268 (3.7.1)~~
 2025-05-10
 
-- Added 4 new custom app icons
+- Added 4 new custom app icons.
 
 # ~~Build 267 (3.7.1)~~
 2025-05-09
 
-- Added 27 new translations (with the help of AI)
-- Added emoji animations
+- Added 27 new translations (with the help of AI).
+- Added emoji animations.
 
 # Build 266 (3.7)
 2025-04-28
 
-- Fix to hide archived discussions
+- Fix to hide archived discussions.
 
 # ~~Build 265 (3.7)~~
 2025-04-14
 
-- Fix several bugs
+- Fix several bugs.
 
 # ~~Build 264 (3.7)~~
 2025-03-30
@@ -70,39 +88,39 @@
 # Build 263 (3.6)
 2025-02-10
 
-- Greatly improve groups v2 administrator chain verification time for large groups 
+- Greatly improve groups v2 administrator chain verification time for large groups .
 
 # ~~Build 262 (3.6)~~
 2025-02-04
 
-- Add the possibility to archive a discussion
-- Display the reception status of messages sent from your other devices
-- Add an incoming/ongoing call panel inside the app to answer/reject a call if the Android notification is not visible
-- Integrate image text recognition (OCR) into the internal image viewer
-- Performances improvement for the discussion list screen
-- Make the new internal pdf viewer the default when opening a pdf attachment
+- Add the possibility to archive a discussion.
+- Display the reception status of messages sent from your other devices.
+- Add an incoming/ongoing call panel inside the app to answer/reject a call if the Android notification is not visible.
+- Integrate image text recognition (OCR) into the internal image viewer.
+- Performances improvement for the discussion list screen.
+- Make the new internal pdf viewer the default when opening a pdf attachment.
 
 # Build 261 (3.5.1)
 2025-01-03
 
-- Fix an NPE in user directory search results
-- Improve messages load time in discussion
+- Fix an NPE in user directory search results.
+- Improve messages load time in discussion.
 
 # Build 260 (3.5)
 2024-12-29
 
-- Fix some issues with internal PDF viewer
+- Fix some issues with internal PDF viewer.
 
 # ~~Build 259 (3.5)~~
 2024-12-22
 
-- optimized message download at app startup
-- better GPS management when sharing your location
-- show sent message status in discussion list
-- recognize text content inside images (OCR)
-- avoid some useless messages during phone calls in a multi-device settings
-- (experimental) internal PDF viewer (opt-in in "other settings")
-- several small bug fixes
+- Optimized message download at app startup.
+- Better GPS management when sharing your location.
+- Show sent message status in discussion list.
+- Recognize text content inside images (OCR).
+- Avoid some useless messages during phone calls in a multi-device settings.
+- (experimental) Internal PDF viewer (opt-in in "other settings").
+- Several small bug fixes.
 
 # Build 258 (3.4.1)
 2024-12-03

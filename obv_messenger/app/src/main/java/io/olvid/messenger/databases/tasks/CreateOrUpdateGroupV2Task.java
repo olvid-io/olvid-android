@@ -70,9 +70,8 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
     private final byte[][] groupLeavers; // array of identity bytes of users who left the group of their own will and should not be marked as removed by updateBy
     private final boolean createdOnOtherDevice; // true only if groupWasJustCreatedByMe is true and it was created on another device
     private final boolean synchronizeUpdateInProgressWithEngine;
-    private final JsonExpiration jsonExpirationSettings;
 
-    public CreateOrUpdateGroupV2Task(ObvGroupV2 groupV2, boolean groupWasJustCreatedByMe, boolean updatedByMe, boolean createdOnOtherDevice, boolean synchronizeUpdateInProgressWithEngine, JsonExpiration jsonExpirationSettings, byte[] updatedBy, byte[][] groupLeavers) {
+    public CreateOrUpdateGroupV2Task(ObvGroupV2 groupV2, boolean groupWasJustCreatedByMe, boolean updatedByMe, boolean createdOnOtherDevice, boolean synchronizeUpdateInProgressWithEngine, byte[] updatedBy, byte[][] groupLeavers) {
         this.groupV2 = groupV2;
         this.groupWasJustCreatedByMe = groupWasJustCreatedByMe;
         this.updatedByMe = updatedByMe;
@@ -80,7 +79,6 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
         this.groupLeavers = groupLeavers;
         this.createdOnOtherDevice = createdOnOtherDevice;
         this.synchronizeUpdateInProgressWithEngine = synchronizeUpdateInProgressWithEngine;
-        this.jsonExpirationSettings = jsonExpirationSettings;
     }
 
     @Override
@@ -198,7 +196,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
 
                 Discussion discussion = db.discussionDao().getByGroupIdentifier(groupV2.bytesOwnedIdentity, bytesGroupIdentifier);
                 if (discussion == null) {
-                    discussion = Discussion.createOrReuseGroupV2Discussion(db, group, groupWasJustCreatedByMe, createdOnOtherDevice, jsonExpirationSettings);
+                    discussion = Discussion.createOrReuseGroupV2Discussion(db, group, groupWasJustCreatedByMe, createdOnOtherDevice);
                     groupWasJoinedOrRejoined = true;
 
                     if (discussion == null) {

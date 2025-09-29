@@ -224,7 +224,9 @@ class GroupCreationActivity : LockableActivity() {
                                 }
                             },
                             showTitle = true,
+                            isGroupCreation = true,
                             validationLabel = getString(R.string.button_label_next),
+                            onBack = { navController.popBackStack() },
                             onValidate = {
                                 if (groupV2DetailsViewModel.groupType.type != GroupType.SIMPLE) {
                                     navController.navigate(
@@ -267,6 +269,7 @@ class GroupCreationActivity : LockableActivity() {
                                     }
                                 }
                             },
+                            onBack = { navController.popBackStack() },
                             onValidate = {
                                 onValidateGroupCreation()
                             }

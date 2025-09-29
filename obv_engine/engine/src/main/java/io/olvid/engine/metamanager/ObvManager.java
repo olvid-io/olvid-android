@@ -21,4 +21,7 @@ package io.olvid.engine.metamanager;
 
 public interface ObvManager {
     void initialisationComplete();
+    // we want to process the initial queueing in a relevant order to avoid delaying
+    // websocket connection and message download with cleanup stuff and protocol re-queueing
+    int initialQueueingPriority();
 }

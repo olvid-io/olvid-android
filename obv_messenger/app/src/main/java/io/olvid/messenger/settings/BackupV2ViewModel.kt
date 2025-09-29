@@ -59,7 +59,6 @@ class BackupV2ViewModel: ViewModel() {
     val deviceBackup: MutableState<List<DeviceBackupProfile>?> = mutableStateOf(null)
     val profileBackups: MutableState<List<ProfileBackupSnapshot>?> = mutableStateOf(null)
 
-
     val credentialManagerAvailable = mutableStateOf<Boolean?>(null)
     val disableSeedGeneration = mutableStateOf(false)
 
@@ -69,11 +68,13 @@ class BackupV2ViewModel: ViewModel() {
         showManageBackupsDialog.value = false
         showResetConfirmationDialog.value = false
         showBackupFailed.value = false
+        backupNowState.value = BackupNowState.NONE
 
         showingBackupsForOtherKey.value = false
         deviceBackupSeed.value = null
         backupSeedError.value = false
         selectedProfileBackup.value = null
+        selectedProfileDeviceList.value = null
         fetchingDeviceBackup.value = false
         fetchingProfileBackups.value = false
         profileBackupsTruncated.value = false

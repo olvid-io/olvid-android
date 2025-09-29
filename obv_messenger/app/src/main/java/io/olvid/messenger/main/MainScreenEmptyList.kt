@@ -22,18 +22,27 @@ package io.olvid.messenger.main
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
+import io.olvid.messenger.designsystem.components.dashedBorder
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 
 @Composable
@@ -50,23 +60,42 @@ fun MainScreenEmptyList(
     modifier: Modifier = Modifier,
     @DrawableRes icon: Int,
     iconPadding: Dp = 0.dp,
+    bottomPadding: Dp = 64.dp,
     @StringRes title: Int,
-    @StringRes subtitle: Int? = null
+    @StringRes subtitle: Int? = null,
+    onClick: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .safeDrawingPadding()
+            .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
             modifier = Modifier
                 .size(60.dp)
                 .padding(iconPadding)
-                .alpha(.8f),
+                .alpha(.8f)
+                .then(
+                    if (onClick != null) Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .dashedBorder(
+                            brush = SolidColor(colorResource(id = R.color.greyTint)),
+                            shape = RoundedCornerShape(size = 16.dp)
+                        )
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(
+                                bounded = true,
+                                color = colorResource(R.color.almostBlack),
+                            )
+                        ) { onClick() }
+                        .padding(8.dp)
+                         else Modifier),
             painter = painterResource(id = icon),
             contentDescription = "",
-            colorFilter = ColorFilter.tint(colorResource(id = R.color.greyTint))
+            colorFilter = ColorFilter.tint(colorResource(id = if (onClick == null) R.color.greyTint else R.color.darkGrey))
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -84,12 +113,20 @@ fun MainScreenEmptyList(
                 color = colorResource(id = R.color.greyTint)
             )
         }
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(bottomPadding))
     }
 }
 
 @Preview
 @Composable
 private fun MainScreenEmptyListPreview() {
-    MainScreenEmptyList(icon = R.drawable.ic_phone_log, title = R.string.explanation_empty_discussion_list, subtitle = R.string.explanation_empty_discussion_list_sub)
+    Surface(
+        color = colorResource(R.color.almostWhite)
+    ) {
+        MainScreenEmptyList(
+            icon = R.drawable.ic_phone_log,
+            title = R.string.explanation_empty_discussion_list,
+            subtitle = R.string.explanation_empty_discussion_list_sub,
+            onClick = {})
+    }
 }

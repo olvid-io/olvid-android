@@ -124,25 +124,6 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
             });
         }
 
-        if (!BuildConfig.ENABLE_SSL_HANDSHAKE_VERIFICATION) {
-            Preference notifyCertificateChangePreference = screen.findPreference(SettingsActivity.PREF_KEY_NOTIFY_CERTIFICATE_CHANGE);
-            if (notifyCertificateChangePreference != null) {
-                screen.removePreference(notifyCertificateChangePreference);
-            }
-            Preference blockUntrustedCertificatePreference = screen.findPreference(SettingsActivity.PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE);
-            if (blockUntrustedCertificatePreference != null) {
-                screen.removePreference(blockUntrustedCertificatePreference);
-            }
-            Preference noNotifyCertificateChangeForPreviewsPreference = screen.findPreference(SettingsActivity.PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS);
-            if (noNotifyCertificateChangeForPreviewsPreference != null) {
-                screen.removePreference(noNotifyCertificateChangeForPreviewsPreference);
-            }
-        } else {
-            Preference blockUntrustedCertificatePreference = screen.findPreference(SettingsActivity.PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE);
-            if (blockUntrustedCertificatePreference != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                screen.removePreference(blockUntrustedCertificatePreference);
-            }
-        }
 
         SwitchPreference permanentForegroundPreference = screen.findPreference(SettingsActivity.PREF_KEY_PERMANENT_FOREGROUND_SERVICE);
         if (permanentForegroundPreference != null) {
@@ -183,13 +164,6 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                 Logger.setOutputLogLevel(checked ? Logger.DEBUG : BuildConfig.LOG_LEVEL);
                 return true;
             });
-        }
-
-        DropDownPreference scaledTurnPreference = screen.findPreference(SettingsActivity.PREF_KEY_SCALED_TURN_REGION);
-        if (scaledTurnPreference != null) {
-            if (SettingsActivity.getBetaFeaturesEnabled()) {
-                scaledTurnPreference.setVisible(true);
-            }
         }
 
         SwitchPreference useLegacyZxingScannerPreference = screen.findPreference(SettingsActivity.PREF_KEY_USE_LEGACY_ZXING_SCANNER);
@@ -303,9 +277,16 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
             App.toast(R.string.toast_message_error_exporting_db, Toast.LENGTH_SHORT);
         }
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         view.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.almostWhite));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        activity.setTitle(R.string.pref_category_other_title);
     }
 }

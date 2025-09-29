@@ -141,7 +141,7 @@ public class QRCodeScannerFragment extends Fragment {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 Preview preview = new Preview.Builder()
                         .setResolutionSelector(new ResolutionSelector.Builder()
-                                .setResolutionStrategy(new ResolutionStrategy(new Size(previewView.getWidth(), previewView.getHeight()), ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER))
+                                .setResolutionStrategy(new ResolutionStrategy(new Size(480, 640), ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER))
                                 .build())
                         .build();
                 preview.setSurfaceProvider(previewView.getSurfaceProvider());

@@ -1353,8 +1353,19 @@ public class Message {
                 return;
             }
 
-            final byte[] returnReceiptNonce = AppSingleton.getEngine().getReturnReceiptNonce();
-            final byte[] returnReceiptKey = AppSingleton.getEngine().getReturnReceiptKey();
+            // Check the existing message recipient info to reuse the same nonce and key:
+            // - this is required for delivery status on other owned devices which do not receive this message.
+            // - if no message was sent yet, pick a random one
+            MessageRecipientInfo mriForNonceAndKey = db.messageRecipientInfoDao().getFirstWithNonceAndKeyForMessage(messageRecipientInfo.messageId);
+            final byte[] returnReceiptNonce;
+            final byte[] returnReceiptKey;
+            if (mriForNonceAndKey == null) {
+                returnReceiptNonce = AppSingleton.getEngine().getReturnReceiptNonce();
+                returnReceiptKey = AppSingleton.getEngine().getReturnReceiptKey();
+            } else {
+                returnReceiptNonce = mriForNonceAndKey.returnReceiptNonce;
+                returnReceiptKey = mriForNonceAndKey.returnReceiptKey;
+            }
             final ObvPostMessageOutput postMessageOutput = AppSingleton.getEngine().post(
                     getMessagePayloadAsBytes(discussion.discussionType, discussion.bytesOwnedIdentity, discussion.bytesDiscussionIdentifier, returnReceiptNonce, returnReceiptKey, originalServerTimestamp),
                     (hasAttachmentWithPreview && extendedPayload.length > 0) ? extendedPayload : null,

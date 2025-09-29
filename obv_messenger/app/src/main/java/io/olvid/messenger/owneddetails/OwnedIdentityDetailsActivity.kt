@@ -94,6 +94,7 @@ import io.olvid.engine.engine.types.identities.ObvUrlIdentity
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
+import io.olvid.messenger.billing.SubscriptionStatusFragment
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.MuteNotificationDialog
@@ -101,17 +102,17 @@ import io.olvid.messenger.customClasses.MuteNotificationDialog.MuteType.PROFILE
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.TextChangeListener
+import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedDevice
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.databases.tasks.DeleteOwnedIdentityAndEverythingRelatedToItTask
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask
 import io.olvid.messenger.fragments.FullScreenImageFragment
-import io.olvid.messenger.fragments.SubscriptionStatusFragment
 import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.notifications.AndroidNotificationManager
 import io.olvid.messenger.openid.KeycloakManager
-import io.olvid.messenger.plus_button.PlusButtonActivity
+import io.olvid.messenger.plus_button.scan.ScanActivity
 import io.olvid.messenger.settings.SettingsActivity.Companion.contactDisplayNameFormat
 import io.olvid.messenger.settings.SettingsActivity.Companion.uppercaseLastName
 import java.util.Locale
@@ -140,6 +141,23 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_owned_identity_details)
+
+        onBackPressed {
+            val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
+                FULL_SCREEN_IMAGE_FRAGMENT_TAG
+            )
+            if (fullScreenImageFragment != null) {
+                supportFragmentManager.beginTransaction()
+                    .setCustomAnimations(0, R.anim.fade_out)
+                    .remove(fullScreenImageFragment)
+                    .commit()
+            } else {
+                if (isTaskRoot) {
+                    App.showMainActivityTab(this, MainActivity.DISCUSSIONS_TAB)
+                }
+                finish()
+            }
+        }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.elevation = 0f
@@ -186,6 +204,8 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         discardButton.setOnClickListener(this)
         val addContactButton = findViewById<Button>(R.id.add_contact_button)
         addContactButton.setOnClickListener(this)
+        // TODO Hide add contact button? Is it still needed? Where do we go in new plus button flow ?
+        addContactButton.visibility = View.GONE
 
         val diffUtilCallback: ItemCallback<OwnedDevice> = object : ItemCallback<OwnedDevice>() {
             override fun areItemsTheSame(oldItem: OwnedDevice, newItem: OwnedDevice): Boolean {
@@ -310,7 +330,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
                 return true
             }
 
@@ -455,7 +475,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                                 .setTitle(R.string.dialog_title_unbind_from_keycloak)
                                 .setMessage(R.string.dialog_message_unbind_from_keycloak)
                                 .setPositiveButton(R.string.button_label_ok) { _, _ ->
-                                    KeycloakManager.getInstance().unregisterKeycloakManagedIdentity(
+                                    KeycloakManager.unregisterKeycloakManagedIdentity(
                                         identityObserver.ownedIdentity!!.bytesOwnedIdentity
                                     )
                                     AppSingleton.getEngine()
@@ -524,7 +544,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                         ObvUrlIdentity(
                             ownedIdentity.bytesOwnedIdentity,
                             ownedIdentity.displayName
-                        ).urlRepresentation
+                        ).getUrlRepresentation(false)
                     ).append("\n\n")
                     sb.append(getString(R.string.debug_label_capabilities)).append("\n")
                     sb.append(getString(R.string.bullet)).append(" ").append(
@@ -896,30 +916,12 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
     }
 
 
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
-        val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
-            FULL_SCREEN_IMAGE_FRAGMENT_TAG
-        )
-        if (fullScreenImageFragment != null) {
-            supportFragmentManager.beginTransaction()
-                .setCustomAnimations(0, R.anim.fade_out)
-                .remove(fullScreenImageFragment)
-                .commit()
-        } else {
-            if (isTaskRoot) {
-                App.showMainActivityTab(this, MainActivity.DISCUSSIONS_TAB)
-            }
-            finish()
-        }
-    }
-
     override fun onClick(view: View) {
         val bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity() ?: return
 
         val id = view.id
         if (id == R.id.add_contact_button) {
-            startActivity(Intent(this, PlusButtonActivity::class.java))
+            startActivity(Intent(this, ScanActivity::class.java))
         } else if (id == R.id.button_publish) {
             AppSingleton.getEngine().publishLatestIdentityDetails(bytesOwnedIdentity)
         } else if (id == R.id.button_discard) {

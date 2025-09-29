@@ -163,6 +163,11 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
     }
 
     @Override
+    public int initialQueueingPriority() {
+        return 100;
+    }
+
+    @Override
     public void initialisationComplete() {
         protocolStepCoordinator.initialQueueing();
 

@@ -46,8 +46,8 @@ import io.olvid.engine.engine.types.EngineNotificationListener
 import io.olvid.engine.engine.types.EngineNotifications
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
+import io.olvid.messenger.billing.SubscriptionStatusFragment
 import io.olvid.messenger.customClasses.TextChangeListener
-import io.olvid.messenger.fragments.SubscriptionStatusFragment
 import io.olvid.messenger.onboarding.OnboardingViewModel.VALIDATED_STATUS
 import io.olvid.messenger.onboarding.OnboardingViewModel.VALIDATED_STATUS.CHECKING
 import io.olvid.messenger.onboarding.OnboardingViewModel.VALIDATED_STATUS.INVALID
@@ -267,7 +267,7 @@ class IdentityCreationOptionsFragment : Fragment(), OnClickListener,
     override fun onClick(v: View) {
         when (v.id) {
             R.id.back_button -> {
-                activity.onBackPressed()
+                activity.onBackPressedDispatcher.onBackPressed()
             }
             R.id.button_continue -> {
                 findNavController(v).navigate(R.id.action_identity_creation)
@@ -309,7 +309,7 @@ class IdentityCreationOptionsFragment : Fragment(), OnClickListener,
 
                         val newSubscriptionStatusFragment =
                             SubscriptionStatusFragment.newInstance(
-                                bytesOwnedIdentity,
+                                bytesOwnedIdentity ?: byteArrayOf(),
                                 apiKeyStatus,
                                 apiKeyExpirationTimestamp,
                                 permissions,

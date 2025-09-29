@@ -242,6 +242,9 @@ public class SettingsPojo_0 {
             case FULL:
                 settingsPojo.connectivity_indicator = "full";
                 break;
+            case NEVER:
+                settingsPojo.connectivity_indicator = "never";
+                break;
             case NONE:
             default:
                 break;

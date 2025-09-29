@@ -144,7 +144,6 @@
         android:id="@+id/view_pager_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/lightGrey"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <View
@@ -155,20 +154,18 @@
         android:layout_gravity="bottom|start"
         android:focusableInTouchMode="true"/>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/bottom_bar"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-
-        >
+        android:background="@drawable/background_main_activity_buttons"
+        android:layout_gravity="bottom">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/bottom_buttons"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/tab_bar_size"
-            android:background="@drawable/background_main_activity_buttons"
-            app:layout_constraintBottom_toBottomOf="parent">
+            android:layout_height="@dimen/tab_bar_size">
 
             <ImageView
                 android:id="@+id/tab_discussions_button"
@@ -219,7 +216,7 @@
                 app:srcCompat="@drawable/tab_contacts"
                 android:theme="@style/GreyRipple"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/spacer"
+                app:layout_constraintEnd_toStartOf="@+id/tab_groups_button"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintVertical_bias="0"
                 app:layout_constraintStart_toEndOf="@+id/tab_discussions_button"
@@ -239,16 +236,6 @@
                 app:layout_constraintTop_toTopOf="@+id/tab_contacts_button"
                 app:srcCompat="@drawable/ic_dot_white_bordered"
                 android:contentDescription="@string/content_description_notification_dot" />
-            <View
-                android:id="@+id/spacer"
-                android:layout_width="72dp"
-                android:layout_height="0dp"
-                android:layout_weight="0"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/tab_groups_button"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/tab_contacts_button"
-                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/tab_groups_button"
@@ -267,7 +254,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/tab_calls_button"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintVertical_bias="0"
-                app:layout_constraintStart_toEndOf="@+id/spacer"
+                app:layout_constraintStart_toEndOf="@+id/tab_contacts_button"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
@@ -321,29 +308,12 @@
                 android:contentDescription="@string/content_description_notification_dot" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/transparent"
-            app:cardCornerRadius="@dimen/half_tab_bar_size"
-            app:cardElevation="4dp"
-            app:layout_constraintBottom_toTopOf="@+id/bottom_buttons"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/bottom_buttons">
-
-            <ImageView
-                android:id="@+id/tab_plus_button"
-                android:layout_width="@dimen/tab_bar_size"
-                android:layout_height="@dimen/tab_bar_size"
-                android:contentDescription="@string/content_description_add_contact_button"
-                android:foreground="?attr/selectableItemBackground"
-                app:srcCompat="@drawable/tab_add_contact_button_big"
-                android:theme="@style/WhiteRipple" />
-
-        </androidx.cardview.widget.CardView>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <View
+            android:id="@+id/bottom_button_spacer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"/>
+        
+    </LinearLayout>
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/compose_overlay"
         android:layout_width="match_parent"

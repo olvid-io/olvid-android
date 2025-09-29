@@ -472,6 +472,7 @@ enum class TroubleshootingItemType {
     CONNECTIVITY,
     STORAGE,
     DB_SYNC,
+    UPDATE_AVAILABLE,
 }
 
 @Preview

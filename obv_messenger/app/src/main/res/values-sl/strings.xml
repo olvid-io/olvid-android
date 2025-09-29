@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">Trenutno ni pogovorov</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">Tvoji stiki in skupinski pogovori bodo prikazani tukaj.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">Trenutno ni skupin</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Pritisnite \"Nova skupina\" za ustvarjanje vaše prve skupine.</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">Pritisnite modri + spodaj, da ustvarite svojo prvo skupino.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">Skrbnik skupine je posodobil Kartico Skupine. Stara in nova različica sta prikazani spodaj.\n\nPritisnite \"posodobi\", da posodobite informacije o skupini.</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Skrbnik je spremenil ime skupine v:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Skrbnik je spremenil opis skupine v:</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Pošiljanje in prejem sporočil</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Ko je aktivirano, se enkratna sporočila in sporočila z omejeno privzeto trajanjejočnostjo odprejo takoj, ko vstopite v pogovor. V nasprotnem primeru je potreben klik.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Ko je aktivirana, se izbrisane odhodne sporočila ohranijo, da lahko vidite, kdaj so bila dostavljena ali prebrana. Sicer se izbrišejo.</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">Spletni odjemalec</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Spletni odjemalec</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">Posodobljene nastavitve</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Napaka pri obdelavi povezave za posodobitev nastavitev</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Pošiljanje in prejem sporočil</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">Možnosti ustvarjanja ID</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">Skeniranje konfiguracije</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">Uvozi povezavo iz odložišča</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid je posodobljen</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Imate nameščeno najnovejšo različico Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Na voljo posodobitev</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Novejša različica Olvid je na voljo v storitvi Google Play.\n\nPosodobite, da boste lahko izkoristili najnovejše funkcije.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Klic ni mogel sprožiti</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Olvid ni mogel naložiti vaš Olvid ID ponudniku identitete vaše družbe. Poskusil bo ponovno v ozadju.</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">Napaka ponudnika identitete</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">Vaš ponudnik identitete navaja, da je z drugim Olvid ID povezan uporabnik, kot ste se prijavili, in nimate dovoljenja za njegovo posodobitev.\nZa več informacij se obrnite na svojega skrbnika.</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s dodan v vaše stike</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">%1$s je bil/a dodan/a med vaše stike</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Vaš Olvid ID trenutno upravlja ponudnik identitete vaše družbe. Ne morete ročno aktivirati licence Olvid.\n\nZa več informacij se obrnite na svojega skrbnika.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Zamujen klic</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Kontaktni podatki posodobljeni</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Zahtevana je prijava pri ponudniku oblaka</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Ste nastavili Olvid za samodejne varnostne kopije v oblak, vendar je vaša seja potekla. Ponovno se morate prijaviti pri tem ponudniku.\n\nČe ne želite več samodejnih varnostnih kopij, jih lahko izklopite v nastavitvah aplikacije. Upoštevajte, da so samodejne varnostne kopije edini način, da preprečite izgubo stikov, če se vaša naprava izgubi ali je poškodovana.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Prijava</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">Stopite stik na daljavo</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Stopite stik na daljavo</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s je že v vaših stikih.</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s je na vašem seznamu znanih uporabnikov, vendar še ni v vaših stikih.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Nov</string>
@@ -1187,6 +1189,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Barvita pika na črki „i“ v logotipu Olvid</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Diskrétna črta na vrhu seznama pogovorov</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Popoln status povezave na vrhu seznama pogovorov</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Nikoli ne prikazuj indikatorja, tudi ob izgubi povezave</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">Povezava: NIČ</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">Povezava: POVEZAVA SE…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Povezava: POVEZANO</string>
@@ -1203,7 +1206,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Konfiguriraj pripomoček…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Videz pripomočka</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Akcija ob dotiku widgeta</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">Razpravljati</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">Razpravljati</string>
 	<string name="label_message" state="needs_review" hash="809999904">Sporočilo</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Prednastavljeno sporočilo za pošiljanje</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Potrdite pred pošiljanjem</string>
@@ -1349,9 +1352,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Velikost prikaza</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Odpri pogovor</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">Samo za branje</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">Čakanje na branje samo za bralca</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Čakanje na branje\nsamo za branje</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Skrbnik</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Čakajoči skrbnik</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Čakajoči\nskrbnik</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Ne morem prikazati imena tega uporabnika</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Neimenovana skupina</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Obvestila o pogovorih</string>
@@ -1382,7 +1385,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">Člani skupine/skupno povabljenih:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">Skupinska različica:</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">Vrsta skupine:</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">upravljano s strani uporabnikov</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">upravljajo uporabniki</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">upravlja vaš imenik</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">Še ni poslano</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">Ta skupina se trenutno sinhronizira. Ko se bo sinhronizacija zaključila, boste lahko sprejeli to povabilo.</string>
@@ -1391,7 +1394,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">Ni bilo mogoče klonirati to skupino</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">Skupino %1$s ni mogoče klonirati, ker nekateri člani te skupine uporabljajo zastarelo različico Olvid, ki ne podpira skupin v2. Prosimo, da jih obvestite, da je na voljo novejša različica Olvid!\n\nZastareli uporabniki:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">Opozorilo: delno kloniranje</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">Skupina %1$s vsebuje člane, s katerimi še nimate varnega kanala. Ne morete jih povabiti v novo skupino.\n\nPričemljeni uporabniki:%2$s\n\nŽelite nadaljevati z nepopolno skupino?</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">Skupina %1$s vsebuje uporabnike, s katerimi še nimate varnega kanala. Ne morete jih povabiti v novo skupino.\n\nPričemljeni uporabniki:%2$s\n\nŽelite nadaljevati z nepopolno skupino?</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Kopija \"</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Lokacija poslana</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Lokacija prejeta</string>
@@ -1474,7 +1477,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02ds</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">Ko je možnost vklopljena, bo vnos napačnega PIN-a/gesla 3-krat zaporedoma tiho izbrisala vsa enkrat prebrana in sporočila z omejeno vidljivostjo.</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">Izbriši občutljiva sporočila po 3 napačnih PIN-ih</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">Aktivirajte to možnost, da določite \"silni\" PIN/geslo, ki odklene aplikacijo, vendar tiho izbriše vse skrite profile, enkrat prebrane in sporočila z omejeno vidnostjo. Vnos tega PIN-a bo tudi izklopil to možnost.</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">Aktivirajte to možnost, da definirate \"silni\" PIN/geslo, ki odklene aplikacijo, vendar tiho izbriše vse skrite profile, sporočila za enkratno branje in sporočila z omejeno vidnostjo. Vnos tega PIN-a bo tudi deaktiviral to možnost.</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">Zasilni PIN</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">Izberite PIN za nujne primere</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">Vnos te PIN-kode za nujne primere na zaklenjenem zaslonu Olvid bo odklepal Olvid, a bo tiho izbrisal vsak skriti profil, ki ga morda imate.</string>
@@ -1602,8 +1605,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Vklopite to možnost, da izklopite zaznavanje sprememb potrdil pri pridobivanju predogleda povezave. Nekatere spletne strani lahko predstavijo drugačno potrdilo pri vsaki povezavi in če je ta možnost izklopljena, lahko prejmete pogosta obvestila.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Uporabite starejšo knjižnico ZXing za skeniranje QR kod</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">Privzeto se za skeniranje QR kod uporabljajo ML Kit. Omogočite to možnost, če imate težave pri skeniranju QR kod v Olvid.</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">Uporabite vgrajeni bralnik PDF (eksperimentalno)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">Privzeto se PDF priloge odprejo v zunanjem bralniku. Omogočite to možnost, da namesto tega uporabite (osnovni) notranji bralnik.</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Uporabi vgrajeni PDF bralnik</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Privzeto se PDF priloge odprejo v (osnovnem) notranjem brskalniku. Izklopite to možnost, da namesto tega uporabite zunanji brskalnik.</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">Moje naprave</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Naprava %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Ta naprava</string>
@@ -1659,7 +1662,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">Vnesite kodo, prikazano na drugi napravi</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">Začnite Olvid na drugi napravi. Tapnite svojo profilno sliko v zgornjem levem kotu. Izberite profil, ki ga želite uvoziti, in tapnite gumb „Upravljanje“. Tapnite „Dodaj napravo“ za prikaz kode.</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">Vnesite to kodo na drugi napravi</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">Imate naročnino za več naprav</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">Imate naročnino za več naprav</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">Tukaj je seznam vaših trenutnih naprav</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">Izberite napravo, katero napravo želite ohraniti aktivno</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">Druge naprave bodo deaktivirane v 30 dneh</string>
@@ -1884,7 +1887,6 @@
 	<string name="dialog_title_authentication_failed_time_offset" state="needs_review" hash="-170194947">Možna razlika v času?</string>
 	<string name="dialog_message_authentication_failed_time_offset" state="needs_review" hash="300612997">Žal nam je, da se prijava ni uspela.\n\nMožen vzrok je lahko razlika, **večja od 10 minut**, med časom vaše naprave in časom strežnika.\n\nPreverite, ali so na vaši napravi pravilno nastavljeni čas, datum in časovni pas, ter poskusite ponovno se prijaviti.\n\n*Če težava vztraja, se obrnite na svojega skrbnika.*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">Nastavitve ure</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">Kontaktiraj</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">Pogovorite z %1$s</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">Omejitev prenosa profila</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">Pomembno</string>
@@ -2002,7 +2004,7 @@
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">Ni uspelo obnoviti vaš profil. Poskusite znova.</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">Ponovno vzpostavi moj profil</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Shrani vse z Olvid+</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Ko obnovite profil, lahko izberete, katero napravo želite ohraniti aktivno v nastavitvah profila.</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">Po obnovitvi profila lahko izberete, katero napravo želite ohraniti aktivno v nastavitvah svojega profila.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">S ponovno vzpostavitvijo svojega profila «</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Ni bila najdena varnostna kopija ključa</string>
@@ -2089,4 +2091,29 @@
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Odpreti v zunanjem brskalniku</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Napaka pri odpiranju datoteke v notranjem brskalniku Olvid</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Povabljen</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">Novo sporočilo</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Nov stik</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Iskanje</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Oči v oči</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Na daljavo</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Prekliči</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Skenirajte drugičine QR kode</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Sedaj dajte tudi vi skenirati</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Koda je bila skenirana!</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Ne morete skenirati kode?</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Povabite jih na drug način</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">Delite svoj profil</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">Prenesi</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">Koda QR shranjena</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">Ni uspelo shraniti QR kode</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">Kopirano v odložišče</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">Besedilo QR kode</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Dodajte svoj prvi stik</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">Pogovor</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Zamenjaj kamero</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Želite stopiti v stik z %1$s?</string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Kontakti spodaj so del te skupine, vendar še nimajo zasebnega pogovora z vami.</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">Skupinski administratorji</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" je skupna skupina</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Za zaščito vaše zasebnosti Olvid **nima javnega ali osrednjega imenika uporabnikov**. Vaše ime bodo videli le ljudje, s katerimi se povežete.</string>
 </resources>

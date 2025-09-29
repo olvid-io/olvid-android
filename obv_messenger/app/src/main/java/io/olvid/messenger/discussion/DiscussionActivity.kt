@@ -50,6 +50,9 @@ import android.widget.PopupMenu
 import android.widget.PopupMenu.OnMenuItemClickListener
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
@@ -103,6 +106,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -332,6 +336,19 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
     private var discussionSearch by mutableStateOf<DiscussionSearch?>(null)
 
+    private val closeFragmentBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(enabled = false) {
+        override fun handleOnBackPressed() {
+            isEnabled = false
+            supportFragmentManager.findFragmentByTag(FULL_SCREEN_IMAGE_FRAGMENT_TAG)
+                ?.let {
+                    supportFragmentManager.beginTransaction()
+                        .setCustomAnimations(0, R.anim.fade_out)
+                        .remove(it)
+                        .commit()
+                }
+        }
+    }
+
     private val FACTORY: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (ComposeMessageViewModel::class.java.isAssignableFrom(modelClass)) {
@@ -366,22 +383,18 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         super.onCreate(savedInstanceState)
 
         onBackPressed {
-            val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
-                FULL_SCREEN_IMAGE_FRAGMENT_TAG
-            )
-            if (fullScreenImageFragment != null) {
-                supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(0, R.anim.fade_out)
-                    .remove(fullScreenImageFragment)
-                    .commit()
-                return@onBackPressed
-            }
             if (composeMessageDelegate.stopVoiceRecorderIfRecording()) {
                 // do nothing --> recording was stopped by on back pressed
                 return@onBackPressed
             }
             finishAndClearViewModel()
         }
+        onBackPressedDispatcher.addCallback(this, closeFragmentBackPressedCallback)
+
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+        )
 
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
             (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
@@ -528,6 +541,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                 intent.removeExtra(SEARCH_QUERY_INTENT_EXTRA)
                                 val messageId = intent.getLongExtra(MESSAGE_ID_INTENT_EXTRA, -1)
                                 searchItem.expandActionView()
+                                muted = true
                                 (searchItem.actionView as? SearchView?)?.apply {
                                     clearFocus()
                                     setQuery(
@@ -535,9 +549,10 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                         false
                                     )
                                 }
+                                muted = false
                                 setInitialSearchQuery(
                                     searchQuery,
-                                    if (messageId < 0) null else messageId
+                                    messageId.takeUnless { it < 0 }
                                 )
                             }
                         }
@@ -2142,16 +2157,16 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         if (event.actionMasked == MotionEvent.ACTION_UP) {
-            val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
-                FULL_SCREEN_IMAGE_FRAGMENT_TAG
-            )
-            if (fullScreenImageFragment != null) {
-                supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(0, R.anim.fade_out)
-                    .remove(fullScreenImageFragment)
-                    .commit()
-                return true
-            }
+            supportFragmentManager
+                .findFragmentByTag(FULL_SCREEN_IMAGE_FRAGMENT_TAG)
+                ?.let {
+                    closeFragmentBackPressedCallback.isEnabled = false
+                    supportFragmentManager.beginTransaction()
+                        .setCustomAnimations(0, R.anim.fade_out)
+                        .remove(it)
+                        .commit()
+                    return true
+                }
         }
         return super.dispatchTouchEvent(event)
     }
@@ -2498,6 +2513,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                 FULL_SCREEN_IMAGE_FRAGMENT_TAG
             )
             if (alreadyShownFragment != null) {
+                closeFragmentBackPressedCallback.isEnabled = false
                 supportFragmentManager.beginTransaction()
                     .setCustomAnimations(0, R.anim.fade_out)
                     .remove(alreadyShownFragment)
@@ -2506,6 +2522,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                 if (view is InitialView) {
                     val photoUrl = view.photoUrl
                     if (photoUrl != null) {
+                        closeFragmentBackPressedCallback.isEnabled = true
                         val fullScreenImageFragment = FullScreenImageFragment.newInstance(photoUrl)
                         supportFragmentManager.beginTransaction()
                             .setCustomAnimations(R.anim.fade_in, 0)

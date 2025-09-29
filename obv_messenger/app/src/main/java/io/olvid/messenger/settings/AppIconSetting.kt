@@ -74,9 +74,14 @@ import androidx.core.graphics.drawable.toBitmap
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 
-data class AppIcon(val name: String, @DrawableRes val icon: Int, @StringRes val label: Int = R.string.app_name)
+data class AppIcon(
+    val name: String,
+    @DrawableRes val icon: Int,
+    @StringRes val label: Int = R.string.app_name
+)
 
 val appIcons = listOf(
     AppIcon(".main.MainActivityDefault", R.mipmap.ic_launcher),
@@ -92,16 +97,30 @@ val appIcons = listOf(
     AppIcon(".main.MainActivityRosace", R.mipmap.ic_launcher_rosace, R.string.app_name_rosace),
     AppIcon(".main.MainActivityWeather", R.mipmap.ic_launcher_weather, R.string.app_name_weather),
     AppIcon(".main.MainActivityBricks", R.mipmap.ic_launcher_bricks, R.string.app_name_bricks),
-    AppIcon(".main.MainActivityBlackClock", R.mipmap.ic_launcher_black_clock, R.string.app_name_clock),
-    AppIcon(".main.MainActivityWhiteClock", R.mipmap.ic_launcher_white_clock, R.string.app_name_clock),
-    AppIcon(".main.MainActivityCalculator", R.mipmap.ic_launcher_calculator, R.string.app_name_calculator),
+    AppIcon(
+        ".main.MainActivityBlackClock",
+        R.mipmap.ic_launcher_black_clock,
+        R.string.app_name_clock
+    ),
+    AppIcon(
+        ".main.MainActivityWhiteClock",
+        R.mipmap.ic_launcher_white_clock,
+        R.string.app_name_clock
+    ),
+    AppIcon(
+        ".main.MainActivityCalculator",
+        R.mipmap.ic_launcher_calculator,
+        R.string.app_name_calculator
+    ),
 )
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AppIconSettingScreen(isCurrentIcon: (appIcon: AppIcon) -> Boolean) {
     val context = LocalContext.current
-    var currentIcon by remember { mutableStateOf(appIcons.find { isCurrentIcon(it) } ?: appIcons.first()) }
+    var currentIcon by remember {
+        mutableStateOf(appIcons.find { isCurrentIcon(it) } ?: appIcons.first())
+    }
     var selectedAppIcon by remember {
         mutableStateOf(currentIcon)
     }
@@ -151,14 +170,16 @@ fun AppIconSettingScreen(isCurrentIcon: (appIcon: AppIcon) -> Boolean) {
                             contentDescription = stringResource(id = appIcon.label)
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(modifier = Modifier.width(64.dp),
+                        Text(
+                            modifier = Modifier.width(64.dp),
                             text = stringResource(id = appIcon.label),
                             textAlign = TextAlign.Center,
                             style = OlvidTypography.body2,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             color = colorResource(id = R.color.almostBlack),
-                            fontWeight = FontWeight.Medium)
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
@@ -187,21 +208,30 @@ fun AppIconSettingScreen(isCurrentIcon: (appIcon: AppIcon) -> Boolean) {
     }
 
     if (showShortcutWarning) {
-        AlertDialog(onDismissRequest = { showShortcutWarning = false },
+        AlertDialog(
+            onDismissRequest = { showShortcutWarning = false },
+            containerColor = colorResource(R.color.dialogBackground),
             title = {
-                Text(text = stringResource(id = R.string.pref_app_icon_shortcut_warning_title))
-            }, text = {
-                Text(text = stringResource(id = R.string.pref_app_icon_shortcut_warning_text))
+                Text(
+                    text = stringResource(id = R.string.pref_app_icon_shortcut_warning_title),
+                    color = colorResource(R.color.almostBlack)
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(id = R.string.pref_app_icon_shortcut_warning_text),
+                    color = colorResource(R.color.almostBlack)
+                )
             },
             confirmButton = {
-                TextButton(onClick = { context.setIcon(selectedAppIcon) }) {
-                    Text(text = stringResource(id = R.string.button_label_proceed))
-                }
+                OlvidTextButton(
+                    text = stringResource(id = R.string.button_label_proceed),
+                    onClick = { context.setIcon(selectedAppIcon) })
             },
             dismissButton = {
-                TextButton(onClick = { showShortcutWarning = false }) {
-                    Text(text = stringResource(id = R.string.button_label_cancel))
-                }
+                OlvidTextButton(
+                    text = stringResource(id = R.string.button_label_cancel),
+                    onClick = { showShortcutWarning = false })
             })
     }
 }

@@ -108,6 +108,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -145,6 +146,8 @@ import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.contacts.ContactListScreen
@@ -764,220 +767,228 @@ private fun ColumnScope.CallBottomSheetContent(
     callButtonSize: Float
 ) {
     val haptics = LocalHapticFeedback.current
+    Column(
+        modifier = Modifier.cutoutHorizontalPadding().systemBarsHorizontalPadding()
+    ) {
 
-    if (addingParticipant) {
-        Spacer(modifier = Modifier.height(statusBarHeight))
-    }
-    Spacer(modifier = Modifier.height(8.dp))
-    Spacer(
-        modifier = Modifier
-            .align(Alignment.CenterHorizontally)
-            .width(40.dp)
-            .height(4.dp)
-            .background(color = Color(0x80D9D9D9), shape = RoundedCornerShape(50))
-    )
-    LaunchedEffect(addingParticipant) {
         if (addingParticipant) {
-            bottomSheetScaffoldState.bottomSheetState.expand()
-        } else {
-            bottomSheetScaffoldState.bottomSheetState.collapse()
-            contactListViewModel.selectedContacts.clear()
+            Spacer(modifier = Modifier.height(statusBarHeight))
         }
-    }
-    if (addingParticipant) {
-        AddParticipantScreen(contactListViewModel) {
-            webrtcCallService?.callerAddCallParticipants(contactListViewModel.selectedContacts)
-            onCallAction(AddParticipant(false))
-        }
-    } else {
-        val callMediaState =
-            CallMediaState(
-                isMicrophoneEnabled = microphoneMuted?.value?.not() ?: true,
-                isCameraEnabled = webrtcCallService?.cameraEnabled ?: false,
-                isScreenShareEnabled = webrtcCallService?.screenShareActive ?: false,
-                selectedAudioOutput = webrtcCallService?.selectedAudioOutput ?: PHONE,
-                audioOutputs = webrtcCallService?.availableAudioOutputs.orEmpty()
-            )
-        CallControls(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp, bottom = 8.dp),
-            actions = buildOngoingCallControlActions(callMediaState = callMediaState),
-            onToggleSpeaker = { webrtcCallService?.selectAudioOutput(it) },
-            callMediaState = callMediaState,
-            onCallAction = onCallAction,
-            callButtonSize = callButtonSize
-        )
-
-        Spacer(modifier = Modifier.height(navigationBarHeight))
-
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-        ) {
-            Text(
-                text = contact?.getCustomDisplayName().orEmpty(),
-                style = OlvidTypography.body1,
-                color = Color.White
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_phone_outgoing),
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(id = R.string.text_ongoing_call, formatDuration(callDuration?.value ?: 0)) ,
-                    // Body2
-                    style = OlvidTypography.body2,
-                    color = Color(0xFF8B8D97),
-                )
-            }
-        }
-
+        Spacer(modifier = Modifier.height(8.dp))
         Spacer(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 24.dp)
-                .height(1.dp)
-                .background(
-                    Color(0xFF29282D)
-                )
+                .align(Alignment.CenterHorizontally)
+                .width(40.dp)
+                .height(4.dp)
+                .background(color = Color(0x80D9D9D9), shape = RoundedCornerShape(50))
         )
-        LazyColumn {
-            if (iAmTheCaller) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onCallAction(AddParticipant(true)) }
-                            .padding(horizontal = 20.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(56.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF29282D)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Image(
-                                modifier = Modifier
-                                    .size(24.dp),
-                                painter = painterResource(id = R.drawable.ic_add_user),
-                                contentDescription = null
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = stringResource(id = R.string.webrtc_add_participants),
-                            style = OlvidTypography.h3,
-                            color = Color.White
-                        )
-                    }
+        LaunchedEffect(addingParticipant) {
+            if (addingParticipant) {
+                bottomSheetScaffoldState.bottomSheetState.expand()
+            } else {
+                bottomSheetScaffoldState.bottomSheetState.collapse()
+                contactListViewModel.selectedContacts.clear()
+            }
+        }
+        if (addingParticipant) {
+            AddParticipantScreen(contactListViewModel) {
+                webrtcCallService?.callerAddCallParticipants(contactListViewModel.selectedContacts)
+                onCallAction(AddParticipant(false))
+            }
+        } else {
+            val callMediaState =
+                CallMediaState(
+                    isMicrophoneEnabled = microphoneMuted?.value?.not() ?: true,
+                    isCameraEnabled = webrtcCallService?.cameraEnabled ?: false,
+                    isScreenShareEnabled = webrtcCallService?.screenShareActive ?: false,
+                    selectedAudioOutput = webrtcCallService?.selectedAudioOutput ?: PHONE,
+                    audioOutputs = webrtcCallService?.availableAudioOutputs.orEmpty()
+                )
+            CallControls(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp, bottom = 8.dp),
+                actions = buildOngoingCallControlActions(callMediaState = callMediaState),
+                onToggleSpeaker = { webrtcCallService?.selectAudioOutput(it) },
+                callMediaState = callMediaState,
+                onCallAction = onCallAction,
+                callButtonSize = callButtonSize
+            )
+
+            Spacer(modifier = Modifier.height(navigationBarHeight))
+
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+            ) {
+                Text(
+                    text = contact?.getCustomDisplayName().orEmpty(),
+                    style = OlvidTypography.body1,
+                    color = Color.White
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_phone_outgoing),
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(
+                            id = R.string.text_ongoing_call,
+                            formatDuration(callDuration?.value ?: 0)
+                        ),
+                        // Body2
+                        style = OlvidTypography.body2,
+                        color = Color(0xFF8B8D97),
+                    )
                 }
             }
-            callParticipants?.value?.let { callParticipants ->
-                items(callParticipants) { callParticipant ->
-                    var kickParticipant by remember {
-                        mutableStateOf(false)
-                    }
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .combinedClickable(
-                                onClick = {
-                                    if (callParticipant.contact?.oneToOne == true) {
-                                        onCallAction(GoToDiscussion(callParticipant.contact))
-                                    }
-                                },
-                                onLongClick = {
-                                    if (webrtcCallService?.isCaller == true && callParticipants.size > 1) {
-                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        kickParticipant = true
-                                    }
-                                }
-                            )
-                            .padding(horizontal = 20.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (webrtcCallService?.isCaller == true) {
-                            DropdownMenu(
-                                expanded = kickParticipant,
-                                onDismissRequest = { kickParticipant = false }) {
-                                DropdownMenuItem(onClick = {
-                                    kickParticipant = false
-                                    webrtcCallService.callerKickParticipant(
-                                        callParticipant.bytesContactIdentity
-                                    )
-                                }) {
-                                    Text(text = stringResource(id = R.string.dialog_title_webrtc_kick_participant))
-                                }
-                            }
-                        }
-                        Box {
-                            InitialView(
-                                modifier = Modifier.requiredSize(56.dp),
-                                initialViewSetup = { initialView ->
-                                callParticipant.contact?.let {
-                                    initialView.setContact(it)
-                                }
-                            })
-                            if (callParticipant.peerIsMuted) {
-                                Icon(
+
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 24.dp)
+                    .height(1.dp)
+                    .background(
+                        Color(0xFF29282D)
+                    )
+            )
+            LazyColumn {
+                if (iAmTheCaller) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onCallAction(AddParticipant(true)) }
+                                .padding(horizontal = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF29282D)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
                                     modifier = Modifier
-                                        .size(20.dp)
-                                        .padding(4.dp)
-                                        .background(Color.Black, shape = CircleShape)
-                                        .align(Alignment.BottomEnd),
-                                    painter = painterResource(id = R.drawable.ic_microphone_off),
-                                    tint = Color.White,
-                                    contentDescription = "muted"
+                                        .size(24.dp),
+                                    painter = painterResource(id = R.drawable.ic_add_member),
+                                    contentDescription = null,
+                                    colorFilter = ColorFilter.tint(Color.White)
                                 )
                             }
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
+                            Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = callParticipant.displayName ?: "",
+                                text = stringResource(id = R.string.webrtc_add_participants),
                                 style = OlvidTypography.h3,
                                 color = Color.White
                             )
-                            val peerStatus = getPeerStateText(
-                                peerState = callParticipant.peerState,
-                                singleContact = callParticipants.size == 1
-                            )
-                            AnimatedVisibility(visible = peerStatus != null) {
+                        }
+                    }
+                }
+                callParticipants?.value?.let { callParticipants ->
+                    items(callParticipants) { callParticipant ->
+                        var kickParticipant by remember {
+                            mutableStateOf(false)
+                        }
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .combinedClickable(
+                                    onClick = {
+                                        if (callParticipant.contact?.oneToOne == true) {
+                                            onCallAction(GoToDiscussion(callParticipant.contact))
+                                        }
+                                    },
+                                    onLongClick = {
+                                        if (webrtcCallService?.isCaller == true && callParticipants.size > 1) {
+                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            kickParticipant = true
+                                        }
+                                    }
+                                )
+                                .padding(horizontal = 20.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (webrtcCallService?.isCaller == true) {
+                                DropdownMenu(
+                                    expanded = kickParticipant,
+                                    onDismissRequest = { kickParticipant = false }) {
+                                    DropdownMenuItem(onClick = {
+                                        kickParticipant = false
+                                        webrtcCallService.callerKickParticipant(
+                                            callParticipant.bytesContactIdentity
+                                        )
+                                    }) {
+                                        Text(text = stringResource(id = R.string.dialog_title_webrtc_kick_participant))
+                                    }
+                                }
+                            }
+                            Box {
+                                InitialView(
+                                    modifier = Modifier.requiredSize(56.dp),
+                                    initialViewSetup = { initialView ->
+                                        callParticipant.contact?.let {
+                                            initialView.setContact(it)
+                                        }
+                                    })
+                                if (callParticipant.peerIsMuted) {
+                                    Icon(
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .padding(4.dp)
+                                            .background(Color.Black, shape = CircleShape)
+                                            .align(Alignment.BottomEnd),
+                                        painter = painterResource(id = R.drawable.ic_microphone_off),
+                                        tint = Color.White,
+                                        contentDescription = "muted"
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
                                 Text(
-                                    text = peerStatus ?: "",
+                                    text = callParticipant.displayName ?: "",
                                     style = OlvidTypography.h3,
                                     color = Color.White
                                 )
-                            }
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        if (callParticipant.contact?.oneToOne == true) {
-                            IconButton(onClick = {
-                                onCallAction(
-                                    GoToDiscussion(
-                                        callParticipant.contact
+                                val peerStatus = getPeerStateText(
+                                    peerState = callParticipant.peerState,
+                                    singleContact = callParticipants.size == 1
+                                )
+                                AnimatedVisibility(visible = peerStatus != null) {
+                                    Text(
+                                        text = peerStatus ?: "",
+                                        style = OlvidTypography.h3,
+                                        color = Color.White
                                     )
-                                )
-                            }) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.ic_chat_circle),
-                                    contentDescription = null
-                                )
+                                }
+                            }
+                            Spacer(modifier = Modifier.weight(1f))
+                            if (callParticipant.contact?.oneToOne == true) {
+                                IconButton(onClick = {
+                                    onCallAction(
+                                        GoToDiscussion(
+                                            callParticipant.contact
+                                        )
+                                    )
+                                }) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.ic_chat_circle),
+                                        contentDescription = null
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
         }
+        Spacer(modifier = Modifier.height(navigationBarHeight))
     }
-    Spacer(modifier = Modifier.height(navigationBarHeight))
 }
 
 //@Composable

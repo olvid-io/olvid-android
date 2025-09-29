@@ -40,7 +40,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -54,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -70,6 +68,7 @@ import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.designsystem.components.OlvidCircularProgress
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 
@@ -154,14 +153,7 @@ fun SubscriptionOfferDialog(activity: Activity?, onDismissCallback: () -> Unit, 
                         modifier = Modifier.padding(bottom = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .align(Alignment.CenterHorizontally),
-                            color = colorResource(id = R.color.olvid_gradient_light),
-                            strokeWidth = 5.dp,
-                            strokeCap = StrokeCap.Round,
-                        )
+                        OlvidCircularProgress(modifier = Modifier.align(Alignment.CenterHorizontally))
                         Spacer(Modifier.height(8.dp))
                         Text(
                             color = colorResource(id = R.color.almostBlack),

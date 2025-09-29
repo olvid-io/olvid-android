@@ -51,6 +51,7 @@ class DiscussionSearch(
     var scrollTo: ((messageId: Long) -> Unit)? = null
     var lazyListState: LazyListState? = null
     val viewModel: DiscussionSearchViewModel by activity.viewModels()
+    var muted = false
 
     override fun onMenuItemActionExpand(searchItem: MenuItem): Boolean {
         for (i in 0 until menu.size) {
@@ -84,11 +85,14 @@ class DiscussionSearch(
     }
 
     override fun onQueryTextChange(newText: String): Boolean {
-        App.runThread {
-            filter(
-                newText,
-                lazyListState?.layoutInfo?.visibleItemsInfo?.first()?.key as? Long ?: Long.MAX_VALUE
-            )
+        if (!muted) {
+            App.runThread {
+                filter(
+                    newText,
+                    lazyListState?.layoutInfo?.visibleItemsInfo?.first()?.key as? Long
+                        ?: Long.MAX_VALUE
+                )
+            }
         }
         return true
     }

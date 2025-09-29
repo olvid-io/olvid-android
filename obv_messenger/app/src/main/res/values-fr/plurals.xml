@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+        <item quantity="one">\"%1$s\" et 1 autre groupe en commun</item>
+        <item quantity="other">\"%1$s\" et %2$d autres groupes en commun</item>
+    </plurals>
     <plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity">
         <item quantity="one">L\'un de vos appareils va expirer et être désactivé dans **moins de %1$d jour**.\nVous pouvez souscrire à un abonnement **Olvid+** pour le garder actif.</item>
         <item quantity="other">L\'un de vos appareils va expirer et être désactivé dans **moins de %1$d jours**.\nVous pouvez souscrire à un abonnement **Olvid+** pour le garder actif.</item>
@@ -94,6 +98,10 @@
     <plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Vous êtes sur le point d\'inviter chaque membre de ce groupe avec lequel vous avez un canal (actuellement 1 membre) à une discussion privée.\nSouhaitez-vous poursuivre ?</item>
         <item quantity="other">Vous êtes sur le point d\'inviter chaque membre de ce groupe avec lequel vous avez un canal (actuellement %1$d membres) à une discussion privée.\nSouhaitez-vous poursuivre ?</item>
+    </plurals>
+    <plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">1 membre du groupe peut être invité à une discussion privée</item>
+        <item quantity="other">%1$d membres du groupe peuvent être invités à une discussion privée</item>
     </plurals>
     <plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d groupe commun</item>

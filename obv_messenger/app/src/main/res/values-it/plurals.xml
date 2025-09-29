@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" e 1 altro gruppo in comune</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" e %2$d altri gruppi in comune</item>
+	</plurals>
 	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1156880361">Uno dei tuoi dispositivi scadrà e verrà disattivato in **meno di %1$d giorno**.\nPuoi acquistare un abbonamento **Olvid+** per mantenerlo attivo.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Uno dei tuoi dispositivi scadrà e verrà disattivato in **meno di %1$d giorni**.\nPuoi acquistare un abbonamento **Olvid+** per mantenerlo attivo.</item>
@@ -93,6 +97,10 @@
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">Stai per invitare ogni membro del gruppo con cui hai un canale (attualmente 1 membro) in una discussione privata.\nVuoi procedere?</item>
 		<item quantity="other" state="needs_review" hash="-994717142">Stai per invitare ogni membro del gruppo con cui hai un canale (attualmente %1$d membri) a una discussione privata.\nVuoi procedere?</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">Un membro del gruppo può essere invitato a una discussione privata</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d i membri del gruppo possono essere invitati a una discussione privata</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 gruppo comune</item>

@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" și încă 1 grup în comun</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" și %2$d alte grupuri în comun</item>
+	</plurals>
 	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1156880361">Unul dintre dispozitivele tale va expira și va fi dezactivat în **mai puțin de %1$d zi**.\nPoți achiziționa un abonament **Olvid+** pentru a-l menține activ.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Unul dintre dispozitivele dumneavoastră va expira și va fi dezactivat în **mai puțin de %1$d zile**.\nPuteți achiziționa un abonament **Olvid+** pentru a-l menține activ.</item>
@@ -93,6 +97,10 @@
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">Pe punctul de a invita fiecare membru al grupului cu care ai un canal (în prezent 1 membru) într-o discuție privată.\nDorești să continui?</item>
 		<item quantity="other" state="needs_review" hash="-994717142">Pe punctul de a invita fiecare membru al grupului cu care ai un canal (în prezent %1$d membri) într-o discuție privată.\nDorești să continui?</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">1 membru al grupului poate fi invitat la o discuție privată</item>
+		<item quantity="other" state="needs_review" hash="-496794154">Membrii grupului %1$d pot fi invitați într-o discuție privată</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 grup comun</item>

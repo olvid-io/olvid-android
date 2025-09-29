@@ -100,25 +100,40 @@ class TroubleshootingActivity : AppCompatActivity() {
             val troubleshootingDataStore = TroubleshootingDataStore(context)
 
             val batteryOptimizationState = remember {
-                CheckState(BATTERY_CHECK_STATE, troubleshootingDataStore) { getBatteryOptimizationsState() }
+                CheckState(
+                    BATTERY_CHECK_STATE,
+                    troubleshootingDataStore
+                ) { getBatteryOptimizationsState() }
             }
             val alarmState = remember {
                 CheckState(ALARM_CHECK_STATE, troubleshootingDataStore) { getAlarmState() }
             }
             val backgroundRestrictionState = remember {
-                CheckState(BACKGROUND_CHECK_STATE, troubleshootingDataStore) { getBackgroundState() }
+                CheckState(
+                    BACKGROUND_CHECK_STATE,
+                    troubleshootingDataStore
+                ) { getBackgroundState() }
             }
             val storageState = remember {
                 CheckState(STORAGE_CHECK_STATE, troubleshootingDataStore) { getStorageState() }
             }
             val permanentSocketState = remember {
-                CheckState(SOCKET_CHECK_STATE, troubleshootingDataStore) { getPermanentSocketState() }
+                CheckState(
+                    SOCKET_CHECK_STATE,
+                    troubleshootingDataStore
+                ) { getPermanentSocketState() }
             }
             val backupState = remember {
-                CheckState(BACKUP_CHECK_STATE, troubleshootingDataStore, statusIsOk = { a -> a == 0 }) { getBackupState() }
+                CheckState(
+                    BACKUP_CHECK_STATE,
+                    troubleshootingDataStore,
+                    statusIsOk = { a -> a == 0 }) { getBackupState() }
             }
             val fullScreenIntentState = remember {
-                CheckState(FULL_SCREEN_CHECK_STATE, troubleshootingDataStore) { getFullScreenIntentState() }
+                CheckState(
+                    FULL_SCREEN_CHECK_STATE,
+                    troubleshootingDataStore
+                ) { getFullScreenIntentState() }
             }
             val locationState = remember {
                 CheckState(LOCATION_CHECK_STATE, troubleshootingDataStore) { getLocationState() }
@@ -127,7 +142,12 @@ class TroubleshootingActivity : AppCompatActivity() {
             val postNotificationsState = rememberPermissionState(permission.POST_NOTIFICATIONS)
             val cameraState = rememberPermissionState(permission.CAMERA)
             val microphoneState = rememberPermissionState(permission.RECORD_AUDIO)
-            val locationPermissionState = rememberMultiplePermissionsState(listOf(permission.ACCESS_FINE_LOCATION, permission.ACCESS_COARSE_LOCATION))
+            val locationPermissionState = rememberMultiplePermissionsState(
+                listOf(
+                    permission.ACCESS_FINE_LOCATION,
+                    permission.ACCESS_COARSE_LOCATION
+                )
+            )
 
             LifecycleCheckerEffect(
                 checks = listOf<CheckState<out Any>>(
@@ -147,32 +167,69 @@ class TroubleshootingActivity : AppCompatActivity() {
             }
 
             LaunchedEffect(Unit) {
-                val list: ArrayList<Triple<Boolean, Boolean, TroubleshootingItemType>> = ArrayList() // triple is (valid, critical, TroubleshootItemType)
+                val list: ArrayList<Triple<Boolean, Boolean, TroubleshootingItemType>> =
+                    ArrayList() // triple is (valid, critical, TroubleshootItemType)
                 if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU) {
-                    list.add(Triple(postNotificationsState.status.isGranted, true, TroubleshootingItemType.NOTIFICATIONS))
+                    list.add(
+                        Triple(
+                            postNotificationsState.status.isGranted,
+                            true,
+                            TroubleshootingItemType.NOTIFICATIONS
+                        )
+                    )
                 } else {
                     list.add(Triple(true, false, TroubleshootingItemType.NOTIFICATIONS))
                 }
 
                 if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                    list.add(Triple(cameraState.status.isGranted, false, TroubleshootingItemType.CAMERA))
+                    list.add(
+                        Triple(
+                            cameraState.status.isGranted,
+                            false,
+                            TroubleshootingItemType.CAMERA
+                        )
+                    )
                 }
 
                 if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                    list.add(Triple(microphoneState.status.isGranted, false, TroubleshootingItemType.MICROPHONE))
+                    list.add(
+                        Triple(
+                            microphoneState.status.isGranted,
+                            false,
+                            TroubleshootingItemType.MICROPHONE
+                        )
+                    )
                 }
 
                 list.add(Triple(locationState.valid, false, TroubleshootingItemType.LOCATION))
                 if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                    list.add(Triple(locationPermissionState.allPermissionsGranted, false, TroubleshootingItemType.LOCATION_PERMISSIONS))
+                    list.add(
+                        Triple(
+                            locationPermissionState.allPermissionsGranted,
+                            false,
+                            TroubleshootingItemType.LOCATION_PERMISSIONS
+                        )
+                    )
                 }
 
                 if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                    list.add(Triple(batteryOptimizationState.valid, true, TroubleshootingItemType.BATTERY_OPTIMIZATION))
+                    list.add(
+                        Triple(
+                            batteryOptimizationState.valid,
+                            true,
+                            TroubleshootingItemType.BATTERY_OPTIMIZATION
+                        )
+                    )
                 }
 
                 if (VERSION.SDK_INT >= VERSION_CODES.P) {
-                    list.add(Triple(backgroundRestrictionState.valid, true, TroubleshootingItemType.BACKGROUND_RESTRICTION))
+                    list.add(
+                        Triple(
+                            backgroundRestrictionState.valid,
+                            true,
+                            TroubleshootingItemType.BACKGROUND_RESTRICTION
+                        )
+                    )
                 }
 
                 if (VERSION.SDK_INT >= VERSION_CODES.S) {
@@ -180,20 +237,52 @@ class TroubleshootingActivity : AppCompatActivity() {
                 }
 
                 if (VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    list.add(Triple(fullScreenIntentState.valid, true, TroubleshootingItemType.FULL_SCREEN_INTENT))
+                    list.add(
+                        Triple(
+                            fullScreenIntentState.valid,
+                            true,
+                            TroubleshootingItemType.FULL_SCREEN_INTENT
+                        )
+                    )
                 }
 
-                if (!BuildConfig.USE_FIREBASE_LIB || !GoogleServicesUtils.googleServicesAvailable(this@TroubleshootingActivity)) {
-                    list.add(Triple(permanentSocketState.valid, true, TroubleshootingItemType.PERMANENT_WEBSOCKET))
+                if (!BuildConfig.USE_FIREBASE_LIB || !GoogleServicesUtils.googleServicesAvailable(
+                        this@TroubleshootingActivity
+                    )
+                ) {
+                    list.add(
+                        Triple(
+                            permanentSocketState.valid,
+                            true,
+                            TroubleshootingItemType.PERMANENT_WEBSOCKET
+                        )
+                    )
                 }
 
                 list.add(Triple(backupState.valid, true, TroubleshootingItemType.BACKUPS))
 
-                list.add(Triple(AppSingleton.getWebsocketConnectivityStateLiveData().value == 2, true, TroubleshootingItemType.CONNECTIVITY))
+                list.add(
+                    Triple(
+                        AppSingleton.getWebsocketConnectivityStateLiveData().value == 2,
+                        true,
+                        TroubleshootingItemType.CONNECTIVITY
+                    )
+                )
 
                 list.add(Triple(storageState.valid, true, TroubleshootingItemType.STORAGE))
 
                 list.add(Triple(storageState.valid, true, TroubleshootingItemType.DB_SYNC))
+
+                val updateAvailable = SettingsActivity.isUpdateAvailable()
+                val versionOutdated = SettingsActivity.isVersionOutdated()
+                list.add(
+                    Triple(
+                        !updateAvailable && !versionOutdated,
+                        versionOutdated,
+                        TroubleshootingItemType.UPDATE_AVAILABLE
+                    )
+                )
+
 
                 list.sortBy {
                     when {
@@ -266,7 +355,11 @@ class TroubleshootingActivity : AppCompatActivity() {
                                                 ObvFirebaseMessagingService.getLastPushNotificationTimestamp()
                                             )
                                         }
-                                    ) + "\n" + stringResource(id = R.string.dialog_message_about_deprioritized_push_notification, ObvFirebaseMessagingService.getDeprioritizedMessageCount(), ObvFirebaseMessagingService.getHighPriorityMessageCount())
+                                    ) + "\n" + stringResource(
+                                        id = R.string.dialog_message_about_deprioritized_push_notification,
+                                        ObvFirebaseMessagingService.getDeprioritizedMessageCount(),
+                                        ObvFirebaseMessagingService.getHighPriorityMessageCount()
+                                    )
                                 } else "",
                                 titleInvalid = stringResource(id = R.string.troubleshooting_notifications_invalid_title),
                                 descriptionInvalid = stringResource(id = R.string.troubleshooting_notifications_invalid_description),
@@ -404,7 +497,9 @@ class TroubleshootingActivity : AppCompatActivity() {
                             ) {
                                 TextButton(
                                     onClick = {
-                                        startSettingsActivity(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+                                        startSettingsActivity(
+                                            ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                                        )
                                     },
                                     shape = RoundedCornerShape(6.dp),
                                     colors = ButtonDefaults.textButtonColors(
@@ -634,7 +729,10 @@ class TroubleshootingActivity : AppCompatActivity() {
                                                 inProgress = true
                                                 App.runThread {
                                                     try {
-                                                        AppDatabaseOpenCallback.syncEngineDatabases(AppSingleton.getEngine(), AppDatabase.getInstance())
+                                                        AppDatabaseOpenCallback.syncEngineDatabases(
+                                                            AppSingleton.getEngine(),
+                                                            AppDatabase.getInstance()
+                                                        )
                                                         Thread.sleep(1000)
                                                     } catch (_: Exception) {
                                                     }
@@ -660,6 +758,52 @@ class TroubleshootingActivity : AppCompatActivity() {
                                     }
                                 }
                             ) { }
+                        }
+
+                        TroubleshootingItemType.UPDATE_AVAILABLE -> {
+                            val isUpdateAvailable = SettingsActivity.isUpdateAvailable()
+                            val isOutdated = SettingsActivity.isVersionOutdated()
+                            TroubleShootItem(
+                                title = when {
+                                    isOutdated -> stringResource(R.string.dialog_title_outdated_version)
+                                    isUpdateAvailable -> stringResource(R.string.dialog_title_update_available)
+                                    else -> stringResource(R.string.troubleshooting_update_valid_title)
+                                },
+                                description = when {
+                                    isOutdated -> stringResource(R.string.dialog_message_outdated_version)
+                                    isUpdateAvailable -> stringResource(R.string.dialog_message_update_available)
+                                    else -> stringResource(R.string.explanation_latest_olvid_version)
+                                },
+                                valid = !isUpdateAvailable && !isOutdated,
+                                critical = isOutdated
+                            ) {
+                                TextButton(
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = ButtonDefaults.textButtonColors(
+                                        contentColor = colorResource(R.color.almostBlack)
+                                    ),
+                                    onClick = {
+                                        try {
+                                            context.startActivity(
+                                                Intent(
+                                                    Intent.ACTION_VIEW,
+                                                    "market://details?id=${context.packageName}".toUri()
+                                                )
+                                            )
+                                        } catch (_: Exception) {
+                                            context.startActivity(
+                                                Intent(
+                                                    Intent.ACTION_VIEW,
+                                                    "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
+                                                )
+                                            )
+                                        }
+                                    }
+                                ) {
+                                    Text(text = stringResource(R.string.menu_check_update))
+                                }
+
+                            }
                         }
                     }
                 }

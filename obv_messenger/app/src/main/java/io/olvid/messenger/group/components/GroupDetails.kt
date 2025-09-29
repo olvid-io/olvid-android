@@ -69,6 +69,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -89,6 +90,7 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.customClasses.linkify
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Group2
 import io.olvid.messenger.designsystem.components.OlvidActionButton
@@ -106,7 +108,7 @@ fun GroupDetailsScreen(
     groupV2DetailsViewModel: GroupV2DetailsViewModel = viewModel(),
     call: (Group2) -> Unit = {},
     imageClick: (String?) -> Unit = {},
-    inviteAllMembers: () -> Unit = {},
+    onInviteMembers: () -> Unit = {},
     onFullMembersList: () -> Unit = {},
     onEditMembers: () -> Unit = {},
     onEditAdmins: () -> Unit = {},
@@ -179,7 +181,7 @@ fun GroupDetailsScreen(
                 OlvidActionButton(
                     modifier = Modifier.weight(1f),
                     icon = R.drawable.ic_message,
-                    text = stringResource(R.string.label_discuss)
+                    text = stringResource(R.string.button_label_discuss)
                 ) {
                     group?.let {
                         App.openGroupV2DiscussionActivity(
@@ -239,13 +241,22 @@ fun GroupDetailsScreen(
                     )
             }
             var photoChanged by remember { mutableStateOf(false) }
-            LaunchedEffect(detailsAndPhoto.serializedPublishedDetails, detailsAndPhoto.publishedPhotoUrl, detailsAndPhoto.photoUrl) {
+            LaunchedEffect(
+                detailsAndPhoto.serializedPublishedDetails,
+                detailsAndPhoto.publishedPhotoUrl,
+                detailsAndPhoto.photoUrl
+            ) {
                 photoChanged = if (detailsAndPhoto.serializedPublishedDetails == null) {
                     false
-                } else if (detailsAndPhoto.publishedPhotoUrl.isNullOrEmpty().not() && detailsAndPhoto.photoUrl.isNullOrEmpty().not()) {
+                } else if (detailsAndPhoto.publishedPhotoUrl.isNullOrEmpty()
+                        .not() && detailsAndPhoto.photoUrl.isNullOrEmpty().not()
+                ) {
                     // if the photo url changed, the photo might still be the same, so we compare the bytes
-                    !File(App.absolutePathFromRelative(detailsAndPhoto.publishedPhotoUrl)!!).readBytes().contentEquals(File(App.absolutePathFromRelative(detailsAndPhoto.photoUrl)!!).readBytes())
-                } else if (detailsAndPhoto.publishedPhotoUrl?.isEmpty() == true && detailsAndPhoto.photoUrl.isNullOrEmpty().not()) {
+                    !File(App.absolutePathFromRelative(detailsAndPhoto.publishedPhotoUrl)!!).readBytes()
+                        .contentEquals(File(App.absolutePathFromRelative(detailsAndPhoto.photoUrl)!!).readBytes())
+                } else if (detailsAndPhoto.publishedPhotoUrl?.isEmpty() == true && detailsAndPhoto.photoUrl.isNullOrEmpty()
+                        .not()
+                ) {
                     false
                 } else {
                     detailsAndPhoto.publishedPhotoUrl != detailsAndPhoto.photoUrl
@@ -276,7 +287,9 @@ fun GroupDetailsScreen(
         }
         if (group?.ownPermissionAdmin == true) {
             Text(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 6.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 6.dp),
                 text = stringResource(R.string.label_group_administration),
                 style = OlvidTypography.h3.copy(color = colorResource(R.color.almostBlack)),
                 maxLines = 1,
@@ -322,8 +335,10 @@ fun GroupDetailsScreen(
         }
         members?.let {
             Text(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 6.dp),
-                text = stringResource(R.string.label_group_members) + " (${it.size+1})",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 6.dp),
+                text = stringResource(R.string.label_group_members) + " (${it.size + 1})",
                 style = OlvidTypography.h3.copy(color = colorResource(R.color.almostBlack)),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -336,7 +351,8 @@ fun GroupDetailsScreen(
                     )
                     .clip(RoundedCornerShape(16.dp))
             ) {
-                val nonAdminsReadOnly = remember(groupV2DetailsViewModel.groupType) {  groupV2DetailsViewModel.groupType.areNonAdminsReadOnly() }
+                val nonAdminsReadOnly =
+                    remember(groupV2DetailsViewModel.groupType) { groupV2DetailsViewModel.groupType.areNonAdminsReadOnly() }
                 AppSingleton.getCurrentIdentityLiveData().value?.let {
                     GroupMemberItem(
                         member = GroupMember(
@@ -351,26 +367,29 @@ fun GroupDetailsScreen(
                         ),
                         keycloakManaged = it.keycloakManaged,
                         nonAdminsReadOnly = nonAdminsReadOnly,
-                        onInvite = {}
                     )
                 }
                 it.take(5).forEach { member ->
                     GroupMemberItem(
                         member = member.toGroupMember(),
                         keycloakManaged = member.contact?.keycloakManaged == true,
-                        nonAdminsReadOnly = nonAdminsReadOnly,
-                        onInvite = { contact ->
-                            groupV2DetailsViewModel.invite(contact)
-                        })
+                        nonAdminsReadOnly = nonAdminsReadOnly
+                    )
                 }
                 if (it.size > 5) {
                     Row(
                         modifier = Modifier
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
-                                indication = ripple(bounded = true, color = colorResource(R.color.greyOverlay))
+                                indication = ripple(
+                                    bounded = true,
+                                    color = colorResource(R.color.greyOverlay)
+                                )
                             ) { onFullMembersList() }
-                            .padding(20.dp)) {
+                            .height(56.dp)
+                            .padding(horizontal = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Text(
                             modifier = Modifier.weight(1f),
                             text = stringResource(R.string.label_see_all),
@@ -384,16 +403,43 @@ fun GroupDetailsScreen(
                     }
                 }
             }
-            if (members?.any { it.contact?.oneToOne == false } == true) {
+            val invitableCount =
+                members?.count { (it.contact?.hasChannelOrPreKey() == true || it.contact?.keycloakManaged == true) && it.contact?.active == true && it.contact?.oneToOne != true }
+                    ?: 0
+            if (invitableCount > 0) {
                 Spacer(modifier = Modifier.height(8.dp))
-                OlvidActionButton(
+                Row(
                     modifier = Modifier
-                        .widthIn(max = 400.dp)
-                        .fillMaxWidth(),
-                    icon = R.drawable.ic_invite_all,
-                    text = stringResource(R.string.menu_action_invite_all_members),
-                    onClick = inviteAllMembers
-                )
+                        .background(
+                            color = colorResource(R.color.lighterGrey),
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(
+                                bounded = true,
+                                color = colorResource(R.color.greyOverlay)
+                            ),
+                            onClick = onInviteMembers
+                        )
+                        .padding(vertical = 8.dp, horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = pluralStringResource(
+                            R.plurals.explanation_invite_group_members,
+                            invitableCount,
+                            invitableCount
+                        ),
+                        style = OlvidTypography.body1.copy(color = colorResource(R.color.greyTint))
+                    )
+                    Icon(
+                        painter = painterResource(R.drawable.ic_chevron_right),
+                        tint = colorResource(R.color.greyTint),
+                        contentDescription = null
+                    )
+                }
             }
         }
     }
@@ -540,41 +586,49 @@ private fun GroupUpdate(
             ) {
                 name?.let {
                     Card(
-                        modifier = Modifier.width(width).then(
-                            if (changeCount > 1)
-                                Modifier.fillMaxHeight()
-                            else
-                                Modifier
-                        ),
+                        modifier = Modifier
+                            .width(width)
+                            .then(
+                                if (changeCount > 1)
+                                    Modifier.fillMaxHeight()
+                                else
+                                    Modifier
+                            ),
                         colors = CardDefaults.cardColors(
                             containerColor = colorResource(R.color.lighterGrey),
                             contentColor = colorResource(R.color.almostBlack)
                         )
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = stringResource(R.string.explanation_new_group_v2_card_name),
-                                style = OlvidTypography.body2)
-                            Text(text = buildAnnotatedString {
-                                if (name.isEmpty()) {
-                                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                                        append(stringResource(R.string.text_unnamed_group))
+                            Text(
+                                text = stringResource(R.string.explanation_new_group_v2_card_name),
+                                style = OlvidTypography.body2
+                            )
+                            Text(
+                                text = buildAnnotatedString {
+                                    if (name.isEmpty()) {
+                                        withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                                            append(stringResource(R.string.text_unnamed_group))
+                                        }
+                                    } else {
+                                        append(name)
                                     }
-                                } else {
-                                    append(name)
-                                }
-                            },
-                                style = OlvidTypography.body2)
+                                },
+                                style = OlvidTypography.body2
+                            )
                         }
                     }
                 }
                 description?.let {
                     Card(
-                        modifier = Modifier.width(width).then(
-                            if (changeCount > 1)
-                                Modifier.fillMaxHeight()
-                            else
-                                Modifier
-                        ),
+                        modifier = Modifier
+                            .width(width)
+                            .then(
+                                if (changeCount > 1)
+                                    Modifier.fillMaxHeight()
+                                else
+                                    Modifier
+                            ),
                         colors = CardDefaults.cardColors(
                             containerColor = colorResource(R.color.lighterGrey),
                             contentColor = colorResource(R.color.almostBlack)
@@ -588,12 +642,14 @@ private fun GroupUpdate(
                 }
                 photoUrl?.let {
                     Card(
-                        modifier = Modifier.width(width).then(
-                            if (changeCount > 1)
-                                Modifier.fillMaxHeight()
-                            else
-                                Modifier
-                        ),
+                        modifier = Modifier
+                            .width(width)
+                            .then(
+                                if (changeCount > 1)
+                                    Modifier.fillMaxHeight()
+                                else
+                                    Modifier
+                            ),
                         colors = CardDefaults.cardColors(
                             containerColor = colorResource(R.color.lighterGrey),
                             contentColor = colorResource(R.color.almostBlack)
@@ -606,15 +662,15 @@ private fun GroupUpdate(
                             InitialView(
                                 modifier = Modifier.size(56.dp),
                                 initialViewSetup = { initialView ->
-                                if (photoUrl.isEmpty()) {
-                                    initialView.setGroup(bytesGroupIdentifier)
-                                } else {
-                                    initialView.setPhotoUrl(
-                                        bytesGroupIdentifier,
-                                        it
-                                    )
-                                }
-                            })
+                                    if (photoUrl.isEmpty()) {
+                                        initialView.setGroup(bytesGroupIdentifier)
+                                    } else {
+                                        initialView.setPhotoUrl(
+                                            bytesGroupIdentifier,
+                                            it
+                                        )
+                                    }
+                                })
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(text = stringResource(R.string.explanation_new_group_v2_card_photo))
                         }
@@ -636,7 +692,7 @@ fun GroupMemberItem(
     member: GroupMember,
     keycloakManaged: Boolean,
     nonAdminsReadOnly: Boolean,
-    onInvite: (contact: Contact) -> Unit = {}
+    onInvite: ((contact: Contact) -> Unit)? = null
 ) {
     val context = LocalContext.current
     ContactListItem(
@@ -645,14 +701,9 @@ fun GroupMemberItem(
         title = AnnotatedString(
             member.getDisplayName(context) + if (member.isYou) " (${context.getString(R.string.text_you)})" else ""
         ),
-        body = when {
-            member.isAdmin && member.pending -> AnnotatedString(stringResource(R.string.label_pending_admin))
-            member.isAdmin -> AnnotatedString(stringResource(R.string.label_admin))
-            nonAdminsReadOnly && member.pending -> AnnotatedString(stringResource(R.string.label_pending_read_only))
-            nonAdminsReadOnly -> AnnotatedString(stringResource(R.string.label_read_only))
-            member.pending -> AnnotatedString(stringResource(R.string.label_pending))
-            else -> null
-        },
+        body = (ContactCacheSingleton.getContactDetailsSecondLine(member.bytesIdentity)
+            ?: member.jsonIdentityDetails?.formatPositionAndCompany(""))?.takeIf { it.isNotEmpty() }
+            ?.let { AnnotatedString(it) },
         onClick = {
             if (member.contact != null) {
                 if (member.contact.oneToOne) {
@@ -696,22 +747,60 @@ fun GroupMemberItem(
             }
         },
         endContent = {
-            member.contact?.let { contact ->
-                if ((contact.hasChannelOrPreKey() || contact.keycloakManaged) && contact.active && contact.oneToOne.not()) {
+            onInvite?.let {
+                member.contact?.let { contact ->
                     val inviteSent = AppDatabase.getInstance().invitationDao()
-                        .getContactOneToOneInvitation(contact.bytesOwnedIdentity, contact.bytesContactIdentity).observeAsState()
+                        .getContactOneToOneInvitation(
+                            contact.bytesOwnedIdentity,
+                            contact.bytesContactIdentity
+                        ).observeAsState()
                     OlvidTextButton(
-                        text = if (inviteSent.value == null) stringResource(R.string.button_label_invite) else stringResource(R.string.button_label_invited),
-                        contentColor = if (inviteSent.value == null) colorResource(R.color.olvid_gradient_light) else colorResource(R.color.greyTint),
+                        text = if (inviteSent.value == null) stringResource(R.string.button_label_invite) else stringResource(
+                            R.string.button_label_invited
+                        ),
+                        contentColor = if (inviteSent.value == null) colorResource(R.color.olvid_gradient_light) else colorResource(
+                            R.color.greyTint
+                        ),
                         enabled = inviteSent.value == null,
                         onClick = {
                             onInvite(member.contact)
                         },
                     )
                 }
-            }
+            } ?: AdminEndLabel(
+                admin = member.isAdmin,
+                pending = member.pending,
+                nonAdminsReadOnly = nonAdminsReadOnly,
+            )
         }
     )
+}
+
+
+@Composable
+fun AdminEndLabel(
+    admin: Boolean,
+    pending: Boolean,
+    nonAdminsReadOnly: Boolean,
+) {
+    when {
+        admin && pending -> AnnotatedString(stringResource(R.string.label_pending_admin))
+        admin -> AnnotatedString(stringResource(R.string.label_admin))
+        nonAdminsReadOnly && pending -> AnnotatedString(stringResource(R.string.label_pending_read_only))
+        nonAdminsReadOnly -> AnnotatedString(stringResource(R.string.label_read_only))
+        pending -> AnnotatedString(stringResource(R.string.label_pending))
+        else -> null
+    }?.let {
+        Text(
+            modifier = Modifier
+                .width(80.dp)
+                .padding(horizontal = 4.dp),
+            textAlign = TextAlign.Center,
+            text = it,
+            color = colorResource(id = R.color.greyTint),
+            style = OlvidTypography.subtitle1,
+        )
+    }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)

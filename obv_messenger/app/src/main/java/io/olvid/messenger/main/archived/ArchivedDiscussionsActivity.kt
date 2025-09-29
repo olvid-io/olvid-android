@@ -31,6 +31,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -60,6 +62,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -93,6 +97,7 @@ class ArchivedDiscussionsActivity : LockableActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val context = LocalContext.current
+            val resources = LocalResources.current
             val hapticFeedback = LocalHapticFeedback.current
             val archivedDiscussions by discussionListViewModel.archivedDiscussions.observeAsState()
             val scope = rememberCoroutineScope()
@@ -177,13 +182,20 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                     }
                 },
             ) { contentPadding ->
+                val layoutDirection = LocalLayoutDirection.current
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = contentPadding.calculateTopPadding())
-                        .cutoutHorizontalPadding()
-                        .systemBarsHorizontalPadding()
-                        .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
+                        .padding(
+                            start = contentPadding.calculateStartPadding(layoutDirection),
+                            top = contentPadding.calculateTopPadding(),
+                            end = contentPadding.calculateEndPadding(layoutDirection),
+                            bottom = 0.dp,
+                        )
+//                        .padding(top = contentPadding.calculateTopPadding())
+//                        .cutoutHorizontalPadding()
+//                        .systemBarsHorizontalPadding()
+//                        .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
                 ) {
                     LaunchedEffect(discussionListViewModel.cancelableArchivedDiscussions) {
                         if (discussionListViewModel.cancelableArchivedDiscussions.isNotEmpty()) {
@@ -194,7 +206,7 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                 val count =
                                     discussionListViewModel.cancelableArchivedDiscussions.size
                                 val result = snackbarHostState.showSnackbar(
-                                    message = context.resources.getQuantityString(
+                                    message = resources.getQuantityString(
                                         R.plurals.label_discussion_unarchive_done,
                                         count,
                                         count

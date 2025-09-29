@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" và 1 nhóm chung</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" và %2$d nhóm chung khác</item>
+	</plurals>
 	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1156880361">Một trong các thiết bị của bạn sẽ hết hạn và bị hủy kích hoạt trong **ít hơn %1$d ngày**.\nBạn có thể mua đăng ký **Olvid+** để giữ cho thiết bị hoạt động.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Một trong các thiết bị của bạn sẽ hết hạn và bị hủy kích hoạt trong **ít hơn %1$d ngày**.\nBạn có thể mua đăng ký **Olvid+** để giữ cho thiết bị hoạt động.</item>
@@ -93,6 +97,10 @@
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">Bạn sắp mời từng thành viên trong nhóm mà bạn có kênh (hiện tại 1 thành viên) tham gia vào một cuộc trò chuyện riêng tư.\nBạn có muốn tiếp tục không?</item>
 		<item quantity="other" state="needs_review" hash="-994717142">Bạn sắp mời từng thành viên trong nhóm mà bạn có kênh (hiện tại %1$d thành viên) tham gia một cuộc trò chuyện riêng tư.\nBạn có muốn tiếp tục không?</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">Có thể mời 1 thành viên nhóm vào cuộc trò chuyện riêng tư</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d thành viên nhóm có thể được mời tham gia một cuộc trò chuyện riêng tư</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 nhóm chung</item>

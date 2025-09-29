@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" a 1 další skupina společná</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" a %2$d další společné skupiny</item>
+	</plurals>
 	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1156880361">Jedno z vašich zařízení vyprší a bude deaktivováno za **méně než %1$d den**.\nMůžete si zakoupit předplatné **Olvid+** a udržet jej aktivní.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Jedno z vašich zařízení vyprší a bude deaktivováno za **méně než %1$d dní**.\nMůžete si zakoupit předplatné **Olvid+** a udržet jej aktivní.</item>
@@ -93,6 +97,10 @@
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (v současné době 1 člen), do soukromé diskuze.\nChcete pokračovat?</item>
 		<item quantity="other" state="needs_review" hash="-994717142">Chystáte se pozvat každého člena skupiny, se kterým máte kanál (v současné době %1$d členů), do soukromé diskuze.\nChcete pokračovat?</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">Lze pozvat 1 člena skupiny do soukromé konverzace</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d členové skupiny mohou být pozváni do soukromé konverzace</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 společná skupina</item>

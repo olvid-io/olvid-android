@@ -87,7 +87,7 @@
     <string name="explanation_empty_discussion_list">Aucune discussion pour le moment</string>
     <string name="explanation_empty_discussion_list_sub">Les discussions avec vos contacts et groupes s\'afficheront ici.</string>
     <string name="explanation_empty_group_list">Aucun groupe pour le moment</string>
-    <string name="explanation_empty_group_list_sub">Appuyez sur \"Nouveau groupe\" pour en créer un.</string>
+    <string name="explanation_empty_group_list_sub">Apuyez sur le + bleu ci-dessous pour en créer un.</string>
     <string name="explanation_new_group_card">L\'administrateur du groupe a mis à jour la Group Card. L\'ancienne version et la nouvelle sont affichées ci-dessous.\n\nActualisez les informations du groupe en cliquant «\u00a0mettre à jour\u00a0».</string>
     <string name="explanation_new_group_v2_card_name">Un administrateur a mis à jour le nom du groupe :</string>
     <string name="explanation_new_group_v2_card_description">Un administrateur a mis à jour la description du groupe :</string>
@@ -721,7 +721,7 @@
     <string name="pref_category_send_receive_messages">Envoyer &amp; recevoir des messages</string>
     <string name="pref_auto_open_limited_visibility_inbound_summary">Quand cette option est activée, les messages éphémères sont ouverts automatiquement en entrant dans la discussion. Autrement, un click est nécessaire.</string>
     <string name="pref_retain_wiped_outbound_messages_summary">Une fois cette option activée, les messages envoyés sont conservés après leur effacement afin de savoir quand ils sont reçus et lus. Autrement, il sont supprimés.</string>
-    <string name="pref_category_webclient">Client web</string>
+    <string name="pref_category_webclient_title">Client web</string>
     <string name="label_title_change_list">Paramètres modifiés</string>
     <string name="toast_message_error_parsing_settings_update_link">Lien de mise à jour de réglages corrompu</string>
     <string name="pref_discussion_category_send_receive">Envoi et réception de messages</string>
@@ -828,6 +828,8 @@
     <string name="activity_title_identity_creation_options">Options de création d\'ID</string>
     <string name="activity_title_scan_configuration">Scan de configuration</string>
     <string name="menu_action_import_activation_from_clipboard">Importer un lien du presse-papier</string>
+    <string name="troubleshooting_update_valid_title">Olvid est à jour</string>
+    <string name="explanation_latest_olvid_version">Vous disposez de la version la plus récente d\'olvid</string>
     <string name="dialog_title_update_available">Mise à jour disponible</string>
     <string name="dialog_message_update_available">Une nouvelle version d\'Olvid est disponible sur Google Play.\n\nVeuillez mettre à jour pour profiter des dernières fonctionnalités.</string>
     <string name="dialog_title_call_initiation_not_supported">Émission d\'appels impossible</string>
@@ -889,7 +891,7 @@
     <string name="dialog_message_failed_to_upload_identity_to_keycloak">Olvid n\'a pas pu déposer votre ID Olvid sur le fournisseur d\'identités de votre société. Nous réessayerons en tâche de fond.</string>
     <string name="dialog_title_keycloak_identity_replacement_forbidden">Erreur de fournisseur d\'identités</string>
     <string name="dialog_message_keycloak_identity_replacement_forbidden">Votre fournisseur d\'identités indique qu\'un ID Olvid est déjà associé à l\'utilisateur sous lequel vous vous êtes connecté et vous n\'avez pas la permission de le mettre à jour.\nVeuillez contacter votre administrateur pour plus de détails.</string>
-    <string name="toast_message_contact_added">%1$s ajouté à vos contacts</string>
+    <string name="toast_message_contact_added">%1$s a été ajouté à vos contacts</string>
     <string name="text_explanation_keycloak_license_activation_impossible">Votre ID Olvid est actuellement géré par le fournisseur d\'identités de votre société. Vous ne pouvez pas activer manuellement une licence Olvid.\n\nVeuillez contacter votre administrateur pour plus de détails.</string>
     <string name="text_missed_call">Appel manqué</string>
     <string name="text_contact_details_updated">Détails du contact mis à jour</string>
@@ -994,7 +996,7 @@
     <string name="dialog_title_backup_requires_sign_in">Connexion à votre fournisseur cloud requise</string>
     <string name="dialog_message_backup_requires_sign_in">Vous avez configuré Olvid pour effectuer des sauvegardes automatiques vers un fournisseur cloud, mais votre session a expiré. Vous devez vous reconnecter à ce fournisseur.\n\nSi vous ne souhaitez plus profiter des sauvegardes automatiques, vous pouvez les désactiver dans les paramètres d\'Olvid. Gardez à l\'esprit que les sauvegardes automatiques sont le seul moyen d\'éviter la perte de vos contacts en cas de perte ou de panne de votre appareil.</string>
     <string name="button_label_sign_in">Connexion</string>
-    <string name="button_label_invite_contact">Entrer en contact à distance</string>
+    <string name="button_label_get_in_contact_remotely">Entrer en contact à distance</string>
     <string name="text_explanation_warning_mutual_scan_contact_already_known">%1$s fait déjà partie de vos contacts.</string>
     <string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one">%1$s fait partie de votre liste d\'utilisateurs connus mais n\'est pas encore dans vos contacts.</string>
     <string name="label_new">Nouv.</string>
@@ -1188,6 +1190,7 @@
     <string name="pref_text_ping_connectivity_indicator_dot">Point coloré sur le «\u00a0i\u00a0» du logo Olvid</string>
     <string name="pref_text_ping_connectivity_indicator_line">Ligne discrète en haut de la liste de discussions</string>
     <string name="pref_text_ping_connectivity_indicator_full">Statut de connexion complet en haut de la liste de discussions</string>
+    <string name="pref_text_ping_connectivity_indicator_never">Ne jamais rien afficher, même sur perte de connexion</string>
     <string name="label_ping_connectivity_none">Réseau\u00a0: AUCUN</string>
     <string name="label_ping_connectivity_connecting">Réseau\u00a0: CONNEXION…</string>
     <string name="label_ping_connectivity_connected">Réseau\u00a0: CONNECTÉ</string>
@@ -1204,7 +1207,7 @@
     <string name="dialog_title_configure_widget">Configurer le widget…</string>
     <string name="label_widget_appearance">Apparence du widget</string>
     <string name="label_widget_tap_action">Action en appuyant le widget</string>
-    <string name="label_discuss">Discuter</string>
+    <string name="button_label_discuss">Discuter</string>
     <string name="label_message">Message</string>
     <string name="hint_predefined_message_to_send">Message prédéfini à envoyer</string>
     <string name="label_confirm_before_sending">Confirmation avant l\'envoi</string>
@@ -1350,9 +1353,9 @@
     <string name="pref_screen_scale">Taille d\'affichage</string>
     <string name="content_description_open_discussion">Ouvrir la discussion</string>
     <string name="label_read_only">Lecture seule</string>
-    <string name="label_pending_read_only">Lecture seule en attente</string>
+    <string name="label_pending_read_only">Lecture seule\nen attente</string>
     <string name="label_admin">Admin</string>
-    <string name="label_pending_admin">Admin en attente</string>
+    <string name="label_pending_admin">Admin\nen attente</string>
     <string name="text_unable_to_display_contact_name">Impossible d\'afficher le nom de cet utilisateur</string>
     <string name="text_unnamed_group">Groupe sans nom</string>
     <string name="pref_discussion_category_notifications_title">Notifications de discussion</string>
@@ -1383,7 +1386,7 @@
     <string name="debug_label_number_of_members_and_invited">Membres du group/total invités\u00a0:</string>
     <string name="debug_label_group_version">Version du group\u00a0:</string>
     <string name="debug_label_group_type">Type de group\u00a0:</string>
-    <string name="debug_label_group_type_user_managed">géré par les members</string>
+    <string name="debug_label_group_type_user_managed">géré par les membres</string>
     <string name="debug_label_group_type_keycloak">géré par votre annuaire</string>
     <string name="text_not_sent_yet">Pas encore envoyé</string>
     <string name="invitation_status_description_group_v2_frozen_invitation">Ce groupe est en cours de synchronisation. Une fois terminé, vous pourrez accepter cette invitation.</string>
@@ -1392,7 +1395,7 @@
     <string name="dialog_title_clone_group_error_missing_capability">Impossible de cloner ce groupe</string>
     <string name="dialog_message_clone_group_error_missing_capability">Le groupe %1$s ne peut pas être cloné car certains membres de ce groupe utilisent une version ancienne d\'Olvid qui ne gère pas les groupes v2. Faites leur savoir qu\'une nouvelle version d\'Olvid est disponible\u00a0!Utilisateurs concernés\u00a0:%2$s</string>
     <string name="dialog_title_clone_group_warning_missing_members">Attention\u00a0: clonage partiel</string>
-    <string name="dialog_message_clone_group_warning_missing_members">Le groupe %1$s contient des members avec lesquels vous n\'avez pas encore the canal sécurisé. Vous ne pouvez pas les inviter dans le nouveau groupe.\n\nUtilisateurs concernés:%2$s\n\nSouhaitez-vous poursuivre avec un groupe incomplet\u00a0?</string>
+    <string name="dialog_message_clone_group_warning_missing_members">Le groupe %1$s contient des membres avec lesquels vous n\'avez pas encore the canal sécurisé. Vous ne pouvez pas les inviter dans le nouveau groupe.\n\nUtilisateurs concernés:%2$s\n\nSouhaitez-vous poursuivre avec un groupe incomplet\u00a0?</string>
     <string name="text_copy_of_prefix">"Copie de "</string>
     <string name="text_message_location_sent">Position envoyée</string>
     <string name="text_message_location_received">Position reçue</string>
@@ -1470,7 +1473,7 @@
     <string name="x_seconds">%1$02ds</string>
     <string name="pref_unlock_failed_wipe_messages_summary">Quand cette option est activée, saisir 3 mauvais PINs/mots de passe d\'affilée entraîne l\'effacement silencieux de tous les messages à visibilité limitée.</string>
     <string name="pref_unlock_failed_wipe_messages_title">Effacer les message sensibles après 3 mauvais PINs</string>
-    <string name="pref_use_emergency_pin_summary">Activez cette option pour définir un PIN/mot de passe «\u00a0de secours\u00a0» qui déverrouille l\'application, mais efface silencieusement tous les profils masqués et les messages à visibilité limitée. Saisir ce PIN déactive également cette option.</string>
+    <string name="pref_use_emergency_pin_summary">Activez cette option pour définir un PIN/mot de passe «\u00a0de secours\u00a0» qui déverrouille l\'application, mais efface silencieusement tous les profils masqués et les messages à visibilité limitée. Saisir ce PIN désactive également cette option.</string>
     <string name="pref_use_emergency_pin_title">PIN de secours</string>
     <string name="dialog_title_emergency_pin_creation">Coisissez un PIN de secours</string>
     <string name="text_emergency_pin_creation_explanation">Saisir ce PIN de secours sur l\'écran de verrouillage d\'Olvid deverrouillera Olvid mais effacera silencieusement tous les profils masqués que vous pourriez avoir.</string>
@@ -1598,8 +1601,8 @@
     <string name="pref_no_notify_certificate_change_for_previews_summary">Activez cette option pour désactiver la détection de changement de certificat lors du téléchargement d\'aperçus de liens. Certains sites peuvent présenter un certificat différent à chaque connexion, induisant des notifications fréquentes sans cette option.</string>
     <string name="pref_use_legacy_zxing_scanner_title">Utiliser ZXing pour scanner les codes QR</string>
     <string name="pref_use_legacy_zxing_scanner_summary">Par défaut, Olvid utilise ML Kit pour cela. Activez cette option si le scan de codes QR fonctionne mal dans Olvid.</string>
-    <string name="pref_use_internal_pdf_viewer_title">Utiliser la visionneuse PDF interne (expérimental)</string>
-    <string name="pref_use_internal_pdf_viewer_summary">Par défaut, les pièces jointes PDF sont ouvertes dans une visionneuse externe. Activez cette option pour utiliser la visionneuse interne à la place.</string>
+    <string name="pref_use_internal_pdf_viewer_title">Utiliser la visionneuse PDF interne</string>
+    <string name="pref_use_internal_pdf_viewer_summary">Par défaut, les PDF sont ouverts dans la visionneuse interne. Désactivez cette option pour utiliser une visionneuse externe à la place.</string>
     <string name="label_my_devices">Mes appareils</string>
     <string name="text_device_xxxx">Appareil %1$s</string>
     <string name="text_this_device">Cet appareil</string>
@@ -1655,7 +1658,7 @@
     <string name="onboarding_transfer_target_session_title">Tapez ici le code affiché sur l\'autre appareil</string>
     <string name="onboarding_transfer_target_session_explanation">Démarrez Olvid sur l\'autre appareil.\nAppuyez sur votre photo de profil en haut à gauche.\nSélectionnez le profil que vous souhaitez importer et appuyez sur le bouton « Gérer ».\nAppuyez sur « Ajouter un appareil » pour afficher le code.</string>
     <string name="onboarding_transfer_target_sas_title">Tapez ce code sur l\'autre appareil</string>
-    <string name="onboarding_transfer_devices_multi_title">Vous disposez d\'un abonement multi-appareils</string>
+    <string name="onboarding_transfer_devices_multi_title">Vous disposez d\'un abonnement multi-appareils</string>
     <string name="onboarding_transfer_devices_multi_subtitle">Voici vos appareils actuels</string>
     <string name="onboarding_transfer_devices_title">Choisissez l\'appareil que vous souhaitez garder actif</string>
     <string name="onboarding_transfer_devices_subtitle">Les autres appareils seront désactivés d\'ici 30 jours</string>
@@ -1881,7 +1884,6 @@
     <string name="dialog_title_authentication_failed_time_offset">Décalage d\'horloge possible ?</string>
     <string name="dialog_message_authentication_failed_time_offset">Malheureusement, l\'authentification a échoué.\n\nUne cause possible pourrait être un décalage de **plus de 10 minutes** entre l\'horloge de votre appareil et celle du serveur.\n\nVeuillez vérifier que l\'heure, la date et le fuseau horaire de votre appareils sont corrects et essayer de vous authentifier à nouveau.\n\n*Si le problème persiste, veuillez contacter votre administateur.*</string>
     <string name="button_label_clock_settings">Paramètres d\'horloge</string>
-    <string name="activity_title_get_in_contact">Entrer en contact</string>
     <string name="button_label_discuss_with">Discuter avec %1$s</string>
     <string name="onboarding_transfer_restricted_title">Transfert de profil réglementé</string>
     <string name="explanation_transfer_restriction_title_1">Important</string>
@@ -2001,7 +2003,7 @@
     <string name="explanation_failed_to_restore_backup">Échec de restauration de votre profil. Veuillez réessayer.</string>
     <string name="button_label_restore_my_profile">Restaurer mon profil</string>
     <string name="button_label_keep_all_with_olvid_plus">Les garder tous grâce à Olvid+</string>
-    <string name="explanation_backup_v2_choose_device_after_restore">Après la restauration, vous pourrez choisir quel appareil garder actif depuis les réglages de votre profil.</string>
+    <string name="explanation_backup_v2_choose_device_after_restore">Après la restauration, vous pourrez choisir quel appareil garder actif depuis les réglages de votre profil</string>
     <string name="explanation_backup_v2_device_expiration_start">En restaurant votre profil « </string>
     <string name="explanation_backup_v2_device_expiration_nickname">" (%1$s)"</string>
     <string name="toast_message_no_key_found">Aucune clé de sauvegarde n\'a été trouvée</string>
@@ -2086,4 +2088,29 @@
     <string name="button_label_open_in_external_viewer">Ouvrir dans un lecteur externe</string>
     <string name="pdf_viewer_password_not_supported">Erreur d\'ouverture du fichier dans la visionneuse interne d\'Olvid</string>
     <string name="button_label_invited">Invité</string>
+    <string name="label_new_message_title">Nouveau message</string>
+    <string name="button_label_new_contact">Nouveau contact</string>
+    <string name="new_message_action_search">Recherche</string>
+    <string name="new_contact_double_scan">Face à face</string>
+    <string name="new_contact_remotely">À distance</string>
+    <string name="new_contact_cancel">Annuler</string>
+    <string name="scan_screen_mutual_scan_title">Scannez mutuellement vos codes QR</string>
+    <string name="scan_screen_mutual_scan_yours_title">Maintenant, faites scanner le vôtre</string>
+    <string name="label_scan_screen_code_scanned">Code scanné !</string>
+    <string name="scan_screen_share_invitation_title">Vous ne pouvez pas scanner le code ?</string>
+    <string name="scan_screen_share_invitation_subtitle">Invitez autrement</string>
+    <string name="label_share_profile">Partager votre profil</string>
+    <string name="button_label_download">Télécharger</string>
+    <string name="toast_message_qr_code_saved">QR Code enregistré</string>
+    <string name="toast_message_failed_to_save_qr_code">Échec d\'enregistrement du QR Code</string>
+    <string name="toast_message_clipboard_copied">Copié dans le presse-papier</string>
+    <string name="label_text_qr_code">Texte QR code</string>
+    <string name="button_label_add_first_contact">Ajouter votre premier contact</string>
+    <string name="label_discussion">Discussion</string>
+    <string name="content_description_switch_camera">Changer d\'appareil photo</string>
+    <string name="label_get_in_contact_with">Souhaitez-vous entrer en contact avec %1$s ?</string>
+    <string name="explanation_invite_group_members_list">Les contacts ci-dessous font partie de ce groupe mais n\'ont pas encore de discussion privée avec vous.</string>
+    <string name="label_group_admins">Administrateurs du groupe</string>
+    <string name="text_common_group">\"%1$s\" est un groupe en commun</string>
+    <string name="onboarding_privacy_disclaimer">Pour protéger votre vie privée, Olvid n\'a **pas d\'annuaire centralisé des utilisateurs**. Seuls vos contacts verront votre nom.</string>
 </resources>

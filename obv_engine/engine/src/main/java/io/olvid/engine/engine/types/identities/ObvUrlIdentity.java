@@ -61,8 +61,8 @@ public class ObvUrlIdentity {
         return identity.getBytes();
     }
 
-    public String getUrlRepresentation() {
-        return URL_PROTOCOL + "://" + URL_INVITATION_HOST + "/#" + ObvBase64.encode(Encoded.of(new Encoded[]{
+    public String getUrlRepresentation(boolean forMutualScan) {
+        return URL_PROTOCOL + "://" + URL_INVITATION_HOST + (forMutualScan ? "/1#" : "/#") + ObvBase64.encode(Encoded.of(new Encoded[]{
                 Encoded.of(identity),
                 Encoded.of(displayName)
         }).getBytes());

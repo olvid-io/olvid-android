@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" i još jedna zajednička grupa</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" i %2$d ostalih zajedničkih grupa</item>
+	</plurals>
 	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1156880361">Jedan od vaših uređaja će isteći i biti deaktiviran za **manje od %1$d dana**.\nMožete kupiti **Olvid+** pretplatu kako biste ga zadržali aktivnim.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Jedan od vaših uređaja će isteći i biti deaktiviran za **manje od %1$d dana**.\nMožete kupiti **Olvid+** pretplatu kako biste ga zadržali aktivnim.</item>
@@ -93,6 +97,10 @@
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">Spremate se pozvati svakog člana grupe s kojim imate kanal (trenutno 1 član) u privatnu raspravu.\nŽelite li nastaviti?</item>
 		<item quantity="other" state="needs_review" hash="-994717142">Spremate se pozvati svakog člana grupe s kojim imate kanal (trenutno %1$d članova) u privatnu raspravu.\nŽelite li nastaviti?</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">Jedan član grupe može biti pozvan u privatnu raspravu</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d članovi grupe mogu biti pozvani u privatnu raspravu</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 zajednička grupa</item>

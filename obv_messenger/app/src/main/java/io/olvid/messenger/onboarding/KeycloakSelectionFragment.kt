@@ -24,7 +24,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.method.PasswordTransformationMethod
@@ -41,6 +40,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.core.net.toUri
 import androidx.core.util.Pair
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -172,7 +172,7 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
                             autoViewGroup?.visibility = View.GONE
                             manualViewGroup?.visibility = View.VISIBLE
                             manualViewGroup?.alpha = 0f
-                            manualViewGroup?.animate()?.alpha(1f)?.setDuration(200)
+                            manualViewGroup?.animate()?.alpha(1f)?.duration = 200
                         }
                     })
             }
@@ -374,7 +374,7 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
                 activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
             imm?.hideSoftInputFromWindow(v.windowToken, 0)
 
-            activity.onBackPressed()
+            activity.onBackPressedDispatcher.onBackPressed()
         } else if (v.id == R.id.button_validate_configuration) {
             if (viewModel.keycloakServer == null) {
                 return
@@ -385,7 +385,7 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
 
             validateKeycloakServer()
         } else if (v.id == R.id.button_authentication_browser) {
-            KeycloakBrowserChooserDialog.openBrowserChoiceDialog(v)
+            KeycloakBrowserChooserDialog.openBrowserChoiceDialog(v.context)
         } else if (v.id == R.id.button_authenticate) {
             val imm =
                 activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
@@ -408,15 +408,11 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
                                 failed(KeycloakTasks.RFC_USER_NOT_AUTHENTICATED)
                                 return
                             }
-                            if (keycloakAuthenticationStartFragment.authenticationSpinnerGroup != null) {
-                                keycloakAuthenticationStartFragment.authenticationSpinnerGroup.visibility =
-                                    View.VISIBLE
-                            }
-                            if (keycloakAuthenticationStartFragment.authenticationSpinnerText != null) {
-                                keycloakAuthenticationStartFragment.authenticationSpinnerText.setText(
-                                    R.string.label_retrieving_user_details
-                                )
-                            }
+                            keycloakAuthenticationStartFragment.authenticationSpinnerGroup.visibility =
+                                View.VISIBLE
+                            keycloakAuthenticationStartFragment.authenticationSpinnerText.setText(
+                                R.string.label_retrieving_user_details
+                            )
 
                             KeycloakTasks.getOwnDetails(
                                 activity,
@@ -425,15 +421,15 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
                                 clientSecret,
                                 jwks,
                                 null,
-                                object : KeycloakCallback<Pair<KeycloakUserDetailsAndStuff, KeycloakServerRevocationsAndStuff>> {
-                                    override fun success(userDetailsAndApiKeyAndRevocationAllowed: Pair<KeycloakUserDetailsAndStuff, KeycloakServerRevocationsAndStuff>) {
-                                        if (userDetailsAndApiKeyAndRevocationAllowed.first == null || userDetailsAndApiKeyAndRevocationAllowed.second == null) {
+                                object : KeycloakCallback<Pair<KeycloakUserDetailsAndStuff, KeycloakServerRevocationsAndStuff>?> {
+                                    override fun success(userDetailsAndApiKeyAndRevocationAllowed: Pair<KeycloakUserDetailsAndStuff, KeycloakServerRevocationsAndStuff>?) {
+                                        if (userDetailsAndApiKeyAndRevocationAllowed?.first == null || userDetailsAndApiKeyAndRevocationAllowed.second == null) {
                                             failed(0)
                                             return
                                         }
 
                                         val minimumBuildVersion =
-                                            if (userDetailsAndApiKeyAndRevocationAllowed.second.minimumBuildVersions != null) userDetailsAndApiKeyAndRevocationAllowed.second.minimumBuildVersions["android"] else null
+                                            if (userDetailsAndApiKeyAndRevocationAllowed.second.minimumBuildVersions != null) userDetailsAndApiKeyAndRevocationAllowed.second.minimumBuildVersions!!["android"] else null
                                         if (minimumBuildVersion != null && minimumBuildVersion > BuildConfig.VERSION_CODE) {
                                             failed(VERSION_OUTDATED)
                                             return
@@ -452,30 +448,24 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
                                         activity.runOnUiThread {
                                             if (userDetailsAndApiKeyAndRevocationAllowed.first.server != null) {
                                                 viewModel.validateServer(userDetailsAndApiKeyAndRevocationAllowed.first.server)
-                                                if (keycloakAuthenticationStartFragment.authenticationSpinnerText != null) {
-                                                    keycloakAuthenticationStartFragment.authenticationSpinnerText.setText(
-                                                        R.string.label_checking_server
-                                                    )
-                                                }
+                                                keycloakAuthenticationStartFragment.authenticationSpinnerText.setText(
+                                                    R.string.label_checking_server
+                                                )
                                                 AppSingleton.getEngine().queryServerWellKnown(
                                                     userDetailsAndApiKeyAndRevocationAllowed.first.server
                                                 )
                                             } else {
-                                                if (keycloakAuthenticationStartFragment.authenticationSpinnerGroup != null) {
-                                                    keycloakAuthenticationStartFragment.authenticationSpinnerGroup.visibility =
-                                                        View.GONE
-                                                }
+                                                keycloakAuthenticationStartFragment.authenticationSpinnerGroup.visibility =
+                                                    View.GONE
                                                 findNavController(v).navigate(R.id.action_keycloak_identity_creation)
                                             }
                                         }
                                     }
 
                                     override fun failed(rfc: Int) {
-                                        if (keycloakAuthenticationStartFragment.authenticationSpinnerGroup != null) {
-                                            activity.runOnUiThread {
-                                                keycloakAuthenticationStartFragment.authenticationSpinnerGroup.visibility =
-                                                    View.GONE
-                                            }
+                                        activity.runOnUiThread {
+                                            keycloakAuthenticationStartFragment.authenticationSpinnerGroup.visibility =
+                                                View.GONE
                                         }
                                         if (rfc == VERSION_OUTDATED) {
                                             val builder = SecureAlertDialogBuilder(
@@ -488,18 +478,16 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
                                                     try {
                                                         startActivity(
                                                             Intent(
-                                                                Intent.ACTION_VIEW, Uri.parse(
-                                                                    "market://details?id=$appPackageName"
-                                                                )
+                                                                Intent.ACTION_VIEW,
+                                                                "market://details?id=$appPackageName".toUri()
                                                             )
                                                         )
                                                     } catch (_: ActivityNotFoundException) {
                                                         try {
                                                             startActivity(
                                                                 Intent(
-                                                                    Intent.ACTION_VIEW, Uri.parse(
-                                                                        "https://play.google.com/store/apps/details?id=$appPackageName"
-                                                                    )
+                                                                    Intent.ACTION_VIEW,
+                                                                    "https://play.google.com/store/apps/details?id=$appPackageName".toUri()
                                                                 )
                                                             )
                                                         } catch (ee: Exception) {
@@ -537,10 +525,8 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
                 if (server != null) {
                     viewModel.serverValidationFinished(server, false)
                     activity.runOnUiThread {
-                        if (keycloakAuthenticationStartFragment.authenticationSpinnerGroup != null) {
-                            keycloakAuthenticationStartFragment.authenticationSpinnerGroup.visibility =
-                                View.GONE
-                        }
+                        keycloakAuthenticationStartFragment.authenticationSpinnerGroup.visibility =
+                            View.GONE
                         App.toast(
                             R.string.toast_message_unable_to_connect_to_server,
                             Toast.LENGTH_SHORT,
@@ -556,10 +542,8 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
                 if (server != null) {
                     viewModel.serverValidationFinished(server, true)
                     activity.runOnUiThread {
-                        if (keycloakAuthenticationStartFragment.authenticationSpinnerGroup != null) {
-                            keycloakAuthenticationStartFragment.authenticationSpinnerGroup.visibility =
-                                View.GONE
-                        }
+                        keycloakAuthenticationStartFragment.authenticationSpinnerGroup.visibility =
+                            View.GONE
                         findNavController(authenticateButton!!).navigate(R.id.action_keycloak_identity_creation)
                     }
                 }

@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">Ei keskusteluja toistaiseksi</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">Yhteystietosi ja ryhmäkeskustelusi näkyvät täällä.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">Ei ryhmiä toistaiseksi</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Paina \"Uusi ryhmä\" luodaksesi ensimmäisen ryhmäsi.</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">Paina alla olevaa sinistä + -merkkiä luodaksesi ensimmäisen ryhmän.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">Ryhmän ylläpitäjä on päivittänyt Ryhmäkortin. Sekä vanha että uusi versio näkyvät alla.\n\nPaina \"päivitä\" päivittääksesi ryhmän tiedot.</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Ylläpitäjä muutti ryhmän nimen muotoon:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Ylläpitäjä muutti ryhmän kuvauksen muotoon:</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Viestien lähettäminen ja vastaanottaminen</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Kun se on käytössä, kertakäyttöviestit ja oletusarvoisen rajoitetun näkyvyysajan viestit avautuvat heti, kun siirryt keskusteluun. Muussa tapauksessa tarvitaan klikkaus.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Kun se on käytössä, poistetut lähtevät viestit säilytetään, jotta voit nähdä, milloin ne on toimitettu tai luettu. Muussa tapauksessa ne poistetaan.</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">Web-asiakas</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Web-asiakas</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">Päivitetyt asetukset</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Virhe asetusten päivityslinkin jäsentämisessä</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Viestien lähettäminen ja vastaanottaminen</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">ID:n luontivaihtoehdot</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">Määritelmän skannaus</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">Tuo linkki leikepöydältä</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid on päivitetty</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Sinulla on asennettuna uusin Olvid-versio</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Päivitys saatavilla</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Uudempi versio Olvidista on saatavilla Google Playssa.\n\nPäivitä, jotta voit hyödyntää uusimpia ominaisuuksia.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Puhelun aloitus epäonnistui</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Olvid ei pystynyt lataamaan Olvid-tunnustasi yrityksesi tunnistetietopalveluun. Sitä yritetään uudelleen taustalla.</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">Identiteetintarjoajan virhe</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">Identiteetintarjoajasi ilmoittaa, että eri Olvid-tunnus on liitetty käyttäjään, jona kirjauduit sisään, eikä sinulla ole lupaa päivittää sitä.\nOta yhteyttä järjestelmänvalvojaan saadaksesi lisätietoja.</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s lisätty yhteystietoihisi</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">%1$s lisättiin yhteystietoihisi</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Olvid-tunnuksesi hallinnoi tällä hetkellä yrityksesi identiteetintarjoaja. Et voi aktivoida Olvid-lisenssiä manuaalisesti.\n\nOta yhteyttä järjestelmänvalvojaan saadaksesi lisätietoja.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Puuttuva soitto</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Yhteystiedot päivitetty</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Pilvipalveluntarjoajan kirjautuminen vaaditaan</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Olet määrittänyt Olvidin käyttämään automaattisia varmuuskopioita pilvipalveluntarjoajaan, mutta istuntosi on vanhentunut. Sinun täytyy kirjautua uudelleen tähän palveluntarjoajaan.\n\nJos et enää halua automaattisia varmuuskopioita, voit poistaa ne käytöstä Sovellusasetuksissa. Muista, että automaattiset varmuuskopiot ovat ainoa tapa estää yhteystietojesi menetys, jos laitteesi katoaa tai vahingoittuu.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Kirjaudu sisään</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">Ota yhteyttä etänä</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Ota yhteyttä etänä</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s on jo yhteystiedoissasi.</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s on luettelossasi tunnetuista käyttäjistä, mutta ei vielä yhteystiedoissasi.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Uusi</string>
@@ -1187,6 +1189,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Värillinen piste Olvid-logon ”i”-kirjaimessa</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Huomaamaton viiva keskusteluluettelon yläosassa</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Täysi yhteystila keskusteluluettelon yläosassa</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Älä koskaan näytä mitään indikaattoria, edes yhteyden katketessa</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">Yhteys: EI YHTEYTTÄ</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">Yhteys: YHDISTETÄÄN…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Yhteys: YHDISTETTY</string>
@@ -1203,7 +1206,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Määritä widget…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Widgetin ulkoasu</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Widgetin toiminto napautettaessa</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">Keskustele</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">Keskustele</string>
 	<string name="label_message" state="needs_review" hash="809999904">Viesti</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Esiasetettu viesti lähetettäväksi</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Vahvista ennen lähettämistä</string>
@@ -1349,9 +1352,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Näytön koko</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Avaa keskustelu</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">Vain luku -tila</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">Odottaa vain lukemista</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Odottaa\nvain luku -tila</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Ylläpitäjä</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Odottaa hyväksyntää</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Odottaa hyväksyntää ylläpitäjältä</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Käyttäjän nimeä ei voitu näyttää</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Nimetön ryhmä</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Keskusteluilmoitukset</string>
@@ -1382,7 +1385,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">Ryhmän jäsenet/kutsujen kokonaismäärä:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">Ryhmäversio:</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">Ryhmän tyyppi:</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">käyttäjien hallinnoima</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">käyttäjän hallinnoima</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">hakemiston hallinnoima</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">Ei vielä lähetetty</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">Tätä ryhmää synkronoidaan parhaillaan. Kun synkronointi on valmis, voit hyväksyä kutsun.</string>
@@ -1391,7 +1394,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">Ryhmän kloonaus epäonnistui</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">Ryhmää %1$s ei voi kloonata, koska jotkut tämän ryhmän jäsenet käyttävät vanhentunutta Olvid-versiota, joka ei tue ryhmiä v2. Kerro heille, että uudempi Olvid-versio on saatavilla!\n\nVanhentuneet käyttäjät:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">Varoitus: osittainen kloonaus</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">Ryhmässä %1$s on jäseniä, joiden kanssa sinulla ei vielä ole suojattua kanavaa. Et voi kutsua heitä uuteen ryhmään.\n\nVaikutetut käyttäjät:%2$s\n\nHaluatko jatkaa keskeneräisellä ryhmällä?</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">Ryhmässä %1$s on jäseniä, joiden kanssa sinulla ei vielä ole suojattua kanavaa. Et voi kutsua heitä uuteen ryhmään.\n\nVaikutetut käyttäjät:%2$s\n\nHaluatko jatkaa keskeneräisellä ryhmällä?</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Kopio\u0020</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Sijainti lähetetty</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Sijainti vastaanotettu</string>
@@ -1475,7 +1478,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02ds</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">Kun tämä on käytössä, väärän PIN-koodin/salasanan syöttäminen kolme kertaa peräkkäin poistaa äänettömästi kaikki kerran luetut ja rajoitetun näkyvyyden omaavat viestit.</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">Poista arkaluontoiset viestit 3 virheellisen PIN-koodin jälkeen</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">Ota tämä vaihtoehto käyttöön määrittääksesi \"hätä\"-PIN-koodin/salasanan, joka avaa sovelluksen, mutta poistaa äänettömästi kaikki piilotetut profiilit, kerran luettavat viestit ja viestit, joiden näkyvyys on rajoitettu. Tämän PIN-koodin syöttäminen poistaa myös tämän vaihtoehdon käytöstä.</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">Ota tämä vaihtoehto käyttöön määrittääksesi \"hätä\" PIN-koodin/salasanan, joka avaa sovelluksen, mutta poistaa äänettömästi kaikki piilotetut profiilit, kerran luetut ja rajoitetun näkyvyyden viestit. Tämän PIN-koodin syöttäminen poistaa myös tämän vaihtoehdon käytöstä.</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">Hätä-PIN-koodi</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">Valitse hätä-PIN-koodi</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">Tämän hätä-PIN-koodin syöttäminen Olvidin lukitusnäytöllä avaa Olvidin lukituksen, mutta poistaa hiljaa kaikki mahdolliset piilotetut profiilit.</string>
@@ -1603,8 +1606,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Ota tämä vaihtoehto käyttöön poistaaksesi käytöstä varmenteen muutosten havaitsemisen linkin esikatselukuvia ladattaessa. Jotkin sivustot saattavat esittää eri varmenteen jokaisessa yhteydessä, jolloin saatat saada usein ilmoituksia, jos tämä vaihtoehto on poistettu käytöstä.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Käytä vanhempaa ZXing-kirjastoa QR-koodien skannaukseen</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">Oletusarvoisesti ML Kit:iä käytetään QR-koodien skannaukseen. Ota tämä vaihtoehto käyttöön, jos sinulla on ongelmia QR-koodien skannauksessa Olvidissa.</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">Käytä sisäistä PDF-lukijaa (kokeellinen)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">Oletusarvoisesti PDF-liitteet avataan ulkoisessa katseluohjelmassa. Ota tämä vaihtoehto käyttöön käyttääksesi (yksinkertaista) sisäistä katseluohjelmaa sen sijaan.</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Käytä sisäistä PDF-katselinohjelmaa</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Oletusarvoisesti PDF-tiedostot avataan sisäisessä (yksinkertaisessa) katseluohjelmassa. Poista tämä asetus käytöstä käyttääksesi ulkoista katseluohjelmaa sen sijaan.</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">Laitteeni</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Laite %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Tämä laite</string>
@@ -1660,7 +1663,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">Kirjoita toisella laitteella näkyvä koodi</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">Käynnistä Olvid toisella laitteellasi. Napauta profiilikuvaasi vasemmassa yläkulmassa. Valitse profiili, jonka haluat tuoda, ja napauta painiketta \"Hallitse\". Napauta \"Lisää laite\" näyttääksesi koodin.</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">Syötä tämä koodi toiseen laitteeseesi</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">Sinulla on usean laitteen tilaus</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">Sinulla on monilaitetilaus</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">Tässä on luettelo nykyisistä laitteistasi</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">Valitse laite, jonka haluat pitää aktiivisena</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">Muut laitteet deaktivoidaan 30 päivän kuluessa</string>
@@ -1885,7 +1888,6 @@
 	<string name="dialog_title_authentication_failed_time_offset" state="needs_review" hash="-170194947">Mahdollinen kellonero?</string>
 	<string name="dialog_message_authentication_failed_time_offset" state="needs_review" hash="300612997">Valitettavasti tunnistautuminen epäonnistui.\n\nMahdollinen syy voi olla **yli 10 minuutin** ero laitteesi kellon ja palvelimen kellon välillä.\n\nTarkista, että laitteesi aika, päivämäärä ja aikavyöhyke ovat oikein, ja yritä tunnistautua uudelleen.\n\n*Jos ongelma jatkuu, ota yhteyttä järjestelmänvalvojaan.*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">Kellon asetukset</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">Ota yhteyttä</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">Keskustele %1$s:n kanssa</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">Profiilin siirtorajoitus</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">Tärkeää</string>
@@ -2003,7 +2005,7 @@
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">Profiilin palautus epäonnistui. Yritä uudelleen.</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">Palauta profiilini</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Säilytä ne kaikki Olvid+:n avulla</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Kun profiilisi on palautettu, voit valita, minkä laitteen haluat pitää aktiivisena profiiliasetuksista.</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">Kun profiilisi on palautettu, voit valita profiiliasetuksista, minkä laitteen haluat pitää aktiivisena.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Palauttamalla profiilisi «</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Yksikään varmuuskopioavainta ei löytynyt</string>
@@ -2090,4 +2092,29 @@
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Avaa ulkoisessa sovelluksessa</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Virhe avattaessa tätä tiedostoa Olvidin sisäisessä katseluohjelmassa</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Kutsuttu</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">Uusi viesti</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Uusi yhteyshenkilö</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Haku</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Kasvotusten</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Etänä</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Peruuta</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Skannaa toistenne QR-koodit</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Skannaa omasi nyt</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Koodi skannattu!</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Etkö pysty skannaamaan koodia?</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Kutsu heidät toisella tavalla</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">Jaa profiilisi</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">Lataa</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">QR-koodi tallennettu</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">QR-koodin tallennus epäonnistui</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">Kopioitu leikepöydälle</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">QR-koodin teksti</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Lisää ensimmäinen yhteyshenkilö</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">Keskustelu</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Vaihda kameraa</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Haluatko ottaa yhteyttä %1$s?</string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Alla olevat kontaktit ovat osa tätä ryhmää, mutta heillä ei vielä ole yksityistä keskustelua kanssasi.</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">Ryhmän ylläpitäjät</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" on yleinen ryhmä</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Suojataksesi yksityisyyttäsi, Olvidilla **ei ole julkista tai keskitettyä käyttäjäluetteloa**. Nimesi näkevät vain ne, joiden kanssa olet yhteydessä.</string>
 </resources>

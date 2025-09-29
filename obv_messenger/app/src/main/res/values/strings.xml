@@ -88,7 +88,7 @@
     <string name="explanation_empty_discussion_list">No discussions for now</string>
     <string name="explanation_empty_discussion_list_sub">Contact and group discussions will appear here.</string>
     <string name="explanation_empty_group_list">No groups for now</string>
-    <string name="explanation_empty_group_list_sub">Press \"New group\" to create your first group.</string>
+    <string name="explanation_empty_group_list_sub">Press the blue + below to create your first group.</string>
     <string name="explanation_new_group_card">The group manager updated the Group Card. Both the old and new versions are shown below.\n\nPress \"update\" to update the group\'s information.</string>
     <string name="explanation_new_group_v2_card_name">An administrator changed the group name to:</string>
     <string name="explanation_new_group_v2_card_description">An administrator changed the group description to:</string>
@@ -730,7 +730,7 @@
     <string name="pref_category_send_receive_messages">Sending &amp; receiving messages</string>
     <string name="pref_auto_open_limited_visibility_inbound_summary">When activated, read once messages and messages with the default limited visibility duration are opened as soon as you enter the discussion. Otherwise, a click is required.</string>
     <string name="pref_retain_wiped_outbound_messages_summary">When activated, wiped outbound messages are retained so you can see when they are delivered or read. Otherwise, they are deleted.</string>
-    <string name="pref_category_webclient">WebClient</string>
+    <string name="pref_category_webclient_title">WebClient</string>
     <string name="label_title_change_list">Updated settings</string>
     <string name="toast_message_error_parsing_settings_update_link">Error parsing settings update link</string>
     <string name="pref_discussion_category_send_receive">Sending &amp; receiving messages</string>
@@ -837,6 +837,8 @@
     <string name="activity_title_identity_creation_options">ID creation options</string>
     <string name="activity_title_scan_configuration">Scan configuration</string>
     <string name="menu_action_import_activation_from_clipboard">Import link from clipboard</string>
+    <string name="troubleshooting_update_valid_title">Olvid is up to date</string>
+    <string name="explanation_latest_olvid_version">You have the latest version of Olvid installed</string>
     <string name="dialog_title_update_available">Update available</string>
     <string name="dialog_message_update_available">A newer version of Olvid is available from Google Play.\n\nPlease update to take advantage of the newest features.</string>
     <string name="dialog_title_call_initiation_not_supported">Call initiation not supported</string>
@@ -898,7 +900,7 @@
     <string name="dialog_message_failed_to_upload_identity_to_keycloak">Olvid was unable to upload your Olvid ID to your company\'s identity provider. It will be retried in the background.</string>
     <string name="dialog_title_keycloak_identity_replacement_forbidden">Identity provider error</string>
     <string name="dialog_message_keycloak_identity_replacement_forbidden">Your identity provider indicates that a different Olvid ID is associated to the user you signed in as and you do not have permission to update it.\nPlease contact your administrator for more details.</string>
-    <string name="toast_message_contact_added">%1$s added to your contacts</string>
+    <string name="toast_message_contact_added">%1$s was added to your contacts</string>
     <string name="text_explanation_keycloak_license_activation_impossible">Your Olvid ID is currently managed by your company\'s identity provider. You cannot manually activate an Olvid license.\n\nPlease contact your administrator for more details.</string>
     <string name="text_missed_call">Missed call</string>
     <string name="text_contact_details_updated">Contact details updated</string>
@@ -1003,7 +1005,7 @@
     <string name="dialog_title_backup_requires_sign_in">Cloud provider sign in required</string>
     <string name="dialog_message_backup_requires_sign_in">You have configured Olvid to use automatic backups to a cloud provider, but your session has expired. You need to sign in to this provider again.\n\nIf you no longer want automatic backups, you can disable them in the App Settings. Keep in mind that automatic backups are the only way to prevent the loss of your contacts if your device is lost or damaged.</string>
     <string name="button_label_sign_in">Sign in</string>
-    <string name="button_label_invite_contact">Get in contact remotely</string>
+    <string name="button_label_get_in_contact_remotely">Get in contact remotely</string>
     <string name="text_explanation_warning_mutual_scan_contact_already_known">%1$s is already part of your contacts.</string>
     <string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one">%1$s is part of your list of known users but is not yet in your contacts.</string>
     <string name="label_new">New</string>
@@ -1203,6 +1205,7 @@
     <string name="pref_text_ping_connectivity_indicator_dot">Colored dot on the \"i\" of the Olvid logo</string>
     <string name="pref_text_ping_connectivity_indicator_line">Discreet line at the top of discussion list</string>
     <string name="pref_text_ping_connectivity_indicator_full">Full connection status at the top of discussion list</string>
+    <string name="pref_text_ping_connectivity_indicator_never">Never show an indicator, even on connection loss</string>
     <string name="label_ping_connectivity_none">Connectivity: NONE</string>
     <string name="label_ping_connectivity_connecting">Connectivity: CONNECTING…</string>
     <string name="label_ping_connectivity_connected">Connectivity: CONNECTED</string>
@@ -1219,7 +1222,7 @@
     <string name="dialog_title_configure_widget">Configure widget…</string>
     <string name="label_widget_appearance">Widget appearance</string>
     <string name="label_widget_tap_action">Widget tap action</string>
-    <string name="label_discuss">Discuss</string>
+    <string name="button_label_discuss">Discuss</string>
     <string name="label_message">Message</string>
     <string name="hint_predefined_message_to_send">Predefined message to send</string>
     <string name="label_confirm_before_sending">Confirm before sending</string>
@@ -1368,9 +1371,9 @@
     <string name="pref_screen_scale">Display size</string>
     <string name="content_description_open_discussion">Open discussion</string>
     <string name="label_read_only">Read Only</string>
-    <string name="label_pending_read_only">Pending read Only</string>
+    <string name="label_pending_read_only">Pending\nread only</string>
     <string name="label_admin">Admin</string>
-    <string name="label_pending_admin">Pending admin</string>
+    <string name="label_pending_admin">Pending\nadmin</string>
     <string name="text_unable_to_display_contact_name">Unable to display this user\'s name</string>
     <string name="text_unnamed_group">Unnamed group</string>
     <string name="pref_discussion_category_notifications_title">Discussion notifications</string>
@@ -1619,8 +1622,8 @@
     <string name="pref_no_notify_certificate_change_for_previews_summary">Enable this option to disable certificate change detection when fetching a link preview. Some sites may present a different certificate at each connection and you may get frequent notifications with this option off.</string>
     <string name="pref_use_legacy_zxing_scanner_title">Use legacy ZXing library for QR code scanning</string>
     <string name="pref_use_legacy_zxing_scanner_summary">By default, ML Kit is used for QR code scanning. Enable this option if you have issues scanning QR codes from within Olvid.</string>
-    <string name="pref_use_internal_pdf_viewer_title">Use internal PDF viewer (experimental)</string>
-    <string name="pref_use_internal_pdf_viewer_summary">By default, PDF attachments are opened in an external viewer. Enable this option to use the (basic) internal viewer instead.</string>
+    <string name="pref_use_internal_pdf_viewer_title">Use internal PDF viewer</string>
+    <string name="pref_use_internal_pdf_viewer_summary">By default, PDF attachments are opened in a (basic) internal viewer. Disable this option to use an external viewer instead.</string>
     <string name="label_my_devices">My devices</string>
     <string name="text_device_xxxx">Device %1$s</string>
     <string name="text_this_device">This device</string>
@@ -1907,7 +1910,6 @@
     <string name="dialog_title_authentication_failed_time_offset">Possible clock skew?</string>
     <string name="dialog_message_authentication_failed_time_offset">Unfortunately, your authentication failed.\n\nA possible reason could be an offset of **more than 10 minutes** between your device\'s clock and the server\'s clock.\n\nPlease check that your device\'s time, date, and time zone are accurate and try authenticating again.\n\n*If the problem persists, please contact your administrator.*</string>
     <string name="button_label_clock_settings">Clock settings</string>
-    <string name="activity_title_get_in_contact">Get in contact</string>
     <string name="button_label_discuss_with">Discuss with %1$s</string>
     <string name="restriction_alternate_turn_server_url_title" translatable="false">Alternate TURN server URLs</string>
     <string name="restriction_alternate_turn_server_url_description" translatable="false">Comma-separated list of alternate TURN sever URLs to use for Olvid audio and video calls. Username and password must also be provided in other MDM fields.</string>
@@ -2118,4 +2120,30 @@
     <string name="button_label_open_in_external_viewer">Open in external viewer</string>
     <string name="pdf_viewer_password_not_supported">Error opening this file in Olvid\'s internal viewer</string>
     <string name="button_label_invited">Invited</string>
+    <string name="pref_category_webclient_summary" translatable="false">https://web.olvid.io</string>
+    <string name="label_new_message_title">New message</string>
+    <string name="button_label_new_contact">New contact</string>
+    <string name="new_message_action_search">Search</string>
+    <string name="new_contact_double_scan">Face to face</string>
+    <string name="new_contact_remotely">Remotely</string>
+    <string name="new_contact_cancel">Cancel</string>
+    <string name="scan_screen_mutual_scan_title">Scan each other\'s QR codes</string>
+    <string name="scan_screen_mutual_scan_yours_title">Now get yours scanned</string>
+    <string name="label_scan_screen_code_scanned">Code scanned!</string>
+    <string name="scan_screen_share_invitation_title">Can\'t scan the code?</string>
+    <string name="scan_screen_share_invitation_subtitle">Invite them another way</string>
+    <string name="label_share_profile">Share your profile</string>
+    <string name="button_label_download">Download</string>>
+    <string name="toast_message_qr_code_saved">QR Code saved</string>
+    <string name="toast_message_failed_to_save_qr_code">Failed to save QR Code</string>
+    <string name="toast_message_clipboard_copied">Copied to clipboard</string>
+    <string name="label_text_qr_code">QR code text</string>
+    <string name="button_label_add_first_contact">Add your first contact</string>
+    <string name="label_discussion">Discussion</string>
+    <string name="content_description_switch_camera">Switch camera</string>
+    <string name="label_get_in_contact_with">Do you want to get in contact with %1$s?</string>
+    <string name="explanation_invite_group_members_list">Contacts below are part of this group but do not have a private discussion with you yet.</string>
+    <string name="label_group_admins">Group administrators</string>
+    <string name="text_common_group">\"%1$s\" is a common group</string>
+    <string name="onboarding_privacy_disclaimer">To protect your privacy, Olvid has **no public or central user directory**. Your name will only be seen by the people you connect with.</string>
 </resources>

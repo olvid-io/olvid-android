@@ -62,6 +62,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
@@ -150,6 +151,8 @@ fun SearchBarInput(
             Spacer(modifier = Modifier.requiredWidth(2.dp))
             Text(
                 text = placeholderText,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 style = OlvidTypography.body1.copy(color = colorResource(R.color.darkGrey))
             )
         },

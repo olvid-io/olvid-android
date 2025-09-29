@@ -19,7 +19,9 @@
 
 package io.olvid.messenger.group.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -40,7 +42,8 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -54,14 +57,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.ifNull
@@ -85,10 +91,16 @@ fun EditGroupAdminsScreen(
     val members by groupV2DetailsViewModel.groupMembers.observeAsState()
     val groupMembersViewModel = viewModel<GroupMembersViewModel>()
 
-    LaunchedEffect(members) {
-        groupMembersViewModel.setMembers(members?.map {
-            it.toGroupMember().apply { selected = it.permissionAdmin }
-        }.orEmpty())
+    BackHandler(enabled = groupV2DetailsViewModel.isEditingAdmins && !groupV2DetailsViewModel.isEditingAdminsAfterTypeChange) {
+        groupV2DetailsViewModel.isEditingAdmins = false
+    }
+
+    LaunchedEffect(members, groupV2DetailsViewModel.isEditingAdmins) {
+        groupMembersViewModel.setSelectedMembers(null)
+        groupMembersViewModel.setMembers(members?.filter { groupV2DetailsViewModel.isEditingAdmins || it.permissionAdmin }
+            ?.map {
+                it.toGroupMember().apply { selected = it.permissionAdmin }
+            }.orEmpty())
     }
 
     LaunchedEffect(Unit) {
@@ -107,21 +119,39 @@ fun EditGroupAdminsScreen(
             placeholderText = stringResource(R.string.hint_search_contact_name),
             onSearchTextChanged = { groupMembersViewModel.setSearchFilter(it) },
             onClearClick = { groupMembersViewModel.setSearchFilter(null) },
-            selectAllBeacon = selectAllBeacon)
+            selectAllBeacon = selectAllBeacon
+        )
         Box(modifier = Modifier.weight(1f)) {
             GroupAdminsSelection(
-                members = groupMembersViewModel.filteredMembers,
-                showSelectAll = groupMembersViewModel.currentFilter.isNullOrEmpty(),
+                members = AppSingleton.getCurrentIdentityLiveData().value
+                    ?.takeIf { groupMembersViewModel.filterPatterns.isEmpty() }
+                    ?.let {
+                        listOf(GroupMember(
+                            bytesIdentity = it.bytesOwnedIdentity,
+                            contact = null,
+                            jsonIdentityDetails = it.getIdentityDetails(),
+                            fullSearchDisplayName = "",
+                            isAdmin = true,
+                            isYou = true,
+                            pending = false,
+                            selected = false
+                        ))
+                    }.orEmpty()
+                        + groupMembersViewModel.filteredMembers,
+                allMembers = groupMembersViewModel.allMembers,
+                isEditingAdmins = groupV2DetailsViewModel.isEditingAdmins,
+                showSelectAll = groupV2DetailsViewModel.isEditingAdmins && groupMembersViewModel.filterPatterns.isEmpty(),
                 selectAdmins = {
                     groupMembersViewModel.setSelectedMembers(it.toList())
                     selectAllBeacon++
                 },
-                filterPatterns = groupMembersViewModel.filterPatterns
+                filterPatterns = groupMembersViewModel.filterPatterns,
+                nonAdminsReadOnly = groupV2DetailsViewModel.groupType.areNonAdminsReadOnly()
             )
             androidx.compose.animation.AnimatedVisibility(
                 modifier = Modifier
                     .align(Alignment.BottomCenter),
-                visible = groupMembersViewModel.allMembers.any { it.selected xor it.isAdmin },
+                visible = groupMembersViewModel.allMembers.any { it.selected xor it.isAdmin } || groupV2DetailsViewModel.isEditingAdminsAfterTypeChange,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -146,7 +176,9 @@ fun EditGroupAdminsScreen(
                                     it.selected
                                 )
                             }
+                        groupV2DetailsViewModel.selectedGroupType?.let { groupV2DetailsViewModel.groupType = it }
                         groupV2DetailsViewModel.publishGroupEdits()
+                        groupV2DetailsViewModel.isEditingAdmins = false
                         onValidate()
                     }
                 }
@@ -182,18 +214,23 @@ fun ChooseGroupAdminsScreen(
             placeholderText = stringResource(R.string.hint_search_contact_name),
             onSearchTextChanged = { groupMembersViewModel.setSearchFilter(it) },
             onClearClick = { groupMembersViewModel.setSearchFilter(null) },
-            selectAllBeacon = selectAllBeacon)
+            selectAllBeacon = selectAllBeacon
+        )
         Box(modifier = Modifier.weight(1f)) {
             GroupAdminsSelection(
                 members = groupMembersViewModel.filteredMembers,
+                allMembers = groupMembersViewModel.allMembers,
+                isEditingAdmins = true,
                 showSelectAll = groupMembersViewModel.currentFilter.isNullOrEmpty(),
                 selectAdmins = {
                     groupMembersViewModel.setSelectedMembers(it.toList())
                     groupCreationViewModel.admins.value =
-                        groupMembersViewModel.allMembers.filter { it.selected }.mapNotNull { it.contact }.toHashSet()
+                        groupMembersViewModel.allMembers.filter { it.selected }
+                            .mapNotNull { it.contact }.toHashSet()
                     selectAllBeacon++
                 },
-                filterPatterns = groupMembersViewModel.filterPatterns
+                filterPatterns = groupMembersViewModel.filterPatterns,
+                nonAdminsReadOnly = false, // we don't care what we set here, as we are always in isEditingAdmins and the end of row labels will not be shown
             )
             Box(
                 modifier = Modifier
@@ -220,9 +257,12 @@ fun ChooseGroupAdminsScreen(
 @Composable
 fun GroupAdminsSelection(
     members: List<GroupMember>?,
+    allMembers: List<GroupMember>?,
     showSelectAll: Boolean = true,
+    isEditingAdmins: Boolean = false,
     selectAdmins: (HashSet<ByteArray>) -> Unit,
-    filterPatterns: List<Pattern> = emptyList()
+    filterPatterns: List<Pattern> = emptyList(),
+    nonAdminsReadOnly: Boolean,
 ) {
     val context = LocalContext.current
     Column {
@@ -231,15 +271,18 @@ fun GroupAdminsSelection(
                 modifier = Modifier
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple(bounded = true, color = colorResource(R.color.greyOverlay))
+                        indication = ripple(
+                            bounded = true,
+                            color = colorResource(R.color.greyOverlay)
+                        )
                     ) {
-                        if (members?.all { it.selected } == false) {
-                            selectAdmins(members.map { it.bytesIdentity }.toHashSet())
+                        if (allMembers?.all { it.selected } == false) {
+                            selectAdmins(allMembers.map { it.bytesIdentity }.toHashSet())
                         } else {
                             selectAdmins(hashSetOf())
                         }
                     }
-                    .padding(start = 24.dp, top = 8.dp, bottom = 8.dp, end = 16.dp),
+                    .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -248,9 +291,9 @@ fun GroupAdminsSelection(
                     style = OlvidTypography.h3
                 )
                 Switch(
-                    checked = members?.all { it.selected } == true,
+                    checked = members?.filter { !(it.isYou) }?.all { it.selected } == true,
                     onCheckedChange = null,
-                    enabled = members?.size != 0,
+                    enabled = members.isNullOrEmpty().not(),
                     colors = SwitchDefaults.colors(
                         checkedTrackColor = colorResource(R.color.olvid_gradient_light)
                     )
@@ -258,13 +301,45 @@ fun GroupAdminsSelection(
             }
         }
         members?.takeIf { it.isNotEmpty() }?.let {
+            if (filterPatterns.isEmpty()) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 16.dp, bottom = 6.dp, end = 16.dp),
+                    text = stringResource(R.string.label_group_admins) + " (${it.filter { it.selected }.size + 1})",
+                    style = OlvidTypography.h3.copy(color = colorResource(R.color.almostBlack)),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             LazyColumn(
-                contentPadding = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).asPaddingValues() + PaddingValues(top = 16.dp, bottom = 64.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
+                contentPadding = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
+                    .asPaddingValues() + PaddingValues(bottom = 64.dp)
             ) {
-                items(it) { member ->
+                itemsIndexed(items = it, key = {_, member -> member.bytesIdentity}) { index, member ->
                     ContactListItem(
-                        padding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                        title = AnnotatedString(ContactCacheSingleton.getContactDetailsFirstLine(member.bytesIdentity) ?: member.getDisplayName(context = context)).highlight(
+                        modifier = Modifier
+                            .then(
+                                if (index == 0) {
+                                    if (it.size == 1) {
+                                        Modifier.clip(RoundedCornerShape(16.dp))
+                                    } else {
+                                        Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                                    }
+                                } else if (index == it.size - 1) {
+                                    Modifier.clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                                } else {
+                                    Modifier
+                                }
+                            )
+                            .background(colorResource(R.color.lighterGrey)),
+                        padding = PaddingValues(4.dp),
+                        title = AnnotatedString(
+                            ContactCacheSingleton.getContactDetailsFirstLine(
+                                member.bytesIdentity
+                            ) ?: member.getDisplayName(context = context)
+                        ).highlight(
                             SpanStyle(
                                 background = colorResource(id = R.color.searchHighlightColor),
                                 color = colorResource(id = R.color.black)
@@ -274,56 +349,90 @@ fun GroupAdminsSelection(
                         body = (ContactCacheSingleton.getContactDetailsSecondLine(member.bytesIdentity)
                             ?: member.jsonIdentityDetails?.formatPositionAndCompany(""))
                             ?.let {
-                            AnnotatedString(it).highlight(
-                                SpanStyle(
-                                    background = colorResource(id = R.color.searchHighlightColor),
-                                    color = colorResource(id = R.color.black)
-                                ),
-                                filterPatterns
-                            )
-                        },
+                                AnnotatedString(it).highlight(
+                                    SpanStyle(
+                                        background = colorResource(id = R.color.searchHighlightColor),
+                                        color = colorResource(id = R.color.black)
+                                    ),
+                                    filterPatterns
+                                )
+                            },
                         onClick = {
-                            val selectedAdmins =
-                                members.filter { it.selected }.map { it.bytesIdentity }
-                                    .toMutableList()
-                            if (selectedAdmins.remove(member.bytesIdentity).not()) {
-                                selectedAdmins.add(member.bytesIdentity)
+                            if (isEditingAdmins) {
+                                allMembers?.let {
+                                    val selectedAdmins = allMembers.filter { it.selected }.map { it.bytesIdentity }.toMutableList()
+                                    if (selectedAdmins.remove(member.bytesIdentity).not()) {
+                                        selectedAdmins.add(member.bytesIdentity)
+                                    }
+                                    selectAdmins(selectedAdmins.toHashSet())
+                                }
                             }
-                            selectAdmins(selectedAdmins.toHashSet())
                         },
                         initialViewSetup = { initialView ->
-                            member.contact?.let {
-                                initialView.setContact(member.contact)
-                            } ?: run {
-                                member.jsonIdentityDetails?.let {
-                                    initialView.setInitial(
-                                        member.bytesIdentity,
-                                        StringUtils.getInitial(
-                                            it.formatDisplayName(
-                                                SettingsActivity.contactDisplayNameFormat,
-                                                SettingsActivity.uppercaseLastName
+                            if (member.isYou) {
+                                initialView.setFromCache(member.bytesIdentity)
+                            } else {
+                                member.contact?.let {
+                                    initialView.setContact(member.contact)
+                                } ?: run {
+                                    member.jsonIdentityDetails?.let {
+                                        initialView.setInitial(
+                                            member.bytesIdentity,
+                                            StringUtils.getInitial(
+                                                it.formatDisplayName(
+                                                    SettingsActivity.contactDisplayNameFormat,
+                                                    SettingsActivity.uppercaseLastName
+                                                )
                                             )
                                         )
-                                    )
-                                } ifNull {
-                                    initialView.setUnknown()
+                                    } ifNull {
+                                        initialView.setUnknown()
+                                    }
                                 }
                             }
                         },
                         endContent = {
-                            Switch(
-                                checked = member.selected,
-                                onCheckedChange = null,
-                                colors = SwitchDefaults.colors(
-                                    checkedTrackColor = colorResource(id = R.color.olvid_gradient_light)
-                                )
-                            )
+                            Box(
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                androidx.compose.animation.AnimatedVisibility(
+                                    visible = isEditingAdmins,
+                                    enter = fadeIn(),
+                                    exit = fadeOut(),
+                                ) {
+                                    Switch(
+                                        enabled = member.isYou.not(),
+                                        checked = member.isYou || member.selected,
+                                        onCheckedChange = null,
+                                        colors = SwitchDefaults.colors(
+                                            checkedTrackColor = colorResource(id = R.color.olvid_gradient_light)
+                                        )
+                                    )
+                                }
+                                androidx.compose.animation.AnimatedVisibility(
+                                    visible = !isEditingAdmins,
+                                    enter = fadeIn(),
+                                    exit = fadeOut(),
+                                ) {
+                                    AdminEndLabel(
+                                        admin = member.isAdmin,
+                                        pending = member.pending,
+                                        nonAdminsReadOnly = nonAdminsReadOnly,
+                                    )
+                                }
+                            }
                         }
                     )
                 }
             }
         } ?: run {
-            Text(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), text = stringResource(R.string.explanation_no_contact_match_filter), textAlign = TextAlign.Center)
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                text = stringResource(R.string.explanation_no_contact_match_filter),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

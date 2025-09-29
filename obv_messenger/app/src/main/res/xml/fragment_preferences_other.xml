@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
         <Preference
+            android:title="@string/pref_category_webclient_title"
+            android:summary="@string/pref_category_webclient_summary"
+            android:fragment="io.olvid.messenger.settings.WebClientPreferenceFragment"
+            android:icon="@drawable/ic_pref_webclient"
+            android:widgetLayout="@layout/preference_widget_header_chevron" />
+        <Preference
             android:key="pref_key_reset_dialogs"
             android:summary="@string/pref_reset_dialogs_summary"
             android:title="@string/pref_reset_dialogs_title"
@@ -16,40 +22,19 @@
             android:icon="@drawable/ic_pref_share"
             android:order="20" />
         <SwitchPreference
-            android:key="pref_key_notify_certificate_change"
-            android:defaultValue="false"
-            android:summary="@string/pref_notify_certificate_change_summary"
-            android:title="@string/pref_notify_certificate_change_title"
-            android:icon="@drawable/ic_pref_certificate"
+            android:key="pref_key_use_internal_image_viewer"
+            android:defaultValue="true"
+            android:title="@string/pref_use_internal_image_viewer_title"
+            android:summary="@string/pref_use_internal_image_viewer_summary"
+            android:icon="@drawable/ic_pref_image"
+            android:order="23" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="pref_key_use_internal_pdf_viewer"
+            android:title="@string/pref_use_internal_pdf_viewer_title"
+            android:summary="@string/pref_use_internal_pdf_viewer_summary"
+            android:icon="@drawable/ic_pref_pdf"
             android:order="24" />
-        <ListPreference
-            android:key="pref_key_block_untrusted_certificate"
-            android:defaultValue="issuer"
-            app:useSimpleSummaryProvider="true"
-            app:singleLineTitle="false"
-            android:title="@string/pref_block_untrusted_certificate_title"
-            android:entries="@array/block_untrusted_certificate"
-            android:entryValues="@array/block_untrusted_certificate_values"
-            android:icon="@drawable/ic_pref_block_untrusted"
-            android:dependency="pref_key_notify_certificate_change"
-            android:shouldDisableView="true"
-            android:order="25" />
-        <SwitchPreference
-            android:key="pref_key_no_notify_certificate_change_for_previews"
-            android:defaultValue="false"
-            android:summary="@string/pref_no_notify_certificate_change_for_previews_summary"
-            android:title="@string/pref_no_notify_certificate_change_for_previews_title"
-            android:icon="@drawable/ic_pref_preview"
-            android:dependency="pref_key_notify_certificate_change"
-            android:shouldDisableView="true"
-            android:order="26" />
-        <SwitchPreference
-            android:key="pref_key_send_with_hardware_enter"
-            android:defaultValue="false"
-            android:title="@string/pref_send_with_hardware_enter"
-            android:summary="@string/pref_send_with_hardware_enter_summary"
-            android:icon="@drawable/ic_pref_send"
-            android:order="27" />
         <SwitchPreference
             android:key="pref_key_sending_foreground_service"
             android:defaultValue="true"
@@ -64,15 +49,6 @@
             android:summary="@string/pref_permanent_foreground_service_summary"
             android:icon="@drawable/ic_pref_foreground_service"
             android:order="29"/>
-        <DropDownPreference
-            android:defaultValue="null"
-            android:key="pref_key_ping_connectivity_indicator"
-            android:title="@string/pref_ping_connectivity_indicator_title"
-            app:useSimpleSummaryProvider="true"
-            android:entries="@array/ping_connectivity_indicator"
-            android:entryValues="@array/ping_connectivity_indicator_value"
-            android:icon="@drawable/ic_pref_ping_indicator"
-            android:order="30" />
         <DropDownPreference
             android:defaultValue="M"
             android:entries="@array/QR_correction_levels"
@@ -89,25 +65,6 @@
             android:summary="@string/pref_use_legacy_zxing_scanner_summary"
             android:icon="@drawable/ic_pref_qr_code"
             android:order="32" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="pref_key_use_internal_pdf_viewer"
-            android:title="@string/pref_use_internal_pdf_viewer_title"
-            android:summary="@string/pref_use_internal_pdf_viewer_summary"
-            android:icon="@drawable/ic_pref_pdf"
-            android:order="33" />
-        <DropDownPreference
-            android:defaultValue="null"
-            app:singleLineTitle="false"
-            android:entries="@array/regional_turn_servers"
-            android:entryValues="@array/regional_turn_servers_values"
-            app:isPreferenceVisible="false"
-            tools:isPreferenceVisible="true"
-            android:key="pref_key_scaled_turn_region"
-            android:title="@string/pref_scaled_turn_title"
-            app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/ic_pref_language"
-            android:order="35" />
         <SwitchPreference
             android:defaultValue="false"
             android:key="pref_key_debug_log_level"

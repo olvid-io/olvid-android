@@ -199,12 +199,12 @@ class OwnedIdentityDetailsFragment : Fragment() {
                     return
                 }
                 if (value == null || value == INVALID) {
-                    firstNameLayout?.setError(" ")
-                    lastNameLayout?.setError(" ")
+                    firstNameLayout?.error = " "
+                    lastNameLayout?.error = " "
                     errorTextView?.setText(R.string.message_error_first_or_last_name_needed)
                 } else {
-                    firstNameLayout?.setError(null)
-                    lastNameLayout?.setError(null)
+                    firstNameLayout?.error = null
+                    lastNameLayout?.error = null
                     errorTextView?.text = null
                 }
             }
@@ -438,7 +438,7 @@ class OwnedIdentityDetailsFragment : Fragment() {
                 viewModel.takePictureUri = photoUri
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
                 App.startActivityForResult(this, takePictureIntent, REQUEST_CODE_TAKE_PICTURE)
-            } catch (e: IOException) {
+            } catch (_: IOException) {
                 Logger.w("Error creating photo capture file $photoFile")
             }
         }

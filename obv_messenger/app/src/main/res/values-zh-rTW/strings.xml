@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">目前沒有任何對話</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">您的聯絡人和群組對話將顯示於此。</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">目前尚無群組</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">請點擊「新增群組」來建立您的第一個群組。</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">點擊下方的藍色 + 建立您的第一個群組。</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">群組管理員已更新群組卡。下方顯示舊版和新版。\n\n按下「更新」以更新群組資訊。</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">管理員已將群組名稱變更為：</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">管理員已更改群組描述為：</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">傳送與接收訊息</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">啟用後，閱後即焚訊息和預設有限可見時長的訊息會在您進入對話時立即開啟。否則，需要點擊才能開啟。</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">啟用後，已清除的傳出訊息會被保留，以便您可以查看訊息是否已送達或已讀取。否則，它們將被刪除。</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">網頁客戶端</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">網頁客戶端</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">已更新設定</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">設定更新連結解析錯誤</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">傳送與接收訊息</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">ID建立選項</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">掃描設定</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">從剪貼簿匯入連結</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid 已更新至最新版本</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">您已安裝最新版本的 Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">有新的更新可用</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Olvid 在 Google Play 上有新版本可用。\n\n請更新以享受最新功能。</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">無法發起通話</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Olvid 無法將您的 Olvid ID 上傳至您公司的身分識別提供者。系統將在背景重試。</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">身分驗證供應商錯誤</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">您的身分驗證供應商顯示，您登入的使用者帳戶已關聯不同的 Olvid ID，且您沒有權限更新它。\n請聯絡您的管理員以獲取更多詳細資訊。</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s 已加入您的聯絡人</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">%1$s 已加入您的聯絡人</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">您的 Olvid ID 目前由您的公司身分驗證供應商管理。您無法手動啟用 Olvid 授權。\n\n請聯絡您的管理員以獲取更多詳細資訊。</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">漏接電話</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">聯絡人資訊已更新</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">需要登入雲端供應商</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">您已設定 Olvid 使用自動備份至雲端供應商，但您的連線已過期。您需要再次登入該供應商。\n\n如果您不再需要自動備份，可以在應用程式設定中停用它們。請記住，自動備份是防止您的聯絡人遺失的唯一方法，如果您的裝置遺失或損壞。</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">登入</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">遠端聯繫</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">遠端聯繫</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s 已經是您的聯絡人。</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s 出現在您的已知用戶列表中，但尚未加入您的聯絡人。</string>
 	<string name="label_new" state="needs_review" hash="1426137772">新增</string>
@@ -1187,6 +1189,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Olvid 標誌「i」上的彩色點</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">對話列表頂端的隱密線</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">在對話列表中顯示完整的連線狀態</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">絕不顯示任何指示器，即使在連線中斷時</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">連線狀態：無</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">連線中…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">連線狀態：已連線</string>
@@ -1203,7 +1206,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">設定小工具…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">小工具外觀</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">小工具點擊動作</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">討論</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">討論</string>
 	<string name="label_message" state="needs_review" hash="809999904">訊息</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">預設訊息</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">發送前確認</string>
@@ -1349,9 +1352,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">顯示大小</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">開啟討論</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">唯讀</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">待讀 (僅查看)</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">待處理\n僅供閱讀</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">管理員</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">待定管理員</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">待定\n管理員</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">無法顯示這位使用者的名稱</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">未命名群組</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">討論通知</string>
@@ -1382,7 +1385,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">群組成員/總邀請人數：</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">群組版本：</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">群組類型：</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">使用者管理</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">使用者管理</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">由您的通訊錄管理</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">尚未傳送</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">這個群組目前正在同步。同步完成後，您將可以接受此邀請。</string>
@@ -1391,7 +1394,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">無法複製這個群組</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">群組 %1$s 無法複製，因為該群組中的部分成員使用的 Olvid 版本過舊，不支援群組 v2。請告知他們有更新版本的 Olvid 可用！\n\n過舊的使用者：%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">警告：部分複製</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">群組 %1$s 包含您尚未建立安全連線的成員。您無法將他們邀請到新的群組。\n\n受影響的使用者：%2$s\n\n您是否要繼續建立不完整的群組？</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">群組 %1$s 包含您尚未建立安全通道的成員。您無法邀請他們加入新群組。\n\n受影響的使用者：%2$s\n\n您是否希望繼續使用不完整的群組？</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">「「」的副本</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">位置已傳送</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">位置已接收</string>
@@ -1475,7 +1478,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02d秒</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">啟用後，連續輸入三次錯誤的 PIN 碼/密碼會靜默刪除所有已讀一次和有限可見度訊息。</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">輸入錯誤的 PIN 碼 3 次後，將刪除敏感訊息</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">啟用此選項以設定「緊急」PIN碼/密碼，解鎖應用程式，但會靜默刪除所有隱藏的個人檔案、已讀一次和有限可見性訊息。輸入此 PIN 碼也會停用此選項。</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">啟用此選項以定義一個「緊急」PIN碼/密碼，該PIN碼/密碼將解鎖該應用程式，但會靜默刪除所有隱藏的個人資料、一次性檢視訊息和有限可見性訊息。輸入此PIN碼也會停用此選項。</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">緊急 PIN 碼</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">選擇緊急 PIN 碼</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">在 Olvid 的鎖定畫面輸入此緊急 PIN 碼會解鎖 Olvid，但會靜默刪除您可能擁有的任何隱藏設定檔。</string>
@@ -1603,8 +1606,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">啟用此選項以停用在擷取連結預覽時的憑證變更偵測。有些網站在每次連線時可能會呈現不同的憑證，如果您停用此選項，可能會收到頻繁的通知。</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">使用舊版 ZXing 函式庫掃描 QR 碼</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">預設情況下，Olvid 使用 ML Kit 進行 QR 碼掃描。如果您在 Olvid 內掃描 QR 碼時遇到問題，請啟用此選項。</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">使用內建 PDF 檢視器 (實驗性功能)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">預設情況下，PDF 附件會以外部檢視器開啟。啟用此選項以改用內建（基礎）檢視器。</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">使用內建 PDF 檢視器</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">預設情況下，PDF 附件會在內建（基本）檢視器中開啟。停用此選項以使用外部檢視器代替。</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">我的裝置</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">裝置 %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">這部裝置</string>
@@ -1660,7 +1663,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">請輸入顯示在您其他裝置上的驗證碼</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">在您的其他裝置上啟動 Olvid.\n點擊左上方的個人資料圖片.\n選擇您想要匯入的個人資料，然後點擊「管理」按鈕.\n點擊「新增裝置」以顯示代碼。</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">請在您的其他裝置上輸入此碼</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">您擁有跨裝置訂閱</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">您擁有跨裝置訂閱</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">這是您目前使用的裝置列表</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">請選擇您希望保持啟用的裝置</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">其他裝置將在 30 天內停用</string>
@@ -1885,7 +1888,6 @@
 	<string name="dialog_title_authentication_failed_time_offset" state="needs_review" hash="-170194947">時間同步可能有誤差？</string>
 	<string name="dialog_message_authentication_failed_time_offset" state="needs_review" hash="300612997">很抱歉，您的驗證失敗。\n\n可能的原因是您的裝置時鐘與伺服器時鐘相差 **超過 10 分鐘**。\n\n請檢查您的裝置時間、日期和時區是否正確，然後再次嘗試驗證。\n\n*如果問題仍然存在，請聯絡您的管理員。*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">時鐘設定</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">聯絡</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">與 %1$s 討論</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">個人資料轉移限制</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">重要</string>
@@ -2003,7 +2005,7 @@
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">無法還原您的個人資料。請稍後再試。</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">還原我的個人資料</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">讓所有回憶都留在 Olvid+\u0020</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">當您的個人資料還原後，您可以從個人資料設定中選擇要維持運作的裝置。</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">您的個人資料恢復後，您可以從個人資料設定中選擇要保持啟動的裝置。</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">藉由還原您的個人資料「</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">找不到備份金鑰</string>
@@ -2090,4 +2092,29 @@
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">在外部檢視器中開啟</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">無法在Olvid的內部檢視器中開啟此檔案</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">已邀請</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">新訊息</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">新聯絡人</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">搜尋</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">面對面</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">遠端</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">取消</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">掃描彼此的 QR 碼</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">現在掃描您的</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">代碼已掃描！</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">無法掃描條碼？</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">以其他方式邀請他們</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">分享您的個人資料</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">下載</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">QR碼已儲存</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">無法保存QR碼</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">已複製到剪貼板</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">QR碼文字</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">新增您的第一個聯絡人</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">討論</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">切換相機</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">您想與%1$s聯繫嗎？</string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">以下聯絡人屬於此群組，但尚未與您進行私聊。</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">群組管理員</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" 是一個共同群組</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">為了保護您的隱私，Olvid **沒有公開或中央化的使用者目錄**。您的姓名僅會被您聯繫的人看到。</string>
 </resources>

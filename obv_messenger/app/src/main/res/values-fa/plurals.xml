@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" و ۱ گروه دیگر مشترک</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" و %2$d گروه مشترک دیگر</item>
+	</plurals>
 	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1156880361">یکی از دستگاه‌های شما در **کمتر از %1$d روز** منقضی و غیرفعال می‌شود.\nمی‌توانید با خرید اشتراک **Olvid+** آن را فعال نگه دارید.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">یکی از دستگاه‌های شما در **کمتر از %1$d روز** منقضی و غیرفعال می‌شود.\nمی‌توانید با خرید اشتراک **Olvid+** آن را فعال نگه دارید.</item>
@@ -93,6 +97,10 @@
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">در حال دعوت از هر یک از اعضای گروهی هستید که کانالی با آن‌ها دارید (در حال حاضر ۱ عضو) به یک بحث خصوصی.\nآیا می‌خواهید ادامه دهید؟</item>
 		<item quantity="other" state="needs_review" hash="-994717142">در حال دعوت از تک‌تک اعضای گروهی هستید که کانالی با آن‌ها دارید (در حال حاضر %1$d عضو).\nآیا می‌خواهید ادامه دهید؟</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">یک عضو گروه می‌تواند به یک بحث خصوصی دعوت شود</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d اعضای گروه می‌توانند به یک بحث خصوصی دعوت شوند</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">۱ گروه مشترک</item>

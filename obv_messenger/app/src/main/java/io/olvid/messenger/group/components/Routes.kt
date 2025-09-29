@@ -22,34 +22,46 @@ package io.olvid.messenger.group.components
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.olvid.engine.engine.types.JsonGroupDetails
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
+import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Group2
+import io.olvid.messenger.designsystem.components.OlvidActionButton
+import io.olvid.messenger.designsystem.plus
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.group.CustomGroup
 import io.olvid.messenger.group.GroupCreationViewModel
 import io.olvid.messenger.group.GroupTypeModel
@@ -63,6 +75,7 @@ import io.olvid.messenger.group.clone
 object Routes {
     const val GROUP_DETAILS = "group_details"
     const val FULL_GROUP_MEMBERS = "full_group_members"
+    const val INVITE_GROUP_MEMBERS = "invite_group_members"
     const val EDIT_GROUP_MEMBERS = "edit_group_members"
     const val EDIT_GROUP_DETAILS = "edit_group_details"
     const val ADD_GROUP_MEMBERS = "add_group_members"
@@ -77,7 +90,7 @@ fun NavGraphBuilder.groupDetails(
     call: (Group2) -> Unit = {},
     imageClick: (String?) -> Unit = {},
     onFullMembersList: () -> Unit = {},
-    inviteAllMembers: () -> Unit = {},
+    onInviteMembers: () -> Unit = {},
     onEditMembers: () -> Unit = {},
     onEditAdmins: () -> Unit = {},
     onGroupType: () -> Unit = {}
@@ -93,12 +106,105 @@ fun NavGraphBuilder.groupDetails(
             groupV2DetailsViewModel = groupV2DetailsViewModel,
             call = call,
             imageClick = imageClick,
-            inviteAllMembers = inviteAllMembers,
+            onInviteMembers = onInviteMembers,
             onFullMembersList = onFullMembersList,
             onEditMembers = onEditMembers,
             onEditAdmins = onEditAdmins,
             onGroupType = onGroupType
         )
+    }
+}
+
+
+fun NavGraphBuilder.inviteGroupMembers(
+    groupV2DetailsViewModel: GroupV2DetailsViewModel,
+    onBack: () -> Unit,
+) {
+    composable(
+        Routes.INVITE_GROUP_MEMBERS,
+        enterTransition = { slideIntoContainer(SlideDirection.Start) },
+        exitTransition = { slideOutOfContainer(SlideDirection.Start) },
+        popEnterTransition = { slideIntoContainer(SlideDirection.End) },
+        popExitTransition = { slideOutOfContainer(SlideDirection.End) },
+    ) {
+        val group by groupV2DetailsViewModel.group.observeAsState()
+        val members by groupV2DetailsViewModel.groupMembers.observeAsState()
+        val invitations by AppDatabase.getInstance().invitationDao().getAllForOwnedIdentity(groupV2DetailsViewModel.bytesOwnedIdentity ?: byteArrayOf()).observeAsState()
+        val allMembersInvited = remember(members, invitations) {
+            members?.all { member ->
+                invitations?.any { invitation -> invitation.bytesContactIdentity.contentEquals(member.bytesContactIdentity) } ?: false
+            } ?: false
+        }
+
+        BackHandler {
+            onBack()
+        }
+        Box(modifier = Modifier.fillMaxSize()) {
+            val invitationMembers = members?.filter {
+                it.contact?.let { contact ->
+                    (contact.hasChannelOrPreKey() || contact.keycloakManaged) && contact.active && contact.oneToOne.not()
+                } ?: false
+            }
+            invitationMembers?.let {
+                val nonAdminsReadOnly =
+                    remember(groupV2DetailsViewModel.groupType) { groupV2DetailsViewModel.groupType.areNonAdminsReadOnly() }
+                LazyColumn(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    contentPadding = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
+                        .asPaddingValues() + PaddingValues(top = 16.dp, bottom = 64.dp)
+                ) {
+                    item(key = ByteArray(0)) {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            text = stringResource(R.string.explanation_invite_group_members_list),
+                            style = OlvidTypography.body2,
+                            color = colorResource(R.color.almostBlack)
+                        )
+                    }
+                    itemsIndexed(items = it, key = {index, member -> member.bytesContactIdentity }) { index, member ->
+                        GroupMemberItem(
+                            modifier = Modifier
+                                .then(
+                                    if (index == 0) {
+                                        if (it.size == 1) {
+                                            Modifier.clip(RoundedCornerShape(16.dp))
+                                        } else {
+                                            Modifier.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                                        }
+                                    } else if (index == it.size - 1) {
+                                        Modifier.clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                                    } else {
+                                        Modifier
+                                    }
+                                )
+                                .background(colorResource(R.color.lighterGrey)),
+                            member = member.toGroupMember(),
+                            keycloakManaged = group?.keycloakManaged == true,
+                            nonAdminsReadOnly = nonAdminsReadOnly,
+                            onInvite = { groupV2DetailsViewModel.invite(it) }
+                        )
+                    }
+                }
+            }
+
+            if (invitationMembers.isNullOrEmpty().not() && allMembersInvited.not()) {
+                val context = LocalContext.current
+                OlvidActionButton(
+                    modifier = Modifier
+                        .background(colorResource(R.color.whiteOverlay))
+                        .safeDrawingPadding()
+                        .widthIn(max = 400.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    icon = R.drawable.ic_invite_all,
+                    text = stringResource(R.string.menu_action_invite_all_members),
+                    onClick = { groupV2DetailsViewModel.inviteAllMembers(context) }
+                )
+            }
+        }
     }
 }
 
@@ -119,10 +225,12 @@ fun NavGraphBuilder.fullGroupMembers(
             onBack()
         }
         members?.let {
-            val nonAdminsReadOnly = remember(groupV2DetailsViewModel.groupType) {  groupV2DetailsViewModel.groupType.areNonAdminsReadOnly() }
+            val nonAdminsReadOnly =
+                remember(groupV2DetailsViewModel.groupType) { groupV2DetailsViewModel.groupType.areNonAdminsReadOnly() }
             LazyColumn(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                contentPadding = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).asPaddingValues()
+                contentPadding = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
+                    .asPaddingValues()
             ) {
                 AppSingleton.getCurrentIdentityLiveData().value?.let { ownIdentity ->
                     item(key = ownIdentity.bytesOwnedIdentity) {
@@ -131,10 +239,10 @@ fun NavGraphBuilder.fullGroupMembers(
                                 .padding(top = 16.dp)
                                 .clip(
                                     RoundedCornerShape(
-                                        topStart = 10.dp,
-                                        topEnd = 10.dp,
-                                        bottomStart = if (it.isEmpty()) 10.dp else 0.dp,
-                                        bottomEnd = if (it.isEmpty()) 10.dp else 0.dp,
+                                        topStart = 16.dp,
+                                        topEnd = 16.dp,
+                                        bottomStart = if (it.isEmpty()) 16.dp else 0.dp,
+                                        bottomEnd = if (it.isEmpty()) 16.dp else 0.dp,
                                     )
                                 )
                                 .background(colorResource(R.color.lighterGrey)),
@@ -149,8 +257,7 @@ fun NavGraphBuilder.fullGroupMembers(
                                 selected = false
                             ),
                             keycloakManaged = ownIdentity.keycloakManaged,
-                            nonAdminsReadOnly = nonAdminsReadOnly,
-                            onInvite = {}
+                            nonAdminsReadOnly = nonAdminsReadOnly
                         )
                     }
                 }
@@ -165,8 +272,8 @@ fun NavGraphBuilder.fullGroupMembers(
                                             RoundedCornerShape(
                                                 topStart = 0.dp,
                                                 topEnd = 0.dp,
-                                                bottomStart = 10.dp,
-                                                bottomEnd = 10.dp,
+                                                bottomStart = 16.dp,
+                                                bottomEnd = 16.dp,
                                             )
                                         )
                                 } else {
@@ -176,10 +283,8 @@ fun NavGraphBuilder.fullGroupMembers(
                             .background(colorResource(R.color.lighterGrey)),
                         member = member.toGroupMember(),
                         keycloakManaged = group?.keycloakManaged == true,
-                        nonAdminsReadOnly = nonAdminsReadOnly,
-                        onInvite = {
-                            groupV2DetailsViewModel.invite(member.contact)
-                        })
+                        nonAdminsReadOnly = nonAdminsReadOnly
+                    )
                 }
             }
         }
@@ -194,6 +299,7 @@ fun NavGraphBuilder.editGroupDetails(
     content: (@Composable () -> Unit)? = null,
     isGroupCreation: Boolean = false,
     isGroupV2: Boolean = true,
+    onBack: () -> Unit,
     onValidate: () -> Unit
 ) {
     composable(
@@ -203,6 +309,10 @@ fun NavGraphBuilder.editGroupDetails(
         popEnterTransition = { slideIntoContainer(SlideDirection.End) },
         popExitTransition = { slideOutOfContainer(SlideDirection.End) },
     ) {
+        BackHandler {
+            editGroupDetailsViewModel.initialized = false
+            onBack()
+        }
         LaunchedEffect(Unit) {
             if (editGroupDetailsViewModel.cloning.value.not()) {
                 editGroupDetailsViewModel.setGroupV2(isGroupV2)
@@ -212,8 +322,11 @@ fun NavGraphBuilder.editGroupDetails(
                     groupV2DetailsViewModel.group.value?.bytesGroupIdentifier ?: byteArrayOf()
                 )
                 editGroupDetailsViewModel.setOwnedGroupDetailsV2(
-                    groupDetails = groupV2DetailsViewModel.getPublishedJsonDetails() ?: JsonGroupDetails(),
-                    photoUrl = groupV2DetailsViewModel.detailsAndPhotos?.publishedPhotoUrl ?: groupV2DetailsViewModel.detailsAndPhotos?.photoUrl ?: groupV2DetailsViewModel.group.value?.photoUrl,
+                    groupDetails = groupV2DetailsViewModel.getPublishedJsonDetails()
+                        ?: JsonGroupDetails(),
+                    photoUrl = groupV2DetailsViewModel.detailsAndPhotos?.publishedPhotoUrl
+                        ?: groupV2DetailsViewModel.detailsAndPhotos?.photoUrl
+                        ?: groupV2DetailsViewModel.group.value?.photoUrl,
                     personalNote = groupV2DetailsViewModel.group.value?.personalNote
                 )
             }
@@ -245,6 +358,7 @@ fun NavGraphBuilder.editGroupMembers(
                 .orEmpty(),
             groupAdmin = groupV2DetailsViewModel.group.value?.ownPermissionAdmin == true,
             keycloakCertified = groupV2DetailsViewModel.group.value?.keycloakManaged == true,
+            nonAdminsReadOnly = groupV2DetailsViewModel.groupType.areNonAdminsReadOnly(),
             gotoAddMembers = onAddMembers,
             gotoRemoveMembers = onRemoveMembers
         )
@@ -331,7 +445,10 @@ fun NavGraphBuilder.groupType(
     groupV2DetailsViewModel: GroupV2DetailsViewModel,
     content: @Composable () -> Unit = {},
     showTitle: Boolean = false,
+    isGroupCreation: Boolean = false,
     validationLabel: String,
+    onSelectAdmins: () -> Unit = {},
+    onBack: () -> Unit,
     onValidate: () -> Unit = {}
 ) {
     composable(
@@ -341,12 +458,17 @@ fun NavGraphBuilder.groupType(
         popEnterTransition = { slideIntoContainer(SlideDirection.End) },
         popExitTransition = { slideOutOfContainer(SlideDirection.End) },
     ) {
+        BackHandler {
+            groupV2DetailsViewModel.selectedGroupType = null
+            onBack()
+        }
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = colorResource(id = R.color.almostWhite)
         ) {
-            var selectedGroupType by remember {
-                mutableStateOf(groupV2DetailsViewModel.groupType)
+            LaunchedEffect(groupV2DetailsViewModel.groupType) {
+                if (groupV2DetailsViewModel.selectedGroupType == null) groupV2DetailsViewModel.selectedGroupType =
+                    groupV2DetailsViewModel.groupType
             }
             GroupTypeSelection(
                 content = content,
@@ -358,26 +480,34 @@ fun NavGraphBuilder.groupType(
                         if (groupV2DetailsViewModel.groupType.type == GroupTypeModel.GroupType.CUSTOM) groupV2DetailsViewModel.groupType.clone() else CustomGroup()
                     }
                 ),
-                selectedGroupType = selectedGroupType,
+                selectedGroupType = groupV2DetailsViewModel.selectedGroupType
+                    ?: groupV2DetailsViewModel.groupType,
                 selectGroupType = {
-                    selectedGroupType = it
+                    groupV2DetailsViewModel.selectedGroupType = it
                 },
                 updateReadOnly = {
-                    selectedGroupType =
-                        selectedGroupType.clone().apply { readOnlySetting = it }
+                    groupV2DetailsViewModel.selectedGroupType =
+                        groupV2DetailsViewModel.selectedGroupType?.clone()
+                            ?.apply { readOnlySetting = it }
                 },
                 updateRemoteDelete = {
-                    selectedGroupType =
-                        selectedGroupType.clone().apply { remoteDeleteSetting = it }
+                    groupV2DetailsViewModel.selectedGroupType =
+                        groupV2DetailsViewModel.selectedGroupType?.clone()
+                            ?.apply { remoteDeleteSetting = it }
                 },
+                onSelectAdmins = onSelectAdmins,
                 validationLabel = validationLabel,
                 onValidate = {
-                    groupV2DetailsViewModel.groupType = selectedGroupType
+                    if (groupV2DetailsViewModel.selectedGroupType != null && groupV2DetailsViewModel.selectedGroupType != groupV2DetailsViewModel.initialGroupType) {
+                        groupV2DetailsViewModel.groupType =
+                            groupV2DetailsViewModel.selectedGroupType!!
+                    }
                     onValidate()
                 },
                 getPermissionsChanges = groupV2DetailsViewModel::getPermissionsChangeAlert,
-                initialGroupType = groupV2DetailsViewModel.initialGroupType,
-                showTitle = showTitle
+                initialGroupType = groupV2DetailsViewModel.groupType,
+                showTitle = showTitle,
+                isGroupCreation = isGroupCreation,
             )
         }
     }

@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">No hay conversaciones por ahora</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">Tus contactos y conversaciones de grupo aparecerán aquí.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">No hay grupos por ahora</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Pulsa \"Nuevo grupo\" para crear tu primer grupo.</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">Pulsa el + azul de abajo para crear tu primer grupo.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">El administrador del grupo ha actualizado la Tarjeta del Grupo. Se muestran a continuación tanto la versión antigua como la nueva.\n\nPulsa \"actualizar\" para actualizar la información del grupo.</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Un administrador cambió el nombre del grupo a:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Un administrador cambió la descripción del grupo a:</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Enviar y recibir mensajes</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Cuando se activa, los mensajes de lectura única y los mensajes con la duración de visibilidad limitada predeterminada se abren tan pronto como entras en la conversación. De lo contrario, se requiere un clic.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Cuando se activa, los mensajes salientes borrados se guardan para que puedas ver cuándo se entregan o leen. De lo contrario, se eliminan.</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">Cliente web</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Cliente web</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">Ajustes actualizados</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Error al analizar el enlace de actualización de configuración</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Envío y recepción de mensajes</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">Opciones de creación de ID</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">Escanear configuración</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">Importar enlace del portapapeles</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid está actualizado</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Tienes instalada la última versión de Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Actualización disponible</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Hay una versión más reciente de Olvid disponible en Google Play.\n\nPor favor, actualiza para disfrutar de las últimas funciones.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">No se pudo iniciar la llamada</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Olvid no pudo subir tu ID de Olvid al proveedor de identidad de tu empresa. Se reintentará en segundo plano.</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">Error del proveedor de identidad</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">Su proveedor de identidad indica que un ID de Olvid diferente está asociado al usuario con el que ha iniciado sesión y no tiene permiso para actualizarlo.\nPóngase en contacto con su administrador para obtener más detalles.</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s añadido a tus contactos</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">%1$s se agregó a tus contactos</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Su ID de Olvid está gestionado actualmente por el proveedor de identidad de su empresa. No puede activar manualmente una licencia de Olvid.\n\nPóngase en contacto con su administrador para obtener más detalles.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Llamada perdida</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Detalles del contacto actualizados</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Se requiere iniciar sesión en el proveedor de la nube</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Has configurado Olvid para usar copias de seguridad automáticas en un proveedor de la nube, pero tu sesión ha caducado. Necesitas iniciar sesión en este proveedor nuevamente.\n\nSi ya no deseas utilizar copias de seguridad automáticas, puedes desactivarlas en la Configuración de la aplicación. Ten en cuenta que las copias de seguridad automáticas son la única forma de evitar la pérdida de tus contactos si pierdes o se daña tu dispositivo.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Iniciar sesión</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">Ponte en contacto de forma remota</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Ponte en contacto de forma remota</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s ya está en tus contactos.</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s está en tu lista de usuarios conocidos pero aún no está en tus contactos.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Nuevo</string>
@@ -1187,6 +1189,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Punto de color en la \"i\" del logotipo de Olvid</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Línea discreta en la parte superior de la lista de conversaciones</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Estado de conexión completo en la parte superior de la lista de chats</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Nunca mostrar un indicador, ni siquiera en caso de pérdida de conexión</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">Conectividad: NINGUNA</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">Conectividad: CONECTANDO…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Conectividad: CONECTADO</string>
@@ -1203,7 +1206,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Configurar widget…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Apariencia del widget</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Acción al tocar el widget</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">Debatir</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">Debatir</string>
 	<string name="label_message" state="needs_review" hash="809999904">Mensaje</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Mensaje predefinido para enviar</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Confirmar antes de enviar</string>
@@ -1349,9 +1352,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Tamaño de visualización</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Abrir conversación</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">Solo lectura</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">Pendiente de solo lectura</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Pendiente\nsolo lectura</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Administrador</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Administrador pendiente</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Administrador\npendiente</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">No se puede mostrar el nombre de este usuario</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Grupo sin nombre</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Notificaciones de conversación</string>
@@ -1382,7 +1385,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">Miembros del grupo/total invitados:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">Versión del grupo:</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">Tipo de grupo:</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">gestionado por el usuario</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">gestionado por los usuarios</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">gestionado por su directorio</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">Aún no enviado</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">Este grupo se está sincronizando actualmente. Una vez completado, podrás aceptar esta invitación.</string>
@@ -1391,7 +1394,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">No se pudo clonar este grupo</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">El grupo %1$s no se puede clonar porque algunos miembros de este grupo utilizan una versión obsoleta de Olvid que no es compatible con grupos v2. Por favor, infórmales de que hay una versión más reciente de Olvid disponible.\n\nUsuarios desactualizados:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">Advertencia: clonación parcial</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">El grupo %1$s contiene miembros con los que aún no tienes un canal seguro. No puedes invitarlos al nuevo grupo.\n\nUsuarios afectados:%2$s\n\n¿Deseas continuar con un grupo incompleto?</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">El grupo %1$s contiene miembros con los que aún no tienes un canal seguro. No puedes invitarlos al nuevo grupo.\n\nUsuarios afectados:%2$s\n\n¿Deseas continuar con un grupo incompleto?</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Copia de\u0020</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Ubicación enviada</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Ubicación recibida</string>
@@ -1474,7 +1477,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02ds</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">Cuando se activa, introducir un PIN/contraseña incorrecta 3 veces seguidas borrará silenciosamente todos los mensajes de visualización única y de visibilidad limitada.</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">Borra los mensajes confidenciales después de 3 PINs incorrectos</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">Activa esta opción para definir un PIN/contraseña de \"emergencia\" que desbloquea la aplicación, pero borra silenciosamente todos los perfiles ocultos y los mensajes de un solo uso o con visibilidad limitada. Introducir este PIN también desactivará esta opción.</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">Active esta opción para definir un PIN/contraseña de \"emergencia\" que desbloquee la aplicación, pero borre silenciosamente todos los perfiles ocultos, los mensajes de un solo uso y los mensajes con visibilidad limitada. Introducir este PIN también desactiva esta opción.</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">PIN de emergencia</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">Elige un PIN de emergencia</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">Introducir este PIN de emergencia en la pantalla de bloqueo de Olvid desbloqueará Olvid, pero borrará silenciosamente cualquier perfil oculto que puedas tener.</string>
@@ -1602,8 +1605,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Activa esta opción para desactivar la detección de cambios de certificado al obtener una vista previa de un enlace. Algunos sitios pueden presentar un certificado diferente en cada conexión y podrías recibir notificaciones frecuentes si desactivas esta opción.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Usar la biblioteca ZXing heredada para escanear códigos QR</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">De forma predeterminada, Olvid utiliza ML Kit para escanear códigos QR. Activa esta opción si tienes problemas al escanear códigos QR dentro de Olvid.</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">Usar visor PDF interno (experimental)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">Por defecto, los archivos adjuntos PDF se abren en un visor externo. Activa esta opción para usar el visor interno (básico) en su lugar.</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Usar visor PDF interno</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Por defecto, los archivos PDF adjuntos se abren en un visor interno (básico). Desactive esta opción para usar un visor externo en su lugar.</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">Mis dispositivos</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Dispositivo %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Este dispositivo</string>
@@ -1659,7 +1662,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">Introduce el código que se muestra en tu otro dispositivo</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">Comienza Olvid en tu otro dispositivo.\nToca tu foto de perfil en la esquina superior izquierda.\nSelecciona el perfil que quieres importar y toca el botón \"Gestionar\".\nToca \"Añadir un dispositivo\" para mostrar el código.</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">Introduce este código en tu otro dispositivo</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">Tienes una suscripción multi-dispositivo</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">Tienes una suscripción multi-dispositivo</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">Aquí está tu lista de dispositivos actuales</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">Elige qué dispositivo quieres mantener activo</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">Otros dispositivos se desactivarán en 30 días</string>
@@ -1884,7 +1887,6 @@
 	<string name="dialog_title_authentication_failed_time_offset" state="needs_review" hash="-170194947">¿Posible desfase de reloj?</string>
 	<string name="dialog_message_authentication_failed_time_offset" state="needs_review" hash="300612997">Desafortunadamente, su autenticación falló.\n\nUna posible razón podría ser una diferencia de **más de 10 minutos** entre el reloj de su dispositivo y el reloj del servidor.\n\nPor favor, compruebe que la hora, la fecha y la zona horaria de su dispositivo sean correctas e intente autenticarse de nuevo.\n\n*Si el problema persiste, póngase en contacto con su administrador.*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">Ajustes de reloj</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">Ponerse en contacto</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">Hablar con %1$s</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">Restricción de transferencia de perfil</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">Importante</string>
@@ -2002,7 +2004,7 @@
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">No se pudo restaurar tu perfil. Por favor, inténtalo de nuevo.</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">Restaurar mi perfil</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Guarda todos tus contactos con Olvid+</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Una vez que se haya restaurado tu perfil, podrás elegir qué dispositivo mantener activo desde la configuración de tu perfil.</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">Una vez que se haya restaurado tu perfil, puedes elegir qué dispositivo mantener activo desde la configuración de tu perfil.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Al restaurar tu perfil «</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">No se encontró ninguna clave de copia de seguridad</string>
@@ -2089,4 +2091,29 @@
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Abrir en visor externo</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Error al abrir este archivo en el visor interno de Olvid</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Invitado</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">Nuevo mensaje</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Nuevo contacto</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Buscar</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Cara a cara</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">De forma remota</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Cancelar</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Escanea los códigos QR del otro</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Escanea el tuyo ahora</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">¡Código escaneado!</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">¿No se puede escanear el código?</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Invítalos de otra manera</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">Compartir tu perfil</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">Descargar</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">Código QR guardado</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">No se pudo guardar el código QR</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">Copiado al portapapeles</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">Texto del código QR</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Añade tu primer contacto</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">Conversación</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Cambiar cámara</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">¿Desea ponerse en contacto con %1$s?</string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Los contactos que aparecen a continuación forman parte de este grupo, pero aún no tienen una conversación privada contigo.</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">Administradores del grupo</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" es un grupo común</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Para proteger tu privacidad, Olvid **no tiene un directorio público o centralizado de usuarios**. Tu nombre solo será visible para las personas con las que te conectes.</string>
 </resources>

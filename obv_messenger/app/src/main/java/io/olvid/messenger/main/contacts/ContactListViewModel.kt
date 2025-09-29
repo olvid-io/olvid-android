@@ -34,8 +34,11 @@ import androidx.lifecycle.viewModelScope
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails
 import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.StringUtils2
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDetails
@@ -48,8 +51,13 @@ import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 
-class ContactListViewModel : ViewModel() {
+enum class ContactListPage(val labelResId: Int) {
+    CONTACTS(R.string.contact_list_tab_contact),
+    OTHERS(R.string.contact_list_tab_others),
+    DIRECTORY(R.string.contact_list_tab_directory)
+}
 
+class ContactListViewModel : ViewModel() {
     private var unfilteredContacts: List<Contact> = emptyList()
     private var unfilteredNotOneToOneContacts: List<Contact> = emptyList()
     internal val filteredContacts = MutableLiveData<List<ContactOrKeycloakDetails>>()
@@ -62,7 +70,10 @@ class ContactListViewModel : ViewModel() {
     private var keycloakSearchAdditionalResults = 0
 
     var keycloakManaged = mutableStateOf(false)
-    var selectedContacts = mutableStateListOf<Contact>() // TODO: change this to a BytesKey -> Contact map for better preformance
+    var selectedContacts = mutableStateListOf<Contact>() // TODO: change this to a BytesKey -> Contact map for better performance
+    val filteredPages = mutableStateListOf<ContactListPage>()
+    var contactInvitation: ContactOrKeycloakDetails? by mutableStateOf(null)
+
 
     fun setUnfilteredContacts(unfilteredContacts: List<Contact>?) {
         this.unfilteredContacts = unfilteredContacts.orEmpty()
@@ -182,11 +193,11 @@ class ContactListViewModel : ViewModel() {
             // something changed during the KEYCLOAK_SEARCH_DELAY_MILLIS --> abort
             return
         }
-        KeycloakManager.getInstance().search(
+        KeycloakManager.search(
             bytesOwnedIdentity,
             filter,
-            object : KeycloakCallback<Pair<List<JsonKeycloakUserDetails>?, Int?>?> {
-                override fun success(searchResult: Pair<List<JsonKeycloakUserDetails>?, Int?>?) {
+            object : KeycloakCallback<Pair<List<JsonKeycloakUserDetails>, Int>?> {
+                override fun success(result: Pair<List<JsonKeycloakUserDetails>, Int>?) {
                     val reOwnedIdentity = AppSingleton.getCurrentIdentityLiveData().value
                     if (this@ContactListViewModel._filter != filter || reOwnedIdentity == null || !reOwnedIdentity.bytesOwnedIdentity.contentEquals(
                             bytesOwnedIdentity
@@ -198,13 +209,13 @@ class ContactListViewModel : ViewModel() {
                     keycloakSearchInProgress = false
                     keycloakSearchBytesOwnedIdentity = bytesOwnedIdentity
                     keycloakSearchResultsFilter = filter
-                    keycloakSearchResults = searchResult?.first
-                    keycloakSearchAdditionalResults = if (searchResult?.second == null) {
+                    keycloakSearchResults = result?.first
+                    keycloakSearchAdditionalResults = if (result?.second == null) {
                         0
-                    } else if (searchResult.first == null) {
-                        searchResult.second!!
+                    } else if (result.first == null) {
+                        result.second!!
                     } else {
-                        searchResult.second!! - searchResult.first!!.size
+                        result.second!! - result.first!!.size
                     }
 
                     // re-filter to add keycloak search results
@@ -340,6 +351,40 @@ fun ContactOrKeycloakDetails.getAnnotatedDescription(): AnnotatedString? {
         }
     }.takeIf { it.isNotEmpty() }
 }
+
+fun ContactOrKeycloakDetails.getInitialViewSetup(): (InitialView) -> Unit =
+    { initialView ->
+        when (contactType) {
+            CONTACT -> contact?.let {
+                initialView.setContact(
+                    it
+                )
+            }
+
+            KEYCLOAK -> keycloakUserDetails?.let { keycloakUserDetails ->
+                val identityDetails =
+                    keycloakUserDetails.getIdentityDetails(
+                        null
+                    )
+                val name =
+                    identityDetails.formatFirstAndLastName(
+                        SettingsActivity.contactDisplayNameFormat,
+                        SettingsActivity.uppercaseLastName
+                    )
+                ContactCacheSingleton.getContactPhotoUrl(keycloakUserDetails.identity)?.let {
+                    initialView.setPhotoUrl(keycloakUserDetails.identity, it)
+                } ?: initialView.setInitial(
+                    keycloakUserDetails.identity,
+                    StringUtils.getInitial(
+                        name
+                    )
+                )
+                initialView.setKeycloakCertified(true)
+            }
+            else -> {}
+        }
+    }
+
 
 fun AnnotatedString.highlight(
     spanStyle: SpanStyle,

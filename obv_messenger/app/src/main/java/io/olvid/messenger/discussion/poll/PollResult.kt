@@ -41,6 +41,7 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -103,7 +104,6 @@ import io.olvid.messenger.designsystem.components.OlvidTopAppBar
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
-import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.contacts.ContactListItem
 import java.util.UUID
 
@@ -373,7 +373,8 @@ fun PollOverview(
                             if (sortByPollOrder) {
                                 Icon(
                                     painter = painterResource(R.drawable.ic_check),
-                                    contentDescription = null
+                                    contentDescription = null,
+                                    tint = colorResource(R.color.darkGrey)
                                 )
                             }
                         }
@@ -388,7 +389,8 @@ fun PollOverview(
                             if (!sortByPollOrder) {
                                 Icon(
                                     painter = painterResource(R.drawable.ic_check),
-                                    contentDescription = null
+                                    contentDescription = null,
+                                    tint = colorResource(R.color.darkGrey)
                                 )
                             }
                         }
@@ -396,13 +398,12 @@ fun PollOverview(
                 }
             }
         }
-        Spacer(modifier = Modifier.height(4.dp))
-        SectionCard(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp)
-        ) {
-            if (answersCount == 0) {
+        if (answersCount == 0) {
+            SectionCard(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+            ) {
                 Row(
                     modifier = Modifier
                         .padding(horizontal = 12.dp, vertical = 16.dp),
@@ -415,78 +416,137 @@ fun PollOverview(
                         )
                     )
                 }
-            } else {
-                val answers by remember(poll.candidates, sortByPollOrder) {
-                    mutableStateOf(
-                        if (sortByPollOrder) poll.candidates else poll.candidates.sortedByDescending { candidate ->
-                            pollResults.count { it.voteUuid == candidate.uuid && it.voted }
+            }
+        } else {
+            val answers by remember(poll.candidates, sortByPollOrder) {
+                mutableStateOf(
+                    if (sortByPollOrder) poll.candidates else poll.candidates.sortedByDescending { candidate ->
+                        pollResults.count { it.voteUuid == candidate.uuid && it.voted }
+                    }
+                )
+            }
+            answers.forEachIndexed { index, pollAnswer ->
+                key(pollAnswer.uuid) {
+                    val myVote = remember(pollResults) {
+                        pollResults.firstOrNull {
+                            it.voteUuid == pollAnswer.uuid
+                                    && it.voted
+                                    && it.voter.contentEquals(
+                                runCatching { AppSingleton.getBytesCurrentIdentity() }.getOrNull()
+                            )
                         }
-                    )
-                }
-                answers.forEachIndexed { index, pollAnswer ->
-                    key(pollAnswer.uuid) {
-                        val votes =
-                            remember(pollResults) { pollResults.count { it.voteUuid == pollAnswer.uuid && it.voted } }
-                        if (votes > 0) {
-                            if (index > 0) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 12.dp),
-                                    color = colorResource(R.color.lightGrey)
-                                )
+                    }
+                    val voters = remember(pollResults, myVote) {
+                        pollResults.filter {
+                            it.voteUuid == pollAnswer.uuid
+                                    && it.voted
+                        }.sortedBy {
+                            if (it == myVote) {
+                                0L
+                            } else {
+                                Long.MAX_VALUE - it.serverTimestamp
                             }
-                            Row(
-                                modifier = Modifier
-                                    .clickable(
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        indication = ripple()
-                                    ) {
-                                        onCandidateClick.invoke(pollAnswer.uuid)
-                                    }
-                                    .padding(horizontal = 12.dp, vertical = 16.dp),
-                                verticalAlignment = CenterVertically
-                            ) {
+                        }
+                    }
+                    val votes = voters.size
+
+                    if (votes > 0) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SectionCard(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp)
+                        ) {
+                            Column {
                                 Row(
-                                    modifier = Modifier.weight(1f, true),
-                                    verticalAlignment = CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                                        .heightIn(min = 48.dp),
+                                    verticalAlignment = CenterVertically
                                 ) {
                                     Text(
-                                        modifier = Modifier.weight(1f, false).padding(end = 8.dp),
+                                        modifier = Modifier.weight(1f, true)
+                                            .padding(end = 8.dp),
                                         text = pollAnswer.getText(context),
-                                        maxLines = 1,
+                                        maxLines = 2,
                                         overflow = TextOverflow.Ellipsis,
-                                        style = OlvidTypography.body2
+                                        style = OlvidTypography.body1
                                     )
-                                    val myVote = remember(pollResults) {
-                                        pollResults.firstOrNull {
-                                            it.voteUuid == pollAnswer.uuid
-                                                    && it.voted
-                                                    && it.voter.contentEquals(
-                                                runCatching { AppSingleton.getBytesCurrentIdentity() }.getOrNull()
+                                    Text(
+                                        text = pluralStringResource(
+                                            R.plurals.label_poll_answers,
+                                            votes,
+                                            votes
+                                        ),
+                                        color = colorResource(R.color.greyTint)
+                                    )
+                                }
+
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 12.dp),
+                                    color = colorResource(R.color.mediumGrey)
+                                )
+
+                                voters.take(if (votes > 5) 4 else 5).forEachIndexed { index, pollVote ->
+                                    ContactListItem(
+                                        padding = PaddingValues(end = 12.dp, top = 2.dp, bottom = 2.dp),
+                                        title = AnnotatedString(
+                                            ContactCacheSingleton.getContactDetailsFirstLine(pollVote.voter)
+                                                ?: stringResource(R.string.text_deleted_contact)
+                                        ),
+                                        body = ContactCacheSingleton.getContactDetailsSecondLine(pollVote.voter)?.let {
+                                            AnnotatedString(it)
+                                        },
+                                        initialViewSetup = { it.setFromCache(pollVote.voter) },
+                                        endContent = {
+                                            Text(
+                                                text = StringUtils.getNiceDateString(
+                                                    context,
+                                                    pollVote.serverTimestamp
+                                                ).toString()
                                             )
-                                        }
-                                    }
-                                    myVote?.let { voter ->
-                                        InitialView(
-                                            modifier = Modifier.padding(end = 8.dp).size(20.dp),
-                                            initialViewSetup = {
-                                                it.setFromCache(voter.voter)
-                                            })
+                                        },
+                                        onClick = {}
+                                    )
+                                    if (index < votes - 1) {
+                                        HorizontalDivider(
+                                            modifier = Modifier.padding(horizontal = 12.dp),
+                                            color = colorResource(R.color.lightGrey)
+                                        )
                                     }
                                 }
-                                Text(
-                                    text = pluralStringResource(
-                                        R.plurals.label_poll_answers,
-                                        votes,
-                                        votes
-                                    ),
-                                    color = colorResource(R.color.greyTint)
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_chevron_right),
-                                    tint = colorResource(R.color.greyTint),
-                                    contentDescription = stringResource(R.string.button_label_see_details)
-                                )
+
+                                if (votes > 5) {
+                                    // see all button
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = ripple()
+                                            ) {
+                                                onCandidateClick.invoke(pollAnswer.uuid)
+                                            }
+                                            .padding(horizontal = 12.dp)
+                                            .heightIn(min = 48.dp),
+                                        verticalAlignment = CenterVertically
+                                    ) {
+                                        Text(
+                                            modifier = Modifier.weight(1f, true)
+                                                .padding(end = 8.dp),
+                                            text = stringResource(R.string.label_see_all),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            style = OlvidTypography.body2
+                                        )
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_chevron_right),
+                                            tint = colorResource(R.color.greyTint),
+                                            contentDescription = stringResource(R.string.button_label_see_details)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <plurals name="text_common_groups">
+        <item quantity="one">\"%1$s\" and 1 other group in common</item>
+        <item quantity="other">\"%1$s\" and %2$d other groups in common</item>
+    </plurals>
     <plurals name="tip_expiring_device_message">
         <item quantity="one">One of your devices will expire and get deactivated in **less than %1$d day**.\nYou may purchase an **Olvid+** subscription to keep it active.</item>
         <item quantity="other">One of your devices will expire and get deactivated in **less than %1$d days**.\nYou may purchase an **Olvid+** subscription to keep it active.</item>
@@ -94,6 +98,10 @@
     <plurals name="dialog_message_invite_all_group_members">
         <item quantity="one">You are about to invite each group member with whom you have a channel (currently 1 member) to a private discussion.\nDo you want to proceed?</item>
         <item quantity="other">You are about to invite each group member with whom you have a channel (currently %1$d members) to a private discussion.\nDo you want to proceed?</item>
+    </plurals>
+    <plurals name="explanation_invite_group_members">
+        <item quantity="one">1 group member can be invited to a private discussion</item>
+        <item quantity="other">%1$d group members can be invited to a private discussion</item>
     </plurals>
     <plurals name="dialog_message_delete_user_impossible_count">
         <item quantity="one">1 common group</item>

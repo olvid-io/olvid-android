@@ -264,14 +264,29 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                             String photoUrl;
                             AuthEncKey key;
 
-                            if (userData.bytesGroupOwnerAndUidOrIdentifier != null) {
-                                JsonGroupDetailsWithVersionAndPhoto json = fetchManagerSession.identityDelegate.getGroupPublishedAndLatestOrTrustedDetails(fetchManagerSession.session, userData.ownedIdentity, userData.bytesGroupOwnerAndUidOrIdentifier)[0];
-                                photoUrl = json.getPhotoUrl();
-                                key = (AuthEncKey) new Encoded(json.getPhotoServerKey()).decodeSymmetricKey();
-                            } else {
-                                JsonIdentityDetailsWithVersionAndPhoto json = fetchManagerSession.identityDelegate.getOwnedIdentityPublishedDetails(fetchManagerSession.session, userData.ownedIdentity);
-                                photoUrl = json.getPhotoUrl();
-                                key = (AuthEncKey) new Encoded(json.getPhotoServerKey()).decodeSymmetricKey();
+                            switch (userData.type) {
+                                case OWNED_IDENTITY: {
+                                    JsonIdentityDetailsWithVersionAndPhoto json = fetchManagerSession.identityDelegate.getOwnedIdentityPublishedDetails(fetchManagerSession.session, userData.ownedIdentity);
+                                    photoUrl = json.getPhotoUrl();
+                                    key = (AuthEncKey) new Encoded(json.getPhotoServerKey()).decodeSymmetricKey();
+                                    break;
+                                }
+                                case GROUP: {
+                                    JsonGroupDetailsWithVersionAndPhoto json = fetchManagerSession.identityDelegate.getGroupPublishedAndLatestOrTrustedDetails(fetchManagerSession.session, userData.ownedIdentity, userData.bytesGroupOwnerAndUidOrIdentifier)[0];
+                                    photoUrl = json.getPhotoUrl();
+                                    key = (AuthEncKey) new Encoded(json.getPhotoServerKey()).decodeSymmetricKey();
+                                    break;
+                                }
+                                case GROUP_V2: {
+                                    GroupV2.ServerPhotoInfo serverPhotoInfo = fetchManagerSession.identityDelegate.getGroupV2PublishedServerPhotoInfo(fetchManagerSession.session, userData.ownedIdentity, userData.bytesGroupOwnerAndUidOrIdentifier);
+                                    photoUrl = fetchManagerSession.identityDelegate.getGroupV2PhotoUrl(fetchManagerSession.session, userData.ownedIdentity, GroupV2.Identifier.of(userData.bytesGroupOwnerAndUidOrIdentifier));
+                                    key = serverPhotoInfo.serverPhotoKey;
+                                    break;
+                                }
+                                default: {
+                                    photoUrl = null;
+                                    key = null;
+                                }
                             }
 
                             if (photoUrl != null && key != null) {
@@ -287,6 +302,7 @@ public class ServerUserDataCoordinator implements Operation.OnCancelCallback, Op
                         }
                     } catch (Exception e) {
                         // do nothing, this will be retried after the next restart
+                        Logger.x(e);
                     }
                     break;
                 }

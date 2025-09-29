@@ -216,6 +216,11 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
+    public int initialQueueingPriority() {
+        return 20;
+    }
+
+    @Override
     public void initialisationComplete() {
         // - notify if an ownedIdentity is inactive
         // - also compute a profile backup seed for legacy identities without one

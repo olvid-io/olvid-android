@@ -177,6 +177,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         return getApplication().getApplicationContext();
     }
 
+    public static long latestAppForeground = 0;
     private static boolean isVisible = false;
     private static boolean isAppDialogShowing = false;
     private static boolean killActivitiesOnLockAndCloseHiddenProfileOnBackground = true;
@@ -248,6 +249,7 @@ public class App extends Application implements DefaultLifecycleObserver {
 
     @Override
     public void onStart(@NonNull LifecycleOwner owner) {
+        latestAppForeground = System.currentTimeMillis();
         isVisible = true;
         killActivitiesOnLockAndCloseHiddenProfileOnBackground = true;
         UnifiedForegroundService.onAppForeground(getContext());
@@ -713,7 +715,24 @@ public class App extends Application implements DefaultLifecycleObserver {
         }
     }
 
-    public static void openLink(Context context, Uri uri) {
+    public static void displayText(Context context, String text) {
+        if (context == null || text == null || text.isEmpty()) {
+            return;
+        }
+
+        final AlertDialog.Builder builder = new SecureAlertDialogBuilder(context, R.style.CustomAlertDialog)
+                .setTitle(R.string.label_text_qr_code)
+                .setMessage(text)
+                .setNeutralButton(R.string.button_label_copy, (dialog, which) -> {
+                    ClipboardManager clipboard = (ClipboardManager) context.getSystemService(CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText(text, text);
+                    clipboard.setPrimaryClip(clip);
+                    toast(R.string.toast_message_clipboard_copied, Toast.LENGTH_SHORT);
+                })
+                .setPositiveButton(R.string.button_label_ok, null);
+        builder.create().show();
+    }
+   public static void openLink(Context context, Uri uri) {
         if (context == null || uri == null) {
             return;
         }
@@ -903,14 +922,6 @@ public class App extends Application implements DefaultLifecycleObserver {
         HashMap<String, Object> dialogParameters = new HashMap<>();
         dialogParameters.put(AppDialogShowActivity.DIALOG_SUBSCRIPTION_REQUIRED_FEATURE_KEY, permission);
         showDialog(bytesOwnedIdentity, AppDialogShowActivity.DIALOG_SUBSCRIPTION_REQUIRED, dialogParameters);
-    }
-
-    public static void openAppDialogNewVersionAvailable() {
-        showDialog(null, AppDialogShowActivity.DIALOG_NEW_VERSION_AVAILABLE, new HashMap<>());
-    }
-
-    public static void openAppDialogOutdatedVersion() {
-        showDialog(null, AppDialogShowActivity.DIALOG_OUTDATED_VERSION, new HashMap<>());
     }
 
     public static void openAppDialogCallInitiationNotSupported(byte[] bytesOwnedIdentity) {

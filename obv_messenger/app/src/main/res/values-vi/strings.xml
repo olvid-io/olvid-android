@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">Chưa có cuộc trò chuyện nào</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">Các cuộc trò chuyện và nhóm của bạn sẽ hiển thị ở đây.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">Chưa có nhóm nào</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Nhấn \"Nhóm mới\" để tạo nhóm đầu tiên của bạn.</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">Nhấn vào dấu + màu xanh lam bên dưới để tạo nhóm đầu tiên của bạn.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">Quản lý nhóm đã cập nhật Thẻ nhóm. Cả phiên bản cũ và mới đều được hiển thị bên dưới.\n\nNhấn \"cập nhật\" để cập nhật thông tin nhóm.</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Quản trị viên đã thay đổi tên nhóm thành:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Quản trị viên đã thay đổi mô tả nhóm thành:</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Gửi và nhận tin nhắn</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Khi được kích hoạt, tin nhắn một lần và tin nhắn có thời gian hiển thị giới hạn mặc định sẽ mở ngay khi bạn vào cuộc trò chuyện. Nếu không, bạn cần nhấp để mở chúng.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Khi được kích hoạt, các tin nhắn đi đã xóa sẽ được giữ lại để bạn có thể xem khi nào chúng được gửi hoặc đọc. Nếu không, chúng sẽ bị xóa.</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">Ứng dụng web</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Ứng dụng web</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">Cài đặt đã được cập nhật</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Lỗi phân tích liên kết cập nhật cài đặt</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Gửi và nhận tin nhắn</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">Tùy chọn tạo ID</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">Quét cấu hình</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">Nhập liên kết từ bộ nhớ tạm thời</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid đã được cập nhật lên phiên bản mới nhất</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Bạn đã cài đặt phiên bản Olvid mới nhất</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Có bản cập nhật</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Một phiên bản mới của Olvid đã có trên Google Play.\n\nVui lòng cập nhật để tận hưởng các tính năng mới nhất.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Không hỗ trợ bắt đầu cuộc gọi</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Olvid không thể tải lên ID Olvid của bạn lên nhà cung cấp danh tính của công ty bạn. Nó sẽ được thử lại trong nền.</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">Lỗi nhà cung cấp danh tính</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">Nhà cung cấp danh tính của bạn cho biết một ID Olvid khác đang được liên kết với người dùng bạn đã đăng nhập và bạn không có quyền cập nhật nó.\nVui lòng liên hệ với quản trị viên của bạn để biết thêm chi tiết.</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s đã được thêm vào danh bạ của bạn</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">%1$s đã được thêm vào danh bạ của bạn</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">ID Olvid của bạn hiện đang được quản lý bởi nhà cung cấp danh tính của công ty bạn. Bạn không thể kích hoạt thủ công giấy phép Olvid.\n\nVui lòng liên hệ với quản trị viên để biết thêm chi tiết.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Cuộc gọi nhỡ</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Thông tin liên hệ đã được cập nhật</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Yêu cầu đăng nhập nhà cung cấp đám mây</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Bạn đã cấu hình Olvid để sử dụng sao lưu tự động lên một nhà cung cấp đám mây, nhưng phiên của bạn đã hết hạn. Bạn cần đăng nhập lại vào nhà cung cấp này.\n\nNếu bạn không muốn sử dụng sao lưu tự động nữa, bạn có thể tắt nó trong Cài đặt ứng dụng. Xin lưu ý rằng sao lưu tự động là cách duy nhất để ngăn mất danh bạ nếu thiết bị của bạn bị mất hoặc hư hỏng.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Đăng nhập</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">Liên lạc từ xa</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Liên lạc từ xa</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s đã có trong danh bạ của bạn.</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s có trong danh sách người dùng đã biết của bạn nhưng chưa có trong danh bạ của bạn.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Mới</string>
@@ -1187,6 +1189,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Chấm màu trên chữ \"i\" của logo Olvid</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Dòng kẻ mờ ở đầu danh sách trò chuyện</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Trạng thái kết nối đầy đủ ở trên cùng danh sách trò chuyện</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Không bao giờ hiển thị chỉ báo, ngay cả khi mất kết nối</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">Kết nối: KHÔNG</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">Kết nối: ĐANG KẾT NỐI…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Kết nối: ĐÃ KẾT NỐI</string>
@@ -1203,7 +1206,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Cấu hình widget…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Giao diện widget</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Hành động chạm vào widget</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">Thảo luận</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">Thảo luận</string>
 	<string name="label_message" state="needs_review" hash="809999904">Tin nhắn</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Tin nhắn được xác định trước để gửi</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Xác nhận trước khi gửi</string>
@@ -1349,9 +1352,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Kích thước hiển thị</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Mở cuộc trò chuyện</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">Chỉ đọc</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">Đang chờ đọc (chỉ xem)</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Đang chờ\nchỉ đọc</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Quản trị viên</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Quản trị viên đang chờ xử lý</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Đang chờ\nquản trị viên</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Không thể hiển thị tên của người dùng này</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Nhóm không tên</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Thông báo cuộc trò chuyện</string>
@@ -1382,7 +1385,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">Thành viên nhóm/tổng số đã mời:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">Phiên bản nhóm:</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">Loại nhóm:</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">do người dùng quản lý</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">do người dùng quản lý</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">được quản lý bởi danh bạ của bạn</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">Chưa gửi</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">Nhóm này hiện đang đồng bộ. Khi hoàn tất, bạn sẽ có thể chấp nhận lời mời này.</string>
@@ -1391,7 +1394,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">Không thể nhân bản nhóm này</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">Không thể sao chép nhóm %1$s vì một số thành viên trong nhóm này đang sử dụng phiên bản Olvid cũ không hỗ trợ nhóm v2. Vui lòng thông báo cho họ rằng có phiên bản Olvid mới hơn!\n\nNgười dùng cũ:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">Cảnh báo: Sao chép một phần</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">Nhóm %1$s chứa các thành viên mà bạn chưa có kênh bảo mật với họ. Bạn không thể mời họ vào nhóm mới.\n\nNgười dùng bị ảnh hưởng:%2$s\n\nBạn có muốn tiếp tục với một nhóm không đầy đủ không?</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">Nhóm %1$s chứa các thành viên mà bạn chưa có kênh bảo mật với họ. Bạn không thể mời họ vào nhóm mới.\n\nNgười dùng bị ảnh hưởng:%2$s\n\nBạn có muốn tiếp tục với một nhóm không đầy đủ không?</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Sao chép của</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Đã gửi vị trí</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Đã nhận vị trí</string>
@@ -1475,7 +1478,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02ds</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">Khi bật tính năng này, nhập sai PIN/mật khẩu 3 lần liên tiếp sẽ xóa im lặng tất cả các tin nhắn một lần xem và có giới hạn hiển thị.</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">Xóa các tin nhắn nhạy cảm sau 3 lần nhập PIN sai</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">Kích hoạt tùy chọn này để định nghĩa một PIN/mật khẩu \"khẩn cấp\" mở khóa ứng dụng, nhưng sẽ xóa lặng lẽ tất cả các hồ sơ ẩn, tin nhắn một lần xem và tin nhắn có khả năng hiển thị hạn chế. Nhập PIN này cũng sẽ tắt tùy chọn này.</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">Kích hoạt tùy chọn này để định nghĩa một mã PIN/mật khẩu \"khẩn cấp\" mở khóa ứng dụng, nhưng sẽ xóa lặng lẽ tất cả các hồ sơ ẩn, tin nhắn một lần xem và tin nhắn có giới hạn hiển thị. Nhập mã PIN này cũng sẽ tắt tùy chọn này.</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">PIN khẩn cấp</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">Chọn PIN khẩn cấp</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">Nhập mã PIN khẩn cấp này vào màn hình khóa của Olvid sẽ mở khóa Olvid, nhưng sẽ xóa lặng lẽ mọi hồ sơ ẩn mà bạn có thể có.</string>
@@ -1603,8 +1606,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Bật tùy chọn này để tắt tính năng phát hiện thay đổi chứng chỉ khi lấy bản xem trước liên kết. Một số trang web có thể trình bày một chứng chỉ khác nhau ở mỗi kết nối và bạn có thể nhận được thông báo thường xuyên nếu tắt tùy chọn này.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Sử dụng thư viện ZXing cũ để quét mã QR</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">Theo mặc định, ML Kit được sử dụng để quét mã QR. Hãy bật tùy chọn này nếu bạn gặp sự cố khi quét mã QR trong Olvid.</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">Sử dụng trình xem PDF tích hợp (thử nghiệm)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">Theo mặc định, các tệp đính kèm PDF sẽ được mở trong trình xem bên ngoài. Bật tùy chọn này để sử dụng trình xem nội bộ (cơ bản) thay thế.</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Sử dụng trình xem PDF tích hợp</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Theo mặc định, các tệp đính kèm PDF sẽ được mở trong trình xem nội bộ (cơ bản). Tắt tùy chọn này để sử dụng trình xem bên ngoài thay thế.</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">Thiết bị của tôi</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Thiết bị %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Thiết bị này</string>
@@ -1660,7 +1663,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">Nhập mã hiển thị trên thiết bị khác của bạn</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">Khởi động Olvid trên thiết bị khác của bạn.\nNhấn vào ảnh đại diện của bạn ở góc trên cùng bên trái.\nChọn hồ sơ bạn muốn nhập và nhấn vào nút \"Quản lý\".\nNhấn vào \"Thêm thiết bị\" để hiển thị mã.</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">Nhập mã này trên thiết bị khác của bạn</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">Bạn có đăng ký đa thiết bị</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">Bạn có đăng ký đa thiết bị</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">Đây là danh sách thiết bị hiện tại của bạn</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">Chọn thiết bị bạn muốn giữ hoạt động</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">Các thiết bị khác sẽ bị hủy kích hoạt trong vòng 30 ngày</string>
@@ -1885,7 +1888,6 @@
 	<string name="dialog_title_authentication_failed_time_offset" state="needs_review" hash="-170194947">Có thể có sự chênh lệch giờ?</string>
 	<string name="dialog_message_authentication_failed_time_offset" state="needs_review" hash="300612997">Rất tiếc, quá trình xác thực của bạn đã không thành công.\n\nMột lý do có thể là sự chênh lệch **hơn 10 phút** giữa giờ trên thiết bị của bạn và giờ của máy chủ.\n\nVui lòng kiểm tra xem giờ, ngày và múi giờ trên thiết bị của bạn có chính xác không, sau đó thử xác thực lại.\n\n*Nếu sự cố vẫn tiếp diễn, vui lòng liên hệ với quản trị viên.*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">Cài đặt đồng hồ</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">Liên hệ</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">Thảo luận với %1$s</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">Hạn chế chuyển đổi hồ sơ</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">Quan trọng</string>
@@ -2003,7 +2005,7 @@
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">Không thể khôi phục hồ sơ của bạn. Vui lòng thử lại.</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">Khôi phục hồ sơ của tôi</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Giữ tất cả với Olvid+</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Sau khi khôi phục, bạn có thể chọn thiết bị nào muốn giữ hoạt động từ cài đặt hồ sơ của mình.</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">Sau khi khôi phục hồ sơ, bạn có thể chọn thiết bị nào sẽ giữ hoạt động từ cài đặt hồ sơ của mình.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Bằng cách khôi phục hồ sơ \"</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Không tìm thấy khóa sao lưu</string>
@@ -2090,4 +2092,29 @@
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Mở bằng trình xem bên ngoài</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Lỗi mở tệp này trong trình xem nội bộ của Olvid</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Đã mời</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">Tin nhắn mới</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Liên hệ mới</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Tìm kiếm</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Trực tiếp</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Từ xa</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Hủy</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Quét mã QR của nhau</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Bây giờ hãy quét của bạn</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Mã đã được quét!</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Không thể quét mã?</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Mời họ bằng cách khác</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">Chia sẻ hồ sơ của bạn</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">Tải xuống</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">Mã QR đã lưu</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">Không thể lưu mã QR</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">Đã sao chép vào khay nhớ tạm</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">Văn bản mã QR</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Thêm liên hệ đầu tiên của bạn</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">Cuộc trò chuyện</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Chuyển đổi camera</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Bạn có muốn liên hệ với %1$s không?</string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Các liên hệ bên dưới thuộc nhóm này nhưng chưa có cuộc trò chuyện riêng tư với bạn.</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">Quản trị viên nhóm</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" là một nhóm chung</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Để bảo vệ quyền riêng tư của bạn, Olvid **không có danh bạ người dùng công khai hoặc tập trung**. Tên của bạn chỉ hiển thị với những người bạn kết nối.</string>
 </resources>

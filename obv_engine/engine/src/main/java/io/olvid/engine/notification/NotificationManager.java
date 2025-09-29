@@ -46,6 +46,11 @@ public class NotificationManager implements NotificationListeningDelegate, Notif
     }
 
     @Override
+    public int initialQueueingPriority() {
+        return 1000;
+    }
+
+    @Override
     public void initialisationComplete() {
         // Nothing to do here
     }

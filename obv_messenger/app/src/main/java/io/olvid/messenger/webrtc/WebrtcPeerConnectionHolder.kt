@@ -18,6 +18,7 @@
  */
 package io.olvid.messenger.webrtc
 
+import android.media.AudioManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -184,6 +185,7 @@ class WebrtcPeerConnectionHolder(
             audioDeviceModule = JavaAudioDeviceModule.builder(App.getContext())
                 .setUseHardwareAcousticEchoCanceler(SettingsActivity.useHardwareEchoCanceler())
                 .setUseHardwareNoiseSuppressor(SettingsActivity.useHardwareNoiseSuppressor())
+                .setSampleRate(android.media.AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_VOICE_CALL))
                 .createAudioDeviceModule()
             eglBase = EglBase.create()
             val videoEncoderFactory: VideoEncoderFactory =

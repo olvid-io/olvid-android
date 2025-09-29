@@ -41,6 +41,7 @@ class OwnedGroupDetailsViewModel : ViewModel() {
     private var groupV2 = false
     lateinit var bytesOwnedIdentity: ByteArray
     private var bytesGroupOwnerAndUidOrIdentifier: ByteArray? = null
+    var initialized = false
 
     var cloning = mutableStateOf(false)
     var groupName = mutableStateOf<String?>(null)
@@ -79,6 +80,8 @@ class OwnedGroupDetailsViewModel : ViewModel() {
         groupDetails: JsonGroupDetailsWithVersionAndPhoto,
         personalNote: String?
     ) {
+        if (initialized) return
+        initialized = true
         oldDetails = groupDetails.groupDetails
         oldPhotoUrl = groupDetails.photoUrl
         oldPersonalNote = personalNote
@@ -94,6 +97,8 @@ class OwnedGroupDetailsViewModel : ViewModel() {
         photoUrl: String?,
         personalNote: String?
     ) {
+        if (initialized) return
+        initialized = true
         oldDetails = groupDetails
         oldPhotoUrl = photoUrl
         oldPersonalNote = personalNote

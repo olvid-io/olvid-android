@@ -47,6 +47,7 @@ import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.databases.tasks.PromptToDeleteContactTask
+import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment
 import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.main.RefreshingFragment
@@ -99,14 +100,14 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
             setContent {
                 val refreshing by refreshingViewModel.isRefreshing.collectAsStateWithLifecycle()
                 ContactListScreen(
-                    modifier = Modifier.navigationBarsPadding(),
                     contactListViewModel = contactListViewModel,
                     refreshing = refreshing,
                     onRefresh = ::onRefresh,
                     onClick = ::contactClicked,
                     onInvite = ::inviteClicked,
                     onScrollStart = ::dismissKeyboard,
-                    contactMenu = this@ContactListFragment
+                    contactMenu = this@ContactListFragment,
+                    addPlusButtonBottomPadding = true,
                 )
             }
         }
@@ -140,7 +141,7 @@ class ContactListFragment : RefreshingFragment(), ContactMenu {
                             )
                             .setNegativeButton(R.string.button_label_cancel, null)
                             .setPositiveButton(R.string.button_label_add_contact) { _, _ ->
-                                KeycloakManager.getInstance().addContact(
+                                KeycloakManager.addContact(
                                     ownedIdentity.bytesOwnedIdentity,
                                     contactOrKeycloakDetails.keycloakUserDetails.id,
                                     contactOrKeycloakDetails.keycloakUserDetails.identity,

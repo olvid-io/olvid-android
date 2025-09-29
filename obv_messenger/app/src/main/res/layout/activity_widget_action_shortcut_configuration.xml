@@ -344,7 +344,7 @@
                     android:id="@+id/label_discussion"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/label_discuss"
+                    android:text="@string/label_discussion"
                     android:layout_marginTop="8dp"
                     android:layout_marginStart="16dp"
                     app:layout_constraintStart_toStartOf="parent"

@@ -147,7 +147,7 @@ public class KeycloakAuthenticationRequiredDialogFragment extends DialogFragment
         authenticateButton.setOnClickListener(v -> authenticate());
 
         ImageButton authenticationBrowserChoiceButton = dialogView.findViewById(R.id.button_authentication_browser);
-        authenticationBrowserChoiceButton.setOnClickListener(KeycloakBrowserChooserDialog::openBrowserChoiceDialog);
+        authenticationBrowserChoiceButton.setOnClickListener(view -> KeycloakBrowserChooserDialog.openBrowserChoiceDialog(view.getContext()));
 
         TextView dialogTitle = dialogView.findViewById(R.id.dialog_title);
         TextView dialogMessage = dialogView.findViewById(R.id.dialog_message);
@@ -186,7 +186,7 @@ public class KeycloakAuthenticationRequiredDialogFragment extends DialogFragment
                     new Handler(Looper.getMainLooper()).post(() -> keycloakAuthenticationStartFragment.authenticate(authState.jsonSerializeString(), clientId, clientSecret, new KeycloakTasks.AuthenticateCallback() {
                         @Override
                         public void success(@NonNull AuthState authState) {
-                            KeycloakManager.getInstance().reAuthenticationSuccessful(bytesOwnedIdentity, jwks, authState);
+                            KeycloakManager.reAuthenticationSuccessful(bytesOwnedIdentity, jwks, authState);
                             dismiss();
                         }
 

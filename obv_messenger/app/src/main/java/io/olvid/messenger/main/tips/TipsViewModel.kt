@@ -60,29 +60,39 @@ class TipsViewModel : ViewModel() {
         private const val RATING_INSTALL_MIN_AGE = 30 * 86_400_000L
     }
 
-    var tipToShow : Tip? by mutableStateOf(null)
+    var tipToShow: Tip? by mutableStateOf(null)
     var deviceExpirationDays by mutableIntStateOf(0)
     private val firstInstallTimestamp = installTimestamp() ?: 0L
 
     fun refreshTipToShow(activity: ComponentActivity) {
         AppSingleton.getBytesCurrentIdentity()?.let { bytesOwnedIdentity ->
-            if (KeycloakManager.getAuthenticationRequiredOwnedIdentities().contains(BytesKey(bytesOwnedIdentity))) {
+            if (KeycloakManager.authenticationRequiredOwnedIdentities.contains(BytesKey(bytesOwnedIdentity))) {
                 tipToShow = Tip.AUTHENTICATION_REQUIRED
                 return
             }
+        }
+        if (SettingsActivity.isVersionOutdated()) {
+            tipToShow = Tip.VERSION_OUTDATED
+            return
+        }
+        if (SettingsActivity.isUpdateAvailable() && SettingsActivity.isUpdateAvailableTipDismissed.not()) {
+            tipToShow = Tip.UPDATE_AVAILABLE
+            return
         }
         val contactCount = AppDatabase.getInstance().contactDao().countAll()
         if (!SettingsActivity.defaultSendReadReceipt) {
             val lastReadReceiptAnswer = SettingsActivity.lastReadReceiptTipTimestamp
             if (lastReadReceiptAnswer != -1L
                 && (System.currentTimeMillis() - lastReadReceiptAnswer > READ_RECEIPT_MUTE_DURATION)
-                && contactCount > 0) {
+                && contactCount > 0
+            ) {
                 tipToShow = Tip.PROMPT_FOR_READ_RECEIPTS
                 return
             }
         }
         AppSingleton.getBytesCurrentIdentity()?.let { bytesCurrentIdentity ->
-            val devices = AppDatabase.getInstance().ownedDeviceDao().getAllSync(bytesCurrentIdentity)
+            val devices =
+                AppDatabase.getInstance().ownedDeviceDao().getAllSync(bytesCurrentIdentity)
 
             if (System.currentTimeMillis() - SettingsActivity.lastExpiringDeviceTipTimestamp > EXPIRING_DEVICE_MUTE_DURATION) {
                 devices.filter {
@@ -93,7 +103,9 @@ class TipsViewModel : ViewModel() {
                 }.minByOrNull {
                     it.expirationTimestamp!!
                 }?.let { expiringDevice ->
-                    deviceExpirationDays = ((expiringDevice.expirationTimestamp!! - System.currentTimeMillis()) / 86_400_000L).toInt().coerceAtLeast(0) + 1
+                    deviceExpirationDays =
+                        ((expiringDevice.expirationTimestamp!! - System.currentTimeMillis()) / 86_400_000L).toInt()
+                            .coerceAtLeast(0) + 1
                     tipToShow = Tip.EXPIRING_DEVICE
                     return
                 }
@@ -137,7 +149,8 @@ class TipsViewModel : ViewModel() {
         }
 
         if (System.currentTimeMillis() - SettingsActivity.lastTroubleshootingTipTimestamp > TROUBLESHOOTING_MUTE_DURATION
-            && activity.shouldShowTroubleshootingTip()) {
+            && activity.shouldShowTroubleshootingTip()
+        ) {
             tipToShow = Tip.TROUBLESHOOTING
             return
         }
@@ -158,6 +171,8 @@ class TipsViewModel : ViewModel() {
         AUTHENTICATION_REQUIRED,
         OFFLINE_DEVICE,
         PLAY_STORE_REVIEW,
-        PROMPT_FOR_READ_RECEIPTS
+        PROMPT_FOR_READ_RECEIPTS,
+        UPDATE_AVAILABLE,
+        VERSION_OUTDATED,
     }
 }

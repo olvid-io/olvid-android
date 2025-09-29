@@ -93,7 +93,7 @@ class ScanFragment : Fragment(), OnClickListener,
 
     override fun onClick(v: View) {
         if (v.id == R.id.back_button) {
-            activity.onBackPressed()
+            activity.onBackPressedDispatcher.onBackPressed()
         } else if (v.id == R.id.more_button) {
             val popup = PopupMenu(activity, v, Gravity.END)
             popup.inflate(R.menu.popup_more_onboarding)

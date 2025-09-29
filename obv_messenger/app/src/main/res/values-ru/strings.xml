@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">Пока нет обсуждений</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">Ваши контакты и групповые обсуждения будут отображаться здесь.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">Групп пока нет</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Нажмите \"Новая группа\", чтобы создать свою первую группу.</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">Нажмите на синий + ниже, чтобы создать свою первую группу.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">Администратор группы обновил Карточку Группы. Старая и новая версии отображены ниже.\n\nНажмите «обновить», чтобы обновить информацию о группе.</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Администратор изменил название группы на:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Администратор изменил описание группы на:</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Отправка и получение сообщений</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">При активации сообщения для однократного просмотра и сообщения с ограниченным временем видимости по умолчанию открываются сразу после входа в чат. В противном случае требуется нажатие.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">При активации удаленные исходящие сообщения сохраняются, чтобы вы могли видеть, когда они были доставлены или прочитаны. В противном случае они будут удалены.</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">Веб-клиент</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Веб-клиент</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">Обновленные настройки</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Ошибка при разборе ссылки обновления настроек</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Отправка и получение сообщений</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">Параметры создания ID</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">Сканирование конфигурации</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">Импортировать ссылку из буфера обмена</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid обновлен</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">У вас установлена последняя версия Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Доступно обновление</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Более новая версия Olvid доступна в Google Play.\n\nПожалуйста, обновите, чтобы воспользоваться новейшими функциями.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Не удалось начать вызов</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Olvid не смог загрузить ваш Olvid ID в поставщик удостоверений вашей компании. Повторная попытка будет предпринята в фоновом режиме.</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">Ошибка поставщика удостоверений</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">Ваш поставщик удостоверений личности сообщает, что другой ID Olvid связан с пользователем, под которым вы вошли в систему, и у вас нет разрешения на его обновление.\nОбратитесь к вашему администратору для получения более подробной информации.</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s добавлен в ваши контакты</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">%1$s был добавлен в ваши контакты</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Ваш Olvid ID в настоящее время управляется поставщиком удостоверений вашей компании. Вы не можете вручную активировать лицензию Olvid.\n\nОбратитесь к вашему администратору для получения более подробной информации.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Пропущенный вызов</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Детали контакта обновлены</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Требуется вход в облачного провайдера</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Вы настроили Olvid для использования автоматических резервных копий в облачном хранилище, но ваша сессия истекла. Вам необходимо повторно войти в этот сервис.\n\nЕсли вы больше не хотите использовать автоматические резервные копии, вы можете отключить их в настройках приложения. Помните, что автоматические резервные копии — это единственный способ предотвратить потерю ваших контактов в случае потери или повреждения устройства.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Войти</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">Связаться удаленно</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Связаться удаленно</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s уже есть в ваших контактах.</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s есть в вашем списке известных пользователей, но его еще нет в ваших контактах.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Новый</string>
@@ -1187,6 +1189,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Цветная точка на букве «i» в логотипе Olvid</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Неброская линия вверху списка чатов</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Полный статус подключения в верхней части списка чатов</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Никогда не показывать индикатор, даже при потере соединения</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">Подключение: ОТСУТСТВУЕТ</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">Подключение: ПОДКЛЮЧЕНИЕ…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Подключение: ПОДКЛЮЧЕНО</string>
@@ -1203,7 +1206,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Настроить виджет…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Внешний вид виджета</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Действие при нажатии на виджет</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">Обсудить</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">Обсудить</string>
 	<string name="label_message" state="needs_review" hash="809999904">Сообщение</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Предопределенное сообщение для отправки</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Подтвердите перед отправкой</string>
@@ -1349,9 +1352,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Размер отображения</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Открыть обсуждение</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">Только чтение</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">Ожидание - Только чтение</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">В ожидании\nтолько чтение</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Администратор</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Ожидающий администратор</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">В ожидании\nадминистратор</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Не удалось отобразить имя этого пользователя</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Безымянная группа</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Уведомления о чатах</string>
@@ -1382,7 +1385,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">Участники группы/всего приглашено:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">Групповая версия:</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">Тип группы:</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">управляемый пользователями</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">управляемый пользователем</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">управляется вашим каталогом</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">Ещё не отправлено</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">Группа сейчас синхронизируется. После завершения вы сможете принять это приглашение.</string>
@@ -1391,7 +1394,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">Не удалось клонировать эту группу</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">Группу %1$s нельзя клонировать, так как некоторые участники используют устаревшую версию Olvid, которая не поддерживает группы v2. Пожалуйста, сообщите им о доступности новой версии Olvid!\n\nУстаревшие пользователи:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">Предупреждение: частичное клонирование</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">Группа %1$s содержит участников, с которыми у вас ещё нет защищённого канала. Вы не можете пригласить их в новую группу.\n\nЗатронутые пользователи:%2$s\n\nВы хотите продолжить с неполной группой?</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">В группе %1$s есть участники, с которыми у вас еще не установлен защищенный канал. Вы не можете пригласить их в новую группу.\n\nЗатронутые пользователи:%2$s\n\nВы хотите продолжить с неполной группой?</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Копия \"</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Местоположение отправлено</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Местоположение получено</string>
@@ -1474,7 +1477,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02dс</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">При активации, ввод неправильного PIN-кода/пароля 3 раза подряд приведет к тихому удалению всех сообщений, просмотренных один раз, и сообщений с ограниченной видимостью.</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">Удалить конфиденциальные сообщения после 3 неверных PIN-кодов</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">Активируйте эту опцию, чтобы установить PIN-код/пароль \"экстренной\" разблокировки приложения, который также беззвучно удалит все скрытые профили, сообщения, просматриваемые один раз, и сообщения с ограниченной видимостью. Ввод этого PIN-кода также отключит эту опцию.</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">Активируйте эту опцию, чтобы установить PIN-код/пароль \"экстренной\" разблокировки приложения, который также беззвучно удалит все скрытые профили, сообщения для однократного просмотра и сообщения с ограниченной видимостью. Ввод этого PIN-кода также отключит эту опцию.</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">Аварийный PIN-код</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">Выберите PIN-код для экстренных случаев</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">Ввод этого аварийного PIN-кода на экране блокировки Olvid разблокирует Olvid, но беззвучно удалит любой скрытый профиль, который у вас может быть.</string>
@@ -1602,8 +1605,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Включите эту опцию, чтобы отключить проверку изменения сертификата при получении предварительного просмотра ссылки. Некоторые сайты могут использовать разные сертификаты при каждом подключении, что может привести к частым уведомлениям, если эта опция отключена.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Использовать устаревшую библиотеку ZXing для сканирования QR-кодов</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">По умолчанию, для сканирования QR-кодов используется ML Kit. Включите эту опцию, если у вас возникли проблемы со сканированием QR-кодов в Olvid.</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">Использовать встроенный просмотрщик PDF (экспериментальная версия)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">По умолчанию PDF-вложения открываются во внешней программе просмотра. Включите эту опцию, чтобы использовать встроенный (простой) просмотрщик вместо этого.</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Использовать встроенный просмотрщик PDF</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">По умолчанию, PDF-вложения открываются во встроенном (простом) просмотрщике. Отключите эту опцию, чтобы использовать внешний просмотрщик.</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">Мои устройства</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Устройство %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">Это устройство</string>
@@ -1659,7 +1662,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">Введите код, отображаемый на другом устройстве</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">Запустите Olvid на другом устройстве. Нажмите на свою фотографию профиля в верхнем левом углу. Выберите профиль, который хотите импортировать, и нажмите кнопку «Управление». Нажмите «Добавить устройство», чтобы отобразить код.</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">Введите этот код на другом устройстве</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">У вас подключена подписка для нескольких устройств</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">У вас есть подписка на несколько устройств</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">Вот список ваших текущих устройств</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">Выберите устройство, которое хотите оставить активным</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">Другие устройства будут деактивированы в течение 30 дней</string>
@@ -1884,7 +1887,6 @@
 	<string name="dialog_title_authentication_failed_time_offset" state="needs_review" hash="-170194947">Возможно расхождение времени?</string>
 	<string name="dialog_message_authentication_failed_time_offset" state="needs_review" hash="300612997">К сожалению, аутентификация не удалась.\n\nВозможной причиной может быть разница во времени **более 10 минут** между временем вашего устройства и временем сервера.\n\nПожалуйста, убедитесь, что время, дата и часовой пояс на вашем устройстве установлены верно, и повторите попытку аутентификации.\n\n*Если проблема не исчезнет, обратитесь к вашему администратору.*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">Настройки времени</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">Связаться</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">Обсудить с %1$s</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">Ограничение передачи профиля</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">Важно</string>
@@ -2002,7 +2004,7 @@
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">Не удалось восстановить ваш профиль. Пожалуйста, попробуйте еще раз.</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">Восстановить мой профиль</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Сохраните их всех с Olvid+</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">После восстановления профиля вы можете выбрать, какое устройство оставить активным в настройках профиля.</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">После восстановления профиля вы можете выбрать, какое устройство оставить активным в настройках профиля</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Восстановив свой профиль «</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Ключ резервной копии не найден</string>
@@ -2089,4 +2091,29 @@
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Открыть во внешнем просмотрщике</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Ошибка открытия этого файла во встроенном просмотрщике Olvid</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Приглашён</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">Новое сообщение</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Новый контакт</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Поиск</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Лицом к лицу</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Удалённо</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Отменить</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Отсканируйте QR-коды друг друга</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Отсканируйте свой сейчас</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Код сканирован!</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Не удается сканировать код?</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Пригласите их другим способом</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">Поделиться своим профилем</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">Скачать</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">QR-код сохранен</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">Не удалось сохранить QR-код</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">Скопировано в буфер обмена</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">Текст QR-кода</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Добавьте свой первый контакт</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">Обсуждение</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Переключить камеру</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Хотите связаться с %1$s?</string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Контакты ниже входят в эту группу, но у вас еще нет личной переписки с ними.</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">Администраторы группы</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" - это общая группа</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Для защиты вашей конфиденциальности в Olvid **нет общедоступного или централизованного каталога пользователей**. Ваше имя будет видно только тем, с кем вы общаетесь.</string>
 </resources>

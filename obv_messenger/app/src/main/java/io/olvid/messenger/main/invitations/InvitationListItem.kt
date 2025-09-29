@@ -599,7 +599,7 @@ fun InvitationListItem(
 }
 
 @Composable
-private fun BoxedChar(
+fun BoxedChar(
     modifier: Modifier = Modifier,
     error: Boolean,
     index: Int,
@@ -615,7 +615,7 @@ private fun BoxedChar(
     Text(
         modifier = modifier
             .border(
-                1.dp, if (error) Color(0xFFE2594E) else when {
+                1.dp, if (error) colorResource(R.color.red) else when {
                     isFocused -> colorResource(id = R.color.blueOrWhite)
                     else -> colorResource(id = R.color.grey)
                 }, RoundedCornerShape(8.dp)
@@ -625,7 +625,7 @@ private fun BoxedChar(
         fontSize = 26.sp,
         color =
         if (error) {
-            Color(0xFFE2594E)
+            colorResource(R.color.red)
         } else if (isFocused) {
             colorResource(id = R.color.blueOrWhite)
         } else {

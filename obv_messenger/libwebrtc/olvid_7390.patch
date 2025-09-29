@@ -1,0 +1,602 @@
+diff --git a/p2p/BUILD.gn b/p2p/BUILD.gn
+index 34f6ef11ea..134e70c20c 100644
+--- a/p2p/BUILD.gn
++++ b/p2p/BUILD.gn
+@@ -115,6 +115,7 @@ rtc_library("basic_packet_socket_factory") {
+     "../rtc_base:ssl",
+     "../rtc_base:ssl_adapter",
+     "../rtc_base/system:rtc_export",
++    "../rtc_base:olvid_async_https_proxy_socket",
+     "//third_party/abseil-cpp/absl/memory",
+   ]
+ }
+diff --git a/p2p/base/basic_packet_socket_factory.cc b/p2p/base/basic_packet_socket_factory.cc
+index 3810e2b324..db5efd08b8 100644
+--- a/p2p/base/basic_packet_socket_factory.cc
++++ b/p2p/base/basic_packet_socket_factory.cc
+@@ -14,6 +14,7 @@
+ #include <memory>
+ #include <string>
+ 
++#include "rtc_base/olvid_async_https_proxy_socket.h"
+ #include "absl/memory/memory.h"
+ #include "api/async_dns_resolver.h"
+ #include "api/packet_socket_factory.h"
+@@ -36,6 +37,20 @@ BasicPacketSocketFactory::BasicPacketSocketFactory(
+     SocketFactory* socket_factory)
+     : socket_factory_(socket_factory) {}
+ 
++BasicPacketSocketFactory::BasicPacketSocketFactory(
++    SocketFactory* socket_factory,
++    SocketAddress proxy_socket_address,
++    std::string& user_agent)
++    : socket_factory_(socket_factory) {
++  if (proxy_socket_address.IsComplete()) {
++    proxy_type_ = PROXY_HTTPS;
++    proxy_socket_address_ = proxy_socket_address;
++  } else {
++    proxy_type_ = PROXY_NONE;
++  }
++  user_agent_ = user_agent;
++}
++
+ BasicPacketSocketFactory::~BasicPacketSocketFactory() {}
+ 
+ AsyncPacketSocket* BasicPacketSocketFactory::CreateUdpSocket(
+@@ -121,6 +136,12 @@ AsyncPacketSocket* BasicPacketSocketFactory::CreateClientTcpSocket(
+                       << socket->GetError();
+   }
+ 
++  // proxy support
++  if (proxy_type_ == PROXY_HTTPS) {
++    socket =
++        new olvid::AsyncHttpsProxySocket(socket, user_agent_, proxy_socket_address_);
++  }
++
+   // Assert that at most one TLS option is used.
+   int tlsOpts = tcp_options.opts & (PacketSocketFactory::OPT_TLS |
+                                     PacketSocketFactory::OPT_TLS_FAKE |
+diff --git a/p2p/base/basic_packet_socket_factory.h b/p2p/base/basic_packet_socket_factory.h
+index 40bf94cce4..2da05f928f 100644
+--- a/p2p/base/basic_packet_socket_factory.h
++++ b/p2p/base/basic_packet_socket_factory.h
+@@ -24,9 +24,14 @@
+ 
+ namespace webrtc {
+ 
++enum ProxyType { PROXY_NONE, PROXY_HTTPS };
++
+ class RTC_EXPORT BasicPacketSocketFactory : public PacketSocketFactory {
+  public:
+   explicit BasicPacketSocketFactory(SocketFactory* socket_factory);
++  explicit BasicPacketSocketFactory(SocketFactory* socket_factory,
++                                        SocketAddress proxy_socket_address,
++                                        std::string& user_agent);
+   ~BasicPacketSocketFactory() override;
+ 
+   AsyncPacketSocket* CreateUdpSocket(const SocketAddress& local_address,
+@@ -50,6 +55,9 @@ class RTC_EXPORT BasicPacketSocketFactory : public PacketSocketFactory {
+                  uint16_t max_port);
+ 
+   SocketFactory* socket_factory_;
++  ProxyType proxy_type_;
++  SocketAddress proxy_socket_address_;
++  std::string user_agent_;
+ };
+ 
+ }  //  namespace webrtc
+diff --git a/rtc_base/BUILD.gn b/rtc_base/BUILD.gn
+index 27cf292d16..78ce93fda9 100644
+--- a/rtc_base/BUILD.gn
++++ b/rtc_base/BUILD.gn
+@@ -1421,6 +1421,24 @@ rtc_library("dscp") {
+   sources = [ "dscp.h" ]
+ }
+ 
++rtc_library("olvid_async_https_proxy_socket") {
++  visibility = [ "*" ]
++  sources = [
++    "olvid_async_https_proxy_socket.cc",
++    "olvid_async_https_proxy_socket.h",
++  ]
++  deps = [
++    "../api:array_view",
++    ":async_socket",
++    ":socket",
++    ":socket_adapters",
++    ":socket_address",
++    "//third_party/abseil-cpp/absl/strings",
++    ":checks",
++    ":logging",
++  ]
++}
++
+ rtc_library("file_rotating_stream") {
+   sources = [
+     "file_rotating_stream.cc",
+diff --git a/rtc_base/olvid_async_https_proxy_socket.cc b/rtc_base/olvid_async_https_proxy_socket.cc
+new file mode 100644
+index 0000000000..d4e618a113
+--- /dev/null
++++ b/rtc_base/olvid_async_https_proxy_socket.cc
+@@ -0,0 +1,254 @@
++/*
++////////////////////////////////////////////////////////
++Proxy support
++////////////////////////////////////////////////////////
++
++Copied from rtc_base/socket_adapters.cc (version 6478)
++before this part was deleted (L.218)
++
++used only in olvid/proxy_packet_socket_factory.cc
++*/
++
++#include "rtc_base/olvid_async_https_proxy_socket.h"
++
++#include <algorithm>
++#include <cerrno>
++#include <cstddef>
++#include <cstdint>
++#include <cstring>
++
++#include "absl/strings/match.h"
++#include "api/array_view.h"
++#include "rtc_base/async_socket.h"
++#include "rtc_base/checks.h"
++#include "rtc_base/logging.h"
++#include "rtc_base/socket.h"
++#include "rtc_base/socket_address.h"
++
++namespace webrtc {
++namespace olvid {
++
++AsyncHttpsProxySocket::AsyncHttpsProxySocket(Socket* socket,
++                                             absl::string_view user_agent,
++                                             const SocketAddress& proxy)
++    : BufferedReadAdapter(socket, 1024),
++      proxy_(proxy),
++      agent_(user_agent),
++      force_connect_(false),
++      state_(PS_ERROR) {}
++
++AsyncHttpsProxySocket::~AsyncHttpsProxySocket() {}
++
++int AsyncHttpsProxySocket::Connect(const SocketAddress& addr) {
++  int ret;
++  RTC_LOG(LS_VERBOSE) << "AsyncHttpsProxySocket::Connect("
++                      << proxy_.ToSensitiveString() << ")";
++  dest_ = addr;
++  state_ = PS_INIT;
++  if (ShouldIssueConnect()) {
++    BufferInput(true);
++  }
++  ret = BufferedReadAdapter::Connect(proxy_);
++  // TODO: Set state_ appropriately if Connect fails.
++  return ret;
++}
++
++SocketAddress AsyncHttpsProxySocket::GetRemoteAddress() const {
++  return dest_;
++}
++
++int AsyncHttpsProxySocket::Close() {
++  headers_.clear();
++  state_ = PS_ERROR;
++  dest_.Clear();
++  return BufferedReadAdapter::Close();
++}
++
++Socket::ConnState AsyncHttpsProxySocket::GetState() const {
++  if (state_ < PS_TUNNEL) {
++    return CS_CONNECTING;
++  } else if (state_ == PS_TUNNEL) {
++    return CS_CONNECTED;
++  } else {
++    return CS_CLOSED;
++  }
++}
++
++void AsyncHttpsProxySocket::OnConnectEvent(Socket* socket) {
++  RTC_LOG(LS_VERBOSE) << "AsyncHttpsProxySocket::OnConnectEvent";
++  if (!ShouldIssueConnect()) {
++    state_ = PS_TUNNEL;
++    BufferedReadAdapter::OnConnectEvent(socket);
++    return;
++  }
++  SendRequest();
++}
++
++void AsyncHttpsProxySocket::OnCloseEvent(Socket* socket, int err) {
++  RTC_LOG(LS_VERBOSE) << "AsyncHttpsProxySocket::OnCloseEvent(" << err << ")";
++  if ((state_ == PS_WAIT_CLOSE) && (err == 0)) {
++    state_ = PS_ERROR;
++    Connect(dest_);
++  } else {
++    BufferedReadAdapter::OnCloseEvent(socket, err);
++  }
++}
++
++void AsyncHttpsProxySocket::ProcessInput(char* data, size_t* len) {
++  size_t start = 0;
++  for (size_t pos = start; state_ < PS_TUNNEL && pos < *len;) {
++    if (state_ == PS_SKIP_BODY) {
++      size_t consume = std::min(*len - pos, content_length_);
++      pos += consume;
++      start = pos;
++      content_length_ -= consume;
++      if (content_length_ == 0) {
++        EndResponse();
++      }
++      continue;
++    }
++
++    if (data[pos++] != '\n')
++      continue;
++
++    size_t length = pos - start - 1;
++    if ((length > 0) && (data[start + length - 1] == '\r'))
++      --length;
++
++    data[start + length] = 0;
++    ProcessLine(data + start, length);
++    start = pos;
++  }
++
++  *len -= start;
++  if (*len > 0) {
++    memmove(data, data + start, *len);
++  }
++
++  if (state_ != PS_TUNNEL)
++    return;
++
++  bool remainder = (*len > 0);
++  BufferInput(false);
++  SignalConnectEvent(this);
++
++  // FIX: if SignalConnect causes the socket to be destroyed, we are in trouble
++  if (remainder)
++    SignalReadEvent(this);  // TODO: signal this??
++}
++
++bool AsyncHttpsProxySocket::ShouldIssueConnect() const {
++  // TODO: Think about whether a more sophisticated test
++  // than dest port == 80 is needed.
++  return force_connect_ || (dest_.port() != 80);
++}
++
++void AsyncHttpsProxySocket::SendRequest() {
++  webrtc::StringBuilder ss;
++  ss << "CONNECT " << dest_.ToString() << " HTTP/1.0\r\n";
++  ss << "User-Agent: " << agent_ << "\r\n";
++  ss << "Host: " << dest_.HostAsURIString() << "\r\n";
++  ss << "Content-Length: 0\r\n";
++  ss << "Proxy-Connection: Keep-Alive\r\n";
++  ss << headers_;
++  ss << "\r\n";
++  std::string str = ss.str();
++  DirectSend(str.c_str(), str.size());
++  state_ = PS_LEADER;
++  expect_close_ = true;
++  content_length_ = 0;
++  headers_.clear();
++
++  RTC_LOG(LS_VERBOSE) << "AsyncHttpsProxySocket >> " << str;
++}
++
++void AsyncHttpsProxySocket::ProcessLine(char* data, size_t len) {
++  RTC_LOG(LS_VERBOSE) << "AsyncHttpsProxySocket << " << data;
++
++  if (len == 0) {
++    if (state_ == PS_TUNNEL_HEADERS) {
++      state_ = PS_TUNNEL;
++    } else if (state_ == PS_ERROR_HEADERS) {
++      Error(defer_error_);
++      return;
++    } else if (state_ == PS_SKIP_HEADERS) {
++      if (content_length_) {
++        state_ = PS_SKIP_BODY;
++      } else {
++        EndResponse();
++        return;
++      }
++    } else {
++      if (!unknown_mechanisms_.empty()) {
++        RTC_LOG(LS_ERROR) << "Unsupported authentication methods: "
++                          << unknown_mechanisms_;
++      }
++      // Unexpected end of headers
++      Error(0);
++      return;
++    }
++  } else if (state_ == PS_LEADER) {
++    unsigned int code;
++    if (sscanf(data, "HTTP/%*u.%*u %u", &code) != 1) {
++      Error(0);
++      return;
++    }
++    switch (code) {
++      case 200:
++        // connection good!
++        state_ = PS_TUNNEL_HEADERS;
++        return;
++#if defined(HTTP_STATUS_PROXY_AUTH_REQ) && (HTTP_STATUS_PROXY_AUTH_REQ != 407)
++#error Wrong code for HTTP_STATUS_PROXY_AUTH_REQ
++#endif
++      case 407:  // HTTP_STATUS_PROXY_AUTH_REQ
++        state_ = PS_AUTHENTICATE;
++        return;
++      default:
++        defer_error_ = 0;
++        state_ = PS_ERROR_HEADERS;
++        return;
++    }
++  } else if ((state_ == PS_AUTHENTICATE) &&
++             absl::StartsWithIgnoreCase(data, "Proxy-Authenticate:")) {
++    // Essai qui peut fonctionner à partir d'ici (g supprimé des trucs cf les
++    // doc pour plus d'infos)
++    std::string response, auth_method;
++    RTC_LOG(LS_VERBOSE) << "Ignoring Proxy-Authenticate: " << auth_method;
++    if (!unknown_mechanisms_.empty())
++      unknown_mechanisms_.append(", ");
++    unknown_mechanisms_.append(auth_method);
++  } else if (absl::StartsWithIgnoreCase(data, "Content-Length:")) {
++    content_length_ = strtoul(data + 15, 0, 0);
++  } else if (absl::StartsWithIgnoreCase(data, "Proxy-Connection: Keep-Alive")) {
++    expect_close_ = false;
++    /*
++  } else if (absl::StartsWithIgnoreCase(data, "Connection: close") {
++    expect_close_ = true;
++    */
++  }
++}
++
++void AsyncHttpsProxySocket::EndResponse() {
++  if (!expect_close_) {
++    SendRequest();
++    return;
++  }
++
++  // No point in waiting for the server to close... let's close now
++  // TODO: Refactor out PS_WAIT_CLOSE
++  state_ = PS_WAIT_CLOSE;
++  BufferedReadAdapter::Close();
++  OnCloseEvent(this, 0);
++}
++
++void AsyncHttpsProxySocket::Error(int error) {
++  BufferInput(false);
++  Close();
++  SetError(error);
++  SignalCloseEvent(this, error);
++}
++
++
++}  // olvid
++}  // namespace webrtc
+diff --git a/rtc_base/olvid_async_https_proxy_socket.h b/rtc_base/olvid_async_https_proxy_socket.h
+new file mode 100644
+index 0000000000..07a0f4246c
+--- /dev/null
++++ b/rtc_base/olvid_async_https_proxy_socket.h
+@@ -0,0 +1,83 @@
++/*
++ * ///////////////////////////////////////////////////////
++ * Proxy support
++ * ///////////////////////////////////////////////////////
++ *
++ * Copied from rtc_base/socket_adapters.h (version 6478)
++ * before this part was deleted (L.79)
++*/
++
++#ifndef RTC_BASE_OLVID_ASYNC_HTTPS_PROXY_SOCKET_H_
++#define RTC_BASE_OLVID_ASYNC_HTTPS_PROXY_SOCKET_H_
++
++#include <cstddef>
++#include <cstdint>
++
++#include "api/array_view.h"
++// #include "rtc_base/olvid_crypt_string.h"
++#include "rtc_base/async_socket.h"
++#include "rtc_base/socket.h"
++#include "rtc_base/socket_adapters.h"
++#include "rtc_base/socket_address.h"
++
++namespace webrtc {
++namespace olvid {
++
++// Implements a socket adapter that speaks the HTTP/S proxy protocol.
++class AsyncHttpsProxySocket : public BufferedReadAdapter {
++ public:
++  AsyncHttpsProxySocket(Socket* socket,
++                        absl::string_view user_agent,
++                        const SocketAddress& proxy);
++  ~AsyncHttpsProxySocket() override;
++
++  AsyncHttpsProxySocket(const AsyncHttpsProxySocket&) = delete;
++  AsyncHttpsProxySocket& operator=(const AsyncHttpsProxySocket&) = delete;
++
++  // If connect is forced, the adapter will always issue an HTTP CONNECT to the
++  // target address.  Otherwise, it will connect only if the destination port
++  // is not port 80.
++  void SetForceConnect(bool force) { force_connect_ = force; }
++
++  int Connect(const SocketAddress& addr) override;
++  SocketAddress GetRemoteAddress() const override;
++  int Close() override;
++  ConnState GetState() const override;
++
++ protected:
++  void OnConnectEvent(Socket* socket) override;
++  void OnCloseEvent(Socket* socket, int err) override;
++  void ProcessInput(char* data, size_t* len) override;
++
++  bool ShouldIssueConnect() const;
++  void SendRequest();
++  void ProcessLine(char* data, size_t len);
++  void EndResponse();
++  void Error(int error);
++
++ private:
++  SocketAddress proxy_, dest_;
++  std::string agent_, headers_;
++  bool force_connect_;
++  size_t content_length_;
++  int defer_error_;
++  bool expect_close_;
++  enum ProxyState {
++    PS_INIT,
++    PS_LEADER,
++    PS_AUTHENTICATE,
++    PS_SKIP_HEADERS,
++    PS_ERROR_HEADERS,
++    PS_TUNNEL_HEADERS,
++    PS_SKIP_BODY,
++    PS_TUNNEL,
++    PS_WAIT_CLOSE,
++    PS_ERROR
++  } state_;
++  std::string unknown_mechanisms_;
++};
++
++}  //  namespace olvid
++}  //  namespace webrtc
++
++#endif  // RTC_BASE_OLVID_ASYNC_HTTPS_PROXY_SOCKET_H_
+\ No newline at end of file
+diff --git a/sdk/android/BUILD.gn b/sdk/android/BUILD.gn
+index ddce4ac653..f8361254a4 100644
+--- a/sdk/android/BUILD.gn
++++ b/sdk/android/BUILD.gn
+@@ -890,6 +890,8 @@ if (current_os == "linux" || is_android) {
+       "//third_party/abseil-cpp/absl/memory",
+       "//third_party/abseil-cpp/absl/strings",
+       "//third_party/jni_zero",
++      "//p2p:basic_packet_socket_factory",
++      "//rtc_base:socket_address",
+     ]
+   }
+ 
+diff --git a/sdk/android/api/org/webrtc/PeerConnectionFactory.java b/sdk/android/api/org/webrtc/PeerConnectionFactory.java
+index 9d06d81c73..4ad2bcabda 100644
+--- a/sdk/android/api/org/webrtc/PeerConnectionFactory.java
++++ b/sdk/android/api/org/webrtc/PeerConnectionFactory.java
+@@ -179,6 +179,10 @@ public class PeerConnectionFactory {
+     @Nullable private NetworkControllerFactoryFactory networkControllerFactoryFactory;
+     @Nullable private NetworkStatePredictorFactoryFactory networkStatePredictorFactoryFactory;
+     @Nullable private NetEqFactoryFactory neteqFactoryFactory;
++    // Proxy support
++    @Nullable private String proxyAddress;
++    private int proxyPort;
++    @Nullable private String userAgent;
+ 
+     private Builder() {}
+ 
+@@ -265,6 +269,19 @@ public class PeerConnectionFactory {
+       return this;
+     }
+ 
++    
++    // Proxy support
++    public Builder setHttpsProxy(String proxyAddress, int proxyPort) {
++      this.proxyAddress = proxyAddress;
++      this.proxyPort = proxyPort;
++      return this;
++    }
++
++    public Builder setUserAgent(String userAgent) {
++      this.userAgent = userAgent;
++      return this;
++    }
++
+     public PeerConnectionFactory createPeerConnectionFactory() {
+       checkInitializeHasBeenCalled();
+       try (Environment env = envBuilder.build()) {
+@@ -289,7 +306,9 @@ public class PeerConnectionFactory {
+             networkStatePredictorFactoryFactory == null
+                 ? 0
+                 : networkStatePredictorFactoryFactory.createNativeNetworkStatePredictorFactory(),
+-            neteqFactoryFactory == null ? 0 : neteqFactoryFactory.createNativeNetEqFactory());
++            neteqFactoryFactory == null ? 0 : neteqFactoryFactory.createNativeNetEqFactory(),
++            // Proxy support
++            proxyAddress, proxyPort, userAgent);
+       }
+     }
+   }
+@@ -610,7 +629,8 @@ public class PeerConnectionFactory {
+       long audioDecoderFactory, VideoEncoderFactory encoderFactory,
+       VideoDecoderFactory decoderFactory, long nativeAudioProcessor,
+       long nativeFecControllerFactory, long nativeNetworkControllerFactory,
+-      long nativeNetworkStatePredictorFactory, long neteqFactory);
++      long nativeNetworkStatePredictorFactory, long neteqFactory,
++      String proxyAddress, int proxyPort, String userAgent); // Proxy support
+ 
+   private static native long nativeCreatePeerConnection(long factory,
+       PeerConnection.RTCConfiguration rtcConfig, MediaConstraints constraints, long nativeObserver,
+diff --git a/sdk/android/src/jni/pc/peer_connection_factory.cc b/sdk/android/src/jni/pc/peer_connection_factory.cc
+index 910ad58c34..7b4e585fdb 100644
+--- a/sdk/android/src/jni/pc/peer_connection_factory.cc
++++ b/sdk/android/src/jni/pc/peer_connection_factory.cc
+@@ -49,6 +49,10 @@
+ #include "rtc_base/socket_factory.h"
+ #include "rtc_base/ssl_identity.h"
+ #include "rtc_base/thread.h"
++// Proxy support
++#include "p2p/base/basic_packet_socket_factory.h"
++#include "rtc_base/socket_address.h"
++
+ #include "sdk/android/generated_peerconnection_jni/PeerConnectionFactory_jni.h"
+ #include "sdk/android/native_api/jni/java_types.h"
+ #include "sdk/android/native_api/jni/scoped_java_ref.h"
+@@ -265,7 +269,11 @@ ScopedJavaLocalRef<jobject> CreatePeerConnectionFactoryForJava(
+         network_controller_factory,
+     std::unique_ptr<NetworkStatePredictorFactoryInterface>
+         network_state_predictor_factory,
+-    std::unique_ptr<NetEqFactory> neteq_factory) {
++    std::unique_ptr<NetEqFactory> neteq_factory,
++    // Proxy support
++    std::string proxyAddress,
++    jint proxyPort,
++    std::string userAgent) {
+   // talk/ assumes pretty widely that the current Thread is ThreadManager'd, but
+   // ThreadManager only WrapCurrentThread()s the thread where it is first
+   // created.  Since the semantics around when auto-wrapping happens in
+@@ -306,6 +314,13 @@ ScopedJavaLocalRef<jobject> CreatePeerConnectionFactoryForJava(
+     dependencies.network_monitor_factory =
+         std::make_unique<AndroidNetworkMonitorFactory>();
+   }
++  // Proxy support
++  if ((!proxyAddress.empty() && proxyPort != 0) || !userAgent.empty()) {
++    dependencies.packet_socket_factory =
++        std::make_unique<BasicPacketSocketFactory>(
++            socket_server.get(), webrtc::SocketAddress(proxyAddress, proxyPort),
++            userAgent);
++  }
+ 
+   dependencies.adm = std::move(audio_device_module);
+   dependencies.audio_encoder_factory = std::move(audio_encoder_factory);
+@@ -355,7 +370,11 @@ JNI_PeerConnectionFactory_CreatePeerConnectionFactory(
+     jlong native_fec_controller_factory,
+     jlong native_network_controller_factory,
+     jlong native_network_state_predictor_factory,
+-    jlong native_neteq_factory) {
++    jlong native_neteq_factory,
++    // Proxy support
++    const JavaParamRef<jstring>& proxyAddress,
++    jint proxyPort,
++    const JavaParamRef<jstring>& userAgent) {
+   const Environment* env = reinterpret_cast<Environment*>(webrtc_env_ref);
+   RTC_CHECK(env != nullptr);
+   scoped_refptr<AudioProcessing> audio_processor(
+@@ -373,7 +392,10 @@ JNI_PeerConnectionFactory_CreatePeerConnectionFactory(
+           native_network_controller_factory),
+       TakeOwnershipOfUniquePtr<NetworkStatePredictorFactoryInterface>(
+           native_network_state_predictor_factory),
+-      TakeOwnershipOfUniquePtr<NetEqFactory>(native_neteq_factory));
++      TakeOwnershipOfUniquePtr<NetEqFactory>(native_neteq_factory),
++      // Proxy support
++      proxyAddress.is_null() ? "" : JavaToStdString(jni, proxyAddress),
++      proxyPort, userAgent.is_null() ? "" : JavaToStdString(jni, userAgent));
+ }
+ 
+ static void JNI_PeerConnectionFactory_FreeFactory(JNIEnv*, jlong j_p) {

@@ -19,6 +19,10 @@
 
 package io.olvid.messenger;
 
+import android.content.SharedPreferences;
+
+import androidx.preference.PreferenceManager;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -163,17 +167,20 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         break;
                     }
 
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(App.getContext());
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
                     if (updated) {
                         Integer latest = appInfo.get("latest_android");
-                        if (latest != null && latest > BuildConfig.VERSION_CODE) {
-                            App.openAppDialogNewVersionAvailable();
-                        }
-                    } else {
-                        Integer min = appInfo.get("min_android");
-                        if (min != null && min > BuildConfig.VERSION_CODE) {
-                            App.openAppDialogOutdatedVersion();
+                        if (latest != null && latest > sharedPreferences.getInt(SettingsActivity.PREF_KEY_LATEST_APP_VERSION, -1)) {
+                            SettingsActivity.setUpdateAvailableTipDismissed(false);
+                            editor.putInt(SettingsActivity.PREF_KEY_LATEST_APP_VERSION, latest);
                         }
                     }
+                    Integer min = appInfo.get("min_android");
+                    if (min != null && min != sharedPreferences.getInt(SettingsActivity.PREF_KEY_MIN_APP_VERSION, -1)) {
+                        editor.putInt(SettingsActivity.PREF_KEY_MIN_APP_VERSION, min);
+                    }
+                    editor.apply();
                 }
                 break;
             }
@@ -381,7 +388,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
 
                                     // if no longer keycloak managed, unregister from
                                     if (!appOwnedIdentity.keycloakManaged) {
-                                        KeycloakManager.getInstance().unregisterKeycloakManagedIdentity(appOwnedIdentity.bytesOwnedIdentity);
+                                        KeycloakManager.unregisterKeycloakManagedIdentity(appOwnedIdentity.bytesOwnedIdentity);
                                         if (BuildConfig.USE_BILLING_LIB) {
                                             BillingUtils.newIdentityAvailableForSubscription(appOwnedIdentity.bytesOwnedIdentity);
                                         }
@@ -522,7 +529,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                     ObvIdentity obvIdentity = engine.getOwnedIdentity(bytesOwnedIdentity);
                     ObvKeycloakState keycloakState = engine.getOwnedIdentityKeycloakState(bytesOwnedIdentity);
                     if (obvIdentity != null && keycloakState != null) {
-                        KeycloakManager.getInstance().registerKeycloakManagedIdentity(
+                        KeycloakManager.registerKeycloakManagedIdentity(
                                 obvIdentity,
                                 keycloakState.keycloakServer,
                                 keycloakState.clientId,
@@ -537,7 +544,8 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                                 false
                         );
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
                 break;
             }
             case EngineNotifications.CONTACT_INTRODUCTION_INVITATION_SENT: {

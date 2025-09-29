@@ -143,14 +143,20 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
     // region setDelegates
 
     @Override
+    public int initialQueueingPriority() {
+        return 0;
+    }
+
+    @Override
     public void initialisationComplete() {
+        // we optimize the initial queueing order so web sockets connect as soon as possible and messages are listed soon too.
         wellKnownCoordinator.initialQueueing();
+        websocketCoordinator.initialQueueing();
+        downloadMessagesAndListAttachmentsCoordinator.initialQueueing();
         registerServerPushNotificationsCoordinator.initialQueueing();
         downloadAttachmentCoordinator.initialQueueing();
         serverQueryCoordinator.initialQueueing();
-        downloadMessagesAndListAttachmentsCoordinator.initialQueueing();
         downloadMessageExtendedPayloadCoordinator.initialQueueing();
-        websocketCoordinator.initialQueueing();
         serverUserDataCoordinator.initialQueueing();
         createServerSessionCoordinator.initialQueueing();
     }

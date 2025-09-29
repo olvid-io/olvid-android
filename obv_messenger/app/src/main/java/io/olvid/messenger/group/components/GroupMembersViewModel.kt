@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.jsonIdentityDetails
 import io.olvid.messenger.databases.dao.Group2MemberDao.Group2MemberOrPending
@@ -81,6 +82,9 @@ class GroupMembersViewModel : ViewModel() {
         private set
     var allMembers by mutableStateOf(emptyList<GroupMember>())
         private set
+    var selectedMembers by mutableStateOf<Set<BytesKey>?>(null)
+        private set
+
     var currentFilter by mutableStateOf<String?>(null)
         private set
     var selectAllFilterText by mutableStateOf(false)
@@ -125,41 +129,48 @@ class GroupMembersViewModel : ViewModel() {
     }
 
     fun toggleMemberSelection(memberBytes: ByteArray) {
-        updateSelectedMembers { currentMembers ->
-            currentMembers.map { member ->
-                if (member.bytesIdentity.contentEquals(memberBytes)) {
-                    member.copy(selected = !member.selected)
-                } else {
-                    member
-                }
-            }
+        val key = BytesKey(memberBytes)
+        val currentSelection =
+            selectedMembers ?: allMembers.filter { it.selected }.map { BytesKey(it.bytesIdentity) }
+                .toSet()
+
+        selectedMembers = if (currentSelection.contains(key)) {
+            currentSelection - key
+        } else {
+            currentSelection + key
         }
+        updateMembersSelection()
     }
 
-    private fun updateSelectedMembers(update: (List<GroupMember>) -> List<GroupMember>) {
-        allMembers = update(allMembers)
+    private fun updateMembersSelection() {
+        val selection = selectedMembers ?: return
+        allMembers = allMembers.map {
+            it.copy(selected = selection.contains(BytesKey(it.bytesIdentity)))
+        }
         selectAllFilterText = true
-        filterMembers() // Ensure the filtered list is updated
-    }
-
-    fun setMembers(members: List<GroupMember>) {
-        allMembers = members
         filterMembers()
     }
 
-    fun setSelectedMembers(selectedMembersIdentities: List<ByteArray>) {
-        updateSelectedMembers { currentMembers ->
-            currentMembers.map { member ->
-                if (selectedMembersIdentities.contains(member.bytesIdentity)) {
-                    member.copy(selected = true)
-                } else {
-                    member.copy(selected = false)
-                }
+    fun setMembers(members: List<GroupMember>) {
+        val selection = selectedMembers
+        allMembers = if (selection == null) {
+            members
+        } else {
+            members.map {
+                it.copy(selected = selection.contains(BytesKey(it.bytesIdentity)))
             }
         }
+        filterMembers()
+    }
+
+    fun setSelectedMembers(selectedMembersIdentities: List<ByteArray>?, onlyOnce: Boolean = false) {
+        if (onlyOnce && selectedMembers != null) return
+        selectedMembers = selectedMembersIdentities?.map { BytesKey(it) }?.toSet()
+        updateMembersSelection()
     }
 }
 
+// Extensions
 fun Group2MemberOrPending.toGroupMember(
     selected: Boolean = false,
     removableFromRow: Boolean = false
@@ -169,8 +180,11 @@ fun Group2MemberOrPending.toGroupMember(
         contact = contact,
         jsonIdentityDetails = identityDetails?.jsonIdentityDetails(),
         fullSearchDisplayName = contact?.fullSearchDisplayName
-            ?: StringUtils.unAccent(identityDetails.jsonIdentityDetails()
-                ?.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false).orEmpty()),
+            ?: StringUtils.unAccent(
+                identityDetails.jsonIdentityDetails()
+                    ?.formatDisplayName(JsonIdentityDetails.FORMAT_STRING_FOR_SEARCH, false)
+                    .orEmpty()
+            ),
         pending = pending,
         isAdmin = permissionAdmin,
         removableFromRow = removableFromRow,
@@ -191,19 +205,8 @@ fun Contact.toGroupMember(selected: Boolean = false): GroupMember {
 }
 
 fun GroupMember.getDisplayName(context: Context): String {
-    return contact?.customDisplayName?.let { customName ->
-        val formattedIdentityName = jsonIdentityDetails?.formatDisplayName(
-            SettingsActivity.contactDisplayNameFormat,
-            SettingsActivity.uppercaseLastName
-        )
-        if (formattedIdentityName != null) {
-            "$customName ($formattedIdentityName)"
-        } else {
-            customName
-        }
-    } ?: jsonIdentityDetails?.formatFirstAndLastName(
+    return contact?.customDisplayName ?: jsonIdentityDetails?.formatFirstAndLastName(
         SettingsActivity.contactDisplayNameFormat,
         SettingsActivity.uppercaseLastName
     ) ?: context.getString(R.string.text_unable_to_display_contact_name)
-
 }

@@ -50,6 +50,7 @@ import androidx.core.view.WindowInsetsCompat.Type
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.customClasses.onBackPressed
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -105,6 +106,13 @@ class SelectDetailsPhotoActivity : LockableActivity(), OnTouchListener, OnClickL
             ).isAppearanceLightStatusBars =
                 false
         }
+
+        onBackPressed {
+            val returnIntent = Intent()
+            setResult(RESULT_CANCELED, returnIntent)
+            finish()
+        }
+
         val root = findViewById<ConstraintLayout>(R.id.root_constraint_layout)
         if (root != null) {
             ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets: WindowInsetsCompat ->
@@ -164,14 +172,14 @@ class SelectDetailsPhotoActivity : LockableActivity(), OnTouchListener, OnClickL
 
     private fun handleIntent(intent: Intent) {
         if (intent.data == null) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
             return
         }
 
         try {
             viewModel.setPhotoUri(this.contentResolver, intent.data!!)
         } catch (_: Exception) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
     }
 
@@ -386,7 +394,7 @@ class SelectDetailsPhotoActivity : LockableActivity(), OnTouchListener, OnClickL
     override fun onClick(v: View) {
         val id = v.id
         if (id == R.id.button_back) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         } else if (id == R.id.button_rotate) {
             viewModel.rotate90()
         } else if (id == R.id.button_reset) {
@@ -452,13 +460,6 @@ class SelectDetailsPhotoActivity : LockableActivity(), OnTouchListener, OnClickL
                 App.toast(R.string.toast_message_error_retry, Toast.LENGTH_SHORT)
             }
         }
-    }
-
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
-        val returnIntent = Intent()
-        setResult(RESULT_CANCELED, returnIntent)
-        finish()
     }
 
     override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {

@@ -102,7 +102,7 @@ public class AppBackupAndSyncDelegate implements ObvBackupAndSyncDelegate {
                         try {
                             ObvKeycloakState keycloakState = AppSingleton.getEngine().getOwnedIdentityKeycloakState(obvOwnedIdentity.getBytesIdentity());
                             if (keycloakState != null) {
-                                KeycloakManager.getInstance().registerKeycloakManagedIdentity(
+                                KeycloakManager.registerKeycloakManagedIdentity(
                                         obvOwnedIdentity,
                                         keycloakState.keycloakServer,
                                         keycloakState.clientId,

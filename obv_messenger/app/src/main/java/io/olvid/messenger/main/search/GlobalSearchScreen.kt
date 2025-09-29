@@ -30,12 +30,17 @@ import androidx.compose.foundation.layout.IntrinsicSize.Min
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -58,8 +63,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -81,6 +88,8 @@ import io.olvid.messenger.databases.dao.MessageDao.DiscussionAndMessage
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.plus
+import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionActivity
 import io.olvid.messenger.discussion.gallery.FyleListItem
@@ -198,7 +207,7 @@ fun GlobalSearchScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(colorResource(id = R.color.almostWhite))
-                    .navigationBarsPadding()
+                    .systemBarsHorizontalPadding()
                     .cutoutHorizontalPadding(),
                 contentAlignment = Alignment.TopStart
             ) {
@@ -211,7 +220,10 @@ fun GlobalSearchScreen(
                         } else {
                             LazyColumn(
                                 state = lazyListState,
-                                contentPadding = PaddingValues(bottom = 64.dp)
+                                contentPadding = WindowInsets.safeDrawing
+                                    .only(WindowInsetsSides.Bottom)
+                                    .asPaddingValues(LocalDensity.current)
+                                        + PaddingValues(bottom = 80.dp + dimensionResource(R.dimen.tab_bar_size))
                             ) {
                                 globalSearchViewModel.contactsFound?.takeIf { it.isNotEmpty() }
                                     ?.let {
@@ -238,7 +250,10 @@ fun GlobalSearchScreen(
                         } else {
                             LazyColumn(
                                 state = lazyListState,
-                                contentPadding = PaddingValues(bottom = 64.dp)
+                                contentPadding = WindowInsets.safeDrawing
+                                    .only(WindowInsetsSides.Bottom)
+                                    .asPaddingValues(LocalDensity.current)
+                                        + PaddingValues(bottom = 80.dp + dimensionResource(R.dimen.tab_bar_size))
                             ) {
                                 globalSearchViewModel.groupsFound?.takeIf { it.isNotEmpty() }
                                     ?.let {
@@ -274,7 +289,10 @@ fun GlobalSearchScreen(
                         messages?.takeIf { it.itemCount > 0 }?.let {
                             LazyColumn(
                                 state = lazyListState,
-                                contentPadding = PaddingValues(bottom = 64.dp)
+                                contentPadding = WindowInsets.safeDrawing
+                                    .only(WindowInsetsSides.Bottom)
+                                    .asPaddingValues(LocalDensity.current)
+                                        + PaddingValues(bottom = 80.dp + dimensionResource(R.dimen.tab_bar_size))
                             ) {
                                 items(
                                     count = messages.itemCount,
@@ -301,7 +319,10 @@ fun GlobalSearchScreen(
                         attachments?.takeIf { it.itemCount > 0 }?.let {
                             LazyColumn(
                                 state = lazyListState,
-                                contentPadding = PaddingValues(top = 8.dp, bottom = 64.dp)
+                                contentPadding = WindowInsets.safeDrawing
+                                    .only(WindowInsetsSides.Bottom)
+                                    .asPaddingValues(LocalDensity.current)
+                                        + PaddingValues(bottom = 80.dp + dimensionResource(R.dimen.tab_bar_size), top = 8.dp)
                             ) {
                                 items(
                                     count = attachments.itemCount,
@@ -396,7 +417,10 @@ fun GlobalSearchScreen(
                         links?.takeIf { it.itemCount > 0 }?.let {
                             LazyColumn(
                                 state = lazyListState,
-                                contentPadding = PaddingValues(top = 8.dp, bottom = 64.dp)
+                                contentPadding = WindowInsets.safeDrawing
+                                    .only(WindowInsetsSides.Bottom)
+                                    .asPaddingValues(LocalDensity.current)
+                                        + PaddingValues(bottom = 80.dp + dimensionResource(R.dimen.tab_bar_size), top = 8.dp)
                             ) {
                                 items(
                                     count = links.itemCount,

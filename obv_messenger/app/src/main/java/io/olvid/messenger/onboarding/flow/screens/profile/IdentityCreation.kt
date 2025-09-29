@@ -56,6 +56,7 @@ import androidx.navigation.compose.rememberNavController
 import io.olvid.messenger.R
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.string
+import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.OnboardingActivity
 import io.olvid.messenger.onboarding.flow.OnboardingAction
@@ -80,7 +81,7 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
         val context = LocalContext.current
         val keyboardController = LocalSoftwareKeyboardController.current
         val scanLauncher = rememberLauncherForActivityResult(StartActivityForResult()) {}
-        
+
         OnboardingScreen(
             step = OnboardingStep(title = stringResource(id = string.onboarding_welcome_among_us),
                 actions = listOf(
@@ -125,6 +126,13 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
                 )
             }
         ) {
+            Text(
+                text = AnnotatedString(stringResource(R.string.onboarding_privacy_disclaimer)).formatMarkdown(),
+                style = OlvidTypography.h3.copy(fontWeight = FontWeight.Normal),
+                color = colorResource(R.color.almostBlack),
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = onboardingFlowViewModel.firstName,
                 onValueChange = onboardingFlowViewModel::updateFirstName,
@@ -157,9 +165,11 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
     }
 }
 
+
 @Preview
+@Preview(locale = "fr")
 @Composable
-fun IdentityCreationPreview() {
+private fun IdentityCreationPreview() {
     NavHost(
         navController = rememberNavController(),
         startDestination = OnboardingRoutes.IDENTITY_CREATION,

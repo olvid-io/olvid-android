@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" e 1 outro grupo em comum</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" e %2$d outros grupos em comum</item>
+	</plurals>
 	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1156880361">Um dos seus dispositivos irá expirar e ser desativado em **menos de %1$d dia**.\nPode adquirir uma subscrição **Olvid+** para mantê-lo ativo.</item>
 		<item quantity="other" state="needs_review" hash="-574658149">Um dos seus dispositivos irá expirar e ser desativado em **menos de %1$d dias**.\nPode adquirir uma subscrição **Olvid+** para mantê-lo ativo.</item>
@@ -93,6 +97,10 @@
 	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1306576418">Está prestes a convidar cada membro do grupo com quem tem um canal (atualmente 1 membro) para uma discussão privada.\nQuer prosseguir?</item>
 		<item quantity="other" state="needs_review" hash="-994717142">Está prestes a convidar cada membro do grupo com o qual tem um canal (atualmente %1$d membros) para uma discussão privada.\nQuer prosseguir?</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">1 membro do grupo pode ser convidado para uma discussão privada</item>
+		<item quantity="other" state="needs_review" hash="-496794154">Os membros do %1$d podem ser convidados para uma discussão privada</item>
 	</plurals>
 	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1699852572">1 grupo comum</item>

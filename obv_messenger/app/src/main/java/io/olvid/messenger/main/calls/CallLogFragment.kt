@@ -48,15 +48,9 @@ class CallLogFragment : Fragment() {
                 CallLogScreen(
                     callLogViewModel = callLogViewModel,
                     onClick = ::callClicked,
-                    onNewCallClick = ::startNewCall
                 )
             }
         }
-    }
-
-    private fun startNewCall() {
-        val callContactDialogFragment = CallContactDialogFragment.newInstance()
-        activity?.supportFragmentManager?.let { callContactDialogFragment.show(it, "dialog") }
     }
 
     private fun callClicked(callLogItem: CallLogItemAndContacts) {

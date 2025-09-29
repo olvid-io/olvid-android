@@ -38,12 +38,6 @@ public class ReceptionChannelInfo {
     private final UID remoteDeviceUid;
     private final Identity remoteIdentity;
 
-    ///////
-    // GKMV2 related info --> not serialized
-    private int fullRatchetCount;
-    private int selfRatchetCount;
-    private boolean obliviousChannelsSupportsGKMV2;
-
 
     private ReceptionChannelInfo(int channelType) {
         this(channelType, null, null);
@@ -53,13 +47,6 @@ public class ReceptionChannelInfo {
         this.channelType = channelType;
         this.remoteDeviceUid = remoteDeviceUid;
         this.remoteIdentity = remoteIdentity;
-    }
-
-    // add information about GKMV2 in receptionChannelInfo, this information is not serialized
-    public void enrichWithGKMV2Info(int fullRatchetCount, int selfRatchetCount, boolean obliviousChannelsSupportsGKMV2) {
-        this.fullRatchetCount = fullRatchetCount;
-        this.selfRatchetCount = selfRatchetCount;
-        this.obliviousChannelsSupportsGKMV2 = obliviousChannelsSupportsGKMV2;
     }
 
     public static ReceptionChannelInfo createLocalChannelInfo() {
@@ -144,18 +131,6 @@ public class ReceptionChannelInfo {
 
     public Identity getRemoteIdentity() {
         return remoteIdentity;
-    }
-
-    public boolean obliviousChannelsSupportsGKMV2() {
-        return obliviousChannelsSupportsGKMV2;
-    }
-
-    public int getFullRatchetCount() {
-        return fullRatchetCount;
-    }
-
-    public int getSelfRatchetCount() {
-        return selfRatchetCount;
     }
 
     @Override

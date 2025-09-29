@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">현재 대화가 없습니다</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">연락처 및 그룹 대화가 여기에 표시됩니다.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">현재 그룹이 없습니다</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">"새 그룹"을 눌러 첫 번째 그룹을 만드세요.</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">아래 파란색 + 버튼을 눌러 첫 그룹을 만드세요.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">그룹 관리자가 그룹 카드를 업데이트했습니다. 이전 버전과 새 버전이 아래에 표시됩니다.\n\n"업데이트"를 눌러 그룹 정보를 업데이트하세요.</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">관리자가 그룹 이름을 다음으로 변경했습니다:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">관리자가 그룹 설명을 다음으로 변경했습니다:</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">메시지 보내기 및 받기</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">활성화하면 한 번 읽은 메시지와 기본 제한된 가시성 기간의 메시지는 대화에 들어오자마자 열립니다. 그렇지 않으면 클릭이 필요합니다.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">활성화하면 삭제된 발신 메시지가 유지되어 언제 전송되었거나 읽혔는지 확인할 수 있습니다. 그렇지 않으면 삭제됩니다.</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">웹 클라이언트</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">웹 클라이언트</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">설정이 업데이트되었습니다</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">설정 업데이트 링크 구문 분석 오류</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">메시지 보내기 및 받기</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">ID 생성 옵션</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">구성 스캔</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">클립보드에서 링크 가져오기</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid가 최신 버전입니다.</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">올비드의 최신 버전이 설치되어 있습니다.</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">업데이트가 있습니다</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Olvid의 새 버전이 Google Play에서 제공됩니다.\n\n최신 기능을 사용하려면 업데이트하세요.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">통화 시작이 지원되지 않습니다</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Olvid에서 Olvid ID를 회사 ID 공급업체에 업로드하지 못했습니다. 백그라운드에서 다시 시도합니다.</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">ID 공급자 오류</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">귀하의 신원 제공업체는 귀하가 로그인한 사용자와 연결된 다른 Olvid ID가 있음을 나타내며, 이를 업데이트할 권한이 없습니다.\n자세한 내용은 관리자에게 문의하십시오.</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s님이 연락처에 추가되었습니다.</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">%1$s님이 연락처에 추가되었습니다.</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">귀하의 Olvid ID는 현재 귀사의 ID 공급업체에서 관리하고 있습니다. Olvid 라이선스를 수동으로 활성화할 수 없습니다.\n\n자세한 내용은 관리자에게 문의하십시오.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">부재중 전화</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">연락처 정보가 업데이트되었습니다.</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">클라우드 공급자 로그인 필요</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Olvid를 클라우드 제공업체에 대한 자동 백업을 사용하도록 구성했지만 세션이 만료되었습니다. 이 제공업체에 다시 로그인해야 합니다.\n\n자동 백업을 더 이상 원하지 않는 경우 앱 설정에서 비활성화할 수 있습니다. 장치를 분실하거나 손상된 경우 자동 백업은 연락처 손실을 방지하는 유일한 방법이라는 점을 명심하십시오.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">로그인</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">원격으로 연락하기</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">원격으로 연락하기</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s는 이미 연락처에 있습니다.</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s는 알려진 사용자 목록에 포함되어 있지만 아직 연락처에 저장되지 않았습니다.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">새로운</string>
@@ -1187,6 +1189,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Olvid 로고의 "i"에 있는 색깔 점</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">대화 목록 상단의 은은한 선</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">대화 목록 상단에 전체 연결 상태가 표시됩니다</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">연결 끊김 시에도 표시기를 절대 표시하지 않음</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">연결 없음</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">연결 중…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">연결 상태: 연결됨</string>
@@ -1203,7 +1206,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">위젯 구성…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">위젯 모양</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">위젯 탭 동작</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">토론하기</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">토론하기</string>
 	<string name="label_message" state="needs_review" hash="809999904">메시지</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">보낼 미리 정의된 메시지</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">보내기 전에 확인</string>
@@ -1349,9 +1352,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">표시 크기</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">토론 시작</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">읽기 전용</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">읽기 전용 보류 중</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">읽기 전용\n대기 중</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">관리자</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">보류 중인 관리자</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">보류 중\n관리자</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">이 사용자의 이름을 표시할 수 없습니다</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">이름 없는 그룹</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">대화 알림</string>
@@ -1382,7 +1385,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">그룹 멤버/총 초대된 인원:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">그룹 버전:</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">그룹 종류:</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">사용자 관리</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">사용자 관리</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">디렉터리에서 관리</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">아직 보내지 않았습니다</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">이 그룹은 현재 동기화 중입니다. 완료되면 이 초대 요청을 수락할 수 있습니다.</string>
@@ -1391,7 +1394,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">이 그룹을 복제할 수 없습니다</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">그룹 %1$s는 이 그룹의 일부 구성원이 그룹 v2를 지원하지 않는 Olvid의 이전 버전을 사용하고 있기 때문에 복제할 수 없습니다. Olvid의 새 버전이 있다는 것을 알려주세요!\n\n오래된 사용자:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">경고: 부분 복제</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">그룹 %1$s에는 아직 보안 채널이 설정되지 않은 멤버가 포함되어 있습니다. 새 그룹에 초대할 수 없습니다.\n\n영향을 받는 사용자:%2$s\n\n불완전한 그룹으로 진행하시겠습니까?</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">그룹 %1$s에는 아직 보안 채널이 설정되지 않은 멤버가 있습니다. 이들을 새 그룹에 초대할 수 없습니다.\n\n해당 사용자:%2$s\n\n불완전한 그룹으로 진행하시겠습니까?</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">의 사본</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">위치 정보 전송됨</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">위치 정보 수신됨</string>
@@ -1475,7 +1478,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02ds</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">이 옵션을 활성화하면 PIN/비밀번호를 3번 연속으로 잘못 입력할 경우, 한 번만 열람 가능한 메시지와 제한된 공개 메시지가 모두 자동으로 삭제됩니다.</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">3번의 잘못된 PIN 입력 후 민감한 메시지를 삭제합니다.</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">이 옵션을 활성화하여 앱을 잠금 해제하지만 숨겨진 프로필, 한 번 읽기 메시지 및 제한된 가시성 메시지를 모두 자동으로 삭제하는 "긴급" PIN/비밀번호를 정의합니다. 이 PIN을 입력하면 이 옵션도 비활성화됩니다.</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">이 옵션을 활성화하여 앱을 잠금 해제하지만 숨겨진 프로필, 1회성 메시지 및 제한된 가시성 메시지를 자동으로 삭제하는 \"긴급\" PIN/비밀번호를 설정합니다. 이 PIN을 입력하면 이 옵션도 비활성화됩니다.</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">긴급 PIN</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">긴급 PIN을 선택하세요</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">Olvid의 잠금 화면에 이 긴급 PIN을 입력하면 Olvid의 잠금이 해제되지만 숨겨진 프로필이 있는 경우 해당 프로필이 자동으로 삭제됩니다.</string>
@@ -1603,8 +1606,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">링크 미리보기를 가져오는 동안 인증서 변경 감지를 비활성화하려면 이 옵션을 활성화하세요. 일부 사이트는 각 연결 시 다른 인증서를 표시할 수 있으며, 이 옵션을 끄면 빈번한 알림을 받을 수 있습니다.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">QR 코드 스캔에 레거시 ZXing 라이브러리 사용</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">기본적으로 Olvid은 QR 코드 스캔에 ML Kit을 사용합니다. Olvid 내에서 QR 코드를 스캔하는 데 문제가 있는 경우 이 옵션을 활성화하세요.</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">내부 PDF 뷰어 사용 (실험적)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">기본적으로 PDF 첨부 파일은 외부 뷰어에서 열립니다. 이 옵션을 활성화하여 대신 (기본) 내부 뷰어를 사용하십시오.</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">내부 PDF 뷰어 사용</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">기본적으로 PDF 첨부 파일은 (기본) 내부 뷰어에서 열립니다. 이 옵션을 비활성화하면 외부 뷰어를 대신 사용합니다.</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">내 기기</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">기기 %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">이 장치</string>
@@ -1660,7 +1663,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">다른 기기에 표시된 코드를 입력하세요.</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">다른 기기에서 Olvid를 시작합니다.\n왼쪽 상단의 프로필 사진을 탭합니다.\n가져올 프로필을 선택하고 "관리" 버튼을 탭합니다.\n코드를 표시하려면 "기기 추가"를 탭합니다.</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">다른 기기에서 이 코드를 입력하세요</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">여러 기기 구독이 있습니다</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">여러 기기 구독이 활성화되었습니다.</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">현재 기기 목록입니다.</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">활성 상태로 유지할 기기를 선택하세요.</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">다른 기기는 30일 이내에 비활성화됩니다.</string>
@@ -1885,7 +1888,6 @@
 	<string name="dialog_title_authentication_failed_time_offset" state="needs_review" hash="-170194947">시계 오차가 있을 수 있나요?</string>
 	<string name="dialog_message_authentication_failed_time_offset" state="needs_review" hash="300612997">인증에 실패했습니다.\n\n가능한 원인은 장치 시간과 서버 시간 사이에 **10분 이상**의 차이가 있을 수 있습니다.\n\n장치의 시간, 날짜 및 시간대가 정확한지 확인하고 다시 인증해 보세요.\n\n*문제가 지속되면 관리자에게 문의하십시오.*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">시계 설정</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">연락하기</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">%1$s와 논의하기</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">프로필 전송 제한</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">중요함</string>
@@ -2003,7 +2005,7 @@
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">프로필 복원 실패. 다시 시도해주세요.</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">프로필 복원</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Olvid+로 모두 보관하세요</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">프로필이 복원되면 프로필 설정에서 활성 상태로 유지할 기기를 선택할 수 있습니다.</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">프로필이 복원되면 프로필 설정에서 활성 상태로 유지할 기기를 선택할 수 있습니다.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">프로필을 복원하여 \"</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">백업 키를 찾을 수 없습니다.</string>
@@ -2090,4 +2092,29 @@
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">외부 뷰어에서 열기</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Olvid 내부 뷰어에서 이 파일을 열 수 없습니다.</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">초대받음</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">새 메시지</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">새 연락처</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">검색</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">직접 만나서</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">원격으로</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">취소</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">서로의 QR 코드를 스캔하세요.</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">지금 본인의 것도 스캔하세요.</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">코드 스캔 완료!</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">코드를 스캔할 수 없나요?</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">다른 방법으로 초대하세요</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">프로필 공유하기</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">다운로드</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">QR 코드 저장됨</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">QR 코드 저장 실패</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">클립보드에 복사됨</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">QR 코드 텍스트</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">첫 연락처 추가하기</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">대화</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">카메라 전환</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">%1$s님과 연락하시겠습니까?</string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">아래 연락처는 이 그룹의 멤버이지만 아직 개인적인 대화가 없습니다.</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">그룹 관리자</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\"은(는) 흔한 그룹입니다.</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">개인 정보 보호를 위해 Olvid는 **공개 또는 중앙 사용자 디렉터리를 가지고 있지 않습니다**. 귀하의 이름은 연결된 사람들에게만 표시됩니다.</string>
 </resources>

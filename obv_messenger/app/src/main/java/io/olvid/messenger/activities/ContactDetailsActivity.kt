@@ -19,7 +19,6 @@
 package io.olvid.messenger.activities
 
 import android.animation.LayoutTransition
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -53,6 +52,7 @@ import android.widget.LinearLayout.LayoutParams
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.widget.AppCompatTextView
@@ -92,6 +92,7 @@ import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
@@ -148,6 +149,19 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
 
     private var animationsSet = false
 
+    private val closeFragmentBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(enabled = false) {
+        override fun handleOnBackPressed() {
+            isEnabled = false
+            supportFragmentManager.findFragmentByTag(FULL_SCREEN_IMAGE_FRAGMENT_TAG)
+                ?.let {
+                    supportFragmentManager.beginTransaction()
+                        .setCustomAnimations(0, R.anim.fade_out)
+                        .remove(it)
+                        .commit()
+                }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -170,6 +184,15 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                 WindowInsetsCompat.CONSUMED
             }
         }
+
+        onBackPressed {
+            if (isTaskRoot) {
+                App.showMainActivityTab(this, MainActivity.CONTACTS_TAB)
+            }
+            finish()
+        }
+
+        onBackPressedDispatcher.addCallback(this, closeFragmentBackPressedCallback)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.elevation = 0f
@@ -333,16 +356,16 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
         if (contact.oneToOne) {
             setTitle(R.string.activity_title_contact_details)
             introduceButton.visibility = View.VISIBLE
-            notOneToOneCardView!!.visibility = View.GONE
+            notOneToOneCardView?.visibility = View.GONE
             discussionButton.visibility = View.VISIBLE
         } else {
             setTitle(R.string.activity_title_user_details)
             introduceButton.visibility = View.GONE
-            notOneToOneCardView!!.visibility = View.VISIBLE
+            notOneToOneCardView?.visibility = View.VISIBLE
             discussionButton.visibility = View.INVISIBLE
             if (invitation == null) {
-                notOneToOneTitleTextView!!.setText(R.string.label_contact_not_one_to_one)
-                notOneToOneExplanationTextView!!.text =
+                notOneToOneTitleTextView?.setText(R.string.label_contact_not_one_to_one)
+                notOneToOneExplanationTextView?.text =
                     getString(
                         R.string.explanation_contact_not_one_to_one,
                         contact.getCustomDisplayName()
@@ -351,8 +374,8 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                 notOneToOneInviteButton.setText(R.string.button_label_invite)
                 notOneToOneRejectButton.visibility = View.GONE
             } else if (invitation.categoryId == Category.ONE_TO_ONE_INVITATION_SENT_DIALOG_CATEGORY) {
-                notOneToOneTitleTextView!!.setText(R.string.invitation_status_one_to_one_invitation)
-                notOneToOneExplanationTextView!!.text = getString(
+                notOneToOneTitleTextView?.setText(R.string.invitation_status_one_to_one_invitation)
+                notOneToOneExplanationTextView?.text = getString(
                     R.string.invitation_status_description_one_to_one_invitation_sent,
                     contact.getCustomDisplayName()
                 )
@@ -361,8 +384,8 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                 notOneToOneRejectButton.setText(R.string.button_label_abort)
             } else if (invitation.categoryId == Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY) {
                 AndroidNotificationManager.clearInvitationNotification(invitation.dialogUuid)
-                notOneToOneTitleTextView!!.setText(R.string.invitation_status_one_to_one_invitation)
-                notOneToOneExplanationTextView!!.text = getString(
+                notOneToOneTitleTextView?.setText(R.string.invitation_status_one_to_one_invitation)
+                notOneToOneExplanationTextView?.text = getString(
                     R.string.invitation_status_description_one_to_one_invitation,
                     contact.getCustomDisplayName()
                 )
@@ -375,16 +398,16 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
 
         val displayName = contact.getCustomDisplayName()
         contactInitialView.setContact(contact)
-        contactNameTextView!!.text = displayName
+        contactNameTextView?.text = displayName
         if (contact.personalNote != null) {
-            personalNoteTextView!!.visibility = View.VISIBLE
-            personalNoteTextView!!.text = contact.personalNote
+            personalNoteTextView?.visibility = View.VISIBLE
+            personalNoteTextView?.text = contact.personalNote
         } else {
-            personalNoteTextView!!.visibility = View.GONE
+            personalNoteTextView?.visibility = View.GONE
         }
 
         if (contact.shouldShowChannelCreationSpinner() && contact.active) {
-            noChannelCardView!!.visibility = View.VISIBLE
+            noChannelCardView?.visibility = View.VISIBLE
             val animated = AnimatedVectorDrawableCompat.create(App.getContext(), R.drawable.dots)
             if (animated != null) {
                 animated.registerAnimationCallback(object : AnimationCallback() {
@@ -392,18 +415,18 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                         Handler(Looper.getMainLooper()).post { animated.start() }
                     }
                 })
-                noChannelSpinner!!.setImageDrawable(animated)
+                noChannelSpinner?.setImageDrawable(animated)
                 animated.start()
             }
         } else {
-            noChannelCardView!!.visibility = View.GONE
-            noChannelSpinner!!.setImageDrawable(null)
+            noChannelCardView?.visibility = View.GONE
+            noChannelSpinner?.setImageDrawable(null)
         }
 
         if (contact.recentlyOnline) {
-            notRecentlyOnlineCardView!!.visibility = View.GONE
+            notRecentlyOnlineCardView?.visibility = View.GONE
         } else {
-            notRecentlyOnlineCardView!!.visibility = View.VISIBLE
+            notRecentlyOnlineCardView?.visibility = View.VISIBLE
         }
 
         if (contact.hasChannelOrPreKey()) {
@@ -423,18 +446,18 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
             contact.bytesContactIdentity
         )
         if (reasons != null && reasons.contains(REVOKED)) {
-            revokedCardView!!.visibility = View.VISIBLE
+            revokedCardView?.visibility = View.VISIBLE
             if (reasons.contains(FORCEFULLY_UNBLOCKED)) {
-                revokedExplanationTextView!!.setText(R.string.explanation_contact_revoked_and_unblocked)
+                revokedExplanationTextView?.setText(R.string.explanation_contact_revoked_and_unblocked)
                 reblockRevokedButton.visibility = View.VISIBLE
                 unblockRevokedButton.visibility = View.GONE
             } else {
-                revokedExplanationTextView!!.setText(R.string.explanation_contact_revoked)
+                revokedExplanationTextView?.setText(R.string.explanation_contact_revoked)
                 reblockRevokedButton.visibility = View.GONE
                 unblockRevokedButton.visibility = View.VISIBLE
             }
         } else {
-            revokedCardView!!.visibility = View.GONE
+            revokedCardView?.visibility = View.GONE
         }
 
         try {
@@ -446,11 +469,11 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                 return
             }
             if (jsons.size == 1) {
-                acceptUpdateCardView!!.visibility = View.GONE
-                trustedDetailsCardView!!.visibility = View.GONE
+                acceptUpdateCardView?.visibility = View.GONE
+                trustedDetailsCardView?.visibility = View.GONE
 
-                publishDetailsTitle!!.setText(R.string.label_olvid_card)
-                publishDetailsTitle!!.background =
+                publishDetailsTitle?.setText(R.string.label_olvid_card)
+                publishDetailsTitle?.background =
                     ContextCompat.getDrawable(
                         this,
                         R.drawable.background_identity_title
@@ -538,17 +561,17 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                     }
                 }
             } else {
-                publishDetailsTitle!!.setText(R.string.label_olvid_card_published_update)
-                publishDetailsTitle!!.background =
+                publishDetailsTitle?.setText(R.string.label_olvid_card_published_update)
+                publishDetailsTitle?.background =
                     ContextCompat.getDrawable(
                         this,
                         R.drawable.background_identity_title_new
                     )
 
-                acceptUpdateCardView!!.visibility = View.VISIBLE
-                trustedDetailsCardView!!.visibility = View.VISIBLE
+                acceptUpdateCardView?.visibility = View.VISIBLE
+                trustedDetailsCardView?.visibility = View.VISIBLE
 
-                trustedDetailsTextViews!!.removeAllViews()
+                trustedDetailsTextViews?.removeAllViews()
                 publishedDetailsTextViews.removeAllViews()
 
                 val trustedDetails = jsons[1].identityDetails
@@ -573,12 +596,12 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                     val tv = textView
                     tv.text = trustedFirstLine
                     tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                    trustedDetailsTextViews!!.addView(tv)
+                    trustedDetailsTextViews?.addView(tv)
                 }
                 if (!trustedSecondLine.isNullOrEmpty()) {
                     val tv = textView
                     tv.text = trustedSecondLine
-                    trustedDetailsTextViews!!.addView(tv)
+                    trustedDetailsTextViews?.addView(tv)
                 }
                 if (trustedDetails.customFields != null) {
                     val keys: MutableList<String> = ArrayList(trustedDetails.customFields.size)
@@ -601,7 +624,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                         )
                         tv.text = spannableString
-                        trustedDetailsTextViews!!.addView(tv)
+                        trustedDetailsTextViews?.addView(tv)
                     }
                 }
 
@@ -701,7 +724,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
             return
         }
         if (!animationsSet) {
-            mainConstraintLayout!!.layoutTransition = LayoutTransition()
+            mainConstraintLayout?.layoutTransition = LayoutTransition()
             animationsSet = true
         }
         App.runThread(
@@ -1009,7 +1032,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
             )
         }
 
-        contactGroupDiscussionsFragment!!.setUnfilteredDiscussions(contactDetailsViewModel.groupDiscussions)
+        contactGroupDiscussionsFragment?.setUnfilteredDiscussions(contactDetailsViewModel.groupDiscussions)
     }
 
 
@@ -1104,14 +1127,14 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
             )
         } else if (id == R.id.contact_share_button) {
             val intent = Intent(Intent.ACTION_SEND)
-            intent.setType("text/plain")
+            intent.type = "text/plain"
             val identityUrl = ObvUrlIdentity(
                 contact.bytesContactIdentity,
                 publishedDetails.formatDisplayName(
                     JsonIdentityDetails.FORMAT_STRING_FIRST_LAST_POSITION_COMPANY,
                     false
                 )
-            ).urlRepresentation
+            ).getUrlRepresentation(false)
                 ?: return
             intent.putExtra(Intent.EXTRA_TEXT, identityUrl)
             startActivity(Intent.createChooser(intent, getString(R.string.title_sharing_chooser)))
@@ -1198,6 +1221,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                     .setCustomAnimations(R.anim.fade_in, 0)
                     .replace(R.id.overlay, fullScreenImageFragment, FULL_SCREEN_IMAGE_FRAGMENT_TAG)
                     .commit()
+                closeFragmentBackPressedCallback.isEnabled = true
             }
         }
     }
@@ -1208,6 +1232,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                 FULL_SCREEN_IMAGE_FRAGMENT_TAG
             )
             if (fullScreenImageFragment != null) {
+                closeFragmentBackPressedCallback.isEnabled = false
                 supportFragmentManager.beginTransaction()
                     .setCustomAnimations(0, R.anim.fade_out)
                     .remove(fullScreenImageFragment)
@@ -1217,29 +1242,10 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
         return super.dispatchTouchEvent(event)
     }
 
-
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
-        val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
-            FULL_SCREEN_IMAGE_FRAGMENT_TAG
-        )
-        if (fullScreenImageFragment != null) {
-            supportFragmentManager.beginTransaction()
-                .setCustomAnimations(0, R.anim.fade_out)
-                .remove(fullScreenImageFragment)
-                .commit()
-        } else {
-            if (isTaskRoot) {
-                App.showMainActivityTab(this, MainActivity.CONTACTS_TAB)
-            }
-            finish()
-        }
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val itemId = item.itemId
         if (itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
             return true
         } else if (itemId == R.id.action_call) {
             if (contactDetailsViewModel.contactAndInvitation == null || contactDetailsViewModel.contactAndInvitation.value == null) {
@@ -1287,7 +1293,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                     this,
                     contactAndInvitation.contact.bytesOwnedIdentity,
                     contactAndInvitation.contact.bytesContactIdentity
-                ) { this.onBackPressed() })
+                ) { onBackPressedDispatcher.onBackPressed() })
             }
             return true
         } else if (itemId == R.id.action_debug_information) {
@@ -1310,7 +1316,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                     ObvUrlIdentity(
                         contact.bytesContactIdentity,
                         contact.displayName
-                    ).urlRepresentation
+                    ).getUrlRepresentation(false)
                 ).append("\n\n")
                 sb.append(getString(R.string.debug_label_capabilities)).append("\n")
                 sb.append(getString(R.string.bullet)).append(" ").append(

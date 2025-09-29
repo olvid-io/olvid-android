@@ -355,7 +355,7 @@ public class Discussion {
     }
 
     @Ignore
-    public static Discussion createOrReuseGroupV2Discussion(AppDatabase db, @NonNull Group2 group2, boolean groupWasJustCreatedByMe, boolean createdOnOtherDevice, JsonExpiration jsonExpirationSettings) {
+    public static Discussion createOrReuseGroupV2Discussion(AppDatabase db, @NonNull Group2 group2, boolean groupWasJustCreatedByMe, boolean createdOnOtherDevice) {
         if (!db.inTransaction()) {
             Logger.e("ERROR: running discussion createOrReuseGroupV2Discussion outside a transaction");
             return null;
@@ -386,9 +386,7 @@ public class Discussion {
 
             // if the is a group we just created, we should apply ephemeral settings
             if (groupWasJustCreatedByMe) {
-                if (jsonExpirationSettings != null) {
-                    setEphemeralMessageSettings(discussion, db, group2.bytesOwnedIdentity, jsonExpirationSettings);
-                } else if (!createdOnOtherDevice) {
+                if (!createdOnOtherDevice) {
                     setDefaultEphemeralMessageSettings(discussion, db, group2.bytesOwnedIdentity);
                 }
             } else {

@@ -86,7 +86,7 @@
 	<string name="explanation_empty_discussion_list" state="needs_review" hash="-951447229">Brak dyskusji na razie</string>
 	<string name="explanation_empty_discussion_list_sub" state="needs_review" hash="-1892819595">Twoje kontakty i rozmowy grupowe będą wyświetlane tutaj.</string>
 	<string name="explanation_empty_group_list" state="needs_review" hash="1498843411">Brak grup na razie</string>
-	<string name="explanation_empty_group_list_sub" state="needs_review" hash="610464457">Naciśnij \"Nowa grupa\", aby utworzyć swoją pierwszą grupę.</string>
+	<string name="explanation_empty_group_list_sub" state="needs_review" hash="2063769649">Naciśnij niebieski + poniżej, aby utworzyć swoją pierwszą grupę.</string>
 	<string name="explanation_new_group_card" state="needs_review" hash="-1276814682">Administrator grupy zaktualizował Kartę Grupy. Zarówno stara, jak i nowa wersja są wyświetlane poniżej.\n\nNaciśnij \"aktualizuj\", aby zaktualizować informacje o grupie.</string>
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Administrator zmienił nazwę grupy na:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Administrator zmienił opis grupy na:</string>
@@ -719,7 +719,7 @@
 	<string name="pref_category_send_receive_messages" state="needs_review" hash="-893413247">Wysyłanie i odbieranie wiadomości</string>
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Po włączeniu wiadomości jednorazowe i wiadomości z domyślnym ograniczonym czasem widoczności są otwierane zaraz po wejściu do dyskusji. W przeciwnym razie wymagane jest kliknięcie.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Po włączeniu usunięte wiadomości wychodzące są zachowywane, aby można było sprawdzić, kiedy zostały dostarczone lub odczytane. W przeciwnym razie zostaną usunięte.</string>
-	<string name="pref_category_webclient" state="needs_review" hash="-2125862146">Klient webowy</string>
+	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Klient webowy</string>
 	<string name="label_title_change_list" state="needs_review" hash="76730245">Zaktualizowane ustawienia</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Błąd podczas analizowania linku do aktualizacji ustawień</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Wysyłanie i odbieranie wiadomości</string>
@@ -826,6 +826,8 @@
 	<string name="activity_title_identity_creation_options" state="needs_review" hash="1180456032">Opcje tworzenia ID</string>
 	<string name="activity_title_scan_configuration" state="needs_review" hash="-386259993">Skanowanie konfiguracji</string>
 	<string name="menu_action_import_activation_from_clipboard" state="needs_review" hash="-70842935">Importuj link ze schowka</string>
+	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid jest aktualny.</string>
+	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Masz zainstalowaną najnowszą wersję Olvid.</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Dostępna aktualizacja</string>
 	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Nowsza wersja Olvid jest dostępna w Google Play.\n\nZaktualizuj, aby skorzystać z najnowszych funkcji.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Nie można zainicjować połączenia</string>
@@ -887,7 +889,7 @@
 	<string name="dialog_message_failed_to_upload_identity_to_keycloak" state="needs_review" hash="-2046989513">Olvid nie mógł przesłać Twojego ID Olvid do dostawcy tożsamości Twojej firmy. Próba zostanie powtórzona w tle.</string>
 	<string name="dialog_title_keycloak_identity_replacement_forbidden" state="needs_review" hash="1111621036">Błąd dostawcy tożsamości</string>
 	<string name="dialog_message_keycloak_identity_replacement_forbidden" state="needs_review" hash="1389665549">Twój dostawca tożsamości wskazuje, że inny identyfikator Olvid jest powiązany z użytkownikiem, na którym się zalogowałeś, i nie masz uprawnień do jego aktualizacji.\nSkontaktuj się z administratorem, aby uzyskać więcej informacji.</string>
-	<string name="toast_message_contact_added" state="needs_review" hash="748036080">%1$s dodano do kontaktów</string>
+	<string name="toast_message_contact_added" state="needs_review" hash="-466761658">%1$s został(a) dodany(a) do kontaktów.</string>
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Twój identyfikator Olvid jest obecnie zarządzany przez dostawcę tożsamości Twojej firmy. Nie możesz ręcznie aktywować licencji Olvid.\n\nSkontaktuj się z administratorem, aby uzyskać więcej informacji.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Nieodebrane połączenie</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Dane kontaktu zaktualizowane</string>
@@ -992,7 +994,7 @@
 	<string name="dialog_title_backup_requires_sign_in" state="needs_review" hash="-720389674">Wymagane zalogowanie do dostawcy chmury</string>
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Skonfigurowano Olvid do korzystania z automatycznych kopii zapasowych w chmurze, ale Twoja sesja wygasła. Musisz ponownie zalogować się do tego dostawcy.\n\nJeśli nie chcesz już korzystać z automatycznych kopii zapasowych, możesz je wyłączyć w Ustawieniach aplikacji. Pamiętaj, że automatyczne kopie zapasowe są jedynym sposobem na uniknięcie utraty kontaktów w przypadku zgubienia lub uszkodzenia urządzenia.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Zaloguj się</string>
-	<string name="button_label_invite_contact" state="needs_review" hash="-1685767964">Skontaktuj się zdalnie</string>
+	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Skontaktuj się zdalnie</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s jest już w Twoich kontaktach.</string>
 	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s znajduje się na liście znanych użytkowników, ale jeszcze nie jest w twoich kontaktach.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Nowy</string>
@@ -1187,6 +1189,7 @@
 	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Kolorowy punkt na \"i\" w logo Olvid</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Dyskretna linia na górze listy rozmów</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Pełny status połączenia na górze listy rozmów</string>
+	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Nigdy nie wyświetlaj wskaźnika, nawet w przypadku utraty połączenia</string>
 	<string name="label_ping_connectivity_none" state="needs_review" hash="-1354963032">Połączenie: BRAK</string>
 	<string name="label_ping_connectivity_connecting" state="needs_review" hash="-120710791">Połączenie: ŁĄCZENIE…</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Połączenie: POŁĄCZONO</string>
@@ -1203,7 +1206,7 @@
 	<string name="dialog_title_configure_widget" state="needs_review" hash="-1729240345">Skonfiguruj widget…</string>
 	<string name="label_widget_appearance" state="needs_review" hash="1939721328">Wygląd widgetu</string>
 	<string name="label_widget_tap_action" state="needs_review" hash="-34274807">Akcja po naciśnięciu widgetu</string>
-	<string name="label_discuss" state="needs_review" hash="422951553">Porozmawiaj</string>
+	<string name="button_label_discuss" state="needs_review" hash="422951553">Porozmawiaj</string>
 	<string name="label_message" state="needs_review" hash="809999904">Wiadomość</string>
 	<string name="hint_predefined_message_to_send" state="needs_review" hash="322970075">Wiadomość predefiniowana do wysłania</string>
 	<string name="label_confirm_before_sending" state="needs_review" hash="-302448048">Potwierdź przed wysłaniem</string>
@@ -1349,9 +1352,9 @@
 	<string name="pref_screen_scale" state="needs_review" hash="-1522654277">Rozmiar wyświetlania</string>
 	<string name="content_description_open_discussion" state="needs_review" hash="-2143445796">Rozpocznij dyskusję</string>
 	<string name="label_read_only" state="needs_review" hash="1996439460">Tylko do odczytu</string>
-	<string name="label_pending_read_only" state="needs_review" hash="649164855">Oczekiwanie na tryb tylko do odczytu</string>
+	<string name="label_pending_read_only" state="needs_review" hash="-1735615933">Tylko do odczytu\noczekuje</string>
 	<string name="label_admin" state="needs_review" hash="-1641568928">Administrator</string>
-	<string name="label_pending_admin" state="needs_review" hash="-1074135173">Oczekujący administrator</string>
+	<string name="label_pending_admin" state="needs_review" hash="-2032202913">Oczekujący\nadministrator</string>
 	<string name="text_unable_to_display_contact_name" state="needs_review" hash="-910138263">Nie można wyświetlić imienia tego użytkownika</string>
 	<string name="text_unnamed_group" state="needs_review" hash="-1360684454">Grupa bez nazwy</string>
 	<string name="pref_discussion_category_notifications_title" state="needs_review" hash="228240063">Powiadomienia o dyskusjach</string>
@@ -1382,7 +1385,7 @@
 	<string name="debug_label_number_of_members_and_invited" state="needs_review" hash="1704881352">Członkowie grupy/łącznie zaproszonych:</string>
 	<string name="debug_label_group_version" state="needs_review" hash="389625399">Wersja grupy:</string>
 	<string name="debug_label_group_type" state="needs_review" hash="1583286027">Typ grupy:</string>
-	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033504983">zarządzane przez użytkownika</string>
+	<string name="debug_label_group_type_user_managed" state="needs_review" hash="1033517073">zarządzane przez użytkowników</string>
 	<string name="debug_label_group_type_keycloak" state="needs_review" hash="-8319531">zarządzane przez katalog</string>
 	<string name="text_not_sent_yet" state="needs_review" hash="-1632447777">Jeszcze nie wysłano</string>
 	<string name="invitation_status_description_group_v2_frozen_invitation" state="needs_review" hash="-1196108594">Ta grupa jest obecnie synchronizowana. Po zakończeniu będziesz mógł zaakceptować to zaproszenie.</string>
@@ -1391,7 +1394,7 @@
 	<string name="dialog_title_clone_group_error_missing_capability" state="needs_review" hash="-38944379">Nie można było sklonować tej grupy</string>
 	<string name="dialog_message_clone_group_error_missing_capability" state="needs_review" hash="-492340199">Grupy %1$s nie można sklonować, ponieważ niektórzy członkowie tej grupy używają przestarzałej wersji Olvid, która nie obsługuje grup v2. Proszę poinformować ich o dostępności nowszej wersji Olvid.\n\nUżytkownicy z nieaktualną wersją:%2$s</string>
 	<string name="dialog_title_clone_group_warning_missing_members" state="needs_review" hash="952235905">Ostrzeżenie: Częściowe klonowanie</string>
-	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-1650650412">Grupa %1$s zawiera członków, z którymi nie masz jeszcze bezpiecznego kanału. Nie możesz ich zaprosić do nowej grupy.\n\nAffected users:%2$s\n\nCzy chcesz kontynuować z niekompletną grupą?</string>
+	<string name="dialog_message_clone_group_warning_missing_members" state="needs_review" hash="-496016934">Grupa %1$s zawiera członków, z którymi nie masz jeszcze zabezpieczonego kanału. Nie możesz ich zaprosić do nowej grupy.\n\nDotknięci użytkownicy:%2$s\n\nCzy chcesz kontynuować z niekompletną grupą?</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Kopia z</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Wysłano lokalizację</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Otrzymano lokalizację</string>
@@ -1475,7 +1478,7 @@
 	<string name="x_seconds" state="needs_review" hash="-1842367520">%1$02ds</string>
 	<string name="pref_unlock_failed_wipe_messages_summary" state="needs_review" hash="-1178661594">Po włączeniu, wprowadzenie błędnego PIN-u/hasła 3 razy z rzędu spowoduje ciche usunięcie wszystkich wiadomości do jednorazowego przeczytania i o ograniczonej widoczności.</string>
 	<string name="pref_unlock_failed_wipe_messages_title" state="needs_review" hash="594982690">Usuń poufne wiadomości po 3 błędnych PIN-ach</string>
-	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1889936048">Włącz tę opcję, aby zdefiniować PIN/hasło „awaryjne”, które odblokowuje aplikację, ale cicho usuwa wszystkie ukryte profile oraz wiadomości jednorazowe lub o ograniczonej widoczności. Wprowadzenie tego PIN-u wyłącza również tę opcję.</string>
+	<string name="pref_use_emergency_pin_summary" state="needs_review" hash="-1436928229">Włącz tę opcję, aby zdefiniować PIN/hasło \"awaryjne\", które odblokowuje aplikację, ale cicho usuwa wszystkie ukryte profile, wiadomości jednorazowe i wiadomości o ograniczonej widoczności. Wprowadzenie tego PIN-u wyłącza również tę opcję.</string>
 	<string name="pref_use_emergency_pin_title" state="needs_review" hash="555395370">PIN awaryjny</string>
 	<string name="dialog_title_emergency_pin_creation" state="needs_review" hash="-1077502537">Wybierz PIN awaryjny</string>
 	<string name="text_emergency_pin_creation_explanation" state="needs_review" hash="-1508027323">Wprowadzenie tego kodu PIN awaryjnego w ekranie blokady Olvid odblokuje Olvid, ale w sposób dyskretny usunie wszelkie ukryte profile, które możesz mieć.</string>
@@ -1603,8 +1606,8 @@
 	<string name="pref_no_notify_certificate_change_for_previews_summary" state="needs_review" hash="-607282709">Włącz tę opcję, aby wyłączyć wykrywanie zmian w certyfikacie podczas pobierania podglądu linku. Niektóre strony internetowe mogą prezentować inny certyfikat przy każdym połączeniu i możesz otrzymywać częste powiadomienia, jeśli wyłączysz tę opcję.</string>
 	<string name="pref_use_legacy_zxing_scanner_title" state="needs_review" hash="1340908255">Użyj starszej biblioteki ZXing do skanowania kodów QR</string>
 	<string name="pref_use_legacy_zxing_scanner_summary" state="needs_review" hash="28857075">Domyślnie Olvid używa ML Kit do skanowania kodów QR. Włącz tę opcję, jeśli masz problemy ze skanowaniem kodów QR w Olvid.</string>
-	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="79621659">Użyj wbudowanego przeglądarki PDF (eksperymentalna)</string>
-	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1586362692">Domyślnie załączniki PDF są otwierane w zewnętrznym programie do przeglądania. Włącz tę opcję, aby użyć podstawowego, wbudowanego czytnika.</string>
+	<string name="pref_use_internal_pdf_viewer_title" state="needs_review" hash="-1276658273">Użyj wbudowanego czytnika PDF</string>
+	<string name="pref_use_internal_pdf_viewer_summary" state="needs_review" hash="-1153419644">Domyślnie pliki PDF są otwierane w (podstawowym) wewnętrznym przeglądarce. Wyłącz tę opcję, aby użyć zewnętrznej przeglądarki zamiast niej.</string>
 	<string name="label_my_devices" state="needs_review" hash="-1832505809">Moje urządzenia</string>
 	<string name="text_device_xxxx" state="needs_review" hash="-1424404096">Urządzenie %1$s</string>
 	<string name="text_this_device" state="needs_review" hash="273515292">To urządzenie</string>
@@ -1660,7 +1663,7 @@
 	<string name="onboarding_transfer_target_session_title" state="needs_review" hash="615939188">Wprowadź kod wyświetlany na drugim urządzeniu</string>
 	<string name="onboarding_transfer_target_session_explanation" state="needs_review" hash="983671212">Uruchom Olvid na innym urządzeniu.\nDotknij swojego zdjęcia profilowego w lewym górnym rogu.\nWybierz profil, który chcesz zaimportować, i dotknij przycisku „Zarządzaj”.\nDotknij „Dodaj urządzenie”, aby wyświetlić kod.</string>
 	<string name="onboarding_transfer_target_sas_title" state="needs_review" hash="-1838551486">Wprowadź ten kod na innym urządzeniu</string>
-	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="1761148699">Masz subskrypcję multi-urządzeń</string>
+	<string name="onboarding_transfer_devices_multi_title" state="needs_review" hash="-1477616977">Masz subskrypcję multi-urządzeń.</string>
 	<string name="onboarding_transfer_devices_multi_subtitle" state="needs_review" hash="1486696572">Oto lista Twoich urządzeń</string>
 	<string name="onboarding_transfer_devices_title" state="needs_review" hash="359013581">Wybierz urządzenie, które chcesz pozostawić aktywne</string>
 	<string name="onboarding_transfer_devices_subtitle" state="needs_review" hash="1905247182">Pozostałe urządzenia zostaną dezaktywowane w ciągu 30 dni</string>
@@ -1895,7 +1898,6 @@ Proszę sprawdzić, czy godzina, data i strefa czasowa urządzenia są poprawne 
 
 *Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.*</string>
 	<string name="button_label_clock_settings" state="needs_review" hash="-1235707039">Ustawienia zegara</string>
-	<string name="activity_title_get_in_contact" state="needs_review" hash="-1641527322">Nawiąż kontakt</string>
 	<string name="button_label_discuss_with" state="needs_review" hash="126750270">Porozmawiaj z %1$s</string>
 	<string name="onboarding_transfer_restricted_title" state="needs_review" hash="606233644">Ograniczenie transferu profilu</string>
 	<string name="explanation_transfer_restriction_title_1" state="needs_review" hash="-1260133824">Ważne</string>
@@ -2032,7 +2034,7 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="explanation_failed_to_restore_backup" state="needs_review" hash="1337103157">Nie udało się przywrócić profilu. Spróbuj ponownie.</string>
 	<string name="button_label_restore_my_profile" state="needs_review" hash="418284480">Przywróć mój profil</string>
 	<string name="button_label_keep_all_with_olvid_plus" state="needs_review" hash="622534541">Zachowaj ich wszystkich dzięki Olvid+</string>
-	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="492129719">Po przywróceniu profilu możesz wybrać, które urządzenie ma pozostać aktywne w ustawieniach profilu.</string>
+	<string name="explanation_backup_v2_choose_device_after_restore" state="needs_review" hash="292969815">Po przywróceniu profilu możesz wybrać, które urządzenie ma pozostać aktywne w ustawieniach profilu.</string>
 	<string name="explanation_backup_v2_device_expiration_start" state="needs_review" hash="-147053489">Przywracając swój profil «</string>
 	<string name="explanation_backup_v2_device_expiration_nickname" state="needs_review" hash="2093353377"> (%1$s)</string>
 	<string name="toast_message_no_key_found" state="needs_review" hash="-1984410678">Nie znaleziono klucza kopii zapasowej</string>
@@ -2119,4 +2121,29 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="button_label_open_in_external_viewer" state="needs_review" hash="700249249">Otwórz w zewnętrznej przeglądarce</string>
 	<string name="pdf_viewer_password_not_supported" state="needs_review" hash="259599643">Błąd otwierania tego pliku w wewnętrznym podglądzie Olvid.</string>
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Zaproszony</string>
+	<string name="label_new_message_title" state="needs_review" hash="-451735433">Nowa wiadomość</string>
+	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Nowy kontakt</string>
+	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Wyszukaj</string>
+	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Osobiste spotkanie</string>
+	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Zdalnie</string>
+	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Anuluj</string>
+	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Zeskanuj kody QR drugiej osoby.</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Zeskanuj teraz swój.</string>
+	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Kod zeskanowany!</string>
+	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Nie można zeskanować kodu?</string>
+	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Zaproś ich w inny sposób</string>
+	<string name="label_share_profile" state="needs_review" hash="2122001643">Udostępnij swój profil</string>
+	<string name="button_label_download" state="needs_review" hash="-139700604">Pobierz</string>
+	<string name="toast_message_qr_code_saved" state="needs_review" hash="-2125689955">Kod QR zapisany</string>
+	<string name="toast_message_failed_to_save_qr_code" state="needs_review" hash="624947165">Nie udało się zapisać kodu QR</string>
+	<string name="toast_message_clipboard_copied" state="needs_review" hash="1315583312">Skopiowano do schowka</string>
+	<string name="label_text_qr_code" state="needs_review" hash="284973699">Tekst kodu QR</string>
+	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Dodaj pierwszy kontakt</string>
+	<string name="label_discussion" state="needs_review" hash="301166224">Rozmowa</string>
+	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Zmień kamerę</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Czy chcesz skontaktować się z %1$s? </string>
+	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Poniższe kontakty należą do tej grupy, ale nie prowadzą z Tobą jeszcze prywatnej rozmowy.</string>
+	<string name="label_group_admins" state="needs_review" hash="468245065">Administratorzy grupy</string>
+	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" to popularna grupa.</string>
+	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Aby chronić Twoją prywatność, Olvid **nie posiada publicznego ani centralnego katalogu użytkowników**. Twoje imię i nazwisko będą widoczne tylko dla osób, z którymi się połączysz.</string>
 </resources>

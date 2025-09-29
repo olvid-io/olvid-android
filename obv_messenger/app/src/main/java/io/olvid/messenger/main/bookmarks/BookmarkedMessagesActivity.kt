@@ -23,13 +23,23 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,21 +58,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.designsystem.components.SelectionTopAppBar
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.discussion.message.SwipeForActionBox
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.archived.SwipeActionBackground
-import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.main.search.SearchResult
 import kotlinx.coroutines.launch
 
@@ -75,172 +90,186 @@ class BookmarkedMessagesActivity : LockableActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
             (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+        )
+
         setContent {
-            AppCompatTheme {
-                val context = LocalContext.current
-                val hapticFeedback = LocalHapticFeedback.current
-                val scope = rememberCoroutineScope()
-                val snackbarHostState = remember { SnackbarHostState() }
-                val bookmarks by bookmarksViewModel.bookmarkedMessages.observeAsState()
-                Scaffold(
-                    containerColor = colorResource(R.color.almostWhite),
-                    contentColor = colorResource(R.color.almostBlack),
-                    topBar = {
-                        SelectionTopAppBar(
-                            title = stringResource(R.string.activity_title_bookmarks),
-                            selection = bookmarksViewModel.selection,
-                            actions = listOf(R.drawable.ic_star_off to {
-                                bookmarksViewModel.bookmarkMessage(
-                                    *bookmarksViewModel.selection.toTypedArray(),
-                                    bookmarked = false,
-                                    cancelable = true
-                                )
-                            })
-                        ) {
+            val context = LocalContext.current
+            val resources = LocalResources.current
+            val hapticFeedback = LocalHapticFeedback.current
+            val scope = rememberCoroutineScope()
+            val snackbarHostState = remember { SnackbarHostState() }
+            val bookmarks by bookmarksViewModel.bookmarkedMessages.observeAsState()
+            Scaffold(
+                containerColor = colorResource(R.color.almostWhite),
+                contentColor = colorResource(R.color.almostBlack),
+                topBar = {
+                    SelectionTopAppBar(
+                        title = stringResource(R.string.activity_title_bookmarks),
+                        selection = bookmarksViewModel.selection,
+                        actions = listOf(R.drawable.ic_star_off to {
+                            bookmarksViewModel.bookmarkMessage(
+                                *bookmarksViewModel.selection.toTypedArray(),
+                                bookmarked = false,
+                                cancelable = true
+                            )
+                        }),
+                        onBackPressed = {
                             if (bookmarksViewModel.selection.isEmpty()) {
                                 onBackPressedDispatcher.onBackPressed()
                             } else {
                                 bookmarksViewModel.clearSelection()
                             }
                         }
-                    },
-                    snackbarHost = {
-                        SnackbarHost(hostState = snackbarHostState) { snackbarData ->
-                            Snackbar(
-                                contentColor = colorResource(R.color.alwaysWhite),
-                                actionColor = colorResource(R.color.olvid_gradient_light),
-                                snackbarData = snackbarData
-                            )
-                        }
-                    },
-                ) { contentPadding ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-//                            .systemBarsPadding()
-                            .padding(contentPadding)
-                    ) {
-                        LaunchedEffect(bookmarksViewModel.cancelableBookmarkedMessages) {
-                            if (bookmarksViewModel.cancelableBookmarkedMessages.isNotEmpty()) {
-                                scope.launch {
-                                    snackbarHostState.currentSnackbarData?.apply {
-                                        dismiss()
+                    )
+                },
+                snackbarHost = {
+                    SnackbarHost(hostState = snackbarHostState) { snackbarData ->
+                        Snackbar(
+                            contentColor = colorResource(R.color.alwaysWhite),
+                            actionColor = colorResource(R.color.olvid_gradient_light),
+                            snackbarData = snackbarData
+                        )
+                    }
+                },
+            ) { contentPadding ->
+                val layoutDirection = LocalLayoutDirection.current
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = contentPadding.calculateStartPadding(layoutDirection),
+                            top = contentPadding.calculateTopPadding(),
+                            end = contentPadding.calculateEndPadding(layoutDirection),
+                            bottom = 0.dp,
+                        )
+                ) {
+                    LaunchedEffect(bookmarksViewModel.cancelableBookmarkedMessages) {
+                        if (bookmarksViewModel.cancelableBookmarkedMessages.isNotEmpty()) {
+                            scope.launch {
+                                snackbarHostState.currentSnackbarData?.apply {
+                                    dismiss()
+                                }
+                                val count = bookmarksViewModel.cancelableBookmarkedMessages.size
+                                val result = snackbarHostState.showSnackbar(
+                                    message = resources.getQuantityString(
+                                        R.plurals.label_message_unbookmark_done, count, count
+                                    ),
+                                    actionLabel = context.getString(R.string.snackbar_action_label_undo),
+                                    duration = Short
+                                )
+                                when (result) {
+                                    ActionPerformed -> {
+                                        bookmarksViewModel.bookmarkMessage(
+                                            *bookmarksViewModel.cancelableBookmarkedMessages.toTypedArray(),
+                                            bookmarked = true,
+                                            cancelable = false
+                                        )
+                                        bookmarksViewModel.cancelableBookmarkedMessages =
+                                            emptyList()
                                     }
-                                    val count = bookmarksViewModel.cancelableBookmarkedMessages.size
-                                    val result = snackbarHostState.showSnackbar(
-                                        message = context.resources.getQuantityString(
-                                            R.plurals.label_message_unbookmark_done, count, count
-                                        ),
-                                        actionLabel = context.getString(R.string.snackbar_action_label_undo),
-                                        duration = Short
-                                    )
-                                    when (result) {
-                                        ActionPerformed -> {
-                                            bookmarksViewModel.bookmarkMessage(
-                                                *bookmarksViewModel.cancelableBookmarkedMessages.toTypedArray(),
-                                                bookmarked = true,
-                                                cancelable = false
-                                            )
+
+                                    Dismissed -> {
+                                        if (bookmarksViewModel.cancelableBookmarkedMessages.size == count) {
                                             bookmarksViewModel.cancelableBookmarkedMessages =
                                                 emptyList()
                                         }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
-                                        Dismissed -> {
-                                            if (bookmarksViewModel.cancelableBookmarkedMessages.size == count) {
-                                                bookmarksViewModel.cancelableBookmarkedMessages =
-                                                    emptyList()
+                    bookmarks?.takeIf { it.isNotEmpty() }?.let { bookmarks ->
+                        LazyColumn(
+                            contentPadding = WindowInsets.safeDrawing
+                                .only(WindowInsetsSides.Bottom)
+                                .asPaddingValues(LocalDensity.current)
+                        ) {
+                            items(bookmarks, key = { it.message.id }) { discussionAndMessage ->
+                                SwipeForActionBox(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .animateItem(),
+                                    maxOffset = 96.dp,
+                                    enabledFromStartToEnd = bookmarksViewModel.selection.isEmpty(),
+                                    enabledFromEndToStart = bookmarksViewModel.selection.isEmpty(),
+                                    callbackStartToEnd = {
+                                        bookmarksViewModel.bookmarkMessage(
+                                            discussionAndMessage.message,
+                                            bookmarked = false,
+                                            cancelable = true
+                                        )
+                                    },
+                                    callbackEndToStart = {
+                                        bookmarksViewModel.bookmarkMessage(
+                                            discussionAndMessage.message,
+                                            bookmarked = false,
+                                            cancelable = true
+                                        )
+                                    },
+                                    backgroundContentFromEndToStart = { progress ->
+                                        SwipeActionBackground(
+                                            label = stringResource(
+                                                R.string.menu_action_unbookmark
+                                            ),
+                                            icon = R.drawable.ic_star_off,
+                                            progress = progress,
+                                            fromStartToEnd = false
+                                        )
+                                    },
+                                    backgroundContentFromStartToEnd = { progress ->
+                                        SwipeActionBackground(
+                                            label = stringResource(
+                                                R.string.menu_action_unbookmark
+                                            ),
+                                            icon = R.drawable.ic_star_off,
+                                            progress = progress,
+                                            fromStartToEnd = true
+                                        )
+                                    }) {
+                                    SearchResult(
+                                        modifier = Modifier
+                                            .background(
+                                                shape = RoundedCornerShape(8.dp),
+                                                color = colorResource(R.color.almostWhite)
+                                            )
+                                            .cutoutHorizontalPadding(),
+                                        discussionAndMessage = discussionAndMessage,
+                                        selected = bookmarksViewModel.selection.contains(
+                                            discussionAndMessage.message
+                                        ),
+                                        onClick = if (bookmarksViewModel.selection.isEmpty()) {
+                                            null
+                                        } else {
+                                            {
+                                                bookmarksViewModel.toggleSelection(
+                                                    discussionAndMessage.message
+                                                )
+                                            }
+                                        },
+                                        onLongClick = {
+                                            hapticFeedback.performHapticFeedback(
+                                                HapticFeedbackType.LongPress
+                                            )
+                                            if (bookmarksViewModel.selection.isEmpty()) {
+                                                bookmarksViewModel.enableSelection(
+                                                    discussionAndMessage.message
+                                                )
+                                            } else {
+                                                bookmarksViewModel.toggleSelection(
+                                                    discussionAndMessage.message
+                                                )
                                             }
                                         }
-                                    }
+                                    )
                                 }
                             }
                         }
-
-                        bookmarks?.takeIf { it.isNotEmpty() }?.let { bookmarks ->
-                            LazyColumn {
-                                items(bookmarks, key = { it.message.id }) { discussionAndMessage ->
-                                    SwipeForActionBox(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .animateItem(),
-                                        maxOffset = 96.dp,
-                                        enabledFromStartToEnd = bookmarksViewModel.selection.isEmpty(),
-                                        enabledFromEndToStart = bookmarksViewModel.selection.isEmpty(),
-                                        callbackStartToEnd = {
-                                            bookmarksViewModel.bookmarkMessage(
-                                                discussionAndMessage.message,
-                                                bookmarked = false,
-                                                cancelable = true
-                                            )
-                                        },
-                                        callbackEndToStart = {
-                                            bookmarksViewModel.bookmarkMessage(
-                                                discussionAndMessage.message,
-                                                bookmarked = false,
-                                                cancelable = true
-                                            )
-                                        },
-                                        backgroundContentFromEndToStart = { progress ->
-                                            SwipeActionBackground(
-                                                label = stringResource(
-                                                    R.string.menu_action_unbookmark
-                                                ),
-                                                icon = R.drawable.ic_star_off,
-                                                progress = progress,
-                                                fromStartToEnd = false
-                                            )
-                                        },
-                                        backgroundContentFromStartToEnd = { progress ->
-                                            SwipeActionBackground(
-                                                label = stringResource(
-                                                    R.string.menu_action_unbookmark
-                                                ),
-                                                icon = R.drawable.ic_star_off,
-                                                progress = progress,
-                                                fromStartToEnd = true
-                                            )
-                                        }) {
-                                        SearchResult(
-                                            modifier = Modifier
-                                                .background(
-                                                    shape = RoundedCornerShape(8.dp),
-                                                    color = colorResource(R.color.almostWhite)
-                                                )
-                                                .cutoutHorizontalPadding(),
-                                            discussionAndMessage = discussionAndMessage,
-                                            selected = bookmarksViewModel.selection.contains(
-                                                discussionAndMessage.message
-                                            ),
-                                            onClick = if (bookmarksViewModel.selection.isEmpty()) {
-                                                null
-                                            } else {
-                                                {
-                                                    bookmarksViewModel.toggleSelection(
-                                                        discussionAndMessage.message
-                                                    )
-                                                }
-                                            },
-                                            onLongClick = {
-                                                hapticFeedback.performHapticFeedback(
-                                                    HapticFeedbackType.LongPress
-                                                )
-                                                if (bookmarksViewModel.selection.isEmpty()) {
-                                                    bookmarksViewModel.enableSelection(
-                                                        discussionAndMessage.message
-                                                    )
-                                                } else {
-                                                    bookmarksViewModel.toggleSelection(
-                                                        discussionAndMessage.message
-                                                    )
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        } ?: run {
-                            NoBookmarksFound()
-                        }
+                    } ?: run {
+                        NoBookmarksFound()
                     }
                 }
             }

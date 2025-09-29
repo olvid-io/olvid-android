@@ -188,6 +188,26 @@ public class PrivacyPreferenceFragment extends PreferenceFragmentCompat {
                 });
             }
         }
+
+        if (!BuildConfig.ENABLE_SSL_HANDSHAKE_VERIFICATION) {
+            Preference notifyCertificateChangePreference = screen.findPreference(SettingsActivity.PREF_KEY_NOTIFY_CERTIFICATE_CHANGE);
+            if (notifyCertificateChangePreference != null) {
+                screen.removePreference(notifyCertificateChangePreference);
+            }
+            Preference blockUntrustedCertificatePreference = screen.findPreference(SettingsActivity.PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE);
+            if (blockUntrustedCertificatePreference != null) {
+                screen.removePreference(blockUntrustedCertificatePreference);
+            }
+            Preference noNotifyCertificateChangeForPreviewsPreference = screen.findPreference(SettingsActivity.PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS);
+            if (noNotifyCertificateChangeForPreviewsPreference != null) {
+                screen.removePreference(noNotifyCertificateChangeForPreviewsPreference);
+            }
+        } else {
+            Preference blockUntrustedCertificatePreference = screen.findPreference(SettingsActivity.PREF_KEY_BLOCK_UNTRUSTED_CERTIFICATE);
+            if (blockUntrustedCertificatePreference != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                screen.removePreference(blockUntrustedCertificatePreference);
+            }
+        }
     }
 
     private static void updateHiddenProfileClosePolicySummary(@NonNull Preference preference) {

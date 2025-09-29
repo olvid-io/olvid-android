@@ -436,8 +436,10 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                     val byYou = bytesOwnedIdentity.contentEquals(message.senderIdentifier)
                     var displayName =
                         ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                    var mentionCount = 0
                     val mention = message.jsonMentions?.let {
                         message.mentions?.let { mentions ->
+                            mentionCount = mentions.size
                             when (mentions.size) {
                                 0 -> null
                                 1 -> ContactCacheSingleton.getContactCustomDisplayName(mentions.first().userIdentifier) ?: run {
@@ -471,7 +473,7 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                                 } else {
                                     context.resources.getQuantityString(
                                         R.plurals.text_joined_the_group,
-                                        2,
+                                        mentionCount,
                                         mention
                                     )
                                 }
@@ -492,8 +494,10 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                     val byYou = bytesOwnedIdentity.contentEquals(message.senderIdentifier)
                     var displayName =
                         ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                    var mentionCount = 0
                     val mention = message.jsonMentions?.let {
                         message.mentions?.let { mentions ->
+                            mentionCount = mentions.size
                             when (mentions.size) {
                                 0 -> null
                                 1 -> ContactCacheSingleton.getContactCustomDisplayName(mentions.first().userIdentifier) ?: run {
@@ -527,7 +531,7 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                                 } else {
                                     context.resources.getQuantityString(
                                         R.plurals.text_left_the_group,
-                                        2,
+                                        mentionCount,
                                         mention
                                     )
                                 }

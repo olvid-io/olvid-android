@@ -60,16 +60,11 @@ class GroupListFragment : RefreshingFragment(), OnRefreshListener, EngineNotific
                     groupListViewModel = groupListViewModel,
                     refreshing = refreshing,
                     onRefresh = ::onRefresh,
-                    onNewGroupClick = ::newGroupClicked,
                     onGroupClick = ::groupClicked,
                     groupMenu = this@GroupListFragment
                 )
             }
         }
-    }
-
-    private fun newGroupClicked() {
-        App.openGroupCreationActivity(activity)
     }
 
     private fun groupClicked(group: GroupOrGroup2) {

@@ -19,10 +19,6 @@
 
 package io.olvid.messenger.main
 
-import android.graphics.drawable.Drawable
-import android.os.Handler
-import android.os.Looper
-import android.widget.ImageView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -32,14 +28,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.vectordrawable.graphics.drawable.Animatable2Compat.AnimationCallback
-import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
-import io.olvid.messenger.R
 import io.olvid.messenger.R.color
-import io.olvid.messenger.R.drawable
 import io.olvid.messenger.R.string
+import io.olvid.messenger.designsystem.components.DotAnimation
 
 
 @Composable
@@ -54,25 +46,7 @@ fun EstablishingChannel() {
                 id = color.greyTint
             )
         )
-        AndroidView(factory = { context ->
-            AnimatedVectorDrawableCompat.create(
-                context,
-                drawable.dots
-            )?.let { animated ->
-                animated.registerAnimationCallback(object :
-                    AnimationCallback() {
-                    override fun onAnimationEnd(drawable: Drawable) {
-                        Handler(Looper.getMainLooper()).post { animated.start() }
-                    }
-                })
-                animated.start()
-                ImageView(context).apply {
-                    setImageDrawable(animated)
-                }
-            } ?: kotlin.run {
-                ImageView(context).apply { setImageResource(R.drawable.dots) }
-            }
-        })
+        DotAnimation()
     }
 }
 

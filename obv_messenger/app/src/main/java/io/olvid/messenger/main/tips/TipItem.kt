@@ -404,7 +404,7 @@ fun TipItem(
 
         Tip.AUTHENTICATION_REQUIRED -> {
             AppSingleton.getBytesCurrentIdentity()?.takeIf { bytesOwnedIdentity ->
-                KeycloakManager.getAuthenticationRequiredOwnedIdentities()
+                KeycloakManager.authenticationRequiredOwnedIdentities
                     .contains(BytesKey(bytesOwnedIdentity))
             }?.let { bytesOwnedIdentity ->
                 TipBubble(
@@ -420,6 +420,43 @@ fun TipItem(
                 )
             }
         }
+
+        Tip.VERSION_OUTDATED -> {
+            TipBubble(
+                icon = R.drawable.ic_sending_1,
+                title = R.string.dialog_title_outdated_version,
+                message = R.string.dialog_message_outdated_version,
+                action = R.string.menu_check_update,
+                onAction = {
+                    try {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=${context.packageName}".toUri()))
+                    } catch (_: Exception) {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()))
+                    }
+                }
+            )
+        }
+
+        Tip.UPDATE_AVAILABLE -> {
+            TipBubble(
+                icon = R.drawable.ic_sending_1,
+                title = R.string.dialog_title_update_available,
+                message = R.string.dialog_message_update_available,
+                action = R.string.menu_check_update,
+                onAction = {
+                    try {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=${context.packageName}".toUri()))
+                    } catch (_: Exception) {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()))
+                    }
+                },
+                onDismiss = {
+                    SettingsActivity.isUpdateAvailableTipDismissed = true
+                    refreshTipState()
+                }
+            )
+        }
+
     }
 }
 
@@ -525,6 +562,16 @@ private fun TipPreview() {
         TipItem(refreshTipState = {}, tipToShow = Tip.CONFIGURE_BACKUPS)
 //        TipItem(refreshTipState = {}, tipToShow = Tip.WRITE_BACKUP_KEY)
         TipItem(refreshTipState = {}, tipToShow = Tip.NEW_TRANSLATIONS)
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun TipPreviewUpdates() {
+    Column {
+        TipItem(refreshTipState = {}, tipToShow = Tip.UPDATE_AVAILABLE)
+        TipItem(refreshTipState = {}, tipToShow = Tip.VERSION_OUTDATED)
     }
 }
 
