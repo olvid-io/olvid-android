@@ -30,7 +30,6 @@ import androidx.fragment.app.activityViewModels
 import io.olvid.messenger.App
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
-import io.olvid.messenger.fragments.dialog.CallContactDialogFragment
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment
 
 class CallLogFragment : Fragment() {

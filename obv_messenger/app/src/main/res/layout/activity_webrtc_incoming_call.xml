@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    tools:context=".webrtc.WebrtcIncomingCallActivity">
+    tools:context=".webrtc.WebrtcIncomingCallActivity"
+    android:id="@+id/root_constraint_layout">
 
     <TextView
         android:id="@+id/peer_status_text_view"

@@ -22,7 +22,6 @@ import android.content.res.Resources
 import android.util.Patterns
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
@@ -36,7 +35,6 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import io.olvid.engine.Logger
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.engine.engine.types.identities.ObvMutualScanUrl
 import io.olvid.engine.engine.types.identities.ObvUrlIdentity
@@ -61,7 +59,7 @@ import kotlin.math.min
 // Define ScanState
 sealed class ScanUiState {
     object IdleScanning : ScanUiState()
-    data class InvitationScanned(val remoteInvitation: Boolean) : ScanUiState()
+    data class InvitationScanned(val remoteInvitation: Boolean, val contactUrlIdentity: ObvUrlIdentity) : ScanUiState()
     object ConfigurationScanned : ScanUiState()
     object WebClientScanned : ScanUiState()
     object UrlScan : ScanUiState()
@@ -271,12 +269,12 @@ class PlusButtonViewModel : ViewModel() {
         } else if (invitationMatcher.find()) {
             scannedUri = invitationMatcher.group(0)
             val bytesOwnedIdentity = currentIdentity?.bytesOwnedIdentity ?: return
-            val contactUrlIdentity =
-                ObvUrlIdentity.fromUrlRepresentation(scannedUri)
+            val contactUrlIdentity = ObvUrlIdentity.fromUrlRepresentation(scannedUri) ?: return
             var remoteInvitation = false
             try {
                 remoteInvitation = invitationMatcher.group(2) != "1"
             } catch (_: Exception) { }
+
             if (bytesOwnedIdentity.contentEquals(contactUrlIdentity.bytesIdentity)) {
                 updateScanState(
                     ScanUiState.MutualScanError(
@@ -296,7 +294,7 @@ class PlusButtonViewModel : ViewModel() {
                     getQrImage(this.urlRepresentation)
                 }
                 mutualScanBytesContactIdentity = contactUrlIdentity.bytesIdentity
-                updateScanState(ScanUiState.InvitationScanned(remoteInvitation))
+                updateScanState(ScanUiState.InvitationScanned(remoteInvitation, contactUrlIdentity))
             }
         } else if (configurationMatcher.find()) {
             scannedUri = configurationMatcher.group(0)

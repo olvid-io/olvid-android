@@ -1,15 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight">
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
-        <item name="colorPrimary">@color/olvid_gradient_dark</item>
-        <item name="colorPrimaryDark">@color/olvid_gradient_dark</item>
-        <item name="colorAccent">@color/accent</item>
+        <item name="colorPrimary">@color/almostWhite</item>
+        <item name="colorAccent">@color/olvid_gradient_light</item>
         <item name="android:navigationBarColor">@color/transparent</item>
-        <item name="android:windowBackground">@color/lightGrey</item>
+        <item name="android:windowBackground">@color/almostWhite</item>
         <item name="android:textColorHint">@color/grey</item>
         <item name="windowActionModeOverlay">true</item>
-        <item name="actionModeBackground">@color/olvid_gradient_dark</item>
+        <item name="actionModeBackground">@color/olvid_gradient_light</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">@bool/dayMode</item>
     </style>
 
     <style name="CustomAlertDialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
@@ -28,39 +28,12 @@
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:navigationBarColor">@color/almostWhite</item>
-        <item name="android:statusBarColor">@color/olvid_gradient_dark</item>
     </style>
 
     <style name="AppTheme.NoActionBar.Black">
         <item name="android:windowBackground">@color/black</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar.LightBlueStatusBar">
-        <item name="android:windowBackground">@color/almostWhite</item>
-        <item name="android:statusBarColor">@color/olvid_gradient_light</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar.BlackStatusBar">
         <item name="android:statusBarColor">@color/black</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar.AlmostWhiteStatusBar">
-        <item name="android:windowBackground">@color/almostWhite</item>
-        <item name="android:statusBarColor">@color/almostWhite</item>
-    </style>
-
-    <!-- Discussion/Storage activity -->
-    <style name="AppTheme.NoActionBar.ActionModeOverlay">
-        <item name="windowActionModeOverlay">true</item>
-        <item name="actionModeBackground">@color/orange</item>
-        <item name="android:windowBackground">@color/almostWhite</item>
-    </style>
-
-    <!-- QR Code only -->
-    <style name="AppTheme.NoActionBar.FullScreen">
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowBackground">@color/almostWhite</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
     </style>
 
     <style name="AppTheme.DialogFullScreen">
@@ -70,13 +43,15 @@
     </style>
 
     <!-- Camera activity + Select Details Photo Activity-->
-    <style name="AppTheme.NoActionBar.FullScreen.Black">
+    <style name="AppTheme.NoActionBar.FullScreenBlack">
+        <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">@color/black</item>
         <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">never</item>
     </style>
 
     <!-- Obv Link Activity -->
-    <style name="AppTheme.NoActionBar.FullScreen.Transparent">
+    <style name="AppTheme.NoActionBar.FullScreenTransparent">
+        <item name="android:windowFullscreen">true</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">false</item>
@@ -106,23 +81,24 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
-    <!-- DiscussionSettingsActivity and SettingsActivity -->
-    <style name="AppTheme.WhiteBackground">
-        <item name="android:windowBackground">@color/almostWhite</item>
-    </style>
-
     <!-- Custom color for license -->
-    <style name="AppTheme.WhiteBackground.Licenses">
+    <style name="AppTheme.Licenses">
         <item name="colorAccent">@color/olvid_gradient_dark</item>
         <item name="android:statusBarColor">@color/olvid_gradient_dark</item>
         <item name="android:textColorPrimary">@color/grey</item>
         <item name="android:textColorLink">@color/primary700</item>
         <item name="titleTextColor">@color/alwaysWhite</item>
-        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back_white</item>
     </style>
 
-    <!-- AppBar style to use for "blue" AppBar to force light icons -->
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <!-- AppBar style to use for "blue/black" AppBar to force light icons -->
+    <style name="AppTheme.DarkAppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <!-- AppBar style to use for "white" AppBar for dark icons, and still force white icons when in actionMode -->
+    <style name="AppTheme.LightAppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="actionModeTheme">@style/AppTheme.DarkAppBarOverlay</item>
+        <item name="actionModeBackground">@color/olvid_gradient_light</item>
+    </style>
 
     <style name="AppTheme.Splashscreen" parent="AppTheme.NoActionBar"/>
 

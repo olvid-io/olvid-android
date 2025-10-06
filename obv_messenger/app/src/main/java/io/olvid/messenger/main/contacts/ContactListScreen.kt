@@ -48,7 +48,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -197,10 +196,11 @@ fun ContactListScreen(
             LaunchedEffect(pagerState.currentPage) {
                 snapshotFlow { pagerState.currentPage }.collect { pageIndex ->
                     val page = pageTypes[pageIndex]
-                    if (page == ContactListPage.DIRECTORY || showOthers.not()) {
+                    if (page == ContactListPage.DIRECTORY || (showOthers.not() && contactListViewModel.getFilter().isNullOrEmpty().not())) {
                         if (contactListViewModel.getFilter() == null) {
                             contactListViewModel.setFilter("")
-                        } else if (contactListViewModel.getFilter() == "") {
+                        }
+                        if (contactListViewModel.getFilter() == "") {
                             contactListViewModel.refreshKeycloakSearch()
                         }
                     }
@@ -489,7 +489,11 @@ fun ContactListScreen(
                                         } else if (emptyContactTabContent == null) {
                                             MainScreenEmptyList(
                                                 icon = R.drawable.tab_contacts,
-                                                title = page.labelResId,
+                                                title = when (page) {
+                                                    ContactListPage.CONTACTS -> R.string.explanation_empty_contact_list
+                                                    ContactListPage.OTHERS -> R.string.explanation_empty_other_contact_list
+                                                    ContactListPage.DIRECTORY -> R.string.explanation_empty_directory
+                                                },
                                                 subtitle = when (page) {
                                                     ContactListPage.CONTACTS -> R.string.explanation_empty_contact_list_sub
                                                     ContactListPage.OTHERS -> R.string.explanation_empty_other_contact_list_sub
@@ -781,7 +785,7 @@ private fun FilterChipsBar(
                 selected = contactListViewModel.filteredPages.contains(page),
                 onClick = { onChipSelected(page) },
                 icon = when (page) {
-                    ContactListPage.CONTACTS -> R.drawable.tab_contacts
+                    ContactListPage.CONTACTS -> R.drawable.ic_contacts
                     ContactListPage.DIRECTORY -> R.drawable.ic_keycloak_directory_white
                     else -> null
                 }

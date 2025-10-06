@@ -83,7 +83,7 @@
         android:clickable="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_arrow_back"
+        app:srcCompat="@drawable/ic_arrow_back_white"
         android:background="@drawable/background_circular_ripple"
         android:theme="@style/AlwaysWhiteRipple"
         android:focusable="true" />

@@ -225,7 +225,6 @@
 	<string name="notification_title_one_to_one_invitation" state="needs_review" hash="-351127459">Uitnodiging van %1$s</string>
 	<string name="notification_title_user_has_mentioned_you" state="needs_review" hash="-1965484006">%1$s heeft je genoemd</string>
 	<string name="pref_autodownload_size_title" state="needs_review" hash="149272168">Automatisch bijlagen downloaden…</string>
-	<string name="pref_category_camera_title" state="needs_review" hash="1539779714">Foto\\\'s</string>
 	<string name="pref_camera_resolution_title" state="needs_review" hash="-1295742224">Foto\\\'s die binnen Olvid zijn gemaakt, verkleinen?</string>
 	<string name="pref_qr_correction_level_title" state="needs_review" hash="-1685499441">QR-code foutcorrectieniveau</string>
 	<string name="pref_text_QR_correction_high" state="needs_review" hash="1408732723">Hoog</string>
@@ -572,16 +571,10 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">Tab Gesprekken</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">Contacten-tab</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">Groepen</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">Contact toevoegen</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">Notificatiepunt</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">Gevoelige JPEG-metadata verwijderen</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">Wanneer geactiveerd, zal Olvid proberen gevoelige metadata uit geïmporteerde fotobestanden te verwijderen.\nDit omvat GPS-gegevens, het cameramerk, de creatiedatum…</string>
-	<string name="activity_title_add_contact" state="needs_review" hash="-1050193239">Contact toevoegen</string>
 	<string name="button_label_scan" state="needs_review" hash="1683724449">Scannen</string>
-	<string name="text_explanation_scan_contact_id" state="needs_review" hash="-2129167034">Het scannen van de ID van een andere gebruiker stelt je in staat hem uit te nodigen.</string>
-	<string name="button_label_share_my_id" state="needs_review" hash="-75320325">Mijn ID delen</string>
-	<string name="label_scan" state="needs_review" hash="1683724449">Scannen</string>
-	<string name="button_label_show_my_id" state="needs_review" hash="-197520345">Mijn ID tonen</string>
 	<string name="toast_message_unrecognized_url" state="needs_review" hash="1921493221">Onbekende QR-code URL</string>
 	<string name="dialog_title_webclient_sas_input" state="needs_review" hash="891876517">Voer de PIN-code in die in uw webbrowser wordt weergegeven</string>
 	<string name="webclient_error_invalid_qrcode" state="needs_review" hash="358206378">Ongeldige QR-code</string>
@@ -592,7 +585,6 @@
 	<string name="webclient_toast_connection_timedout" state="needs_review" hash="869943528">Webclient-verbindingstime-out</string>
 	<string name="webclient_protocol_in_progress" state="needs_review" hash="805709221">Een beveiligde verbinding tussen uw App en de Webclient wordt tot stand gebracht…</string>
 	<string name="webclient_error_sas_incorrect" state="needs_review" hash="-1861981708">Incorrecte PIN. Probeer het opnieuw.</string>
-	<string name="label_webclient" state="needs_review" hash="-2125862146">Webclient</string>
 	<string name="label_webclient_already_running" state="needs_review" hash="788166693">De webclient is al actief</string>
 	<string name="label_webclient_restart_connection" state="needs_review" hash="934550160">Huidige verbinding sluiten en een nieuwe starten?</string>
 	<string name="webclient_successfully_connected" state="needs_review" hash="-1216119082">Verbinding succesvol tot stand gebracht!</string>
@@ -614,7 +606,6 @@
 	<string name="pref_webclient_notification_for_messages_after_inactivity_title" state="needs_review" hash="-732458468">Waarschuw bij inactiviteit</string>
 	<string name="activity_detected_after_inactivity" state="needs_review" hash="1909603717">Activiteit gedetecteerd in de WebClient na een lange periode van inactiviteit.</string>
 	<string name="pref_webclient_notification_for_messages_after_inactivity_summary" state="needs_review" hash="464494780">Ontvang een melding als er activiteit wordt gedetecteerd na 10 minuten inactiviteit.</string>
-	<string name="text_explanation_scan_share_id" state="needs_review" hash="1214882443">Het delen van je ID stelt een andere Olvid-gebruiker in staat je uit te nodigen.</string>
 	<string name="dialog_title_subscription_updated" state="needs_review" hash="1912189310">Abonnement bijgewerkt</string>
 	<string name="button_label_add_contact" state="needs_review" hash="744905192">Contact toevoegen</string>
 	<string name="button_label_add" state="needs_review" hash="-1358923215">Toevoegen</string>
@@ -629,7 +620,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">Licentieserver:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">Je server:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">Ongeldige licentieactiveringslink.\n\nNeem contact op met de persoon die je deze link heeft gestuurd.</string>
-	<string name="label_please_contact_activation_link" state="needs_review" hash="-497652404">Neem contact op met de persoon die je deze link heeft gestuurd.</string>
 	<string name="label_checking_license" state="needs_review" hash="-777109669">Licentie wordt gecontroleerd…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">Kan licentiestatus niet controleren</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Onbekende licentie</string>
@@ -720,7 +710,6 @@
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Wanneer geactiveerd, worden eenmalige berichten en berichten met de standaard beperkte zichtbaarheidsduur geopend zodra je de discussie opent. Anders is er een klik nodig.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Wanneer geactiveerd, worden gewiste uitgaande berichten bewaard, zodat je kunt zien wanneer ze zijn afgeleverd of gelezen. Anders worden ze verwijderd.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Webclient</string>
-	<string name="label_title_change_list" state="needs_review" hash="76730245">Instellingen bijgewerkt</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Fout bij het verwerken van de link voor het bijwerken van instellingen</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Berichten verzenden en ontvangen</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">Gedeelde instellingen voor vergankelijke berichten</string>
@@ -860,13 +849,8 @@
 	<string name="toast_message_keycloak_revoke_successful" state="needs_review" hash="-1216369809">Vorige Olvid ID succesvol vervangen</string>
 	<string name="dialog_title_keycloak_authentication_required_user_id_changed" state="needs_review" hash="-896407029">Gebruikerswijziging gedetecteerd</string>
 	<string name="dialog_message_keycloak_authentication_required_user_id_changed" state="needs_review" hash="1319874532">Je Olvid ID wordt beheerd door de identiteitsprovider van je bedrijf. Het lijkt erop dat je bent ingelogd als een andere gebruiker dan normaal. Dit wordt niet ondersteund.\n\nNeem contact op met je beheerder of log opnieuw in als de juiste gebruiker.</string>
-	<string name="hint_search_keycloak" state="needs_review" hash="1386776811">Zoek in het bedrijfsregister…</string>
-	<string name="explanation_empty_keycloak_search" state="needs_review" hash="860472461">Geen resultaten gevonden</string>
-	<string name="explanation_keycloak_search_not_started" state="needs_review" hash="1192355189">Je Olvid-ID wordt beheerd door de identiteitsprovider van je bedrijf.\n\nJe kunt eenvoudig contacten binnen je bedrijf toevoegen door het zoekveld hierboven te gebruiken en in de gebruikersdirectory te zoeken.</string>
-	<string name="explanation_keycloak_searching" state="needs_review" hash="1696749815">Zoeken…</string>
 	<string name="dialog_title_add_keycloak_user" state="needs_review" hash="-1050193239">Contact toevoegen</string>
 	<string name="dialog_message_add_keycloak_user" state="needs_review" hash="-1755937035">Je hebt geselecteerd om %1$s aan je contacten toe te voegen. Wil je doorgaan?</string>
-	<string name="label_bind_keycloak" state="needs_review" hash="1305090894">Gebruik een identiteitsprovider</string>
 	<string name="explanation_keycloak_update_new" state="needs_review" hash="1136733528">Je staat op het punt de identiteitsprovider van je bedrijf in Olvid te configureren. Zodra dit is geconfigureerd, kun je verifiëren met deze server en Olvid stelt je in staat om andere medewerkers naadloos aan je contacten toe te voegen.\nNeem contact op met je beheerder voor meer informatie.</string>
 	<string name="explanation_keycloak_update_change_server" state="needs_review" hash="2029115402">Olvid is al geconfigureerd om een ANDERE identiteitsprovider te gebruiken. Als uw bedrijf daadwerkelijk van identiteitsprovider is gewisseld, kunt u doorgaan met authenticeren bij deze nieuwe provider. Neem bij twijfel eenvoudigweg contact op met uw beheerder.\nNeem contact op met uw beheerder voor meer informatie.</string>
 	<string name="explanation_keycloak_update_same_server" state="needs_review" hash="1886762594">Olvid is al geconfigureerd met de identiteitsprovider van uw bedrijf.\nNeem contact op met uw beheerder voor meer informatie.</string>
@@ -995,12 +979,7 @@
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Je hebt Olvid geconfigureerd om automatische back-ups naar een cloudprovider te gebruiken, maar je sessie is verlopen. Je moet opnieuw inloggen bij deze provider.\n\nAls je geen automatische back-ups meer wilt, kun je ze uitschakelen in de App-instellingen. Houd er rekening mee dat automatische back-ups de enige manier zijn om het verlies van je contacten te voorkomen als je apparaat verloren gaat of beschadigd raakt.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Inloggen</string>
 	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Op afstand contact opnemen</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s staat al in je contacten.</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s staat op je lijst met bekende gebruikers, maar nog niet in je contacten.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Nieuw</string>
-	<string name="label_option_invite_locally" state="needs_review" hash="-1267065954">Optie 1: persoonlijk</string>
-	<string name="label_option_invite_remotely" state="needs_review" hash="369824596">Optie 2: op afstand</string>
-	<string name="text_explanation_mutual_scan" state="needs_review" hash="-1822394875">Vraag %1$s om deze QR-code te scannen om direct contact op te nemen.</string>
 	<string name="text_explanation_invalid_mutual_scan_qr_code" state="needs_review" hash="-1461387693">Deze QR-code kan niet worden gebruikt om %1$s aan je contacten toe te voegen.\nProbeer het opnieuw en zorg ervoor dat %1$s jouw QR-code scant voordat jij de zijne scant.</string>
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s wordt toegevoegd aan je contacten zodra zijn apparaat bereikbaar is.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s is toegevoegd aan je contacten 🙌!</string>
@@ -1087,7 +1066,6 @@
 	<string name="button_label_create_password" state="needs_review" hash="649429298">Wachtwoord aanmaken</string>
 	<string name="toast_message_hidden_profile_password_set" state="needs_review" hash="1225440753">Verborgen profielwachtwoord ingesteld</string>
 	<string name="toast_message_hidden_profile_password_failed" state="needs_review" hash="-1988538273">Kon het wachtwoord voor het verborgen profiel niet aanmaken</string>
-	<string name="button_label_directory" state="needs_review" hash="351731324">Map</string>
 	<string name="dialog_title_cancel_hide_profile" state="needs_review" hash="356889825">Wachtwoord negeren?</string>
 	<string name="dialog_message_cancel_hide_profile" state="needs_review" hash="1495424902">Je staat op het punt de wijzigingen die je hebt aangebracht, te annuleren. Vooral het wachtwoord dat je voor dit profiel hebt gekozen, is nog niet opgeslagen en gaat verloren.\nBen je zeker dat je wilt doorgaan?</string>
 	<string name="dialog_title_unhide_profile" state="needs_review" hash="-733133172">Verborgen profiel weergeven?</string>
@@ -1185,7 +1163,7 @@
 	<string name="pref_send_with_hardware_enter_summary" state="needs_review" hash="1694640710">Wanneer geactiveerd, zal het indrukken van \"Enter\" op een fysiek toetsenbord je bericht verzenden. \"Shift + Enter\" voegt een nieuwe regel toe.</string>
 	<string name="pref_ping_connectivity_indicator_title" state="needs_review" hash="1245192677">Netwerkconnectie-indicator</string>
 	<string name="pref_text_ping_connectivity_indicator_none" state="needs_review" hash="-1725558072">Geen verbindingsindicator</string>
-	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Gekleurd punt op de \"i\" van het Olvid-logo</string>
+	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="752487342">Gekleurde punt in de titelbalk</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Discrete lijn bovenin de gesprekslijst</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Volledige verbindingsstatus bovenin de gesprekslijst</string>
 	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Nooit een indicator weergeven, zelfs niet bij verbindingsverlies</string>
@@ -2054,18 +2032,15 @@
 	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">Toevoegen</string>
 	<string name="label_poll_see_answers" state="needs_review" hash="710858547">Antwoorden bekijken</string>
 	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">Wacht op hun antwoord</string>
-	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">Herinneren</string>
 	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">Voeg een \"%1$s\" antwoord toe</string>
 	<string name="label_poll_options" state="needs_review" hash="-13216192">Opties</string>
 	<string name="text_none_answer" state="needs_review" hash="560562575">Geen van bovenstaande</string>
 	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">Meerdere antwoorden toestaan</string>
 	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">Kies één of meerdere antwoorden</string>
-	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">Quizmodus</string>
 	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">Einde</string>
 	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">Verloopdatum toevoegen</string>
 	<string name="label_poll_expiration" state="needs_review" hash="605126523">De poll eindigt over %1$s.</string>
 	<string name="label_poll_ended" state="needs_review" hash="415569292">Poll is afgelopen</string>
-	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">Voeg minstens twee antwoorden toe</string>
 	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">Dit antwoord bestaat al</string>
 	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">Exporteer als CSV</string>
 	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">Fout bij het exporteren van de poll als CSV. Probeer het opnieuw.</string>
@@ -2093,12 +2068,10 @@
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Uitgenodigd</string>
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Nieuw bericht</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Nieuw contact</string>
-	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Zoeken</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Persoonlijk</string>
 	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Op afstand</string>
-	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Annuleren</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Scan elkaars QR-codes.</string>
-	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Laat nu die van jou scannen.</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Vraag %1$s om je code te scannen.</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Code gescand!</string>
 	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Kan de code niet scannen?</string>
 	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Nodig ze op een andere manier uit</string>
@@ -2111,9 +2084,15 @@
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Je eerste contact toevoegen</string>
 	<string name="label_discussion" state="needs_review" hash="301166224">Gesprek</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Camera omschakelen</string>
-	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Wilt u contact opnemen met %1$s?</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">Op afstand contact opnemen met %1$s?</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">De onderstaande contacten maken deel uit van deze groep, maar hebben nog geen privégesprek met u.</string>
 	<string name="label_group_admins" state="needs_review" hash="468245065">Groepsbeheerders</string>
 	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" is een veelvoorkomende groep.</string>
 	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Om uw privacy te beschermen, heeft Olvid **geen openbaar of centraal gebruikersregister**. Uw naam wordt alleen zichtbaar voor de mensen met wie u verbinding maakt.</string>
+	<string name="tab_title_discussions" state="needs_review" hash="491497248">Gesprekken</string>
+	<string name="tab_title_contacts" state="needs_review" hash="-859216410">Contacten</string>
+	<string name="tab_title_groups" state="needs_review" hash="-990226727">Groepen</string>
+	<string name="tab_title_calls" state="needs_review" hash="541245696">Oproepen</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Vastgespeld gesprek</string>
+	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">Kan %1$s uw code niet scannen?</string>
 </resources>

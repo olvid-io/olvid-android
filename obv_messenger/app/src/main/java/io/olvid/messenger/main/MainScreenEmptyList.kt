@@ -124,7 +124,7 @@ private fun MainScreenEmptyListPreview() {
         color = colorResource(R.color.almostWhite)
     ) {
         MainScreenEmptyList(
-            icon = R.drawable.ic_phone_log,
+            icon = R.drawable.tab_discussions,
             title = R.string.explanation_empty_discussion_list,
             subtitle = R.string.explanation_empty_discussion_list_sub,
             onClick = {})

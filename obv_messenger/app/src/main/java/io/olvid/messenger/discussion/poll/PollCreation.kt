@@ -555,8 +555,8 @@ private fun SendButton(
         },
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.textButtonColors(
-            contentColor = colorResource(R.color.alwaysWhite),
-            disabledContentColor = colorResource(R.color.alwaysWhite).copy(alpha = .4f)
+            contentColor = colorResource(R.color.olvid_gradient_light),
+            disabledContentColor = colorResource(R.color.olvid_gradient_light).copy(alpha = .5f)
         ),
         onClick = onClick,
         enabled = enabled

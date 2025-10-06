@@ -11,30 +11,29 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
+        android:theme="@style/AppTheme.LightAppBarOverlay">
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/tab_bar_size"
             android:layout_weight="1"
             app:popupTheme="@style/AppTheme"
-            android:background="@color/olvid_gradient_dark">
+            android:background="@color/almostWhite">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_gravity="center_vertical">
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="start">
+                    android:layout_height="48dp">
                     <io.olvid.messenger.customClasses.InitialView
                         android:id="@+id/owned_identity_initial_view"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_marginTop="2dp"
                         android:layout_marginBottom="2dp"
-                        android:layout_marginEnd="2dp"
+                        android:layout_marginEnd="18dp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
@@ -43,50 +42,48 @@
                         android:id="@+id/owned_identity_unread_marker_image_view"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
+                        android:layout_marginEnd="16dp"
                         android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/ic_dot_blue_bordered"
+                        app:srcCompat="@drawable/ic_dot_white_bordered"
                         tools:visibility="visible" />
                     <ImageView
                         android:id="@+id/owned_identity_muted_marker_image_view"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="2dp"
                         android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:srcCompat="@drawable/ic_notification_muted_circle_blue"
+                        app:srcCompat="@drawable/ic_notification_muted_circle"
                         tools:visibility="visible" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp">
-                    <ImageView
-                        android:id="@+id/imageView"
-                        android:layout_width="@dimen/main_logo_width"
-                        android:layout_height="24dp"
-                        android:layout_gravity="start"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginEnd="16dp"
-                        app:srcCompat="@drawable/olvid"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"/>
                     <ImageView
                         android:id="@+id/ping_indicator_dot"
-                        android:layout_width="8dp"
-                        android:layout_height="8dp"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginStart="@dimen/ping_dot_offset"
-                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_width="6dp"
+                        android:layout_height="6dp"
+                        android:layout_marginTop="21dp"
+                        android:layout_marginEnd="6dp"
                         app:layout_constraintTop_toTopOf="parent"
-                        android:src="@drawable/dot_mask_blue"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:src="@drawable/dot_mask_white"
                         tools:background="@color/green"
                         android:visibility="gone"
                         tools:visibility="visible"
                         />
                 </androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:id="@+id/main_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="@string/tab_title_discussions"
+                    android:layout_gravity="center_vertical"
+                    android:ellipsize="end"
+                    android:textStyle="bold"
+                    android:textColor="@color/almostBlack"
+                    android:textSize="20dp"
+                    tools:ignore="SpUsage" />
             </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
         <View
@@ -159,7 +156,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/background_main_activity_buttons"
+        android:background="@color/whiteOpaqueOverlay"
         android:layout_gravity="bottom">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -172,12 +169,12 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/tab_bar_size"
                 android:layout_weight="1"
-                android:background="?attr/selectableItemBackground"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/content_description_discussions_tab"
                 android:paddingStart="4dp"
-                android:paddingTop="13dp"
+                android:paddingTop="12dp"
                 android:paddingEnd="4dp"
-                android:paddingBottom="11dp"
+                android:paddingBottom="12dp"
                 app:srcCompat="@drawable/tab_discussions"
                 android:theme="@style/GreyRipple"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -207,7 +204,7 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/tab_bar_size"
                 android:layout_weight="1"
-                android:background="?attr/selectableItemBackground"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/content_description_contacts_tab"
                 android:paddingTop="12dp"
                 android:paddingBottom="12dp"
@@ -242,7 +239,7 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/tab_bar_size"
                 android:layout_weight="1"
-                android:background="?attr/selectableItemBackground"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/content_description_groups_tab"
                 android:paddingTop="12dp"
                 android:paddingBottom="12dp"
@@ -277,13 +274,13 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/tab_bar_size"
                 android:layout_weight="1"
-                android:background="?attr/selectableItemBackground"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/activity_title_call_log"
                 android:paddingTop="15dp"
                 android:paddingBottom="15dp"
-                android:paddingEnd="8dp"
+                android:paddingEnd="4dp"
                 android:paddingStart="4dp"
-                app:srcCompat="@drawable/ic_phone_log"
+                app:srcCompat="@drawable/tab_calls"
                 android:theme="@style/GreyRipple"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

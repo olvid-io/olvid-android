@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:src="@drawable/ic_arrow_back"
+            android:src="@drawable/ic_arrow_back_white"
             android:tint="@color/darkGrey"
             android:layout_marginTop="16dp"
             android:layout_marginStart="16dp"

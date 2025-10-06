@@ -81,11 +81,6 @@ fun buildPreCallControlActions(
       callAction = CallAction.ToggleSpeaker
     ),
     CallControlAction(
-      icon = painterResource(id = R.drawable.ic_chat),
-      background = background(true),
-      callAction = CallAction.GoToDiscussion()
-    ),
-    CallControlAction(
       icon = cameraIcon,
       background = background(callMediaState.isCameraEnabled),
       callAction = CallAction.ToggleCamera

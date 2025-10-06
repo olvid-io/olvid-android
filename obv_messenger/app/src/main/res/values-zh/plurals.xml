@@ -1,4 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_files" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1591553998">文件</item>
+		<item quantity="other" state="needs_review" hash="-129414826">%1$d 文件</item>
+	</plurals>
+	<plurals name="text_images" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1471675200">照片</item>
+		<item quantity="other" state="needs_review" hash="1017714912">%1$d 照片</item>
+	</plurals>
+	<plurals name="text_videos" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="366973148">视频</item>
+		<item quantity="other" state="needs_review" hash="-200168444">%1$d 视频</item>
+	</plurals>
 	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" 和 1 个共同群组</item>
 		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\"和%2$d其他共同群组</item>

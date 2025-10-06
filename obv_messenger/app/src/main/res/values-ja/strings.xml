@@ -225,7 +225,6 @@
 	<string name="notification_title_one_to_one_invitation" state="needs_review" hash="-351127459">%1$sからの招待</string>
 	<string name="notification_title_user_has_mentioned_you" state="needs_review" hash="-1965484006">%1$sがあなたをメンションしました</string>
 	<string name="pref_autodownload_size_title" state="needs_review" hash="149272168">添付ファイルを自動的にダウンロード…</string>
-	<string name="pref_category_camera_title" state="needs_review" hash="1539779714">写真</string>
 	<string name="pref_camera_resolution_title" state="needs_review" hash="-1295742224">Olvid内で撮影した写真のサイズを変更しますか？</string>
 	<string name="pref_qr_correction_level_title" state="needs_review" hash="-1685499441">QRコード誤り訂正レベル</string>
 	<string name="pref_text_QR_correction_high" state="needs_review" hash="1408732723">高い</string>
@@ -572,16 +571,10 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">ディスカッションタブ</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">連絡先</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">グループタブ</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">連絡先を追加</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">通知ドット</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">機密性の高いJPEGメタデータを削除</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">有効にすると、Olvidはインポートされた写真ファイルから機密性の高いメタデータを削除しようとします。\nこれには、GPSデータ、カメラのメーカー、作成日などが含まれます。</string>
-	<string name="activity_title_add_contact" state="needs_review" hash="-1050193239">連絡先を追加</string>
 	<string name="button_label_scan" state="needs_review" hash="1683724449">スキャン</string>
-	<string name="text_explanation_scan_contact_id" state="needs_review" hash="-2129167034">別のユーザーのIDをスキャンすると、招待できます。</string>
-	<string name="button_label_share_my_id" state="needs_review" hash="-75320325">IDを共有</string>
-	<string name="label_scan" state="needs_review" hash="1683724449">スキャン</string>
-	<string name="button_label_show_my_id" state="needs_review" hash="-197520345">私のIDを表示</string>
 	<string name="toast_message_unrecognized_url" state="needs_review" hash="1921493221">認識できないQRコードURL</string>
 	<string name="dialog_title_webclient_sas_input" state="needs_review" hash="891876517">ウェブブラウザに表示されているPINコードを入力してください</string>
 	<string name="webclient_error_invalid_qrcode" state="needs_review" hash="358206378">無効なQRコード</string>
@@ -592,7 +585,6 @@
 	<string name="webclient_toast_connection_timedout" state="needs_review" hash="869943528">Webクライアント接続がタイムアウトしました</string>
 	<string name="webclient_protocol_in_progress" state="needs_review" hash="805709221">アプリとWebクライアント間の安全な接続を作成中です…</string>
 	<string name="webclient_error_sas_incorrect" state="needs_review" hash="-1861981708">PINコードが間違っています。もう一度お試しください。</string>
-	<string name="label_webclient" state="needs_review" hash="-2125862146">ウェブクライアント</string>
 	<string name="label_webclient_already_running" state="needs_review" hash="788166693">ウェブクライアントはすでに実行中です</string>
 	<string name="label_webclient_restart_connection" state="needs_review" hash="934550160">現在の接続を閉じて新しい接続を開始しますか？</string>
 	<string name="webclient_successfully_connected" state="needs_review" hash="-1216119082">接続が正常に確立されました！</string>
@@ -614,7 +606,6 @@
 	<string name="pref_webclient_notification_for_messages_after_inactivity_title" state="needs_review" hash="-732458468">非アクティブ後の通知</string>
 	<string name="activity_detected_after_inactivity" state="needs_review" hash="1909603717">Webクライアントで長時間非アクティブ後にアクティビティが検出されました。</string>
 	<string name="pref_webclient_notification_for_messages_after_inactivity_summary" state="needs_review" hash="464494780">10分間の非アクティブ状態の後にアクティビティが検出された場合に通知を受け取ります。</string>
-	<string name="text_explanation_scan_share_id" state="needs_review" hash="1214882443">あなたのIDを共有すると、他のOlvidユーザーがあなたを招待できるようになります。</string>
 	<string name="dialog_title_subscription_updated" state="needs_review" hash="1912189310">サブスクリプションが更新されました</string>
 	<string name="button_label_add_contact" state="needs_review" hash="744905192">連絡先を追加</string>
 	<string name="button_label_add" state="needs_review" hash="-1358923215">追加</string>
@@ -629,7 +620,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">ライセンスサーバー:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">あなたのサーバー:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">ライセンス認証リンクが無効です。\n\nこのリンクを送信した人に連絡してください。</string>
-	<string name="label_please_contact_activation_link" state="needs_review" hash="-497652404">このリンクを送信した人に連絡してください。</string>
 	<string name="label_checking_license" state="needs_review" hash="-777109669">ライセンスを確認しています…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">ライセンス状況を確認できません</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">不明なライセンス</string>
@@ -720,7 +710,6 @@
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">有効にすると、一度読んだメッセージと、デフォルトの表示時間制限のあるメッセージは、会話に入るとすぐに開きます。そうでない場合は、クリックが必要です。</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">有効にすると、削除された送信メッセージは保持され、いつ配信または読まれたかを確認できます。そうでない場合、削除されます。</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">ウェブクライアント</string>
-	<string name="label_title_change_list" state="needs_review" hash="76730245">設定が更新されました</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">設定更新リンクの解析エラー</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">メッセージの送受信</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">共有エフェメラルメッセージ設定</string>
@@ -860,13 +849,8 @@
 	<string name="toast_message_keycloak_revoke_successful" state="needs_review" hash="-1216369809">以前のOlvid IDが正常に置き換えられました</string>
 	<string name="dialog_title_keycloak_authentication_required_user_id_changed" state="needs_review" hash="-896407029">ユーザー変更を検出しました</string>
 	<string name="dialog_message_keycloak_authentication_required_user_id_changed" state="needs_review" hash="1319874532">あなたのOlvid IDは、会社のIDプロバイダーによって管理されています。普段とは異なるユーザーとして認証されたようです。これはサポートされていません。\n\n管理者に連絡するか、正しいユーザーとして再認証してください。</string>
-	<string name="hint_search_keycloak" state="needs_review" hash="1386776811">会社のディレクトリを検索…</string>
-	<string name="explanation_empty_keycloak_search" state="needs_review" hash="860472461">結果が見つかりませんでした</string>
-	<string name="explanation_keycloak_search_not_started" state="needs_review" hash="1192355189">あなたのOlvid IDは、会社のIDプロバイダーによって管理されます。\n\n上記の検索フィールドを使用して、ユーザーディレクトリを検索することで、社内の連絡先を簡単に追加できます。</string>
-	<string name="explanation_keycloak_searching" state="needs_review" hash="1696749815">検索中…</string>
 	<string name="dialog_title_add_keycloak_user" state="needs_review" hash="-1050193239">連絡先を追加</string>
 	<string name="dialog_message_add_keycloak_user" state="needs_review" hash="-1755937035">%1$sを連絡先に追加することを選択しました。続行しますか？</string>
-	<string name="label_bind_keycloak" state="needs_review" hash="1305090894">IDプロバイダーを使用する</string>
 	<string name="explanation_keycloak_update_new" state="needs_review" hash="1136733528">Olvidで会社のIDプロバイダーを設定しようとしています。設定が完了すると、このサーバーで認証できるようになり、Olvidを使用すると、他の従業員を連絡先にシームレスに追加できます。\n詳細については、管理者にお問い合わせください。</string>
 	<string name="explanation_keycloak_update_change_server" state="needs_review" hash="2029115402">Olvidはすでに別のIDプロバイダーを使用するように設定されています。もしあなたの会社が実際にIDプロバイダーを変更した場合、この新しいプロバイダーで認証して進むことができます。もし疑問がある場合は、キャンセルしてください。\n詳細については、管理者にお問い合わせください。</string>
 	<string name="explanation_keycloak_update_same_server" state="needs_review" hash="1886762594">Olvidはすでに、お客様の会社のIDプロバイダーで設定されています。\n詳細については、管理者にお問い合わせください。</string>
@@ -995,12 +979,7 @@
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Olvidをクラウドプロバイダーへの自動バックアップ用に設定しましたが、セッションが期限切れになりました。このプロバイダーに再度サインインする必要があります。\n\n自動バックアップをもう使用したくない場合は、アプリの設定で無効にすることができます。デバイスを紛失または破損した場合、自動バックアップは連絡先を失うのを防ぐ唯一の方法であることを覚えておいてください。</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">サインイン</string>
 	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">リモートで連絡する</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$sはすでにあなたの連絡先に含まれています。</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s は既知のユーザーリストに含まれていますが、まだ連絡先に登録されていません。</string>
 	<string name="label_new" state="needs_review" hash="1426137772">新しい</string>
-	<string name="label_option_invite_locally" state="needs_review" hash="-1267065954">オプション1：対面で</string>
-	<string name="label_option_invite_remotely" state="needs_review" hash="369824596">オプション2：リモート</string>
-	<string name="text_explanation_mutual_scan" state="needs_review" hash="-1822394875">%1$sにこのQRコードをスキャンしてもらい、すぐに連絡を取ってください。</string>
 	<string name="text_explanation_invalid_mutual_scan_qr_code" state="needs_review" hash="-1461387693">このQRコードは、%1$sを連絡先に登録するために使用できません。\nもう一度お試しください。%1$sがあなたのQRコードをスキャンする前に、相手のQRコードをスキャンしていることを確認してください。</string>
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$sは、相手のデバイスに到達次第、連絡先に登録されます。</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s があなたの連絡先に登録されました 🙌！</string>
@@ -1087,7 +1066,6 @@
 	<string name="button_label_create_password" state="needs_review" hash="649429298">パスワードを作成</string>
 	<string name="toast_message_hidden_profile_password_set" state="needs_review" hash="1225440753">非表示プロファイルパスワードが設定されました</string>
 	<string name="toast_message_hidden_profile_password_failed" state="needs_review" hash="-1988538273">非表示プロファイルパスワードの作成に失敗しました</string>
-	<string name="button_label_directory" state="needs_review" hash="351731324">ディレクトリ</string>
 	<string name="dialog_title_cancel_hide_profile" state="needs_review" hash="356889825">パスワードを破棄しますか？</string>
 	<string name="dialog_message_cancel_hide_profile" state="needs_review" hash="1495424902">あなたが加えた変更を破棄しようとしています。特に、このプロファイルに選択したパスワードはまだ保存されておらず、失われます。\n続行しますか？</string>
 	<string name="dialog_title_unhide_profile" state="needs_review" hash="-733133172">プロフィールを表示しますか？</string>
@@ -1185,7 +1163,7 @@
 	<string name="pref_send_with_hardware_enter_summary" state="needs_review" hash="1694640710">有効にすると、ハードウェアキーボードを使用している場合、「Enter」キーを押すとメッセージが送信されます。「Shift + Enter」を押すと、新しい行が追加されます。</string>
 	<string name="pref_ping_connectivity_indicator_title" state="needs_review" hash="1245192677">ネットワーク接続インジケーター</string>
 	<string name="pref_text_ping_connectivity_indicator_none" state="needs_review" hash="-1725558072">接続状況インジケーターなし</string>
-	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Olvidロゴの「i」にある色付きの点</string>
+	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="752487342">タイトルバーのカラー付きドット</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">チャットリストの上部の目立たない線</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">チャットリストの上部に完全な接続ステータスが表示されます</string>
 	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">接続が失われた場合でも、インジケーターを表示しない</string>
@@ -2052,18 +2030,15 @@
 	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">追加</string>
 	<string name="label_poll_see_answers" state="needs_review" hash="710858547">回答を見る</string>
 	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">相手の返信を待っています</string>
-	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">リマインド</string>
 	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">「%1$s」という回答を追加</string>
 	<string name="label_poll_options" state="needs_review" hash="-13216192">設定</string>
 	<string name="text_none_answer" state="needs_review" hash="560562575">上記のいずれでもありません</string>
 	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">複数の回答を許可する</string>
 	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">一つまたは複数の回答を選択してください</string>
-	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">クイズモード</string>
 	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">終了</string>
 	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">有効期限を追加</string>
 	<string name="label_poll_expiration" state="needs_review" hash="605126523">投票は%1$sで終了します</string>
 	<string name="label_poll_ended" state="needs_review" hash="415569292">投票が終了しました</string>
-	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">少なくとも2つの応答を追加してください</string>
 	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">この応答は既に存在します</string>
 	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">CSVとしてエクスポート</string>
 	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">CSV形式での投票のエクスポートに失敗しました。もう一度お試しください。</string>
@@ -2091,12 +2066,10 @@
 	<string name="button_label_invited" state="needs_review" hash="2094724552">招待された</string>
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">新しいメッセージ</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">新しい連絡先</string>
-	<string name="new_message_action_search" state="needs_review" hash="-2085358317">検索</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">直接対面</string>
 	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">リモートで</string>
-	<string name="new_contact_cancel" state="needs_review" hash="1270066923">キャンセル</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">互いのQRコードをスキャンしてください</string>
-	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">あなたもスキャンしましょう</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">%1$sにコードをスキャンしてもらいましょう</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">コードがスキャンされました！</string>
 	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">コードをスキャンできませんか？</string>
 	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">別の方法で招待する</string>
@@ -2109,9 +2082,15 @@
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">最初の連絡先を追加</string>
 	<string name="label_discussion" state="needs_review" hash="301166224">議論</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">カメラを切り替える</string>
-	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">%1$sと連絡を取りたいですか？</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">%1$sと遠隔で連絡を取る？</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">以下の連絡先は、このグループのメンバーですが、まだあなたとのプライベートなチャットは行われていません。</string>
 	<string name="label_group_admins" state="needs_review" hash="468245065">グループ管理者</string>
 	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" は共通のグループです</string>
 	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">プライバシーを保護するため、Olvidには**公開または中央のユーザーディレクトリがありません**。あなたの名前は、あなたが接続する相手にのみ表示されます。</string>
+	<string name="tab_title_discussions" state="needs_review" hash="491497248">ディスカッション</string>
+	<string name="tab_title_contacts" state="needs_review" hash="-859216410">連絡先</string>
+	<string name="tab_title_groups" state="needs_review" hash="-990226727">グループ</string>
+	<string name="tab_title_calls" state="needs_review" hash="541245696">通話</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">固定された会話</string>
+	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">%1$sがあなたのコードをスキャンできませんか？</string>
 </resources>

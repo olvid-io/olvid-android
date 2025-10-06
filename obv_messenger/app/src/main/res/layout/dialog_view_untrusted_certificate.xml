@@ -60,7 +60,8 @@
         android:layout_marginStart="16dp"
         android:src="@drawable/ic_warning_outline"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/domain_name_text_view"/>
+        app:layout_constraintTop_toBottomOf="@id/domain_name_text_view"
+        android:contentDescription="@null"/>
 
     <TextView
         android:id="@+id/risk_level_explanation_text_view"
@@ -137,6 +138,7 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
+            android:contentDescription="@null"
             app:tint="@color/greyTint"
             android:src="@drawable/ic_swipe_copy"
             android:layout_gravity="end"
@@ -202,6 +204,7 @@
             app:tint="@color/greyTint"
             android:src="@drawable/ic_swipe_copy"
             android:layout_gravity="end"
+            android:contentDescription="@null"
             />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

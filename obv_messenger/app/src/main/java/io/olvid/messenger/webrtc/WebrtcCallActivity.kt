@@ -133,6 +133,12 @@ class WebrtcCallActivity : AppCompatActivity() {
                     or LayoutParams.FLAG_KEEP_SCREEN_ON
                     or LayoutParams.FLAG_TURN_SCREEN_ON
         )
+
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb())
+        )
+
         super.onCreate(savedInstanceState)
         val intent = intent
         if (CALL_BACK_ACTION == intent.action) {
@@ -185,11 +191,6 @@ class WebrtcCallActivity : AppCompatActivity() {
                 Intent(this@WebrtcCallActivity, WebrtcCallService::class.java)
             bindService(serviceBindIntent, this, 0)
         }
-
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb())
-        )
 
         delegate.localNightMode = AppCompatDelegate.MODE_NIGHT_YES
         setContent {

@@ -61,7 +61,7 @@ fun CallButton(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
         ) {
             Icon(
                 modifier = Modifier.align(Alignment.Center),
-                painter = painterResource(R.drawable.ic_phone),
+                painter = painterResource(R.drawable.tab_calls),
                 contentDescription = stringResource(R.string.button_label_call)
             )
         }

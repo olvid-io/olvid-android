@@ -227,7 +227,6 @@
     <string name="notification_title_one_to_one_invitation">Invitation from %1$s</string>
     <string name="notification_title_user_has_mentioned_you">%1$s mentioned you</string>
     <string name="pref_autodownload_size_title">Automatically download attachments…</string>
-    <string name="pref_category_camera_title">Photos</string>
     <string name="pref_camera_resolution_title">Resize photos taken within Olvid?</string>
     <string name="pref_qr_correction_level_title">QR-code error correction level</string>
     <string name="preference_filename_app" translatable="false">io.olvid.messenger.APP_PREFERENCE_FILE</string>
@@ -583,16 +582,10 @@
     <string name="content_description_discussions_tab">Discussions tab</string>
     <string name="content_description_contacts_tab">Contacts tab</string>
     <string name="content_description_groups_tab">Groups tab</string>
-    <string name="content_description_add_contact_button">Add contact</string>
     <string name="content_description_notification_dot">Notification dot</string>
     <string name="pref_exif_erase_title">Remove sensitive JPEG metadata</string>
     <string name="pref_exif_erase_summary">When activated, Olvid will attempt to remove sensitive metadata from imported photo files.\nThis includes GPS data, camera make, creation date…</string>
-    <string name="activity_title_add_contact">Add a contact</string>
     <string name="button_label_scan">Scan</string>
-    <string name="text_explanation_scan_contact_id">Scanning the ID of another user allows you to invite them.</string>
-    <string name="button_label_share_my_id">Share my ID</string>
-    <string name="label_scan">Scan</string>
-    <string name="button_label_show_my_id">Show my ID</string>
     <string name="toast_message_unrecognized_url">Unrecognized QR-code URL</string>
     <string name="dialog_title_webclient_sas_input">Please enter the PIN code displayed in your web browser</string>
     <string name="webclient_error_invalid_qrcode">Invalid QR-code</string>
@@ -603,7 +596,6 @@
     <string name="webclient_toast_connection_timedout">WebClient connection timed out</string>
     <string name="webclient_protocol_in_progress">Creating a secure connection between your App and the WebClient…</string>
     <string name="webclient_error_sas_incorrect">Incorrect PIN. Please try again.</string>
-    <string name="label_webclient">WebClient</string>
     <string name="label_webclient_already_running">WebClient is already running</string>
     <string name="label_webclient_restart_connection">Close current connection and start a new one?</string>
     <string name="webclient_successfully_connected">Connection successfully established!</string>
@@ -625,7 +617,6 @@
     <string name="pref_webclient_notification_for_messages_after_inactivity_title">Notify after inactivity</string>
     <string name="activity_detected_after_inactivity">Activity detected in WebClient after an extended period of inactivity</string>
     <string name="pref_webclient_notification_for_messages_after_inactivity_summary">Receive a notification in case of activity after 10 minutes of inactivity.</string>
-    <string name="text_explanation_scan_share_id">Sharing your ID allows another Olvid user to invite you.</string>
     <string name="dialog_title_subscription_updated">Subscription updated</string>
     <string name="button_label_add_contact">Add contact</string>
     <string name="button_label_add">Add</string>
@@ -640,7 +631,6 @@
     <string name="label_license_server">License server:</string>
     <string name="label_your_server">Your server:</string>
     <string name="text_explanation_malformed_activation_link">Malformed license activation link.\n\nPlease contact the person who sent you this link.</string>
-    <string name="label_please_contact_activation_link">Please contact the person who sent you this link.</string>
     <string name="label_checking_license">Checking license…</string>
     <string name="label_unable_to_check_license_status">Unable to check license status</string>
     <string name="text_unknown_license">Unknown license</string>
@@ -731,7 +721,6 @@
     <string name="pref_auto_open_limited_visibility_inbound_summary">When activated, read once messages and messages with the default limited visibility duration are opened as soon as you enter the discussion. Otherwise, a click is required.</string>
     <string name="pref_retain_wiped_outbound_messages_summary">When activated, wiped outbound messages are retained so you can see when they are delivered or read. Otherwise, they are deleted.</string>
     <string name="pref_category_webclient_title">WebClient</string>
-    <string name="label_title_change_list">Updated settings</string>
     <string name="toast_message_error_parsing_settings_update_link">Error parsing settings update link</string>
     <string name="pref_discussion_category_send_receive">Sending &amp; receiving messages</string>
     <string name="pref_discussion_category_shared_ephemeral_settings_title">Shared ephemeral message settings</string>
@@ -871,13 +860,8 @@
     <string name="toast_message_keycloak_revoke_successful">Successfully replaced previous Olvid ID</string>
     <string name="dialog_title_keycloak_authentication_required_user_id_changed">User change detected</string>
     <string name="dialog_message_keycloak_authentication_required_user_id_changed">You Olvid ID is managed by your company\'s identity provider. It seems you authenticated as a different user than usual. This is not supported.\n\nPlease contact your administrator or re-authenticate as the correct user.</string>
-    <string name="hint_search_keycloak">Search company\'s directory…</string>
-    <string name="explanation_empty_keycloak_search">No result found</string>
-    <string name="explanation_keycloak_search_not_started">Your Olvid ID is managed by your company\'s identity provider.\n\nYou can easily add contacts inside your company by using the search field above and digging into its user directory.</string>
-    <string name="explanation_keycloak_searching">Searching…</string>
     <string name="dialog_title_add_keycloak_user">Add a contact</string>
     <string name="dialog_message_add_keycloak_user">You selected to add %1$s to your contacts. Do you want to proceed?</string>
-    <string name="label_bind_keycloak">Use an identity provider</string>
     <string name="explanation_keycloak_update_new">You are about to configure your company\'s identity provider in Olvid. Once configured, you can authenticate with this server and Olvid will let you to seamlessly add other employees to your contacts.\nPlease contact your administrator for more details.</string>
     <string name="explanation_keycloak_update_change_server">Olvid is already configured to use a DIFFERENT identity provider. If your company indeed changed identity provider, you can proceed by authenticating with this new provider. If in doubt, simply cancel.\nPlease contact your administrator for more details.</string>
     <string name="explanation_keycloak_update_same_server">Olvid is already configured with your company\'s identity provider.\nPlease contact your administrator for more details.</string>
@@ -1006,12 +990,7 @@
     <string name="dialog_message_backup_requires_sign_in">You have configured Olvid to use automatic backups to a cloud provider, but your session has expired. You need to sign in to this provider again.\n\nIf you no longer want automatic backups, you can disable them in the App Settings. Keep in mind that automatic backups are the only way to prevent the loss of your contacts if your device is lost or damaged.</string>
     <string name="button_label_sign_in">Sign in</string>
     <string name="button_label_get_in_contact_remotely">Get in contact remotely</string>
-    <string name="text_explanation_warning_mutual_scan_contact_already_known">%1$s is already part of your contacts.</string>
-    <string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one">%1$s is part of your list of known users but is not yet in your contacts.</string>
     <string name="label_new">New</string>
-    <string name="label_option_invite_locally">Option 1: face to face</string>
-    <string name="label_option_invite_remotely">Option 2: remotely</string>
-    <string name="text_explanation_mutual_scan">Have %1$s scan this QR code to get in contact immediately.</string>
     <string name="text_explanation_invalid_mutual_scan_qr_code">This QR cannot be used to add %1$s to your contacts.\nPlease try again, making sure %1$s scans your QR code before you scan their\'s.</string>
     <string name="text_explanation_mutual_scan_pending">%1$s will be added to your contacts once their device can be reached.</string>
     <string name="text_explanation_mutual_scan_success">%1$s was added to your contact 🙌!</string>
@@ -1104,7 +1083,6 @@
     <string name="button_label_create_password">Create password</string>
     <string name="toast_message_hidden_profile_password_set">Hidden profile password set</string>
     <string name="toast_message_hidden_profile_password_failed">Failed to create hidden profile password</string>
-    <string name="button_label_directory">Directory</string>
     <string name="dialog_title_cancel_hide_profile">Discard your password?</string>
     <string name="dialog_message_cancel_hide_profile">You are about do discard the changes you made. In particular, the password you chose for this profile was not yet saved and will be lost.\nAre you sure you want to proceed?</string>
     <string name="dialog_title_unhide_profile">Un-hide profile?</string>
@@ -1202,7 +1180,7 @@
     <string name="pref_send_with_hardware_enter_summary">When activated, if using a hardware keyboard, pressing \"Enter\" will send your message. \"Shift + Enter\" will add a new line</string>
     <string name="pref_ping_connectivity_indicator_title">Network connectivity indicator</string>
     <string name="pref_text_ping_connectivity_indicator_none">No connectivity indicator</string>
-    <string name="pref_text_ping_connectivity_indicator_dot">Colored dot on the \"i\" of the Olvid logo</string>
+    <string name="pref_text_ping_connectivity_indicator_dot">Colored dot in the title bar</string>
     <string name="pref_text_ping_connectivity_indicator_line">Discreet line at the top of discussion list</string>
     <string name="pref_text_ping_connectivity_indicator_full">Full connection status at the top of discussion list</string>
     <string name="pref_text_ping_connectivity_indicator_never">Never show an indicator, even on connection loss</string>
@@ -2083,18 +2061,15 @@
     <string name="hint_poll_answer_add">Add</string>
     <string name="label_poll_see_answers">View answers</string>
     <string name="label_poll_answer_pending">Waiting for their answer</string>
-    <string name="button_label_poll_answer_remind">Remind</string>
     <string name="label_poll_include_none_answer">Add a \"%1$s\" answer</string>
     <string name="label_poll_options">Options</string>
     <string name="text_none_answer">None of the above</string>
     <string name="label_poll_answer_multiple_choice">Allow multiple answers</string>
     <string name="explanation_poll_answer_multiple_choice">Choose one or more answers</string>
-    <string name="label_poll_quiz_mode">Quiz mode</string>
     <string name="label_poll_expiration_date">End</string>
     <string name="label_poll_add_expiration_date">Add expiration date</string>
     <string name="label_poll_expiration">Poll ends in %1$s</string>
     <string name="label_poll_ended">Poll ended</string>
-    <string name="error_poll_minimum_answers">Add at least two responses</string>
     <string name="error_poll_duplicate_answer">This response already exists</string>
     <string name="label_poll_export_csv">Export as CSV</string>
     <string name="toast_message_error_exporting_poll_csv">Error exporting poll as CSV. Please try again.</string>
@@ -2123,12 +2098,10 @@
     <string name="pref_category_webclient_summary" translatable="false">https://web.olvid.io</string>
     <string name="label_new_message_title">New message</string>
     <string name="button_label_new_contact">New contact</string>
-    <string name="new_message_action_search">Search</string>
     <string name="new_contact_double_scan">Face to face</string>
     <string name="new_contact_remotely">Remotely</string>
-    <string name="new_contact_cancel">Cancel</string>
     <string name="scan_screen_mutual_scan_title">Scan each other\'s QR codes</string>
-    <string name="scan_screen_mutual_scan_yours_title">Now get yours scanned</string>
+    <string name="scan_screen_mutual_scan_yours_title">Have %1$s scan your code</string>
     <string name="label_scan_screen_code_scanned">Code scanned!</string>
     <string name="scan_screen_share_invitation_title">Can\'t scan the code?</string>
     <string name="scan_screen_share_invitation_subtitle">Invite them another way</string>
@@ -2141,9 +2114,16 @@
     <string name="button_label_add_first_contact">Add your first contact</string>
     <string name="label_discussion">Discussion</string>
     <string name="content_description_switch_camera">Switch camera</string>
-    <string name="label_get_in_contact_with">Do you want to get in contact with %1$s?</string>
+    <string name="label_get_in_contact_with">Get in contact remotely with %1$s?</string>
     <string name="explanation_invite_group_members_list">Contacts below are part of this group but do not have a private discussion with you yet.</string>
     <string name="label_group_admins">Group administrators</string>
     <string name="text_common_group">\"%1$s\" is a common group</string>
     <string name="onboarding_privacy_disclaimer">To protect your privacy, Olvid has **no public or central user directory**. Your name will only be seen by the people you connect with.</string>
+    <string name="tab_title_discussions">Discussions</string>
+    <string name="tab_title_contacts">Contacts</string>
+    <string name="tab_title_groups">Groups</string>
+    <string name="tab_title_calls">Calls</string>
+    <string name="content_description_pinned_discussion">Pinned discussion</string>
+    <string name="attachments_joiner" translatable="false">" + "</string>
+    <string name="scan_screen_share_contact_cant_scan_title">%1$s can\'t scan your code?</string>
 </resources>

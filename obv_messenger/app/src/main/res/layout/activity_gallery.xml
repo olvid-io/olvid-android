@@ -33,7 +33,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@color/blackOverlay"
-        android:theme="@style/AppTheme.AppBarOverlay"
+        android:theme="@style/AppTheme.DarkAppBarOverlay"
         app:popupTheme="@style/AppTheme"/>
 
     <TextView

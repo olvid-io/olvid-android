@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.plus_button.scan
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -46,6 +47,14 @@ class ScanActivity : LockableActivity() {
     private val plusButtonViewModel: PlusButtonViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(
+                Color.Transparent.toArgb(),
+                ContextCompat.getColor(this, R.color.blackOverlay)
+            )
+        )
+
         super.onCreate(savedInstanceState)
         val scanOnly = intent.getBooleanExtra(SCAN_ONLY_EXTRA_KEY, false)
         plusButtonViewModel.currentIdentity = AppSingleton.getCurrentIdentityLiveData().value
@@ -59,13 +68,12 @@ class ScanActivity : LockableActivity() {
             plusButtonViewModel.handleLink(this, linkUri)
         }
 
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(
-                Color.Transparent.toArgb(),
-                ContextCompat.getColor(this, R.color.blackOverlay)
-            )
-        )
+
+        if (Build.VERSION.SDK_INT >= 34) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, R.anim.fade_in, R.anim.none)
+            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.none, R.anim.fade_out)
+        }
+
         setContent {
             val mutualScanFinishedListener = remember {
                 object : SimpleEngineNotificationListener(EngineNotifications.MUTUAL_SCAN_CONTACT_ADDED) {

@@ -338,7 +338,7 @@
             android:taskAffinity=""
             android:noHistory="true"
             android:exported="true"
-            android:theme="@style/AppTheme.NoActionBar.FullScreen.Transparent">
+            android:theme="@style/AppTheme.NoActionBar.FullScreenTransparent">
             <intent-filter android:label="@string/link_label_invitation_url">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -406,7 +406,7 @@
             android:taskAffinity=""
             android:noHistory="true"
             android:exported="true"
-            android:theme="@style/AppTheme.NoActionBar.FullScreen.Transparent">
+            android:theme="@style/AppTheme.NoActionBar.FullScreenTransparent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.NOTIFICATION_PREFERENCES" />
@@ -414,7 +414,7 @@
         </activity>
         <activity
             android:name=".discussion.DiscussionActivity"
-            android:theme="@style/AppTheme.NoActionBar.ActionModeOverlay"
+            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"/>
         <activity
@@ -521,15 +521,15 @@
         <activity
             android:name=".onboarding.OnboardingActivity"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar" />
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".onboarding.flow.OnboardingFlowActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize"
-            android:theme="@style/AppTheme.NoActionBar.AlmostWhiteStatusBar" />
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".troubleshooting.TroubleshootingActivity"
-            android:theme="@style/AppTheme.NoActionBar.AlmostWhiteStatusBar" />
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".appdialogs.AppDialogShowActivity"
             android:configChanges="orientation|screenSize|screenLayout|uiMode"
@@ -537,10 +537,10 @@
             android:theme="@style/AppTheme.NoActionBar.DimmedWithStatusTransparent" />
         <activity
             android:name=".owneddetails.SelectDetailsPhotoActivity"
-            android:theme="@style/AppTheme.NoActionBar.FullScreen.Black" />
+            android:theme="@style/AppTheme.NoActionBar.FullScreenBlack" />
         <activity
             android:name=".webrtc.WebrtcCallActivity"
-            android:theme="@style/AppTheme.NoActionBar.LightBlueStatusBar"
+            android:theme="@style/AppTheme.NoActionBar.Black"
             android:label="@string/activity_title_webrtc_call"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
@@ -551,7 +551,7 @@
             tools:targetApi="o_mr1" />
         <activity
             android:name=".webrtc.WebrtcIncomingCallActivity"
-            android:theme="@style/AppTheme.NoActionBar.BlackStatusBar"
+            android:theme="@style/AppTheme.NoActionBar.Black"
             android:label="@string/activity_title_webrtc_incoming_call"
             android:excludeFromRecents="true"
             android:showWhenLocked="true"
@@ -570,7 +570,8 @@
             android:launchMode="singleInstance"
             android:theme="@style/AppTheme.NoActionBar.Transparent" />
         <activity android:name=".settings.StorageExplorer"
-            android:label="@string/activity_title_storage_explorer"/>
+            android:label="@string/activity_title_storage_explorer"
+            tools:targetApi="24" />
         <activity android:name=".widget.ActionShortcutConfigurationActivity"
             android:theme="@style/AppTheme.NoActionBar.Transparent.Dimmed"
             android:exported="false"
@@ -586,7 +587,7 @@
             android:noHistory="true"
             android:stateNotNeeded="true" />
         <activity android:name=".activities.storage_manager.StorageManagerActivity"
-            android:theme="@style/AppTheme.NoActionBar.ActionModeOverlay" />
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".discussion.poll.PollCreationActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize"/>

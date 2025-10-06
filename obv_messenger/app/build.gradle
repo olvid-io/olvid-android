@@ -26,8 +26,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 21
         targetSdk 36
-        versionCode 276
-        versionName "4.0"
+        versionCode 277
+        versionName "4.0.1"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr', 'af', 'ar', 'ca', 'cs', 'da', 'de', 'el', 'es', 'fa', 'fi', 'hi', 'hr', 'hu', 'it', 'iw', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-rBR', 'ro', 'ru', 'sk', 'sl', 'sv', 'tr', 'uk', 'vi', 'zh', 'zh-rTW']
@@ -191,7 +191,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.credentials:credentials:1.5.0'
-    implementation 'androidx.credentials:credentials-play-services-auth:1.5.0'
+    fullImplementation 'androidx.credentials:credentials-play-services-auth:1.5.0'
     implementation 'androidx.documentfile:documentfile:1.1.0'
     implementation 'androidx.exifinterface:exifinterface:1.4.1'
     implementation 'androidx.fragment:fragment-ktx:1.8.9'

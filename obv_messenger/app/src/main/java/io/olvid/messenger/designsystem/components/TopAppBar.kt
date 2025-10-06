@@ -44,7 +44,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -99,14 +100,15 @@ fun <T> SelectionTopAppBar(
         onBackPressed = onBackPressed,
         actions = {
             AnimatedVisibility(visible = selection.isNotEmpty()) {
-                Row {
-                    actions.forEach {
-                        IconButton(onClick = it.second) {
-                            Icon(
-                                painter = painterResource(it.first),
-                                tint = Color.White,
-                                contentDescription = null
-                            )
+                CompositionLocalProvider(LocalContentColor provides colorResource(id = R.color.almostBlack)) {
+                    Row {
+                        actions.forEach {
+                            IconButton(onClick = it.second) {
+                                Icon(
+                                    painter = painterResource(it.first),
+                                    contentDescription = null
+                                )
+                            }
                         }
                     }
                 }
@@ -125,6 +127,7 @@ fun OlvidTopAppBar(
     onBackPressed: (() -> Unit)? = null
 ) {
     TopAppBar(
+        modifier = Modifier.shadow(4.dp),
         expandedHeight = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) 48.dp else 56.dp,
         title = {
             titleText?.let {
@@ -136,15 +139,15 @@ fun OlvidTopAppBar(
             } ?: title?.invoke()
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = colorResource(id = R.color.olvid_gradient_dark),
-            titleContentColor = colorResource(id = R.color.alwaysWhite)
+            containerColor = colorResource(id = R.color.almostWhite),
+            titleContentColor = colorResource(id = R.color.almostBlack)
         ),
         navigationIcon = {
             onBackPressed?.let {
-                CompositionLocalProvider(LocalContentColor provides colorResource(id = R.color.alwaysWhite)) {
+                CompositionLocalProvider(LocalContentColor provides colorResource(id = R.color.almostBlack)) {
                     IconButton(onClick = onBackPressed) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_arrow_back),
+                            painter = painterResource(id = R.drawable.ic_arrow_back_white),
                             contentDescription = stringResource(R.string.content_description_back_button)
                         )
                     }

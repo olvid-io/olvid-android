@@ -102,9 +102,6 @@ fun CallLogItemView(
                     )
                     .requiredSize(40.dp),
                 initialViewSetup = initialViewSetup,
-                unreadMessages = false,
-                muted = false,
-                locked = false,
             )
 
             // content

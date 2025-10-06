@@ -180,7 +180,7 @@ fun GroupDetailsScreen(
             ) {
                 OlvidActionButton(
                     modifier = Modifier.weight(1f),
-                    icon = R.drawable.ic_message,
+                    icon = R.drawable.tab_discussions,
                     text = stringResource(R.string.button_label_discuss)
                 ) {
                     group?.let {
@@ -194,7 +194,7 @@ fun GroupDetailsScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 OlvidActionButton(
                     modifier = Modifier.weight(1f),
-                    icon = R.drawable.ic_phone,
+                    icon = R.drawable.tab_calls,
                     text = stringResource(R.string.button_label_call)
                 ) {
                     group?.let { call(it) }

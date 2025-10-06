@@ -19,7 +19,6 @@
 
 package io.olvid.messenger.activities;
 
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -58,6 +57,7 @@ import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.security.KeyStore;
@@ -123,8 +123,17 @@ public class LockScreenActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        WindowCompat.enableEdgeToEdge(getWindow());
+
         super.onCreate(savedInstanceState);
         getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
+        Window window = getWindow();
+        if (window != null) {
+            WindowCompat.setDecorFitsSystemWindows(window, false);
+            WindowCompat.getInsetsController(window, window.getDecorView()).setAppearanceLightNavigationBars(false);
+            WindowCompat.getInsetsController(window, window.getDecorView()).setAppearanceLightStatusBars(false);
+        }
 
         setContentView(R.layout.activity_lock_screen);
 
@@ -134,11 +143,6 @@ public class LockScreenActivity extends AppCompatActivity {
         imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
         boolean isNeutral = SettingsActivity.lockScreenNeutral();
-
-        Window window = getWindow();
-        if (window != null) {
-            window.setStatusBarColor(ContextCompat.getColor(this, isNeutral ? R.color.black : R.color.olvid_gradient_light));
-        }
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override

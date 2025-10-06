@@ -228,7 +228,7 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
         Row(Modifier.fillMaxWidth()) {
             IconButton(onClick = { finish() }) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_arrow_back),
+                    painter = painterResource(id = R.drawable.ic_arrow_back_white),
                     contentDescription = stringResource(
                         id = R.string.content_description_back_button
                     )

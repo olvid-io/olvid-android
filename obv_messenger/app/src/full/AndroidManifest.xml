@@ -16,10 +16,10 @@
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
             android:label="@string/oss_license_title"
-            android:theme="@style/AppTheme.WhiteBackground.Licenses" />
+            android:theme="@style/AppTheme.Licenses" />
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
-            android:theme="@style/AppTheme.WhiteBackground.Licenses" />
+            android:theme="@style/AppTheme.Licenses" />
         <!-- Override the default theme for SignInHubActivity to remove nasty close animation after choosing a drive account -->
         <activity
             android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"

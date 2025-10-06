@@ -43,7 +43,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple
+import androidx.compose.material3.ripple
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -62,6 +62,7 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -71,7 +72,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.components.OlvidTextButton
@@ -249,10 +249,8 @@ fun hasPinnedShortcuts(): Boolean =
 @Composable
 @Preview
 private fun AppIconSettingScreenPreview() {
-    AppCompatTheme {
-        AppIconSettingScreen {
-            it == appIcons[0]
-        }
+    AppIconSettingScreen {
+        it == appIcons[0]
     }
 }
 
@@ -306,7 +304,7 @@ fun Context.setIcon(appIcon: AppIcon) {
 
 @Composable
 fun adaptiveIconPainterResource(@DrawableRes id: Int): Painter {
-    val res = LocalContext.current.resources
+    val res = LocalResources.current
     val theme = LocalContext.current.theme
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

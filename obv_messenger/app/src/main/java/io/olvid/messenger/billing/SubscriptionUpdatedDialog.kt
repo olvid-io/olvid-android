@@ -23,7 +23,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -31,8 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.viewmodel.compose.viewModel
-import io.olvid.engine.engine.types.EngineAPI
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.databases.entity.OwnedIdentity
@@ -57,7 +54,7 @@ fun SubscriptionUpdatedDialog(
                 modifier = Modifier.padding(16.dp),
                 text = stringResource(id = R.string.dialog_title_subscription_updated),
                 style = OlvidTypography.h2,
-                color = colorResource(R.color.accent)
+                color = colorResource(R.color.olvid_gradient_light)
             )
 
             SubscriptionStatusScreen(

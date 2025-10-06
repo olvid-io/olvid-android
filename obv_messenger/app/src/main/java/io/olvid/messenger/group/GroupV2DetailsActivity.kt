@@ -149,12 +149,10 @@ class GroupV2DetailsActivity : LockableActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(
-                Color.Transparent.toArgb(),
-                ContextCompat.getColor(this, R.color.blackOverlay)
-            )
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
+
         super.onCreate(savedInstanceState)
         onBackPressed {
             val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
@@ -233,7 +231,6 @@ class GroupV2DetailsActivity : LockableActivity() {
                                     }) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.ic_pencil),
-                                            tint = colorResource(id = R.color.alwaysWhite),
                                             contentDescription = stringResource(R.string.menu_action_edit_group_details)
                                         )
                                     }
@@ -245,7 +242,6 @@ class GroupV2DetailsActivity : LockableActivity() {
                                     }) {
                                         Icon(
                                             imageVector = Icons.Default.MoreVert,
-                                            tint = colorResource(id = R.color.alwaysWhite),
                                             contentDescription = "menu"
                                         )
                                         OlvidDropdownMenu(

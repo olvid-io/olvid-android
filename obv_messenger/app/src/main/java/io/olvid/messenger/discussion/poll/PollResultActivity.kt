@@ -46,6 +46,10 @@ class PollResultActivity : LockableActivity() {
     private lateinit var exportPollCsvLauncher: ActivityResultLauncher<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+        )
         super.onCreate(savedInstanceState)
         val messageId = intent.getLongExtra(MESSAGE_ID_INTENT_EXTRA, -1L)
         val viewModel: PollResultViewModel by viewModels {
@@ -60,10 +64,7 @@ class PollResultActivity : LockableActivity() {
         ) { uri: Uri? ->
             viewModel.exportPollCsv(uri, contentResolver)
         }
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
-        )
+
         setContent {
             val message by viewModel.message.observeAsState()
             val pollResults by viewModel.pollResults.observeAsState()

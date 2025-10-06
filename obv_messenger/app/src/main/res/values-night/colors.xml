@@ -9,6 +9,7 @@
     <color name="primary100">#081623</color>
     <color name="almostWhite">#000000</color>
     <color name="almostBlack">#F4F4F4</color>
+    <color name="almostBlackOverlay">#77F4F4F4</color>
     <color name="red">#df342a</color>
     <color name="green">#589549</color>
     <color name="orange">#da8200</color>
@@ -29,6 +30,7 @@
 <!--    <color name="searchHighlightColor">#ff0a660d</color>-->
     <color name="searchHighlightColor">#fffff426</color>
     <color name="whiteOverlay">#bb000000</color>
+    <color name="whiteOpaqueOverlay">#dd000000</color>
 
     <color name="attachmentBorder">#33ffffff</color>
     <color name="locationBorder">#3b3b3b</color>

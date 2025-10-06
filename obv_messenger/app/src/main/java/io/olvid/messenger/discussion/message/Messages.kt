@@ -753,11 +753,11 @@ private fun MessageFooter(
 
 @Composable
 fun OutboundMessageStatus(modifier: Modifier = Modifier, size: Dp = 16.dp, message: Message) {
-    getOutboundStatusIcon(message)?.let {
+    message.getOutboundStatusIcon()?.let {
         Image(
             modifier = modifier
                 .height(height = size)
-                .width(width = (size.value * getOutboundStatusIconAspectRation(message)).dp),
+                .width(width = size * message.getOutboundStatusIconAspectRation()),
             painter = painterResource(id = it),
             contentDescription = stringResource(
                 id = R.string.content_description_message_status
@@ -1476,9 +1476,9 @@ fun getAnnotatedStringContent(
 }
 
 @DrawableRes
-private fun getOutboundStatusIcon(message: Message): Int? =
-    if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
-        when (message.status) {
+fun Message.getOutboundStatusIcon(): Int? =
+    if (messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+        when (status) {
             Message.STATUS_DRAFT -> {
                 R.drawable.ic_message_status_draft
             }
@@ -1516,7 +1516,7 @@ private fun getOutboundStatusIcon(message: Message): Int? =
             }
 
             Message.STATUS_UNPROCESSED, Message.STATUS_COMPUTING_PREVIEW, Message.STATUS_PROCESSING -> {
-                if (message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
+                if (wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
                     R.drawable.ic_message_status_sent
                 } else {
                     R.drawable.ic_message_status_processing
@@ -1524,7 +1524,7 @@ private fun getOutboundStatusIcon(message: Message): Int? =
             }
 
             else -> {
-                if (message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
+                if (wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
                     R.drawable.ic_message_status_sent
                 } else {
                     R.drawable.ic_message_status_processing
@@ -1535,9 +1535,9 @@ private fun getOutboundStatusIcon(message: Message): Int? =
         null
     }
 
-fun getOutboundStatusIconAspectRation(message: Message): Float =
-    if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
-        when (message.status) {
+fun Message.getOutboundStatusIconAspectRation(): Float =
+    if (messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+        when (status) {
             Message.STATUS_DRAFT,
             Message.STATUS_SENT,
             Message.STATUS_DELIVERED,
@@ -1549,7 +1549,7 @@ fun getOutboundStatusIconAspectRation(message: Message): Float =
             Message.STATUS_DELIVERED_ALL_READ_ONE,
             Message.STATUS_DELIVERED_ALL_READ_ALL -> 1.45f
 
-            else -> if (message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
+            else -> if (wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED) {
                 1f
             } else {
                 1.45f

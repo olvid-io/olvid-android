@@ -5,13 +5,12 @@
     android:id="@+id/root_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/olvid_gradient_dark"
     tools:context=".activities.storage_manager.StorageManagerActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:theme="@style/AppTheme.LightAppBarOverlay">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
@@ -19,6 +18,7 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/collapsing_graph"
                 android:layout_marginTop="@dimen/tab_bar_size"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -171,10 +171,11 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/tab_bar_size"
+                android:elevation="4dp"
                 app:contentInsetStart="0dp"
                 app:contentInsetEnd="0dp"
                 app:popupTheme="@style/AppTheme"
-                android:background="@color/olvid_gradient_dark"
+                android:background="@color/almostWhite"
                 app:layout_collapseMode="pin">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -189,7 +190,7 @@
                         android:padding="8dp"
                         app:srcCompat="@drawable/ic_arrow_back"
                         android:background="@drawable/background_circular_ripple"
-                        android:theme="@style/AlwaysWhiteSubtleRipple"
+                        android:theme="@style/GreyRipple"
                         android:layout_marginStart="8dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -217,7 +218,7 @@
                         android:visibility="gone"
                         app:layout_constraintTop_toTopOf="@+id/current_identity_initial_view"
                         app:layout_constraintStart_toStartOf="@+id/current_identity_initial_view"
-                        app:srcCompat="@drawable/ic_notification_muted_circle_blue"
+                        app:srcCompat="@drawable/ic_notification_muted_circle"
                         tools:visibility="visible" />
 
 
@@ -230,7 +231,7 @@
                         android:ellipsize="end"
                         android:maxLines="1"
                         android:textAppearance="@style/RobotoMedium"
-                        android:textColor="@color/alwaysWhite"
+                        android:textColor="@color/almostBlack"
                         android:textSize="16dp"
                         app:layout_constraintBottom_toTopOf="@id/current_identity_name_second_line_text_view"
                         app:layout_constraintEnd_toStartOf="@id/button_switch_profile"
@@ -248,7 +249,7 @@
                         android:layout_marginEnd="4dp"
                         android:ellipsize="end"
                         android:maxLines="1"
-                        android:textColor="@color/alwaysWhite"
+                        android:textColor="@color/almostBlack"
                         android:textSize="12dp"
                         android:visibility="gone"
                         app:layout_constraintEnd_toStartOf="@id/button_switch_profile"
@@ -261,15 +262,15 @@
 
                     <TextView
                         android:id="@+id/button_switch_profile"
-                        android:textColor="@color/alwaysWhite"
+                        android:textColor="@color/greyTint"
                         android:textAllCaps="true"
                         android:paddingVertical="6dp"
                         android:paddingHorizontal="12dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="12sp"
-                        android:background="@drawable/background_rounded_button_always_white"
-                        android:theme="@style/AlwaysWhiteSubtleRipple"
+                        android:background="@drawable/background_rounded_button_grey"
+                        android:theme="@style/GreyRipple"
                         android:text="@string/button_label_switch_profile"
                         android:layout_gravity="end"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -288,65 +289,63 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@drawable/background_main_activity_buttons">
+        android:background="@color/whiteOpaqueOverlay">
 
         <ImageView
             android:id="@+id/tab_images_button"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:background="?attr/selectableItemBackground"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:paddingStart="4dp"
             android:paddingTop="9dp"
             android:paddingEnd="4dp"
             android:paddingBottom="7dp"
             app:srcCompat="@drawable/storage_tab_media"
             android:theme="@style/GreyRipple"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/tab_files_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
         <ImageView
             android:id="@+id/tab_files_button"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:background="?attr/selectableItemBackground"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:paddingStart="4dp"
             android:paddingTop="9dp"
             android:paddingEnd="4dp"
             android:paddingBottom="7dp"
             app:srcCompat="@drawable/storage_tab_files"
             android:theme="@style/GreyRipple"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/tab_images_button"
             app:layout_constraintEnd_toStartOf="@id/tab_audio_button"
             app:layout_constraintTop_toTopOf="parent" />
         <ImageView
             android:id="@+id/tab_audio_button"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:background="?attr/selectableItemBackground"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:paddingStart="4dp"
             android:paddingTop="9dp"
             android:paddingEnd="4dp"
             android:paddingBottom="7dp"
             app:srcCompat="@drawable/storage_tab_audio"
             android:theme="@style/GreyRipple"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/tab_files_button"
             app:layout_constraintEnd_toStartOf="@id/tab_all_button"
             app:layout_constraintTop_toTopOf="parent" />
         <TextView
             android:id="@+id/tab_all_button"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
-            android:background="?attr/selectableItemBackground"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:textStyle="bold"
             android:gravity="center"
             android:textAllCaps="true"
@@ -355,7 +354,6 @@
             android:textColor="@color/greyTint"
             android:textSize="14dp"
             android:theme="@style/GreyRipple"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/tab_audio_button"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

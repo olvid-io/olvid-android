@@ -116,6 +116,7 @@ import androidx.compose.ui.layout.positionOnScreen
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.pluralStringResource
@@ -380,6 +381,11 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         "NotifyDataSetChanged"
     )
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+        )
+
         super.onCreate(savedInstanceState)
 
         onBackPressed {
@@ -391,15 +397,11 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         }
         onBackPressedDispatcher.addCallback(this, closeFragmentBackPressedCallback)
 
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
-        )
-
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
             (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
-            false
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+
         setContentView(R.layout.activity_discussion)
 
         monitorLockViewHeight()
@@ -417,6 +419,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
 
         composeView.setContent {
+            val resources = LocalResources.current
             val context = LocalContext.current
             val density = LocalDensity.current
             CompositionLocalProvider(LocalUriHandler provides SecureUriHandler(context)) {
@@ -510,7 +513,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                     }, 300)
                                     lazyListState.scrollToItem(
                                         index = 2 + pos,
-                                        scrollOffset = -2 * context.resources.displayMetrics.heightPixels / 3
+                                        scrollOffset = -2 * resources.displayMetrics.heightPixels / 3
                                     )
                                 }
                                 highlightMessageId =

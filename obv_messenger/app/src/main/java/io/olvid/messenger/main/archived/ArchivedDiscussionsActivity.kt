@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.main.archived
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.SystemBarStyle
@@ -27,7 +28,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -38,7 +38,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -51,6 +50,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult.ActionPerformed
 import androidx.compose.material3.SnackbarResult.Dismissed
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
@@ -66,15 +66,16 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.designsystem.components.SelectionTopAppBar
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
-import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.discussion.message.SwipeForActionBox
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.discussions.DiscussionListItem
@@ -82,23 +83,32 @@ import io.olvid.messenger.main.discussions.DiscussionListViewModel
 import io.olvid.messenger.main.discussions.getAnnotatedBody
 import io.olvid.messenger.main.discussions.getAnnotatedDate
 import io.olvid.messenger.main.discussions.getAnnotatedTitle
+import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.notifications.NotificationActionService
 import kotlinx.coroutines.launch
+import kotlin.getValue
 
 class ArchivedDiscussionsActivity : LockableActivity() {
 
+    private val invitationListViewModel: InvitationListViewModel by viewModels()
     private val discussionListViewModel: DiscussionListViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
             navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
         super.onCreate(savedInstanceState)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+
         setContent {
             val context = LocalContext.current
             val resources = LocalResources.current
             val hapticFeedback = LocalHapticFeedback.current
+            val invitations by invitationListViewModel.invitations.observeAsState()
             val archivedDiscussions by discussionListViewModel.archivedDiscussions.observeAsState()
             val scope = rememberCoroutineScope()
             val snackbarHostState = remember { SnackbarHostState() }
@@ -111,7 +121,7 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                         title = stringResource(R.string.activity_title_archived_discussions),
                         selection = discussionListViewModel.selection,
                         actions = buildList {
-                            add(R.drawable.ic_delete to {
+                            add(R.drawable.ic_delete_outline to {
                                 discussionListViewModel.deleteDiscussions(
                                     discussions = discussionListViewModel.selection.map { it.discussion },
                                     context = context,
@@ -192,10 +202,6 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                             end = contentPadding.calculateEndPadding(layoutDirection),
                             bottom = 0.dp,
                         )
-//                        .padding(top = contentPadding.calculateTopPadding())
-//                        .cutoutHorizontalPadding()
-//                        .systemBarsHorizontalPadding()
-//                        .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
                 ) {
                     LaunchedEffect(discussionListViewModel.cancelableArchivedDiscussions) {
                         if (discussionListViewModel.cancelableArchivedDiscussions.isNotEmpty()) {
@@ -302,6 +308,12 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                             )
                                         }
                                     ) {
+                                        val invitation by remember {
+                                            derivedStateOf {
+                                                invitations?.sortedBy { it.invitationTimestamp }
+                                                    ?.find { it.discussionId == discussionAndMessage.discussion.id }
+                                            }
+                                        }
                                         DiscussionListItem(
                                             modifier = Modifier
                                                 .background(
@@ -312,7 +324,9 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                             title = discussionAndMessage.discussion.getAnnotatedTitle(
                                                 context
                                             ),
-                                            body = discussionAndMessage.discussion.getAnnotatedBody(
+                                            body = invitation?.let {
+                                                AnnotatedString(it.statusText)
+                                            } ?: discussionAndMessage.discussion.getAnnotatedBody(
                                                 context,
                                                 discussionAndMessage.message
                                             ),
@@ -329,16 +343,22 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                             backgroundImageUrl = App.absolutePathFromRelative(
                                                 discussionAndMessage.discussionCustomization?.backgroundImageUrl
                                             ),
-                                            unread = discussionAndMessage.discussion.unread,
+                                            unread = (invitation?.requiresAction() == true) || discussionAndMessage.discussion.unread,
                                             unreadCount = discussionAndMessage.unreadCount,
                                             muted = discussionAndMessage.discussionCustomization?.shouldMuteNotifications() == true,
-                                            locked = discussionAndMessage.discussion.isLocked,
+                                            locked = discussionAndMessage.discussion.isLocked && (invitation == null || invitation?.requiresAction() == false),
                                             mentioned = discussionAndMessage.unreadMention,
                                             pinned = discussionAndMessage.discussion.pinned != 0,
                                             reorderableScope = null,
                                             locationsShared = discussionAndMessage.locationsShared,
+                                            pendingContact = discussionAndMessage.discussion.isLocked && invitation != null,
                                             attachmentCount = if (discussionAndMessage.message?.isLocationMessage == true) 0 else discussionAndMessage.message?.totalAttachmentCount
                                                 ?: 0,
+                                            imageAndVideoCount = if (discussionAndMessage.message?.isLocationMessage == true) 0 else discussionAndMessage.message?.imageCount
+                                                ?: 0,
+                                            videoCount = if (discussionAndMessage.message?.isLocationMessage == true) 0 else discussionAndMessage.message?.imageResolutions?.let {
+                                                it.split(";").count { it.startsWith("v") }
+                                            } ?: 0,
                                             onClick = {
                                                 if (discussionListViewModel.selection.isEmpty()) {
                                                     App.openDiscussionActivity(
@@ -369,19 +389,6 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                                 }
                                             },
                                             onDragStopped = {}
-                                        )
-                                        Spacer(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(
-                                                    start = 84.dp,
-                                                    end = 12.dp
-                                                )
-                                                .requiredHeight(1.dp)
-                                                .align(Alignment.BottomStart)
-                                                .background(
-                                                    color = colorResource(id = R.color.lightGrey)
-                                                )
                                         )
                                     }
                                 }

@@ -24,6 +24,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -108,12 +109,14 @@ fun OlvidTextButton(
     enabled: Boolean = true,
     large: Boolean = false,
     fill: Boolean = false,
+    contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
     onClick: () -> Unit
 ) {
     TextButton(
         modifier = modifier,
         onClick = onClick,
         enabled = enabled,
+        contentPadding = contentPadding,
         colors = ButtonDefaults.textButtonColors(
             contentColor = contentColor,
             disabledContentColor = contentColor.copy(alpha = 0.4f)

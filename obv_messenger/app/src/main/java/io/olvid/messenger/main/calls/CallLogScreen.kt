@@ -111,7 +111,7 @@ fun CallLogScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     MainScreenEmptyList(
-                        icon = R.drawable.ic_phone_log,
+                        icon = R.drawable.tab_calls,
                         iconPadding = 6.dp,
                         title = R.string.explanation_empty_call_log,
                         subtitle = R.string.explanation_empty_call_log_sub

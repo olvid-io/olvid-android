@@ -31,15 +31,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import io.olvid.messenger.R
 import io.olvid.messenger.webrtc.WebrtcCallService.AudioOutput
 import io.olvid.messenger.webrtc.components.CallAction.ToggleSpeaker
 
@@ -76,7 +76,7 @@ fun CallControls(
                         Icon(
                             modifier = Modifier.align(Alignment.Center),
                             painter = action.icon,
-                            tint = Color.White,
+                            tint = colorResource(R.color.alwaysWhite),
                             contentDescription = null
                         )
                     }
@@ -104,32 +104,32 @@ fun CallControls(
 @Preview
 @Composable
 private fun CallControlsPreview() {
-    AppCompatTheme {
-        Column {
-            CallControls(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
-                onToggleSpeaker = {},
-                actions = buildPreCallControlActions(CallMediaState()),
-                onCallAction = {}
-            )
-            CallControls(modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
-                callMediaState = CallMediaState(
-                    isMicrophoneEnabled = true,
-                    isCameraEnabled = true
-                ),
-                onToggleSpeaker = {},
-                onCallAction = {},
-                callButtonSize = 40f
-            )
-            CallControls(modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
-                callMediaState = CallMediaState(
-                    isMicrophoneEnabled = false,
-                    isCameraEnabled = false,
-                    isScreenShareEnabled = true,
-                ),
-                onToggleSpeaker = {},
-                onCallAction = {}
-            )
-        }
+    Column {
+        CallControls(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+            onToggleSpeaker = {},
+            actions = buildPreCallControlActions(CallMediaState()),
+            onCallAction = {}
+        )
+        CallControls(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+            callMediaState = CallMediaState(
+                isMicrophoneEnabled = true,
+                isCameraEnabled = true
+            ),
+            onToggleSpeaker = {},
+            onCallAction = {},
+            callButtonSize = 40f
+        )
+        CallControls(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+            callMediaState = CallMediaState(
+                isMicrophoneEnabled = false,
+                isCameraEnabled = false,
+                isScreenShareEnabled = true,
+            ),
+            onToggleSpeaker = {},
+            onCallAction = {}
+        )
     }
 }

@@ -225,7 +225,6 @@
 	<string name="notification_title_one_to_one_invitation" state="needs_review" hash="-351127459">Invitation fra %1$s</string>
 	<string name="notification_title_user_has_mentioned_you" state="needs_review" hash="-1965484006">%1$s har nævnt dig</string>
 	<string name="pref_autodownload_size_title" state="needs_review" hash="149272168">Download automatisk vedhæftede filer…</string>
-	<string name="pref_category_camera_title" state="needs_review" hash="1539779714">Fotos</string>
 	<string name="pref_camera_resolution_title" state="needs_review" hash="-1295742224">Skift størrelse på billeder taget i Olvid?</string>
 	<string name="pref_qr_correction_level_title" state="needs_review" hash="-1685499441">QR-kode fejlkorrektionsniveau</string>
 	<string name="pref_text_QR_correction_high" state="needs_review" hash="1408732723">Høj</string>
@@ -572,16 +571,10 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">Fane Chat</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">Kontaktfane</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">Grupper</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">Tilføj kontakt</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">Notifikationspunkt</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">Fjern følsomme JPEG-metadata</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">Når den er aktiveret, vil Olvid forsøge at fjerne følsomme metadata fra importerede fotofiler.\nDette omfatter GPS-data, kameramærke, oprettelsesdato…</string>
-	<string name="activity_title_add_contact" state="needs_review" hash="-1050193239">Tilføj kontakt</string>
 	<string name="button_label_scan" state="needs_review" hash="1683724449">Scan</string>
-	<string name="text_explanation_scan_contact_id" state="needs_review" hash="-2129167034">Scanning af en anden brugers ID giver dig mulighed for at invitere dem.</string>
-	<string name="button_label_share_my_id" state="needs_review" hash="-75320325">Del mit ID</string>
-	<string name="label_scan" state="needs_review" hash="1683724449">Scan</string>
-	<string name="button_label_show_my_id" state="needs_review" hash="-197520345">Vis mit ID</string>
 	<string name="toast_message_unrecognized_url" state="needs_review" hash="1921493221">Ukendt QR-kode URL</string>
 	<string name="dialog_title_webclient_sas_input" state="needs_review" hash="891876517">Indtast venligst PIN-koden, der vises i din webbrowser</string>
 	<string name="webclient_error_invalid_qrcode" state="needs_review" hash="358206378">Ugyldig QR-kode</string>
@@ -592,7 +585,6 @@
 	<string name="webclient_toast_connection_timedout" state="needs_review" hash="869943528">Webklientforbindelsen er udløbet</string>
 	<string name="webclient_protocol_in_progress" state="needs_review" hash="805709221">Opretter en sikker forbindelse mellem din App og WebClient…</string>
 	<string name="webclient_error_sas_incorrect" state="needs_review" hash="-1861981708">Forkert PIN. Prøv igen.</string>
-	<string name="label_webclient" state="needs_review" hash="-2125862146">Webklient</string>
 	<string name="label_webclient_already_running" state="needs_review" hash="788166693">Webklienten kører allerede</string>
 	<string name="label_webclient_restart_connection" state="needs_review" hash="934550160">Luk aktuel forbindelse og start en ny?</string>
 	<string name="webclient_successfully_connected" state="needs_review" hash="-1216119082">Forbindelsen er blevet etableret!</string>
@@ -614,7 +606,6 @@
 	<string name="pref_webclient_notification_for_messages_after_inactivity_title" state="needs_review" hash="-732458468">Notificer efter inaktivitet</string>
 	<string name="activity_detected_after_inactivity" state="needs_review" hash="1909603717">Aktivitet detekteret i WebClient efter en længere periode med inaktivitet.</string>
 	<string name="pref_webclient_notification_for_messages_after_inactivity_summary" state="needs_review" hash="464494780">Modtag en notifikation, hvis der registreres aktivitet efter 10 minutters inaktivitet.</string>
-	<string name="text_explanation_scan_share_id" state="needs_review" hash="1214882443">Deling af dit ID giver en anden Olvid-bruger mulighed for at invitere dig.</string>
 	<string name="dialog_title_subscription_updated" state="needs_review" hash="1912189310">Abonnement opdateret</string>
 	<string name="button_label_add_contact" state="needs_review" hash="744905192">Tilføj kontakt</string>
 	<string name="button_label_add" state="needs_review" hash="-1358923215">Tilføj</string>
@@ -629,7 +620,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">Licensserver:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">Din server:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">Ugyldig licensaktiveringslink.\n\nKontaktér venligst den person, der sendte dig dette link.</string>
-	<string name="label_please_contact_activation_link" state="needs_review" hash="-497652404">Kontakt venligst den person, der sendte dig dette link.</string>
 	<string name="label_checking_license" state="needs_review" hash="-777109669">Kontrollerer licens…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">Kunne ikke kontrollere licensstatus</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Ukendt licens</string>
@@ -720,7 +710,6 @@
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Når den er aktiveret, åbnes engangsmeddelelser og meddelelser med standardbegrænset synlighed, så snart du går ind i diskussionen. Ellers kræves der et klik.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Når den er aktiveret, gemmes slettede udgående beskeder, så du kan se, hvornår de er leveret eller læst. Ellers slettes de.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Webklient</string>
-	<string name="label_title_change_list" state="needs_review" hash="76730245">Opdaterede indstillinger</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Fejl ved parsing af link til opdatering af indstillinger</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Afsendelse og modtagelse af beskeder</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">Delte indstillinger for flygtige beskeder</string>
@@ -860,13 +849,8 @@
 	<string name="toast_message_keycloak_revoke_successful" state="needs_review" hash="-1216369809">Tidligere Olvid ID er blevet erstattet korrekt</string>
 	<string name="dialog_title_keycloak_authentication_required_user_id_changed" state="needs_review" hash="-896407029">Brugerændring registreret</string>
 	<string name="dialog_message_keycloak_authentication_required_user_id_changed" state="needs_review" hash="1319874532">Din Olvid ID administreres af din virksomheds identitetsudbyder. Det ser ud til, at du har autentificeret dig som en anden bruger end normalt. Dette understøttes ikke.\n\nKontakt din administrator eller autentificer dig igen som den korrekte bruger.</string>
-	<string name="hint_search_keycloak" state="needs_review" hash="1386776811">Søg i virksomhedsfortegnelsen…</string>
-	<string name="explanation_empty_keycloak_search" state="needs_review" hash="860472461">Ingen resultater fundet</string>
-	<string name="explanation_keycloak_search_not_started" state="needs_review" hash="1192355189">Din Olvid ID administreres af din virksomheds identitetsudbyder.\n\nDu kan nemt tilføje kontakter inden for din virksomhed ved at bruge søgefeltet ovenfor og kigge i dens brugerkatalog.</string>
-	<string name="explanation_keycloak_searching" state="needs_review" hash="1696749815">Søger…</string>
 	<string name="dialog_title_add_keycloak_user" state="needs_review" hash="-1050193239">Tilføj kontakt</string>
 	<string name="dialog_message_add_keycloak_user" state="needs_review" hash="-1755937035">Du har valgt at tilføje %1$s til dine kontakter. Vil du fortsætte?</string>
-	<string name="label_bind_keycloak" state="needs_review" hash="1305090894">Brug en identitetsudbyder</string>
 	<string name="explanation_keycloak_update_new" state="needs_review" hash="1136733528">Du er ved at konfigurere din virksomheds identitetsudbyder i Olvid. Når det er konfigureret, kan du autentificere dig med denne server, og Olvid giver dig mulighed for problemfrit at tilføje andre medarbejdere til dine kontakter.\nKontakt din administrator for flere detaljer.</string>
 	<string name="explanation_keycloak_update_change_server" state="needs_review" hash="2029115402">Olvid er allerede konfigureret til at bruge en ANDEN identitetsudbyder. Hvis din virksomhed faktisk har skiftet identitetsudbyder, kan du fortsætte med at autentificere dig med denne nye udbyder. Hvis du er i tvivl, kan du blot annullere.\nKontakt din administrator for flere detaljer.</string>
 	<string name="explanation_keycloak_update_same_server" state="needs_review" hash="1886762594">Olvid er allerede konfigureret med din virksomheds identitetsudbyder.\nKontakt din administrator for flere detaljer.</string>
@@ -995,12 +979,7 @@
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Du har konfigureret Olvid til at bruge automatiske sikkerhedskopier til en cloududbyder, men din session er udløbet. Du skal logge ind på denne udbyder igen.\n\nHvis du ikke længere ønsker automatiske sikkerhedskopier, kan du deaktivere dem i appindstillingerne. Husk, at automatiske sikkerhedskopier er den eneste måde at forhindre tab af dine kontakter, hvis din enhed går tabt eller bliver beskadiget.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Log ind</string>
 	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Kontaktér på afstand</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s er allerede på din kontaktliste.</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s er på din liste over kendte brugere, men er endnu ikke i dine kontakter.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Ny</string>
-	<string name="label_option_invite_locally" state="needs_review" hash="-1267065954">Mulighed 1: ansigt til ansigt</string>
-	<string name="label_option_invite_remotely" state="needs_review" hash="369824596">Mulighed 2: eksternt</string>
-	<string name="text_explanation_mutual_scan" state="needs_review" hash="-1822394875">Bed %1$s om at scanne denne QR-kode for at få kontakt med det samme.</string>
 	<string name="text_explanation_invalid_mutual_scan_qr_code" state="needs_review" hash="-1461387693">Denne QR-kode kan ikke bruges til at tilføje %1$s til dine kontakter.\nPrøv igen, og sørg for, at %1$s scanner din QR-kode, før du scanner hans/hendes.</string>
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s vil blive tilføjet til dine kontakter, så snart deres enhed kan nås.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s er blevet tilføjet til dine kontakter 🙌!</string>
@@ -1087,7 +1066,6 @@
 	<string name="button_label_create_password" state="needs_review" hash="649429298">Opret adgangskode</string>
 	<string name="toast_message_hidden_profile_password_set" state="needs_review" hash="1225440753">Skjult profiladgangskode indstillet</string>
 	<string name="toast_message_hidden_profile_password_failed" state="needs_review" hash="-1988538273">Kunne ikke oprette adgangskode til skjult profil</string>
-	<string name="button_label_directory" state="needs_review" hash="351731324">Mappe</string>
 	<string name="dialog_title_cancel_hide_profile" state="needs_review" hash="356889825">Kasser adgangskoden?</string>
 	<string name="dialog_message_cancel_hide_profile" state="needs_review" hash="1495424902">Du er ved at kassere de ændringer, du har foretaget. Især den adgangskode, du har valgt til denne profil, er endnu ikke gemt og vil gå tabt. Er du sikker på, at du vil fortsætte?</string>
 	<string name="dialog_title_unhide_profile" state="needs_review" hash="-733133172">Vis profil?</string>
@@ -1186,7 +1164,7 @@
 	<string name="pref_send_with_hardware_enter_summary" state="needs_review" hash="1694640710">Når den er aktiveret, og du bruger et fysisk tastatur, sender et tryk på \"Enter\" din besked. \"Shift + Enter\" tilføjer en ny linje.</string>
 	<string name="pref_ping_connectivity_indicator_title" state="needs_review" hash="1245192677">Netværksforbindelsesindikator</string>
 	<string name="pref_text_ping_connectivity_indicator_none" state="needs_review" hash="-1725558072">Ingen forbindelsesindikator</string>
-	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Farvet prik på „i”-et i Olvid-logoet</string>
+	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="752487342">Farvet prik i titellinjen</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Diskret linje øverst i chatlisten</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Fuld forbindelsesstatus øverst i chatlisten</string>
 	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Vis aldrig en indikator, selv ved forbindelsestab</string>
@@ -2054,18 +2032,15 @@
 	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">Tilføj</string>
 	<string name="label_poll_see_answers" state="needs_review" hash="710858547">Se svar</string>
 	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">Venter på deres svar</string>
-	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">Påmind</string>
 	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">Tilføj et \"%1$s\" svar</string>
 	<string name="label_poll_options" state="needs_review" hash="-13216192">Indstillinger</string>
 	<string name="text_none_answer" state="needs_review" hash="560562575">Ingen af ovenstående</string>
 	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">Tillad flere svar</string>
 	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">Vælg et eller flere svar</string>
-	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">Quiz-tilstand</string>
 	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">Slut</string>
 	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">Tilføj udløbsdato</string>
 	<string name="label_poll_expiration" state="needs_review" hash="605126523">Afstemningen slutter om %1$s</string>
 	<string name="label_poll_ended" state="needs_review" hash="415569292">Afstemning afsluttet</string>
-	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">Tilføj mindst to svar</string>
 	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">Dette svar findes allerede</string>
 	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">Eksporter som CSV</string>
 	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">Fejl ved eksport af afstemning som CSV. Prøv venligst igen.</string>
@@ -2093,12 +2068,10 @@
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Inviteret</string>
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Ny besked</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Ny kontakt</string>
-	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Søg</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Ansigt til ansigt</string>
 	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Fjernstyret</string>
-	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Annuller</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Scan hinandens QR-koder</string>
-	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Få din scannet nu</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Lad %1$s scanne din kode</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Kode scannet!</string>
 	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Kan du ikke scanne koden?</string>
 	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Inviter dem på en anden måde</string>
@@ -2111,9 +2084,15 @@
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Tilføj din første kontakt</string>
 	<string name="label_discussion" state="needs_review" hash="301166224">Samtale</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Skift kamera</string>
-	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Vil du komme i kontakt med %1$s?</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">Kontakt %1$s eksternt?</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Kontakterne nedenfor er en del af denne gruppe, men har endnu ikke en privat samtale med dig.</string>
 	<string name="label_group_admins" state="needs_review" hash="468245065">Gruppeadministratorer</string>
 	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" er en fælles gruppe</string>
 	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">For at beskytte dit privatliv har Olvid **intet offentligt eller centralt brugerregister**. Dit navn vil kun blive vist for de personer, du opretter forbindelse til.</string>
+	<string name="tab_title_discussions" state="needs_review" hash="491497248">Samtaler</string>
+	<string name="tab_title_contacts" state="needs_review" hash="-859216410">Kontakter</string>
+	<string name="tab_title_groups" state="needs_review" hash="-990226727">Grupper</string>
+	<string name="tab_title_calls" state="needs_review" hash="541245696">Opkald</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Fastgjort samtale</string>
+	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">Kan %1$s ikke scanne din kode?</string>
 </resources>

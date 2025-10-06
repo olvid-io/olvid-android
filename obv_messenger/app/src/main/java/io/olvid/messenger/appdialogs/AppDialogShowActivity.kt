@@ -40,10 +40,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.ui.platform.ComposeView
-import androidx.core.net.toUri
 import androidx.core.text.util.LinkifyCompat
 import com.fasterxml.jackson.core.type.TypeReference
-import io.olvid.engine.Logger
 import io.olvid.engine.engine.types.EngineAPI.ApiKeyPermission
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton

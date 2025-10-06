@@ -1,4 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_files" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1591553998">ملف</item>
+		<item quantity="other" state="needs_review" hash="-129414826">%1$d ملفات</item>
+	</plurals>
+	<plurals name="text_images" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1471675200">صورة</item>
+		<item quantity="other" state="needs_review" hash="1017714912">%1$d صور</item>
+	</plurals>
+	<plurals name="text_videos" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="366973148">فيديو</item>
+		<item quantity="other" state="needs_review" hash="-200168444">%1$d مقاطع فيديو</item>
+	</plurals>
 	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" ومجموعة أخرى مشتركة</item>
 		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" و %2$d مجموعات أخرى مشتركة</item>

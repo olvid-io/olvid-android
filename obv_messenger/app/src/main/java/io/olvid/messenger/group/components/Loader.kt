@@ -36,7 +36,7 @@ import io.olvid.messenger.R
 
 @Composable
 fun Loader(
-    modifier: Modifier = Modifier.size(32.dp),
+    modifier: Modifier = Modifier,
     strokeWidth: Dp = 4.dp,
     state: LoaderState,
     onSuccess: () -> Unit,

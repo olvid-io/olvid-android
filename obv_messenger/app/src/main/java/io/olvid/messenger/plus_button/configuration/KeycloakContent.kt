@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,8 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,11 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -255,17 +251,15 @@ internal fun KeycloakContent(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-                OlvidActionButton(
-                    modifier = Modifier.align(Alignment.End).alpha(.8f),
+                OlvidTextButton(
+                    modifier = Modifier.align(Alignment.Start),
+                    contentPadding = PaddingValues(horizontal = 0.dp, vertical = 8.dp),
                     text = stringResource(R.string.content_description_authentication_browser_choice),
                     icon = R.drawable.ic_settings,
                     onClick = { KeycloakBrowserChooserDialog.openBrowserChoiceDialog(context) },
-                    outlinedColor = colorResource(R.color.mediumGrey),
-                    containerColor = Color.Transparent,
-                    contentColor = colorResource(R.color.mediumGrey),
+                    contentColor = colorResource(R.color.olvid_gradient_light),
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(32.dp))
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                     OlvidTextButton(
                         text = stringResource(R.string.button_label_cancel),

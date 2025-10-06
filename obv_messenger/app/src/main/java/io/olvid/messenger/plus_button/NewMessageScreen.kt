@@ -79,6 +79,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
@@ -111,6 +112,7 @@ fun NewMessageScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val contacts by contactListViewModel.filteredContacts.observeAsState(emptyList())
     val context = LocalContext.current
+    val showHeader = contacts.isNotEmpty() || contactListViewModel.keycloakManaged.value || contactListViewModel.isFiltering()
 
     Scaffold(
         modifier = Modifier
@@ -125,7 +127,9 @@ fun NewMessageScreen(
                 MediumTopAppBar(
                     modifier = Modifier.align(Alignment.TopCenter),
                     title = {
-                        if (contacts.isNotEmpty() || contactListViewModel.isFiltering()) {
+                        if (showHeader) {
+                            Logger.e("Keycloak ${contactListViewModel.keycloakManaged.value}")
+
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -251,7 +255,7 @@ fun NewMessageScreen(
                         }
                     },
                     collapsedHeight = 64.dp,
-                    expandedHeight = if (contacts.isNotEmpty() || contactListViewModel.isFiltering()) 232.dp else 64.dp,
+                    expandedHeight = if (showHeader) 232.dp else 64.dp,
                     scrollBehavior = scrollBehavior,
                     colors = TopAppBarDefaults.mediumTopAppBarColors(
                         containerColor = colorResource(id = R.color.almostWhite),
@@ -291,7 +295,7 @@ fun NewMessageScreen(
             }
         }
 
-        if (contacts.isNotEmpty() || contactListViewModel.keycloakManaged.value || contactListViewModel.isFiltering()) {
+        if (showHeader) {
             ContactListScreen(
                 modifier = Modifier
                     .fillMaxSize()

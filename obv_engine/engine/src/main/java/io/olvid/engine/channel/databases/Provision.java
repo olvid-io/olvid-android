@@ -24,8 +24,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.channel.datatypes.ChannelManagerSession;

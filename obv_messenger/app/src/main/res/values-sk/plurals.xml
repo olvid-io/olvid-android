@@ -1,4 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_files" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1591553998">Súbor</item>
+		<item quantity="other" state="needs_review" hash="-129414826">%1$d Súbory</item>
+	</plurals>
+	<plurals name="text_images" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1471675200">Fotka</item>
+		<item quantity="other" state="needs_review" hash="1017714912">%1$d Fotky</item>
+	</plurals>
+	<plurals name="text_videos" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="366973148">Video</item>
+		<item quantity="other" state="needs_review" hash="-200168444">%1$d Videá</item>
+	</plurals>
 	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" a 1 ďalšia skupina v spoločnom</item>
 		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" a %2$d ďalšie spoločné skupiny</item>

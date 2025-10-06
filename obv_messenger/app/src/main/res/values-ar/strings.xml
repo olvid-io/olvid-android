@@ -225,7 +225,6 @@
 	<string name="notification_title_one_to_one_invitation" state="needs_review" hash="-351127459">دعوة من %1$s</string>
 	<string name="notification_title_user_has_mentioned_you" state="needs_review" hash="-1965484006">%1$s ذكرك</string>
 	<string name="pref_autodownload_size_title" state="needs_review" hash="149272168">تنزيل المرفقات تلقائيًا…</string>
-	<string name="pref_category_camera_title" state="needs_review" hash="1539779714">صور</string>
 	<string name="pref_camera_resolution_title" state="needs_review" hash="-1295742224">هل تغيير حجم الصور الملتقطة داخل Olvid؟</string>
 	<string name="pref_qr_correction_level_title" state="needs_review" hash="-1685499441">مستوى تصحيح أخطاء رمز الاستجابة السريعة</string>
 	<string name="pref_text_QR_correction_high" state="needs_review" hash="1408732723">عالي</string>
@@ -572,16 +571,10 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">علامات تبويب المحادثات</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">جهات الاتصال</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">تبويب المجموعات</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">إضافة جهة اتصال</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">نقطة إشعار</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">إزالة بيانات تعريف JPEG الحساسة</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">عند التفعيل، سيحاول Olvid إزالة البيانات الوصفية الحساسة من ملفات الصور المستوردة.\nويشمل ذلك بيانات GPS، وطراز الكاميرا، وتاريخ الإنشاء…</string>
-	<string name="activity_title_add_contact" state="needs_review" hash="-1050193239">إضافة جهة اتصال</string>
 	<string name="button_label_scan" state="needs_review" hash="1683724449">مسح ضوئيّ</string>
-	<string name="text_explanation_scan_contact_id" state="needs_review" hash="-2129167034">مسح معرّف المستخدم الآخر يسمح لك بدعوتهم.</string>
-	<string name="button_label_share_my_id" state="needs_review" hash="-75320325">مشاركة رقمي التعريفي</string>
-	<string name="label_scan" state="needs_review" hash="1683724449">مسح ضوئيّ</string>
-	<string name="button_label_show_my_id" state="needs_review" hash="-197520345">عرض هويتي</string>
 	<string name="toast_message_unrecognized_url" state="needs_review" hash="1921493221">عنوان URL لرمز الاستجابة السريعة غير معروف</string>
 	<string name="dialog_title_webclient_sas_input" state="needs_review" hash="891876517">الرجاء إدخال رمز PIN المعروض في متصفح الويب الخاص بك</string>
 	<string name="webclient_error_invalid_qrcode" state="needs_review" hash="358206378">رمز الاستجابة السريعة غير صالح</string>
@@ -592,7 +585,6 @@
 	<string name="webclient_toast_connection_timedout" state="needs_review" hash="869943528">انتهى وقت الاتصال بالعميل على الويب</string>
 	<string name="webclient_protocol_in_progress" state="needs_review" hash="805709221">جارٍ إنشاء اتصال آمن بين تطبيقك وعميل الويب…</string>
 	<string name="webclient_error_sas_incorrect" state="needs_review" hash="-1861981708">رقم التعريف الشخصي غير صحيح. يرجى المحاولة مرة أخرى.</string>
-	<string name="label_webclient" state="needs_review" hash="-2125862146">عميل الويب</string>
 	<string name="label_webclient_already_running" state="needs_review" hash="788166693">العميل على الويب قيد التشغيل بالفعل</string>
 	<string name="label_webclient_restart_connection" state="needs_review" hash="934550160">هل إغلاق الاتصال الحالي وبدء اتصال جديد؟</string>
 	<string name="webclient_successfully_connected" state="needs_review" hash="-1216119082">تم إنشاء الاتصال بنجاح!</string>
@@ -614,7 +606,6 @@
 	<string name="pref_webclient_notification_for_messages_after_inactivity_title" state="needs_review" hash="-732458468">تنبيه بعد الخمول</string>
 	<string name="activity_detected_after_inactivity" state="needs_review" hash="1909603717">تم اكتشاف نشاط في عميل الويب بعد فترة طويلة من عدم النشاط.</string>
 	<string name="pref_webclient_notification_for_messages_after_inactivity_summary" state="needs_review" hash="464494780">تلقي إشعارًا في حالة وجود نشاط بعد 10 دقائق من عدم النشاط.</string>
-	<string name="text_explanation_scan_share_id" state="needs_review" hash="1214882443">مشاركة مُعرّفك تسمح لمستخدم Olvid آخر بدعوتك.</string>
 	<string name="dialog_title_subscription_updated" state="needs_review" hash="1912189310">تم تحديث الاشتراك</string>
 	<string name="button_label_add_contact" state="needs_review" hash="744905192">إضافة جهة اتصال</string>
 	<string name="button_label_add" state="needs_review" hash="-1358923215">إضافة</string>
@@ -629,7 +620,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">خادم الترخيص:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">خادمك:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">رابط تفعيل الترخيص غير صالح.\n\nيرجى الاتصال بالشخص الذي أرسل لك هذا الرابط.</string>
-	<string name="label_please_contact_activation_link" state="needs_review" hash="-497652404">يرجى التواصل مع الشخص الذي أرسل لك هذا الرابط.</string>
 	<string name="label_checking_license" state="needs_review" hash="-777109669">التحقق من الترخيص…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">تعذر التحقق من حالة الترخيص</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">ترخيص غير معروف</string>
@@ -720,7 +710,6 @@
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">عند التفعيل، تُفتح الرسائل التي تُقرأ مرة واحدة والرسائل ذات مدة الرؤية المحددة افتراضيًا بمجرد دخولك إلى المحادثة. وإلا، يلزم النقر عليها.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">عند التفعيل، يتم الاحتفاظ بالرسائل الصادرة المحذوفة حتى تتمكن من معرفة متى تم تسليمها أو قراءتها. وإلا، فسيتم حذفها.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">عميل الويب</string>
-	<string name="label_title_change_list" state="needs_review" hash="76730245">إعدادات محدثة</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">خطأ في تحليل رابط تحديث الإعدادات</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">إرسال واستقبال الرسائل</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">إعدادات الرسائل المؤقتة المشتركة</string>
@@ -860,13 +849,8 @@
 	<string name="toast_message_keycloak_revoke_successful" state="needs_review" hash="-1216369809">تم استبدال مُعرّف Olvid السابق بنجاح</string>
 	<string name="dialog_title_keycloak_authentication_required_user_id_changed" state="needs_review" hash="-896407029">تم اكتشاف تغيير في المستخدم</string>
 	<string name="dialog_message_keycloak_authentication_required_user_id_changed" state="needs_review" hash="1319874532">معرّف Olvid الخاص بك مُدار من قِبل مزود الهوية الخاص بشركتك. يبدو أنك قمت بالمصادقة كمستخدم مختلف عن المعتاد. هذا غير مدعوم.\n\nيرجى الاتصال بالمسؤول الخاص بك أو إعادة المصادقة كالمستخدم الصحيح.</string>
-	<string name="hint_search_keycloak" state="needs_review" hash="1386776811">ابحث في دليل الشركة…</string>
-	<string name="explanation_empty_keycloak_search" state="needs_review" hash="860472461">لم يتم العثور على نتائج</string>
-	<string name="explanation_keycloak_search_not_started" state="needs_review" hash="1192355189">معرّف Olvid الخاص بك مُدار من قِبل مزود الهوية الخاص بشركتك.\n\nيمكنك بسهولة إضافة جهات اتصال داخل شركتك باستخدام حقل البحث أعلاه والبحث في دليل المستخدمين.</string>
-	<string name="explanation_keycloak_searching" state="needs_review" hash="1696749815">بحث…</string>
 	<string name="dialog_title_add_keycloak_user" state="needs_review" hash="-1050193239">إضافة جهة اتصال</string>
 	<string name="dialog_message_add_keycloak_user" state="needs_review" hash="-1755937035">لقد اخترت إضافة %1$s إلى جهات الاتصال الخاصة بك. هل تريد المتابعة؟</string>
-	<string name="label_bind_keycloak" state="needs_review" hash="1305090894">استخدم مزود هوية</string>
 	<string name="explanation_keycloak_update_new" state="needs_review" hash="1136733528">أنت على وشك إعداد موفر الهوية الخاص بشركتك في Olvid. بمجرد الإعداد، يمكنك المصادقة مع هذا الخادم وسيسمح لك Olvid بإضافة الموظفين الآخرين إلى جهات الاتصال الخاصة بك بسلاسة.\nيرجى الاتصال بالمسؤول الخاص بك للحصول على مزيد من التفاصيل.</string>
 	<string name="explanation_keycloak_update_change_server" state="needs_review" hash="2029115402">تم بالفعل إعداد Olvid لاستخدام موفر هوية مختلف. إذا كانت شركتك قد غيرت بالفعل موفر الهوية، يمكنك المتابعة والمصادقة باستخدام هذا الموفر الجديد. إذا كنت في شك، فما عليك سوى الإلغاء.\nيرجى الاتصال بالمسؤول الخاص بك للحصول على مزيد من التفاصيل.</string>
 	<string name="explanation_keycloak_update_same_server" state="needs_review" hash="1886762594">تم بالفعل تهيئة Olvid مع موفر الهوية الخاص بشركتك.\nيرجى الاتصال بالمسؤول الخاص بك للحصول على مزيد من التفاصيل.</string>
@@ -995,12 +979,7 @@
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">لقد قمت بتكوين Olvid لاستخدام النسخ الاحتياطي التلقائي لمزود سحابي، ولكن جلستك قد انتهت صلاحيتها. تحتاج إلى تسجيل الدخول إلى هذا المزود مرة أخرى.\n\nإذا لم تعد ترغب في النسخ الاحتياطي التلقائي، يمكنك تعطيله في إعدادات التطبيق. تذكر أن النسخ الاحتياطي التلقائي هو الطريقة الوحيدة لمنع فقدان جهات الاتصال الخاصة بك في حالة فقد جهازك أو تلفه.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">تسجيل الدخول</string>
 	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">تواصل عن بعد</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s موجود بالفعل في جهات الاتصال الخاصة بك.</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s موجود في قائمة المستخدمين المعروفين لديك ولكنه ليس بعد في جهات الاتصال الخاصة بك.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">جديد</string>
-	<string name="label_option_invite_locally" state="needs_review" hash="-1267065954">الخيار الأول: وجهاً لوجه</string>
-	<string name="label_option_invite_remotely" state="needs_review" hash="369824596">الخيار 2: عن بعد</string>
-	<string name="text_explanation_mutual_scan" state="needs_review" hash="-1822394875">اجعل %1$s يمسح رمز الاستجابة السريعة هذا للتواصل الفوري.</string>
 	<string name="text_explanation_invalid_mutual_scan_qr_code" state="needs_review" hash="-1461387693">لا يمكن استخدام رمز الاستجابة السريعة هذا لإضافة %1$s إلى جهات الاتصال الخاصة بك.\nيرجى المحاولة مرة أخرى، والتأكد من أن %1$s يقوم بمسح رمز الاستجابة السريعة الخاص بك قبل أن تقوم بمسح رمز الاستجابة السريعة الخاص به.</string>
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">سيتم إضافة %1$s إلى جهات الاتصال الخاصة بك بمجرد الوصول إلى جهازه.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">تمت إضافة %1$s إلى جهات الاتصال الخاصة بك 🙌!</string>
@@ -1087,7 +1066,6 @@
 	<string name="button_label_create_password" state="needs_review" hash="649429298">إنشاء كلمة مرور</string>
 	<string name="toast_message_hidden_profile_password_set" state="needs_review" hash="1225440753">تم تعيين كلمة مرور الملف الشخصي المخفي</string>
 	<string name="toast_message_hidden_profile_password_failed" state="needs_review" hash="-1988538273">فشل إنشاء كلمة مرور الملف الشخصي المخفي</string>
-	<string name="button_label_directory" state="needs_review" hash="351731324">دليل</string>
 	<string name="dialog_title_cancel_hide_profile" state="needs_review" hash="356889825">التخلي عن كلمة المرور الخاصة بك؟</string>
 	<string name="dialog_message_cancel_hide_profile" state="needs_review" hash="1495424902">أنت على وشك التخلي عن التغييرات التي أجريتها. وعلى وجه الخصوص، لن يتم حفظ كلمة المرور التي اخترتها لهذا الملف الشخصي وستفقد.\nهل أنت متأكد من أنك تريد المتابعة؟</string>
 	<string name="dialog_title_unhide_profile" state="needs_review" hash="-733133172">إظهار الملف الشخصي؟</string>
@@ -1186,7 +1164,7 @@
 	<string name="pref_send_with_hardware_enter_summary" state="needs_review" hash="1694640710">عند التفعيل، إذا كنت تستخدم لوحة مفاتيح فعلية، فإن الضغط على "إدخال" سيرسل رسالتك. "Shift + إدخال" سيضيف سطرًا جديدًا.</string>
 	<string name="pref_ping_connectivity_indicator_title" state="needs_review" hash="1245192677">مؤشر اتصال الشبكة</string>
 	<string name="pref_text_ping_connectivity_indicator_none" state="needs_review" hash="-1725558072">لا يوجد مؤشر اتصال</string>
-	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">نقطة ملونة على حرف "i" في شعار Olvid</string>
+	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="752487342">نقطة ملونة في شريط العنوان</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">خط سري في أعلى قائمة المحادثات</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">حالة الاتصال الكاملة في أعلى قائمة المحادثات</string>
 	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">لا تعرض أي مؤشر على الإطلاق، حتى في حالة فقدان الاتصال</string>
@@ -2054,18 +2032,15 @@
 	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">أضف</string>
 	<string name="label_poll_see_answers" state="needs_review" hash="710858547">عرض الإجابات</string>
 	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">في انتظار ردّهم</string>
-	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">ذكّر</string>
 	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">أضف إجابة \"%1$s\"</string>
 	<string name="label_poll_options" state="needs_review" hash="-13216192">خيارات</string>
 	<string name="text_none_answer" state="needs_review" hash="560562575">لا شيء مما سبق</string>
 	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">السماح بإجابات متعددة</string>
 	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">اختر إجابة واحدة أو أكثر</string>
-	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">وضع الاختبار</string>
 	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">نهاية</string>
 	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">أضف تاريخ انتهاء الصلاحية</string>
 	<string name="label_poll_expiration" state="needs_review" hash="605126523">سينتهي الاستطلاع في %1$s</string>
 	<string name="label_poll_ended" state="needs_review" hash="415569292">تم انتهاء الاستطلاع</string>
-	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">أضف ردين على الأقل</string>
 	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">هذه الإجابة موجودة بالفعل</string>
 	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">تصدير كـ CSV</string>
 	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">حدث خطأ أثناء تصدير الاستطلاع كـ CSV. يرجى المحاولة مرة أخرى.</string>
@@ -2093,12 +2068,10 @@
 	<string name="button_label_invited" state="needs_review" hash="2094724552">مدعو</string>
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">رسالة جديدة</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">جهة اتصال جديدة</string>
-	<string name="new_message_action_search" state="needs_review" hash="-2085358317">بحث</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">وجهاً لوجه</string>
 	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">عن بعد</string>
-	<string name="new_contact_cancel" state="needs_review" hash="1270066923">إلغاء</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">امسحوا رموز QR الخاصة ببعضكم البعض</string>
-	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">الآن قم بفحص جهازك</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">اطلب من %1$s مسح رمزك.</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">تم مسح الرمز!</string>
 	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">هل يتعذر مسح الرمز ضوئيًا؟</string>
 	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">ادعُهم بطريقة أخرى</string>
@@ -2111,9 +2084,15 @@
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">أضف جهة اتصالك الأولى</string>
 	<string name="label_discussion" state="needs_review" hash="301166224">محادثة</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">تبديل الكاميرا</string>
-	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">هل ترغب في التواصل مع %1$s؟</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">هل تتواصل عن بعد مع %1$s؟</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">جهات الاتصال أدناه جزء من هذه المجموعة ولكن لم يجروا معك محادثة خاصة بعد.</string>
 	<string name="label_group_admins" state="needs_review" hash="468245065">مديرو المجموعة</string>
 	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" هي مجموعة مشتركة</string>
 	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">لحماية خصوصيتك، لا يمتلك Olvid **دليل مستخدم عام أو مركزي**. لن يرى اسمك إلا الأشخاص الذين تتواصل معهم.</string>
+	<string name="tab_title_discussions" state="needs_review" hash="491497248">المحادثات</string>
+	<string name="tab_title_contacts" state="needs_review" hash="-859216410">جهات الاتصال</string>
+	<string name="tab_title_groups" state="needs_review" hash="-990226727">مجموعات</string>
+	<string name="tab_title_calls" state="needs_review" hash="541245696">مكالمات</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">محادثة مثبّتة</string>
+	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">هل لا يستطيع %1$s مسح رمزك؟</string>
 </resources>

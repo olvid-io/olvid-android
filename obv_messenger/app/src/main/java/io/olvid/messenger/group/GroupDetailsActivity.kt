@@ -46,9 +46,13 @@ import android.widget.LinearLayout.LayoutParams
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.cardview.widget.CardView
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
@@ -123,9 +127,19 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
     private var groupIsOwned = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+        )
+
         super.onCreate(savedInstanceState)
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+
         setContentView(R.layout.activity_group_details)
         findViewById<CoordinatorLayout>(R.id.group_details_coordinatorLayout)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
@@ -139,7 +153,7 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
                 view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     updateMargins(bottom = insets.bottom)
                 }
-                WindowInsetsCompat.CONSUMED
+                windowInsets
             }
         }
         onBackPressed {
@@ -160,6 +174,8 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
         }
         val actionBar = supportActionBar
         actionBar?.setDisplayHomeAsUpEnabled(true)
+        actionBar?.elevation = 0f
+
         mainConstraintLayout = findViewById(R.id.group_details_main_constraint_layout)
         val discussionButton = findViewById<FloatingActionButton>(R.id.group_discussion_button)
         discussionButton.setOnClickListener(this)

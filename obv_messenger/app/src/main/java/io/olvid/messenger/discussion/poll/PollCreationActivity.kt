@@ -37,14 +37,15 @@ class PollCreationActivity : LockableActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+        )
         super.onCreate(savedInstanceState)
         val discussionId = intent.getLongExtra(DISCUSSION_ID_INTENT_EXTRA, -1)
         val pollViewModel by viewModels<PollCreationViewModel>()
         pollViewModel.discussionId = discussionId
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
-        )
+
         setContent {
             PollCreationScreen(pollViewModel = pollViewModel, onBackPressed = { finish() })
         }

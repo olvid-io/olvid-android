@@ -1,4 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_files" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1591553998">Fil</item>
+		<item quantity="other" state="needs_review" hash="-129414826">%1$d Filer</item>
+	</plurals>
+	<plurals name="text_images" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1471675200">Foto</item>
+		<item quantity="other" state="needs_review" hash="1017714912">%1$d Billeder</item>
+	</plurals>
+	<plurals name="text_videos" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="366973148">Video</item>
+		<item quantity="other" state="needs_review" hash="-200168444">%1$d Videoer</item>
+	</plurals>
 	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" og 1 anden gruppe til fælles</item>
 		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" og %2$d andre fælles grupper</item>

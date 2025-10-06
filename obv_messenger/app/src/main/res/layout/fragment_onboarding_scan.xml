@@ -22,7 +22,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:padding="8dp"
-        app:srcCompat="@drawable/ic_arrow_back"
+        app:srcCompat="@drawable/ic_arrow_back_white"
         android:background="@drawable/background_circular_ripple"
         android:theme="@style/AlwaysWhiteSubtleRipple"
         android:layout_marginStart="8dp"
@@ -112,16 +112,6 @@
         app:layout_constraintEnd_toEndOf="@+id/viseur"
         app:layout_constraintStart_toStartOf="@+id/viseur"
         app:layout_constraintTop_toTopOf="@+id/viseur" />
-
-    <ImageView
-        android:layout_width="@dimen/plus_button_qr_code_overlay_olvid_size"
-        android:layout_height="@dimen/plus_button_qr_code_overlay_olvid_size"
-        android:alpha=".5"
-        app:srcCompat="@drawable/olvid_icon_qr_overlay"
-        app:layout_constraintBottom_toBottomOf="@+id/trou"
-        app:layout_constraintEnd_toStartOf="@+id/trou"
-        app:layout_constraintStart_toEndOf="@+id/trou"
-        app:layout_constraintTop_toTopOf="@+id/trou" />
 
 
     <View

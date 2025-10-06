@@ -1980,10 +1980,8 @@ fun SpeakerToggle(
 @Preview
 @Composable
 fun SpeakerTogglePreview() {
-    AppCompatTheme {
-        SpeakerToggle(audioOutputs = listOf(BLUETOOTH), onToggleSpeaker = {}) {
-            SpeakerToggleButton(R.drawable.ic_speaker_light_grey, it)
-        }
+    SpeakerToggle(audioOutputs = listOf(BLUETOOTH), onToggleSpeaker = {}) {
+        SpeakerToggleButton(R.drawable.ic_speaker_light_grey, it)
     }
 }
 

@@ -9,7 +9,7 @@
     android:drawablePadding="24dp"
     android:gravity="center_vertical"
     android:minHeight="48dp"
-    android:textColor="@color/accent"
+    android:textColor="@color/olvid_gradient_light"
     android:textSize="18sp"
     tools:text="Test text"
     android:ellipsize="end" />

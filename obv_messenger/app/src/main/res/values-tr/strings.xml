@@ -225,7 +225,6 @@
 	<string name="notification_title_one_to_one_invitation" state="needs_review" hash="-351127459">%1$s’den davet</string>
 	<string name="notification_title_user_has_mentioned_you" state="needs_review" hash="-1965484006">%1$s sizi etiketledi</string>
 	<string name="pref_autodownload_size_title" state="needs_review" hash="149272168">Ekleri otomatik olarak indir…</string>
-	<string name="pref_category_camera_title" state="needs_review" hash="1539779714">Fotoğraflar</string>
 	<string name="pref_camera_resolution_title" state="needs_review" hash="-1295742224">Olvid içinde çekilen fotoğrafların boyutunu değiştirmek ister misiniz?</string>
 	<string name="pref_qr_correction_level_title" state="needs_review" hash="-1685499441">QR kod hata düzeltme seviyesi</string>
 	<string name="pref_text_QR_correction_high" state="needs_review" hash="1408732723">Yüksek</string>
@@ -572,16 +571,10 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">Konuşmalar sekmesi</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">Kişiler sekmesi</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">Gruplar</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">Kişi ekle</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">Bildirim noktası</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">Hassas JPEG meta verilerini kaldır</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">Etkinleştirildiğinde, Olvid, içe aktarılan fotoğraf dosyalarından hassas meta verileri kaldırmaya çalışacaktır.\nBu, GPS verileri, kamera markası, oluşturulma tarihi… gibi bilgileri içerir.</string>
-	<string name="activity_title_add_contact" state="needs_review" hash="-1050193239">Kişi ekle</string>
 	<string name="button_label_scan" state="needs_review" hash="1683724449">Tara</string>
-	<string name="text_explanation_scan_contact_id" state="needs_review" hash="-2129167034">Başka bir kullanıcının kimliğini taramak, onu davet etmenizi sağlar.</string>
-	<string name="button_label_share_my_id" state="needs_review" hash="-75320325">Kimliğimi Paylaş</string>
-	<string name="label_scan" state="needs_review" hash="1683724449">Tara</string>
-	<string name="button_label_show_my_id" state="needs_review" hash="-197520345">Kimliğimi Göster</string>
 	<string name="toast_message_unrecognized_url" state="needs_review" hash="1921493221">Tanınmayan QR kod URL\'si</string>
 	<string name="dialog_title_webclient_sas_input" state="needs_review" hash="891876517">Lütfen web tarayıcınızda görüntülenen PIN kodunu girin</string>
 	<string name="webclient_error_invalid_qrcode" state="needs_review" hash="358206378">Geçersiz QR kodu</string>
@@ -592,7 +585,6 @@
 	<string name="webclient_toast_connection_timedout" state="needs_review" hash="869943528">Web istemcisi bağlantı süresi doldu</string>
 	<string name="webclient_protocol_in_progress" state="needs_review" hash="805709221">Uygulamanız ve Web İstemcisi arasında güvenli bir bağlantı kuruluyor…</string>
 	<string name="webclient_error_sas_incorrect" state="needs_review" hash="-1861981708">Yanlış PIN. Lütfen tekrar deneyin.</string>
-	<string name="label_webclient" state="needs_review" hash="-2125862146">Web İstemcisi</string>
 	<string name="label_webclient_already_running" state="needs_review" hash="788166693">Web istemcisi zaten çalışıyor</string>
 	<string name="label_webclient_restart_connection" state="needs_review" hash="934550160">Mevcut bağlantıyı kapatıp yeni bir bağlantı başlatmak ister misiniz?</string>
 	<string name="webclient_successfully_connected" state="needs_review" hash="-1216119082">Bağlantı başarıyla kuruldu!</string>
@@ -614,7 +606,6 @@
 	<string name="pref_webclient_notification_for_messages_after_inactivity_title" state="needs_review" hash="-732458468">Hareketsizlik sonrası bildirim</string>
 	<string name="activity_detected_after_inactivity" state="needs_review" hash="1909603717">WebClient\'ta uzun bir süre hareketsizlikten sonra etkinlik tespit edildi.</string>
 	<string name="pref_webclient_notification_for_messages_after_inactivity_summary" state="needs_review" hash="464494780">10 dakika hareketsizlikten sonra herhangi bir aktivite tespit edilirse bildirim alın.</string>
-	<string name="text_explanation_scan_share_id" state="needs_review" hash="1214882443">Kimliğinizi paylaşmak, başka bir Olvid kullanıcısının sizi davet etmesini sağlar.</string>
 	<string name="dialog_title_subscription_updated" state="needs_review" hash="1912189310">Abonelik güncellendi</string>
 	<string name="button_label_add_contact" state="needs_review" hash="744905192">Kişi ekle</string>
 	<string name="button_label_add" state="needs_review" hash="-1358923215">Ekle</string>
@@ -629,7 +620,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">Lisans sunucusu:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">Sunucunuz:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">Geçersiz lisans aktivasyon bağlantısı.\n\nLütfen bu bağlantıyı size gönderen kişiyle iletişime geçin.</string>
-	<string name="label_please_contact_activation_link" state="needs_review" hash="-497652404">Lütfen bu bağlantıyı size gönderen kişiyle iletişime geçin.</string>
 	<string name="label_checking_license" state="needs_review" hash="-777109669">Lisans kontrol ediliyor...</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">Lisans durumunu kontrol etmek mümkün değil</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Bilinmeyen lisans</string>
@@ -720,7 +710,6 @@
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Bu özellik etkinleştirildiğinde, bir kez okunan mesajlar ve varsayılan sınırlı görünürlük süresine sahip mesajlar, sohbete girdiğiniz anda açılır. Aksi takdirde bir tıklama gerekir.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Bu özellik etkinleştirildiğinde, silinen giden mesajlar saklanır, böylece ne zaman teslim edildiğini veya okunduğunu görebilirsiniz. Aksi takdirde silinirler.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Web İstemcisi</string>
-	<string name="label_title_change_list" state="needs_review" hash="76730245">Güncellenmiş ayarlar</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Ayarlar güncelleme bağlantısı ayrıştırılırken hata oluştu</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Mesaj gönderme ve alma</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">Paylaşılan geçici mesaj ayarları</string>
@@ -860,13 +849,8 @@
 	<string name="toast_message_keycloak_revoke_successful" state="needs_review" hash="-1216369809">Eski Olvid ID\'si başarıyla değiştirildi</string>
 	<string name="dialog_title_keycloak_authentication_required_user_id_changed" state="needs_review" hash="-896407029">Kullanıcı değişikliği algılandı</string>
 	<string name="dialog_message_keycloak_authentication_required_user_id_changed" state="needs_review" hash="1319874532">Olvid ID\'niz şirketinizin kimlik sağlayıcısı tarafından yönetilir. Normalde kullandığınızdan farklı bir kullanıcı olarak kimlik doğruladığınız görünüyor. Bu desteklenmiyor.\n\nLütfen yöneticinizle iletişime geçin veya doğru kullanıcı olarak yeniden kimlik doğrulayın.</string>
-	<string name="hint_search_keycloak" state="needs_review" hash="1386776811">Şirket dizininde ara…</string>
-	<string name="explanation_empty_keycloak_search" state="needs_review" hash="860472461">Sonuç bulunamadı</string>
-	<string name="explanation_keycloak_search_not_started" state="needs_review" hash="1192355189">Olvid kimliğiniz şirketinizin kimlik sağlayıcısı tarafından yönetilir.\n\nYukarıdaki arama alanını kullanarak ve kullanıcı dizininde arama yaparak şirketiniz içindeki kişileri kolayca ekleyebilirsiniz.</string>
-	<string name="explanation_keycloak_searching" state="needs_review" hash="1696749815">Aranıyor…</string>
 	<string name="dialog_title_add_keycloak_user" state="needs_review" hash="-1050193239">Kişi ekle</string>
 	<string name="dialog_message_add_keycloak_user" state="needs_review" hash="-1755937035">%1$s\'i kişilerinize eklemeyi seçtiniz. Devam etmek istiyor musunuz?</string>
-	<string name="label_bind_keycloak" state="needs_review" hash="1305090894">Bir kimlik sağlayıcı kullanın</string>
 	<string name="explanation_keycloak_update_new" state="needs_review" hash="1136733528">Olvid\'de şirketinizin kimlik sağlayıcısını yapılandırmak üzeresiniz. Yapılandırıldıktan sonra, bu sunucuyla kimlik doğrulaması yapabilir ve Olvid\'in diğer çalışanları kişilerinize sorunsuz bir şekilde eklemesine izin verebilirsiniz.\nLütfen daha fazla ayrıntı için yöneticinizle iletişime geçin.</string>
 	<string name="explanation_keycloak_update_change_server" state="needs_review" hash="2029115402">Olvid zaten farklı bir kimlik sağlayıcısı kullanacak şekilde yapılandırılmıştır. Şirketiniz gerçekten kimlik sağlayıcısını değiştirdiyse, bu yeni sağlayıcıyla kimlik doğrulamaya devam edebilirsiniz. Emin değilseniz, iptal edin.\nLütfen daha fazla bilgi için yöneticinizle iletişime geçin.</string>
 	<string name="explanation_keycloak_update_same_server" state="needs_review" hash="1886762594">Olvid zaten şirketinizin kimlik sağlayıcısıyla yapılandırılmıştır.\nLütfen daha fazla bilgi için yöneticinizle iletişime geçin.</string>
@@ -995,12 +979,7 @@
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Olvid\'i bir bulut sağlayıcısına otomatik yedekleme kullanacak şekilde yapılandırdınız, ancak oturumunuz sona erdi. Bu sağlayıcıya tekrar giriş yapmanız gerekiyor.\n\nArtık otomatik yedekleme istemiyorsanız, bunu Uygulama Ayarlarından devre dışı bırakabilirsiniz. Cihazınızın kaybolması veya hasar görmesi durumunda kişilerinizi kaybetmemenin tek yolunun otomatik yedeklemeler olduğunu unutmayın.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Giriş yap</string>
 	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Uzaklardan iletişim kurun</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s zaten kişilerinizde var.</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s tanıdığınız kullanıcılar listesinde yer alıyor ancak henüz kişilerinizde değil.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Yeni</string>
-	<string name="label_option_invite_locally" state="needs_review" hash="-1267065954">Seçenek 1: Yüz yüze</string>
-	<string name="label_option_invite_remotely" state="needs_review" hash="369824596">Seçenek 2: uzaktan</string>
-	<string name="text_explanation_mutual_scan" state="needs_review" hash="-1822394875">%1$s\'den bu QR kodunu taramasını isteyin, böylece hemen iletişime geçebiliriz.</string>
 	<string name="text_explanation_invalid_mutual_scan_qr_code" state="needs_review" hash="-1461387693">Bu QR kodu %1$s\'i kişilerinizde eklemek için kullanılamaz.\nLütfen tekrar deneyin ve %1$s\'in QR kodunuzu sizinkini taramadan önce taradığından emin olun.</string>
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s, cihazına ulaşıldığında kişilerinize eklenecektir.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s kişilerinize eklendi 🙌</string>
@@ -1087,7 +1066,6 @@
 	<string name="button_label_create_password" state="needs_review" hash="649429298">Şifre oluştur</string>
 	<string name="toast_message_hidden_profile_password_set" state="needs_review" hash="1225440753">Gizli profil şifresi ayarlandı</string>
 	<string name="toast_message_hidden_profile_password_failed" state="needs_review" hash="-1988538273">Gizli profil şifresi oluşturulamadı</string>
-	<string name="button_label_directory" state="needs_review" hash="351731324">Rehber</string>
 	<string name="dialog_title_cancel_hide_profile" state="needs_review" hash="356889825">Parolanızı silmek ister misiniz?</string>
 	<string name="dialog_message_cancel_hide_profile" state="needs_review" hash="1495424902">Yaptığınız değişiklikleri atmak üzeresiniz. Özellikle, bu profil için seçtiğiniz şifre henüz kaydedilmedi ve kaybolacak.\nDevam etmek istediğinizden emin misiniz?</string>
 	<string name="dialog_title_unhide_profile" state="needs_review" hash="-733133172">Profili göster?</string>
@@ -1185,7 +1163,7 @@
 	<string name="pref_send_with_hardware_enter_summary" state="needs_review" hash="1694640710">Bu seçenek etkinleştirildiğinde, bir donanım klavyesi kullanıyorsanız, \"Enter\" tuşuna basmak mesajınızı gönderir. \"Shift + Enter\" yeni bir satır ekler.</string>
 	<string name="pref_ping_connectivity_indicator_title" state="needs_review" hash="1245192677">Ağ bağlantı göstergesi</string>
 	<string name="pref_text_ping_connectivity_indicator_none" state="needs_review" hash="-1725558072">Bağlantı göstergesi yok</string>
-	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Olvid logosundaki \"i\" harfindeki renkli nokta</string>
+	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="752487342">Başlık çubuğundaki renkli nokta</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Konuşma listesinin üstündeki ince çizgi</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Konuşma listesinin üstünde tam bağlantı durumu</string>
 	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Bağlantı kaybı olsa bile asla bir gösterge gösterme</string>
@@ -2052,18 +2030,15 @@
 	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">Ekle</string>
 	<string name="label_poll_see_answers" state="needs_review" hash="710858547">Cevapları Gör</string>
 	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">Cevaplarını bekliyorum</string>
-	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">Hatırlat</string>
 	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">\"%1$s\" cevabı ekle</string>
 	<string name="label_poll_options" state="needs_review" hash="-13216192">Seçenekler</string>
 	<string name="text_none_answer" state="needs_review" hash="560562575">Yukarıdakilerden hiçbiri</string>
 	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">Çoklu yanıtlara izin ver</string>
 	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">Bir veya birden fazla cevap seçin</string>
-	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">Sınav modu</string>
 	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">Son</string>
 	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">Son kullanma tarihi ekle</string>
 	<string name="label_poll_expiration" state="needs_review" hash="605126523">Anket %1$s içinde sona erecek</string>
 	<string name="label_poll_ended" state="needs_review" hash="415569292">Anket sona erdi</string>
-	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">En az iki yanıt ekleyin</string>
 	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">Bu yanıt zaten mevcut</string>
 	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">CSV olarak dışa aktar</string>
 	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">Anketi CSV olarak dışa aktarımda hata oluştu. Lütfen tekrar deneyin.</string>
@@ -2091,12 +2066,10 @@
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Davet Edildi</string>
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Yeni mesaj</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Yeni kişi</string>
-	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Ara</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Yüz yüze</string>
 	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Uzakta</string>
-	<string name="new_contact_cancel" state="needs_review" hash="1270066923">İptal Et</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Birbirinizin QR kodlarını tarayın</string>
-	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Şimdi siz de taratın</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">%1$s\'in kodunuzu taramasını sağlayın</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Kod tarandı!</string>
 	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Kodu tarayamıyor musunuz?</string>
 	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Onları başka bir şekilde davet et</string>
@@ -2109,9 +2082,15 @@
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">İlk kişinizi ekleyin</string>
 	<string name="label_discussion" state="needs_review" hash="301166224">Tartışma</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Kamerayı değiştir</string>
-	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">%1$s ile iletişim kurmak istiyor musunuz?</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">%1$s ile uzaktan iletişim kurun?</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Aşağıdaki kişiler bu grubun üyesi ancak henüz sizinle özel bir görüşmeleri yok.</string>
 	<string name="label_group_admins" state="needs_review" hash="468245065">Grup yöneticileri</string>
 	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" ortak bir gruptur</string>
 	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Gizliliğinizi korumak için Olvid\'in **kamusal veya merkezi bir kullanıcı dizini bulunmuyor**. Adınız yalnızca iletişim kurduğunuz kişiler tarafından görülecektir.</string>
+	<string name="tab_title_discussions" state="needs_review" hash="491497248">Tartışmalar</string>
+	<string name="tab_title_contacts" state="needs_review" hash="-859216410">Kişiler</string>
+	<string name="tab_title_groups" state="needs_review" hash="-990226727">Gruplar</string>
+	<string name="tab_title_calls" state="needs_review" hash="541245696">Aramalar</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Sabitlenmiş sohbet</string>
+	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">%1$s kodunuzu tarayamıyor mu?</string>
 </resources>

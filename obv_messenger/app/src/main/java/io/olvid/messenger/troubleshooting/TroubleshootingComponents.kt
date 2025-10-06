@@ -274,7 +274,7 @@ fun FaqLinkHeader(openFaq: () -> Unit, onBack: () -> Unit) {
         ) {
             Icon(
                 modifier = Modifier.size(24.dp),
-                painter = painterResource(id = R.drawable.ic_arrow_back),
+                painter = painterResource(id = R.drawable.ic_arrow_back_white),
                 tint = colorResource(id = R.color.almostBlack),
                 contentDescription = stringResource(R.string.content_description_back_button)
             )

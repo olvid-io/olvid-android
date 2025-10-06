@@ -225,7 +225,6 @@
 	<string name="notification_title_one_to_one_invitation" state="needs_review" hash="-351127459">Приглашение от %1$s</string>
 	<string name="notification_title_user_has_mentioned_you" state="needs_review" hash="-1965484006">%1$s упомянул вас</string>
 	<string name="pref_autodownload_size_title" state="needs_review" hash="149272168">Автоматически загружать вложения…</string>
-	<string name="pref_category_camera_title" state="needs_review" hash="1539779714">Фотографии</string>
 	<string name="pref_camera_resolution_title" state="needs_review" hash="-1295742224">Изменять размер фотографий, сделанных в Olvid?</string>
 	<string name="pref_qr_correction_level_title" state="needs_review" hash="-1685499441">Уровень коррекции ошибок QR-кода</string>
 	<string name="pref_text_QR_correction_high" state="needs_review" hash="1408732723">Высокий</string>
@@ -572,16 +571,10 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">Вкладка «Разговоры»</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">Вкладка «Контакты»</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">Группы</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">Добавить контакт</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">Точка уведомления</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">Удалить конфиденциальные метаданные JPEG</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">При активации Olvid попытается удалить конфиденциальные метаданные из импортированных файлов фотографий.\nЭто включает данные GPS, марку камеры, дату создания…</string>
-	<string name="activity_title_add_contact" state="needs_review" hash="-1050193239">Добавить контакт</string>
 	<string name="button_label_scan" state="needs_review" hash="1683724449">Сканировать</string>
-	<string name="text_explanation_scan_contact_id" state="needs_review" hash="-2129167034">Сканирование ID другого пользователя позволяет вам пригласить его.</string>
-	<string name="button_label_share_my_id" state="needs_review" hash="-75320325">Поделиться моим ID</string>
-	<string name="label_scan" state="needs_review" hash="1683724449">Сканировать</string>
-	<string name="button_label_show_my_id" state="needs_review" hash="-197520345">Показать мой ID</string>
 	<string name="toast_message_unrecognized_url" state="needs_review" hash="1921493221">Неизвестный URL-адрес QR-кода</string>
 	<string name="dialog_title_webclient_sas_input" state="needs_review" hash="891876517">Пожалуйста, введите PIN-код, отображаемый в вашем веб-браузере</string>
 	<string name="webclient_error_invalid_qrcode" state="needs_review" hash="358206378">Неверный QR-код</string>
@@ -592,7 +585,6 @@
 	<string name="webclient_toast_connection_timedout" state="needs_review" hash="869943528">Время ожидания подключения веб-клиента истекло</string>
 	<string name="webclient_protocol_in_progress" state="needs_review" hash="805709221">Установление защищенного соединения между вашим приложением и веб-клиентом…</string>
 	<string name="webclient_error_sas_incorrect" state="needs_review" hash="-1861981708">Неверный PIN-код. Пожалуйста, попробуйте еще раз.</string>
-	<string name="label_webclient" state="needs_review" hash="-2125862146">Веб-клиент</string>
 	<string name="label_webclient_already_running" state="needs_review" hash="788166693">Веб-клиент уже запущен</string>
 	<string name="label_webclient_restart_connection" state="needs_review" hash="934550160">Закрыть текущее соединение и начать новое?</string>
 	<string name="webclient_successfully_connected" state="needs_review" hash="-1216119082">Соединение успешно установлено!</string>
@@ -614,7 +606,6 @@
 	<string name="pref_webclient_notification_for_messages_after_inactivity_title" state="needs_review" hash="-732458468">Уведомлять после бездействия</string>
 	<string name="activity_detected_after_inactivity" state="needs_review" hash="1909603717">Обнаружена активность в веб-клиенте после длительного периода бездействия.</string>
 	<string name="pref_webclient_notification_for_messages_after_inactivity_summary" state="needs_review" hash="464494780">Получите уведомление в случае активности после 10 минут бездействия.</string>
-	<string name="text_explanation_scan_share_id" state="needs_review" hash="1214882443">Предоставление вашего ID позволяет другому пользователю Olvid пригласить вас.</string>
 	<string name="dialog_title_subscription_updated" state="needs_review" hash="1912189310">Подписка обновлена</string>
 	<string name="button_label_add_contact" state="needs_review" hash="744905192">Добавить контакт</string>
 	<string name="button_label_add" state="needs_review" hash="-1358923215">Добавить</string>
@@ -629,7 +620,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">Сервер лицензий:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">Ваш сервер:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">Неверная ссылка для активации лицензии.\n\nПожалуйста, свяжитесь с человеком, который прислал вам эту ссылку.</string>
-	<string name="label_please_contact_activation_link" state="needs_review" hash="-497652404">Пожалуйста, свяжитесь с человеком, который прислал вам эту ссылку.</string>
 	<string name="label_checking_license" state="needs_review" hash="-777109669">Проверка лицензии…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">Не удалось проверить статус лицензии</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Неизвестная лицензия</string>
@@ -720,7 +710,6 @@
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">При активации сообщения для однократного просмотра и сообщения с ограниченным временем видимости по умолчанию открываются сразу после входа в чат. В противном случае требуется нажатие.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">При активации удаленные исходящие сообщения сохраняются, чтобы вы могли видеть, когда они были доставлены или прочитаны. В противном случае они будут удалены.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Веб-клиент</string>
-	<string name="label_title_change_list" state="needs_review" hash="76730245">Обновленные настройки</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Ошибка при разборе ссылки обновления настроек</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Отправка и получение сообщений</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">Общие настройки для самоуничтожающихся сообщений</string>
@@ -860,13 +849,8 @@
 	<string name="toast_message_keycloak_revoke_successful" state="needs_review" hash="-1216369809">Предыдущий Olvid ID успешно заменен</string>
 	<string name="dialog_title_keycloak_authentication_required_user_id_changed" state="needs_review" hash="-896407029">Обнаружено изменение пользователя</string>
 	<string name="dialog_message_keycloak_authentication_required_user_id_changed" state="needs_review" hash="1319874532">Ваш Olvid ID управляется поставщиком удостоверений вашей компании. Похоже, вы прошли аутентификацию как другой пользователь, чем обычно. Это не поддерживается.\n\nПожалуйста, свяжитесь со своим администратором или повторно аутентифицируйтесь как правильный пользователь.</string>
-	<string name="hint_search_keycloak" state="needs_review" hash="1386776811">Поиск в корпоративном справочнике…</string>
-	<string name="explanation_empty_keycloak_search" state="needs_review" hash="860472461">Результаты не найдены</string>
-	<string name="explanation_keycloak_search_not_started" state="needs_review" hash="1192355189">Ваш Olvid ID управляется поставщиком идентификации вашей компании.\n\nВы можете легко добавлять контакты внутри вашей компании, используя поле поиска выше и просматривая ее каталог пользователей.</string>
-	<string name="explanation_keycloak_searching" state="needs_review" hash="1696749815">Поиск…</string>
 	<string name="dialog_title_add_keycloak_user" state="needs_review" hash="-1050193239">Добавить контакт</string>
 	<string name="dialog_message_add_keycloak_user" state="needs_review" hash="-1755937035">Вы выбрали добавить %1$s в свои контакты. Хотите продолжить?</string>
-	<string name="label_bind_keycloak" state="needs_review" hash="1305090894">Использовать поставщика удостоверений</string>
 	<string name="explanation_keycloak_update_new" state="needs_review" hash="1136733528">Вы собираетесь настроить поставщика удостоверений вашей компании в Olvid. После настройки вы сможете аутентифицироваться на этом сервере, и Olvid позволит вам легко добавлять других сотрудников в свои контакты.\nПожалуйста, свяжитесь с вашим администратором для получения более подробной информации.</string>
 	<string name="explanation_keycloak_update_change_server" state="needs_review" hash="2029115402">Olvid уже настроен на использование ДРУГОГО поставщика удостоверений. Если ваша компания действительно сменила поставщика удостоверений, вы можете продолжить и пройти аутентификацию с этим новым поставщиком. Если у вас есть сомнения, просто отмените.\nОбратитесь к вашему администратору для получения более подробной информации.</string>
 	<string name="explanation_keycloak_update_same_server" state="needs_review" hash="1886762594">Olvid уже настроен с поставщиком удостоверений вашей компании.\nОбратитесь к вашему администратору для получения дополнительной информации.</string>
@@ -995,12 +979,7 @@
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Вы настроили Olvid для использования автоматических резервных копий в облачном хранилище, но ваша сессия истекла. Вам необходимо повторно войти в этот сервис.\n\nЕсли вы больше не хотите использовать автоматические резервные копии, вы можете отключить их в настройках приложения. Помните, что автоматические резервные копии — это единственный способ предотвратить потерю ваших контактов в случае потери или повреждения устройства.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Войти</string>
 	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Связаться удаленно</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s уже есть в ваших контактах.</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s есть в вашем списке известных пользователей, но его еще нет в ваших контактах.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Новый</string>
-	<string name="label_option_invite_locally" state="needs_review" hash="-1267065954">Вариант 1: лично</string>
-	<string name="label_option_invite_remotely" state="needs_review" hash="369824596">Вариант 2: удаленно</string>
-	<string name="text_explanation_mutual_scan" state="needs_review" hash="-1822394875">Попросите %1$s отсканировать этот QR-код, чтобы немедленно связаться.</string>
 	<string name="text_explanation_invalid_mutual_scan_qr_code" state="needs_review" hash="-1461387693">Этот QR-код нельзя использовать для добавления %1$s в ваши контакты.\nПовторите попытку, убедившись, что %1$s сканирует ваш QR-код, прежде чем вы отсканируете его.</string>
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s будет добавлен в ваши контакты, как только его устройство станет доступным.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s был добавлен в ваши контакты 🙌!</string>
@@ -1087,7 +1066,6 @@
 	<string name="button_label_create_password" state="needs_review" hash="649429298">Создать пароль</string>
 	<string name="toast_message_hidden_profile_password_set" state="needs_review" hash="1225440753">Скрытый пароль профиля установлен</string>
 	<string name="toast_message_hidden_profile_password_failed" state="needs_review" hash="-1988538273">Не удалось создать пароль для скрытого профиля</string>
-	<string name="button_label_directory" state="needs_review" hash="351731324">Справочник</string>
 	<string name="dialog_title_cancel_hide_profile" state="needs_review" hash="356889825">Отменить пароль?</string>
 	<string name="dialog_message_cancel_hide_profile" state="needs_review" hash="1495424902">Вы собираетесь отменить изменения. В частности, пароль, который вы выбрали для этого профиля, еще не был сохранен и будет потерян. Вы уверены, что хотите продолжить?</string>
 	<string name="dialog_title_unhide_profile" state="needs_review" hash="-733133172">Показать профиль?</string>
@@ -1186,7 +1164,7 @@
 	<string name="pref_send_with_hardware_enter_summary" state="needs_review" hash="1694640710">При активации, при использовании аппаратной клавиатуры, нажатие \"Enter\" отправит ваше сообщение. \"Shift + Enter\" добавит новую строку.</string>
 	<string name="pref_ping_connectivity_indicator_title" state="needs_review" hash="1245192677">Индикатор сетевого подключения</string>
 	<string name="pref_text_ping_connectivity_indicator_none" state="needs_review" hash="-1725558072">Нет индикатора подключения</string>
-	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Цветная точка на букве «i» в логотипе Olvid</string>
+	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="752487342">Цветная точка в заголовке</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Неброская линия вверху списка чатов</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Полный статус подключения в верхней части списка чатов</string>
 	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Никогда не показывать индикатор, даже при потере соединения</string>
@@ -2054,18 +2032,15 @@
 	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">Добавить</string>
 	<string name="label_poll_see_answers" state="needs_review" hash="710858547">Просмотреть ответы</string>
 	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">Жду их ответа</string>
-	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">Напомнить</string>
 	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">Добавить ответ \"%1$s\"</string>
 	<string name="label_poll_options" state="needs_review" hash="-13216192">Параметры</string>
 	<string name="text_none_answer" state="needs_review" hash="560562575">Ни один из вариантов выше</string>
 	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">Разрешить несколько ответов</string>
 	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">Выберите один или несколько ответов</string>
-	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">Режим викторины</string>
 	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">Конец</string>
 	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">Установить дату истечения</string>
 	<string name="label_poll_expiration" state="needs_review" hash="605126523">Опрос закончится через %1$s</string>
 	<string name="label_poll_ended" state="needs_review" hash="415569292">Опрос завершен</string>
-	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">Добавьте как минимум два варианта ответа</string>
 	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">Этот ответ уже существует</string>
 	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">Экспортировать в CSV</string>
 	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">Ошибка экспорта опроса в CSV. Пожалуйста, попробуйте еще раз.</string>
@@ -2093,12 +2068,10 @@
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Приглашён</string>
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Новое сообщение</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Новый контакт</string>
-	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Поиск</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Лицом к лицу</string>
 	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Удалённо</string>
-	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Отменить</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Отсканируйте QR-коды друг друга</string>
-	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Отсканируйте свой сейчас</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Попросите %1$s отсканировать ваш код</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Код сканирован!</string>
 	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Не удается сканировать код?</string>
 	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Пригласите их другим способом</string>
@@ -2111,9 +2084,15 @@
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Добавьте свой первый контакт</string>
 	<string name="label_discussion" state="needs_review" hash="301166224">Обсуждение</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Переключить камеру</string>
-	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Хотите связаться с %1$s?</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">Связаться удаленно с %1$s?</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Контакты ниже входят в эту группу, но у вас еще нет личной переписки с ними.</string>
 	<string name="label_group_admins" state="needs_review" hash="468245065">Администраторы группы</string>
 	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" - это общая группа</string>
 	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Для защиты вашей конфиденциальности в Olvid **нет общедоступного или централизованного каталога пользователей**. Ваше имя будет видно только тем, с кем вы общаетесь.</string>
+	<string name="tab_title_discussions" state="needs_review" hash="491497248">Беседы</string>
+	<string name="tab_title_contacts" state="needs_review" hash="-859216410">Контакты</string>
+	<string name="tab_title_groups" state="needs_review" hash="-990226727">Группы</string>
+	<string name="tab_title_calls" state="needs_review" hash="541245696">Звонки</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Закрепленный чат</string>
+	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">%1$s не может сканировать ваш код?</string>
 </resources>

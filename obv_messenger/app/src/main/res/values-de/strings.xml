@@ -225,7 +225,6 @@
 	<string name="notification_title_one_to_one_invitation" state="needs_review" hash="-351127459">Einladung von %1$s</string>
 	<string name="notification_title_user_has_mentioned_you" state="needs_review" hash="-1965484006">%1$s hat dich erwähnt</string>
 	<string name="pref_autodownload_size_title" state="needs_review" hash="149272168">Anhänge automatisch herunterladen…</string>
-	<string name="pref_category_camera_title" state="needs_review" hash="1539779714">Fotos</string>
 	<string name="pref_camera_resolution_title" state="needs_review" hash="-1295742224">Fotos, die innerhalb von Olvid aufgenommen wurden, verkleinern?</string>
 	<string name="pref_qr_correction_level_title" state="needs_review" hash="-1685499441">QR-Code-Fehlerkorrekturstufe</string>
 	<string name="pref_text_QR_correction_high" state="needs_review" hash="1408732723">Hoch</string>
@@ -572,16 +571,10 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">Registerkarte Chats</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">Kontakte-Tab</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">Gruppen</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">Kontakt hinzufügen</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">Benachrichtigungsanzeige</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">Sensible JPEG-Metadaten entfernen</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">Wenn aktiviert, versucht Olvid, sensible Metadaten aus importierten Bilddateien zu entfernen.\nDazu gehören GPS-Daten, Kameramarke, Erstellungsdatum…</string>
-	<string name="activity_title_add_contact" state="needs_review" hash="-1050193239">Kontakt hinzufügen</string>
 	<string name="button_label_scan" state="needs_review" hash="1683724449">Scannen</string>
-	<string name="text_explanation_scan_contact_id" state="needs_review" hash="-2129167034">Das Scannen der ID eines anderen Benutzers ermöglicht es Ihnen, ihn einzuladen.</string>
-	<string name="button_label_share_my_id" state="needs_review" hash="-75320325">Meine ID teilen</string>
-	<string name="label_scan" state="needs_review" hash="1683724449">Scannen</string>
-	<string name="button_label_show_my_id" state="needs_review" hash="-197520345">Meine ID anzeigen</string>
 	<string name="toast_message_unrecognized_url" state="needs_review" hash="1921493221">Unbekannte QR-Code-URL</string>
 	<string name="dialog_title_webclient_sas_input" state="needs_review" hash="891876517">Bitte geben Sie den PIN-Code ein, der in Ihrem Webbrowser angezeigt wird</string>
 	<string name="webclient_error_invalid_qrcode" state="needs_review" hash="358206378">Ungültiger QR-Code</string>
@@ -592,7 +585,6 @@
 	<string name="webclient_toast_connection_timedout" state="needs_review" hash="869943528">Zeitüberschreitung der Webclient-Verbindung</string>
 	<string name="webclient_protocol_in_progress" state="needs_review" hash="805709221">Es wird eine sichere Verbindung zwischen Ihrer App und dem Webclient hergestellt…</string>
 	<string name="webclient_error_sas_incorrect" state="needs_review" hash="-1861981708">Falscher PIN. Bitte erneut versuchen.</string>
-	<string name="label_webclient" state="needs_review" hash="-2125862146">Webclient</string>
 	<string name="label_webclient_already_running" state="needs_review" hash="788166693">Der Webclient ist bereits geöffnet</string>
 	<string name="label_webclient_restart_connection" state="needs_review" hash="934550160">Aktuelle Verbindung schließen und eine neue starten?</string>
 	<string name="webclient_successfully_connected" state="needs_review" hash="-1216119082">Verbindung erfolgreich hergestellt!</string>
@@ -614,7 +606,6 @@
 	<string name="pref_webclient_notification_for_messages_after_inactivity_title" state="needs_review" hash="-732458468">Bei Inaktivität benachrichtigen</string>
 	<string name="activity_detected_after_inactivity" state="needs_review" hash="1909603717">Aktivität im Webclient nach längerer Inaktivität festgestellt.</string>
 	<string name="pref_webclient_notification_for_messages_after_inactivity_summary" state="needs_review" hash="464494780">Erhalte eine Benachrichtigung, wenn nach 10 Minuten Inaktivität eine Aktivität erkannt wird.</string>
-	<string name="text_explanation_scan_share_id" state="needs_review" hash="1214882443">Das Teilen deiner ID ermöglicht es einem anderen Olvid-Nutzer, dich einzuladen.</string>
 	<string name="dialog_title_subscription_updated" state="needs_review" hash="1912189310">Abonnement aktualisiert</string>
 	<string name="button_label_add_contact" state="needs_review" hash="744905192">Kontakt hinzufügen</string>
 	<string name="button_label_add" state="needs_review" hash="-1358923215">Hinzufügen</string>
@@ -629,7 +620,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">Lizenzserver:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">Dein Server:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">Ungültiger Lizenzaktivierungslink.\n\nBitte wenden Sie sich an die Person, die Ihnen diesen Link geschickt hat.</string>
-	<string name="label_please_contact_activation_link" state="needs_review" hash="-497652404">Bitte kontaktiere die Person, die dir diesen Link geschickt hat.</string>
 	<string name="label_checking_license" state="needs_review" hash="-777109669">Lizenz wird geprüft…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">Lizenzstatus konnte nicht überprüft werden</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Unbekannte Lizenz</string>
@@ -720,7 +710,6 @@
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Wenn aktiviert, werden Einmal-Nachrichten und Nachrichten mit der standardmäßigen begrenzten Sichtbarkeitsdauer geöffnet, sobald Sie die Diskussion betreten. Andernfalls ist ein Klick erforderlich.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Wenn aktiviert, werden gelöschte ausgehende Nachrichten gespeichert, damit Sie sehen können, wann sie zugestellt oder gelesen wurden. Andernfalls werden sie gelöscht.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Webclient</string>
-	<string name="label_title_change_list" state="needs_review" hash="76730245">Einstellungen aktualisiert</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Fehler beim Parsen des Links zur Konfigurationseinstellung</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Senden und Empfangen von Nachrichten</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">Gemeinsame Einstellungen für ephemere Nachrichten</string>
@@ -860,13 +849,8 @@
 	<string name="toast_message_keycloak_revoke_successful" state="needs_review" hash="-1216369809">Vorherige Olvid ID erfolgreich ersetzt</string>
 	<string name="dialog_title_keycloak_authentication_required_user_id_changed" state="needs_review" hash="-896407029">Benutzeränderung erkannt</string>
 	<string name="dialog_message_keycloak_authentication_required_user_id_changed" state="needs_review" hash="1319874532">Ihre Olvid ID wird von Ihrem Unternehmens-Identitätsanbieter verwaltet. Es scheint, dass Sie sich mit einem anderen Benutzer als gewöhnlich authentifiziert haben. Dies wird nicht unterstützt.\n\nBitte wenden Sie sich an Ihren Administrator oder authentifizieren Sie sich erneut mit dem richtigen Benutzer.</string>
-	<string name="hint_search_keycloak" state="needs_review" hash="1386776811">Unternehmensverzeichnis durchsuchen…</string>
-	<string name="explanation_empty_keycloak_search" state="needs_review" hash="860472461">Keine Ergebnisse gefunden</string>
-	<string name="explanation_keycloak_search_not_started" state="needs_review" hash="1192355189">Ihre Olvid-ID wird von dem Identitätsanbieter Ihres Unternehmens verwaltet.\n\nSie können ganz einfach Kontakte innerhalb Ihres Unternehmens hinzufügen, indem Sie das Suchfeld oben verwenden und im Benutzerverzeichnis nachschauen.</string>
-	<string name="explanation_keycloak_searching" state="needs_review" hash="1696749815">Suche…</string>
 	<string name="dialog_title_add_keycloak_user" state="needs_review" hash="-1050193239">Kontakt hinzufügen</string>
 	<string name="dialog_message_add_keycloak_user" state="needs_review" hash="-1755937035">Du hast ausgewählt, %1$s zu deinen Kontakten hinzuzufügen. Möchtest du fortfahren?</string>
-	<string name="label_bind_keycloak" state="needs_review" hash="1305090894">Identitätsanbieter verwenden</string>
 	<string name="explanation_keycloak_update_new" state="needs_review" hash="1136733528">Du bist dabei, den Identitätsanbieter deines Unternehmens in Olvid zu konfigurieren. Nach der Konfiguration kannst du dich mit diesem Server authentifizieren und Olvid ermöglicht es dir, andere Mitarbeiter nahtlos zu deinen Kontakten hinzuzufügen.\nBitte kontaktiere deinen Administrator für weitere Details.</string>
 	<string name="explanation_keycloak_update_change_server" state="needs_review" hash="2029115402">Olvid ist bereits so konfiguriert, dass es einen ANDEREN Identitätsanbieter verwendet. Wenn Ihr Unternehmen tatsächlich den Identitätsanbieter gewechselt hat, können Sie sich mit diesem neuen Anbieter authentifizieren. Wenn Sie sich nicht sicher sind, können Sie einfach abbrechen.\nWenden Sie sich für weitere Details an Ihren Administrator.</string>
 	<string name="explanation_keycloak_update_same_server" state="needs_review" hash="1886762594">Olvid ist bereits mit dem Identitätsanbieter Ihres Unternehmens konfiguriert.\nWenden Sie sich für weitere Details an Ihren Administrator.</string>
@@ -995,12 +979,7 @@
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Du hast Olvid so konfiguriert, dass automatische Backups an einen Cloud-Anbieter verwendet werden, aber deine Sitzung ist abgelaufen. Du musst dich erneut bei diesem Anbieter anmelden.\n\nWenn du keine automatischen Backups mehr möchtest, kannst du diese in den App-Einstellungen deaktivieren. Beachte, dass automatische Backups die einzige Möglichkeit sind, den Verlust deiner Kontakte zu verhindern, falls dein Gerät verloren geht oder beschädigt wird.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Anmelden</string>
 	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Remote kontaktieren</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s ist bereits in Ihren Kontakten gespeichert.</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s ist Teil deiner Liste bekannter Nutzer, aber noch nicht in deinen Kontakten.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Neu</string>
-	<string name="label_option_invite_locally" state="needs_review" hash="-1267065954">Option 1: persönlich</string>
-	<string name="label_option_invite_remotely" state="needs_review" hash="369824596">Option 2: aus der Ferne</string>
-	<string name="text_explanation_mutual_scan" state="needs_review" hash="-1822394875">Bitte %1$s diesen QR-Code scannen, um sofort Kontakt aufzunehmen.</string>
 	<string name="text_explanation_invalid_mutual_scan_qr_code" state="needs_review" hash="-1461387693">Dieser QR-Code kann nicht verwendet werden, um %1$s zu deinen Kontakten hinzuzufügen.\nBitte versuche es erneut und stelle sicher, dass %1$s deinen QR-Code scannt, bevor du seinen scannt.</string>
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s wird zu deinen Kontakten hinzugefügt, sobald sein Gerät erreichbar ist.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s wurde zu deinen Kontakten hinzugefügt 🙌!</string>
@@ -1087,7 +1066,6 @@
 	<string name="button_label_create_password" state="needs_review" hash="649429298">Passwort erstellen</string>
 	<string name="toast_message_hidden_profile_password_set" state="needs_review" hash="1225440753">Verstecktes Profil-Passwort festgelegt</string>
 	<string name="toast_message_hidden_profile_password_failed" state="needs_review" hash="-1988538273">Fehler beim Erstellen des Passworts für das verborgene Profil</string>
-	<string name="button_label_directory" state="needs_review" hash="351731324">Verzeichnis</string>
 	<string name="dialog_title_cancel_hide_profile" state="needs_review" hash="356889825">Passwort verwerfen?</string>
 	<string name="dialog_message_cancel_hide_profile" state="needs_review" hash="1495424902">Du bist im Begriff, die Änderungen, die du vorgenommen hast, zu verwerfen. Insbesondere das Passwort, das du für dieses Profil gewählt hast, wurde noch nicht gespeichert und geht verloren.\nBist du sicher, dass du fortfahren möchtest?</string>
 	<string name="dialog_title_unhide_profile" state="needs_review" hash="-733133172">Profil anzeigen?</string>
@@ -1185,7 +1163,7 @@
 	<string name="pref_send_with_hardware_enter_summary" state="needs_review" hash="1694640710">Wenn aktiviert, sendet das Drücken von \"Enter\" mit einer Hardware-Tastatur deine Nachricht. \"Shift + Enter\" fügt eine neue Zeile hinzu.</string>
 	<string name="pref_ping_connectivity_indicator_title" state="needs_review" hash="1245192677">Netzwerkverbindungsanzeige</string>
 	<string name="pref_text_ping_connectivity_indicator_none" state="needs_review" hash="-1725558072">Keine Verbindungsanzeige</string>
-	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Farbbild auf dem \"i\" des Olvid-Logos</string>
+	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="752487342">Farbiger Punkt in der Titelleiste</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Unauffällige Linie oben in der Gesprächsliste</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Vollständiger Verbindungsstatus oben in der Chatliste</string>
 	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Zeige niemals eine Anzeige, nicht einmal bei Verbindungsverlust</string>
@@ -2051,18 +2029,15 @@
 	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">Hinzufügen</string>
 	<string name="label_poll_see_answers" state="needs_review" hash="710858547">Antworten anzeigen</string>
 	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">Warte auf ihre Antwort</string>
-	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">Erinnern</string>
 	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">Füge eine \"%1$s\" Antwort hinzu</string>
 	<string name="label_poll_options" state="needs_review" hash="-13216192">Optionen</string>
 	<string name="text_none_answer" state="needs_review" hash="560562575">Keine der oben genannten</string>
 	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">Mehrere Antworten zulassen</string>
 	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">Wähle eine oder mehrere Antworten</string>
-	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">Quizmodus</string>
 	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">Ende</string>
 	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">Ablaufdatum hinzufügen</string>
 	<string name="label_poll_expiration" state="needs_review" hash="605126523">Die Umfrage endet in %1$s</string>
 	<string name="label_poll_ended" state="needs_review" hash="415569292">Umfrage beendet</string>
-	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">Füge mindestens zwei Antworten hinzu</string>
 	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">Diese Antwort existiert bereits</string>
 	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">Als CSV exportieren</string>
 	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">Fehler beim Exportieren der Umfrage als CSV. Bitte versuchen Sie es erneut.</string>
@@ -2090,12 +2065,10 @@
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Eingeladen</string>
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Neue Nachricht</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Neuer Kontakt</string>
-	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Suchen</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Von Angesicht zu Angesicht</string>
 	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Fernsteuerung</string>
-	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Abbrechen</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Scannt gegenseitig eure QR-Codes</string>
-	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Lass deinen jetzt scannen</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Lass %1$s deinen Code scannen</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Code gescannt!</string>
 	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">Kann den Code nicht scannen?</string>
 	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Lade sie auf anderem Wege einladen</string>
@@ -2108,9 +2081,15 @@
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Füge deinen ersten Kontakt hinzu</string>
 	<string name="label_discussion" state="needs_review" hash="301166224">Diskussion</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Kamera wechseln</string>
-	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Möchten Sie Kontakt zu %1$s aufnehmen?</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">%1$s aus der Ferne kontaktieren?</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Die Kontakte unten sind Teil dieser Gruppe, haben aber noch keine private Unterhaltung mit Ihnen.</string>
 	<string name="label_group_admins" state="needs_review" hash="468245065">Gruppenadministratoren</string>
 	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" ist eine gemeinsame Gruppe</string>
 	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Um Ihre Privatsphäre zu schützen, verfügt Olvid über **kein öffentliches oder zentrales Benutzerverzeichnis**. Ihr Name wird nur den Personen angezeigt, mit denen Sie sich verbinden.</string>
+	<string name="tab_title_discussions" state="needs_review" hash="491497248">Chats</string>
+	<string name="tab_title_contacts" state="needs_review" hash="-859216410">Kontakte</string>
+	<string name="tab_title_groups" state="needs_review" hash="-990226727">Gruppen</string>
+	<string name="tab_title_calls" state="needs_review" hash="541245696">Anrufe</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Angepinnte Konversation</string>
+	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">Kann %1$s Ihren Code nicht scannen?</string>
 </resources>

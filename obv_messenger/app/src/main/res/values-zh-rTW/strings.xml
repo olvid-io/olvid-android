@@ -225,7 +225,6 @@
 	<string name="notification_title_one_to_one_invitation" state="needs_review" hash="-351127459">來自 %1$s 的邀請</string>
 	<string name="notification_title_user_has_mentioned_you" state="needs_review" hash="-1965484006">%1$s 提及了您</string>
 	<string name="pref_autodownload_size_title" state="needs_review" hash="149272168">自動下載附件…</string>
-	<string name="pref_category_camera_title" state="needs_review" hash="1539779714">照片</string>
 	<string name="pref_camera_resolution_title" state="needs_review" hash="-1295742224">是否要調整在 Olvid 內拍攝的照片大小？</string>
 	<string name="pref_qr_correction_level_title" state="needs_review" hash="-1685499441">QR碼錯誤更正等級</string>
 	<string name="pref_text_QR_correction_high" state="needs_review" hash="1408732723">高</string>
@@ -572,16 +571,10 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">對話分頁</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">聯絡人分頁</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">群組分頁</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">新增聯絡人</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">通知點</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">移除敏感的 JPEG 中繼資料</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">啟用後，Olvid 會嘗試移除匯入的照片檔案中的敏感元數據。\n這包括 GPS 數據、相機型號、建立日期…</string>
-	<string name="activity_title_add_contact" state="needs_review" hash="-1050193239">新增聯絡人</string>
 	<string name="button_label_scan" state="needs_review" hash="1683724449">掃描</string>
-	<string name="text_explanation_scan_contact_id" state="needs_review" hash="-2129167034">掃描其他使用者的 ID 可以讓您邀請他們。</string>
-	<string name="button_label_share_my_id" state="needs_review" hash="-75320325">分享我的ID</string>
-	<string name="label_scan" state="needs_review" hash="1683724449">掃描</string>
-	<string name="button_label_show_my_id" state="needs_review" hash="-197520345">顯示我的身份證</string>
 	<string name="toast_message_unrecognized_url" state="needs_review" hash="1921493221">無法辨識的 QR 碼網址</string>
 	<string name="dialog_title_webclient_sas_input" state="needs_review" hash="891876517">請輸入您網頁瀏覽器上顯示的 PIN 碼</string>
 	<string name="webclient_error_invalid_qrcode" state="needs_review" hash="358206378">QR碼無效</string>
@@ -592,7 +585,6 @@
 	<string name="webclient_toast_connection_timedout" state="needs_review" hash="869943528">網頁客戶端連線逾時</string>
 	<string name="webclient_protocol_in_progress" state="needs_review" hash="805709221">正在建立您的應用程式與網頁客戶端之間的安全連線…</string>
 	<string name="webclient_error_sas_incorrect" state="needs_review" hash="-1861981708">PIN 碼錯誤。請再試一次。</string>
-	<string name="label_webclient" state="needs_review" hash="-2125862146">網頁客戶端</string>
 	<string name="label_webclient_already_running" state="needs_review" hash="788166693">網頁版已在執行</string>
 	<string name="label_webclient_restart_connection" state="needs_review" hash="934550160">關閉目前連線並啟動新的連線嗎？</string>
 	<string name="webclient_successfully_connected" state="needs_review" hash="-1216119082">連線成功建立！</string>
@@ -614,7 +606,6 @@
 	<string name="pref_webclient_notification_for_messages_after_inactivity_title" state="needs_review" hash="-732458468">無活動時通知</string>
 	<string name="activity_detected_after_inactivity" state="needs_review" hash="1909603717">網頁版偵測到長時間未活動後出現活動</string>
 	<string name="pref_webclient_notification_for_messages_after_inactivity_summary" state="needs_review" hash="464494780">如果 10 分鐘沒有任何活動，則接收通知。</string>
-	<string name="text_explanation_scan_share_id" state="needs_review" hash="1214882443">分享您的 ID 允許其他 Olvid 使用者邀請您。</string>
 	<string name="dialog_title_subscription_updated" state="needs_review" hash="1912189310">訂閱已更新</string>
 	<string name="button_label_add_contact" state="needs_review" hash="744905192">新增聯絡人</string>
 	<string name="button_label_add" state="needs_review" hash="-1358923215">新增</string>
@@ -629,7 +620,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">授權伺服器：</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">您的伺服器：</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">授權啟動連結格式不正確。\n\n請聯絡傳送此連結給您的人員。</string>
-	<string name="label_please_contact_activation_link" state="needs_review" hash="-497652404">請聯絡傳送此連結給您的對象。</string>
 	<string name="label_checking_license" state="needs_review" hash="-777109669">正在驗證授權…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">無法驗證授權狀態</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">未知授權</string>
@@ -720,7 +710,6 @@
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">啟用後，閱後即焚訊息和預設有限可見時長的訊息會在您進入對話時立即開啟。否則，需要點擊才能開啟。</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">啟用後，已清除的傳出訊息會被保留，以便您可以查看訊息是否已送達或已讀取。否則，它們將被刪除。</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">網頁客戶端</string>
-	<string name="label_title_change_list" state="needs_review" hash="76730245">已更新設定</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">設定更新連結解析錯誤</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">傳送與接收訊息</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">共享限時訊息設定</string>
@@ -860,13 +849,8 @@
 	<string name="toast_message_keycloak_revoke_successful" state="needs_review" hash="-1216369809">已成功取代先前的 Olvid ID</string>
 	<string name="dialog_title_keycloak_authentication_required_user_id_changed" state="needs_review" hash="-896407029">偵測到使用者變更</string>
 	<string name="dialog_message_keycloak_authentication_required_user_id_changed" state="needs_review" hash="1319874532">您的 Olvid ID 由您的公司身分驗證供應商管理。您似乎是以與平常不同的使用者身分驗證。這不支援。\n\n請聯絡您的管理員或重新以正確的使用者身分驗證。</string>
-	<string name="hint_search_keycloak" state="needs_review" hash="1386776811">搜尋公司目錄…</string>
-	<string name="explanation_empty_keycloak_search" state="needs_review" hash="860472461">找不到結果</string>
-	<string name="explanation_keycloak_search_not_started" state="needs_review" hash="1192355189">您的 Olvid ID 由您的公司身分驗證供應商管理。\n\n您可以使用上方搜尋欄位，並在公司使用者目錄中搜尋，輕鬆新增公司內部聯絡人。</string>
-	<string name="explanation_keycloak_searching" state="needs_review" hash="1696749815">搜尋中…</string>
 	<string name="dialog_title_add_keycloak_user" state="needs_review" hash="-1050193239">新增聯絡人</string>
 	<string name="dialog_message_add_keycloak_user" state="needs_review" hash="-1755937035">您已選擇將 %1$s 新增至您的聯絡人。您要繼續嗎？</string>
-	<string name="label_bind_keycloak" state="needs_review" hash="1305090894">使用身分識別供應商</string>
 	<string name="explanation_keycloak_update_new" state="needs_review" hash="1136733528">您即將在 Olvid 中設定貴公司的身分識別提供者。設定完成後，您就可以使用此伺服器進行驗證，Olvid 也會讓您能無縫地將其他員工新增到您的聯絡人。\n請聯絡您的管理員以獲取更多詳細資訊。</string>
 	<string name="explanation_keycloak_update_change_server" state="needs_review" hash="2029115402">Olvid 已經設定使用不同的身分驗證供應商。如果您的公司確實更換了身分驗證供應商，您可以繼續使用新的供應商進行驗證。如果您不確定，請直接取消。\n請聯絡您的管理員以獲取更多詳細資訊。</string>
 	<string name="explanation_keycloak_update_same_server" state="needs_review" hash="1886762594">Olvid 已經設定好與貴公司的身分驗證供應商連動。\n請聯絡您的管理員以獲取更多詳細資訊。</string>
@@ -995,12 +979,7 @@
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">您已設定 Olvid 使用自動備份至雲端供應商，但您的連線已過期。您需要再次登入該供應商。\n\n如果您不再需要自動備份，可以在應用程式設定中停用它們。請記住，自動備份是防止您的聯絡人遺失的唯一方法，如果您的裝置遺失或損壞。</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">登入</string>
 	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">遠端聯繫</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s 已經是您的聯絡人。</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s 出現在您的已知用戶列表中，但尚未加入您的聯絡人。</string>
 	<string name="label_new" state="needs_review" hash="1426137772">新增</string>
-	<string name="label_option_invite_locally" state="needs_review" hash="-1267065954">選項 1：面對面</string>
-	<string name="label_option_invite_remotely" state="needs_review" hash="369824596">選項 2：遠端</string>
-	<string name="text_explanation_mutual_scan" state="needs_review" hash="-1822394875">請讓%1$s掃描此QR碼以立即聯繫。</string>
 	<string name="text_explanation_invalid_mutual_scan_qr_code" state="needs_review" hash="-1461387693">這個 QR 碼無法用來將 %1$s 新增至您的聯絡人。\n請重試，確認 %1$s 掃描您的 QR 碼，然後再掃描他們的 QR 碼。</string>
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">當%1$s的裝置可連線時，將會自動加入您的聯絡人。</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s 已加入您的聯絡人 🙌！</string>
@@ -1087,7 +1066,6 @@
 	<string name="button_label_create_password" state="needs_review" hash="649429298">設定密碼</string>
 	<string name="toast_message_hidden_profile_password_set" state="needs_review" hash="1225440753">隱私檔案密碼已設定</string>
 	<string name="toast_message_hidden_profile_password_failed" state="needs_review" hash="-1988538273">無法建立隱藏個人檔案密碼</string>
-	<string name="button_label_directory" state="needs_review" hash="351731324">通訊錄</string>
 	<string name="dialog_title_cancel_hide_profile" state="needs_review" hash="356889825">捨棄您的密碼嗎？</string>
 	<string name="dialog_message_cancel_hide_profile" state="needs_review" hash="1495424902">您即將捨棄您所做的變更。特別是，您為此設定檔選擇的密碼尚未儲存，將會遺失。\n您確定要繼續嗎？</string>
 	<string name="dialog_title_unhide_profile" state="needs_review" hash="-733133172">顯示個人資料？</string>
@@ -1186,7 +1164,7 @@
 	<string name="pref_send_with_hardware_enter_summary" state="needs_review" hash="1694640710">啟用後，如果您使用的是實體鍵盤，按下「Enter」會傳送您的訊息。「Shift + Enter」會換行</string>
 	<string name="pref_ping_connectivity_indicator_title" state="needs_review" hash="1245192677">網路連線指示器</string>
 	<string name="pref_text_ping_connectivity_indicator_none" state="needs_review" hash="-1725558072">沒有連線指示</string>
-	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Olvid 標誌「i」上的彩色點</string>
+	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="752487342">標題列中的彩色圓點</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">對話列表頂端的隱密線</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">在對話列表中顯示完整的連線狀態</string>
 	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">絕不顯示任何指示器，即使在連線中斷時</string>
@@ -2055,18 +2033,15 @@
 	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">新增</string>
 	<string name="label_poll_see_answers" state="needs_review" hash="710858547">查看回覆</string>
 	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">等待他們的回复</string>
-	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">提醒</string>
 	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">新增 \"%1$s\" 選項</string>
 	<string name="label_poll_options" state="needs_review" hash="-13216192">選項</string>
 	<string name="text_none_answer" state="needs_review" hash="560562575">以上皆非</string>
 	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">允許多個答案</string>
 	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">選擇一個或多個答案</string>
-	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">測驗模式</string>
 	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">結束</string>
 	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">添加過期日期</string>
 	<string name="label_poll_expiration" state="needs_review" hash="605126523">投票將在%1$s結束</string>
 	<string name="label_poll_ended" state="needs_review" hash="415569292">投票結束</string>
-	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">新增至少兩個回覆</string>
 	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">此回覆已存在</string>
 	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">匯出為 CSV</string>
 	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">匯出投票為 CSV 檔案時發生錯誤。請重試。</string>
@@ -2094,12 +2069,10 @@
 	<string name="button_label_invited" state="needs_review" hash="2094724552">已邀請</string>
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">新訊息</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">新聯絡人</string>
-	<string name="new_message_action_search" state="needs_review" hash="-2085358317">搜尋</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">面對面</string>
 	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">遠端</string>
-	<string name="new_contact_cancel" state="needs_review" hash="1270066923">取消</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">掃描彼此的 QR 碼</string>
-	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">現在掃描您的</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">請讓%1$s掃描您的代碼</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">代碼已掃描！</string>
 	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">無法掃描條碼？</string>
 	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">以其他方式邀請他們</string>
@@ -2112,9 +2085,15 @@
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">新增您的第一個聯絡人</string>
 	<string name="label_discussion" state="needs_review" hash="301166224">討論</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">切換相機</string>
-	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">您想與%1$s聯繫嗎？</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">遠端聯繫%1$s？</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">以下聯絡人屬於此群組，但尚未與您進行私聊。</string>
 	<string name="label_group_admins" state="needs_review" hash="468245065">群組管理員</string>
 	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" 是一個共同群組</string>
 	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">為了保護您的隱私，Olvid **沒有公開或中央化的使用者目錄**。您的姓名僅會被您聯繫的人看到。</string>
+	<string name="tab_title_discussions" state="needs_review" hash="491497248">討論</string>
+	<string name="tab_title_contacts" state="needs_review" hash="-859216410">聯絡人</string>
+	<string name="tab_title_groups" state="needs_review" hash="-990226727">群組</string>
+	<string name="tab_title_calls" state="needs_review" hash="541245696">通話</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">已置頂的對話</string>
+	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">%1$s 無法掃描您的代碼？</string>
 </resources>

@@ -4,7 +4,7 @@
       tools:context="io.olvid.messenger.main.MainActivity">
     <item
         android:id="@+id/action_search"
-        android:icon="@drawable/ic_search_white"
+        android:icon="@drawable/ic_search_black"
         android:orderInCategory="10"
         android:title="@string/menu_action_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"

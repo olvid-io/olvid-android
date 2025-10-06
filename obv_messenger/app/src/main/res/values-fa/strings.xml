@@ -225,7 +225,6 @@
 	<string name="notification_title_one_to_one_invitation" state="needs_review" hash="-351127459">دعوت از %1$s</string>
 	<string name="notification_title_user_has_mentioned_you" state="needs_review" hash="-1965484006">%1$s شما را منشن کرد</string>
 	<string name="pref_autodownload_size_title" state="needs_review" hash="149272168">دانلود خودکار پیوست‌ها…</string>
-	<string name="pref_category_camera_title" state="needs_review" hash="1539779714">عکس‌ها</string>
 	<string name="pref_camera_resolution_title" state="needs_review" hash="-1295742224">آیا می‌خواهید عکس‌های گرفته شده در Olvid را تغییر اندازه دهید؟</string>
 	<string name="pref_qr_correction_level_title" state="needs_review" hash="-1685499441">سطح تصحیح خطای کد QR</string>
 	<string name="pref_text_QR_correction_high" state="needs_review" hash="1408732723">بالا</string>
@@ -572,16 +571,10 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">زبانه گفتگوها</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">برگه مخاطبین</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">تب گروه‌ها</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">افزودن مخاطب</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">نقطه اعلان</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">حذف فراداده‌های حساس JPEG</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">با فعال‌سازی این گزینه، Olvid تلاش می‌کند تا متادیتاهای حساس را از فایل‌های عکس وارد شده حذف کند.\nاین شامل داده‌های GPS، سازنده دوربین، تاریخ ایجاد و... می‌شود.</string>
-	<string name="activity_title_add_contact" state="needs_review" hash="-1050193239">افزودن مخاطب</string>
 	<string name="button_label_scan" state="needs_review" hash="1683724449">اسکن</string>
-	<string name="text_explanation_scan_contact_id" state="needs_review" hash="-2129167034">اسکن کردن شناسه کاربر دیگر به شما امکان می‌دهد او را دعوت کنید.</string>
-	<string name="button_label_share_my_id" state="needs_review" hash="-75320325">شناسه کاربری خود را به اشتراک بگذارید</string>
-	<string name="label_scan" state="needs_review" hash="1683724449">اسکن</string>
-	<string name="button_label_show_my_id" state="needs_review" hash="-197520345">نمایش شناسه من</string>
 	<string name="toast_message_unrecognized_url" state="needs_review" hash="1921493221">آدرس QR-code نامعتبر</string>
 	<string name="dialog_title_webclient_sas_input" state="needs_review" hash="891876517">لطفاً کد پین نمایش داده شده در مرورگر وب خود را وارد کنید</string>
 	<string name="webclient_error_invalid_qrcode" state="needs_review" hash="358206378">کد QR نامعتبر</string>
@@ -592,7 +585,6 @@
 	<string name="webclient_toast_connection_timedout" state="needs_review" hash="869943528">اتصال وب‌کلاینت منقضی شد</string>
 	<string name="webclient_protocol_in_progress" state="needs_review" hash="805709221">ایجاد یک اتصال امن بین برنامه و کلاینت وب…</string>
 	<string name="webclient_error_sas_incorrect" state="needs_review" hash="-1861981708">پین نادرست است. لطفاً دوباره تلاش کنید.</string>
-	<string name="label_webclient" state="needs_review" hash="-2125862146">کلاینت وب</string>
 	<string name="label_webclient_already_running" state="needs_review" hash="788166693">وب‌کلاینت در حال حاضر در حال اجراست</string>
 	<string name="label_webclient_restart_connection" state="needs_review" hash="934550160">آیا اتصال فعلی را ببندم و یک اتصال جدید برقرار کنم؟</string>
 	<string name="webclient_successfully_connected" state="needs_review" hash="-1216119082">اتصال با موفقیت برقرار شد!</string>
@@ -614,7 +606,6 @@
 	<string name="pref_webclient_notification_for_messages_after_inactivity_title" state="needs_review" hash="-732458468">اعلان بعد عدم فعالیت</string>
 	<string name="activity_detected_after_inactivity" state="needs_review" hash="1909603717">فعالیتی در WebClient پس از یک دوره طولانی عدم فعالیت شناسایی شد.</string>
 	<string name="pref_webclient_notification_for_messages_after_inactivity_summary" state="needs_review" hash="464494780">در صورت وجود فعالیت پس از 10 دقیقه عدم فعالیت، یک اعلان دریافت کنید.</string>
-	<string name="text_explanation_scan_share_id" state="needs_review" hash="1214882443">به اشتراک‌گذاری شناسه شما به کاربر دیگر Olvid اجازه می‌دهد تا شما را دعوت کند.</string>
 	<string name="dialog_title_subscription_updated" state="needs_review" hash="1912189310">اشتراک به‌روز شد</string>
 	<string name="button_label_add_contact" state="needs_review" hash="744905192">افزودن مخاطب</string>
 	<string name="button_label_add" state="needs_review" hash="-1358923215">افزودن</string>
@@ -629,7 +620,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">سرور مجوز:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">سرور شما:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">پیوند فعال‌سازی مجوز نامعتبر است.\n\nلطفاً با شخصی که این پیوند را برای شما ارسال کرده است، تماس بگیرید.</string>
-	<string name="label_please_contact_activation_link" state="needs_review" hash="-497652404">لطفاً با شخصی که این لینک را برای شما فرستاده تماس بگیرید.</string>
 	<string name="label_checking_license" state="needs_review" hash="-777109669">بررسی مجوز...</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">امکان بررسی وضعیت مجوز وجود ندارد</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">مجوز ناشناخته</string>
@@ -720,7 +710,6 @@
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">با فعال‌سازی این گزینه، پیام‌های یک‌بار مصرف و پیام‌هایی که مدت زمان نمایش محدودی دارند، به محض ورود به گفتگو باز می‌شوند. در غیر این صورت، برای باز کردن آن‌ها نیاز به کلیک است.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">با فعال‌سازی این گزینه، پیام‌های پاک‌شده‌ی ارسالی حفظ می‌شوند تا بتوانید زمان تحویل یا خوانده‌شدن آن‌ها را ببینید. در غیر این صورت، آن‌ها حذف می‌شوند.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">کلاینت وب</string>
-	<string name="label_title_change_list" state="needs_review" hash="76730245">تنظیمات به‌روزرسانی شد</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">پیوند به‌روزرسانی تنظیمات نامعتبر است</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">ارسال و دریافت پیام‌ها</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">تنظیمات پیام‌های ناپایدار اشتراکی</string>
@@ -860,13 +849,8 @@
 	<string name="toast_message_keycloak_revoke_successful" state="needs_review" hash="-1216369809">شناسه قدیمی Olvid با موفقیت جایگزین شد</string>
 	<string name="dialog_title_keycloak_authentication_required_user_id_changed" state="needs_review" hash="-896407029">تغییر کاربر شناسایی شد</string>
 	<string name="dialog_message_keycloak_authentication_required_user_id_changed" state="needs_review" hash="1319874532">شناسه Olvid شما توسط ارائه‌دهنده هویت شرکت شما مدیریت می‌شود. به نظر می‌رسد که شما با کاربری متفاوت از معمول احراز هویت کرده‌اید. این پشتیبانی نمی‌شود.\n\nلطفاً با مدیر سیستم خود تماس بگیرید یا با کاربر صحیح دوباره احراز هویت کنید.</string>
-	<string name="hint_search_keycloak" state="needs_review" hash="1386776811">جستجوی دفترچه شرکت…</string>
-	<string name="explanation_empty_keycloak_search" state="needs_review" hash="860472461">نتیجه‌ای یافت نشد</string>
-	<string name="explanation_keycloak_search_not_started" state="needs_review" hash="1192355189">شناسه Olvid شما توسط ارائه‌دهنده هویت شرکت شما مدیریت می‌شود.\n\nشما می‌توانید به راحتی با استفاده از فیلد جستجوی بالا و جستجو در فهرست کاربران، مخاطبین داخل شرکت خود را اضافه کنید.</string>
-	<string name="explanation_keycloak_searching" state="needs_review" hash="1696749815">جستجو…</string>
 	<string name="dialog_title_add_keycloak_user" state="needs_review" hash="-1050193239">افزودن مخاطب</string>
 	<string name="dialog_message_add_keycloak_user" state="needs_review" hash="-1755937035">شما انتخاب کردید که %1$s را به مخاطبین خود اضافه کنید. آیا می‌خواهید ادامه دهید؟</string>
-	<string name="label_bind_keycloak" state="needs_review" hash="1305090894">از یک ارائه‌دهنده هویت استفاده کنید</string>
 	<string name="explanation_keycloak_update_new" state="needs_review" hash="1136733528">در حال پیکربندی ارائه‌دهنده هویت شرکت خود در Olvid هستید. پس از پیکربندی، می‌توانید با این سرور احراز هویت کنید و Olvid به شما امکان می‌دهد تا سایر کارمندان را به طور یکپارچه به مخاطبین خود اضافه کنید.\nلطفاً برای کسب اطلاعات بیشتر با مدیر سیستم خود تماس بگیرید.</string>
 	<string name="explanation_keycloak_update_change_server" state="needs_review" hash="2029115402">Olvid قبلاً برای استفاده از یک ارائه‌دهنده هویت متفاوت پیکربندی شده است. اگر شرکت شما واقعاً ارائه‌دهنده هویت را تغییر داده است، می‌توانید با احراز هویت با این ارائه‌دهنده جدید ادامه دهید. در صورت شک، به سادگی لغو کنید.\nلطفاً برای کسب اطلاعات بیشتر با مدیر سیستم خود تماس بگیرید.</string>
 	<string name="explanation_keycloak_update_same_server" state="needs_review" hash="1886762594">Olvid قبلاً با ارائه‌دهنده هویت شرکت شما پیکربندی شده است.\nلطفاً برای کسب اطلاعات بیشتر با مدیر سیستم خود تماس بگیرید.</string>
@@ -995,12 +979,7 @@
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">شما Olvid را طوری تنظیم کرده‌اید که از پشتیبان‌گیری خودکار به یک ارائه‌دهنده ابری استفاده کند، اما نشست شما منقضی شده است. برای استفاده مجدد باید به این ارائه‌دهنده وارد شوید.\n\nاگر دیگر نمی‌خواهید از پشتیبان‌گیری خودکار استفاده کنید، می‌توانید آن را در تنظیمات برنامه غیرفعال کنید. به خاطر داشته باشید که پشتیبان‌گیری خودکار تنها راه جلوگیری از از دست رفتن مخاطبین شما در صورت گم شدن یا آسیب دیدن دستگاه شماست.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">ورود</string>
 	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">از راه دور ارتباط برقرار کنید</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s از قبل در لیست مخاطبین شما وجود دارد.</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s در لیست کاربران شناخته‌شده‌ی شما قرار دارد اما هنوز در لیست مخاطبین شما نیست.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">جدید</string>
-	<string name="label_option_invite_locally" state="needs_review" hash="-1267065954">گزینه ۱: رو در رو</string>
-	<string name="label_option_invite_remotely" state="needs_review" hash="369824596">گزینه ۲: از راه دور</string>
-	<string name="text_explanation_mutual_scan" state="needs_review" hash="-1822394875">از %1$s بخواهید این کد QR را اسکن کند تا بلافاصله در تماس باشیم.</string>
 	<string name="text_explanation_invalid_mutual_scan_qr_code" state="needs_review" hash="-1461387693">این کد QR نمی‌تواند برای افزودن %1$s به مخاطبین شما استفاده شود.\nلطفاً دوباره امتحان کنید و مطمئن شوید که %1$s کد QR شما را قبل از اسکن کد QR او اسکن می‌کند.</string>
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s پس از برقراری ارتباط با دستگاه او، به لیست مخاطبین شما اضافه خواهد شد.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s به لیست مخاطبین شما اضافه شد 🙌</string>
@@ -1087,7 +1066,6 @@
 	<string name="button_label_create_password" state="needs_review" hash="649429298">ایجاد رمز عبور</string>
 	<string name="toast_message_hidden_profile_password_set" state="needs_review" hash="1225440753">رمز عبور پروفایل مخفی تنظیم شد</string>
 	<string name="toast_message_hidden_profile_password_failed" state="needs_review" hash="-1988538273">ایجاد رمز عبور پروفایل مخفی ناموفق بود</string>
-	<string name="button_label_directory" state="needs_review" hash="351731324">فهرست</string>
 	<string name="dialog_title_cancel_hide_profile" state="needs_review" hash="356889825">رمز عبور خود را دور بیندازید؟</string>
 	<string name="dialog_message_cancel_hide_profile" state="needs_review" hash="1495424902">در حال از دست دادن تغییراتی هستید که اعمال کرده‌اید. به طور خاص، رمز عبوری که برای این پروفایل انتخاب کرده‌اید هنوز ذخیره نشده و از بین خواهد رفت.\nآیا مطمئن هستید که می‌خواهید ادامه دهید؟</string>
 	<string name="dialog_title_unhide_profile" state="needs_review" hash="-733133172">نمایه را آشکار کنیم؟</string>
@@ -1186,7 +1164,7 @@
 	<string name="pref_send_with_hardware_enter_summary" state="needs_review" hash="1694640710">هنگامی که این گزینه فعال باشد، اگر از صفحه‌کلید سخت‌افزاری استفاده می‌کنید، فشردن دکمه‌ی «Enter» پیام شما را ارسال می‌کند. «Shift + Enter» خط جدیدی اضافه می‌کند.</string>
 	<string name="pref_ping_connectivity_indicator_title" state="needs_review" hash="1245192677">نشانگر اتصال شبکه</string>
 	<string name="pref_text_ping_connectivity_indicator_none" state="needs_review" hash="-1725558072">بدون نشانگر اتصال</string>
-	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">نقطه رنگی روی حرف «i» در لوگوی Olvid</string>
+	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="752487342">نقطه رنگی در نوار عنوان</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">خط ظریف در بالای لیست گفتگوها</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">وضعیت اتصال کامل در بالای لیست گفتگوها</string>
 	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">هرگز هیچ نشانگری را نمایش نده، حتی در صورت قطع ارتباط</string>
@@ -2055,18 +2033,15 @@
 	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">افزودن</string>
 	<string name="label_poll_see_answers" state="needs_review" hash="710858547">مشاهده پاسخ‌ها</string>
 	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">در انتظار پاسخ آن‌ها</string>
-	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">یادآوری</string>
 	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">افزودن گزینه‌ی «%1$s»</string>
 	<string name="label_poll_options" state="needs_review" hash="-13216192">تنظیمات</string>
 	<string name="text_none_answer" state="needs_review" hash="560562575">هیچ‌کدام از موارد بالا</string>
 	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">اجازه دادن به پاسخ‌های متعدد</string>
 	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">یک یا چند پاسخ را انتخاب کنید</string>
-	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">حالت آزمون</string>
 	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">پایان</string>
 	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">تاریخ انقضا را اضافه کنید</string>
 	<string name="label_poll_expiration" state="needs_review" hash="605126523">نظرسنجی در %1$s به پایان می‌رسد</string>
 	<string name="label_poll_ended" state="needs_review" hash="415569292">نظرسنجی به پایان رسید</string>
-	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">حداقل دو پاسخ اضافه کنید</string>
 	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">این پاسخ از قبل وجود دارد</string>
 	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">استخراج به صورت CSV</string>
 	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">خطا در خروجی‌گیری از نظرسنجی به صورت CSV. لطفاً دوباره امتحان کنید.</string>
@@ -2095,12 +2070,10 @@
 	<string name="button_label_invited" state="needs_review" hash="2094724552">دعوت‌شده</string>
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">پیام جدید</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">تماس جدید</string>
-	<string name="new_message_action_search" state="needs_review" hash="-2085358317">جستجو</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">رو در رو</string>
 	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">از راه دور</string>
-	<string name="new_contact_cancel" state="needs_review" hash="1270066923">لغو کردن</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">کدهای QR یکدیگر را اسکن کنید</string>
-	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">حالا اسکن خود را انجام دهید</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">از %1$s بخواهید کد شما را اسکن کند</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">کد اسکن شد!</string>
 	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">آیا نمی‌توانید کد را اسکن کنید؟</string>
 	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">آن‌ها را به روش دیگری دعوت کنید</string>
@@ -2113,9 +2086,15 @@
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">افزودن اولین مخاطب</string>
 	<string name="label_discussion" state="needs_review" hash="301166224">گفتگو</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">تغییر دوربین</string>
-	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">آیا می‌خواهید با %1$s ارتباط برقرار کنید؟</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">آیا می‌خواهید از راه دور با %1$s تماس بگیرید؟</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">مخاطبین زیر عضو این گروه هستند اما هنوز با شما گفتگوی خصوصی ندارند.</string>
 	<string name="label_group_admins" state="needs_review" hash="468245065">مدیران گروه</string>
 	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" یک گروه مشترک است</string>
 	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">برای محافظت از حریم خصوصی شما، Olvid **هیچ فهرست عمومی یا متمرکز از کاربران** ندارد. نام شما فقط توسط افرادی که با آنها ارتباط برقرار می‌کنید قابل مشاهده خواهد بود.</string>
+	<string name="tab_title_discussions" state="needs_review" hash="491497248">گفتگوها</string>
+	<string name="tab_title_contacts" state="needs_review" hash="-859216410">مخاطبین</string>
+	<string name="tab_title_groups" state="needs_review" hash="-990226727">گروه‌ها</string>
+	<string name="tab_title_calls" state="needs_review" hash="541245696">تماس‌ها</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">گفتگوی سنجاق‌شده</string>
+	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">آیا %1$s نمی‌تواند کد شما را اسکن کند؟</string>
 </resources>

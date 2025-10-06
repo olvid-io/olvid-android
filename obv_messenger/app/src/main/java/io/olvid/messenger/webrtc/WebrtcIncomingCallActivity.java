@@ -27,14 +27,21 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Observer;
 
 import io.olvid.engine.Logger;
@@ -70,7 +77,27 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
                 | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
+        WindowCompat.enableEdgeToEdge(getWindow());
+
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_webrtc_incoming_call);
+
+        Window window = getWindow();
+        if (window != null) {
+            WindowCompat.setDecorFitsSystemWindows(window, false);
+            WindowCompat.getInsetsController(window, window.getDecorView()).setAppearanceLightNavigationBars(false);
+            WindowCompat.getInsetsController(window, window.getDecorView()).setAppearanceLightStatusBars(false);
+        }
+
+        ConstraintLayout root = findViewById(R.id.root_constraint_layout);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (@NonNull View v, @NonNull WindowInsetsCompat windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime() | WindowInsetsCompat.Type.displayCutout());
+                root.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                return WindowInsetsCompat.CONSUMED;
+            });
+        }
+
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -85,7 +112,6 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
 
         callObserver = new CallObserver();
 
-        setContentView(R.layout.activity_webrtc_incoming_call);
 
         rejectCallButton = findViewById(R.id.reject_call_button);
         rejectCallButton.setOnClickListener(this);

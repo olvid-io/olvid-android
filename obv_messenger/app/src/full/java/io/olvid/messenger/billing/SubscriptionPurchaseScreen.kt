@@ -275,9 +275,10 @@ fun SubscriptionPurchaseScreen(
                                         )
                                     )
                                     .build()
-                                val result =
-                                    billingClient.launchBillingFlow(context as Activity, params)
-                                if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+                                val result = (context as? Activity)?.let {
+                                    billingClient.launchBillingFlow(context, params)
+                                }
+                                if (result == null || result.responseCode != BillingClient.BillingResponseCode.OK) {
                                     App.toast(
                                         R.string.toast_message_error_launching_in_app_purchase,
                                         Toast.LENGTH_LONG

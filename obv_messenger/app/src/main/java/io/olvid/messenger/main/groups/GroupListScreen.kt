@@ -31,17 +31,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
@@ -49,20 +43,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.R.color
-import io.olvid.messenger.R.drawable
-import io.olvid.messenger.R.string
 import io.olvid.messenger.databases.dao.Group2Dao.GroupOrGroup2
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.plus
@@ -147,33 +135,5 @@ fun GroupListScreen(
 
             RefreshingIndicator(refreshing = refreshing, refreshState = refreshState)
         }
-    }
-}
-
-@Composable
-private fun NewGroupButton(onNewGroupClick: () -> Unit) {
-    Button(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(colorResource(id = color.almostWhite))
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-        colors = buttonColors(
-            backgroundColor = colorResource(id = color.olvid_gradient_light),
-            contentColor = Color.White
-        ),
-        onClick = onNewGroupClick,
-    ) {
-        Icon(
-            modifier = Modifier.requiredSize(24.dp),
-            painter = painterResource(id = drawable.ic_group_add),
-            contentDescription = ""
-        )
-        Text(
-            modifier = Modifier
-                .weight(1f),
-            text = stringResource(id = string.button_label_new_group).uppercase(),
-            textAlign = TextAlign.Center
-        )
     }
 }

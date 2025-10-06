@@ -125,6 +125,25 @@ public class StringUtils {
         }
     }
 
+    public static String getCompactDateString(@NonNull Context context, long timestamp) {
+        long now = System.currentTimeMillis();
+        if (DateUtils.isToday(timestamp)) {
+            // same day
+            return DateUtils.formatDateTime(context, timestamp, DateUtils.FORMAT_SHOW_TIME);
+        } else if ((timestamp < now && timestamp + 86_400_000 > now) ||
+                DateUtils.isToday(timestamp + 86_400_000)) {
+            // yesterday
+            return context.getString(R.string.text_yesterday);
+        } else if (timestamp < now
+                && (timestamp + 86_400_000*6 > now || DateUtils.isToday(timestamp + 86_400_000*6))) {
+            // same week
+            return DateUtils.formatDateTime(context, timestamp, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_ALL);
+        } else {
+            return DateUtils.formatDateTime(context, timestamp, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_ALL);
+        }
+    }
+
+
     public static CharSequence getPreciseAbsoluteDateString(@NonNull Context context, long timestamp) {
         return getPreciseAbsoluteDateString(context, timestamp, "\n");
     }

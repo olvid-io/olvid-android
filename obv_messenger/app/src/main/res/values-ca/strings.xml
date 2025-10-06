@@ -225,7 +225,6 @@
 	<string name="notification_title_one_to_one_invitation" state="needs_review" hash="-351127459">Invitació de %1$s</string>
 	<string name="notification_title_user_has_mentioned_you" state="needs_review" hash="-1965484006">%1$s t\'ha mencionat</string>
 	<string name="pref_autodownload_size_title" state="needs_review" hash="149272168">Descarregar automàticament els adjunts…</string>
-	<string name="pref_category_camera_title" state="needs_review" hash="1539779714">Fotos</string>
 	<string name="pref_camera_resolution_title" state="needs_review" hash="-1295742224">Redimensionar les fotos fetes dins d\'Olvid?</string>
 	<string name="pref_qr_correction_level_title" state="needs_review" hash="-1685499441">Nivell de correcció d\'errors del codi QR</string>
 	<string name="pref_text_QR_correction_high" state="needs_review" hash="1408732723">Alt</string>
@@ -572,16 +571,10 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">Pestanya de xats</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">Pestanya Contactes</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">Grups</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">Afegeix contacte</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">Punt de notificació</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">Eliminar metadades JPEG sensibles</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">Quan s\'activi, Olvid intentarà eliminar les metadades sensibles dels fitxers de foto importats.\nAixò inclou les dades GPS, la marca de la càmera, la data de creació…</string>
-	<string name="activity_title_add_contact" state="needs_review" hash="-1050193239">Afegir un contacte</string>
 	<string name="button_label_scan" state="needs_review" hash="1683724449">Escanejar</string>
-	<string name="text_explanation_scan_contact_id" state="needs_review" hash="-2129167034">Escanear la ID d\'un altre usuari et permet convidar-lo.</string>
-	<string name="button_label_share_my_id" state="needs_review" hash="-75320325">Compartir el meu ID</string>
-	<string name="label_scan" state="needs_review" hash="1683724449">Escanejar</string>
-	<string name="button_label_show_my_id" state="needs_review" hash="-197520345">Mostrar el meu ID</string>
 	<string name="toast_message_unrecognized_url" state="needs_review" hash="1921493221">URL de codi QR no reconeguda</string>
 	<string name="dialog_title_webclient_sas_input" state="needs_review" hash="891876517">Si us plau, introdueix el codi PIN que es mostra al teu navegador web</string>
 	<string name="webclient_error_invalid_qrcode" state="needs_review" hash="358206378">Codi QR no vàlid</string>
@@ -592,7 +585,6 @@
 	<string name="webclient_toast_connection_timedout" state="needs_review" hash="869943528">Temps d\'espera de la connexió del client web ha expirat</string>
 	<string name="webclient_protocol_in_progress" state="needs_review" hash="805709221">Establint una connexió segura entre la teva App i el Client Web…</string>
 	<string name="webclient_error_sas_incorrect" state="needs_review" hash="-1861981708">PIN incorrecte. Si us plau, torneu-ho a provar.</string>
-	<string name="label_webclient" state="needs_review" hash="-2125862146">Client web</string>
 	<string name="label_webclient_already_running" state="needs_review" hash="788166693">El client web ja està en execució</string>
 	<string name="label_webclient_restart_connection" state="needs_review" hash="934550160">Tancar la connexió actual i establir-ne una de nova?</string>
 	<string name="webclient_successfully_connected" state="needs_review" hash="-1216119082">Connexió establerta correctament!</string>
@@ -614,7 +606,6 @@
 	<string name="pref_webclient_notification_for_messages_after_inactivity_title" state="needs_review" hash="-732458468">Notificar després d\'inactivitat</string>
 	<string name="activity_detected_after_inactivity" state="needs_review" hash="1909603717">S\'ha detectat activitat al Client Web després d\'un període prolongat d\'inactivitat.</string>
 	<string name="pref_webclient_notification_for_messages_after_inactivity_summary" state="needs_review" hash="464494780">Rep una notificació en cas d\'activitat després de 10 minuts d\'inactivitat.</string>
-	<string name="text_explanation_scan_share_id" state="needs_review" hash="1214882443">Compartir el teu ID permet a un altre usuari d\'Olvid convidar-te.</string>
 	<string name="dialog_title_subscription_updated" state="needs_review" hash="1912189310">Subscripció actualitzada</string>
 	<string name="button_label_add_contact" state="needs_review" hash="744905192">Afegir contacte</string>
 	<string name="button_label_add" state="needs_review" hash="-1358923215">Afegir</string>
@@ -629,7 +620,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">Servidor de llicència:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">El teu servidor:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">Enllaç d\'activació de llicència incorrecte.\n\nSi us plau, contacta amb la persona que t\'ha enviat aquest enllaç.</string>
-	<string name="label_please_contact_activation_link" state="needs_review" hash="-497652404">Si us plau, contacta amb la persona que t\'ha enviat aquest enllaç.</string>
 	<string name="label_checking_license" state="needs_review" hash="-777109669">Comprovant llicència…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">No s\'ha pogut verificar l\'estat de la llicència</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Llicència desconeguda</string>
@@ -720,7 +710,6 @@
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">Quan s\'activa, els missatges de lectura única i els missatges amb la durada de visibilitat limitada predeterminada s\'obren tan aviat com entres a la conversa. Altrament, es requereix un clic.</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">Quan s\'activa, els missatges sortints esborrats es conserven perquè puguis veure quan es lliuren o es llegeixen. Altrament, es suprimeixen.</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">Client web</string>
-	<string name="label_title_change_list" state="needs_review" hash="76730245">Configuració actualitzada</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">Error analitzant l\'enllaç d\'actualització de configuració</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">Enviament i recepció de missatges</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">Configuració compartida de missatges efímers</string>
@@ -860,13 +849,8 @@
 	<string name="toast_message_keycloak_revoke_successful" state="needs_review" hash="-1216369809">ID Olvid anterior reemplaçat correctament</string>
 	<string name="dialog_title_keycloak_authentication_required_user_id_changed" state="needs_review" hash="-896407029">Canvi d\'usuari detectat</string>
 	<string name="dialog_message_keycloak_authentication_required_user_id_changed" state="needs_review" hash="1319874532">El seu ID Olvid és gestionat pel proveïdor d\'identitat de la seva empresa. Sembla que s\'ha autentificat amb un usuari diferent de l\'habitual. Això no està suportat.\n\nSi us plau, contacteu amb el vostre administrador o torneu a autenticar-vos com l\'usuari correcte.</string>
-	<string name="hint_search_keycloak" state="needs_review" hash="1386776811">Buscar al directori de l\'empresa…</string>
-	<string name="explanation_empty_keycloak_search" state="needs_review" hash="860472461">No s\'han trobat resultats</string>
-	<string name="explanation_keycloak_search_not_started" state="needs_review" hash="1192355189">El teu ID d\'Olvid és gestionat pel proveïdor d\'identitat de la teva empresa.\n\nPots afegir fàcilment contactes dins de la teva empresa utilitzant el camp de cerca anterior i explorant el seu directori d\'usuaris.</string>
-	<string name="explanation_keycloak_searching" state="needs_review" hash="1696749815">Cercant…</string>
 	<string name="dialog_title_add_keycloak_user" state="needs_review" hash="-1050193239">Afegir un contacte</string>
 	<string name="dialog_message_add_keycloak_user" state="needs_review" hash="-1755937035">Has seleccionat afegir %1$s als teus contactes. Vols continuar?</string>
-	<string name="label_bind_keycloak" state="needs_review" hash="1305090894">Utilitzar un proveïdor d\'identitat</string>
 	<string name="explanation_keycloak_update_new" state="needs_review" hash="1136733528">Estàs a punt de configurar el proveïdor d\'identitat de la teva empresa a Olvid. Un cop configurat, podràs autenticar-te amb aquest servidor i Olvid et permetrà afegir fàcilment altres empleats als teus contactes.\nPosa\'t en contacte amb el teu administrador per obtenir més detalls.</string>
 	<string name="explanation_keycloak_update_change_server" state="needs_review" hash="2029115402">Olvid ja està configurat per utilitzar un proveïdor d\'identitat DIFERENT. Si la seva empresa ha canviat efectivament de proveïdor d\'identitat, podeu continuar autenticant-vos amb aquest nou proveïdor. Si té dubtes, simplement cancel·li.\nSi us plau, poseu-vos en contacte amb el vostre administrador per obtenir més detalls.</string>
 	<string name="explanation_keycloak_update_same_server" state="needs_review" hash="1886762594">Olvid ja està configurat amb el proveïdor d\'identitat de la vostra empresa.\nSi us plau, poseu-vos en contacte amb el vostre administrador per obtenir més detalls.</string>
@@ -995,12 +979,7 @@
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">Has configurat Olvid per utilitzar còpies de seguretat automàtiques a un proveïdor del núvol, però la teva sessió ha caducat. Necessites iniciar sessió en aquest proveïdor de nou.\n\nSi ja no vols utilitzar còpies de seguretat automàtiques, pots desactivar-les a la Configuració de l\'aplicació. Tingues en compte que les còpies de seguretat automàtiques són l\'única manera d\'evitar la pèrdua dels teus contactes si perds o es danya el teu dispositiu.</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">Inicia sessió</string>
 	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">Posa\'t en contact de forma remota</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s ja forma part dels teus contactes.</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s és a la teva llista d\'usuaris coneguts però encara no és als teus contactes.</string>
 	<string name="label_new" state="needs_review" hash="1426137772">Nou</string>
-	<string name="label_option_invite_locally" state="needs_review" hash="-1267065954">Opció 1: cara a cara</string>
-	<string name="label_option_invite_remotely" state="needs_review" hash="369824596">Opció 2: de forma remota</string>
-	<string name="text_explanation_mutual_scan" state="needs_review" hash="-1822394875">Demana a %1$s que escaneixi aquest codi QR per contactar immediatament.</string>
 	<string name="text_explanation_invalid_mutual_scan_qr_code" state="needs_review" hash="-1461387693">Aquest codi QR no es pot utilitzar per afegir %1$s als teus contactes.\nTorna-ho a provar, assegurant-te que %1$s escaneja el teu codi QR abans que escaneixis el seu.</string>
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s s\'afegirà als teus contactes un cop el seu dispositiu sigui accessible.</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s s\'ha afegit als teus contactes 🙌!</string>
@@ -1087,7 +1066,6 @@
 	<string name="button_label_create_password" state="needs_review" hash="649429298">Crea una contrasenya</string>
 	<string name="toast_message_hidden_profile_password_set" state="needs_review" hash="1225440753">Contrasenya de perfil ocult establerta</string>
 	<string name="toast_message_hidden_profile_password_failed" state="needs_review" hash="-1988538273">Error al crear la contrasenya del perfil ocult</string>
-	<string name="button_label_directory" state="needs_review" hash="351731324">Directori</string>
 	<string name="dialog_title_cancel_hide_profile" state="needs_review" hash="356889825">Descartar la teva contrasenya?</string>
 	<string name="dialog_message_cancel_hide_profile" state="needs_review" hash="1495424902">Estàs a punt de descartar els canvis que has fet. En particular, la contrasenya que vas triar per a aquest perfil encara no s\'ha desat i es perdrà.\nEstàs segur que vols continuar?</string>
 	<string name="dialog_title_unhide_profile" state="needs_review" hash="-733133172">¿Mostrar perfil ocult?</string>
@@ -1186,7 +1164,7 @@
 	<string name="pref_send_with_hardware_enter_summary" state="needs_review" hash="1694640710">Quan s\'activa, si utilitzes un teclat físic, prémer \"Enter\" enviarà el teu missatge. \"Shift + Enter\" afegirà una nova línia.</string>
 	<string name="pref_ping_connectivity_indicator_title" state="needs_review" hash="1245192677">Indicador de connectivitat de xarxa</string>
 	<string name="pref_text_ping_connectivity_indicator_none" state="needs_review" hash="-1725558072">Sense indicador de connexió</string>
-	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Punt de color a la \"i\" del logotip d\'Olvid</string>
+	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="752487342">Punt de color a la barra de títol</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">Línia discreta a la part superior de la llista de converses</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">Estatut de connexió complet a la part superior de la llista de xats</string>
 	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">Mai mostrar cap indicador, ni tan sols en cas de pèrdua de connexió</string>
@@ -2054,18 +2032,15 @@
 	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">Afegeix</string>
 	<string name="label_poll_see_answers" state="needs_review" hash="710858547">Veure les respostes</string>
 	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">Esperant la seva resposta</string>
-	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">Recorda</string>
 	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">Afegeix una resposta \"%1$s\"</string>
 	<string name="label_poll_options" state="needs_review" hash="-13216192">Opcions</string>
 	<string name="text_none_answer" state="needs_review" hash="560562575">Cap de les anteriors</string>
 	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">Permetre múltiples respostes</string>
 	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">Trieu una o més respostes</string>
-	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">Mode de qüestionari</string>
 	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">Final</string>
 	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">Afegeix data de caducitat</string>
 	<string name="label_poll_expiration" state="needs_review" hash="605126523">L\'enquesta finalitza en %1$s</string>
 	<string name="label_poll_ended" state="needs_review" hash="415569292">Enquesta finalitzada</string>
-	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">Afegeix almenys dues respostes</string>
 	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">Aquesta resposta ja existeix</string>
 	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">Exporta com a CSV</string>
 	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">Error a l\'exportar l\'enquesta com a CSV. Si us plau, torneu-ho a provar.</string>
@@ -2093,12 +2068,10 @@
 	<string name="button_label_invited" state="needs_review" hash="2094724552">Convidat</string>
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Missatge nou</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Nou contacte</string>
-	<string name="new_message_action_search" state="needs_review" hash="-2085358317">Cerca</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Cara a cara</string>
 	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">A distància</string>
-	<string name="new_contact_cancel" state="needs_review" hash="1270066923">Cancel·lar</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Escanegeu els codis QR de l\'altre</string>
-	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">Ara fes escanejar el teu</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Demana a %1$s que scanegi el teu codi.</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Codi escanejat!</string>
 	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">No es pot escanejar el codi?</string>
 	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">Convida\'ls d\'una altra manera</string>
@@ -2111,9 +2084,15 @@
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">Afegeix el teu primer contacte</string>
 	<string name="label_discussion" state="needs_review" hash="301166224">Discussió</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">Canviar de càmera</string>
-	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">Vols posar-te en contacte amb %1$s?</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">Posa\'t en contact remotament amb %1$s?</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">Els contactes següents formen part d\'aquest grup, però encara no tenen una conversa privada amb tu.</string>
 	<string name="label_group_admins" state="needs_review" hash="468245065">Administradors del grup</string>
 	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" és un grup comú</string>
 	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">Per protegir la teva privacitat, Olvid **no té un directori públic o centralitzat d\'usuaris**. El teu nom només el veuran les persones amb les quals et connectis.</string>
+	<string name="tab_title_discussions" state="needs_review" hash="491497248">Converses</string>
+	<string name="tab_title_contacts" state="needs_review" hash="-859216410">Contactes</string>
+	<string name="tab_title_groups" state="needs_review" hash="-990226727">Grups</string>
+	<string name="tab_title_calls" state="needs_review" hash="541245696">Trucades</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Conversa fixada</string>
+	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">%1$s no pot escanejar el teu codi?</string>
 </resources>

@@ -4,8 +4,6 @@
     <dimen name="subtitle_font_size">12dp</dimen>
 
     <dimen name="tab_bar_size">48dp</dimen>
-    <dimen name="minus_tab_bar_size">-48dp</dimen>
-    <dimen name="half_tab_bar_size">24dp</dimen>
 
     <dimen name="owned_identity_list_popup_y_offset">4dp</dimen>
 </resources>

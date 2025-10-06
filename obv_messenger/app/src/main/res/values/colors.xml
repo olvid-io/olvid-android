@@ -7,9 +7,9 @@
     <color name="primary700">#154271</color>
     <color name="primary400_90">#e54b6b93</color>
     <color name="primary100">#e0edf9</color>
-    <color name="accent">#70959E</color>
     <color name="almostWhite">#ffffff</color>
     <color name="almostBlack">#303030</color>
+    <color name="almostBlackOverlay">#77303030</color>
     <color name="red">#ff3b30</color>
     <color name="green">#67AE55</color>
     <color name="orange">#ff9800</color>
@@ -33,6 +33,7 @@
     <color name="greyOverlay">#66808080</color>
     <color name="greySubtleOverlay">#22808080</color>
     <color name="whiteOverlay">#bbffffff</color>
+    <color name="whiteOpaqueOverlay">#e5ffffff</color>
     <color name="blackOverlay">#66000000</color>
     <color name="blackDarkOverlay">#bb000000</color>
     <color name="transparent">#00000000</color>

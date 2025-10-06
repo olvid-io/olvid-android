@@ -142,8 +142,8 @@ public class ShareActivity extends LockScreenOrNotActivity {
 
         Window window = getWindow();
         if (window != null) {
-            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-            WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightNavigationBars(false);
+            WindowCompat.setDecorFitsSystemWindows(window, false);
+            WindowCompat.getInsetsController(window, window.getDecorView()).setAppearanceLightNavigationBars(false);
         }
         ConstraintLayout root = findViewById(R.id.root_constraint_layout);
         if (root != null) {

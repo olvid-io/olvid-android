@@ -6,7 +6,6 @@
     android:id="@+id/group_details_coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/olvid_gradient_dark"
     tools:context=".group.GroupDetailsActivity">
 
     <ScrollView
@@ -553,7 +552,8 @@
         app:layout_anchorGravity="right|bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_message"
+        app:srcCompat="@drawable/tab_discussions"
+        android:tint="@color/alwaysWhite"
         android:contentDescription="@string/content_description_open_discussion" />
 
     <FrameLayout

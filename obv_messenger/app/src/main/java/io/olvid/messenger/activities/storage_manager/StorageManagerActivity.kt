@@ -29,13 +29,14 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.LinearLayout.LayoutParams
 import android.widget.PopupMenu
 import android.widget.PopupWindow
 import android.widget.TextView
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
@@ -43,13 +44,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.view.ActionMode.Callback
 import androidx.appcompat.widget.Toolbar
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
-import androidx.core.view.updateMargins
 import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.MutableLiveData
@@ -133,7 +135,11 @@ class StorageManagerActivity : LockScreenOrNotActivity() {
 
 
     override fun notLockedOnCreate() {
-        window.statusBarColor = ContextCompat.getColor(this, R.color.olvid_gradient_dark)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+        )
+
         setContentView(R.layout.activity_storage_manager)
 
         try {
@@ -149,20 +155,22 @@ class StorageManagerActivity : LockScreenOrNotActivity() {
         supportActionBar?.elevation = 0f
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
 
         findViewById<CoordinatorLayout>(R.id.root_coordinator)?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
                 val insets =
                     windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
                 view.updatePadding(top = insets.top)
-                findViewById<ViewPager2>(R.id.view_pager_container)?.updatePadding(
-                    left = insets.left,
-                    right = insets.right
-                )
-                view.updateLayoutParams<MarginLayoutParams> {
-                    updateMargins(bottom = insets.bottom)
-                }
+                findViewById<ViewPager2>(R.id.view_pager_container)?.updatePadding(left = insets.left, right = insets.right)
+                findViewById<ConstraintLayout>(R.id.collapsing_graph)?.updatePadding(left = insets.left, right = insets.right)
+                findViewById<Toolbar>(R.id.toolbar)?.updatePadding(left = insets.left, right = insets.right)
+
+                findViewById<ConstraintLayout>(R.id.bottom_bar)?.minHeight = insets.bottom + (48 * resources.displayMetrics.density).toInt()
+
                 WindowInsetsCompat.CONSUMED
             }
         }

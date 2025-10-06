@@ -182,7 +182,10 @@ fun ContactInvitationPopup(
                                 Text(
                                     text =
                                         if (groups?.size == 1) {
-                                            stringResource(R.string.text_common_group)
+                                            stringResource(
+                                                R.string.text_common_group,
+                                                groups?.first()?.discussion?.title.orEmpty()
+                                            )
                                         } else {
                                             pluralStringResource(
                                                 R.plurals.text_common_groups,

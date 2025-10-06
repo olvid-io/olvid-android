@@ -401,7 +401,7 @@ fun Discussion.getAnnotatedTitle(context: Context): AnnotatedString {
 fun Discussion.getAnnotatedDate(context: Context, message: Message?): AnnotatedString? {
     return message?.timestamp?.let {
         buildAnnotatedString {
-            append(StringUtils.getLongNiceDateString(context, message.timestamp) as String)
+            append(StringUtils.getCompactDateString(context, message.timestamp) as String)
             if (isLocked) {
                 addStyle(SpanStyle(fontStyle = FontStyle.Italic), 0, length)
             }

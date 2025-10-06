@@ -22,10 +22,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.util.Size
 import android.widget.Toast
-import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
@@ -51,7 +49,6 @@ import io.olvid.messenger.App
 import io.olvid.messenger.QRCodeImageAnalyzer
 import io.olvid.messenger.R
 import io.olvid.messenger.fragments.QRCodeScannerFragment
-import io.olvid.messenger.webrtc.components.findActivity
 import java.util.concurrent.Executors
 
 @Composable

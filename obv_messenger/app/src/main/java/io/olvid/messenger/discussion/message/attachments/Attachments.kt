@@ -143,6 +143,10 @@ enum class Visibility {
 
 @Composable
 fun constantSp(value: Int): TextUnit = with(LocalDensity.current) { (value / fontScale).sp }
+@Composable
+fun constantSp(value: Float): TextUnit = with(LocalDensity.current) { (value / fontScale).sp }
+@Composable
+fun scaledDp(value: Int): Dp = with(LocalDensity.current) { (value * fontScale).dp }
 
 data class Attachment(val fyle: Fyle, val fyleMessageJoinWithStatus: FyleMessageJoinWithStatus) {
     val deterministicContentUriForGallery: Uri by lazy {

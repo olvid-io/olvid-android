@@ -4,7 +4,6 @@
     android:id="@+id/root_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_activity_split_blue_white"
     tools:context=".settings.SettingsActivity">
 
    <FrameLayout

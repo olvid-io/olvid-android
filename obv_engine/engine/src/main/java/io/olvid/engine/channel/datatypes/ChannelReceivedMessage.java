@@ -21,7 +21,6 @@ package io.olvid.engine.channel.datatypes;
 
 
 import io.olvid.engine.Logger;
-import io.olvid.engine.channel.databases.ObliviousChannel;
 import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.Suite;

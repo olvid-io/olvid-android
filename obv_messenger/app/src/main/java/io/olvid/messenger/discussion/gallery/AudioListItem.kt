@@ -45,8 +45,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.ripple
+import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,7 +58,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -68,7 +67,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding.AudioInfo
@@ -245,7 +243,7 @@ fun AudioListItem(
                     text = stringResource(id = R.string.label_new).uppercase(),
                     fontSize = constantSp(value = 10),
                     lineHeight = constantSp(value = 10),
-                    color = Color.White
+                    color = colorResource(R.color.alwaysWhite)
                 )
             }
         }
@@ -263,7 +261,8 @@ fun AudioListItem(
                         fontSize = constantSp(value = 14),
                         lineHeight = constantSp(value = 16),
                         maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        color = colorResource(R.color.almostBlack)
                     )
 
                     if (playbackSpeedState > 0.1f && isPlaying) {
@@ -336,7 +335,7 @@ fun AudioListItem(
                             audioAttachmentServiceBinding?.toggleSpeakerOutput()
                         },
                         painter = painterResource(id = audioOutputResource),
-                        contentDescription = ""
+                        contentDescription = null
                     )
                 }
             }
@@ -348,9 +347,10 @@ fun AudioListItem(
                     Text(
                         text = timeFromMs(playtime),
                         style = OlvidTypography.subtitle1.copy(fontSize = constantSp(value = 10)),
-                        color = if (isPlaying) colorResource(id = R.color.olvid_gradient_light) else colorResource(
-                            id = R.color.greyTint
-                        )
+                        color = if (isPlaying)
+                            colorResource(id = R.color.olvid_gradient_light)
+                        else
+                            colorResource(id = R.color.greyTint)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Slider(
@@ -406,58 +406,58 @@ fun AudioListItem(
 @Preview(widthDp = 240)
 @Composable
 fun AudioListItemPreview() {
-    AppCompatTheme {
-        Column {
-            AudioListItem(modifier = Modifier.background(colorResource(id = R.color.almostWhite)),
-                fyleAndStatus = FyleAndStatus().apply {
-                    fyle = Fyle()
-                    fyleMessageJoinWithStatus = FyleMessageJoinWithStatus(
-                        0,
-                        0,
-                        byteArrayOf(),
-                        "",
-                        "Name of the file which is long and wraps.mp3",
-                        "audio/",
-                        FyleMessageJoinWithStatus.STATUS_COMPLETE,
-                        1024,
-                        byteArrayOf(),
-                        0,
-                        null
-                    )
-                },
-                activity = null,
-                audioAttachmentServiceBinding = null,
-                discussionId = 0,
-                onLongClick = { })
+    Column {
+        AudioListItem(
+            modifier = Modifier.background(colorResource(id = R.color.almostWhite)),
+            fyleAndStatus = FyleAndStatus().apply {
+                fyle = Fyle()
+                fyleMessageJoinWithStatus = FyleMessageJoinWithStatus(
+                    0,
+                    0,
+                    byteArrayOf(),
+                    "",
+                    "Name of the file which is long and wraps.mp3",
+                    "audio/",
+                    FyleMessageJoinWithStatus.STATUS_COMPLETE,
+                    1024,
+                    byteArrayOf(),
+                    0,
+                    null
+                )
+            },
+            activity = null,
+            audioAttachmentServiceBinding = null,
+            discussionId = 0,
+            onLongClick = { })
 
-            Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-            AudioListItem(modifier = Modifier.background(colorResource(id = R.color.almostWhite)),
-                fyleAndStatus = FyleAndStatus().apply {
-                    fyle = Fyle()
-                    fyleMessageJoinWithStatus = FyleMessageJoinWithStatus(
-                        0,
-                        0,
-                        byteArrayOf(),
-                        "",
-                        "Name of the file",
-                        false,
-                        null,
-                        "audio/mp3",
-                        FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE,
-                        1024*1024,
-                        byteArrayOf(),
-                        0,
-                        null,
-                        null,
-                        false,
-                        FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED
-                    )
-                },
-                activity = null,
-                audioAttachmentServiceBinding = null,
-                discussionId = 0,
-                onLongClick = { })
-        }
+        AudioListItem(
+            modifier = Modifier.background(colorResource(id = R.color.almostWhite)),
+            fyleAndStatus = FyleAndStatus().apply {
+                fyle = Fyle()
+                fyleMessageJoinWithStatus = FyleMessageJoinWithStatus(
+                    0,
+                    0,
+                    byteArrayOf(),
+                    "",
+                    "Name of the file",
+                    false,
+                    null,
+                    "audio/mp3",
+                    FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE,
+                    1024 * 1024,
+                    byteArrayOf(),
+                    0,
+                    null,
+                    null,
+                    false,
+                    FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED
+                )
+            },
+            activity = null,
+            audioAttachmentServiceBinding = null,
+            discussionId = 0,
+            onLongClick = { })
     }
 }

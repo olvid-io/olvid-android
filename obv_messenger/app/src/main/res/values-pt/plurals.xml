@@ -1,4 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="text_files" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1591553998">Arquivo</item>
+		<item quantity="other" state="needs_review" hash="-129414826">%1$d Arquivos</item>
+	</plurals>
+	<plurals name="text_images" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1471675200">Foto</item>
+		<item quantity="other" state="needs_review" hash="1017714912">%1$d Fotos</item>
+	</plurals>
+	<plurals name="text_videos" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="366973148">Vídeo</item>
+		<item quantity="other" state="needs_review" hash="-200168444">%1$d Vídeos</item>
+	</plurals>
 	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" e 1 outro grupo em comum</item>
 		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" e %2$d outros grupos em comum</item>

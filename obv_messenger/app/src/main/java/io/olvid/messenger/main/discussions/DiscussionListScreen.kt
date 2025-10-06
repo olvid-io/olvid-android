@@ -39,7 +39,6 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -91,21 +90,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.plus
+import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.message.OutboundMessageStatus
 import io.olvid.messenger.discussion.message.SwipeForActionBox
+import io.olvid.messenger.discussion.message.attachments.scaledDp
+import io.olvid.messenger.discussion.message.getOutboundStatusIcon
+import io.olvid.messenger.discussion.message.getOutboundStatusIconAspectRation
 import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.RefreshingIndicator
@@ -114,9 +119,6 @@ import io.olvid.messenger.main.archived.ArchivedDiscussionsActivity
 import io.olvid.messenger.main.archived.SwipeActionBackground
 import io.olvid.messenger.main.bookmarks.BookmarkedMessagesActivity
 import io.olvid.messenger.main.bookmarks.BookmarksViewModel
-import io.olvid.messenger.designsystem.cutoutHorizontalPadding
-import io.olvid.messenger.designsystem.plus
-import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.main.invitations.getAnnotatedDate
 import io.olvid.messenger.main.invitations.getAnnotatedTitle
@@ -617,18 +619,14 @@ fun DiscussionListScreen(
                                                                 context
                                                             ),
                                                         body = invitation?.let {
-                                                            AnnotatedString(
-                                                                it.statusText
-                                                            )
-                                                        }
-                                                            ?: discussion.getAnnotatedBody(
+                                                            AnnotatedString(it.statusText)
+                                                        } ?: discussion.getAnnotatedBody(
                                                                 context,
                                                                 message
                                                             ),
                                                         date = invitation?.getAnnotatedDate(
                                                             context
-                                                        )
-                                                            ?: discussion.getAnnotatedDate(
+                                                        ) ?: discussion.getAnnotatedDate(
                                                                 context,
                                                                 message
                                                             ),
@@ -654,13 +652,19 @@ fun DiscussionListScreen(
                                                         unread = (invitation?.requiresAction() == true) || discussion.unread,
                                                         unreadCount = unreadCount,
                                                         muted = discussionCustomization?.shouldMuteNotifications() == true,
-                                                        locked = discussion.isLocked && invitation == null,
+                                                        locked = discussion.isLocked && (invitation == null || invitation?.requiresAction() == false),
                                                         mentioned = unreadMention,
                                                         pinned = discussion.pinned != 0,
                                                         reorderableScope = this@ReorderableItem.takeIf { reorderable && discussion.isPreDiscussion.not() },
                                                         locationsShared = locationsShared,
+                                                        pendingContact = discussion.isPreDiscussion || (discussion.isLocked && invitation != null),
                                                         attachmentCount = if (message?.isLocationMessage == true) 0 else message?.totalAttachmentCount
                                                             ?: 0,
+                                                        imageAndVideoCount = if (message?.isLocationMessage == true) 0 else message?.imageCount
+                                                            ?: 0,
+                                                        videoCount = if (message?.isLocationMessage == true) 0 else message?.imageResolutions?.let {
+                                                            it.split(";").count { it.startsWith("v") }
+                                                        } ?: 0,
                                                         onClick = { onClick(discussion) },
                                                         selected = discussionListViewModel.isSelected(
                                                             discussion
@@ -674,30 +678,20 @@ fun DiscussionListScreen(
                                                         onDragStopped = {
                                                             discussionListViewModel.syncPinnedDiscussions()
                                                         },
-                                                        lastOutboundMessageStatus = {
-                                                            message?.let { lastMessage ->
+                                                        lastOutboundMessageStatus = message?.takeIf {it.getOutboundStatusIcon() != null}?.let { lastMessage ->
+                                                            {
                                                                 OutboundMessageStatus(
                                                                     modifier = Modifier.padding(
-                                                                        end = 4.dp
+                                                                        end = scaledDp(4)
                                                                     ),
-                                                                    size = 14.dp,
+                                                                    size = scaledDp(14),
                                                                     message = lastMessage
                                                                 )
                                                             }
-                                                        }
-                                                    )
-                                                    Spacer(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .padding(
-                                                                start = 84.dp,
-                                                                end = 12.dp
-                                                            )
-                                                            .requiredHeight(1.dp)
-                                                            .align(Alignment.BottomStart)
-                                                            .background(
-                                                                color = colorResource(id = R.color.lightGrey)
-                                                            )
+                                                        },
+                                                        lastOutboundMessageStatusWidth =  message?.takeIf {it.getOutboundStatusIcon() != null}?.let { lastMessage ->
+                                                            (14 * lastMessage.getOutboundStatusIconAspectRation() + 4).sp
+                                                        } ?: 0.sp
                                                     )
                                                 }
                                             }

@@ -225,7 +225,6 @@
 	<string name="notification_title_one_to_one_invitation" state="needs_review" hash="-351127459">%1$s से निमंत्रण</string>
 	<string name="notification_title_user_has_mentioned_you" state="needs_review" hash="-1965484006">%1$s ने आपको टैग किया</string>
 	<string name="pref_autodownload_size_title" state="needs_review" hash="149272168">अटैचमेंट स्वचालित रूप से डाउनलोड करें…</string>
-	<string name="pref_category_camera_title" state="needs_review" hash="1539779714">तस्वीरें</string>
 	<string name="pref_camera_resolution_title" state="needs_review" hash="-1295742224">क्या Olvid के भीतर ली गई तस्वीरों का आकार बदलें?</string>
 	<string name="pref_qr_correction_level_title" state="needs_review" hash="-1685499441">क्यूआर कोड त्रुटि सुधार स्तर</string>
 	<string name="pref_text_QR_correction_high" state="needs_review" hash="1408732723">उच्च</string>
@@ -572,16 +571,10 @@
 	<string name="content_description_discussions_tab" state="needs_review" hash="-1317411170">चर्चाएँ टैब</string>
 	<string name="content_description_contacts_tab" state="needs_review" hash="904960920">संपर्क</string>
 	<string name="content_description_groups_tab" state="needs_review" hash="1921723081">समूह टैब</string>
-	<string name="content_description_add_contact_button" state="needs_review" hash="-230274659">संपर्क जोड़ें</string>
 	<string name="content_description_notification_dot" state="needs_review" hash="371828684">नोटिफिकेशन डॉट</string>
 	<string name="pref_exif_erase_title" state="needs_review" hash="-863962475">संवेदनशील JPEG मेटाडेटा हटाएं</string>
 	<string name="pref_exif_erase_summary" state="needs_review" hash="1268994787">सक्रिय होने पर, Olvid आयातित फ़ोटो फ़ाइलों से संवेदनशील मेटाडेटा को हटाने का प्रयास करेगा।\nइसमें GPS डेटा, कैमरा मेक, निर्माण तिथि… शामिल हैं।</string>
-	<string name="activity_title_add_contact" state="needs_review" hash="-1050193239">संपर्क जोड़ें</string>
 	<string name="button_label_scan" state="needs_review" hash="1683724449">स्कैन करें</string>
-	<string name="text_explanation_scan_contact_id" state="needs_review" hash="-2129167034">किसी अन्य उपयोगकर्ता की आईडी स्कैन करने से आप उन्हें आमंत्रित कर सकते हैं।</string>
-	<string name="button_label_share_my_id" state="needs_review" hash="-75320325">मेरा आईडी साझा करें</string>
-	<string name="label_scan" state="needs_review" hash="1683724449">स्कैन करें</string>
-	<string name="button_label_show_my_id" state="needs_review" hash="-197520345">मेरी आईडी दिखाएं</string>
 	<string name="toast_message_unrecognized_url" state="needs_review" hash="1921493221">अज्ञात क्यूआर-कोड यूआरएल</string>
 	<string name="dialog_title_webclient_sas_input" state="needs_review" hash="891876517">कृपया अपने वेब ब्राउज़र में प्रदर्शित पिन कोड दर्ज करें</string>
 	<string name="webclient_error_invalid_qrcode" state="needs_review" hash="358206378">अमान्य क्यूआर कोड</string>
@@ -592,7 +585,6 @@
 	<string name="webclient_toast_connection_timedout" state="needs_review" hash="869943528">वेब क्लाइंट कनेक्शन समय समाप्त</string>
 	<string name="webclient_protocol_in_progress" state="needs_review" hash="805709221">आपके ऐप और वेब क्लाइंट के बीच एक सुरक्षित कनेक्शन स्थापित किया जा रहा है…</string>
 	<string name="webclient_error_sas_incorrect" state="needs_review" hash="-1861981708">गलत पिन. कृपया फिर से प्रयास करें।</string>
-	<string name="label_webclient" state="needs_review" hash="-2125862146">वेब क्लाइंट</string>
 	<string name="label_webclient_already_running" state="needs_review" hash="788166693">वेब क्लाइंट पहले से ही चल रहा है</string>
 	<string name="label_webclient_restart_connection" state="needs_review" hash="934550160">वर्तमान कनेक्शन बंद करें और एक नया शुरू करें?</string>
 	<string name="webclient_successfully_connected" state="needs_review" hash="-1216119082">कनेक्शन सफलतापूर्वक स्थापित हो गया!</string>
@@ -614,7 +606,6 @@
 	<string name="pref_webclient_notification_for_messages_after_inactivity_title" state="needs_review" hash="-732458468">निष्क्रियता के बाद सूचना</string>
 	<string name="activity_detected_after_inactivity" state="needs_review" hash="1909603717">वेब क्लाइंट में लंबे समय तक निष्क्रिय रहने के बाद गतिविधि का पता चला।</string>
 	<string name="pref_webclient_notification_for_messages_after_inactivity_summary" state="needs_review" hash="464494780">10 मिनट की निष्क्रियता के बाद गतिविधि होने पर सूचना प्राप्त करें।</string>
-	<string name="text_explanation_scan_share_id" state="needs_review" hash="1214882443">अपनी आईडी साझा करने से किसी अन्य Olvid उपयोगकर्ता को आपको आमंत्रित करने की अनुमति मिलती है।</string>
 	<string name="dialog_title_subscription_updated" state="needs_review" hash="1912189310">सदस्यता अपडेट की गई</string>
 	<string name="button_label_add_contact" state="needs_review" hash="744905192">संपर्क जोड़ें</string>
 	<string name="button_label_add" state="needs_review" hash="-1358923215">जोड़ें</string>
@@ -629,7 +620,6 @@
 	<string name="label_license_server" state="needs_review" hash="1566572313">लाइसेंस सर्वर:</string>
 	<string name="label_your_server" state="needs_review" hash="-940321662">आपका सर्वर:</string>
 	<string name="text_explanation_malformed_activation_link" state="needs_review" hash="-1368429365">लाइसेंस सक्रियण लिंक अमान्य है।\n\nकृपया उस व्यक्ति से संपर्क करें जिसने आपको यह लिंक भेजा है।</string>
-	<string name="label_please_contact_activation_link" state="needs_review" hash="-497652404">कृपया उस व्यक्ति से संपर्क करें जिसने आपको यह लिंक भेजा है।</string>
 	<string name="label_checking_license" state="needs_review" hash="-777109669">लाइसेंस की जाँच की जा रही है…</string>
 	<string name="label_unable_to_check_license_status" state="needs_review" hash="323920014">लाइसेंस स्थिति की जांच करने में असमर्थ</string>
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">अज्ञात लाइसेंस</string>
@@ -720,7 +710,6 @@
 	<string name="pref_auto_open_limited_visibility_inbound_summary" state="needs_review" hash="-237108805">सक्रिय होने पर, एक बार पढ़े जाने वाले संदेश और डिफ़ॉल्ट सीमित दृश्यता अवधि वाले संदेश जैसे ही आप चर्चा में प्रवेश करते हैं, खुल जाते हैं। अन्यथा, क्लिक की आवश्यकता होती है।</string>
 	<string name="pref_retain_wiped_outbound_messages_summary" state="needs_review" hash="-908482254">सक्रिय होने पर, मिटाए गए आउटगोइंग संदेश बरकरार रखे जाते हैं ताकि आप देख सकें कि वे कब वितरित या पढ़े गए थे। अन्यथा, वे हटा दिए जाएंगे।</string>
 	<string name="pref_category_webclient_title" state="needs_review" hash="-2125862146">वेब क्लाइंट</string>
-	<string name="label_title_change_list" state="needs_review" hash="76730245">सेटिंग्स अपडेट की गई</string>
 	<string name="toast_message_error_parsing_settings_update_link" state="needs_review" hash="2114443565">सेटिंग्स अपडेट लिंक पार्स करने में त्रुटि</string>
 	<string name="pref_discussion_category_send_receive" state="needs_review" hash="115574282">संदेश भेजना और प्राप्त करना</string>
 	<string name="pref_discussion_category_shared_ephemeral_settings_title" state="needs_review" hash="-1685482591">साझा क्षणिक संदेश सेटिंग्स</string>
@@ -860,13 +849,8 @@
 	<string name="toast_message_keycloak_revoke_successful" state="needs_review" hash="-1216369809">पिछला Olvid ID सफलतापूर्वक बदल दिया गया</string>
 	<string name="dialog_title_keycloak_authentication_required_user_id_changed" state="needs_review" hash="-896407029">उपयोगकर्ता परिवर्तन का पता चला</string>
 	<string name="dialog_message_keycloak_authentication_required_user_id_changed" state="needs_review" hash="1319874532">आपकी Olvid ID आपकी कंपनी के पहचान प्रदाता द्वारा प्रबंधित की जाती है। ऐसा लगता है कि आपने सामान्य से अलग उपयोगकर्ता के रूप में प्रमाणित किया है। यह समर्थित नहीं है।\n\nकृपया अपने व्यवस्थापक से संपर्क करें या सही उपयोगकर्ता के रूप में फिर से प्रमाणित करें।</string>
-	<string name="hint_search_keycloak" state="needs_review" hash="1386776811">कंपनी की निर्देशिका खोजें…</string>
-	<string name="explanation_empty_keycloak_search" state="needs_review" hash="860472461">कोई परिणाम नहीं मिला</string>
-	<string name="explanation_keycloak_search_not_started" state="needs_review" hash="1192355189">आपकी Olvid ID आपकी कंपनी के पहचान प्रदाता द्वारा प्रबंधित की जाती है।\n\nआप ऊपर दिए गए खोज फ़ील्ड का उपयोग करके और इसकी उपयोगकर्ता निर्देशिका में खोज करके आसानी से अपनी कंपनी के भीतर संपर्क जोड़ सकते हैं।</string>
-	<string name="explanation_keycloak_searching" state="needs_review" hash="1696749815">खोज रहा है…</string>
 	<string name="dialog_title_add_keycloak_user" state="needs_review" hash="-1050193239">संपर्क जोड़ें</string>
 	<string name="dialog_message_add_keycloak_user" state="needs_review" hash="-1755937035">आपने %1$s को अपने संपर्कों में जोड़ने के लिए चुना है। क्या आप आगे बढ़ना चाहते हैं?</string>
-	<string name="label_bind_keycloak" state="needs_review" hash="1305090894">एक पहचान प्रदाता का उपयोग करें</string>
 	<string name="explanation_keycloak_update_new" state="needs_review" hash="1136733528">आप Olvid में अपनी कंपनी के पहचान प्रदाता को कॉन्फ़िगर करने वाले हैं। एक बार कॉन्फ़िगर हो जाने के बाद, आप इस सर्वर के साथ प्रमाणित कर सकते हैं और Olvid आपको अपने संपर्कों में अन्य कर्मचारियों को आसानी से जोड़ने देगा।\nअधिक जानकारी के लिए कृपया अपने व्यवस्थापक से संपर्क करें।</string>
 	<string name="explanation_keycloak_update_change_server" state="needs_review" hash="2029115402">Olvid पहले से ही एक अलग पहचान प्रदाता का उपयोग करने के लिए कॉन्फ़िगर किया गया है। यदि आपकी कंपनी ने वास्तव में पहचान प्रदाता बदल दिया है, तो आप इस नए प्रदाता के साथ प्रमाणित करके आगे बढ़ सकते हैं। यदि आपको संदेह है, तो बस रद्द कर दें।\nअधिक जानकारी के लिए कृपया अपने व्यवस्थापक से संपर्क करें।</string>
 	<string name="explanation_keycloak_update_same_server" state="needs_review" hash="1886762594">Olvid पहले से ही आपकी कंपनी के पहचान प्रदाता के साथ कॉन्फ़िगर किया गया है।\nअधिक जानकारी के लिए कृपया अपने व्यवस्थापक से संपर्क करें।</string>
@@ -995,12 +979,7 @@
 	<string name="dialog_message_backup_requires_sign_in" state="needs_review" hash="119557495">आपने Olvid को किसी क्लाउड प्रदाता के लिए स्वचालित बैकअप का उपयोग करने के लिए कॉन्फ़िगर किया है, लेकिन आपका सत्र समाप्त हो गया है। आपको फिर से इस प्रदाता में साइन इन करने की आवश्यकता है।\n\nयदि आप अब स्वचालित बैकअप नहीं चाहते हैं, तो आप उन्हें ऐप सेटिंग्स में अक्षम कर सकते हैं। ध्यान रखें कि स्वचालित बैकअप आपके संपर्कों को खोने से रोकने का एकमात्र तरीका है यदि आपका डिवाइस खो जाता है या क्षतिग्रस्त हो जाता है।</string>
 	<string name="button_label_sign_in" state="needs_review" hash="-1369932447">साइन इन करें</string>
 	<string name="button_label_get_in_contact_remotely" state="needs_review" hash="-1685767964">दूर से संपर्क करें</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known" state="needs_review" hash="302209114">%1$s पहले से ही आपके संपर्कों का हिस्सा है।</string>
-	<string name="text_explanation_warning_mutual_scan_contact_already_known_not_one_to_one" state="needs_review" hash="1080615266">%1$s आपकी ज्ञात उपयोगकर्ताओं की सूची का हिस्सा है लेकिन अभी तक आपके संपर्कों में नहीं है।</string>
 	<string name="label_new" state="needs_review" hash="1426137772">नया</string>
-	<string name="label_option_invite_locally" state="needs_review" hash="-1267065954">विकल्प 1: आमने-सामने</string>
-	<string name="label_option_invite_remotely" state="needs_review" hash="369824596">विकल्प 2: दूर से</string>
-	<string name="text_explanation_mutual_scan" state="needs_review" hash="-1822394875">%1$s से तुरंत संपर्क करने के लिए इस QR कोड को स्कैन करवाएं।</string>
 	<string name="text_explanation_invalid_mutual_scan_qr_code" state="needs_review" hash="-1461387693">इस क्यूआर कोड का उपयोग %1$s को आपके संपर्कों में जोड़ने के लिए नहीं किया जा सकता है।\nकृपया फिर से प्रयास करें, यह सुनिश्चित करते हुए कि %1$s आपके क्यूआर कोड को स्कैन करे, इससे पहले कि आप उनका स्कैन करें।</string>
 	<string name="text_explanation_mutual_scan_pending" state="needs_review" hash="-1591433921">%1$s आपके संपर्कों में जुड़ जाएगा/जाएगी जैसे ही उसके डिवाइस तक पहुंचा जा सके।</string>
 	<string name="text_explanation_mutual_scan_success" state="needs_review" hash="-1480802173">%1$s को आपकी संपर्क सूची में जोड़ा गया 🙌!</string>
@@ -1087,7 +1066,6 @@
 	<string name="button_label_create_password" state="needs_review" hash="649429298">पासवर्ड बनाएं</string>
 	<string name="toast_message_hidden_profile_password_set" state="needs_review" hash="1225440753">छिपा हुआ प्रोफ़ाइल पासवर्ड सेट किया गया</string>
 	<string name="toast_message_hidden_profile_password_failed" state="needs_review" hash="-1988538273">छिपे हुए प्रोफ़ाइल पासवर्ड बनाने में विफल</string>
-	<string name="button_label_directory" state="needs_review" hash="351731324">निर्देशिका</string>
 	<string name="dialog_title_cancel_hide_profile" state="needs_review" hash="356889825">अपना पासवर्ड त्यागें?</string>
 	<string name="dialog_message_cancel_hide_profile" state="needs_review" hash="1495424902">आप उन बदलावों को त्यागने वाले हैं जो आपने किए हैं। विशेष रूप से, इस प्रोफ़ाइल के लिए आपके द्वारा चुना गया पासवर्ड अभी तक सहेजा नहीं गया है और खो जाएगा।\nक्या आप आगे बढ़ना चाहते हैं?</string>
 	<string name="dialog_title_unhide_profile" state="needs_review" hash="-733133172">प्रोफ़ाइल दिखाएं?</string>
@@ -1185,7 +1163,7 @@
 	<string name="pref_send_with_hardware_enter_summary" state="needs_review" hash="1694640710">जब सक्रिय किया जाए, तो यदि आप हार्डवेयर कीबोर्ड का उपयोग कर रहे हैं, तो "एंटर" दबाने से आपका संदेश भेजा जाएगा। "शिफ्ट + एंटर" एक नई लाइन जोड़ देगा।</string>
 	<string name="pref_ping_connectivity_indicator_title" state="needs_review" hash="1245192677">नेटवर्क कनेक्टिविटी इंडिकेटर</string>
 	<string name="pref_text_ping_connectivity_indicator_none" state="needs_review" hash="-1725558072">कोई कनेक्टिविटी संकेतक नहीं</string>
-	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="377002337">Olvid लोगो के "i" पर रंगीन बिंदु</string>
+	<string name="pref_text_ping_connectivity_indicator_dot" state="needs_review" hash="752487342">टाइटल बार में रंगीन बिंदु</string>
 	<string name="pref_text_ping_connectivity_indicator_line" state="needs_review" hash="-1488555370">चर्चा सूची के शीर्ष पर सूक्ष्म रेखा</string>
 	<string name="pref_text_ping_connectivity_indicator_full" state="needs_review" hash="-1661188746">चर्चा सूची के शीर्ष पर पूर्ण कनेक्शन स्थिति</string>
 	<string name="pref_text_ping_connectivity_indicator_never" state="needs_review" hash="718470870">कनेक्शन खो जाने पर भी कभी कोई इंडिकेटर न दिखाएं</string>
@@ -2054,18 +2032,15 @@
 	<string name="hint_poll_answer_add" state="needs_review" hash="-1358923215">जोड़ें</string>
 	<string name="label_poll_see_answers" state="needs_review" hash="710858547">उत्तर देखें</string>
 	<string name="label_poll_answer_pending" state="needs_review" hash="1126000465">उनके जवाब का इंतज़ार कर रहे हैं</string>
-	<string name="button_label_poll_answer_remind" state="needs_review" hash="-1874697137">याद दिलाएं</string>
 	<string name="label_poll_include_none_answer" state="needs_review" hash="1127183238">“%1$s” उत्तर जोड़ें</string>
 	<string name="label_poll_options" state="needs_review" hash="-13216192">विकल्प</string>
 	<string name="text_none_answer" state="needs_review" hash="560562575">उपरोक्त में से कोई नहीं</string>
 	<string name="label_poll_answer_multiple_choice" state="needs_review" hash="-1156570165">कई उत्तरों की अनुमति दें</string>
 	<string name="explanation_poll_answer_multiple_choice" state="needs_review" hash="-1649245603">एक या अधिक उत्तर चुनें</string>
-	<string name="label_poll_quiz_mode" state="needs_review" hash="209800676">क्विज़ मोड</string>
 	<string name="label_poll_expiration_date" state="needs_review" hash="2080048464">अंत</string>
 	<string name="label_poll_add_expiration_date" state="needs_review" hash="-1095448498">समाप्ति तिथि जोड़ें</string>
 	<string name="label_poll_expiration" state="needs_review" hash="605126523">पोल %1$s में समाप्त होगा</string>
 	<string name="label_poll_ended" state="needs_review" hash="415569292">पोल समाप्त हुआ</string>
-	<string name="error_poll_minimum_answers" state="needs_review" hash="1962295108">कम से कम दो प्रतिक्रियाएं जोड़ें</string>
 	<string name="error_poll_duplicate_answer" state="needs_review" hash="1038063001">यह प्रतिक्रिया पहले से मौजूद है</string>
 	<string name="label_poll_export_csv" state="needs_review" hash="1317804074">CSV के रूप में निर्यात करें</string>
 	<string name="toast_message_error_exporting_poll_csv" state="needs_review" hash="-1053349512">CSV के रूप में पोल निर्यात करने में त्रुटि। कृपया पुनः प्रयास करें।</string>
@@ -2093,12 +2068,10 @@
 	<string name="button_label_invited" state="needs_review" hash="2094724552">आमंत्रित</string>
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">नया संदेश</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">नया संपर्क</string>
-	<string name="new_message_action_search" state="needs_review" hash="-2085358317">खोज</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">आमने-सामने</string>
 	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">दूर से</string>
-	<string name="new_contact_cancel" state="needs_review" hash="1270066923">रद्द करें</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">एक दूसरे के QR कोड स्कैन करें</string>
-	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="285875805">अब अपना स्कैन करवाएं</string>
+	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">%1$s से अपना कोड स्कैन करवाएं</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">कोड स्कैन किया गया!</string>
 	<string name="scan_screen_share_invitation_title" state="needs_review" hash="-983690097">क्या आप कोड स्कैन नहीं कर पा रहे हैं?</string>
 	<string name="scan_screen_share_invitation_subtitle" state="needs_review" hash="1220884509">उन्हें किसी अन्य तरीके से आमंत्रित करें</string>
@@ -2111,9 +2084,15 @@
 	<string name="button_label_add_first_contact" state="needs_review" hash="-945206134">अपना पहला संपर्क जोड़ें</string>
 	<string name="label_discussion" state="needs_review" hash="301166224">चर्चा</string>
 	<string name="content_description_switch_camera" state="needs_review" hash="-681220952">कैमरा बदलें</string>
-	<string name="label_get_in_contact_with" state="needs_review" hash="-1180439426">क्या आप %1$s से संपर्क करना चाहेंगे?</string>
+	<string name="label_get_in_contact_with" state="needs_review" hash="2100646957">क्या आप दूर से %1$s से संपर्क करना चाहेंगे?</string>
 	<string name="explanation_invite_group_members_list" state="needs_review" hash="-2104545988">नीचे दिए गए संपर्क इस समूह का हिस्सा हैं लेकिन अभी तक आपके साथ कोई निजी बातचीत नहीं की है।</string>
 	<string name="label_group_admins" state="needs_review" hash="468245065">समूह व्यवस्थापक</string>
 	<string name="text_common_group" state="needs_review" hash="-1384805668">\"%1$s\" एक सामान्य समूह है</string>
 	<string name="onboarding_privacy_disclaimer" state="needs_review" hash="-487795875">आपकी गोपनीयता की रक्षा के लिए, Olvid के पास **कोई सार्वजनिक या केंद्रीकृत उपयोगकर्ता निर्देशिका नहीं** है। आपका नाम केवल उन लोगों को दिखाई देगा जिनसे आप जुड़ते हैं।</string>
+	<string name="tab_title_discussions" state="needs_review" hash="491497248">चर्चाएँ</string>
+	<string name="tab_title_contacts" state="needs_review" hash="-859216410">संपर्क</string>
+	<string name="tab_title_groups" state="needs_review" hash="-990226727">समूह</string>
+	<string name="tab_title_calls" state="needs_review" hash="541245696">कॉल</string>
+	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">पिन की गई बातचीत</string>
+	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">क्या %1$s आपका कोड स्कैन नहीं कर पा रहा है?</string>
 </resources>

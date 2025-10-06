@@ -6,7 +6,6 @@
     android:id="@+id/root_coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/olvid_gradient_dark"
     tools:context=".owneddetails.OwnedIdentityDetailsActivity">
 
     <ScrollView
@@ -16,6 +15,7 @@
         android:background="@color/lightGrey">
 
         <LinearLayout
+            android:id="@+id/scroll_content"
             android:orientation="vertical"
             android:gravity="center"
             android:layout_width="match_parent"

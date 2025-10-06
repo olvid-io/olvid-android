@@ -1,3 +1,10 @@
+# Build 277 (4.0.1)
+2025-10-06
+
+- UI update to remove top blue bars
+- A few fixes for the new "plus" button introduced in version 4.0
+
+
 # Build 276 (4.0)
 2025-09-29
 

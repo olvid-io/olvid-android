@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <plurals name="text_files" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Fichier</item>
+        <item quantity="other">%1$d Fichiers</item>
+    </plurals>
+    <plurals name="text_images" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Photo</item>
+        <item quantity="other">%1$d Photos</item>
+    </plurals>
+    <plurals name="text_videos" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Vidéo</item>
+        <item quantity="other">%1$d Vidéos</item>
+    </plurals>
     <plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
         <item quantity="one">\"%1$s\" et 1 autre groupe en commun</item>
         <item quantity="other">\"%1$s\" et %2$d autres groupes en commun</item>

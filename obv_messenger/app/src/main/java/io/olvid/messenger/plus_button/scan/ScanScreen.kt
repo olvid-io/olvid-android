@@ -20,7 +20,9 @@
 package io.olvid.messenger.plus_button.scan
 
 import android.content.res.Configuration
+import android.view.WindowManager
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
@@ -346,14 +348,13 @@ fun BottomSheetContent(
     onCancel: () -> Unit,
     plusButtonViewModel: PlusButtonViewModel,
 ) {
-
     var showScanAlternative by remember { mutableStateOf(false) }
     var showDirectInviteButton by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         delay(scanAlternativeDelay)
         showScanAlternative = true
     }
-    LaunchedEffect(plusButtonViewModel.scanUiState) {
+    LaunchedEffect(plusButtonViewModel.scanUiState.collectAsState().value) {
         if ((plusButtonViewModel.scanUiState.value as? ScanUiState.InvitationScanned)?.remoteInvitation == true) {
             showDirectInviteButton = true
             showScanAlternative = true
@@ -461,7 +462,7 @@ fun BottomSheetContent(
                             is ScanUiState.InvitationScanned -> {
                                 Text(
                                     modifier = Modifier.padding(horizontal = 16.dp),
-                                    text = stringResource(R.string.scan_screen_mutual_scan_yours_title),
+                                    text = stringResource(R.string.scan_screen_mutual_scan_yours_title, StringUtils.removeCompanyFromDisplayName(currentUiState.contactUrlIdentity.displayName)),
                                     style = OlvidTypography.h2.copy(color = colorResource(R.color.almostBlack)),
                                     textAlign = TextAlign.Center
                                 )
@@ -477,6 +478,27 @@ fun BottomSheetContent(
                             verticalArrangement = Arrangement.Center
                         ) {
                             plusButtonViewModel.currentIdentity?.let { currentIdentity ->
+                                val activity = LocalActivity.current
+                                DisposableEffect(Unit) {
+                                    activity?.window?.apply {
+                                        attributes?.apply {
+                                            screenBrightness =
+                                                WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+                                        }
+                                        addFlags(WindowManager.LayoutParams.SCREEN_BRIGHTNESS_CHANGED)
+                                    }
+
+                                    onDispose {
+                                        activity?.window?.apply {
+                                            attributes?.apply {
+                                                screenBrightness =
+                                                    WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                                            }
+                                            addFlags(WindowManager.LayoutParams.SCREEN_BRIGHTNESS_CHANGED)
+                                        }
+                                    }
+                                }
+
                                 Box(
                                     Modifier
                                         .clipToBounds()
@@ -517,81 +539,81 @@ fun BottomSheetContent(
                                     )
                                 }
                             }
+
                             var showInvitationDialog by remember { mutableStateOf(false) }
-                            if (showInvitationDialog) {
-                                val contact = remember (plusButtonViewModel.scannedUri) { ObvUrlIdentity.fromUrlRepresentation(
-                                    plusButtonViewModel.scannedUri
-                                ) }
-                                AlertDialog(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    properties = DialogProperties(usePlatformDefaultWidth = false),
-                                    containerColor = colorResource(R.color.dialogBackground),
-                                    onDismissRequest = { showInvitationDialog = false },
-                                    text = {
-                                        Column(
-                                            horizontalAlignment = Alignment.Start,
-                                            verticalArrangement = spacedBy(24.dp)
-                                        ) {
-                                            Text(
-                                                text = stringResource(R.string.label_get_in_contact_with, contact.displayName),
-                                                style = OlvidTypography.h2
-                                            )
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically
+                            (currentUiState as? ScanUiState.InvitationScanned)?.let { invitationScanned ->
+                                if (showInvitationDialog) {
+                                    AlertDialog(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        properties = DialogProperties(usePlatformDefaultWidth = false),
+                                        containerColor = colorResource(R.color.dialogBackground),
+                                        onDismissRequest = { showInvitationDialog = false },
+                                        text = {
+                                            Column(
+                                                horizontalAlignment = Alignment.Start,
+                                                verticalArrangement = spacedBy(24.dp)
                                             ) {
-                                                InitialView(
-                                                    modifier = Modifier.size(40.dp),
-                                                    initialViewSetup = { initialView ->
-                                                        initialView.setInitial(contact.bytesIdentity, StringUtils.getInitial(contact.displayName))
-                                                    }
-                                                )
                                                 Text(
-                                                    modifier = Modifier
-                                                        .padding(start = 8.dp)
-                                                        .weight(1f, true),
-                                                    text = contact.displayName
+                                                    text = stringResource(R.string.label_get_in_contact_with, StringUtils.removeCompanyFromDisplayName(invitationScanned.contactUrlIdentity.displayName)),
+                                                    style = OlvidTypography.h2
                                                 )
-                                            }
-                                        }
-                                    },
-                                    textContentColor = colorResource(R.color.almostBlack),
-                                    dismissButton = {
-                                        OlvidTextButton(
-                                            contentColor = colorResource(R.color.greyTint),
-                                            text = stringResource(R.string.button_label_cancel),
-                                            onClick = { showInvitationDialog = false },
-                                        )
-                                    },
-                                    confirmButton = {
-                                        val context = LocalContext.current
-                                        OlvidTextButton(
-                                            text = stringResource(R.string.button_label_get_in_contact_remotely),
-                                            onClick = {
-                                                runCatching {
-                                                    AppSingleton.getEngine()
-                                                        .startTrustEstablishmentProtocol(
-                                                            contact.bytesIdentity,
-                                                            contact.displayName,
-                                                            plusButtonViewModel.currentIdentity!!.bytesOwnedIdentity
-                                                        )
-                                                    App.openOneToOneDiscussionActivity(
-                                                        context,
-                                                        plusButtonViewModel.currentIdentity!!.bytesOwnedIdentity,
-                                                        contact.bytesIdentity,
-                                                        true
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    InitialView(
+                                                        modifier = Modifier.size(40.dp),
+                                                        initialViewSetup = { initialView ->
+                                                            initialView.setInitial(invitationScanned.contactUrlIdentity.bytesIdentity, StringUtils.getInitial(invitationScanned.contactUrlIdentity.displayName))
+                                                        }
                                                     )
-                                                    showInvitationDialog = false
-                                                    onCancel()
-                                                }.onFailure {
-                                                    App.toast(
-                                                        R.string.toast_message_failed_to_invite_contact,
-                                                        Toast.LENGTH_SHORT
+                                                    Text(
+                                                        modifier = Modifier
+                                                            .padding(start = 8.dp)
+                                                            .weight(1f, true),
+                                                        text = invitationScanned.contactUrlIdentity.displayName
                                                     )
                                                 }
-                                            },
-                                        )
-                                    }
-                                )
+                                            }
+                                        },
+                                        textContentColor = colorResource(R.color.almostBlack),
+                                        dismissButton = {
+                                            OlvidTextButton(
+                                                contentColor = colorResource(R.color.greyTint),
+                                                text = stringResource(R.string.button_label_cancel),
+                                                onClick = { showInvitationDialog = false },
+                                            )
+                                        },
+                                        confirmButton = {
+                                            val context = LocalContext.current
+                                            OlvidTextButton(
+                                                text = stringResource(R.string.button_label_get_in_contact_remotely),
+                                                onClick = {
+                                                    runCatching {
+                                                        AppSingleton.getEngine()
+                                                            .startTrustEstablishmentProtocol(
+                                                                invitationScanned.contactUrlIdentity.bytesIdentity,
+                                                                invitationScanned.contactUrlIdentity.displayName,
+                                                                plusButtonViewModel.currentIdentity!!.bytesOwnedIdentity
+                                                            )
+                                                        App.openOneToOneDiscussionActivity(
+                                                            context,
+                                                            plusButtonViewModel.currentIdentity!!.bytesOwnedIdentity,
+                                                            invitationScanned.contactUrlIdentity.bytesIdentity,
+                                                            true
+                                                        )
+                                                        showInvitationDialog = false
+                                                        onCancel()
+                                                    }.onFailure {
+                                                        App.toast(
+                                                            R.string.toast_message_failed_to_invite_contact,
+                                                            Toast.LENGTH_SHORT
+                                                        )
+                                                    }
+                                                },
+                                            )
+                                        }
+                                    )
+                                }
                             }
                             AnimatedVisibility(visible = showScanAlternative) {
                                 if (currentUiState is ScanUiState.InvitationScanned && showDirectInviteButton) {
@@ -625,7 +647,15 @@ fun BottomSheetContent(
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
                                             Text(
-                                                stringResource(R.string.scan_screen_share_invitation_title),
+                                                if (currentUiState is ScanUiState.InvitationScanned)
+                                                    stringResource(
+                                                        R.string.scan_screen_share_contact_cant_scan_title,
+                                                        StringUtils.removeCompanyFromDisplayName(currentUiState.contactUrlIdentity.displayName)
+                                                    )
+                                                else
+                                                    stringResource(
+                                                        R.string.scan_screen_share_invitation_title
+                                                    ),
                                                 style = OlvidTypography.body2
                                             )
                                             Text(

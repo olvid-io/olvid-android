@@ -40,6 +40,7 @@ import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
@@ -52,7 +53,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.LaunchedEffect
@@ -136,6 +136,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
     private val globalSearchViewModel by viewModels<GlobalSearchViewModel>()
     private val tipsViewModel by viewModels<TipsViewModel>()
     private val ownInitialView: InitialView by lazy { findViewById(R.id.owned_identity_initial_view) }
+    private val titleTextView: TextView by lazy { findViewById(R.id.main_title) }
     private var tabsPagerAdapter: TabsPagerAdapter? = null
     private val viewPager: ViewPager2 by lazy { findViewById(R.id.view_pager_container) }
     private var mainActivityPageChangeListener: MainActivityPageChangeListener? = null
@@ -176,23 +177,24 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
             setTheme(R.style.AppTheme_NoActionBar)
         }
 
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+        )
+
         super.onCreate(savedInstanceState)
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
             (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
-            false
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
 
         onBackPressed {
             if (!moveTaskToBack(true)) {
                 finishAndRemoveTask()
             }
         }
-
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
-        )
 
         setContentView(R.layout.activity_main)
         val root : CoordinatorLayout = findViewById(R.id.root_coordinator)
@@ -975,6 +977,15 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
             } else {
                 showPlusButton = true
             }
+            titleTextView.setText(
+                when (position) {
+                    DISCUSSIONS_TAB -> R.string.tab_title_discussions
+                    CONTACTS_TAB -> R.string.tab_title_contacts
+                    GROUPS_TAB -> R.string.tab_title_groups
+                    else -> R.string.tab_title_calls
+                }
+            )
+
             currentPosition = position
         }
 

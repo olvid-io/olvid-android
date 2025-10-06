@@ -105,7 +105,7 @@ class GroupCreationActivity : LockableActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
+            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
             navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
         super.onCreate(savedInstanceState)
@@ -229,7 +229,7 @@ class GroupCreationActivity : LockableActivity() {
                             onBack = { navController.popBackStack() },
                             onValidate = {
                                 if (groupV2DetailsViewModel.groupType.type != GroupType.SIMPLE) {
-                                    navController.navigate(
+                                   navController.navigate(
                                         route = Routes.CHOOSE_NEW_GROUP_ADMINS,
                                     )
                                 } else {
