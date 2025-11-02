@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Du har forlatt gruppen</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Du har blitt med i gruppen igjen</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Du har blitt med i gruppen</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s har lagt deg til i denne gruppen.</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s har lagt deg til i denne gruppen igjen.</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Gruppe administrert av %1$s</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">Ble med i gruppen: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">Ble med i gruppen: %1$s</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s la til %2$s i gruppen</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Du har lagt til %2$s i gruppen.</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s fjernet %2$s fra gruppen</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">Du fjernet %2$s fra gruppen.</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s har fjernet deg fra gruppen.</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">Du har blitt fjernet fra gruppen.</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">ukjent</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Ingen</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Utkast:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Ukjent lisens</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Gyldig lisens</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">Utløpt lisens</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">Kunne ikke aktivere lisensen</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">Del kontakt-ID</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">Test av betafunksjoner</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">Premium-funksjoner tilgjengelig gratis</string>
@@ -1206,7 +1209,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">din melding</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d reaksjoner til: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s reagerte på %2$s</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">Sett inn en emoji</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Sett inn en emoji</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Trykk og hold for å legge til/fjerne fra favoritter</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Feilsøkingsinformasjon</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Antall kanaler/enheter:</string>
@@ -1217,7 +1220,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Grupper v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">Bruk animerte emojis (hvis tilgjengelig)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Bruk animerte emojis (hvis tilgjengelig)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Profil lagringsbruk</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">Bilder</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">Videoer</string>
@@ -1478,7 +1481,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Avansert</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Slipp løs den fulle kraften i Olvid-grupper!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Gruppeadministratorer</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Du er nå administrator for gruppen</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">Du er nå en gruppeadministrator.</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Du er ikke lenger gruppeadministrator</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Du har nå tillatelse til å sende meldinger</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">Du kan ikke lenger sende meldinger her</string>
@@ -1856,6 +1859,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">Mulige meldingsstatus</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">For gruppemeldinger</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">Andre statuser</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Lesekvitteringer er valgfrie i Olvid.\nKontaktpersonene dine kan ha valgt å ikke varsle deg når de leser meldingene dine.</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">Kontakt har vært offline i lang tid</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">Det ser ut til at denne kontakten ikke har brukt Olvid på en stund. Vi kan ikke garantere at meldinger vil bli levert korrekt til dem.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">Ingen nettleser funnet</string>
@@ -2070,7 +2074,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Ny melding</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Ny kontakt</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Ansikt til ansikt</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Eksternt</string>
+	<string name="new_contact_remotely" hash="-1391656952">På avstand</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Skann hverandres QR-koder.</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Be %1$s om å skanne koden din.</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Kode skannet!</string>
@@ -2096,4 +2100,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">Samtaler</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Festet samtale</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">Kan %1$s ikke skanne koden din?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">Ikke klarert</string>
+	<string name="label_offline" state="needs_review" hash="315122527">Offline</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">Hvordan vil du legge til denne kontakten?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">Ukjent tilgjengelighetstjeneste</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">En ukjent tilgjengelighetstjeneste er blitt oppdaget. Hvis du ikke frivillig aktiverte en slik tjeneste, kan det være skadelig programvare. Vennligst sjekk at tjenesten nedenfor er trygg å bruke:</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">Stol på denne tjenesten</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">Tilgjengelighetstjenester</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">Liste over godkjente tilgjengelighetstjenester:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Ingen ukjente tilgjengelighetstjenester ble funnet.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Ukjent tilgjengelighetstjeneste</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">En ukjent tilgjengelighetstjeneste er blitt oppdaget. Vennligst sjekk at det er trygt å bruke:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Søk etter en emoji</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Nylig</string>
 </resources>

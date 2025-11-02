@@ -140,6 +140,11 @@ class WebrtcCallActivity : AppCompatActivity() {
         )
 
         super.onCreate(savedInstanceState)
+
+        if (VERSION.SDK_INT >= VERSION_CODES.S) {
+            window.setHideOverlayWindows(true)
+        }
+
         val intent = intent
         if (CALL_BACK_ACTION == intent.action) {
             val bytesOwnedIdentity = intent.getByteArrayExtra(CALL_BACK_EXTRA_BYTES_OWNED_IDENTITY)
@@ -149,7 +154,7 @@ class WebrtcCallActivity : AppCompatActivity() {
             val discussionId = intent.getLongExtra(CALL_BACK_EXTRA_DISCUSSION_ID, -1)
             if (bytesOwnedIdentity != null && bytesContactIdentity != null) {
                 val serviceIntent = Intent(this, WebrtcCallService::class.java)
-                serviceIntent.setAction(WebrtcCallService.ACTION_START_CALL)
+                serviceIntent.action = WebrtcCallService.ACTION_START_CALL
                 val bytesContactIdentitiesBundle = Bundle()
                 bytesContactIdentitiesBundle.putByteArray(
                     WebrtcCallService.SINGLE_CONTACT_IDENTITY_BUNDLE_KEY,
@@ -381,31 +386,6 @@ class WebrtcCallActivity : AppCompatActivity() {
                 this, arrayOf(permission.RECORD_AUDIO, permission.READ_PHONE_STATE),
                 if (rationaleWasShown) PERMISSIONS_REQUEST_CODE_AFTER_RATIONALE else PERMISSIONS_REQUEST_CODE
             )
-        } else if (VERSION.SDK_INT >= VERSION_CODES.S &&
-            ContextCompat.checkSelfPermission(
-                this,
-                permission.BLUETOOTH_CONNECT
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            if (!SettingsActivity.wasFirstCallBluetoothPermissionRequested() || shouldShowRequestPermissionRationale(
-                    permission.BLUETOOTH_CONNECT
-                )
-            ) {
-                SettingsActivity.setFirstCallBluetoothPermissionRequested(true)
-                permissionDialogToShow = PermissionDialog(R.string.dialog_title_android_12_bluetooth_access, R.string.dialog_message_android_12_bluetooth_access) {
-                    ActivityCompat.requestPermissions(
-                        this, arrayOf(
-                            permission.BLUETOOTH_CONNECT
-                        ), PERMISSIONS_REQUEST_CODE
-                    )
-                }
-            } else {
-                ActivityCompat.requestPermissions(
-                    this, arrayOf(
-                        permission.BLUETOOTH_CONNECT
-                    ), PERMISSIONS_REQUEST_CODE
-                )
-            }
         }
     }
 
@@ -461,7 +441,7 @@ class WebrtcCallActivity : AppCompatActivity() {
                             return
                         }
                         discussionIntent = Intent(this, MainActivity::class.java)
-                        discussionIntent.setAction(MainActivity.FORWARD_ACTION)
+                        discussionIntent.action = MainActivity.FORWARD_ACTION
                         discussionIntent.putExtra(
                             MainActivity.FORWARD_TO_INTENT_EXTRA,
                             DiscussionActivity::class.java.name
@@ -485,7 +465,7 @@ class WebrtcCallActivity : AppCompatActivity() {
                             return
                         }
                         discussionIntent = Intent(this, MainActivity::class.java)
-                        discussionIntent.setAction(MainActivity.FORWARD_ACTION)
+                        discussionIntent.action = MainActivity.FORWARD_ACTION
                         discussionIntent.putExtra(
                             MainActivity.FORWARD_TO_INTENT_EXTRA,
                             DiscussionActivity::class.java.name
@@ -513,7 +493,7 @@ class WebrtcCallActivity : AppCompatActivity() {
                             return
                         }
                         discussionIntent = Intent(this, MainActivity::class.java)
-                        discussionIntent.setAction(MainActivity.FORWARD_ACTION)
+                        discussionIntent.action = MainActivity.FORWARD_ACTION
                         discussionIntent.putExtra(
                             MainActivity.FORWARD_TO_INTENT_EXTRA,
                             DiscussionActivity::class.java.name
@@ -570,10 +550,6 @@ class WebrtcCallActivity : AppCompatActivity() {
                         webrtcCallService?.toggleCamera()
                         refreshProximityLockStatus()
                     }
-                } else if (permission.BLUETOOTH_CONNECT == permissions[i]) {
-                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED && webrtcCallService != null) {
-                        webrtcCallService?.bluetoothPermissionGranted()
-                    }
                 } else if (permission.READ_PHONE_STATE == permissions[i]) {
                     if (grantResults[i] == PackageManager.PERMISSION_GRANTED && webrtcCallService != null) {
                         webrtcCallService?.readCallStatePermissionGranted()
@@ -595,10 +571,10 @@ class WebrtcCallActivity : AppCompatActivity() {
                         additionalButton = {
                             TextButton(onClick = {
                                 val settingsIntent = Intent()
-                                settingsIntent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                                settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                settingsIntent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                settingsIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                 val uri = Uri.fromParts("package", packageName, null)
-                                settingsIntent.setData(uri)
+                                settingsIntent.data = uri
                                 startActivity(settingsIntent)
                             }) {
                                 Text(text = stringResource(id = R.string.button_label_app_settings))
@@ -621,10 +597,10 @@ class WebrtcCallActivity : AppCompatActivity() {
                         additionalButton = {
                             TextButton(onClick = {
                                 val settingsIntent = Intent()
-                                settingsIntent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                                settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                settingsIntent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                settingsIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                 val uri = Uri.fromParts("package", packageName, null)
-                                settingsIntent.setData(uri)
+                                settingsIntent.data = uri
                                 startActivity(settingsIntent)
                             }) {
                                 Text(text = stringResource(id = R.string.button_label_app_settings))

@@ -110,7 +110,10 @@ public class PostLocationMessageInDiscussionTask implements Runnable {
                     discussion.bytesOwnedIdentity,
                     discussion.senderThreadIdentifier,
                     0,
-                    0
+                    0,
+                    0,
+                    0,
+                    null
             );
             message.id = db.messageDao().insert(message);
             message.post(showToast, null);

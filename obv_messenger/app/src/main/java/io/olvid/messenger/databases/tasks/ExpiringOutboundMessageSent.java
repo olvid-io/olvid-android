@@ -88,8 +88,10 @@ public class ExpiringOutboundMessageSent implements Runnable {
                     if (retain) {
                         db.runInTransaction(() -> {
                             Message reMessage = db.messageDao().get(message.id);
-                            reMessage.wipe(db);
-                            reMessage.deleteAttachments(db);
+                            if (reMessage != null) {
+                                reMessage.wipe(db);
+                                reMessage.deleteAttachments(db);
+                            }
                         });
                     } else {
                         new DeleteMessagesTask(Collections.singletonList(message.id), SecureDeleteEverywhereDialogBuilder.DeletionChoice.LOCAL).run();

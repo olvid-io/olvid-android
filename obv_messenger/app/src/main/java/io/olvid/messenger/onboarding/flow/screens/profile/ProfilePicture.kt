@@ -274,6 +274,11 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
                 Button(
                     enabled = onboardingFlowViewModel.absolutePhotoUrl != null,
                     elevation = null,
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = colorResource(R.color.alwaysWhite),
+                        backgroundColor = colorResource(R.color.olvid_gradient_light),
+                        disabledBackgroundColor = colorResource(R.color.olvid_gradient_light).copy(alpha = .5f)
+                    ),
                     onClick = {
                         try {
                             AppSingleton.getEngine().updateOwnedIdentityPhoto(

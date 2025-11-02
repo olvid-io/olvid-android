@@ -94,6 +94,7 @@ public class AppSingleton {
     private static final String LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY = "last_android_sdk_version";
     private static final String LAST_FTS_GLOBAL_SEARCH_VERSION_PREFERENCE_KEY = "last_fts_global_search_version";
     private static final String LAST_ENGINE_SYNC_PREFERENCE_KEY = "last_engine_sync";
+    public static final String LAST_EMOJI_DB_VERSION_PREFERENCE_KEY = "last_emoji_db_version";
 
 
     public static final String FYLE_DIRECTORY = "fyles";
@@ -207,6 +208,15 @@ public class AppSingleton {
             editor.apply();
         }
 
+        if (lastBuildExecuted < 278) {
+            // if the user has customized attach icon order, add the emoji icon so they see it
+            List<Integer> icons = SettingsActivity.getComposeMessageIconPreferredOrder();
+            if (icons != null && !icons.contains(ComposeMessageFragment.ICON_ATTACH_POLL)) {
+                icons.add(0, ComposeMessageFragment.ICON_ATTACH_POLL);
+                SettingsActivity.setComposeMessageIconPreferredOrder(icons);
+            }
+        }
+
         {
             // generate App directories
             File fylesDirectory = new File(App.getContext().getNoBackupFilesDir(), FYLE_DIRECTORY);
@@ -245,7 +255,7 @@ public class AppSingleton {
 
         // initialize Engine
         try {
-            System.loadLibrary("crypto_1_1");
+            System.loadLibrary("crypto_3_0");
             this.engine = new Engine(App.getContext().getNoBackupFilesDir(), new AppBackupAndSyncDelegate(), DatabaseKey.get(DatabaseKey.ENGINE_DATABASE_SECRET), this.sslSocketFactory,
                     new Logger.LogOutputter() {
                         @Override
@@ -928,6 +938,16 @@ public class AppSingleton {
         editor.apply();
     }
 
+    public static void saveLastEmojiDbVersion(int version) {
+        SharedPreferences.Editor editor = instance.sharedPreferences.edit();
+        editor.putInt(LAST_EMOJI_DB_VERSION_PREFERENCE_KEY, version);
+        editor.apply();
+    }
+
+    public static int getLastEmojiDbVersion() {
+        return instance.sharedPreferences.getInt(LAST_EMOJI_DB_VERSION_PREFERENCE_KEY, 0);
+    }
+
     public static void saveLastEngineSynchronisationTime(long timestamp) {
         SharedPreferences.Editor editor = instance.sharedPreferences.edit();
         editor.putLong(LAST_ENGINE_SYNC_PREFERENCE_KEY, timestamp);
@@ -956,211 +976,6 @@ public class AppSingleton {
 
     // endregion
 
-//    // region Contact names and info caches (for main thread access)
-//
-//    @NonNull private final MutableLiveData<HashMap<BytesKey, Pair<String, String>>> contactNamesCache; // the first element of the pair is the full display name, the second the first name (or custom name for both, if set)
-//    @NonNull private final MutableLiveData<HashMap<BytesKey, Integer>> contactHuesCache;
-//    @NonNull private final MutableLiveData<HashMap<BytesKey, String>> contactPhotoUrlsCache;
-//    @NonNull private final MutableLiveData<HashMap<BytesKey, ContactCacheInfo>> contactInfoCache;
-//
-//
-//
-//    @NonNull
-//    public static LiveData<HashMap<BytesKey, Pair<String, String>>> getContactNamesCache() {
-//        return getInstance().contactNamesCache;
-//    }
-//
-//    @NonNull
-//    public static LiveData<HashMap<BytesKey, Integer>> getContactHuesCache() {
-//        return getInstance().contactHuesCache;
-//    }
-//
-//    @NonNull
-//    public static LiveData<HashMap<BytesKey, String>> getContactPhotoUrlsCache() {
-//        return getInstance().contactPhotoUrlsCache;
-//    }
-//
-//    @NonNull
-//    public static LiveData<HashMap<BytesKey, ContactCacheInfo>> getContactInfoCache() {
-//        return getInstance().contactInfoCache;
-//    }
-//
-//    public static void reloadCachedDisplayNamesAndHues() {
-//        instance.reloadCachedDisplayNamesAndHues(getCurrentIdentityLiveData().getValue());
-//    }
-//
-//    private void reloadCachedDisplayNamesAndHues(@Nullable OwnedIdentity ownedIdentity) {
-//        if (ownedIdentity == null) {
-//            getInstance().contactNamesCache.postValue(new HashMap<>());
-//            getInstance().contactHuesCache.postValue(new HashMap<>());
-//            getInstance().contactPhotoUrlsCache.postValue(new HashMap<>());
-//            getInstance().contactInfoCache.postValue(new HashMap<>());
-//            return;
-//        }
-//        List<Contact> contacts = AppDatabase.getInstance().contactDao().getAllForOwnedIdentitySync(ownedIdentity.bytesOwnedIdentity);
-//        HashMap<BytesKey, Pair<String, String>> contactNamesHashMap = new HashMap<>();
-//        HashMap<BytesKey, Integer> contactHuesHashMap = new HashMap<>();
-//        HashMap<BytesKey, String> contactPhotoUrlsHashMap = new HashMap<>();
-//        HashMap<BytesKey, ContactCacheInfo> contactCacheInfoHashMap = new HashMap<>();
-//        for (Contact contact : contacts) {
-//            BytesKey key = new BytesKey(contact.bytesContactIdentity);
-//            contactNamesHashMap.put(key, new Pair<>(contact.getCustomDisplayName(), contact.getFirstNameOrCustom()));
-//            if (contact.customNameHue != null) {
-//                contactHuesHashMap.put(key, contact.customNameHue);
-//            }
-//            if (contact.getCustomPhotoUrl() != null) {
-//                contactPhotoUrlsHashMap.put(key, contact.getCustomPhotoUrl());
-//            }
-//            contactCacheInfoHashMap.put(key, new ContactCacheInfo(contact.keycloakManaged, contact.active, contact.oneToOne, contact.recentlyOnline, contact.trustLevel));
-//        }
-//
-//        BytesKey ownKey = new BytesKey(ownedIdentity.bytesOwnedIdentity);
-//        contactNamesHashMap.put(ownKey, new Pair<>(App.getContext().getString(R.string.text_you), App.getContext().getString(R.string.text_you)));
-//        if (ownedIdentity.photoUrl != null) {
-//            contactPhotoUrlsHashMap.put(ownKey, ownedIdentity.photoUrl);
-//        }
-//        contactCacheInfoHashMap.put(ownKey, new ContactCacheInfo(ownedIdentity.keycloakManaged, ownedIdentity.active, true, true, 0));
-//
-//        List<Group2PendingMember> pendingMembers = AppDatabase.getInstance().group2PendingMemberDao().getAll(ownedIdentity.bytesOwnedIdentity);
-//        for (Group2PendingMember pendingMember : pendingMembers) {
-//            BytesKey key = new BytesKey(pendingMember.bytesContactIdentity);
-//            if (!contactNamesHashMap.containsKey(key)) {
-//                contactNamesHashMap.put(key, new Pair<>(pendingMember.displayName, pendingMember.getFirstName()));
-//            }
-//        }
-//
-//        getInstance().contactNamesCache.postValue(contactNamesHashMap);
-//        getInstance().contactHuesCache.postValue(contactHuesHashMap);
-//        getInstance().contactPhotoUrlsCache.postValue(contactPhotoUrlsHashMap);
-//        getInstance().contactInfoCache.postValue(contactCacheInfoHashMap);
-//    }
-//
-//    @Nullable
-//    public static String getContactCustomDisplayName(byte[] bytesContactIdentity) {
-//        if (getContactNamesCache().getValue() == null) {
-//            return null;
-//        }
-//        Pair<String, String> cache = getContactNamesCache().getValue().get(new BytesKey(bytesContactIdentity));
-//        if (cache != null) {
-//            return cache.first;
-//        }
-//        return null;
-//    }
-//
-//    @Nullable
-//    public static String getContactFirstName(byte[] bytesContactIdentity) {
-//        if (getContactNamesCache().getValue() == null) {
-//            return null;
-//        }
-//        Pair<String, String> cache = getContactNamesCache().getValue().get(new BytesKey(bytesContactIdentity));
-//        if (cache != null) {
-//            return cache.second;
-//        }
-//        return null;
-//    }
-//
-//    @Nullable
-//    public static Integer getContactCustomHue(byte[] bytesContactIdentity) {
-//        if (getContactHuesCache().getValue() == null) {
-//            return null;
-//        }
-//        return getContactHuesCache().getValue().get(new BytesKey(bytesContactIdentity));
-//    }
-//
-//    @Nullable
-//    public static String getContactPhotoUrl(byte[] bytesContactIdentity) {
-//        if (getContactPhotoUrlsCache().getValue() == null) {
-//            return null;
-//        }
-//        return getContactPhotoUrlsCache().getValue().get(new BytesKey(bytesContactIdentity));
-//    }
-//
-//    @Nullable
-//    public static ContactCacheInfo getContactCacheInfo(byte[] bytesContactIdentity) {
-//        HashMap<BytesKey, ContactCacheInfo> cacheInfoHashMap = getContactInfoCache().getValue();
-//        if (cacheInfoHashMap == null) {
-//            return null;
-//        }
-//        return cacheInfoHashMap.get(new BytesKey(bytesContactIdentity));
-//    }
-//
-//    public static void updateCachedCustomDisplayName(@NonNull byte[] bytesContactIdentity, @NonNull String customDisplayName, @NonNull String firstNameOrCustom) {
-//        if (getContactNamesCache().getValue() == null) {
-//            return;
-//        }
-//        HashMap<BytesKey, Pair<String, String>> hashMap = getContactNamesCache().getValue();
-//        hashMap.put(new BytesKey(bytesContactIdentity), new Pair<>(customDisplayName, firstNameOrCustom));
-//        getInstance().contactNamesCache.postValue(hashMap);
-//    }
-//
-//    public static void updateCachedCustomHue(byte[] bytesContactIdentity, Integer customHue) {
-//        if (getContactHuesCache().getValue() == null) {
-//            return;
-//        }
-//        HashMap<BytesKey, Integer> hashMap = getContactHuesCache().getValue();
-//        if (customHue != null) {
-//            hashMap.put(new BytesKey(bytesContactIdentity), customHue);
-//        } else {
-//            hashMap.remove(new BytesKey(bytesContactIdentity));
-//        }
-//        getInstance().contactHuesCache.postValue(hashMap);
-//    }
-//
-//    public static void updateCachedPhotoUrl(byte[] bytesContactIdentity, String photoUrl) {
-//        if (getContactPhotoUrlsCache().getValue() == null) {
-//            return;
-//        }
-//        HashMap<BytesKey, String> hashMap = getContactPhotoUrlsCache().getValue();
-//        if (photoUrl != null) {
-//            hashMap.put(new BytesKey(bytesContactIdentity), photoUrl);
-//        } else {
-//            hashMap.remove(new BytesKey(bytesContactIdentity));
-//        }
-//        getInstance().contactPhotoUrlsCache.postValue(hashMap);
-//    }
-//
-//    public static void updateContactCachedInfo(Contact contact) {
-//        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
-//        if (contactInfoHashMap == null) {
-//            return;
-//        }
-//        contactInfoHashMap.put(new BytesKey(contact.bytesContactIdentity), new ContactCacheInfo(contact.keycloakManaged, contact.active, contact.oneToOne, contact.recentlyOnline, contact.trustLevel));
-//        getInstance().contactInfoCache.postValue(contactInfoHashMap);
-//    }
-//
-//    public static void updateContactCachedInfo(OwnedIdentity ownedIdentity) {
-//        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
-//        if (contactInfoHashMap == null) {
-//            return;
-//        }
-//        contactInfoHashMap.put(new BytesKey(ownedIdentity.bytesOwnedIdentity), new ContactCacheInfo(ownedIdentity.keycloakManaged, ownedIdentity.active, true, true, 0));
-//        getInstance().contactInfoCache.postValue(contactInfoHashMap);
-//    }
-//
-//
-//
-//    public static void updateCacheContactDeleted(byte[] bytesContactIdentity) {
-//        BytesKey key = new BytesKey(bytesContactIdentity);
-//        HashMap<BytesKey, Pair<String, String>> namesHashMap = getContactNamesCache().getValue();
-//        if (namesHashMap != null && namesHashMap.remove(key) != null) {
-//            getInstance().contactNamesCache.postValue(namesHashMap);
-//        }
-//        HashMap<BytesKey, Integer> huesHashMap = getContactHuesCache().getValue();
-//        if (huesHashMap != null && huesHashMap.remove(key) != null) {
-//            getInstance().contactHuesCache.postValue(huesHashMap);
-//        }
-//        HashMap<BytesKey, String> photosHashMap = getContactPhotoUrlsCache().getValue();
-//        if (photosHashMap != null && photosHashMap.remove(key) != null) {
-//            getInstance().contactPhotoUrlsCache.postValue(photosHashMap);
-//        }
-//        HashMap<BytesKey, ContactCacheInfo> contactInfoHashMap = getContactInfoCache().getValue();
-//        if (contactInfoHashMap != null && contactInfoHashMap.remove(key) != null) {
-//            getInstance().contactInfoCache.postValue(contactInfoHashMap);
-//        }
-//    }
-//
-//    // endregion
-
     // region Upgrade after new build
 
     private void runBuildUpgrade(int lastBuildExecuted, int ignoredLastAndroidSdkVersionExecuted) {
@@ -1176,7 +991,7 @@ public class AppSingleton {
                 List<Message> messages = db.messageDao().getAllWithImages();
                 for (Message message: messages) {
                     if (message.recomputeAttachmentCount(db)) {
-                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.wipedAttachmentCount, message.imageResolutions);
+                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
                     }
                 }
                 Logger.i("Build 126/127 image migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
@@ -1200,14 +1015,14 @@ public class AppSingleton {
             if (lastBuildExecuted != 0 && lastBuildExecuted < 183) {
                 App.openAppDialogIntroducingGroupsV2();
             }
-            if (lastBuildExecuted < 193) {
+            if (lastBuildExecuted != 0 &&lastBuildExecuted < 193) {
                 // recompute the number of images in all messages as the filtering method was changed
                 long migrationStartTime = System.currentTimeMillis();
                 AppDatabase db = AppDatabase.getInstance();
                 List<Message> messages = db.messageDao().getAllWithLinkPreview();
                 for (Message message: messages) {
                     if (message.recomputeAttachmentCount(db)) {
-                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.wipedAttachmentCount, message.imageResolutions);
+                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
                     }
                 }
                 Logger.i("Build 193 link-preview migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
@@ -1233,6 +1048,19 @@ public class AppSingleton {
             if (lastBuildExecuted != 0 && (lastBuildExecuted < 262)) {
                 App.runThread(() -> db.fyleMessageJoinWithStatusDao().clearTextExtractedFromImages());
             }
+            if (lastBuildExecuted < 278) {
+                // recompute the attachment counts of all messages to get video and audio counts
+                long migrationStartTime = System.currentTimeMillis();
+                AppDatabase db = AppDatabase.getInstance();
+                List<Message> messages = db.messageDao().getAllWithAttachments();
+                for (Message message: messages) {
+                    if (message.recomputeAttachmentCount(db)) {
+                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
+                    }
+                }
+                Logger.i("🔫🔫 Build 277->278 attachment count migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
+            }
+
 
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());
             saveLastExecutedVersions(BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);

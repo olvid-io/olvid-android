@@ -351,6 +351,11 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
             App.runThread {
                 tipsViewModel.refreshTipToShow(this)
             }
+            TipsViewModel.getOwnedDeviceDiscoveryPerformed().observe(this) {
+                App.runThread {
+                    tipsViewModel.refreshTipToShow(this)
+                }
+            }
             if (ownedIdentity.shouldMuteNotifications()) {
                 ownedIdentityMutedImageView.visibility = View.VISIBLE
             } else {

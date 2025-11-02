@@ -28,6 +28,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +41,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,7 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
@@ -60,7 +62,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.map
 import coil.compose.rememberAsyncImagePainter
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.ifNull
@@ -80,7 +81,8 @@ fun LinkPreview(
     discussionViewModel: DiscussionViewModel?,
     linkPreviewViewModel: LinkPreviewViewModel?,
     highlighter: ((Context, AnnotatedString) -> AnnotatedString)? = null,
-    onLongClick: () -> Unit = {}
+    onLongClick: () -> Unit = {},
+    blockClicks: Boolean,
 ) {
     var opengraph by remember {
         mutableStateOf<OpenGraph?>(null)
@@ -141,7 +143,8 @@ fun LinkPreview(
                 modifier = modifier,
                 openGraph = it,
                 onLongClick = onLongClick,
-                highlighter = highlighter
+                highlighter = highlighter,
+                blockClicks = blockClicks,
             )
         }
     }
@@ -153,10 +156,11 @@ private fun LinkPreviewContent(
     modifier: Modifier = Modifier,
     openGraph: OpenGraph,
     onLongClick: () -> Unit = {},
-    highlighter: ((Context, AnnotatedString) -> AnnotatedString)?
+    highlighter: ((Context, AnnotatedString) -> AnnotatedString)?,
+    blockClicks: Boolean,
 ) {
     val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboard.current
     Box(modifier = modifier
         .border(
             width = 1.dp,
@@ -167,24 +171,32 @@ private fun LinkPreviewContent(
             color = colorResource(id = R.color.greyTint),
             shape = RoundedCornerShape(4.dp)
         )
-        .combinedClickable(onLongClick = {
-            openGraph.getSafeUri()?.toString()?.let {
-                clipboardManager.nativeClipboard.setPrimaryClip(
-                    ClipData.newPlainText(
-                        it,
-                        it
-                    )
-                )
-                App.toast(
-                    R.string.toast_message_link_copied,
-                    Toast.LENGTH_SHORT
-                )
-            } ifNull {
-                onLongClick()
-            }
-        }) {
-            App.openLink(context, openGraph.getSafeUri())
-        }) {
+        .then(
+            if (blockClicks)
+                Modifier
+            else
+                Modifier.combinedClickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(),
+                    onLongClick = {
+                        openGraph.getSafeUri()?.toString()?.let {
+                            clipboardManager.nativeClipboard.setPrimaryClip(
+                                ClipData.newPlainText(
+                                    it,
+                                    it
+                                )
+                            )
+                            App.toast(
+                                R.string.toast_message_link_copied,
+                                Toast.LENGTH_SHORT
+                            )
+                        } ifNull {
+                            onLongClick()
+                        }
+                    }) {
+                    App.openLink(context, openGraph.getSafeUri())
+                })
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -265,14 +277,13 @@ private fun LinkTitleAndDescription(
 @Preview
 @Composable
 fun LinkPreviewContentPreview() {
-    AppCompatTheme {
-        LinkPreviewContent(
-            openGraph = OpenGraph(
-                title = "Link title",
-                description = "Link description sufficiently long to span multiple lines",
-                url = "https://olvid.io",
-            ),
-            highlighter = null
-        )
-    }
+    LinkPreviewContent(
+        openGraph = OpenGraph(
+            title = "Link title",
+            description = "Link description sufficiently long to span multiple lines",
+            url = "https://olvid.io",
+        ),
+        highlighter = null,
+        blockClicks = true,
+    )
 }

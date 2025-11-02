@@ -73,6 +73,7 @@ import androidx.activity.result.contract.ActivityResultContracts.RequestPermissi
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.cardview.widget.CardView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.layout.Box
@@ -82,15 +83,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat.SRC_IN
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LiveData
@@ -386,6 +391,39 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        view.findViewById<ConstraintLayout>(R.id.root_constraint_layout)?.let {
+            ViewCompat.setOnApplyWindowInsetsListener(it) { view, windowInsets ->
+                val insets =
+                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+
+                if (view.layoutDirection == View.LAYOUT_DIRECTION_LTR) {
+                    view.findViewById<View>(R.id.start_spacer)?.let { spacer ->
+                        spacer.layoutParams.apply {
+                            width = 4 + insets.left
+                        }
+                    }
+                    view.findViewById<View>(R.id.end_spacer)?.let { spacer ->
+                        spacer.layoutParams.apply {
+                            width = 4 + insets.right
+                        }
+                    }
+                } else {
+                    view.findViewById<View>(R.id.start_spacer)?.let { spacer ->
+                        spacer.layoutParams.apply {
+                            width = 4 + insets.right
+                        }
+                    }
+                    view.findViewById<View>(R.id.end_spacer)?.let { spacer ->
+                        spacer.layoutParams.apply {
+                            width = 4 + insets.left
+                        }
+                    }
+                }
+                windowInsets
+            }
+        }
+
         val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         newMessageEditText = view.findViewById(R.id.compose_message_edit_text)
         if (SettingsActivity.useKeyboardIncognitoMode()) {
@@ -542,97 +580,95 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 false
             })
         }
-        if (VERSION.SDK_INT >= VERSION_CODES.M) {
-            newMessageEditText?.customSelectionActionModeCallback = object : Callback {
-                override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-                    menu.add(Menu.FIRST, 1111, 1, R.string.label_selection_formatting)
-                    return true
-                }
-
-                override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-                    // Possible improvement: don't show markdown menu if not relevant:
-                    // - selection crosses already present inline markdown
-                    // - selection is inside a code block or inline code
-                    return true
-                }
-
-                override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-                    if (item.itemId == 1111) {
-                        val popupMenu = PopupMenu(activity, newMessageEditText)
-                        popupMenu.inflate(R.menu.action_menu_text_selection)
-                        popupMenu.setOnMenuItemClickListener { menuItem: MenuItem ->
-                            when (menuItem.itemId) {
-                                R.id.action_text_selection_bold -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownBold())
-                                }
-
-                                R.id.action_text_selection_italic -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownItalic())
-                                }
-
-                                R.id.action_text_selection_strikethrough -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownStrikeThrough())
-                                }
-
-                                R.id.action_text_selection_heading -> {
-                                    return@setOnMenuItemClickListener false
-                                }
-
-                                R.id.action_text_selection_heading_1 -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownHeading(1))
-                                }
-
-                                R.id.action_text_selection_heading_2 -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownHeading(2))
-                                }
-
-                                R.id.action_text_selection_heading_3 -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownHeading(3))
-                                }
-
-                                R.id.action_text_selection_heading_4 -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownHeading(4))
-                                }
-
-                                R.id.action_text_selection_heading_5 -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownHeading(5))
-                                }
-
-                                R.id.action_text_selection_list -> {
-                                    return@setOnMenuItemClickListener false
-                                }
-
-                                R.id.action_text_selection_list_bullet -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownListItem())
-                                }
-
-                                R.id.action_text_selection_list_ordered -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownOrderedListItem())
-                                }
-
-                                R.id.action_text_selection_quote -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownQuote())
-                                }
-
-                                R.id.action_text_selection_code -> {
-                                    newMessageEditText?.insertMarkdown(MarkdownCode())
-                                }
-
-                                else -> {
-                                    newMessageEditText?.insertMarkdown(null)
-                                }
-                            }
-                            mode.finish()
-                            true
-                        }
-                        popupMenu.show()
-                        return true
-                    }
-                    return false
-                }
-
-                override fun onDestroyActionMode(mode: ActionMode) {}
+        newMessageEditText?.customSelectionActionModeCallback = object : Callback {
+            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                menu.add(Menu.FIRST, 1111, 1, R.string.label_selection_formatting)
+                return true
             }
+
+            override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+                // Possible improvement: don't show markdown menu if not relevant:
+                // - selection crosses already present inline markdown
+                // - selection is inside a code block or inline code
+                return true
+            }
+
+            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                if (item.itemId == 1111) {
+                    val popupMenu = PopupMenu(activity, newMessageEditText)
+                    popupMenu.inflate(R.menu.action_menu_text_selection)
+                    popupMenu.setOnMenuItemClickListener { menuItem: MenuItem ->
+                        when (menuItem.itemId) {
+                            R.id.action_text_selection_bold -> {
+                                newMessageEditText?.insertMarkdown(MarkdownBold())
+                            }
+
+                            R.id.action_text_selection_italic -> {
+                                newMessageEditText?.insertMarkdown(MarkdownItalic())
+                            }
+
+                            R.id.action_text_selection_strikethrough -> {
+                                newMessageEditText?.insertMarkdown(MarkdownStrikeThrough())
+                            }
+
+                            R.id.action_text_selection_heading -> {
+                                return@setOnMenuItemClickListener false
+                            }
+
+                            R.id.action_text_selection_heading_1 -> {
+                                newMessageEditText?.insertMarkdown(MarkdownHeading(1))
+                            }
+
+                            R.id.action_text_selection_heading_2 -> {
+                                newMessageEditText?.insertMarkdown(MarkdownHeading(2))
+                            }
+
+                            R.id.action_text_selection_heading_3 -> {
+                                newMessageEditText?.insertMarkdown(MarkdownHeading(3))
+                            }
+
+                            R.id.action_text_selection_heading_4 -> {
+                                newMessageEditText?.insertMarkdown(MarkdownHeading(4))
+                            }
+
+                            R.id.action_text_selection_heading_5 -> {
+                                newMessageEditText?.insertMarkdown(MarkdownHeading(5))
+                            }
+
+                            R.id.action_text_selection_list -> {
+                                return@setOnMenuItemClickListener false
+                            }
+
+                            R.id.action_text_selection_list_bullet -> {
+                                newMessageEditText?.insertMarkdown(MarkdownListItem())
+                            }
+
+                            R.id.action_text_selection_list_ordered -> {
+                                newMessageEditText?.insertMarkdown(MarkdownOrderedListItem())
+                            }
+
+                            R.id.action_text_selection_quote -> {
+                                newMessageEditText?.insertMarkdown(MarkdownQuote())
+                            }
+
+                            R.id.action_text_selection_code -> {
+                                newMessageEditText?.insertMarkdown(MarkdownCode())
+                            }
+
+                            else -> {
+                                newMessageEditText?.insertMarkdown(null)
+                            }
+                        }
+                        mode.finish()
+                        true
+                    }
+                    popupMenu.show()
+                    return true
+                }
+                return false
+            }
+
+            override fun onDestroyActionMode(mode: ActionMode) {}
         }
         ownedIdentityInitialView = view.findViewById(R.id.owned_identity_initial_view)
         AppSingleton.getCurrentIdentityLiveData()
@@ -1059,6 +1095,9 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         composeMessageLinkPreviewGroup?.visibility = View.GONE
         discussionViewModel.discussionId?.let { discussionId ->
             if (composeMessageViewModel.trimmedNewMessageText != null || composeMessageViewModel.hasAttachments() || recording) {
+                sending = true
+                sendButton?.isEnabled = false
+
                 discussionDelegate?.markMessagesRead()
                 val trimAndMentions = Utils.removeProtectionFEFFsAndTrim(
                     composeMessageViewModel.rawNewMessageText ?: "",
@@ -1066,27 +1105,32 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
                 )
 
                 // if there is a link preview currently loading, delay message sending a bit (max 2 second)
-                sending = true
-                sendButton?.isEnabled = false
                 linkPreviewViewModel.waitForPreview {
                     App.runThread {
-                        if (recording) {
-                            voiceMessageRecorder?.stopRecord(discard = false, async = false)
+                        try {
+                            if (recording) {
+                                voiceMessageRecorder?.stopRecord(discard = false, async = false)
+                            }
+                            PostMessageInDiscussionTask(
+                                trimAndMentions.first,
+                                discussionId,
+                                true,
+                                linkPreviewViewModel.openGraph.value,
+                                trimAndMentions.second,
+                                null
+                            ).run()
+                        } catch (e: Exception) {
+                            Logger.x(e)
                         }
-                        PostMessageInDiscussionTask(
-                            trimAndMentions.first,
-                            discussionId,
-                            true,
-                            linkPreviewViewModel.openGraph.value,
-                            trimAndMentions.second,
-                            null
-                        ).run()
+
+                        Handler(Looper.getMainLooper()).post {
+                            discussionDelegate?.messageWasSent()
+                            sending = false
+                            linkPreviewViewModel.reset()
+                            newMessageEditText?.setText("")
+                            sendButton?.isEnabled = true
+                        }
                     }
-                    discussionDelegate?.messageWasSent()
-                    sending = false
-                    linkPreviewViewModel.reset()
-                    newMessageEditText?.setText("")
-                    sendButton?.isEnabled = true
                 }
             }
         }
@@ -1635,9 +1679,6 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         } else {
             adapterIcons!!.add(-1)
         }
-        if (!SettingsActivity.betaFeaturesEnabled) {
-            adapterIcons?.remove(ICON_ATTACH_POLL)
-        }
         adapter.submitList(adapterIcons)
         val builder = Builder(
             iconOrderRecyclerView.context, R.style.CustomAlertDialog
@@ -1742,11 +1783,6 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         if (discussionViewModel.discussion.value?.discussionType != Discussion.TYPE_CONTACT) {
             icons.remove(ICON_INTRODUCE)
             otherIcons.remove(ICON_INTRODUCE)
-        }
-
-        if (SettingsActivity.betaFeaturesEnabled.not()) {
-            icons.remove(ICON_ATTACH_POLL)
-            otherIcons.remove(ICON_ATTACH_POLL)
         }
 
         // Compose area layout
@@ -2151,11 +2187,11 @@ class ComposeMessageFragment : Fragment(R.layout.fragment_discussion_compose), O
         const val ICON_INTRODUCE = 8
         const val ICON_ATTACH_POLL = 9
         val DEFAULT_ICON_ORDER = listOf(
+            ICON_ATTACH_POLL,
             ICON_EMOJI,
             ICON_EPHEMERAL_SETTINGS,
             ICON_ATTACH_FILE,
             ICON_ATTACH_PICTURE,
-            ICON_ATTACH_POLL,
             ICON_TAKE_PICTURE,
             ICON_TAKE_VIDEO,
             ICON_SEND_LOCATION,

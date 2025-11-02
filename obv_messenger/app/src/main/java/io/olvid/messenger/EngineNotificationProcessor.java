@@ -59,6 +59,7 @@ import io.olvid.messenger.databases.tasks.InsertMediatorInvitationMessageTask;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
 import io.olvid.messenger.databases.tasks.backup.BackupAppDataForEngineTask;
 import io.olvid.messenger.main.invitations.InvitationListViewModelKt;
+import io.olvid.messenger.main.tips.TipsViewModel;
 import io.olvid.messenger.notifications.AndroidNotificationManager;
 import io.olvid.messenger.openid.KeycloakManager;
 import io.olvid.messenger.services.BackupCloudProviderService;
@@ -101,6 +102,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                 EngineNotifications.CONTACT_INTRODUCTION_INVITATION_RESPONSE,
 
                 EngineNotifications.OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER,
+                EngineNotifications.OWNED_DEVICE_DISCOVERY_DONE,
         }) {
             engine.addNotificationListener(notificationName, this);
         }
@@ -622,6 +624,15 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                     });
                 }
 
+                break;
+            }
+            case EngineNotifications.OWNED_DEVICE_DISCOVERY_DONE: {
+                byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.OWNED_DEVICE_DISCOVERY_DONE_BYTES_OWNED_IDENTITY_KEY);
+                if (bytesOwnedIdentity == null) {
+                    break;
+                }
+
+                TipsViewModel.Companion.ownedDeviceDiscoveryPerformed(bytesOwnedIdentity);
                 break;
             }
         }

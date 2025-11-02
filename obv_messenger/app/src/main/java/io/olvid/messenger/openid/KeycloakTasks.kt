@@ -242,7 +242,7 @@ object KeycloakTasks {
                                     callback.failed(RFC_INVALID_SIGNATURE)
                                 }
 
-                            } ?: {
+                            } ?: run {
                                 callback.failed(RFC_BAD_RESPONSE)
                             }
                         } catch (e: IOException) {

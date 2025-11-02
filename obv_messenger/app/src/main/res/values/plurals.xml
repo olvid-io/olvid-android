@@ -2,15 +2,23 @@
 <resources>
     <plurals name="text_files">
         <item quantity="one">File</item>
-        <item quantity="other">%1$d Files</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+    <plurals name="text_audios">
+        <item quantity="one">Audio</item>
+        <item quantity="other">%1$d audios</item>
+    </plurals>
+    <plurals name="text_others">
+        <item quantity="one">%1$d other</item>
+        <item quantity="other">%1$d others</item>
     </plurals>
     <plurals name="text_images">
         <item quantity="one">Photo</item>
-        <item quantity="other">%1$d Photos</item>
+        <item quantity="other">%1$d photos</item>
     </plurals>
     <plurals name="text_videos">
         <item quantity="one">Video</item>
-        <item quantity="other">%1$d Videos</item>
+        <item quantity="other">%1$d videos</item>
     </plurals>
     <plurals name="text_common_groups">
         <item quantity="one">\"%1$s\" and 1 other group in common</item>

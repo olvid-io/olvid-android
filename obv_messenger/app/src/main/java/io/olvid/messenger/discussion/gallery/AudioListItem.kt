@@ -204,6 +204,8 @@ fun AudioListItem(
             .fillMaxWidth()
             .height(64.dp)
             .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
                 onClick = {
                     if (playable) {
                         audioAttachmentServiceBinding?.playPause(

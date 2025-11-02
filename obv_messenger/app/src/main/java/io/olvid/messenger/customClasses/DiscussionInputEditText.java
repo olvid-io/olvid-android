@@ -24,7 +24,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.Spanned;
@@ -48,23 +47,17 @@ public class DiscussionInputEditText extends AppCompatEditText {
 
     public DiscussionInputEditText(Context context) {
         super(context);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            setBackgroundResource(R.drawable.background_discussion_edit_text);
-        }
+        setBackgroundResource(R.drawable.background_discussion_edit_text);
     }
 
     public DiscussionInputEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            setBackgroundResource(R.drawable.background_discussion_edit_text);
-        }
+        setBackgroundResource(R.drawable.background_discussion_edit_text);
     }
 
     public DiscussionInputEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            setBackgroundResource(R.drawable.background_discussion_edit_text);
-        }
+        setBackgroundResource(R.drawable.background_discussion_edit_text);
     }
 
 
@@ -75,10 +68,8 @@ public class DiscussionInputEditText extends AppCompatEditText {
 
     @Override
     public boolean onTextContextMenuItem(int id) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (id == android.R.id.paste) {
-                id = android.R.id.pasteAsPlainText;
-            }
+        if (id == android.R.id.paste) {
+            id = android.R.id.pasteAsPlainText;
         }
         return super.onTextContextMenuItem(id);
     }
@@ -132,8 +123,8 @@ public class DiscussionInputEditText extends AppCompatEditText {
     public void insertTextAtSelection(CharSequence input) {
         int start = getSelectionStart();
         int end = getSelectionEnd();
+        Editable text = getText();
         if (start != -1 && end != -1) {
-            Editable text = getText();
             if (text == null) {
                 setText(input);
                 setSelection(input.length());
@@ -142,7 +133,6 @@ public class DiscussionInputEditText extends AppCompatEditText {
                 setSelection(start + input.length());
             }
         } else {
-            Editable text = getText();
             if (text == null) {
                 setText(input);
                 setSelection(input.length());

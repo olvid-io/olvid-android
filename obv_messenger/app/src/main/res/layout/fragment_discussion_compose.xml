@@ -17,18 +17,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/compose_message_card" />
 
+    <View
+        android:id="@+id/end_spacer"
+        android:layout_width="4dp"
+        android:layout_height="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
     <androidx.cardview.widget.CardView
         android:id="@+id/compose_message_card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
         android:layout_marginBottom="4dp"
         app:cardBackgroundColor="@color/lighterGrey"
         app:cardCornerRadius="12dp"
         app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/end_spacer"
         app:layout_constraintStart_toEndOf="@+id/attach_icons_group"
         app:layout_goneMarginTop="10dp">
 
@@ -340,6 +347,14 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
+    <View
+        android:id="@+id/start_spacer"
+        android:layout_width="4dp"
+        android:layout_height="1dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
     <ImageView
         android:id="@+id/attach_stuff_plus"
         android:layout_width="36dp"
@@ -349,7 +364,7 @@
         android:layout_marginBottom="4dp"
         android:background="@drawable/background_circular_ripple"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/start_spacer"
         android:src="@drawable/ic_attach_add"
         android:theme="@style/SubtleBlueRipple"
         tools:ignore="UnusedAttribute"/>

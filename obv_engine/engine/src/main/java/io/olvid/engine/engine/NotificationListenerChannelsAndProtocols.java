@@ -56,6 +56,7 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
                 ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_SENT,
                 ProtocolNotifications.NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE,
                 ProtocolNotifications.NOTIFICATION_SNAPSHOT_RESTORATION_FINISHED,
+                ProtocolNotifications.NOTIFICATION_OWNED_DEVICE_DISCOVERY_DONE,
         }) {
             notificationManager.addListener(notificationName, this);
         }
@@ -224,6 +225,19 @@ public class NotificationListenerChannelsAndProtocols implements NotificationLis
             }
             case ProtocolNotifications.NOTIFICATION_SNAPSHOT_RESTORATION_FINISHED: {
                 engine.postEngineNotification(EngineNotifications.ENGINE_SNAPSHOT_RESTORATION_FINISHED, new HashMap<>());
+                break;
+            }
+            case ProtocolNotifications.NOTIFICATION_OWNED_DEVICE_DISCOVERY_DONE: {
+                Identity ownedIdentity = (Identity) userInfo.get(ProtocolNotifications.NOTIFICATION_OWNED_DEVICE_DISCOVERY_DONE_OWNED_IDENTITY_KEY);
+
+                if (ownedIdentity == null) {
+                    break;
+                }
+
+                HashMap<String, Object> engineInfo = new HashMap<>();
+                engineInfo.put(EngineNotifications.OWNED_DEVICE_DISCOVERY_DONE_BYTES_OWNED_IDENTITY_KEY, ownedIdentity.getBytes());
+
+                engine.postEngineNotification(EngineNotifications.OWNED_DEVICE_DISCOVERY_DONE, engineInfo);
                 break;
             }
             default:

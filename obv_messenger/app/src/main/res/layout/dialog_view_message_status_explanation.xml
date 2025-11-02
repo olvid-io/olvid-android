@@ -121,6 +121,15 @@
         android:layout_marginStart="4dp"
         android:layout_marginVertical="4dp"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_info_message"
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:text="@string/explanation_message_status_read_receipts"
+        />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

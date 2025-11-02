@@ -32,6 +32,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -78,17 +79,18 @@ public class ContactGroupV2 implements ObvDatabase {
     static final String OWNED_IDENTITY = "owned_identity";
     private byte[] serializedOwnPermissions; // permission strings separated by 0x00 bytes --> allows storing future permissions
     static final String SERIALIZED_OWN_PERMISSIONS = "serialized_own_permissions";
+
     private int version; // always 0 for a keycloak group
     static final String VERSION = "version";
     public int trustedDetailsVersion; // always 0 for a keycloak group
     static final String TRUSTED_DETAILS_VERSION = "trusted_details_version";
-
     private byte[] verifiedAdministratorsChain; // null for a keycloak group
     static final String VERIFIED_ADMINISTRATORS_CHAIN = "verified_administrators_chain";
     private Seed blobMainSeed; // used to decrypt the blob on the server, null for a keycloak group
     static final String BLOB_MAIN_SEED = "blob_main_seed";
     private Seed blobVersionSeed; // used to decrypt the blob on the server, null for a keycloak group
     static final String BLOB_VERSION_SEED = "blob_version_seed";
+
     private ServerAuthenticationPrivateKey groupAdminServerAuthenticationPrivateKey; // non null for admins --> required to upload the blob
     static final String GROUP_ADMIN_SERVER_AUTHENTICATION_PRIVATE_KEY = "group_admin_server_authentication_private_key";
     private byte[] ownGroupInvitationNonce;
@@ -99,10 +101,13 @@ public class ContactGroupV2 implements ObvDatabase {
     static final String LAST_MODIFICATION_TIMESTAMP = "last_modification_timestamp";
     private String pushTopic; // non-null only for keyclaok groups
     static final String PUSH_TOPIC = "push_topic";
+
     private String serializedSharedSettings; // non-null only for keyclaok groups
     static final String SERIALIZED_SHARED_SETTINGS = "serialized_shared_settings";
     private String serializedJsonGroupType;
     static final String SERIALIZED_JSON_GROUP_TYPE = "serialized_json_group_type";
+    private Integer alreadyTrustedDetailsVersion; // non-null only if some details were trusted on another device while the version to be trusted was not yet available on this device
+    static final String ALREADY_TRUSTED_DETAILS_VERSION = "already_trusted_details_version";
 
 
     public Identity getOwnedIdentity() {
@@ -165,6 +170,17 @@ public class ContactGroupV2 implements ObvDatabase {
         return serializedJsonGroupType;
     }
 
+    public Integer getAlreadyTrustedDetailsVersion() {
+        return alreadyTrustedDetailsVersion;
+    }
+
+    private Identity inviterIdentity;
+    private Identity deletedBy;
+
+    public void setDeletedBy(Identity deletedBy) {
+        this.deletedBy = deletedBy;
+    }
+
     // region constructor
 
     // used only by the group creator to create a new group
@@ -198,7 +214,7 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
 
-    public static ContactGroupV2 createJoined(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, String serializedGroupDetails, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, String serializedGroupType, boolean createdByMeOnOtherDevice) {
+    public static ContactGroupV2 createJoined(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, String serializedGroupDetails, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, String serializedGroupType, boolean createdByMeOnOtherDevice, Identity inviterIdentity) {
         if ((ownedIdentity == null) || (groupIdentifier == null) || (serializedGroupDetails == null) || (verifiedAdministratorsChain == null) || (blobKeys == null) || (ownGroupInvitationNonce == null) || (ownPermissionStrings == null)) {
             return null;
         }
@@ -214,6 +230,7 @@ public class ContactGroupV2 implements ObvDatabase {
             }
 
             ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, GroupV2.Permission.serializePermissionStrings(ownPermissionStrings), contactGroupDetails.getVersion(), verifiedAdministratorsChain, blobKeys, ownGroupInvitationNonce, false, System.currentTimeMillis(), null, null, serializedGroupType);
+            contactGroup.inviterIdentity = inviterIdentity;
             contactGroup.insert();
             if (createdByMeOnOtherDevice) {
                 contactGroup.commitHookBits |= HOOK_BIT_INSERTED_AS_NEW | HOOK_BIT_CREATED_ON_OTHER_DEVICE;
@@ -279,6 +296,7 @@ public class ContactGroupV2 implements ObvDatabase {
         this.pushTopic = pushTopic;
         this.serializedSharedSettings = serializedSharedSettings;
         this.serializedJsonGroupType = serializedJsonGroupType;
+        this.alreadyTrustedDetailsVersion = null;
     }
 
     private ContactGroupV2(IdentityManagerSession identityManagerSession, ResultSet res) throws SQLException {
@@ -315,6 +333,10 @@ public class ContactGroupV2 implements ObvDatabase {
         this.pushTopic = res.getString(PUSH_TOPIC);
         this.serializedSharedSettings = res.getString(SERIALIZED_SHARED_SETTINGS);
         this.serializedJsonGroupType = res.getString(SERIALIZED_JSON_GROUP_TYPE);
+        this.alreadyTrustedDetailsVersion = res.getInt(ALREADY_TRUSTED_DETAILS_VERSION);
+        if (res.wasNull()) {
+            this.alreadyTrustedDetailsVersion = null;
+        }
     }
 
 
@@ -812,6 +834,27 @@ public class ContactGroupV2 implements ObvDatabase {
         }
     }
 
+    public void setAlreadyTrustedDetailsVersion(Integer alreadyTrustedDetailsVersion) throws SQLException {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                " SET " + ALREADY_TRUSTED_DETAILS_VERSION + " = ? " +
+                " WHERE " + GROUP_UID + " = ? " +
+                " AND " + SERVER_URL + " = ? " +
+                " AND " + CATEGORY + " = ? " +
+                " AND " + OWNED_IDENTITY + " = ?;")) {
+            if (alreadyTrustedDetailsVersion == null) {
+                statement.setNull(1, Types.INTEGER);
+            } else {
+                statement.setInt(1, alreadyTrustedDetailsVersion);
+            }
+            statement.setBytes(2, groupUid.getBytes());
+            statement.setString(3, serverUrl);
+            statement.setInt(4, category);
+            statement.setBytes(5, ownedIdentity.getBytes());
+            statement.executeUpdate();
+            this.alreadyTrustedDetailsVersion = alreadyTrustedDetailsVersion;
+        }
+    }
+
 
 
     public List<Identity> updateWithNewBlob(GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe, Identity updatedBy, List<Identity> leavers) throws SQLException {
@@ -894,6 +937,18 @@ public class ContactGroupV2 implements ObvDatabase {
                 }
             }
             version = newDetails.getVersion();
+
+            // check if this new version was already trusted on another device
+            if (alreadyTrustedDetailsVersion != null) {
+                if (version == alreadyTrustedDetailsVersion) {
+                    // we can immediately trust the new version
+                    trustedDetailsVersion = alreadyTrustedDetailsVersion;
+                    alreadyTrustedDetailsVersion = null;
+                } else if (version > alreadyTrustedDetailsVersion) {
+                    // a new update was published since our already trusted version --> discard it
+                    alreadyTrustedDetailsVersion = null;
+                }
+            }
         }
 
         // update the group in DB
@@ -1412,6 +1467,7 @@ public class ContactGroupV2 implements ObvDatabase {
                     PUSH_TOPIC + " TEXT, " +
                     SERIALIZED_SHARED_SETTINGS + " TEXT, " +
                     SERIALIZED_JSON_GROUP_TYPE + " TEXT, " +
+                    ALREADY_TRUSTED_DETAILS_VERSION + " INT, " +
                     " CONSTRAINT PK_" + TABLE_NAME + " PRIMARY KEY(" + GROUP_UID + ", " + SERVER_URL + ", " + CATEGORY + ", " + OWNED_IDENTITY + "), " +
                     " FOREIGN KEY (" + OWNED_IDENTITY + ") REFERENCES " + OwnedIdentity.TABLE_NAME + "(" + OwnedIdentity.OWNED_IDENTITY + ")," +
                     " FOREIGN KEY (" + GROUP_UID + ", " + SERVER_URL + ", " + CATEGORY + ", " + OWNED_IDENTITY + ", " + VERSION + ") REFERENCES " + ContactGroupV2Details.TABLE_NAME + "(" + ContactGroupV2Details.GROUP_UID + ", " + ContactGroupV2Details.SERVER_URL + ", " + ContactGroupV2Details.CATEGORY + ", " + ContactGroupV2Details.OWNED_IDENTITY + ", " + ContactGroupV2Details.VERSION + ")," +
@@ -1482,10 +1538,16 @@ public class ContactGroupV2 implements ObvDatabase {
                 statement.execute("ALTER TABLE contact_group_v2 ADD COLUMN `serialized_json_group_type` TEXT DEFAULT NULL");
             }
         }
+        if (oldVersion < 48 && newVersion >= 48) {
+            try (Statement statement = session.createStatement()) {
+                Logger.d("MIGRATING `contact_group_v2` DATABASE FROM VERSION " + oldVersion + " to 48");
+                statement.execute("ALTER TABLE contact_group_v2 ADD COLUMN `already_trusted_details_version` INT DEFAULT NULL");
+            }
+        }
     }
 
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?);")) {
             statement.setBytes(1, groupUid.getBytes());
             statement.setString(2, serverUrl);
             statement.setInt(3, category);
@@ -1503,8 +1565,14 @@ public class ContactGroupV2 implements ObvDatabase {
             statement.setBoolean(13, frozen);
             statement.setLong(14, lastModificationTimestamp);
             statement.setString(15, pushTopic);
+
             statement.setString(16, serializedSharedSettings);
             statement.setString(17, serializedJsonGroupType);
+            if (alreadyTrustedDetailsVersion == null) {
+                statement.setNull(18, Types.INTEGER);
+            } else {
+                statement.setInt(18, alreadyTrustedDetailsVersion);
+            }
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_INSERTED;
             identityManagerSession.session.addSessionCommitListener(this);
@@ -1558,7 +1626,8 @@ public class ContactGroupV2 implements ObvDatabase {
                 LAST_MODIFICATION_TIMESTAMP + " = ?, " +
                 PUSH_TOPIC + " = ?, " +
                 SERIALIZED_SHARED_SETTINGS + " = ?, " +
-                SERIALIZED_JSON_GROUP_TYPE + " = ? " +
+                SERIALIZED_JSON_GROUP_TYPE + " = ?, " +
+                ALREADY_TRUSTED_DETAILS_VERSION + " = ? " +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +
@@ -1577,13 +1646,17 @@ public class ContactGroupV2 implements ObvDatabase {
 
             statement.setString(11, pushTopic);
             statement.setString(12, serializedSharedSettings);
-
             statement.setString(13, serializedJsonGroupType);
+            if (alreadyTrustedDetailsVersion == null) {
+                statement.setNull(14, Types.INTEGER);
+            } else {
+                statement.setInt(14, alreadyTrustedDetailsVersion);
+            }
 
-            statement.setBytes(14, groupUid.getBytes());
-            statement.setString(15, serverUrl);
-            statement.setInt(16, category);
-            statement.setBytes(17, ownedIdentity.getBytes());
+            statement.setBytes(15, groupUid.getBytes());
+            statement.setString(16, serverUrl);
+            statement.setInt(17, category);
+            statement.setBytes(18, ownedIdentity.getBytes());
             statement.executeUpdate();
         }
     }
@@ -1624,12 +1697,18 @@ public class ContactGroupV2 implements ObvDatabase {
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_GROUP_IDENTIFIER_KEY, getGroupIdentifier());
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_CREATED_BY_ME_KEY, (commitHookBits & HOOK_BIT_INSERTED_AS_NEW) != 0);
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_ON_OTHER_DEVICE_KEY, (commitHookBits & HOOK_BIT_CREATED_ON_OTHER_DEVICE) != 0);
+            if (inviterIdentity != null) {
+                userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_BY_KEY, inviterIdentity);
+            }
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED, userInfo);
         }
         if ((commitHookBits & HOOK_BIT_DELETED) != 0) {
             HashMap<String, Object> userInfo = new HashMap<>();
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_DELETED_OWNED_IDENTITY_KEY, ownedIdentity);
             userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_DELETED_GROUP_IDENTIFIER_KEY, getGroupIdentifier());
+            if (deletedBy != null) {
+                userInfo.put(IdentityNotifications.NOTIFICATION_GROUP_V2_DELETED_DELETED_BY_KEY, deletedBy);
+            }
             identityManagerSession.notificationPostingDelegate.postNotification(IdentityNotifications.NOTIFICATION_GROUP_V2_DELETED, userInfo);
         }
         if ((commitHookBits & HOOK_BIT_FROZEN_CHANGED) != 0) {

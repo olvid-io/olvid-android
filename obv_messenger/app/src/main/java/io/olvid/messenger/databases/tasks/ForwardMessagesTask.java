@@ -174,7 +174,10 @@ public class ForwardMessagesTask implements Runnable {
                        discussion.bytesOwnedIdentity,
                        discussion.senderThreadIdentifier,
                        0,
-                       0
+                       0,
+                       0,
+                       0,
+                       null
                );
                if (message.messageType != Message.TYPE_OUTBOUND_MESSAGE) {
                   newMessage.forwarded = true;
@@ -195,7 +198,7 @@ public class ForwardMessagesTask implements Runnable {
                   }
                }
                newMessage.recomputeAttachmentCount(db);
-               db.messageDao().updateAttachmentCount(newMessage.id, newMessage.totalAttachmentCount, newMessage.imageCount, 0, newMessage.imageResolutions);
+               db.messageDao().updateAttachmentCount(newMessage.id, newMessage.totalAttachmentCount, newMessage.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, 0, newMessage.imageResolutions);
 
                newMessage.post(false, null);
             });

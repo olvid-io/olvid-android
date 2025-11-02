@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">आपने समूह छोड़ दिया है</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">आप फिर से समूह में शामिल हुए</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">आप समूह में शामिल हुए</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s ने आपको इस समूह में जोड़ा है</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s ने आपको इस समूह में फिर से जोड़ा है</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">%1$s द्वारा प्रबंधित समूह</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">ग्रुप में शामिल हुए: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">%1$s समूह में शामिल हुए</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s ने समूह में %2$s को जोड़ा</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">आपने %2$s को समूह में जोड़ा</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s ने समूह से %2$s को हटाया</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">आपने %2$s को समूह से हटा दिया</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s ने आपको समूह से हटाया</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">आपको समूह से हटा दिया गया है</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">अज्ञात</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">कोई नहीं</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">मसौदा:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">अज्ञात लाइसेंस</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">वैध लाइसेंस</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">लाइसेंस समाप्त</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">लाइसेंस सक्रिय करने में असमर्थ</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">संपर्क आईडी साझा करें</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">बीटा सुविधा परीक्षण</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">प्रीमियम सुविधाएँ मुफ्त में उपलब्ध हैं</string>
@@ -1205,7 +1208,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">आपका संदेश</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d प्रतिक्रियाएँ: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s ने %2$s पर प्रतिक्रिया दी</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">इमोजी डालें</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">एक इमोजी डालें</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">पसंदीदा में जोड़ने/निकालने के लिए लंबे समय तक दबाएं</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">डीबग जानकारी</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">चैनल/डिवाइस की संख्या:</string>
@@ -1216,7 +1219,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">समूह v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">एनिमेटेड इमोजी का उपयोग करें (यदि उपलब्ध हो)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">एनिमेटेड इमोजी का उपयोग करें (यदि उपलब्ध हो)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">प्रोफ़ाइल संग्रहण उपयोग</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">तस्वीरें</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">वीडियो</string>
@@ -1477,7 +1480,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">उन्नत</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Olvid समूहों की पूरी शक्ति को उजागर करें!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">ग्रुप एडमिन</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">आप अब एक समूह व्यवस्थापक हैं</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">आप अब इस समूह के व्यवस्थापक हैं</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">आप अब समूह व्यवस्थापक नहीं हैं</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">अब आपको संदेश पोस्ट करने की अनुमति है</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">आप अब यहां संदेश पोस्ट नहीं कर सकते</string>
@@ -1855,6 +1858,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">संभावित संदेश स्थिति</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">समूह संदेशों के लिए</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">अन्य स्टेटस</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Olvid में रीड रसीद वैकल्पिक हैं।\nआपके संपर्क संदेश पढ़ने पर आपको सूचित न करने का विकल्प चुन सकते हैं।</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">संपर्क लंबे समय से ऑफ़लाइन है</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">ऐसा लगता है कि यह संपर्क लंबे समय से Olvid का उपयोग नहीं कर रहा है। हम गारंटी नहीं दे सकते कि संदेश उन्हें ठीक से वितरित किए जाएंगे।</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">कोई ब्राउज़र नहीं मिला</string>
@@ -2069,7 +2073,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">नया संदेश</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">नया संपर्क</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">आमने-सामने</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">दूर से</string>
+	<string name="new_contact_remotely" hash="-1391656952">दूर से</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">एक दूसरे के QR कोड स्कैन करें</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">%1$s से अपना कोड स्कैन करवाएं</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">कोड स्कैन किया गया!</string>
@@ -2095,4 +2099,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">कॉल</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">पिन की गई बातचीत</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">क्या %1$s आपका कोड स्कैन नहीं कर पा रहा है?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">अविश्वसनीय</string>
+	<string name="label_offline" state="needs_review" hash="315122527">ऑफ़लाइन</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">आप इस संपर्क को कैसे जोड़ना चाहेंगे?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">अज्ञात एक्सेसिबिलिटी सेवा</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">एक अज्ञात एक्सेसिबिलिटी सर्विस डिटेक्ट की गई है। यदि आपने स्वेच्छा से ऐसी कोई सर्विस सक्षम नहीं की है, तो यह दुर्भावनापूर्ण सॉफ़्टवेयर हो सकता है। कृपया जांच करें कि नीचे सूचीबद्ध सर्विस उपयोग करने के लिए सुरक्षित है या नहीं:</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">इस सेवा पर भरोसा करें</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">अभिगम्यता सेवाएं</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">विश्वसनीय एक्सेसिबिलिटी सेवाओं की सूची:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">कोई अज्ञात एक्सेसिबिलिटी सेवा नहीं मिली।</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">अज्ञात एक्सेसिबिलिटी सेवा</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">एक अज्ञात एक्सेसिबिलिटी सेवा का पता चला है, कृपया जांच करें कि इसका उपयोग करना सुरक्षित है:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">इमोजी खोजें</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">नवीनतम</string>
 </resources>

@@ -16,10 +16,10 @@ repositories {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 23
         consumerProguardFiles 'proguard-rules.pro'
     }
     namespace 'com.thegrizzlylabs.sardineandroid'

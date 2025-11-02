@@ -66,22 +66,22 @@ import io.olvid.engine.datatypes.GroupMembersChangedCallback;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.KeyId;
 import io.olvid.engine.datatypes.PreKeyBlobOnServer;
-import io.olvid.engine.datatypes.containers.AuthEncKeyAndChannelInfo;
-import io.olvid.engine.datatypes.containers.EncodedOwnedPreKey;
-import io.olvid.engine.datatypes.containers.OwnedDeviceAndPreKey;
-import io.olvid.engine.datatypes.containers.PreKey;
 import io.olvid.engine.datatypes.PrivateIdentity;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.SessionCommitListener;
 import io.olvid.engine.datatypes.TrustLevel;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.AuthEncKeyAndChannelInfo;
+import io.olvid.engine.datatypes.containers.EncodedOwnedPreKey;
 import io.olvid.engine.datatypes.containers.Group;
 import io.olvid.engine.datatypes.containers.GroupInformation;
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.KeycloakGroupV2UpdateOutput;
+import io.olvid.engine.datatypes.containers.OwnedDeviceAndPreKey;
+import io.olvid.engine.datatypes.containers.PreKey;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.datatypes.containers.UidAndPreKey;
@@ -1267,7 +1267,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     }
 
                     // group was disbanded, delete it locally
-                    deleteGroupV2(session, ownedIdentity, groupIdentifier);
+                    deleteGroupV2(session, ownedIdentity, groupIdentifier, null);
                 } catch (InvalidJwtException | JsonProcessingException | IllegalArgumentException e) {
                     // unable to process signed deletion --> ignore it
                     Logger.x(e);
@@ -1300,7 +1300,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     }
 
                     // I was kicked from the group, delete it locally
-                    deleteGroupV2(session, ownedIdentity, groupIdentifier);
+                    deleteGroupV2(session, ownedIdentity, groupIdentifier, null);
                 } catch (InvalidJwtException | JsonProcessingException | IllegalArgumentException e) {
                     // unable to process signed deletion --> ignore it
                     Logger.x(e);
@@ -3103,7 +3103,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public boolean createJoinedGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.BlobKeys blobKeys, GroupV2.ServerBlob serverBlob, boolean createdByMeOnOtherDevice) throws Exception {
+    public boolean createJoinedGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.BlobKeys blobKeys, GroupV2.ServerBlob serverBlob, boolean createdByMeOnOtherDevice, Identity inviterIdentity) throws Exception {
         if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) || (serverBlob == null)) {
             throw new Exception();
         }
@@ -3149,7 +3149,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 ownIdentityAndPermissionsAndDetails.groupInvitationNonce,
                 ownIdentityAndPermissionsAndDetails.permissionStrings,
                 serverBlob.serializedGroupType,
-                createdByMeOnOtherDevice
+                createdByMeOnOtherDevice,
+                inviterIdentity
         );
         if (group == null) {
             throw new Exception("Unable to create joined ContactGroupV2");
@@ -3198,12 +3199,13 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public void deleteGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
+    public void deleteGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity deletedBy) throws SQLException {
         if (groupIdentifier == null) {
             return;
         }
         ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
         if (groupV2 != null) {
+            groupV2.setDeletedBy(deletedBy);
             groupV2.delete();
         }
 
@@ -4045,8 +4047,14 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     GroupV2.Identifier groupIdentifier = obvSyncAtom.getGroupIdentifier();
                     ContactGroupV2 groupV2 = ContactGroupV2.get(wrapSession(session), ownedIdentity, groupIdentifier);
                     // check if there are indeed details to trust matching the version
-                    if (groupV2 != null && groupV2.getVersion() != groupV2.getTrustedDetailsVersion() && groupV2.getVersion() == version) {
-                        trustGroupV2PublishedDetails(session, ownedIdentity, groupIdentifier);
+                    if (groupV2 != null && (groupV2.getVersion() != groupV2.getTrustedDetailsVersion() || groupV2.getVersion() < version)) {
+                        if (groupV2.getVersion() == version) {
+                            trustGroupV2PublishedDetails(session, ownedIdentity, groupIdentifier);
+                        } else if (groupV2.getVersion() < version) {
+                            if (groupV2.getAlreadyTrustedDetailsVersion() == null || groupV2.getAlreadyTrustedDetailsVersion() < version) {
+                                groupV2.setAlreadyTrustedDetailsVersion(version);
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     Logger.x(e);

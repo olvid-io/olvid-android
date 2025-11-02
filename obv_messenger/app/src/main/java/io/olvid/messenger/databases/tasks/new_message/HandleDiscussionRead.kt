@@ -66,6 +66,7 @@ fun handleDiscussionRead(
 
         if (db.messageDao().getServerTimestampOfLatestUnreadInboundMessageInDiscussion(discussion.id) == null) {
             AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussion.id)
+            AndroidNotificationManager.clearMissedCallNotification(discussion.id)
 
             if (SettingsActivity.isNotificationContentHidden) {
                 // if displaying only neutral notifications, check if there is a point in still showing one

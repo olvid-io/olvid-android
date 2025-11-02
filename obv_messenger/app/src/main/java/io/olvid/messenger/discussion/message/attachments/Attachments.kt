@@ -39,6 +39,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -60,9 +61,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -99,7 +99,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.map
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.App.imageLoader
 import io.olvid.messenger.FyleProgressSingleton
@@ -123,6 +122,8 @@ import io.olvid.messenger.databases.tasks.DeleteAttachmentTask
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
 import io.olvid.messenger.databases.tasks.StartAttachmentDownloadTask
 import io.olvid.messenger.databases.tasks.StopAttachmentDownloadTask
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.gallery.AudioListItem
 import io.olvid.messenger.discussion.gallery.FyleListItem
@@ -187,6 +188,7 @@ fun Attachments(
     discussionSearchViewModel: DiscussionSearchViewModel?,
     saveAttachment: () -> Unit,
     saveAllAttachments: () -> Unit,
+    blockClicks: Boolean,
 ) {
     val context = LocalContext.current
     val highlightColor = colorResource(R.color.searchHighlightColor)
@@ -410,7 +412,7 @@ fun Attachments(
                                         ) 6.dp else 0.dp
                                     )
                                 )
-                                .then(if (openOnClick) {
+                                .then(if (blockClicks.not() && openOnClick) {
                                     Modifier.clickable {
                                         downloadAwareClick {
                                             App.runThread(
@@ -525,37 +527,43 @@ fun Attachments(
                                         textElementColor = highlightColor
                                     )
                                 }
-                                .combinedClickable(
-                                    onClick = {
-                                        downloadAwareClick {
-                                            if (message.isLocationMessage) {
-                                                onLocationClicked?.invoke()
-                                            } else if (attachment.fyleMessageJoinWithStatus.mimeType != "image/svg+xml") {
-                                                val showTextBlocksInGallery = textBlocks.isNotEmpty()
-                                                        && (discussionSearchViewModel?.matchedMessageAndFyleIds?.any {
-                                                    it.first == message.id
-                                                            && it.second == attachment.fyle.id
-                                                } == true)
+                                .then(
+                                    if (blockClicks)
+                                        Modifier
+                                    else
+                                        Modifier.combinedClickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = ripple(),
+                                            onClick = {
+                                                downloadAwareClick {
+                                                    if (message.isLocationMessage) {
+                                                        onLocationClicked?.invoke()
+                                                    } else if (attachment.fyleMessageJoinWithStatus.mimeType != "image/svg+xml") {
+                                                        val showTextBlocksInGallery = textBlocks.isNotEmpty()
+                                                                && (discussionSearchViewModel?.matchedMessageAndFyleIds?.any {
+                                                            it.first == message.id
+                                                                    && it.second == attachment.fyle.id
+                                                        } == true)
 
-                                                openViewerCallback?.invoke()
-                                                App.openDiscussionGalleryActivity(
-                                                    context,
-                                                    message.discussionId,
-                                                    attachment.fyleMessageJoinWithStatus.messageId,
-                                                    attachment.fyle.id,
-                                                    true,
-                                                    showTextBlocksInGallery
-                                                )
+                                                        openViewerCallback?.invoke()
+                                                        App.openDiscussionGalleryActivity(
+                                                            context,
+                                                            message.discussionId,
+                                                            attachment.fyleMessageJoinWithStatus.messageId,
+                                                            attachment.fyle.id,
+                                                            true,
+                                                            showTextBlocksInGallery
+                                                        )
+                                                    }
+                                                }
+                                            },
+                                            onLongClick = {
+                                                onAttachmentLongClick(attachment.fyleAndStatus)
+                                                if (message.isLocationMessage.not()) {
+                                                    attachmentContextMenuOpened = true
+                                                }
                                             }
-                                        }
-                                    },
-                                    onLongClick = {
-                                        onAttachmentLongClick(attachment.fyleAndStatus)
-                                        if (message.isLocationMessage.not()) {
-                                            attachmentContextMenuOpened = true
-                                        }
-                                    }
-                                ),
+                                        )),
                             model = imageUri,
                             imageLoader = imageLoader,
                             contentScale = if (attachment.fyleMessageJoinWithStatus.nonNullMimeType != "image/gif" && (attachment.fyleMessageJoinWithStatus.nonNullMimeType.startsWith(
@@ -719,7 +727,7 @@ fun Attachments(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(64.dp)
-                                .then(if (openOnClick) {
+                                .then(if (blockClicks.not() && openOnClick) {
                                     Modifier.clickable {
                                         downloadAwareClick {
                                             App.runThread(
@@ -744,24 +752,30 @@ fun Attachments(
                                 audioAttachmentServiceBinding = audioAttachmentServiceBinding,
                                 discussionId = message.discussionId,
                                 onLongClick = {
-                                    onAttachmentLongClick(attachment.fyleAndStatus)
-                                    menuOpened = true
+                                    if (blockClicks.not()) {
+                                        onAttachmentLongClick(attachment.fyleAndStatus)
+                                        menuOpened = true
+                                    }
                                 },
                                 onIncompleteClick = {
-                                    downloadAwareClick {}
+                                    if (blockClicks.not()) {
+                                        downloadAwareClick {}
+                                    }
                                 },
                                 contextMenu = {
-                                    AttachmentContextMenu(
-                                        menuOpened = menuOpened,
-                                        message = message,
-                                        attachment = attachment,
-                                        visibility = VISIBLE,
-                                        readOnce = false,
-                                        multipleAttachment = attachments.size > 1,
-                                        onDismiss = { menuOpened = false },
-                                        saveAttachment = saveAttachment,
-                                        saveAllAttachments = saveAllAttachments
-                                    )
+                                    if (blockClicks.not()) {
+                                        AttachmentContextMenu(
+                                            menuOpened = menuOpened,
+                                            message = message,
+                                            attachment = attachment,
+                                            visibility = VISIBLE,
+                                            readOnce = false,
+                                            multipleAttachment = attachments.size > 1,
+                                            onDismiss = { menuOpened = false },
+                                            saveAttachment = saveAttachment,
+                                            saveAllAttachments = saveAllAttachments
+                                        )
+                                    }
                                 }
                             )
                         } else {
@@ -776,32 +790,38 @@ fun Attachments(
                                 )
                                     ?: AnnotatedString(attachment.fyleMessageJoinWithStatus.fileName),
                                 onClick = {
-                                    downloadAwareClick {
-                                        App.openFyleViewer(
-                                            context,
-                                            attachment.fyleAndStatus
-                                        ) {
-                                            openViewerCallback?.invoke()
-                                            attachment.fyleMessageJoinWithStatus.markAsOpened()
+                                    if (blockClicks.not()) {
+                                        downloadAwareClick {
+                                            App.openFyleViewer(
+                                                context,
+                                                attachment.fyleAndStatus
+                                            ) {
+                                                openViewerCallback?.invoke()
+                                                attachment.fyleMessageJoinWithStatus.markAsOpened()
+                                            }
                                         }
                                     }
                                 },
                                 onLongClick = {
-                                    onAttachmentLongClick(attachment.fyleAndStatus)
-                                    menuOpened = true
+                                    if (blockClicks.not()) {
+                                        onAttachmentLongClick(attachment.fyleAndStatus)
+                                        menuOpened = true
+                                    }
                                 },
                                 contextMenu = {
-                                    AttachmentContextMenu(
-                                        menuOpened = menuOpened,
-                                        message = message,
-                                        attachment = attachment,
-                                        visibility = VISIBLE,
-                                        readOnce = false,
-                                        multipleAttachment = attachments.size > 1,
-                                        onDismiss = { menuOpened = false },
-                                        saveAttachment = saveAttachment,
-                                        saveAllAttachments = saveAllAttachments
-                                    )
+                                    if (blockClicks.not()) {
+                                        AttachmentContextMenu(
+                                            menuOpened = menuOpened,
+                                            message = message,
+                                            attachment = attachment,
+                                            visibility = VISIBLE,
+                                            readOnce = false,
+                                            multipleAttachment = attachments.size > 1,
+                                            onDismiss = { menuOpened = false },
+                                            saveAttachment = saveAttachment,
+                                            saveAllAttachments = saveAllAttachments
+                                        )
+                                    }
                                 },
                                 previewBorder = false
                             )
@@ -1082,7 +1102,7 @@ fun AttachmentContextMenu(
     val context = LocalContext.current
     // delete
     val delete = @Composable {
-        DropdownMenuItem(
+        OlvidDropdownMenuItem(
             onClick = {
                 if (message.isWithoutText && multipleAttachment.not()) {
                     // we are deleting the last attachment, show the delete message dialog
@@ -1107,17 +1127,13 @@ fun AttachmentContextMenu(
                 }
                 onDismiss()
             },
-            text = {
-                Text(
-                    text = stringResource(id = R.string.menu_action_delete),
-                    color = colorResource(id = R.color.almostBlack)
-                )
-            }
+            textColor = colorResource(R.color.red),
+            text = stringResource(id = R.string.menu_action_delete),
         )
     }
     // open
     val open = @Composable {
-        DropdownMenuItem(
+        OlvidDropdownMenuItem(
             onClick = {
                 if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(
                         PreviewUtils.getNonNullMimeType(
@@ -1144,21 +1160,13 @@ fun AttachmentContextMenu(
                 }
                 onDismiss()
             },
-            text = {
-                Text(
-                    text = stringResource(id = R.string.menu_action_open),
-                    color = colorResource(id = R.color.almostBlack)
-                )
-            }
+            text = stringResource(id = R.string.menu_action_open),
         )
     }
 
-    DropdownMenu(
-        modifier = Modifier
-            .background(
-                color = colorResource(id = R.color.dialogBackground)
-            )
-            .clip(RoundedCornerShape(8.dp)), expanded = menuOpened, onDismissRequest = onDismiss
+    OlvidDropdownMenu(
+        expanded = menuOpened,
+        onDismissRequest = onDismiss
     ) {
         if (visibility == HIDDEN || readOnce) {
             delete()
@@ -1168,37 +1176,25 @@ fun AttachmentContextMenu(
         } else if (attachment.fyle.isComplete) {
             open()
             // save
-            DropdownMenuItem(
+            OlvidDropdownMenuItem(
                 onClick = {
                     saveAttachment()
                     onDismiss()
                 },
-                text = {
-                    Text(
-                        text = stringResource(id = R.string.menu_action_save),
-                        color = colorResource(id = R.color.almostBlack)
-                    )
-                }
+                text = stringResource(id = R.string.menu_action_save),
             )
             if (multipleAttachment) {
                 // saveAll
-                DropdownMenuItem(
+                OlvidDropdownMenuItem(
                     onClick = {
                         saveAllAttachments()
                         onDismiss()
                     },
-                    text = {
-                        Text(
-                            text = stringResource(id = R.string.menu_action_save_all),
-                            color = colorResource(
-                                id = R.color.almostBlack
-                            )
-                        )
-                    }
+                    text = stringResource(id = R.string.menu_action_save_all),
                 )
             }
             // share
-            DropdownMenuItem(
+            OlvidDropdownMenuItem(
                 onClick = {
                     val intent = Intent(Intent.ACTION_SEND)
                     intent.putExtra(
@@ -1214,14 +1210,7 @@ fun AttachmentContextMenu(
                     )
                     onDismiss()
                 },
-                text = {
-                    Text(
-                        text = stringResource(id = R.string.menu_action_share),
-                        color = colorResource(
-                            id = R.color.almostBlack
-                        )
-                    )
-                }
+                text = stringResource(id = R.string.menu_action_share),
             )
             if (message.status != Message.STATUS_UNPROCESSED && message.status != Message.STATUS_COMPUTING_PREVIEW && message.status != Message.STATUS_PROCESSING) {
                 delete()
@@ -1344,18 +1333,16 @@ fun AttachmentDownloadProgress(
 @PreviewLightDark
 @Composable
 private fun AttachmentDownloadProgressPreview() {
-    AppCompatTheme {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            AttachmentDownloadProgress(speed = "352k/s", eta = "45s", progress = .37f)
-            AttachmentDownloadProgress(speed = null, eta = null, progress = 0f)
-            AttachmentDownloadProgress(
-                speed = "3.4M/s",
-                eta = "57s",
-                progress = .72f,
-                large = false
-            )
-            AttachmentDownloadProgress(speed = null, eta = "12s", progress = 0f, large = false)
-        }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        AttachmentDownloadProgress(speed = "352k/s", eta = "45s", progress = .37f)
+        AttachmentDownloadProgress(speed = null, eta = null, progress = 0f)
+        AttachmentDownloadProgress(
+            speed = "3.4M/s",
+            eta = "57s",
+            progress = .72f,
+            large = false
+        )
+        AttachmentDownloadProgress(speed = null, eta = "12s", progress = 0f, large = false)
     }
 }
 

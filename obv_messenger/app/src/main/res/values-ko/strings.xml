@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">그룹을 떠났습니다</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">그룹에 다시 참여하셨습니다.</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">그룹에 참여하셨습니다</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s님이 이 그룹에 вас을 추가했습니다.</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s님이 다시 이 그룹에 추가했습니다.</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">%1$s가 관리하는 그룹</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">그룹에 참여했습니다: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">그룹에 참여했습니다: %1$s</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s님이 %2$s를 그룹에 추가했습니다</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">%2$s 님을 그룹에 추가했습니다.</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s님이 그룹에서 %2$s님을 삭제했습니다</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">%2$s 님을 그룹에서 삭제했습니다.</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s님이 그룹에서 제거했습니다.</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">그룹에서 제거되었습니다.</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">알 수 없음</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">아무도</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">초안:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">알 수 없는 라이선스</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">유효한 라이선스</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">라이선스 만료</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">라이선스 활성화에 실패했습니다.</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">연락처 ID 공유</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">베타 기능 체험</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">프리미엄 기능 무료 이용 가능</string>
@@ -1206,7 +1209,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">당신의 메시지</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%2$s에 대한 %1$d개의 반응</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s님이 %2$s에 반응했습니다</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">이모지 삽입</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">이모지 삽입</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">즐겨찾기에 추가/제거하려면 길게 누르세요</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">디버그 정보</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">채널/기기 수:</string>
@@ -1217,7 +1220,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">그룹 v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">애니메이션 이모티콘 사용 (가능한 경우)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">애니메이션 이모지 사용 (지원되는 경우)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">프로필 저장 공간 사용량</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">사진</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">동영상</string>
@@ -1478,7 +1481,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">고급</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Olvid 그룹의 진정한 힘을 발휘하세요!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">그룹 관리자</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">이제 그룹 관리자가 되었습니다.</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">이제 그룹 관리자가 되었습니다.</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">더 이상 그룹 관리자가 아닙니다</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">이제 메시지 게시가 가능합니다</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">더 이상 여기에 메시지를 게시할 수 없습니다</string>
@@ -1856,6 +1859,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">가능한 메시지 상태</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">그룹 메시지의 경우</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">다른 상태</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Olvid에서는 읽음 확인 기능이 선택 사항입니다.\n연락처가 메시지를 읽을 때 알림을 받지 않도록 설정했을 수 있습니다.</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">연락처가 오랫동안 오프라인 상태입니다.</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">이 연락처는 Olvid를 장기간 사용하지 않은 것 같습니다. 메시지가 제대로 전달될 수 있다는 것을 보장할 수 없습니다.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">브라우저가 감지되지 않았습니다.</string>
@@ -2070,7 +2074,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">새 메시지</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">새 연락처</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">직접 만나서</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">원격으로</string>
+	<string name="new_contact_remotely" hash="-1391656952">원격으로</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">서로의 QR 코드를 스캔하세요.</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">%1$s에게 코드를 스캔하도록 요청하세요.</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">코드 스캔 완료!</string>
@@ -2096,4 +2100,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">전화</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">고정된 대화</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">%1$s이(가) 코드를 스캔할 수 없나요?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">신뢰할 수 없음</string>
+	<string name="label_offline" state="needs_review" hash="315122527">오프라인</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">이 연락처를 어떻게 추가하시겠습니까?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">알 수 없는 접근성 서비스</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">알 수 없는 접근성 서비스가 감지되었습니다. 사용자가 직접 해당 서비스를 활성화하지 않았다면 악성 소프트웨어일 수 있습니다. 아래 나열된 서비스가 안전한지 확인하십시오.</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">이 서비스를 신뢰하세요</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">접근성 서비스</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">신뢰할 수 있는 접근성 서비스 목록:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">알 수 없는 접근성 서비스가 감지되지 않았습니다.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">알 수 없는 접근성 서비스</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">알 수 없는 접근성 서비스가 감지되었습니다. 사용하기에 안전한지 확인해 주세요:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">이모지 검색</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">최근</string>
 </resources>

@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -38,7 +37,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
-import androidx.preference.SwitchPreference;
 
 import java.util.Objects;
 
@@ -60,7 +58,6 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat {
     ImageViewPreference messageLedColorPreference;
     Preference callRingtonePreference;
     Preference callVibrationPatternPreference;
-    SwitchPreference callUseFlashPreference;
     boolean messageSettingsChanged = false;
 
     @Override
@@ -148,15 +145,6 @@ public class NotificationPreferenceFragment extends PreferenceFragmentCompat {
                 return true;
             });
         }
-
-        callUseFlashPreference = screen.findPreference(SettingsActivity.PREF_KEY_CALL_USE_FLASH);
-        if (callUseFlashPreference != null) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                callUseFlashPreference.setVisible(false);
-            }
-        }
-
-
     }
 
     private void updateMessageRingtoneSummary() {

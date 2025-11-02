@@ -391,7 +391,7 @@ public class MessageListener {
                 // if message is read once have a limited visibility duration, do not send more info to web client
                 // warning TYPE_DISCUSSION_SETTINGS_UPDATE have to be filled
                 if  (message.messageType != Message.TYPE_DISCUSSION_SETTINGS_UPDATE &&
-                        (messageBuilder.getReadOnce() || !messageBuilder.getVisibilityDuration().equals(""))) {
+                        (messageBuilder.getReadOnce() || !messageBuilder.getVisibilityDuration().isEmpty())) {
                     return messageBuilder;
                 }
 
@@ -406,6 +406,7 @@ public class MessageListener {
                         sb.append(message.getStringContent(context)).append("\n");
                     }
                     // add address if possible
+                    //noinspection DataFlowIssue
                     String address = message.getJsonLocation().getAddress();
                     if (address != null && !address.isEmpty()) {
                         sb.append(address).append("\n");
@@ -441,11 +442,11 @@ public class MessageListener {
                     }
                 }
 
-                if(message.reactions != null && ! "".equals(message.reactions)){
+                if(message.reactions != null && !message.reactions.isEmpty()){
                     messageBuilder.setReactions(message.reactions);
                 }
 
-                if(message.getJsonMessage() != null && message.getJsonMessage().getJsonReply() != null && !message.isContentHidden()){
+                if(message.getJsonMessage().getJsonReply() != null && !message.isContentHidden()){
                     Message replyMessage = AppDatabase.getInstance().messageDao().getBySenderSequenceNumber(message.getJsonMessage().getJsonReply().getSenderSequenceNumber(), message.getJsonMessage().getJsonReply().getSenderThreadIdentifier(), message.getJsonMessage().getJsonReply().getSenderIdentifier(), message.discussionId);
                     if(replyMessage != null) {
                         messageBuilder.setReplyMessageId(replyMessage.id);

@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -158,11 +157,6 @@ public class DiscussionNotificationsPreferenceFragment extends PreferenceFragmen
         }
 
         callUseFlashPreference = screen.findPreference(DiscussionSettingsActivity.PREF_KEY_DISCUSSION_CALL_USE_FLASH);
-        if (callUseFlashPreference != null) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                callUseFlashPreference.setVisible(false);
-            }
-        }
 
         discussionSettingsViewModel.addSettingsChangedListener(this);
     }

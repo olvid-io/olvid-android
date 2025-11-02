@@ -490,11 +490,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             "pref_key_last_available_space_warning_timestamp"
         const val PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED: String =
             "pref_key_first_call_audio_permission_requested"
-        const val PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED: String =
-            "pref_key_first_call_bluetooth_permission_requested"
         const val PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER: String =
             "pref_key_compose_message_icon_preferred_order"
-
+        @Deprecated("Use emojis table from AppDatabase")
         const val PREF_KEY_PREFERRED_REACTIONS: String = "pref_key_preferred_reactions"
         val PREF_KEY_PREFERRED_REACTIONS_DEFAULT: Array<String> =
             arrayOf("❤️", "👍", "👎", "😂", "😮", "😢")
@@ -1087,7 +1085,6 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     }
             }
 
-
         fun wasFirstCallAudioPermissionRequested(): Boolean {
             return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
                 PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED, false
@@ -1097,18 +1094,6 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         fun setFirstCallAudioPermissionRequested(requested: Boolean) {
             PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
                 putBoolean(PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED, requested)
-            }
-        }
-
-        fun wasFirstCallBluetoothPermissionRequested(): Boolean {
-            return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
-                PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED, false
-            )
-        }
-
-        fun setFirstCallBluetoothPermissionRequested(requested: Boolean) {
-            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
-                putBoolean(PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED, requested)
             }
         }
 
@@ -2973,6 +2958,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     }
             }
 
+        @Deprecated("Use emojis table from AppDatabase")
         @JvmStatic
         var preferredReactions: MutableList<String>
             get() {

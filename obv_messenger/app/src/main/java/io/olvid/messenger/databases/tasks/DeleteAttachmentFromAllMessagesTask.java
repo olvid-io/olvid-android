@@ -78,7 +78,7 @@ public class DeleteAttachmentFromAllMessagesTask implements Runnable {
                     db.messageDao().delete(message);
                     UnreadCountsSingleton.INSTANCE.messageDeleted(message);
                 } else {
-                    db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.wipedAttachmentCount, message.imageResolutions);
+                    db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
                 }
             }
         }

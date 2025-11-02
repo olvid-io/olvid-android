@@ -145,7 +145,7 @@ fun SubscriptionStatusHeader(
         )
 
         EngineAPI.ApiKeyStatus.LICENSES_EXHAUSTED -> Triple(
-            stringResource(if (licenseQuery) R.string.text_unable_to_activate_license else R.string.text_invalid_subscription),
+            stringResource(if (licenseQuery) R.string.label_unable_to_activate else R.string.text_invalid_subscription),
             stringResource(R.string.text_subscription_used_by_another_user),
             !licenseQuery && showInAppPurchase
         )

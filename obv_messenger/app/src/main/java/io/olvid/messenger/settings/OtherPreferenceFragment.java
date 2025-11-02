@@ -88,7 +88,6 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_ADD_DEVICE_EXPLANATION);
                     editor.remove(SettingsActivity.USER_DIALOG_HIDE_UNARCHIVE_SETTINGS);
                     editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_AUDIO_PERMISSION_REQUESTED);
-                    editor.remove(SettingsActivity.PREF_KEY_FIRST_CALL_BLUETOOTH_PERMISSION_REQUESTED);
                     editor.remove(SettingsActivity.PREF_KEY_LAST_TROUBLESHOOTING_TIP_TIMESTAMP);
                     editor.remove(SettingsActivity.PREF_KEY_LAST_EXPIRING_DEVICE_TIP_TIMESTAMP);
                     editor.remove(SettingsActivity.PREF_KEY_LAST_OFFLINE_DEVICE_TIP_TIMESTAMP);

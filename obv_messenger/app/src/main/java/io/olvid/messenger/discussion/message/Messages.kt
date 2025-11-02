@@ -78,6 +78,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -86,6 +87,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
@@ -109,6 +112,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -118,7 +122,6 @@ import androidx.core.text.util.LinkifyCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.engine.datatypes.ObvBase64
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
@@ -146,11 +149,14 @@ import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
 import io.olvid.messenger.designsystem.components.AnimatedEmoji
 import io.olvid.messenger.designsystem.components.OlvidTextButton
+import io.olvid.messenger.designsystem.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionViewModel
 import io.olvid.messenger.discussion.linkpreview.LinkPreview
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.message.attachments.Attachments
+import io.olvid.messenger.discussion.message.reactions.Reactions
 import io.olvid.messenger.discussion.poll.PollCreationViewModel.Companion.NONE_ANSWER
 import io.olvid.messenger.discussion.poll.PollMessageBody
 import io.olvid.messenger.discussion.poll.PollResultActivity
@@ -168,7 +174,8 @@ import java.util.UUID
 fun MessageDisclaimer(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
-            .widthIn(max = 50.dp)
+            .cutoutHorizontalPadding()
+            .systemBarsHorizontalPadding()
             .background(
                 color = colorResource(id = R.color.green),
                 shape = RoundedCornerShape(8.dp),
@@ -260,32 +267,35 @@ fun Message(
     onLocationLongClick: () -> Unit = {},
     onAttachmentLongClick: (fyleAndStatus: FyleAndStatus) -> Unit = {},
     onCallBackButtonClicked: (callLogId: Long) -> Unit = {},
-    scrollToMessage: (messageId: Long) -> Unit,
-    replyAction: (() -> Unit)?,
-    menuAction: () -> Unit,
-    editedSeen: () -> Unit,
-    showSender: Boolean,
-    lastFromSender: Boolean,
-    scale: Float,
+    scrollToMessage: (messageId: Long) -> Unit = {},
+    replyAction: (() -> Unit)? = null,
+    menuAction: () -> Unit = {},
+    editedSeen: () -> Unit = {},
+    showSender: Boolean = false,
+    lastFromSender: Boolean = false,
+    scale: Float = 1f,
     useAnimatedEmojis: Boolean = false,
     loopAnimatedEmojis: Boolean = false,
     linkPreviewViewModel: LinkPreviewViewModel? = null,
     messageExpiration: MessageExpiration? = null,
     discussionViewModel: DiscussionViewModel? = null,
     discussionSearch: DiscussionSearch? = null,
-    audioAttachmentServiceBinding: AudioAttachmentServiceBinding?,
+    audioAttachmentServiceBinding: AudioAttachmentServiceBinding? = null,
     openDiscussionDetailsCallback: (() -> Unit)? = null,
     openOnClick: Boolean = true,
     openViewerCallback: (() -> Unit)? = null,
     saveAttachment: () -> Unit = {},
     saveAllAttachments: () -> Unit = {},
     blockSwipe: Boolean = false,
+    blockClicks: Boolean = false,
+    fullWidth: Boolean = true,
+    onMessageGloballyPositioned: ((LayoutCoordinates) -> Unit)? = null,
 ) {
-    Box {
+    Box(modifier) {
         val maxWidth = 400.dp
         var enableSwipe by remember { mutableStateOf(true) }
         SwipeForActionBox(
-            modifier = modifier,
+            modifier = if (fullWidth) Modifier.fillMaxWidth() else Modifier,
             enabledFromStartToEnd = blockSwipe.not() && enableSwipe && discussionViewModel?.isSelectingForDeletion != true && replyAction != null,
             enabledFromEndToStart = blockSwipe.not() && enableSwipe && discussionViewModel?.isSelectingForDeletion != true,
             callbackStartToEnd = replyAction,
@@ -322,7 +332,7 @@ fun Message(
             maxOffset = 64.dp
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = if (fullWidth) Modifier.fillMaxWidth() else Modifier,
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) Arrangement.End else Arrangement.Start
             ) {
@@ -333,6 +343,9 @@ fun Message(
                             modifier = Modifier.size(32.dp),
                             initialViewSetup = { it.setFromCache(message.senderIdentifier) }
                         ) {
+                            if (blockClicks) {
+                                return@InitialView
+                            }
                             val discussion = discussionViewModel?.discussion?.value
                             if (discussion != null) {
                                 App.runThread {
@@ -386,6 +399,11 @@ fun Message(
 
                     MessageInnerStack(
                         modifier = Modifier
+                            .then(
+                                onMessageGloballyPositioned?.let {
+                                    Modifier.onGloballyPositioned(it)
+                                } ?: Modifier
+                            )
                             .background(
                                 color = if (message.isInbound) colorResource(id = R.color.lighterGrey)
                                 else if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) colorResource(
@@ -505,7 +523,8 @@ fun Message(
                             messageBubbleInteractionSource = interactionSource,
                             jsonPoll = jsonPoll,
                             pollResults = pollResults?.value,
-                            interactionSource = interactionSource
+                            interactionSource = interactionSource,
+                            blockClicks = blockClicks,
                         )
 
                         // message footer
@@ -531,13 +550,16 @@ fun Message(
                                 highlighter = discussionSearch?.viewModel?.let {
                                     it::highlight
                                 },
-                                onLongClick = onLongClick
+                                onLongClick = onLongClick,
+                                blockClicks = blockClicks,
                             )
                         }
 
                         // Attachments
                         if (message.hasAttachments() && message.isLocationMessage.not()) {
-                            BoxWithConstraints {
+                            BoxWithConstraints(
+                                modifier = Modifier.clipToBounds()
+                            ) {
                                 Attachments(
                                     message = message,
                                     onEnableMessageSwipe = { enabled ->
@@ -550,7 +572,8 @@ fun Message(
                                     openViewerCallback = openViewerCallback,
                                     discussionSearchViewModel = discussionSearch?.viewModel,
                                     saveAttachment = saveAttachment,
-                                    saveAllAttachments = saveAllAttachments
+                                    saveAllAttachments = saveAllAttachments,
+                                    blockClicks = blockClicks,
                                 )
                             }
                         }
@@ -561,6 +584,7 @@ fun Message(
                         message = message,
                         useAnimatedEmojis = useAnimatedEmojis,
                         loopAnimatedEmojis = loopAnimatedEmojis,
+                        blockClicks = blockClicks
                     )
                 }
 
@@ -591,23 +615,39 @@ fun MessageInnerStack(
         modifier = modifier,
         content = content,
     ) { measurables, constraints ->
-        val preferredWidth = if (noAutoWidth) constraints.maxWidth else measurables.maxOf {
-            it.maxIntrinsicWidth(constraints.maxHeight)
-        }.coerceAtMost(constraints.maxWidth).coerceAtLeast(constraints.minWidth)
+        val preferredWidth = if (noAutoWidth)
+            constraints.maxWidth
+        else
+            (measurables.maxOfOrNull {
+                it.maxIntrinsicWidth(constraints.maxHeight)
+            } ?: 0).coerceIn(minimumValue = constraints.minWidth, maximumValue = constraints.maxWidth)
         val adjustedConstraints = constraints.copy(maxWidth = preferredWidth)
 
+        var remainingHeight = constraints.maxHeight
+        val spacing = (2 * density).toInt()
+
         val placeables = measurables.map { measurable ->
-            measurable.measure(adjustedConstraints)
+            val placeable = measurable.measure(
+                if (adjustedConstraints.maxHeight == Constraints.Infinity) // only use the remaining height if we are constrained in height (e.g. in MessageActionMenu)
+                    adjustedConstraints
+                else
+                    adjustedConstraints.copy(maxHeight = remainingHeight)
+            )
+            remainingHeight = (remainingHeight - placeable.height - spacing).coerceAtLeast(0)
+            return@map placeable
         }
 
         val totalHeight =
-            placeables.map { it.height }.reduce { acc, v -> acc + v + (2 * density).toInt() }
+            (placeables.sumOf { it.height } + (placeables.size - 1) * spacing).coerceAtLeast(0)
 
         layout(preferredWidth, totalHeight) {
             var y = 0
-            placeables.forEach { placeable ->
+            placeables.forEachIndexed { i, placeable ->
                 placeable.placeRelative(x = 0, y = y)
-                y += placeable.height + (2 * density).toInt()
+                y += placeable.height
+                if (i < placeables.lastIndex) {
+                    y += spacing
+                }
             }
         }
     }
@@ -800,13 +840,16 @@ private fun Replied(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(4.dp))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple()
+                ) {
+                    repliedToMessage?.value?.id?.let { scrollToMessage(it) }
+                }
                 .background(
                     color = color,
                     shape = RoundedCornerShape(4.dp)
                 )
-                .clickable {
-                    repliedToMessage?.value?.id?.let { scrollToMessage(it) }
-                }
                 .padding(start = 4.dp)
                 .background(color = colorResource(id = R.color.almostWhite))
                 .padding(4.dp)
@@ -821,28 +864,38 @@ private fun Replied(
                 ),
                 color = color)
             repliedToMessage?.value?.let { repliedToMessage ->
-                Text(
-                    modifier = Modifier.padding(top = 2.dp),
-                    text = AnnotatedString(repliedToMessage.getStringContent(context)).formatMarkdown(
-                        complete = true,
-                        context = context,
-                        message = repliedToMessage,
-                        bytesOwnedIdentity = discussionViewModel?.discussion?.value?.bytesOwnedIdentity,
-                        backgroundColor = Color(
-                            ContextCompat.getColor(
-                                context,
-                                R.color.greySubtleOverlay
+                val stringContent = repliedToMessage.getStringContent(context, false)
+                if (stringContent.isNotEmpty() || repliedToMessage.hasAttachments().not()) {
+                    Text(
+                        modifier = Modifier.padding(top = 2.dp),
+                        text = AnnotatedString(stringContent).formatMarkdown(
+                            complete = true,
+                            context = context,
+                            message = repliedToMessage,
+                            bytesOwnedIdentity = discussionViewModel?.discussion?.value?.bytesOwnedIdentity,
+                            backgroundColor = Color(
+                                ContextCompat.getColor(
+                                    context,
+                                    R.color.greySubtleOverlay
+                                )
                             )
-                        )
-                    ),
-                    style = OlvidTypography.body2,
-                    color = colorResource(id = R.color.greyTint),
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                    inlineContent = inlineContentMap(.9f)
-                )
-                if (repliedToMessage.hasAttachments()) {
-                    AttachmentCount(repliedToMessage.totalAttachmentCount)
+                        ),
+                        style = OlvidTypography.body2,
+                        color = colorResource(id = R.color.greyTint),
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                        inlineContent = inlineContentMap(.9f)
+                    )
+                }
+                if (repliedToMessage.isLocationMessage.not() && repliedToMessage.hasAttachments()) {
+                    Text(
+                        modifier = Modifier.padding(top = 2.dp),
+                        text = repliedToMessage.getAttachmentsStringContent(context),
+                        style = OlvidTypography.body2,
+                        color = colorResource(id = R.color.greyTint),
+                        maxLines = if (stringContent.isEmpty()) 2 else 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             } ?: Text(
                 text = stringResource(id = R.string.text_original_message_not_found),
@@ -901,6 +954,7 @@ fun MessageBody(
     jsonPoll: JsonPoll?,
     pollResults: List<PollVote>?,
     interactionSource: MutableInteractionSource? = null,
+    blockClicks: Boolean,
 ) {
     val context = LocalContext.current
 
@@ -1000,6 +1054,7 @@ fun MessageBody(
             highlighter = discussionSearch?.viewModel?.let {
                 it::highlight
             },
+            blockClicks = blockClicks,
         )
     } else {
         when (message.messageType) {
@@ -1183,6 +1238,7 @@ fun MessageBody(
                             it::highlight
                         },
                         onVote = { voteUuid, voted ->
+                            if (blockClicks) return@PollMessageBody
                             if (jsonPoll.expiration != null && jsonPoll.expiration < System.currentTimeMillis()) {
                                 App.toast(R.string.label_poll_ended, Toast.LENGTH_SHORT)
                                 return@PollMessageBody
@@ -1563,48 +1619,45 @@ fun Message.getOutboundStatusIconAspectRation(): Float =
 @PreviewLightDark
 @Composable
 private fun MessagePreview() {
-    AppCompatTheme {
-        Column(
-            modifier = Modifier
-                .background(colorResource(id = R.color.almostWhite))
-                .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Message(
-                message = messageInbound,
-                replyAction = null,
-                menuAction = {},
-                editedSeen = {},
-                scrollToMessage = {},
-                showSender = false,
-                lastFromSender = true,
-                scale = 1f,
-                audioAttachmentServiceBinding = null,
-            )
-            Message(
-                message = messageSystem,
-                replyAction = null,
-                menuAction = {},
-                editedSeen = {},
-                scrollToMessage = {},
-                showSender = false,
-                lastFromSender = true,
-                scale = 1f,
-                audioAttachmentServiceBinding = null,
-            )
-            Message(
-                message = messageOutbound,
-                replyAction = null,
-                menuAction = {},
-                editedSeen = {},
-                scrollToMessage = {},
-                showSender = false,
-                lastFromSender = true,
-                scale = 1f,
-                audioAttachmentServiceBinding = null,
-            )
-        }
-
+    Column(
+        modifier = Modifier
+            .background(colorResource(id = R.color.almostWhite))
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Message(
+            message = messageInbound,
+            replyAction = null,
+            menuAction = {},
+            editedSeen = {},
+            scrollToMessage = {},
+            showSender = false,
+            lastFromSender = true,
+            scale = 1f,
+            audioAttachmentServiceBinding = null,
+        )
+        Message(
+            message = messageSystem,
+            replyAction = null,
+            menuAction = {},
+            editedSeen = {},
+            scrollToMessage = {},
+            showSender = false,
+            lastFromSender = true,
+            scale = 1f,
+            audioAttachmentServiceBinding = null,
+        )
+        Message(
+            message = messageOutbound,
+            replyAction = null,
+            menuAction = {},
+            editedSeen = {},
+            scrollToMessage = {},
+            showSender = false,
+            lastFromSender = true,
+            scale = 1f,
+            audioAttachmentServiceBinding = null,
+        )
     }
 }
 
@@ -1641,7 +1694,8 @@ fun GroupUpdateMessageInfo(
         // new (possibly merged) left/joined group messages
         val byYou =
             AppSingleton.getBytesCurrentIdentity()?.contentEquals(message.senderIdentifier) == true
-        val displayName = ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
+        val displayName =
+            ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
         var mentionCount = remember(expanded, message.jsonMentions) {
             0
         }
@@ -1659,9 +1713,16 @@ fun GroupUpdateMessageInfo(
                 )
             }
         }
+        val kicked = message.mentions?.size == 1 && message.mentions?.first()?.userIdentifier?.contentEquals(AppSingleton.getBytesCurrentIdentity()) ?: false
         MessageInfo(
             text = if (mention != null) {
-                if (displayName != null) {
+                if (kicked) {
+                    if (displayName != null) {
+                        stringResource(R.string.text_removed_from_group_by, displayName)
+                    } else {
+                        stringResource(R.string.text_removed_from_group)
+                    }
+                } else if (displayName != null) {
                     if (byYou) {
                         stringResource(
                             id = updatedByYou,
@@ -1734,9 +1795,7 @@ fun MissedMessageCount(modifier: Modifier = Modifier, missedMessageCount: Int) {
 @PreviewLightDark
 @Composable
 fun MissedMessageCountPreview() {
-    AppCompatTheme {
-        MissedMessageCount(missedMessageCount = 1)
-    }
+    MissedMessageCount(missedMessageCount = 1)
 }
 
 val messageInbound = Message(
@@ -1759,7 +1818,12 @@ val messageInbound = Message(
     0,
     0,
     0,
+    0,
+    null,
+    0,
     Message.EDITED_UNSEEN,
+    false,
+    false,
     false,
     "\uD83D\uDE02:1:",
     null,
@@ -1768,7 +1832,6 @@ val messageInbound = Message(
     false,
     null,
     null,
-    false,
     null
 ).apply {
     bookmarked = true
@@ -1793,8 +1856,13 @@ val messageOutboundLocation = Message(
     0,
     0,
     0,
+    0,
+    null,
+    0,
     Message.EDITED_NONE,
     false,
+    false,
+    false,
     null,
     null,
     0,
@@ -1802,7 +1870,6 @@ val messageOutboundLocation = Message(
     false,
     null,
     null,
-    false,
     null
 )
 val messageOutbound = Message(
@@ -1825,8 +1892,13 @@ val messageOutbound = Message(
     0,
     0,
     0,
+    0,
+    null,
+    0,
     Message.EDITED_NONE,
     true,
+    false,
+    false,
     "\uD83D\uDE2E:1:|\uD83D\uDE02:1:\uD83D\uDC4D:2:",
     null,
     0,
@@ -1834,7 +1906,6 @@ val messageOutbound = Message(
     false,
     null,
     null,
-    false,
     null
 )
 val messageSystem = Message(
@@ -1857,8 +1928,13 @@ val messageSystem = Message(
     0,
     0,
     0,
+    0,
+    null,
+    0,
     Message.EDITED_NONE,
     false,
+    false,
+    false,
     null,
     null,
     0,
@@ -1866,6 +1942,5 @@ val messageSystem = Message(
     false,
     null,
     null,
-    false,
     null
 )

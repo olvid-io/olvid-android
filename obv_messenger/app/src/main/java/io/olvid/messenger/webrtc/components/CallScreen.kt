@@ -146,6 +146,8 @@ import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
@@ -430,17 +432,17 @@ private fun OlvidLogo(
 @Preview(device = "spec:width=411dp,height=891dp")
 @Composable
 fun PreCallScreenPreview() {
-    AppCompatTheme {
-        Box (modifier = Modifier
+    Box(
+        modifier = Modifier
             .fillMaxHeight()
-            .background(Color.Black)) {
-            PreCall(
-                "Alice Border",
-                "Connexion...",
-                false,
-                null
-            ) { it.setInitial(byteArrayOf(0, 1, 35), "A") }
-        }
+            .background(Color.Black)
+    ) {
+        PreCall(
+            "Alice Border",
+            "Connexion...",
+            false,
+            null
+        ) { it.setInitial(byteArrayOf(0, 1, 35), "A") }
     }
 }
 
@@ -913,17 +915,18 @@ private fun ColumnScope.CallBottomSheetContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             if (webrtcCallService?.isCaller == true) {
-                                DropdownMenu(
+                                OlvidDropdownMenu(
                                     expanded = kickParticipant,
                                     onDismissRequest = { kickParticipant = false }) {
-                                    DropdownMenuItem(onClick = {
-                                        kickParticipant = false
-                                        webrtcCallService.callerKickParticipant(
-                                            callParticipant.bytesContactIdentity
-                                        )
-                                    }) {
-                                        Text(text = stringResource(id = R.string.dialog_title_webrtc_kick_participant))
-                                    }
+                                    OlvidDropdownMenuItem(
+                                        onClick = {
+                                            kickParticipant = false
+                                            webrtcCallService.callerKickParticipant(
+                                                callParticipant.bytesContactIdentity
+                                            )
+                                        },
+                                        text = stringResource(id = R.string.dialog_title_webrtc_kick_participant)
+                                    )
                                 }
                             }
                             Box {
@@ -1676,12 +1679,10 @@ fun AudioLevel(modifier: Modifier = Modifier, audioLevel: Double?) {
 @Composable
 @Preview
 fun AudioLevelPreview() {
-    AppCompatTheme {
-        Row {
-            AudioLevel(modifier = Modifier.size(64.dp), audioLevel = 0.0)
-            Spacer(modifier = Modifier.width(4.dp))
-            AudioLevel(modifier = Modifier.size(64.dp), audioLevel = 1.0)
-        }
+    Row {
+        AudioLevel(modifier = Modifier.size(64.dp), audioLevel = 0.0)
+        Spacer(modifier = Modifier.width(4.dp))
+        AudioLevel(modifier = Modifier.size(64.dp), audioLevel = 1.0)
     }
 }
 
@@ -1884,15 +1885,13 @@ fun AudioParticipant(
 @Preview
 @Composable
 fun AudioParticipantPreview() {
-    AppCompatTheme {
-        AudioParticipant(
-            initialViewSetup = { it.setInitial(byteArrayOf(0, 12, 24), "A") },
-            name = "Alic B.",
-            isMute = false,
-            state = CONNECTED,
-            audioLevel = 0.7
-        )
-    }
+    AudioParticipant(
+        initialViewSetup = { it.setInitial(byteArrayOf(0, 12, 24), "A") },
+        name = "Alic B.",
+        isMute = false,
+        state = CONNECTED,
+        audioLevel = 0.7
+    )
 }
 
 @Composable
@@ -1962,7 +1961,7 @@ fun SpeakerToggle(
     }
     Box(modifier = modifier) {
         content { expanded = true }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        OlvidDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             audioOutputs.forEach { audioOutput ->
                 DropdownMenuItem(
                     onClick = {
@@ -2001,15 +2000,11 @@ fun EncryptedCallNotice(modifier: Modifier = Modifier, color: Color) {
 @Preview
 @Composable
 private fun ScreenShareOngoingPreview() {
-    AppCompatTheme {
-        ScreenShareOngoing {}
-    }
+    ScreenShareOngoing {}
 }
 
 @Preview
 @Composable
 private fun EncryptedCallNoticePreview() {
-    AppCompatTheme {
-        EncryptedCallNotice(color = Color.White)
-    }
+    EncryptedCallNotice(color = Color.White)
 }

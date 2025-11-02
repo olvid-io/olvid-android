@@ -44,6 +44,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -61,6 +62,8 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.graphics.Insets
@@ -71,6 +74,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.components.CallButton
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.components.PlusButton
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.MainActivity.Companion.LINK_URI_INTENT_EXTRA
 import io.olvid.messenger.main.contacts.ContactListViewModel
 import io.olvid.messenger.plus_button.scan.SCAN_ONLY_EXTRA_KEY
@@ -130,7 +134,9 @@ fun PlusButtonContainer(
             if (newContactExpanded) {
                 BasicAlertDialog(onDismissRequest = { newContactExpanded = false }) {
                     Surface(
-                        modifier = Modifier.wrapContentHeight().padding(horizontal = 16.dp),
+                        modifier = Modifier
+                            .wrapContentHeight()
+                            .padding(horizontal = 16.dp),
                         shape = RoundedCornerShape(16.dp),
                         color = colorResource(R.color.dialogBackground),
                         tonalElevation = AlertDialogDefaults.TonalElevation
@@ -138,8 +144,18 @@ fun PlusButtonContainer(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            Text(
+                                modifier = Modifier.padding(16.dp),
+                                text = stringResource(R.string.dialog_message_how_add_contact),
+                                style = OlvidTypography.body1.copy(fontWeight = FontWeight.Medium),
+                                color = colorResource(R.color.almostBlack),
+                                textAlign = TextAlign.Center,
+                            )
+                            HorizontalDivider(color = colorResource(R.color.lightGrey))
                             OlvidTextButton(
-                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
                                 text = stringResource(R.string.new_contact_double_scan),
                                 large = true,
                                 onClick = {
@@ -154,7 +170,9 @@ fun PlusButtonContainer(
                                 })
                             HorizontalDivider(color = colorResource(R.color.lightGrey))
                             OlvidTextButton(
-                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
                                 text = stringResource(R.string.new_contact_remotely),
                                 large = true,
                                 onClick = {
@@ -162,15 +180,6 @@ fun PlusButtonContainer(
                                     newContactExpanded = false
                                     animateDismiss.invoke()
                                 })
-                            /*
-                            Spacer(modifier = Modifier.height(8.dp))
-                            OlvidTextButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(R.string.new_contact_cancel),
-                                onClick = {
-                                    newContactExpanded = false
-                                })
-                            */
                         }
                     }
                 }
@@ -184,10 +193,12 @@ fun PlusButtonContainer(
                         if (compact)
                             Modifier.statusBarsPadding()
                         else
-                            Modifier.statusBarsPadding().padding(top = 24.dp)
+                            Modifier
+                                .statusBarsPadding()
+                                .padding(top = 24.dp)
                     ),
                 sheetState = state,
-                containerColor = colorResource(R.color.almostWhite),
+                containerColor = colorResource(R.color.lighterGrey),
                 contentColor = colorResource(R.color.almostBlack),
                 onDismissRequest = onDismiss,
                 dragHandle = {

@@ -20,7 +20,6 @@
 package io.olvid.messenger.services;
 
 import android.content.Context;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.sqlite.db.SimpleSQLiteQuery;
@@ -223,9 +222,7 @@ public class PeriodicTasksScheduler {
         private static Constraints getConstraints() {
             Constraints.Builder builder = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.NOT_REQUIRED);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                builder.setRequiresDeviceIdle(true);
-            }
+            builder.setRequiresDeviceIdle(true);
             return builder.build();
         }
 
@@ -253,9 +250,7 @@ public class PeriodicTasksScheduler {
         private static Constraints getConstraints() {
             Constraints.Builder builder = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.NOT_REQUIRED);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                builder.setRequiresDeviceIdle(true);
-            }
+            builder.setRequiresDeviceIdle(true);
             return builder.build();
         }
 
@@ -374,9 +369,7 @@ public class PeriodicTasksScheduler {
         private static Constraints getConstraints() {
             Constraints.Builder builder = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.NOT_REQUIRED);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                builder.setRequiresDeviceIdle(true);
-            }
+            builder.setRequiresDeviceIdle(true);
             return builder.build();
         }
 
@@ -402,9 +395,7 @@ public class PeriodicTasksScheduler {
         private static Constraints getConstraints() {
             Constraints.Builder builder = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.NOT_REQUIRED);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                builder.setRequiresDeviceIdle(true);
-            }
+            builder.setRequiresDeviceIdle(true);
             return builder.build();
         }
 

@@ -67,6 +67,9 @@ public interface MessageDao {
             "mess." + Message.SENDER_THREAD_IDENTIFIER + " AS mess_" + Message.SENDER_THREAD_IDENTIFIER + ", " +
             "mess." + Message.TOTAL_ATTACHMENT_COUNT + " AS mess_" + Message.TOTAL_ATTACHMENT_COUNT + ", " +
             "mess." + Message.IMAGE_COUNT + " AS mess_" + Message.IMAGE_COUNT + ", " +
+            "mess." + Message.VIDEO_COUNT + " AS mess_" + Message.VIDEO_COUNT + ", " +
+            "mess." + Message.AUDIO_COUNT + " AS mess_" + Message.AUDIO_COUNT + ", " +
+            "mess." + Message.FIRST_ATTACHMENT_NAME + " AS mess_" + Message.FIRST_ATTACHMENT_NAME + ", " +
             "mess." + Message.WIPED_ATTACHMENT_COUNT + " AS mess_" + Message.WIPED_ATTACHMENT_COUNT + ", " +
             "mess." + Message.EDITED + " AS mess_" + Message.EDITED + ", " +
             "mess." + Message.FORWARDED + " AS mess_" + Message.FORWARDED + ", " +
@@ -139,10 +142,14 @@ public interface MessageDao {
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.TOTAL_ATTACHMENT_COUNT + " = :totalAttachmentCount, " +
             Message.IMAGE_COUNT + " = :imageCount, " +
+            Message.IMAGE_RESOLUTIONS + " = :imageResolutions, " +
+            Message.VIDEO_COUNT + " = :videoCount, " +
+            Message.AUDIO_COUNT + " = :audioCount, " +
+            Message.FIRST_ATTACHMENT_NAME + " = :firstAttachmentName, " +
             Message.WIPED_ATTACHMENT_COUNT + " = :wipedAttachmentCount, " +
             Message.IMAGE_RESOLUTIONS + " = :imageResolutions " +
             " WHERE id = :messageId")
-    void updateAttachmentCount(long messageId, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, @Nullable String imageResolutions);
+    void updateAttachmentCount(long messageId, int totalAttachmentCount, int imageCount, int videoCount, int audioCount, @Nullable String firstAttachmentName, int wipedAttachmentCount, @Nullable String imageResolutions);
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.CONTENT_BODY + " = NULL, " +
@@ -322,7 +329,7 @@ public interface MessageDao {
             " JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = m." + Message.DISCUSSION_ID +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " WHERE m." + Message.BOOKMARKED + " = 1 " +
-            " ORDER BY m." + Message.SORT_INDEX + " ASC")
+            " ORDER BY m." + Message.TIMESTAMP + " DESC")
     LiveData<List<DiscussionAndMessage>> getAllBookmarkedLiveData(@NonNull byte[] bytesOwnedIdentity);
 
 
@@ -468,6 +475,10 @@ public interface MessageDao {
     @Query("SELECT * FROM " + Message.TABLE_NAME +
             " WHERE " + Message.IMAGE_COUNT + " != 0")
     List<Message> getAllWithImages();
+
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.TOTAL_ATTACHMENT_COUNT + " != 0")
+    List<Message> getAllWithAttachments();
 
     @Query("SELECT message.* FROM " + Message.TABLE_NAME + " AS message " +
             " JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +

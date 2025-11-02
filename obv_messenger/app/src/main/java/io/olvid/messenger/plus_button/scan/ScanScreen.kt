@@ -711,17 +711,21 @@ fun QrCodeScanner(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable(
-                    interactionSource = null,
-                    indication = null,
-                    onClick = {
-                        if (currentUiState in listOf(
-                                ScanUiState.UrlScan,
-                                ScanUiState.TextScan)) {
-                            plusButtonViewModel.updateScanState(ScanUiState.IdleScanning)
-                        }
+                .then(
+                    if (currentUiState in listOf(
+                            ScanUiState.UrlScan,
+                            ScanUiState.TextScan)) {
+                        Modifier.clickable(
+                            interactionSource = null,
+                            indication = null,
+                            onClick = {
+                                plusButtonViewModel.updateScanState(ScanUiState.IdleScanning)
+                            }
+                        )
+                    } else {
+                        Modifier
                     }
-                )
+                ),
         ) {
             if (currentUiState == ScanUiState.IdleScanning) {
                 ScanningReticle(brush = SolidColor(Color.White), fraction = fraction)

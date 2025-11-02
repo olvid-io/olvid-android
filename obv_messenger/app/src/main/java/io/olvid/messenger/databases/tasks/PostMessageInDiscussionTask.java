@@ -125,8 +125,14 @@ public class PostMessageInDiscussionTask implements Runnable {
                         discussion.bytesOwnedIdentity,
                         discussion.senderThreadIdentifier,
                         0,
-                        0);
+                        0,
+                        0,
+                        0,
+                        null);
                 message.mentioned = message.isIdentityMentioned(message.senderIdentifier);
+                if (message.isEmpty()) {
+                    return;
+                }
                 message.id = db.messageDao().insert(message);
                 message.post(showToast, null);
             });
@@ -157,6 +163,9 @@ public class PostMessageInDiscussionTask implements Runnable {
                 draftMessage.timestamp = System.currentTimeMillis();
                 draftMessage.computeOutboundSortIndex(db);
                 draftMessage.recomputeAttachmentCount(db);
+                if (draftMessage.isEmpty()) {
+                    return;
+                }
                 db.messageDao().update(draftMessage);
                 draftMessage.post(showToast, null);
             });

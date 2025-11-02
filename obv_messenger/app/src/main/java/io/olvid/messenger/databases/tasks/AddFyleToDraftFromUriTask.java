@@ -245,7 +245,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                 db.fyleMessageJoinWithStatusDao().insert(copyingFyleMessageJoinWithStatus);
 
                 draftMessage.recomputeAttachmentCount(db);
-                db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, 0, draftMessage.imageResolutions);
+                db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, draftMessage.videoCount, draftMessage.audioCount, draftMessage.firstAttachmentName, 0, draftMessage.imageResolutions);
 
                 long lastUpdateTimestamp = 0;
                 //noinspection ConstantConditions
@@ -343,7 +343,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                             );
                             db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                             draftMessage.recomputeAttachmentCount(db);
-                            db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, 0, draftMessage.imageResolutions);
+                            db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, draftMessage.videoCount, draftMessage.audioCount, draftMessage.firstAttachmentName, 0, draftMessage.imageResolutions);
                             return false;
                         });
                         if (alreadyAttached == null || alreadyAttached) {
@@ -375,7 +375,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                                 fileSize);
                         db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                         draftMessage.recomputeAttachmentCount(db);
-                        db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, 0, draftMessage.imageResolutions);
+                        db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, draftMessage.videoCount, draftMessage.audioCount, draftMessage.firstAttachmentName, 0, draftMessage.imageResolutions);
 
                         // update the filePath and mark the Fyle as complete
                         fyle.moveToFyleDirectory(localFile.getPath());
@@ -411,7 +411,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                             Message reDraftMessage = db.messageDao().get(draftMessage.id);
                             if (reDraftMessage != null && reDraftMessage.status == Message.STATUS_UNPROCESSED) {
                                 reDraftMessage.recomputeAttachmentCount(db);
-                                db.messageDao().updateAttachmentCount(reDraftMessage.id, reDraftMessage.totalAttachmentCount, reDraftMessage.imageCount, 0, reDraftMessage.imageResolutions);
+                                db.messageDao().updateAttachmentCount(reDraftMessage.id, reDraftMessage.totalAttachmentCount, reDraftMessage.imageCount, draftMessage.videoCount, draftMessage.audioCount, draftMessage.firstAttachmentName, 0, reDraftMessage.imageResolutions);
                                 reDraftMessage.post(false, null);
                             }
                         });
@@ -446,7 +446,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                         db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                     }
                     draftMessage.recomputeAttachmentCount(db);
-                    db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, 0, draftMessage.imageResolutions);
+                    db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, draftMessage.videoCount, draftMessage.audioCount, draftMessage.firstAttachmentName, 0, draftMessage.imageResolutions);
 
                     // update the filePath and mark the Fyle as complete
                     fyle.moveToFyleDirectory(localFile.getPath());
@@ -459,7 +459,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                         Message reDraftMessage = db.messageDao().get(draftMessage.id);
                         if (reDraftMessage != null && reDraftMessage.status == Message.STATUS_UNPROCESSED) {
                             reDraftMessage.recomputeAttachmentCount(db);
-                            db.messageDao().updateAttachmentCount(reDraftMessage.id, reDraftMessage.totalAttachmentCount, reDraftMessage.imageCount, 0, reDraftMessage.imageResolutions);
+                            db.messageDao().updateAttachmentCount(reDraftMessage.id, reDraftMessage.totalAttachmentCount, reDraftMessage.imageCount, reDraftMessage.videoCount, reDraftMessage.audioCount, reDraftMessage.firstAttachmentName, 0, reDraftMessage.imageResolutions);
                             reDraftMessage.post(false, null);
                         }
                     });

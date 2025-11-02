@@ -19,6 +19,7 @@
 package io.olvid.messenger.activities
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +36,9 @@ import java.util.regex.Pattern
 class ObvLinkActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            window?.setHideOverlayWindows(true)
+        }
         handleIntent(intent)
     }
 

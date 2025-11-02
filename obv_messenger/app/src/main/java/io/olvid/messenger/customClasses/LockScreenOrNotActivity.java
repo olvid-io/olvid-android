@@ -108,10 +108,13 @@ public abstract class LockScreenOrNotActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (SettingsActivity.preventScreenCapture()) {
-            Window window = getWindow();
-            if (window != null) {
+        Window window = getWindow();
+        if (window != null) {
+            if (SettingsActivity.preventScreenCapture()) {
                 window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                window.setHideOverlayWindows(true);
             }
         }
 

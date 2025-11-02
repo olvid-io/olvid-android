@@ -43,6 +43,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -109,6 +110,7 @@ fun OlvidTextButton(
     enabled: Boolean = true,
     large: Boolean = false,
     fill: Boolean = false,
+    allowTwoLines: Boolean = false,
     contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
     onClick: () -> Unit
 ) {
@@ -134,7 +136,8 @@ fun OlvidTextButton(
         Text(
             modifier = Modifier.weight(1f, fill),
             text = text,
-            maxLines = 1,
+            textAlign = TextAlign.Center,
+            maxLines = if (allowTwoLines) 2 else 1,
             overflow = TextOverflow.Ellipsis,
             style = if (large)
                 OlvidTypography.body1.copy(fontWeight = FontWeight.Medium)

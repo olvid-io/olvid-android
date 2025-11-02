@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
@@ -87,6 +88,9 @@ public class WebrtcIncomingCallActivity extends AppCompatActivity implements Vie
             WindowCompat.setDecorFitsSystemWindows(window, false);
             WindowCompat.getInsetsController(window, window.getDecorView()).setAppearanceLightNavigationBars(false);
             WindowCompat.getInsetsController(window, window.getDecorView()).setAppearanceLightStatusBars(false);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                window.setHideOverlayWindows(true);
+            }
         }
 
         ConstraintLayout root = findViewById(R.id.root_constraint_layout);

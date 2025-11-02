@@ -21,7 +21,6 @@ package io.olvid.messenger.owneddetails
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.DialogInterface
-import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
@@ -111,9 +110,9 @@ import io.olvid.messenger.databases.tasks.DeleteOwnedIdentityAndEverythingRelate
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask
 import io.olvid.messenger.fragments.FullScreenImageFragment
 import io.olvid.messenger.main.MainActivity
+import io.olvid.messenger.main.tips.TipsViewModel
 import io.olvid.messenger.notifications.AndroidNotificationManager
 import io.olvid.messenger.openid.KeycloakManager
-import io.olvid.messenger.plus_button.scan.ScanActivity
 import io.olvid.messenger.settings.SettingsActivity.Companion.contactDisplayNameFormat
 import io.olvid.messenger.settings.SettingsActivity.Companion.uppercaseLastName
 import java.util.Locale
@@ -210,10 +209,6 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         publishButton.setOnClickListener(this)
         val discardButton = findViewById<Button>(R.id.button_discard)
         discardButton.setOnClickListener(this)
-        val addContactButton = findViewById<Button>(R.id.add_contact_button)
-        addContactButton.setOnClickListener(this)
-        // TODO Hide add contact button? Is it still needed? Where do we go in new plus button flow ?
-        addContactButton.visibility = View.GONE
 
         val diffUtilCallback: ItemCallback<OwnedDevice> = object : ItemCallback<OwnedDevice>() {
             override fun areItemsTheSame(oldItem: OwnedDevice, newItem: OwnedDevice): Boolean {
@@ -284,13 +279,13 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         AppSingleton.getCurrentIdentityLiveData().observe(this, identityObserver)
 
         deviceChangedEngineListener = object :
-            SimpleEngineNotificationListener(EngineNotifications.OWNED_IDENTITY_DEVICE_LIST_CHANGED) {
+            SimpleEngineNotificationListener(EngineNotifications.OWNED_DEVICE_DISCOVERY_DONE) {
             override fun callback(userInfo: HashMap<String, Any>) {
                 viewModel.hideRefreshSpinner()
             }
         }
         AppSingleton.getEngine().addNotificationListener(
-            EngineNotifications.OWNED_IDENTITY_DEVICE_LIST_CHANGED,
+            EngineNotifications.OWNED_DEVICE_DISCOVERY_DONE,
             deviceChangedEngineListener
         )
     }
@@ -928,9 +923,7 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         val bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity() ?: return
 
         val id = view.id
-        if (id == R.id.add_contact_button) {
-            startActivity(Intent(this, ScanActivity::class.java))
-        } else if (id == R.id.button_publish) {
+        if (id == R.id.button_publish) {
             AppSingleton.getEngine().publishLatestIdentityDetails(bytesOwnedIdentity)
         } else if (id == R.id.button_discard) {
             AppSingleton.getEngine().discardLatestIdentityDetails(bytesOwnedIdentity)
@@ -995,12 +988,14 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
         private val channelCreationDotsImageView: ImageView =
             itemView.findViewById(R.id.establishing_channel_image_view)
         val dots: ImageView = itemView.findViewById(R.id.button_dots)
-        private val untrusted: ImageView
+        private val untrusted: TextView
+        private val oldDevice: TextView
         private var ownedDevice: OwnedDevice? = null
 
         init {
             dots.setOnClickListener { view: View -> this.onClick(view) }
             untrusted = itemView.findViewById(R.id.untrusted)
+            oldDevice = itemView.findViewById(R.id.old_device)
         }
 
         fun bind(ownedDevice: OwnedDevice, currentDeviceIsActive: Boolean) {
@@ -1057,6 +1052,16 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                 untrusted.visibility = View.GONE
             } else {
                 untrusted.visibility = View.VISIBLE
+            }
+
+            ownedDevice.lastRegistrationTimestamp?.takeIf { ownedDevice.currentDevice.not() }?.let {
+                if (it < (System.currentTimeMillis() - TipsViewModel.Companion.OFFLINE_DEVICE_ALERT_THRESHOLD)) {
+                    oldDevice.visibility = View.VISIBLE
+                } else {
+                    oldDevice.visibility = View.GONE
+                }
+            } ?: run {
+                oldDevice.visibility = View.GONE
             }
 
             if (!currentDeviceIsActive || ownedDevice.channelConfirmed || ownedDevice.currentDevice) {
@@ -1229,13 +1234,16 @@ class OwnedIdentityDetailsActivity : LockableActivity(), OnClickListener {
                                 val nickname: CharSequence? = deviceNameEditText.text
                                 if (nickname != null) {
                                     try {
-                                        viewModel.showRefreshSpinner()
-                                        AppSingleton.getEngine().processDeviceManagementRequest(
-                                            ownedDevice!!.bytesOwnedIdentity,
-                                            ObvDeviceManagementRequest.createSetNicknameRequest(
-                                                ownedDevice!!.bytesDeviceUid, nickname.toString()
+                                        ownedDevice?.let { device ->
+                                            viewModel.showRefreshSpinner()
+                                            AppSingleton.getEngine().processDeviceManagementRequest(
+                                                device.bytesOwnedIdentity,
+                                                ObvDeviceManagementRequest.createSetNicknameRequest(
+                                                    device.bytesDeviceUid,
+                                                    nickname.toString()
+                                                )
                                             )
-                                        )
+                                        }
                                     } catch (e: Exception) {
                                         e.printStackTrace()
                                     }

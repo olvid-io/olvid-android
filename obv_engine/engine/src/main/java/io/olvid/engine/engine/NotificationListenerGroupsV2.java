@@ -60,6 +60,7 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
             case IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED: {
                 try (EngineSession engineSession = engine.getSession()) {
                     Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_OWNED_IDENTITY_KEY);
+                    Identity createdBy = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_BY_KEY);
                     GroupV2.Identifier groupIdentifier = (GroupV2.Identifier) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_GROUP_IDENTIFIER_KEY);
                     Boolean createdByMe = (Boolean) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_CREATED_BY_ME_KEY);
                     Boolean createdOnOtherDevice = (Boolean) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_CREATED_ON_OTHER_DEVICE_KEY);
@@ -77,6 +78,9 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_NEW_GROUP_KEY, createdByMe);
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_BY_ME_KEY, createdByMe);
                     engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_CREATED_ON_OTHER_DEVICE, createdOnOtherDevice);
+                    if (createdBy != null) {
+                        engineInfo.put(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED_BY_KEY, createdBy.getBytes());
+                    }
                     engine.postEngineNotification(EngineNotifications.GROUP_V2_CREATED_OR_UPDATED, engineInfo);
                 } catch (Exception e) {
                     Logger.x(e);
@@ -152,6 +156,7 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
             case IdentityNotifications.NOTIFICATION_GROUP_V2_DELETED: {
                 Identity ownedIdentity = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_DELETED_OWNED_IDENTITY_KEY);
                 GroupV2.Identifier groupIdentifier = (GroupV2.Identifier) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_DELETED_GROUP_IDENTIFIER_KEY);
+                Identity deletedBy = (Identity) userInfo.get(IdentityNotifications.NOTIFICATION_GROUP_V2_DELETED_DELETED_BY_KEY);
                 if ((ownedIdentity == null) || (groupIdentifier == null)) {
                     break;
                 }
@@ -159,6 +164,9 @@ public class NotificationListenerGroupsV2 implements NotificationListener {
                 HashMap<String, Object> engineInfo = new HashMap<>();
                 engineInfo.put(EngineNotifications.GROUP_V2_DELETED_BYTES_OWNED_IDENTITY, ownedIdentity.getBytes());
                 engineInfo.put(EngineNotifications.GROUP_V2_DELETED_BYTES_GROUP_IDENTIFIER_KEY, groupIdentifier.getBytes());
+                if (deletedBy != null) {
+                    engineInfo.put(EngineNotifications.GROUP_V2_DELETED_DELETED_BY_KEY, deletedBy.getBytes());
+                }
                 engine.postEngineNotification(EngineNotifications.GROUP_V2_DELETED, engineInfo);
                 break;
             }

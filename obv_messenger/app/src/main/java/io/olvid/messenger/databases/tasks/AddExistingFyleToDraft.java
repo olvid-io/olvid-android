@@ -83,7 +83,7 @@ public class AddExistingFyleToDraft implements Runnable {
                 );
                 db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                 draftMessage.recomputeAttachmentCount(db);
-                db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, 0, draftMessage.imageResolutions);
+                db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageCount, draftMessage.videoCount, draftMessage.audioCount, draftMessage.firstAttachmentName, 0, draftMessage.imageResolutions);
                 return false;
             });
             if (alreadyAttached == null || alreadyAttached) {

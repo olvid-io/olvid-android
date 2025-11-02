@@ -22,9 +22,11 @@ package io.olvid.messenger.notifications;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Window;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -60,6 +62,13 @@ public class MuteDiscussionDialogActivity extends AppCompatActivity {
             discussionId = getIntent().getLongExtra(DISCUSSION_ID_INTENT_EXTRA, -1);
             if (discussionId == -1) {
                 discussionId = null;
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Window window = getWindow();
+            if (window != null) {
+                window.setHideOverlayWindows(true);
             }
         }
 

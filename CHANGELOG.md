@@ -1,15 +1,24 @@
+# Build 278 (4.1)
+2025-10-02
+
+- You can now create polls to ask a question to all members of a group.
+- Rework of the reaction/contextual menu for messages.
+- \[security\] Detect potential rogue accessibility services.
+- Better notifications for messages with no text content.
+- Several small UI/UX improvements.
+- Drop support for Android versions before Marshmallow (API 23). 
+
 # Build 277 (4.0.1)
 2025-10-06
 
-- UI update to remove top blue bars
-- A few fixes for the new "plus" button introduced in version 4.0
-
+- UI update to remove top blue bars.
+- A few fixes for the new "plus" button introduced in version 4.0.
 
 # Build 276 (4.0)
 2025-09-29
 
-- Fix a few inconsistencies in the previous release
-- Fix compilation of nogoogle version
+- Fix a few inconsistencies in the previous release.
+- Fix compilation of nogoogle version.
 
 # ~~Build 275 (4.0)~~
 2025-09-25

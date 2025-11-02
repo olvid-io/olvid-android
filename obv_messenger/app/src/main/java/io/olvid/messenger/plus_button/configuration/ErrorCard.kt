@@ -31,7 +31,7 @@ internal fun ErrorCard(errorText: String, onCancel: () -> Unit) {
             contentColor = colorResource(R.color.almostBlack)
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_error_outline),

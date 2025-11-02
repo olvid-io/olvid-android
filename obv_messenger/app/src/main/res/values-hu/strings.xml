@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Kiléptél a csoportból</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Újra csatlakozol a csoporthoz</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Csatlakoztál a csoporthoz</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s hozzádadt a csoportba</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s újra felvette önt ebbe a csoportba</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Csoport, melyet %1$s kezel</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">Csatlakozott a csoporthoz: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">Csatlakozott a(z) %1$s csoporthoz</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s hozzáadta %2$s-t a csoporthoz</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Hozzáadtad %2$s-et a csoporthoz</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s eltávolította %2$s-t a csoportból</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">Eltávolította a %2$s személyt a csoportból</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s eltávolított a csoportból</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">Eltávolították Önt a csoportból</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">ismeretlen</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Senki</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Piszkozat:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Ismeretlen licensz</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Érvényes licensz</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">Lejárt engedély</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">A licensz aktiválása sikertelen</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">Kapcsolat azonosító megosztása</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">Béta funkciók kipróbálása</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">Prémium funkciók ingyenesen elérhetők</string>
@@ -1205,7 +1208,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">az üzeneted</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d reakció: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s reagált a %2$s-re</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">Emoji beszúrása</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Emoji beszúrása</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Hosszú megnyomás a kedvencekhez való hozzáadáshoz/eltávolításhoz</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Hibakeresési információk</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Csatornák/eszközök száma:</string>
@@ -1216,7 +1219,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Csoportok v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">Használj animált emojikat (ha elérhető)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Használj animált emojikat (ha elérhető)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Profiltárhely-használat</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">Fényképek</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">Videók</string>
@@ -1477,7 +1480,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Haladó</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Engedd szabadra az Olvid csoportok teljes erejét!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Csoportadminisztrátorok</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Most csoportadminisztrátor vagy</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">Mostantól te vagy a csoport adminisztrátora</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Már nem vagy csoportadminisztrátor</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Most már engedélyezve van az üzenetek küldése</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">Ezen a helyen többé nem küldhetsz üzeneteket</string>
@@ -1855,6 +1858,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">Lehetséges üzenetállapotok</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">Csoportüzenetekhez</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">Egyéb állapotok</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Az Olvidben az olvasási visszaigazolások opcionálisak.\nA kontaktjaid dönthettek úgy, hogy nem értesítenek, amikor elolvassák az üzeneteidet.</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">A kapcsolat hosszú ideje offline</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">Úgy tűnik, ez a kontakt hosszú ideje nem használja az Olvidot. Nem tudjuk garantálni, hogy az üzenetek megfelelően eljutnak hozzá.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">Nincs böngésződetektálva</string>
@@ -2069,7 +2073,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Új üzenet</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Új kapcsolat</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Szemtől szemben</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Távközlön</string>
+	<string name="new_contact_remotely" hash="-1391656952">Távolról</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Olvassátok be egymás QR-kódjait</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Kérd meg %1$s-t, hogy szkennelje be a kódot</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Kód beolvasva!</string>
@@ -2095,4 +2099,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">Hívások</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Rögzített beszélgetés</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">Nem tudja a %1$s szkennelni a kódot?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">Nem megbízható</string>
+	<string name="label_offline" state="needs_review" hash="315122527">Offline</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">Hogyan szeretnéd hozzáadni ezt a kontaktot?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">Ismeretlen akadálymentesítési szolgáltatás</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">Egy ismeretlen akadálymentesítési szolgáltatást észleltünk. Ha nem aktivált ön szándékosan egy ilyen szolgáltatást, az rosszindulatú szoftver lehet. Kérjük, ellenőrizze, hogy az alább felsorolt szolgáltatás biztonságosan használható-e:</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">Bízz ebben a szolgáltatásban</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">Léptető szolgáltatások</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">Megbízható akadálymentesítési szolgáltatások listája:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Nem találtunk ismeretlen akadálymentesítési szolgáltatást.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Ismeretlen akadálymentesítési szolgáltatás</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Egy ismeretlen akadálymentesítési szolgáltatást észleltünk, kérjük ellenőrizze, hogy biztonságos-e a használata:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Emoji keresése</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Legutóbbi</string>
 </resources>

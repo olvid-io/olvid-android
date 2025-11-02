@@ -442,7 +442,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.updatedBlobKeys = GroupV2.BlobKeys.of(list[3]);
             this.membersToKick = decodeMembersToKick(list[4]);
             String decoded = list[5].decodeString();
-            this.absolutePhotoUrlToUpload = decoded.length() == 0 ? null : decoded;
+            this.absolutePhotoUrlToUpload = decoded.isEmpty() ? null : decoded;
             this.failedUploadCounter = list[6].decodeLong();
         }
 
@@ -492,7 +492,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.updatedBlobKeys = GroupV2.BlobKeys.of(list[3]);
             this.membersToKick = decodeMembersToKick(list[4]);
             String decoded = list[5].decodeString();
-            this.absolutePhotoUrlToUpload = decoded.length() == 0 ? null : decoded;
+            this.absolutePhotoUrlToUpload = decoded.isEmpty() ? null : decoded;
         }
 
         @Override
@@ -690,7 +690,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 }
                 this.serializedGroupDetails = inputs[2].decodeString();
                 String url = inputs[3].decodeString();
-                if (url.length() == 0) {
+                if (url.isEmpty()) {
                     this.absolutePhotoUrl = null;
                 } else {
                     this.absolutePhotoUrl = url;
@@ -704,7 +704,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 }
                 this.serializedGroupDetails = inputs[2].decodeString();
                 String url = inputs[3].decodeString();
-                if (url.length() == 0) {
+                if (url.isEmpty()) {
                     this.absolutePhotoUrl = null;
                 } else {
                     this.absolutePhotoUrl = url;
@@ -1967,7 +1967,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         waitingForBlobUpload = false;
                     } else {
                         // we were not able to upload the blob to the server --> delete the group
-                        protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier);
+                        protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier, null);
                         return new FinalState();
                     }
                     break;
@@ -2017,7 +2017,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 HashSet<GroupV2.IdentityAndPermissions> groupMembersAndPermissions = protocolManagerSession.identityDelegate.getGroupV2OtherMembersAndPermissions(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier);
                 if ((blobKeys == null) || (blobKeys.groupAdminServerAuthenticationPrivateKey == null) || (groupMembersAndPermissions == null)) {
                     // we are unable to retrieve basic group information --> delete the group we created before inviting anyone
-                    protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier);
+                    protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, null);
                     return new FinalState();
                 }
 
@@ -2044,7 +2044,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                         // rollback everything and delete the group
                         protocolManagerSession.session.rollback();
                         protocolManagerSession.session.startTransaction();
-                        protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier);
+                        protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, null);
 
                         // delete the group from the server
                         byte[] signature = Signature.sign(Constants.SignatureContext.GROUP_DELETE_ON_SERVER, blobKeys.groupAdminServerAuthenticationPrivateKey.getSignaturePrivateKey(), getPrng());
@@ -2531,7 +2531,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     // the server does not have a group with that identifier, there is nothing we can do --> abort the protocol
                     if (receivedMessage.deletedFromServer) {
                         // blob was deleted from server --> delete the group locally too
-                        protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier);
+                        protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, null);
                     }
 
                     // remove the dialog if any
@@ -2705,7 +2705,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                                 // In both case the group can be safely created and joined
 
                                 // create the group in DB (we use the createJoinedGroupV2 method which is better suited here, even if another of my devices created the group)
-                                boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, blobKeys, serverBlob, true);
+                                boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, blobKeys, serverBlob, true, null);
 
                                 // if success == false, this is not a retry-able failure, so we do nothing
                                 if (success) {
@@ -2805,7 +2805,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                             // can also happen if we have the right seeds but the groupAdminServerAuthenticationPrivateKey is missing
                         } catch (DecodingException e) {
                             // we have the right key, but are unable to decode the decrypted blob or the validation of the blob failed --> abort
-                            protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier);
+                            protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, null);
 
                             // remove the dialog if any
                             CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createUserInterfaceChannelInfo(getOwnedIdentity(), DialogType.createDeleteDialog(), startState.dialogUuid));
@@ -3174,7 +3174,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 ((InvitationReceivedState) startState).serverBlob.administratorsChain.integrityWasChecked = true;
 
                 // create the group in db
-                boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier, ((InvitationReceivedState) startState).blobKeys, ((InvitationReceivedState) startState).serverBlob, false);
+                boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier, ((InvitationReceivedState) startState).blobKeys, ((InvitationReceivedState) startState).serverBlob, false, ((InvitationReceivedState) startState).inviterIdentity);
 
                 // if success == false, this is not a retry-able failure, so we do nothing
                 if (success) {
@@ -3780,13 +3780,14 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     changed = true;
                 }
                 // group photoUrl
-                if (startState.changeSet.updatedPhotoUrl != null && (initialServerBlob.serverPhotoInfo != null || startState.changeSet.updatedPhotoUrl.length() > 0)) {
+                if (startState.changeSet.updatedPhotoUrl != null && (initialServerBlob.serverPhotoInfo != null || !startState.changeSet.updatedPhotoUrl.isEmpty())) {
                     changed = true;
                 }
             }
 
             if (!changed) {
                 // nothing changed --> nothing to upload, discard the changeSet and notify (for app)
+                Logger.d("Nothing change in group");
                 unfreezeAndNotifyUpdateFailed(protocolManagerSession, false);
                 return new FinalState();
             }
@@ -3853,7 +3854,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 }
 
                 GroupV2.ServerPhotoInfo updatedServerPhotoInfo;
-                if (startState.changeSet.updatedPhotoUrl != null && startState.changeSet.updatedPhotoUrl.length() == 0) {
+                if (startState.changeSet.updatedPhotoUrl != null && startState.changeSet.updatedPhotoUrl.isEmpty()) {
                     // photo was removed
                     updatedServerPhotoInfo = null;
                 } else if (startState.changeSet.updatedPhotoUrl != null) {
@@ -4323,9 +4324,11 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     System.arraycopy(invitationNonce, 0, dataToSign, receivedMessage.encryptedAdministratorsChain.length, invitationNonce.length);
 
                     boolean valid = false;
+                    Identity kicker = null;
                     for (Identity identity : administratorsChain.getAdminIdentities()) {
                         if (Signature.verify(Constants.SignatureContext.GROUP_KICK, dataToSign, identity, receivedMessage.signature)) {
                             valid = true;
+                            kicker = identity;
                             break;
                         }
                     }
@@ -4338,7 +4341,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
                         }
 
-                        protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.groupIdentifier);
+                        protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), receivedMessage.groupIdentifier, kicker);
 
                         if (startState instanceof DownloadingGroupBlobState || startState instanceof INeedMoreSeedsState) {
                             return startState;
@@ -4499,7 +4502,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
             {
                 // delete the group
-                protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), this.groupIdentifier);
+                protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), this.groupIdentifier, getOwnedIdentity());
             }
 
             if (propagated) {
@@ -4633,7 +4636,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 return new DisbandingGroupState(this.groupIdentifier, blobKeys);
             } else {
                 // locally delete the group
-                protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), this.groupIdentifier);
+                protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), this.groupIdentifier, getOwnedIdentity());
 
                 return new FinalState();
             }
@@ -4699,7 +4702,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             }
 
             // locally delete the group
-            protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier);
+            protocolManagerSession.identityDelegate.deleteGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, getOwnedIdentity());
 
             return new FinalState();
         }

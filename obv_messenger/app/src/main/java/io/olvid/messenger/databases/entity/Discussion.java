@@ -43,7 +43,6 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.databases.AppDatabase;
-import io.olvid.messenger.databases.entity.jsons.JsonExpiration;
 import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
 import io.olvid.messenger.databases.tasks.InsertContactRevokedMessageTask;
@@ -282,24 +281,6 @@ public class Discussion {
         }
     }
 
-    private static void setEphemeralMessageSettings(Discussion discussion, @NonNull AppDatabase db, @NonNull byte[] contact, @NonNull JsonExpiration jsonExpiration) {
-        Long existenceDuration = jsonExpiration.getExistenceDuration();
-        Long visibilityDuration = jsonExpiration.getVisibilityDuration();
-        boolean readOnce = jsonExpiration.getReadOnce();
-        if (readOnce || visibilityDuration != null || existenceDuration != null) {
-            DiscussionCustomization discussionCustomization = new DiscussionCustomization(discussion.id);
-            discussionCustomization.settingExistenceDuration = existenceDuration;
-            discussionCustomization.settingVisibilityDuration = visibilityDuration;
-            discussionCustomization.settingReadOnce = readOnce;
-            discussionCustomization.sharedSettingsVersion = 0;
-            db.discussionCustomizationDao().insert(discussionCustomization);
-            Message message = Message.createDiscussionSettingsUpdateMessage(db, discussion.id, discussionCustomization.getSharedSettingsJson(), contact, false, 0L);
-            if (message != null) {
-                db.messageDao().insert(message);
-            }
-        }
-    }
-
     @Ignore
     public static Discussion createOrReuseGroupDiscussion(AppDatabase db, @NonNull Group group, boolean createdByMeOnOtherDevice) {
         if (!db.inTransaction()) {
@@ -335,7 +316,7 @@ public class Discussion {
             }
         } else if (!discussion.isNormal()) {
             if (discussion.isLocked()) {
-                Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, null);
                 db.messageDao().insert(reJoinedGroup);
             }
 
@@ -355,7 +336,7 @@ public class Discussion {
     }
 
     @Ignore
-    public static Discussion createOrReuseGroupV2Discussion(AppDatabase db, @NonNull Group2 group2, boolean groupWasJustCreatedByMe, boolean createdOnOtherDevice) {
+    public static Discussion createOrReuseGroupV2Discussion(AppDatabase db, @NonNull Group2 group2, boolean groupWasJustCreatedByMe, boolean createdOnOtherDevice, byte[] updatedBy) {
         if (!db.inTransaction()) {
             Logger.e("ERROR: running discussion createOrReuseGroupV2Discussion outside a transaction");
             return null;
@@ -390,13 +371,16 @@ public class Discussion {
                     setDefaultEphemeralMessageSettings(discussion, db, group2.bytesOwnedIdentity);
                 }
             } else {
-                Message reJoinedGroup = Message.createJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                Message reJoinedGroup = Message.createJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, updatedBy);
                 db.messageDao().insert(reJoinedGroup);
             }
         } else if (!discussion.isNormal()) {
             if (discussion.isLocked()) {
-                Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, updatedBy);
                 db.messageDao().insert(reJoinedGroup);
+            } else if (discussion.isPreDiscussion()) {
+                Message joinedGroup = Message.createJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, updatedBy);
+                db.messageDao().insert(joinedGroup);
             }
 
             discussion.title = group2.getCustomName();
@@ -440,6 +424,10 @@ public class Discussion {
     }
 
     public void lockWithMessage(AppDatabase db) {
+        lockWithMessage(db, null);
+    }
+
+    public void lockWithMessage(AppDatabase db, @Nullable byte[] deletedBy) {
         if (!db.inTransaction()) {
             Logger.e("ERROR: running discussion lockWithMessage outside a transaction");
         }
@@ -449,7 +437,7 @@ public class Discussion {
             return;
         }
 
-        // delete draft messages
+        // delete draft messages and any details updated
         db.messageDao().deleteDiscussionDraftMessage(id);
         List<Message> messageList = db.messageDao().getAllDiscussionNewPublishedDetailsMessages(id);
         db.messageDao().delete(messageList.toArray(new Message[0]));
@@ -503,8 +491,8 @@ public class Discussion {
                 }
                 case TYPE_GROUP:
                 case TYPE_GROUP_V2: {
-                    Message groupLeftMessage = Message.createLeftGroupMessage(db, id, bytesOwnedIdentity);
-                    db.messageDao().insert(groupLeftMessage);
+                    Message groupLeftMessage = Message.createLeftGroupMessage(db, id, bytesOwnedIdentity, deletedBy);
+                    db.messageDao().upsert(groupLeftMessage);
                     break;
                 }
                 default:

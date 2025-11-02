@@ -46,7 +46,10 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmojiList;
@@ -138,7 +141,7 @@ public class EmojiPickerViewFactory {
 
         TypedValue selectableItemBackground = new TypedValue();
         context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, selectableItemBackground, true);
-        for (EmojiList.EmojiGroup emojiGroup : EmojiList.EmojiGroup.values()) {
+        for (EmojiList.EmojiGroup emojiGroup : EmojiList.EmojiGroup.getEntries()) {
             TextView groupTextView = new AppCompatTextView(new ContextThemeWrapper(context, R.style.BlueOrWhiteRipple));
             groupTextView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT, 2));
             groupTextView.setGravity(Gravity.CENTER);
@@ -147,7 +150,7 @@ public class EmojiPickerViewFactory {
             groupTextView.setTextColor(0xff000000);
             groupTextView.setBackgroundResource(selectableItemBackground.resourceId);
 
-            groupTextView.setOnClickListener(v -> adapter.scrollToPosition(EmojiList.offsetForEmojiGroup(emojiGroup)));
+            groupTextView.setOnClickListener(v -> adapter.scrollToPosition(emojiGroup.getIndex()));
             groupLinearLayout.addView(groupTextView);
         }
 
@@ -205,7 +208,7 @@ public class EmojiPickerViewFactory {
 
 
     private static class EmojiListAdapter extends RecyclerView.Adapter<EmojiViewHolder> {
-        private final String[][] emojis = EmojiList.EMOJIS;
+        private final List<List<String>> emojis = EmojiList.EMOJIS;
 
         public static final int TYPE_SINGLE_EMOJI = 1;
         public static final int TYPE_EMOJI_WITH_VARIANTS = 2;
@@ -254,24 +257,24 @@ public class EmojiPickerViewFactory {
 
         @Override
         public void onBindViewHolder(@NonNull EmojiViewHolder holder, int position) {
-            holder.setEmoji(emojis[position][0]);
-            if (emojis[position].length > 1) {
+            holder.setEmoji(emojis.get(position).get(0));
+            if (emojis.get(position).size() > 1) {
                 if (isReactionPopup) {
-                    holder.setEmojiVariants(emojis[position]);
+                    holder.setEmojiVariants(emojis.get(position));
                 } else {
-                    holder.setEmojiVariants(Arrays.copyOfRange(emojis[position], 1, emojis[position].length));
+                    holder.setEmojiVariants(emojis.get(position).subList(1, emojis.get(position).size()));
                 }
             }
         }
 
         @Override
         public int getItemCount() {
-            return emojis.length;
+            return emojis.size();
         }
 
         @Override
         public int getItemViewType(int position) {
-            if (emojis[position].length > 1) {
+            if (emojis.get(position).size() > 1) {
                 return TYPE_EMOJI_WITH_VARIANTS;
             }
             return TYPE_SINGLE_EMOJI;
@@ -302,7 +305,7 @@ public class EmojiPickerViewFactory {
         private final TextView emojiTextView;
         @Nullable private final String highlightedEmoji;
         private String emoji;
-        private String[] emojiVariants;
+        private List<String> emojiVariants;
 
         public EmojiViewHolder(@NonNull View itemView, int viewType, EmojiClickListener emojiClickListener, boolean isReactionPopup, @Nullable String highlightedEmoji, @Nullable View windowTokenView) {
             super(itemView);
@@ -340,16 +343,16 @@ public class EmojiPickerViewFactory {
             }
         }
 
-        public void setEmojiVariants(String[] emojiVariants) {
+        public void setEmojiVariants(List<String> emojiVariants) {
             this.emojiVariants = emojiVariants;
         }
     }
 
-    private static void openEmojiVariantPicker(View anchorView, String[] emojiVariants, EmojiClickListener emojiClickListener, boolean isReactionPopup, @Nullable String highlightedEmoji, @Nullable View windowTokenView) {
+    private static void openEmojiVariantPicker(View anchorView, List<String> emojiVariants, EmojiClickListener emojiClickListener, boolean isReactionPopup, @Nullable String highlightedEmoji, @Nullable View windowTokenView) {
         Context context = anchorView.getContext();
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         int fortyDp = (int) (40 * metrics.density);
-        int rowSize = (isReactionPopup && emojiVariants.length == 6) ? 6 : 5;
+        int rowSize = (isReactionPopup && emojiVariants.size() == 6) ? 6 : 5;
 
         ScrollView popupView = new ScrollView(context);
         popupView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -373,13 +376,12 @@ public class EmojiPickerViewFactory {
         flow.setMaxElementsWrap(rowSize);
         constraintLayout.addView(flow);
 
-        PopupWindow popupWindow = new PopupWindow(popupView, rowSize * fortyDp, (1 + (emojiVariants.length - 1) / rowSize) * fortyDp, true);
+        PopupWindow popupWindow = new PopupWindow(popupView, rowSize * fortyDp, (1 + (emojiVariants.size() - 1) / rowSize) * fortyDp, true);
 
         // if we are in a case with 25 variants, make the "no variant" emoji the last one, otherwise, leave it first
-        if (isReactionPopup && emojiVariants.length > 6) {
-            String[] copy = new String[emojiVariants.length];
-            System.arraycopy(emojiVariants, 1, copy, 0, copy.length - 1);
-            copy[copy.length - 1] = emojiVariants[0];
+        if (isReactionPopup && emojiVariants.size() > 6) {
+            List<String> copy = new ArrayList<>(emojiVariants.subList(1, emojiVariants.size()));
+            copy.add(emojiVariants.get(0));
             emojiVariants = copy;
         }
 
@@ -444,7 +446,7 @@ public class EmojiPickerViewFactory {
         }
 
         popupWindow.setAnimationStyle(R.style.FadeInAndOutAnimation);
-        popupWindow.showAtLocation(windowTokenView == null ? anchorView : windowTokenView, Gravity.NO_GRAVITY, pos[0] + xOffset, pos[1] - (2 + (emojiVariants.length - 1) / rowSize) * fortyDp);
+        popupWindow.showAtLocation(windowTokenView == null ? anchorView : windowTokenView, Gravity.NO_GRAVITY, pos[0] + xOffset, pos[1] - (2 + (emojiVariants.size() - 1) / rowSize) * fortyDp);
     }
 
 }

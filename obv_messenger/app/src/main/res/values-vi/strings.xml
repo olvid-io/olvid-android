@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Bạn đã rời khỏi nhóm</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Bạn đã tham gia lại nhóm</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Bạn đã tham gia nhóm</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s đã thêm bạn vào nhóm này</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s đã thêm lại bạn vào nhóm này</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Nhóm do %1$s quản lý</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">Đã tham gia nhóm: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">Đã tham gia nhóm: %1$s</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s đã thêm %2$s vào nhóm</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Bạn đã thêm %2$s vào nhóm</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s đã loại %2$s khỏi nhóm</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">Bạn đã xóa %2$s khỏi nhóm</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s đã xóa bạn khỏi nhóm</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">Bạn đã bị xóa khỏi nhóm</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">không xác định</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Không ai</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Nháp:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Giấy phép không xác định</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Giấy phép hợp lệ</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">Giấy phép đã hết hạn</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">Không thể kích hoạt giấy phép</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">Chia sẻ ID liên hệ</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">Dùng thử tính năng beta</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">Các tính năng cao cấp miễn phí</string>
@@ -1206,7 +1209,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">tin nhắn của bạn</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d phản hồi về: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s đã phản hồi %2$s</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">Chèn một biểu tượng cảm xúc</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Chèn biểu tượng cảm xúc</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Giữ lâu để thêm/xóa khỏi mục yêu thích</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Thông tin gỡ lỗi</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Số lượng kênh/thiết bị:</string>
@@ -1217,7 +1220,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Nhóm v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">Sử dụng biểu tượng cảm xúc động (nếu có)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Sử dụng biểu tượng cảm xúc động (nếu có)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Dung lượng lưu trữ hồ sơ</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">Ảnh</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">Video</string>
@@ -1478,7 +1481,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Nâng cao</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Giải phóng toàn bộ sức mạnh của các nhóm Olvid!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Quản trị viên nhóm</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Bạn hiện là quản trị viên của nhóm này</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">Bạn hiện là quản trị viên nhóm</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Bạn không còn là quản trị viên của nhóm này nữa</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Bây giờ bạn đã được phép đăng tin nhắn</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">Bạn không thể đăng tin nhắn ở đây nữa</string>
@@ -1856,6 +1859,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">Các trạng thái tin nhắn có thể</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">Dành cho tin nhắn nhóm</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">Các trạng thái khác</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Biên nhận đọc tin nhắn là tùy chọn trong Olvid.\nLiên hệ của bạn có thể đã chọn không thông báo cho bạn khi họ đọc tin nhắn của bạn.</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">Liên hệ ngoại tuyến trong thời gian dài</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">Có vẻ như liên hệ này đã không sử dụng Olvid trong một thời gian dài. Chúng tôi không thể đảm bảo tin nhắn sẽ được gửi đến họ một cách chính xác.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">Không tìm thấy trình duyệt</string>
@@ -2070,7 +2074,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Tin nhắn mới</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Liên hệ mới</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Trực tiếp</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Từ xa</string>
+	<string name="new_contact_remotely" hash="-1391656952">Từ xa</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Quét mã QR của nhau</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Yêu cầu %1$s quét mã của bạn</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Mã đã được quét!</string>
@@ -2096,4 +2100,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">Cuộc gọi</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Cuộc trò chuyện đã ghim</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">%1$s không thể quét mã của bạn?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">Không đáng tin cậy</string>
+	<string name="label_offline" state="needs_review" hash="315122527">Ngoại tuyến</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">Bạn muốn thêm liên hệ này như thế nào?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">Dịch vụ hỗ trợ tiếp cận không xác định</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">Một dịch vụ hỗ trợ tiếp cận không xác định đã được phát hiện. Nếu bạn không tự nguyện bật dịch vụ này, đây có thể là phần mềm độc hại. Vui lòng kiểm tra xem dịch vụ được liệt kê bên dưới có an toàn khi sử dụng hay không:</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">Tin tưởng dịch vụ này</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">Dịch vụ hỗ trợ tiếp cận</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">Danh sách các dịch vụ hỗ trợ tiếp cận đáng tin cậy:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Không phát hiện dịch vụ hỗ trợ truy cập không xác định.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Dịch vụ hỗ trợ tiếp cận không xác định</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Đã phát hiện một dịch vụ hỗ trợ tiếp cận không xác định. Vui lòng kiểm tra xem nó có an toàn khi sử dụng không:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Tìm biểu tượng cảm xúc</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Gần đây</string>
 </resources>

@@ -71,6 +71,7 @@ import io.olvid.messenger.group.PrivateGroup
 import io.olvid.messenger.group.ReadOnlyGroup
 import io.olvid.messenger.group.SimpleGroup
 import io.olvid.messenger.group.clone
+import io.olvid.messenger.main.invitations.InvitationRepository
 
 object Routes {
     const val GROUP_DETAILS = "group_details"
@@ -129,7 +130,7 @@ fun NavGraphBuilder.inviteGroupMembers(
     ) {
         val group by groupV2DetailsViewModel.group.observeAsState()
         val members by groupV2DetailsViewModel.groupMembers.observeAsState()
-        val invitations by AppDatabase.getInstance().invitationDao().getAllForOwnedIdentity(groupV2DetailsViewModel.bytesOwnedIdentity ?: byteArrayOf()).observeAsState()
+        val invitations by InvitationRepository.invitations.observeAsState()
         val allMembersInvited = remember(members, invitations) {
             members?.all { member ->
                 invitations?.any { invitation -> invitation.bytesContactIdentity.contentEquals(member.bytesContactIdentity) } ?: false

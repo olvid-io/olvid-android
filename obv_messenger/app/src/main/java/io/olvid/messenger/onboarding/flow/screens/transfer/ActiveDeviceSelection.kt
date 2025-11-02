@@ -27,7 +27,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -36,11 +35,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.RadioButton
-import androidx.compose.material.RadioButtonDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -72,6 +70,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.billing.SubscriptionOfferDialog
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.onboarding.flow.Device
@@ -164,9 +163,7 @@ fun NavGraphBuilder.activeDeviceSelection(
             if (loading) {
                 Spacer(modifier = Modifier.height(16.dp))
                 CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(128.dp)
-                        .align(Alignment.CenterHorizontally),
+                    modifier = Modifier.size(128.dp),
                     color = colorResource(id = R.color.olvid_gradient_light),
                     strokeWidth = 8.dp,
                     strokeCap = StrokeCap.Round,
@@ -267,26 +264,15 @@ fun NavGraphBuilder.activeDeviceSelection(
                     }
                 }
 
-                Button(
+                OlvidActionButton(
                     modifier = Modifier.padding(top = 16.dp),
-                    elevation = null,
-                    onClick = {
-                        onProceed.invoke()
-                    },
+                    onClick = onProceed,
                     enabled = onboardingFlowViewModel.transferMultiDevice || onboardingFlowViewModel.transferSelectedDevice != null,
-                    contentPadding = PaddingValues(vertical = 16.dp, horizontal = 24.dp)
-                ) {
-                    Text(
-                        text = if (onboardingFlowViewModel.transferMultiDevice)
-                            stringResource(
-                                id = R.string.button_label_add_device_xxx,
-                                onboardingFlowViewModel.deviceName
-                            )
-                        else
-                            stringResource(id = R.string.button_label_proceed),
-                        textAlign = TextAlign.Center
-                    )
-                }
+                    text = if (onboardingFlowViewModel.transferMultiDevice)
+                        stringResource(id = R.string.button_label_add_device_xxx, onboardingFlowViewModel.deviceName)
+                    else
+                        stringResource(id = R.string.button_label_proceed),
+                )
                 Spacer(modifier = Modifier.height(32.dp))
             }
             if (showPurchaseFragment) {

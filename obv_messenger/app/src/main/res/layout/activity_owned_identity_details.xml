@@ -269,23 +269,6 @@
 
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="end"
-                        android:orientation="horizontal">
-
-                        <Button
-                            android:id="@+id/add_contact_button"
-                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:drawableStart="@drawable/tab_add_contact_button"
-                            android:drawablePadding="8dp"
-                            android:text="@string/button_label_add_contact"
-                            android:theme="@style/AppTheme.BlueAccent" />
-                    </LinearLayout>
                 </LinearLayout>
 
 
@@ -338,7 +321,6 @@
                         app:layout_constraintTop_toBottomOf="@id/device_list_recycler_view"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        android:drawableStart="@drawable/tab_add_contact_button"
                         android:drawablePadding="8dp"
                         android:text="@string/button_label_add_device" />
 

@@ -22,10 +22,12 @@ package io.olvid.messenger.widget;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Vibrator;
+import android.view.Window;
 import android.widget.Button;
 
 import androidx.annotation.Nullable;
@@ -51,6 +53,13 @@ public class ActionShortcutSendMessageActivity extends AppCompatActivity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Window window = getWindow();
+            if (window != null) {
+                window.setHideOverlayWindows(true);
+            }
+        }
 
         int appWidgetId = getIntent().getIntExtra(APP_WIDGET_ID_INTENT_EXTRA, AppWidgetManager.INVALID_APPWIDGET_ID);
 
@@ -137,7 +146,10 @@ public class ActionShortcutSendMessageActivity extends AppCompatActivity {
                     discussion.bytesOwnedIdentity,
                     discussion.senderThreadIdentifier,
                     0,
-                    0
+                    0,
+                    0,
+                    0,
+                    null
             );
             message.id = db.messageDao().insert(message);
             // save the messageId for the vibrate observer

@@ -178,6 +178,7 @@ public abstract class IdentityNotifications {
 
     public static final String NOTIFICATION_GROUP_V2_CREATED = "identity_manager_notification_group_v2_created";
     public static final String NOTIFICATION_GROUP_V2_CREATED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+    public static final String NOTIFICATION_GROUP_V2_CREATED_BY_KEY = "created_by"; // Identity
     public static final String NOTIFICATION_GROUP_V2_CREATED_GROUP_IDENTIFIER_KEY = "group_identifier"; // GroupV2.Identifier
     public static final String NOTIFICATION_GROUP_V2_CREATED_CREATED_BY_ME_KEY = "created_by_me"; // boolean --> indicates whether the group was created by me (on this device or on another one)
     public static final String NOTIFICATION_GROUP_V2_CREATED_ON_OTHER_DEVICE_KEY = "on_other_device"; // boolean --> if NEW_GROUP is true, this tells if the group was created on another owned device
@@ -185,6 +186,7 @@ public abstract class IdentityNotifications {
     public static final String NOTIFICATION_GROUP_V2_DELETED = "identity_manager_notification_group_v2_deleted";
     public static final String NOTIFICATION_GROUP_V2_DELETED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
     public static final String NOTIFICATION_GROUP_V2_DELETED_GROUP_IDENTIFIER_KEY = "group_identifier"; // GroupV2.Identifier
+    public static final String NOTIFICATION_GROUP_V2_DELETED_DELETED_BY_KEY = "deleted_by"; // Identity
 
     public static final String NOTIFICATION_GROUP_V2_FROZEN_CHANGED = "identity_manager_notification_group_v2_frozen_changed";
     public static final String NOTIFICATION_GROUP_V2_FROZEN_CHANGED_OWNED_IDENTITY_KEY = "owned_identity"; // Identity

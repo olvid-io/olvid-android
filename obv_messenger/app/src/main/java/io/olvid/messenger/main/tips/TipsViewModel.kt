@@ -27,9 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.customClasses.AccessibilityManager
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.openid.KeycloakManager
@@ -53,11 +56,27 @@ class TipsViewModel : ViewModel() {
         private const val READ_RECEIPT_MUTE_DURATION = 2 * 86_400_000L
         private const val TROUBLESHOOTING_MUTE_DURATION = 7 * 86_400_000L
         private const val OTHER_DEVICE_EXPIRING_SOON_THRESHOLD = 7 * 86_400_000L
-        private const val OFFLINE_DEVICE_ALERT_THRESHOLD = 30 * 86_400_000L
+        const val OFFLINE_DEVICE_ALERT_THRESHOLD = 30 * 86_400_000L
         private const val EXPIRING_DEVICE_MUTE_DURATION = 2 * 86_400_000L
         private const val OFFLINE_DEVICE_MUTE_DURATION = 30 * 86_400_000L
         private const val RATING_MUTE_DURATION = 180 * 86_400_000L
         private const val RATING_INSTALL_MIN_AGE = 30 * 86_400_000L
+
+        private val OWNED_DEVICE_DISCOVERY_PERFORMED : MutableLiveData<Set<BytesKey>>  = MutableLiveData<Set<BytesKey>>(emptySet())
+
+        fun ownedDeviceDiscoveryPerformed(bytesCurrentIdentity: ByteArray) {
+            (OWNED_DEVICE_DISCOVERY_PERFORMED.value ?: emptySet())
+                .toMutableSet()
+                .apply {
+                    add(BytesKey(bytesCurrentIdentity))
+                }.let {
+                    OWNED_DEVICE_DISCOVERY_PERFORMED.postValue(it)
+                }
+        }
+
+        fun getOwnedDeviceDiscoveryPerformed(): LiveData<Set<BytesKey>> {
+            return OWNED_DEVICE_DISCOVERY_PERFORMED
+        }
     }
 
     var tipToShow: Tip? by mutableStateOf(null)
@@ -65,6 +84,11 @@ class TipsViewModel : ViewModel() {
     private val firstInstallTimestamp = installTimestamp() ?: 0L
 
     fun refreshTipToShow(activity: ComponentActivity) {
+        AccessibilityManager.refreshUntrustedAccessibilityServices(activity)?.firstOrNull()?.let {
+            tipToShow = Tip.UNTRUSTED_ACCESSIBILITY_SERVICE
+            return
+        }
+
         AppSingleton.getBytesCurrentIdentity()?.let { bytesOwnedIdentity ->
             if (KeycloakManager.authenticationRequiredOwnedIdentities.contains(BytesKey(bytesOwnedIdentity))) {
                 tipToShow = Tip.AUTHENTICATION_REQUIRED
@@ -91,6 +115,10 @@ class TipsViewModel : ViewModel() {
             }
         }
         AppSingleton.getBytesCurrentIdentity()?.let { bytesCurrentIdentity ->
+            if (OWNED_DEVICE_DISCOVERY_PERFORMED.value?.contains(BytesKey(bytesCurrentIdentity)) != true) {
+                return@let
+            }
+
             val devices =
                 AppDatabase.getInstance().ownedDeviceDao().getAllSync(bytesCurrentIdentity)
 
@@ -174,5 +202,6 @@ class TipsViewModel : ViewModel() {
         PROMPT_FOR_READ_RECEIPTS,
         UPDATE_AVAILABLE,
         VERSION_OUTDATED,
+        UNTRUSTED_ACCESSIBILITY_SERVICE,
     }
 }

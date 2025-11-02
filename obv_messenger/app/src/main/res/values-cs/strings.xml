@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Opustil jsi skupinu</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Znovu ses připojil ke skupině</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Přidal ses do skupiny</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s tě přidal do této skupiny</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s tě znovu přidal do této skupiny</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Skupina spravovaná %1$s</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">Přidal se ke skupině: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">Připojil se ke skupině: %1$s</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s přidal/a %2$s do skupiny</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Přidal/a jsi %2$s do skupiny.</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s odebral/a %2$s ze skupiny</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">Odebral/a jsi %2$s ze skupiny.</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s tě odebral ze skupiny</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">Byl jsi odebrán ze skupiny.</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">neznámý</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Nikdo</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Koncept:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Neznámá licence</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Platná licence</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">Expirovaná licence</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">Nelze aktivovat licenci</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">Sdílet ID kontaktu</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">Testování beta funkcí</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">Prémiové funkce dostupné zdarma</string>
@@ -1206,7 +1209,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">vaše zpráva</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d reakcí na: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s reagoval na %2$s</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">Vložit emoji</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Vložit emoji</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Dlouhé stisknutí pro přidání/odstranění z oblíbených</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Ladící informace</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Počet kanálů/zařízení:</string>
@@ -1217,7 +1220,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Skupiny v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">Používej animované emotikony (pokud jsou dostupné)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Používejte animované emotikony (pokud jsou k dispozici)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Využití úložiště profilu</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">Fotky</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">Videa</string>
@@ -1476,7 +1479,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Pokročilé</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Uvolněte plný potenciál skupin Olvid!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Správci skupiny</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Nyní jste administrátorem skupiny</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">Nyní jsi administrátor skupiny.</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Už nejste administrátorem skupiny</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Nyní můžete odesílat zprávy</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">Zde již nemůžeš odesílat zprávy</string>
@@ -1854,6 +1857,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">Možné stavy zpráv</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">Pro skupinové zprávy</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">Další stavy</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Potvrzení o přečtení jsou v Olvid volitelné.\nVaši kontakty si možná zvolili, že vás nebudou informovat, když si přečtou vaše zprávy.</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">Kontakt je dlouho offline</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">Zdá se, že tento kontakt Olvid delší dobu nepoužíval. Nemůžeme zaručit, že zprávy budou správně doručeny.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">Nebyl detekován žádný prohlížeč</string>
@@ -2068,7 +2072,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Nová zpráva</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Nový kontakt</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Z očí do očí</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Na dálku</string>
+	<string name="new_contact_remotely" hash="-1391656952">Na dálku</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Naskenujte QR kódy jeden druhého</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Požádejte %1$s, aby naskenoval váš kód.</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Kód naskenován!</string>
@@ -2094,4 +2098,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">Volání</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Připnutá konverzace</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">Nemůže %1$s naskenovat váš kód?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">Nedůvěryhodný</string>
+	<string name="label_offline" state="needs_review" hash="315122527">Offline</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">Jak chcete přidat tento kontakt?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">Neznámá služba usnadnění přístupu</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">Byla zjištěna neznámá služba usnadnění přístupu. Pokud jste tuto službu nevynutili dobrovolně, může se jednat o škodlivý software. Zkontrolujte prosím, zda je služba uvedená níže bezpečná k použití:</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">Důvěřujte této službě</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">Služby usnadnění</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">Seznam důvěryhodných služeb usnadňující přístup:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Nebyl detekován žádný neznámý přístupový servis.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Neznámá služba usnadnění přístupu</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Byla zjištěna neznámá služba usnadnění přístupu. Zkontrolujte prosím, zda je bezpečná k použití:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Hledej emoji</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Nedávné</string>
 </resources>

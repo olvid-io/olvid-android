@@ -50,4 +50,8 @@ public abstract class ProtocolNotifications {
     public static final String NOTIFICATION_CONTACT_INTRODUCTION_INVITATION_RESPONSE_ACCEPTED_KEY = "accepted"; // boolean
 
     public static final String NOTIFICATION_SNAPSHOT_RESTORATION_FINISHED = "protocol_manager_notification_snapshot_restoration_finished";
+
+    public static final String NOTIFICATION_OWNED_DEVICE_DISCOVERY_DONE = "protocol_manager_notification_owned_device_discovery_done";
+    public static final String NOTIFICATION_OWNED_DEVICE_DISCOVERY_DONE_OWNED_IDENTITY_KEY = "owned_identity"; // Identity
+
 }

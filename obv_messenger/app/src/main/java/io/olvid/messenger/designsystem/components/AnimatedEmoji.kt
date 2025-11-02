@@ -54,12 +54,13 @@ fun String.getEmojiAssetName() = "lottie_emoji/${
 }.zip"
 
 @Composable
-fun spInDp(value: Float): Dp = with(LocalDensity.current) { (1.175 * value * fontScale).dp }
+fun spInDp(value: Float, scaleFont: Boolean): Dp = with(LocalDensity.current) { (1.175 * value * (if (scaleFont) fontScale else 1f)).dp }
 
 @Composable
 fun AnimatedEmoji(
     modifier: Modifier = Modifier,
     size: Float = 48f,
+    scaleFont: Boolean = true,
     shortEmoji: String,
     autoPlay: Boolean = true,
     loop: Boolean = true,
@@ -94,7 +95,7 @@ fun AnimatedEmoji(
         }
         LottieAnimation(
             modifier = modifier
-                .size(spInDp(size))
+                .size(spInDp(size, scaleFont))
                 .then(
                     if (ignoreClicks)
                         Modifier

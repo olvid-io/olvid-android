@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Has sortit del grup</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Has tornat a unir-te al grup</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">T\'has unit al grup</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s t\'ha afegit a aquest grup</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s t\'ha tornat a afegir a aquest grup</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Grup gestionat per %1$s</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">S\'ha unit al grup: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">S\'ha unit al grup: %1$s</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s ha afegit %2$s al grup</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Has afegit %2$s al grup.</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s ha tret %2$s del grup</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">Has tret %2$s del grup.</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s t\'ha tret del grup</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">Has estat eliminat del grup.</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">desconegut</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Ningú</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Esborrany:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Llicència desconeguda</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Llicència vàlida</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">Llicència caducada</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">No s\'ha pogut activar la llicència</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">Compartir ID de contacte</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">Prova de funcions beta</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">Funcions premium disponibles gratuïtament</string>
@@ -1206,7 +1209,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">el teu missatge</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d reaccions a: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s va reaccionar a %2$s</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">Inserir un emoji</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Insere un emoji</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Mantén premut per afegir/eliminar dels favorits</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Informació de depuració</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Nombre de canals/dispositius:</string>
@@ -1217,7 +1220,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Grups v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">Utilitza emojis animats (si estan disponibles)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Utilitza emojis animats (si estan disponibles)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Emmagatzematge del perfil</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">Fotos</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">Vídeos</string>
@@ -1477,7 +1480,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Avançat</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Allibera tot el poder dels grups Olvid!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Administradors del grup</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Ara ets administrador del grup</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">Ara ets administrador del grup.</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Ja no ets administrador del grup</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Ara pots enviar missatges</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">Ja no pots enviar missatges aquí</string>
@@ -1855,6 +1858,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">Possibles estats del missatge</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">Per a missatges de grup</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">Altres estats</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Els rebuts de lectura són opcionals a Olvid.\nÉs possible que els teus contactes hagin triat no avisar-te quan llegeixen els teus missatges.</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">Contacte fora de línia durant un període prolongat</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">Sembla que aquest contacte no ha fet servir Olvid durant un període de temps prolongat. No podem garantir que els missatges se li entreguin correctament.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">No s\'ha detectat cap navegador</string>
@@ -2069,7 +2073,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Missatge nou</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Nou contacte</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Cara a cara</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">A distància</string>
+	<string name="new_contact_remotely" hash="-1391656952">A distància</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Escanegeu els codis QR de l\'altre</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Demana a %1$s que scanegi el teu codi.</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Codi escanejat!</string>
@@ -2095,4 +2099,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">Trucades</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Conversa fixada</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">%1$s no pot escanejar el teu codi?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">No verificat</string>
+	<string name="label_offline" state="needs_review" hash="315122527">Sense connexió</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">Com vols afegir aquest contacte?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">Servei d\'accessibilitat desconegut</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">S\'ha detectat un servei d\'accessibilitat desconegut. Si no heu habilitat voluntàriament aquest servei, podria ser un programari maliciós. Si us plau, comproveu que el servei que s\'indica a continuació sigui segur d\'utilitzar:</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">Confia en aquest servei</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">Serveis d\'accessibilitat</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">Llista de serveis d\'accessibilitat de confiança:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">No s\'ha detectat cap servei d\'accessibilitat desconegut.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Servei d\'accessibilitat desconegut</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">S\'ha detectat un servei d\'accessibilitat desconegut. Si us plau, comproveu que és segur d\'utilitzar:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Cerca un emoji</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Recents</string>
 </resources>

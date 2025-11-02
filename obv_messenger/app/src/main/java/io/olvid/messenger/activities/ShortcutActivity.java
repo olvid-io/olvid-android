@@ -343,9 +343,6 @@ public class ShortcutActivity extends LockScreenOrNotActivity {
     private static int MAX_SHORTCUTS = 5;
 
     public static void startPublishingShareTargets(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
 
         if (!SettingsActivity.exposeRecentDiscussions()) {
             // if lock screen is on, publish an empty list

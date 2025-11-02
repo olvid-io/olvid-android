@@ -196,7 +196,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
 
                 Discussion discussion = db.discussionDao().getByGroupIdentifier(groupV2.bytesOwnedIdentity, bytesGroupIdentifier);
                 if (discussion == null) {
-                    discussion = Discussion.createOrReuseGroupV2Discussion(db, group, groupWasJustCreatedByMe, createdOnOtherDevice);
+                    discussion = Discussion.createOrReuseGroupV2Discussion(db, group, groupWasJustCreatedByMe, createdOnOtherDevice, updatedBy);
                     groupWasJoinedOrRejoined = true;
 
                     if (discussion == null) {

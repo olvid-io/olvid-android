@@ -139,7 +139,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                                 Message message = db.messageDao().get(fyleMessageJoinWithStatus.messageId);
                                 if (message != null) {
                                     message.recomputeAttachmentCount(db);
-                                    db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, 0, message.imageResolutions);
+                                    db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, 0, message.imageResolutions);
                                 }
                             } else {
                                 // the file matches its metadata sha256, move the file to the Fyle directory and mark it as complete

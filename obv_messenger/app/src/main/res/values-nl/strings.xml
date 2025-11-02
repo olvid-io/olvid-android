@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Je hebt de groep verlaten</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Je bent weer bij de groep gekomen</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Je bent bij de groep gekomen</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s heeft je toegevoegd aan deze groep.</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s heeft je opnieuw aan deze groep toegevoegd.</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Groep beheerd door %1$s</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">Is toegevoegd aan de groep: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">Toegetreden tot groep: %1$s</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s heeft %2$s toegevoegd aan de groep</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Je hebt %2$s toegevoegd aan de groep.</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s heeft %2$s uit de groep verwijderd</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">Je hebt %2$s uit de groep verwijderd.</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s heeft je uit de groep verwijderd.</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">Je bent uit de groep verwijderd.</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">onbekend</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Niemand</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Concept:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Onbekende licentie</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Geldige licentie</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">Verlopen licentie</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">Kan licentie niet activeren</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">Contact-ID delen</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">Betafuncties testen</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">Premium functies gratis beschikbaar</string>
@@ -1205,7 +1208,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">je bericht</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d reacties op: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s reageerde op %2$s</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">Emoji invoegen</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Emoji invoegen</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Lang indrukken om toe te voegen/te verwijderen uit favorieten</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Debug-informatie</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Aantal kanalen/apparaten:</string>
@@ -1216,7 +1219,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Groepen v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">Gebruik geanimeerde emoji\'s (indien beschikbaar)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Gebruik geanimeerde emoji\'s (indien beschikbaar)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Opslagruimte profiel</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">Foto\'s</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">Video\'s</string>
@@ -1477,7 +1480,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Geavanceerd</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Ontketen de volledige kracht van Olvid-groepen!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Groepsbeheerders</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Je bent nu een groepsbeheerder</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">Je bent nu een groepadministrator.</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Je bent geen groepsbeheerder meer</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Je mag nu berichten plaatsen</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">Je kunt hier geen berichten meer plaatsen</string>
@@ -1855,6 +1858,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">Mogelijke berichtstatussen</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">Voor groepsberichten</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">Andere statussen</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Leesbevestigingen zijn optioneel in Olvid.\nJe contacten hebben mogelijk ervoor gekozen je niet te waarschuwen wanneer ze je berichten lezen.</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">Contact staat al lange tijd offline</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">Het lijkt erop dat dit contact Olvid al lange tijd niet meer heeft gebruikt. We kunnen niet garanderen dat berichten correct worden afgeleverd.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">Geen browser gedetecteerd</string>
@@ -2069,7 +2073,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Nieuw bericht</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Nieuw contact</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Persoonlijk</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Op afstand</string>
+	<string name="new_contact_remotely" hash="-1391656952">Op afstand</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Scan elkaars QR-codes.</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Vraag %1$s om je code te scannen.</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Code gescand!</string>
@@ -2095,4 +2099,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">Oproepen</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Vastgespeld gesprek</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">Kan %1$s uw code niet scannen?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">Niet vertrouwd</string>
+	<string name="label_offline" state="needs_review" hash="315122527">Offline</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">Hoe wil je dit contact toevoegen?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">Onbekende toegankelijkheidsservice</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">Er is een onbekende toegankelijkheidsservice gedetecteerd. Als u deze service niet bewust hebt ingeschakeld, kan het om schadelijke software gaan. Controleer of de onderstaande service veilig te gebruiken is.</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">Vertrouw deze dienst</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">Toegankelijkheidsservices</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">Lijst van vertrouwde toegankelijkheidsservices:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Er is geen onbekende toegankelijkheidsservice gedetecteerd.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Onbekende toegankelijkheidsservice</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Een onbekende toegankelijkheidsservice is gedetecteerd. Controleer of deze veilig te gebruiken is:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Zoek een emoji</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Recent</string>
 </resources>

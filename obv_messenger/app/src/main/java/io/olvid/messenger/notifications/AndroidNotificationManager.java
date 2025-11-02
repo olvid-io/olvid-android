@@ -184,7 +184,7 @@ public class AndroidNotificationManager {
                 NotificationManager.IMPORTANCE_HIGH);
         webrtcCallServiceChannel.setDescription(App.getContext().getString(R.string.notification_channel_webrtc_call_service_description));
         webrtcCallServiceChannel.setShowBadge(false);
-        webrtcCallServiceChannel.enableVibration(false);
+        webrtcCallServiceChannel.enableVibration(true);
         webrtcCallServiceChannel.enableLights(false);
         webrtcCallServiceChannel.setSound(null, null);
         webrtcCallServiceChannel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
@@ -618,15 +618,13 @@ public class AndroidNotificationManager {
 
     public static void clearAllMissedCallNotifications() {
         executor.execute(() -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                NotificationManager notificationManager = (NotificationManager) App.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-                if (notificationManager == null) {
-                    return;
-                }
-                for (StatusBarNotification notification : notificationManager.getActiveNotifications()) {
-                    if ((notification.getId() & 0xff000000) == 0x4000000) {
-                        notificationManager.cancel(notification.getId());
-                    }
+            NotificationManager notificationManager = (NotificationManager) App.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager == null) {
+                return;
+            }
+            for (StatusBarNotification notification : notificationManager.getActiveNotifications()) {
+                if ((notification.getId() & 0xff000000) == 0x4000000) {
+                    notificationManager.cancel(notification.getId());
                 }
             }
         });
@@ -901,9 +899,9 @@ public class AndroidNotificationManager {
                 if (ownedIdentity != null && message.isIdentityMentioned(ownedIdentity.bytesOwnedIdentity)) {
                     title = App.getContext().getString(R.string.notification_title_user_has_mentioned_you, title);
                 }
-                discussionNotification.messageNotifications.add(new JsonPojoDiscussionNotification.JsonPojoMessageNotification(message.id, (long) message.sortIndex, title, contact.getCustomPhotoUrl(), contact.bytesContactIdentity, message.getStringContent(App.getContext())));
+                discussionNotification.messageNotifications.add(new JsonPojoDiscussionNotification.JsonPojoMessageNotification(message.id, (long) message.sortIndex, title, contact.getCustomPhotoUrl(), contact.bytesContactIdentity, message.getStringContent(App.getContext(), true)));
             } else {
-                discussionNotification.messageNotifications.add(new JsonPojoDiscussionNotification.JsonPojoMessageNotification(message.id, (long) message.sortIndex, null, null, null, message.getStringContent(App.getContext())));
+                discussionNotification.messageNotifications.add(new JsonPojoDiscussionNotification.JsonPojoMessageNotification(message.id, (long) message.sortIndex, null, null, null, message.getStringContent(App.getContext(), true)));
             }
             saveDiscussionNotification(discussion.id, discussionNotification);
         }

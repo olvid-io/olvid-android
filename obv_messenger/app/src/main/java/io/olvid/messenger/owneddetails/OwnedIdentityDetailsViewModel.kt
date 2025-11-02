@@ -52,70 +52,13 @@ class OwnedIdentityDetailsViewModel : ViewModel() {
     var firstName: String? = null
         set(value) {
             field = value
-            if (absolutePhotoUrl == null && nickname?.trim().isNullOrEmpty()) {
-                if (firstName.isNullOrEmpty().not()) {
-                    val newInitial = StringUtils.getInitial(firstName?.trim())
-                    val oldInitial = this.firstName?.trim()?.takeIf { it.isNotEmpty() }
-                        ?.let { StringUtils.getInitial(it) }
-                    if (newInitial != oldInitial) {
-                        initialViewContent.postValue(
-                            InitialViewContent(
-                                _bytesOwnedIdentity,
-                                newInitial,
-                                null
-                            )
-                        )
-                    }
-                } else if (this.firstName?.trim().isNullOrEmpty().not()) {
-                    if (lastName != null && lastName!!.trim().isNotEmpty()) {
-                        initialViewContent.postValue(
-                            InitialViewContent(
-                                _bytesOwnedIdentity,
-                                StringUtils.getInitial(
-                                    lastName!!.trim()
-                                ),
-                                null
-                            )
-                        )
-                    } else {
-                        initialViewContent.postValue(
-                            InitialViewContent(
-                                _bytesOwnedIdentity,
-                                " ",
-                                null
-                            )
-                        )
-                    }
-                }
-            }
+            refreshInitialView()
             checkValid()
         }
     var lastName: String? = null
         set(value) {
             field = value
-            if (absolutePhotoUrl == null && (firstName == null || firstName!!.trim()
-                    .isEmpty())
-            ) {
-                if (lastName?.trim().isNullOrEmpty().not()) {
-                    val newInitial = StringUtils.getInitial(lastName?.trim())
-                    val oldInitial = if ((this.lastName == null || this.lastName!!.trim()
-                            .isEmpty())
-                    ) null else StringUtils.getInitial(
-                        this.lastName!!.trim()
-                    )
-                    if (newInitial != oldInitial) {
-                        initialViewContent.postValue(
-                            InitialViewContent(
-                                _bytesOwnedIdentity,
-                                newInitial,
-                                null
-                            )
-                        )
-                    }
-                } else if (this.lastName?.trim().isNullOrEmpty().not()) {
-                    initialViewContent.postValue(InitialViewContent(_bytesOwnedIdentity, " ", null))
-                }
-            }
+            refreshInitialView()
             checkValid()
         }
     var company: String? = null
@@ -130,28 +73,15 @@ class OwnedIdentityDetailsViewModel : ViewModel() {
         }
     var nickname: String? = null
         get() = nullOrTrim(field)
-        set(value) { field = value
-            if (this.absolutePhotoUrl == null) {
-                val name =
-                    nickname?.trim().orEmpty() + firstName?.trim().orEmpty() + lastName?.trim()
-                        .orEmpty()
-                if (name.isNotEmpty()) {
-                    initialViewContent.postValue(
-                        InitialViewContent(
-                            _bytesOwnedIdentity,
-                            StringUtils.getInitial(name),
-                            null
-                        )
-                    )
-                } else {
-                    initialViewContent.postValue(InitialViewContent(_bytesOwnedIdentity, " ", null))
-                }
-            }
+        set(value) {
+            field = value
+            refreshInitialView()
         }
+
     var isProfileHidden = false
         set(value) {
             field = value
-            if (!isProfileHidden) {
+            if (!value) {
                 password = null
                 salt = null
             }
@@ -165,32 +95,34 @@ class OwnedIdentityDetailsViewModel : ViewModel() {
     var absolutePhotoUrl: String? = null // absolute path
         set(value) {
             field = value
-            if (absolutePhotoUrl != null) {
+            refreshInitialView()
+            checkValid()
+        }
+
+    private fun refreshInitialView() {
+        if (absolutePhotoUrl != null) {
+            initialViewContent.postValue(
+                InitialViewContent(
+                    _bytesOwnedIdentity,
+                    null,
+                    absolutePhotoUrl
+                )
+            )
+        } else {
+            val name = nickname?.trim().takeUnless { it.isNullOrEmpty() } ?: firstName?.trim()?.trim().takeUnless { it.isNullOrEmpty() } ?: lastName?.trim().takeUnless { it.isNullOrEmpty() }
+            if (name.isNullOrEmpty()) {
+                initialViewContent.postValue(InitialViewContent(_bytesOwnedIdentity, " ", null))
+            } else {
                 initialViewContent.postValue(
                     InitialViewContent(
                         _bytesOwnedIdentity,
-                        null,
-                        absolutePhotoUrl
+                        StringUtils.getInitial(name),
+                        null
                     )
                 )
-            } else if (this.absolutePhotoUrl != null) {
-                val name =
-                    nickname?.trim().orEmpty() + firstName?.trim().orEmpty() + lastName?.trim()
-                        .orEmpty()
-                if (name.isNotEmpty()) {
-                    initialViewContent.postValue(
-                        InitialViewContent(
-                            _bytesOwnedIdentity,
-                            StringUtils.getInitial(name),
-                            null
-                        )
-                    )
-                } else {
-                    initialViewContent.postValue(InitialViewContent(_bytesOwnedIdentity, " ", null))
-                }
             }
-            checkValid()
         }
+    }
 
     var takePictureUri: Uri? = null
     var pictureLocked: Boolean = false

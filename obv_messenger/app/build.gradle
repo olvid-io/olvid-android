@@ -24,10 +24,10 @@ android {
     defaultConfig {
         manifestPlaceholders
         applicationId "io.olvid.messenger"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdk 36
-        versionCode 277
-        versionName "4.0.1"
+        versionCode 278
+        versionName "4.1"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr', 'af', 'ar', 'ca', 'cs', 'da', 'de', 'el', 'es', 'fa', 'fi', 'hi', 'hr', 'hu', 'it', 'iw', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-rBR', 'ro', 'ru', 'sk', 'sl', 'sv', 'tr', 'uk', 'vi', 'zh', 'zh-rTW']
@@ -149,15 +149,17 @@ dependencies {
 
     implementation 'androidx.core:core-ktx:1.17.0'
 
-    def composeBom = platform 'androidx.compose:compose-bom:2025.08.01'
+    def composeBom = platform 'androidx.compose:compose-bom:2025.10.00'
     implementation composeBom
     implementation 'androidx.compose.material:material'
+    implementation 'androidx.compose.material:material-icons-core'
     implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.animation:animation'
     implementation 'androidx.compose.animation:animation-graphics'
     implementation 'androidx.compose.runtime:runtime-livedata'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.ui:ui'
-    final def lifecycle_version = '2.9.3'
+    final def lifecycle_version = '2.9.4'
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version"
@@ -166,6 +168,8 @@ dependencies {
     final def accompanist_version = '0.37.3'
     implementation "com.google.accompanist:accompanist-permissions:$accompanist_version"
     implementation 'sh.calvin.reorderable:reorderable:3.0.0'
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
+    implementation 'androidx.documentfile:documentfile:1.1.0'
 
     final def coil_version = '2.7.0'
     implementation "io.coil-kt:coil-compose:$coil_version"
@@ -180,11 +184,13 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4'
 
     implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'androidx.emoji2:emoji2:1.6.0-rc01'
-    implementation 'androidx.emoji2:emoji2-bundled:1.6.0-rc01'
+    implementation 'androidx.emoji2:emoji2:1.6.0'
+    implementation 'androidx.emoji2:emoji2-bundled:1.6.0'
+    implementation 'androidx.emoji2:emoji2-emojipicker:1.6.0'
     implementation 'androidx.activity:activity-ktx:1.11.0'
     implementation 'androidx.biometric:biometric:1.1.0'
-    final def camera_version = '1.4.2'
+
+    final def camera_version = '1.5.1'
     implementation "androidx.camera:camera-camera2:$camera_version"
     implementation "androidx.camera:camera-lifecycle:$camera_version"
     implementation "androidx.camera:camera-view:$camera_version"
@@ -201,7 +207,7 @@ dependencies {
     implementation "androidx.media3:media3-exoplayer:$media3_version"
     implementation "androidx.media3:media3-ui:$media3_version"
     implementation 'androidx.media:media:1.7.1'
-    final def navigation_version = '2.9.4'
+    final def navigation_version = '2.9.5'
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-compose:$navigation_version"
@@ -209,13 +215,14 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation "androidx.room:room-runtime:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
-    implementation 'net.zetetic:sqlcipher-android:4.8.0@aar'
+    implementation 'net.zetetic:sqlcipher-android:4.11.0@aar'
     implementation 'androidx.sharetarget:sharetarget:1.2.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'androidx.work:work-runtime:2.10.4'
+    // upgrading to 2.11.0 upgrades room to 2.7.0 which breaks paging in discussion
+    implementation 'androidx.work:work-runtime:2.10.5'
     implementation 'androidx.datastore:datastore-preferences:1.1.7'
     implementation 'androidx.security:security-crypto-ktx:1.1.0'
-    implementation 'com.airbnb.android:lottie-compose:6.6.9'
+    implementation 'com.airbnb.android:lottie-compose:6.6.10'
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
     implementation 'org.jsoup:jsoup:1.21.2'
@@ -234,10 +241,10 @@ dependencies {
     implementation 'org.bitbucket.b_c:jose4j:0.9.6'
 
     // map libre integration
-    implementation 'org.maplibre.gl:android-sdk:11.13.5'
+    implementation 'org.maplibre.gl:android-sdk:12.0.1'
     implementation 'org.maplibre.gl:android-plugin-annotation-v9:3.0.2'
 
-    final def commonmark_version = '0.26.0'
+    final def commonmark_version = '0.27.0'
     implementation "org.commonmark:commonmark:$commonmark_version"
     implementation "org.commonmark:commonmark-ext-gfm-strikethrough:$commonmark_version"
 
@@ -249,8 +256,7 @@ dependencies {
     fullImplementation 'com.android.billingclient:billing:8.0.0'
 
     // Firebase
-    // starting with firebase-messaging:25.0.0, API level 23 is required...
-    fullImplementation('com.google.firebase:firebase-messaging:24.1.2') {
+    fullImplementation('com.google.firebase:firebase-messaging:25.0.1') {
         exclude group: 'com.google.firebase', module: 'firebase-core'
         exclude group: 'com.google.firebase', module: 'firebase-analytics'
         exclude group: 'com.google.firebase', module: 'firebase-measurement-connector'
@@ -274,7 +280,7 @@ dependencies {
     fullImplementation('com.google.android.play:review-ktx:2.0.2')
 
     // opensource license page
-    fullImplementation 'com.google.android.gms:play-services-oss-licenses:17.2.2'
+    fullImplementation 'com.google.android.gms:play-services-oss-licenses:17.3.0'
 
     // ML kit
     fullImplementation 'com.google.mlkit:barcode-scanning:17.3.0'

@@ -68,16 +68,26 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.designsystem.components.SelectionTopAppBar
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
+import io.olvid.messenger.discussion.message.OutboundMessageStatus
 import io.olvid.messenger.discussion.message.SwipeForActionBox
+import io.olvid.messenger.discussion.message.attachments.scaledDp
+import io.olvid.messenger.discussion.message.getOutboundStatusIcon
+import io.olvid.messenger.discussion.message.getOutboundStatusIconAspectRation
 import io.olvid.messenger.main.MainScreenEmptyList
 import io.olvid.messenger.main.archived.SwipeActionBackground
-import io.olvid.messenger.main.search.SearchResult
+import io.olvid.messenger.main.discussions.DiscussionListItem
+import io.olvid.messenger.main.discussions.getAnnotatedBody
+import io.olvid.messenger.main.discussions.getAnnotatedDate
+import io.olvid.messenger.main.discussions.getAnnotatedTitle
+import io.olvid.messenger.main.search.goto
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -141,9 +151,9 @@ class BookmarkedMessagesActivity : LockableActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(
-                            start = contentPadding.calculateStartPadding(layoutDirection),
+//                            start = contentPadding.calculateStartPadding(layoutDirection),
                             top = contentPadding.calculateTopPadding(),
-                            end = contentPadding.calculateEndPadding(layoutDirection),
+//                            end = contentPadding.calculateEndPadding(layoutDirection),
                             bottom = 0.dp,
                         )
                 ) {
@@ -213,39 +223,73 @@ class BookmarkedMessagesActivity : LockableActivity() {
                                     },
                                     backgroundContentFromEndToStart = { progress ->
                                         SwipeActionBackground(
+                                            modifier = Modifier.padding(start = contentPadding.calculateStartPadding(layoutDirection)),
                                             label = stringResource(
                                                 R.string.menu_action_unbookmark
                                             ),
                                             icon = R.drawable.ic_star_off,
                                             progress = progress,
-                                            fromStartToEnd = false
+                                            fromStartToEnd = false,
+                                            additionalIconPadding = contentPadding.calculateEndPadding(layoutDirection)
                                         )
                                     },
                                     backgroundContentFromStartToEnd = { progress ->
                                         SwipeActionBackground(
+                                            modifier = Modifier.padding(end = contentPadding.calculateEndPadding(layoutDirection)),
                                             label = stringResource(
                                                 R.string.menu_action_unbookmark
                                             ),
                                             icon = R.drawable.ic_star_off,
                                             progress = progress,
-                                            fromStartToEnd = true
+                                            fromStartToEnd = true,
+                                            additionalIconPadding = contentPadding.calculateStartPadding(layoutDirection)
                                         )
                                     }) {
-                                    SearchResult(
+                                    DiscussionListItem(
                                         modifier = Modifier
+                                            .cutoutHorizontalPadding()
+                                            .systemBarsHorizontalPadding()
                                             .background(
                                                 shape = RoundedCornerShape(8.dp),
                                                 color = colorResource(R.color.almostWhite)
-                                            )
-                                            .cutoutHorizontalPadding(),
-                                        discussionAndMessage = discussionAndMessage,
+                                            ),
                                         selected = bookmarksViewModel.selection.contains(
                                             discussionAndMessage.message
                                         ),
-                                        onClick = if (bookmarksViewModel.selection.isEmpty()) {
-                                            null
-                                        } else {
-                                            {
+                                        title = discussionAndMessage.discussion.getAnnotatedTitle(
+                                            context
+                                        ),
+                                        body = discussionAndMessage.discussion.getAnnotatedBody(
+                                            context,
+                                            discussionAndMessage.message
+                                        ),
+                                        date = discussionAndMessage.discussion.getAnnotatedDate(
+                                            context,
+                                            discussionAndMessage.message
+                                        ),
+                                        initialViewSetup = { initialView ->
+                                            initialView.setDiscussion(discussionAndMessage.discussion)
+                                        },
+                                        unread = discussionAndMessage.discussion.unread,
+                                        unreadCount = 0,
+                                        muted = false,
+                                        locked = false,
+                                        mentioned = false,
+                                        pinned = discussionAndMessage.discussion.pinned != 0,
+                                        reorderableScope = null,
+                                        locationsShared = false,
+                                        pendingContact = false,
+                                        attachmentCount = if (discussionAndMessage.message?.isLocationMessage == true) 0 else discussionAndMessage.message?.totalAttachmentCount
+                                            ?: 0,
+                                        imageAndVideoCount = if (discussionAndMessage.message?.isLocationMessage == true) 0 else discussionAndMessage.message?.imageCount
+                                            ?: 0,
+                                        videoCount = discussionAndMessage.message?.videoCount ?: 0,
+                                        audioCount = discussionAndMessage.message?.audioCount ?: 0,
+                                        firstFileName = discussionAndMessage.message?.firstAttachmentName,
+                                        onClick = {
+                                            if (bookmarksViewModel.selection.isEmpty()) {
+                                                discussionAndMessage.message?.goto(context)
+                                            } else {
                                                 bookmarksViewModel.toggleSelection(
                                                     discussionAndMessage.message
                                                 )
@@ -264,7 +308,22 @@ class BookmarkedMessagesActivity : LockableActivity() {
                                                     discussionAndMessage.message
                                                 )
                                             }
-                                        }
+                                        },
+                                        onDragStopped = { },
+                                        lastOutboundMessageStatus = discussionAndMessage.message?.takeIf {it.getOutboundStatusIcon() != null}?.let { lastMessage ->
+                                            {
+                                                OutboundMessageStatus(
+                                                    modifier = Modifier.padding(
+                                                        end = scaledDp(4)
+                                                    ),
+                                                    size = scaledDp(14),
+                                                    message = lastMessage
+                                                )
+                                            }
+                                        },
+                                        lastOutboundMessageStatusWidth = discussionAndMessage.message?.takeIf {it.getOutboundStatusIcon() != null}?.let { lastMessage ->
+                                            (14 * lastMessage.getOutboundStatusIconAspectRation() + 4).sp
+                                        } ?: 0.sp
                                     )
                                 }
                             }

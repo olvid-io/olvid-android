@@ -62,6 +62,7 @@ class OutgoingCallRinger(private val context: Context) {
                     .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING)
                     .build()
             )
+            mediaPlayer?.setVolume(.5f, .5f)
         } catch (e: IOException) {
             e.printStackTrace()
             Logger.w("☎ Error initializing media player for outgoing call ringing")

@@ -356,9 +356,9 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                                 ?: 0,
                                             imageAndVideoCount = if (discussionAndMessage.message?.isLocationMessage == true) 0 else discussionAndMessage.message?.imageCount
                                                 ?: 0,
-                                            videoCount = if (discussionAndMessage.message?.isLocationMessage == true) 0 else discussionAndMessage.message?.imageResolutions?.let {
-                                                it.split(";").count { it.startsWith("v") }
-                                            } ?: 0,
+                                            videoCount = discussionAndMessage.message?.videoCount ?: 0,
+                                            audioCount = discussionAndMessage.message?.audioCount ?: 0,
+                                            firstFileName = discussionAndMessage.message?.firstAttachmentName,
                                             onClick = {
                                                 if (discussionListViewModel.selection.isEmpty()) {
                                                     App.openDiscussionActivity(

@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
@@ -103,6 +104,8 @@ fun DiscussionListItem(
     attachmentCount: Int,
     imageAndVideoCount: Int,
     videoCount: Int,
+    audioCount: Int,
+    firstFileName: String?,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     selected: Boolean = false,
@@ -257,7 +260,7 @@ fun DiscussionListItem(
 
                 // Message content
                 Row(
-                    modifier = Modifier.heightIn(min = 34.dp),
+                    modifier = Modifier.heightIn(min = scaledDp(34)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
@@ -300,9 +303,26 @@ fun DiscussionListItem(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 if (body.isEmpty()) {
-                                    lastOutboundMessageStatus?.invoke()
+                                    LastMessageAttachments(
+                                        fileCount = attachmentCount - imageAndVideoCount - audioCount,
+                                        imageCount = imageAndVideoCount - videoCount,
+                                        videoCount = videoCount,
+                                        audioCount = audioCount,
+                                        firstFileName = firstFileName,
+                                        useTwoLines = body.isEmpty(),
+                                        lastOutboundMessageStatus = lastOutboundMessageStatus,
+                                        lastOutboundMessageStatusWidth = lastOutboundMessageStatusWidth,
+                                    )
+                                } else {
+                                    LastMessageAttachments(
+                                        fileCount = attachmentCount - imageAndVideoCount - audioCount,
+                                        imageCount = imageAndVideoCount - videoCount,
+                                        videoCount = videoCount,
+                                        audioCount = audioCount,
+                                        firstFileName = firstFileName,
+                                        useTwoLines = body.isEmpty(),
+                                    )
                                 }
-                                LastMessageAttachments(attachmentCount - imageAndVideoCount, imageAndVideoCount - videoCount, videoCount)
                             }
                         }
                     }
@@ -362,8 +382,23 @@ val inlineMap: Map<String, InlineTextContent> by lazy {
             ),
             children = {
                 Icon(
-                    modifier = Modifier.fillMaxSize().padding(end = scaledDp(4)),
+                    modifier = Modifier.fillMaxSize().padding(end = scaledDp(4)).offset(y = scaledDp(-1)),
                     painter = painterResource(R.drawable.attachment_file),
+                    contentDescription = null,
+                    tint = colorResource(R.color.greyTint),
+                )
+            }
+        ),
+        "audio" to InlineTextContent(
+            placeholder = Placeholder(
+                width = 16.sp,
+                height = 16.sp,
+                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+            ),
+            children = {
+                Icon(
+                    modifier = Modifier.fillMaxSize().padding(end = scaledDp(4)),
+                    painter = painterResource(R.drawable.attachment_audio),
                     contentDescription = null,
                     tint = colorResource(R.color.greyTint),
                 )
@@ -408,25 +443,63 @@ fun LastMessageAttachments(
     fileCount: Int,
     imageCount: Int,
     videoCount: Int,
+    audioCount: Int,
+    firstFileName: String?,
+    useTwoLines: Boolean,
+    lastOutboundMessageStatus: @Composable (() -> Unit)? = null,
+    lastOutboundMessageStatusWidth: TextUnit = 0.sp,
 ) {
-
+    val localInlineMap = inlineMap.toMutableMap()
     val text = buildAnnotatedString {
+        lastOutboundMessageStatus?.let { status ->
+            localInlineMap["status_tag"] = InlineTextContent(
+                placeholder = Placeholder(
+                    width = lastOutboundMessageStatusWidth,
+                    height = 14.sp,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                ),
+                children = {
+                    status.invoke()
+                }
+            )
+            appendInlineContent("status_tag", "status")
+        }
+
         if (fileCount > 0) {
             appendInlineContent("file", "file")
-            append(pluralStringResource(R.plurals.text_files, fileCount, fileCount))
+            append("\u2060")
+            if (firstFileName != null) {
+                append(firstFileName)
+                if (fileCount > 1) {
+                    append(stringResource(R.string.attachments_files_joiner))
+                    append(pluralStringResource(R.plurals.text_others, fileCount - 1, fileCount - 1))
+                }
+            } else {
+                append(pluralStringResource(R.plurals.text_files, fileCount, fileCount))
+            }
         }
-        if (imageCount > 0) {
+        if (audioCount > 0) {
             if (fileCount > 0) {
                 append(stringResource(R.string.attachments_joiner))
             }
+            appendInlineContent("audio", "audio")
+            append("\u2060")
+            append(pluralStringResource(R.plurals.text_audios, audioCount, audioCount))
+        }
+        if (imageCount > 0) {
+            if (fileCount > 0 || audioCount > 0) {
+                append(stringResource(R.string.attachments_joiner))
+            }
             appendInlineContent("image", "photo")
+            append("\u2060")
             append(pluralStringResource(R.plurals.text_images, imageCount, imageCount))
         }
         if (videoCount > 0) {
-            if (fileCount > 0 || imageCount > 0) {
+            if (fileCount > 0  || audioCount > 0|| imageCount > 0) {
                 append(stringResource(R.string.attachments_joiner))
             }
             appendInlineContent("video", "video")
+            append("\u2060")
             append(pluralStringResource(R.plurals.text_videos, videoCount, videoCount))
         }
     }
@@ -434,9 +507,9 @@ fun LastMessageAttachments(
         text = text,
         color = colorResource(id = R.color.greyTint),
         style = OlvidTypography.body2,
-        maxLines = 1,
+        maxLines = if (useTwoLines) 2 else 1,
         overflow = TextOverflow.Ellipsis,
-        inlineContent = inlineMap,
+        inlineContent = localInlineMap,
     )
 }
 
@@ -474,6 +547,8 @@ private fun DiscussionListItemPreview() {
                     attachmentCount = 0,
                     imageAndVideoCount =  0,
                     videoCount = 0,
+                    audioCount = 0,
+                    firstFileName = null,
                     onClick = {},
                     onLongClick = {},
                     selected = true,
@@ -506,6 +581,8 @@ private fun DiscussionListItemPreview() {
                     attachmentCount = 0,
                     imageAndVideoCount =  0,
                     videoCount = 0,
+                    audioCount = 0,
+                    firstFileName = null,
                     onClick = {},
                     onLongClick = {},
                     selected = true,
@@ -522,7 +599,7 @@ private fun DiscussionListItemPreview() {
                 DiscussionListItem(
                     modifier = Modifier.background(colorResource(R.color.almostWhite)),
                     title = AnnotatedString("Discussion Title"),
-                    body = AnnotatedString("Latest message content wrapping on 2 lines"),
+                    body = AnnotatedString(""),
                     date = AnnotatedString(StringUtils.getCompactDateString(LocalContext.current, 1724654987654)),
                     initialViewSetup = {},
                     unread = false,
@@ -535,7 +612,9 @@ private fun DiscussionListItemPreview() {
                     pendingContact = false,
                     attachmentCount = 4,
                     imageAndVideoCount =  2,
-                    videoCount = 1,
+                    videoCount = 0,
+                    audioCount = 1,
+                    firstFileName = "Business PLan.xlsx",
                     onClick = {},
                     onLongClick = {},
                     selected = true,

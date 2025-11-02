@@ -42,19 +42,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 
 @Composable
 fun SwipeActionBackground(
+    modifier: Modifier = Modifier,
     label: String,
     @DrawableRes icon: Int,
     @ColorRes backgroundColor: Int = R.color.olvid_gradient_dark,
     progress: Float,
-    fromStartToEnd: Boolean = true
+    fromStartToEnd: Boolean = true,
+    additionalIconPadding: Dp = 0.dp,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(
                 colorResource(backgroundColor).copy(
@@ -65,7 +68,7 @@ fun SwipeActionBackground(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (fromStartToEnd) {
-            Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(20.dp + additionalIconPadding))
         }
         Icon(
             modifier = Modifier
@@ -75,7 +78,7 @@ fun SwipeActionBackground(
             contentDescription = label
         )
         if (!fromStartToEnd) {
-            Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(20.dp + additionalIconPadding))
         }
     }
 }

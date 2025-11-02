@@ -8,13 +8,13 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.13.0'
-        classpath 'androidx.navigation:navigation-safe-args-gradle-plugin:2.9.3'
-        classpath 'com.google.android.gms:oss-licenses-plugin:0.10.8'
+        classpath 'androidx.navigation:navigation-safe-args-gradle-plugin:2.9.5'
+        classpath 'com.google.android.gms:oss-licenses-plugin:0.10.9'
 
         // protobuf plugin for Web Client
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.5'
 
-        classpath 'com.google.gms:google-services:4.4.3'
+        classpath 'com.google.gms:google-services:4.4.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }

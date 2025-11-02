@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">شما از گروه خارج شدید</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">به گروه بازگشتید</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">به گروه پیوستید</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s شما را به این گروه اضافه کرد</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s شما را دوباره به این گروه اضافه کرد</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">گروه مدیریت شده توسط %1$s</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">به گروه %1$s پیوست</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">به گروه %1$s پیوست</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s، %2$s را به گروه اضافه کرد.</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">شما %2$s را به گروه اضافه کردید</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s، %2$s را از گروه حذف کرد.</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">شما %2$s را از گروه حذف کردید</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s شما را از گروه حذف کرد</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">از گروه حذف شدید</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">نامشخص</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">هیچ‌کس</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">پیش‌نویس:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">مجوز ناشناخته</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">مجوز معتبر</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">مجوز منقضی شده</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">فعال‌سازی مجوز امکان‌پذیر نیست</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">شناسه مخاطب را به اشتراک بگذارید</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">آزمایش ویژگی‌های بتا</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">ویژگی‌های پریمیوم به صورت رایگان در دسترس است</string>
@@ -1206,7 +1209,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">پیام شما</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">‏%1$d واکنش به: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s به %2$s واکنش نشان داد</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">یک ایموجی وارد کنید</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">یک ایموجی وارد کنید</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">برای افزودن یا حذف از علاقه‌مندی‌ها، طولانی فشار دهید</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">اطلاعات اشکال‌زدایی</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">تعداد کانال‌ها/دستگاه‌ها:</string>
@@ -1217,7 +1220,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">گروه‌ها v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">از ایموجی‌های متحرک استفاده کنید (در صورت وجود)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">از ایموجی‌های متحرک استفاده کنید (در صورت وجود)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">فضای ذخیره‌سازی پروفایل</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">عکس‌ها</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">ویدیوها</string>
@@ -1478,7 +1481,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">پیشرفته</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">قدرت کامل گروه‌های Olvid را آزاد کنید!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">مدیران گروه</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">شما اکنون مدیر این گروه هستید</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">شما اکنون مدیر این گروه هستید</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">دیگر مدیر این گروه نیستید</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">اکنون مجاز به ارسال پیام هستید</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">دیگر نمی‌توانید در اینجا پیام ارسال کنید</string>
@@ -1856,6 +1859,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">وضعیت‌های ممکن پیام</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">برای پیام‌های گروهی</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">وضعیت‌های دیگر</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">در Olvid، رسید خواندن پیام‌ها اختیاری است.\nممکن است مخاطبان شما انتخاب کرده باشند که به شما اطلاع ندهند وقتی پیام‌های شما را می‌خوانند.</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">تماس برای مدت طولانی قطع است</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">به نظر می‌رسد این مخاطب مدتی است از Olvid استفاده نکرده است. ما نمی‌توانیم تضمین کنیم پیام‌های شما به درستی به او ارسال شوند.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">مرورگر شناسایی نشد</string>
@@ -2071,7 +2075,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">پیام جدید</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">تماس جدید</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">رو در رو</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">از راه دور</string>
+	<string name="new_contact_remotely" hash="-1391656952">از راه دور</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">کدهای QR یکدیگر را اسکن کنید</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">از %1$s بخواهید کد شما را اسکن کند</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">کد اسکن شد!</string>
@@ -2097,4 +2101,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">تماس‌ها</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">گفتگوی سنجاق‌شده</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">آیا %1$s نمی‌تواند کد شما را اسکن کند؟</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">تایید نشده</string>
+	<string name="label_offline" state="needs_review" hash="315122527">آفلاین</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">چگونه می‌خواهید این مخاطب را اضافه کنید؟</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">سرویس دسترسی ناشناخته</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">یک سرویس دسترسی ناشناس شناسایی شد. اگر به طور داوطلبانه چنین سرویسی را فعال نکرده‌اید، ممکن است یک نرم‌افزار مخرب باشد. لطفاً بررسی کنید که آیا سرویس ذکر شده در زیر برای استفاده ایمن است:</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">به این سرویس اعتماد کنید</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">خدمات دسترسی‌پذیری</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">فهرست سرویس‌های دسترسی معتبر:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">هیچ سرویس دسترسی ناشناخته‌ای یافت نشد.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">سرویس دسترسی ناشناخته</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">یک سرویس دسترسی ناشناس شناسایی شد، لطفاً بررسی کنید که استفاده از آن ایمن است:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">جستجوی ایموجی</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">آخرین‌ها</string>
 </resources>

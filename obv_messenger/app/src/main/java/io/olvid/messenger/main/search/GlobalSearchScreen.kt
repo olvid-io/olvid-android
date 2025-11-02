@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,11 +47,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.DropdownMenu
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.Text
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -86,6 +86,8 @@ import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.dao.MessageDao.DiscussionAndMessage
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Message
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.plus
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
@@ -551,6 +553,8 @@ fun SearchResult(
             .height(Min)
             .fillMaxWidth()
             .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
                 onClick = {
                     onClick?.let {
                         onClick()
@@ -599,10 +603,10 @@ fun SearchResult(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // contextual menu
-        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+        OlvidDropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
             menuItems?.forEach {
-                DropdownMenuItem(
-                    text = { Text(text = it.first) },
+                OlvidDropdownMenuItem(
+                    text = it.first,
                     onClick = {
                         it.second()
                         menuExpanded = false
@@ -687,8 +691,8 @@ fun SearchResult(
                     context,
                     discussionAndMessage.message.apply {
                         contentBody = globalSearchViewModel?.truncateMessageBody(
-                            body = getStringContent(context)
-                        ) ?: getStringContent(context)
+                            body = getStringContent(context, true)
+                        ) ?: getStringContent(context, true)
                     }))?.let {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     discussionAndMessage?.message?.let { lastMessage ->

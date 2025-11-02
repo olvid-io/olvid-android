@@ -157,17 +157,15 @@ class IncomingCallRinger(private val context: Context) {
         }
 
         // flash
-        if (VERSION.SDK_INT >= VERSION_CODES.M) {
-            for (thread in cameraIdsFlashThreads.values) {
-                thread.interrupt()
-            }
-            cameraIdsFlashThreads.clear()
-            if (useFlash) {
-                for (cameraId in cameraIdsToFlash) {
-                    val cameraFlashThread = CameraFlashThread(cameraId)
-                    cameraFlashThread.start()
-                    cameraIdsFlashThreads[cameraId] = cameraFlashThread
-                }
+        for (thread in cameraIdsFlashThreads.values) {
+            thread.interrupt()
+        }
+        cameraIdsFlashThreads.clear()
+        if (useFlash) {
+            for (cameraId in cameraIdsToFlash) {
+                val cameraFlashThread = CameraFlashThread(cameraId)
+                cameraFlashThread.start()
+                cameraIdsFlashThreads[cameraId] = cameraFlashThread
             }
         }
     }
@@ -181,14 +179,10 @@ class IncomingCallRinger(private val context: Context) {
     }
 
     private fun cleanup() {
-        if (mediaPlayer != null) {
-            mediaPlayer!!.release()
-            mediaPlayer = null
-        }
-        if (mediaSession != null) {
-            mediaSession!!.release()
-            mediaSession = null
-        }
+        mediaPlayer?.release()
+        mediaPlayer = null
+        mediaSession?.release()
+        mediaSession = null
     }
 
     @RequiresApi(api = VERSION_CODES.M)
@@ -226,8 +220,8 @@ class IncomingCallRinger(private val context: Context) {
 
         private fun torch(enabled: Boolean) {
             try {
-                cameraManager!!.setTorchMode(cameraId, enabled)
-            } catch (e: CameraAccessException) {
+                cameraManager?.setTorchMode(cameraId, enabled)
+            } catch (_: CameraAccessException) {
                 // Nothing special to do here
             }
         }

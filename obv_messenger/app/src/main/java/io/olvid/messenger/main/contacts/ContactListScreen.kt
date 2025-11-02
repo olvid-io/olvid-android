@@ -311,7 +311,7 @@ fun ContactListScreen(
                                         contentPadding = WindowInsets.safeDrawing
                                             .only(WindowInsetsSides.Bottom)
                                             .asPaddingValues(LocalDensity.current)
-                                                + if (addPlusButtonBottomPadding) PaddingValues(bottom = 80.dp + dimensionResource(R.dimen.tab_bar_size)) else PaddingValues(),
+                                                + if (addPlusButtonBottomPadding) PaddingValues(bottom = 80.dp + dimensionResource(R.dimen.tab_bar_size)) else PaddingValues(bottom = 16.dp),
                                     ) {
                                         sortedGrouped.forEach { (initial, list) ->
                                             if (initial.isNotEmpty()) {

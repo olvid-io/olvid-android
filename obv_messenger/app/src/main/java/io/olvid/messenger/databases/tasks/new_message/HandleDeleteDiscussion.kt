@@ -67,6 +67,7 @@ fun handleDeleteDiscussion(
 
             // clear notifications if needed
             AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussion.id)
+            AndroidNotificationManager.clearMissedCallNotification(discussion.id)
 
             // reload the discussion
             if (messagesToDelete > 0) {

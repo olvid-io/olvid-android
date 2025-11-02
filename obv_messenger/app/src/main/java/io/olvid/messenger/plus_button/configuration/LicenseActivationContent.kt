@@ -51,7 +51,7 @@ internal fun LicenseActivationContent(
     }
 
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         if (licenseActivationViewModel.errorText != null) {
             ErrorCard(errorText = licenseActivationViewModel.errorText!!, onCancel = onCancel)
         } else {

@@ -22,6 +22,7 @@ package io.olvid.engine.protocol.protocols;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
 import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
 import io.olvid.engine.datatypes.containers.ServerQuery;
+import io.olvid.engine.datatypes.notifications.ProtocolNotifications;
 import io.olvid.engine.encoder.Encoded;
 import io.olvid.engine.engine.types.identities.ObvOwnedDevice;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
@@ -550,6 +552,11 @@ public class OwnedDeviceDiscoveryProtocol extends ConcreteProtocol {
                     }
                 }
             }
+
+            protocolManagerSession.notificationPostingDelegate.postNotification(ProtocolNotifications.NOTIFICATION_OWNED_DEVICE_DISCOVERY_DONE, Collections.singletonMap(
+                    ProtocolNotifications.NOTIFICATION_OWNED_DEVICE_DISCOVERY_DONE_OWNED_IDENTITY_KEY,
+                    getOwnedIdentity()
+            ));
 
             return new FinishedState();
         }

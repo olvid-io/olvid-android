@@ -243,12 +243,16 @@
     <string name="text_group_left">You left the group</string>
     <string name="text_group_re_joined">You re-joined the group</string>
     <string name="text_group_joined">You joined the group</string>
+    <string name="text_group_joined_by">%1$s added you to this group</string>
+    <string name="text_group_re_joined_by">%1$s re-added you to this group</string>
     <string name="text_group_managed_by">Group managed by %1$s</string>
     <string name="text_joined_group">Joined group: %1$s</string>
     <string name="text_joined_the_group_by">%1$s added %2$s to the group</string>
     <string name="text_joined_the_group_by_you">You added %2$s to the group</string>
     <string name="text_left_the_group_by">%1$s removed %2$s from the group</string>
     <string name="text_left_the_group_by_you">You removed %2$s from the group</string>
+    <string name="text_removed_from_group_by">%1$s removed you from the group</string>
+    <string name="text_removed_from_group">You have been removed from the group</string>
     <string name="text_unknown_member">unknown</string>
     <string name="text_nobody">Nobody</string>
     <string name="text_draft_message_prefix">"Draft: "</string>
@@ -636,7 +640,6 @@
     <string name="text_unknown_license">Unknown license</string>
     <string name="text_valid_license">Valid license</string>
     <string name="text_expired_license">Expired license</string>
-    <string name="text_unable_to_activate_license">Unable to activate license</string>
     <string name="button_label_share_contact_id">Share contact ID</string>
     <string name="text_beta_feature_tryout">Beta feature tryout</string>
     <string name="text_premium_features_available">Premium features available for free</string>
@@ -1878,6 +1881,7 @@
     <string name="dialog_title_message_status_explanations">Possible message statuses</string>
     <string name="label_for_group_messages">For group messages</string>
     <string name="label_other_statuses">Other statuses</string>
+    <string name="explanation_message_status_read_receipts">Read receipts are optional in Olvid.\nYour contacts may have chosen not to notify you when they read your messages</string>
     <string name="label_contact_offline_extended_period">Contact offline for an extended period of time</string>
     <string name="explanation_contact_offline_extended_period">It seems this contact has not used Olvid for an extended period of time. We cannot guarantee messages will be properly delivered to them.</string>
     <string name="dialog_title_no_browser_found">No browser detected</string>
@@ -2124,6 +2128,20 @@
     <string name="tab_title_groups">Groups</string>
     <string name="tab_title_calls">Calls</string>
     <string name="content_description_pinned_discussion">Pinned discussion</string>
-    <string name="attachments_joiner" translatable="false">" + "</string>
+    <string name="attachments_files_joiner" translatable="false">" + "</string>
+    <string name="attachments_joiner" translatable="false">" - "</string>
     <string name="scan_screen_share_contact_cant_scan_title">%1$s can\'t scan your code?</string>
+    <string name="label_untrusted_device">Untrusted</string>
+    <string name="label_offline">Offline</string>
+    <string name="dialog_message_how_add_contact">How would you like to add this contact?</string>
+    <string name="tip_untrusted_accessibility_service_title">Unknown accessibility service</string>
+    <string name="tip_untrusted_accessibility_service_message">An unknown accessibility service has been detected. If you did not voluntarily enable such a service, this could be a malicious software. Please check that the service listed below is safe to use:</string>
+    <string name="button_label_trust_service">Trust this service</string>
+    <string name="troubleshooting_accessibility_services_valid_title">Accessibility services</string>
+    <string name="troubleshooting_accessibility_services_whitelist_description">List of trusted accessibility services:</string>
+    <string name="troubleshooting_accessibility_services_valid_description">No unknown accessibility service detected.</string>
+    <string name="troubleshooting_accessibility_services_invalid_title">Unknown accessibility service</string>
+    <string name="troubleshooting_accessibility_services_invalid_description">An unknown accessibility service has been detected, please check that it is safe to use:</string>
+    <string name="hint_search_emoji">Search an emoji</string>
+    <string name="label_emoji_recents">Recent</string>
 </resources>

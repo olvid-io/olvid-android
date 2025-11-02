@@ -516,7 +516,6 @@ public class OwnedDevice implements ObvDatabase {
     private static final long HOOK_BIT_INSERTED_OTHER_DEVICE = 0x1;
     private static final long HOOK_BIT_CAPABILITIES_UPDATED = 0x2;
     private static final long HOOK_BIT_DEVICES_CHANGED = 0x4;
-    private static final long HOOK_BIT_DEVICE_PRE_KEY_ADDED_OR_REMOVED = 0x8;
 
     @Override
     public void wasCommitted() {

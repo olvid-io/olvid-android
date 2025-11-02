@@ -32,12 +32,12 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.graphics.Bitmap.Config.ARGB_8888
 import android.graphics.Canvas
 import android.graphics.drawable.Icon
 import android.media.AudioAttributes
 import android.media.AudioAttributes.Builder
+import android.media.AudioDeviceCallback
+import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.media.SoundPool
 import android.media.projection.MediaProjection
@@ -61,6 +61,8 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -80,7 +82,6 @@ import io.olvid.engine.engine.types.ObvTurnCredentialsFailedReason.PERMISSION_DE
 import io.olvid.engine.engine.types.ObvTurnCredentialsFailedReason.UNABLE_TO_CONTACT_SERVER
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
-import io.olvid.messenger.R
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.dimen
 import io.olvid.messenger.R.drawable
@@ -103,7 +104,6 @@ import io.olvid.messenger.databases.entity.jsons.JsonPayload
 import io.olvid.messenger.databases.entity.jsons.JsonWebrtcMessage
 import io.olvid.messenger.notifications.AndroidNotificationManager
 import io.olvid.messenger.settings.SettingsActivity
-import io.olvid.messenger.webrtc.BluetoothHeadsetManager.State.HEADSET_UNAVAILABLE
 import io.olvid.messenger.webrtc.OutgoingCallRinger.Type
 import io.olvid.messenger.webrtc.OutgoingCallRinger.Type.RING
 import io.olvid.messenger.webrtc.WebrtcCallActivity.Companion.ANSWER_CALL_ACTION
@@ -270,7 +270,6 @@ class WebrtcCallService : Service() {
     }
 
     private val webrtcCallServiceBinder = WebrtcCallServiceBinder()
-    private val wiredHeadsetReceiver: WiredHeadsetReceiver = WiredHeadsetReceiver()
     private val objectMapper = AppSingleton.getJsonObjectMapper()
     private var role = NONE
     var closeCallActivity: () -> Unit = {}
@@ -302,7 +301,6 @@ class WebrtcCallService : Service() {
     var selectedAudioOutput by mutableStateOf(PHONE)
         private set
     private var bluetoothAutoConnect = true
-    var wiredHeadsetConnected = false
     var availableAudioOutputs = mutableStateListOf(PHONE, LOUDSPEAKER, MUTED)
         private set
 
@@ -337,8 +335,7 @@ class WebrtcCallService : Service() {
     private var initialized = false
     private var savedAudioManagerMode = 0
 
-    @JvmField
-    var audioManager: AudioManager? = null
+    val audioManager by lazy { getSystemService(AUDIO_SERVICE) as AudioManager? }
     private var incomingCallRinger: IncomingCallRinger? = null
     private var outgoingCallRinger: OutgoingCallRinger? = null
     private var soundPool: SoundPool? = null
@@ -351,7 +348,7 @@ class WebrtcCallService : Service() {
     private var phoneCallStateListener: PhoneCallStateListener? = null
     private var screenOffReceiver: ScreenOffReceiver? = null
     private var audioFocusRequest: AudioFocusRequestCompat? = null
-    private var bluetoothHeadsetManager: BluetoothHeadsetManager? = null
+
     private var callLogItem: CallLogItem? = null
     private var webrtcMessageReceivedBroadcastReceiver: WebrtcMessageReceivedBroadcastReceiver? =
         null
@@ -365,6 +362,16 @@ class WebrtcCallService : Service() {
     private var recipientTurnPassword: String? = null
 
     private val queuedIncomingCalls = emptyList<Call>().toMutableList()
+
+    val audioDeviceCallback = object : AudioDeviceCallback() {
+        override fun onAudioDevicesAdded(addedDevices: Array<AudioDeviceInfo>) {
+            updateAvailableAudioOutputsList()
+        }
+
+        override fun onAudioDevicesRemoved(removedDevices: Array<AudioDeviceInfo>) {
+            updateAvailableAudioOutputsList()
+        }
+    }
 
     private fun dequeueIncomingCall(call: Call) {
         queuedIncomingCalls.remove(call)
@@ -991,12 +998,12 @@ class WebrtcCallService : Service() {
         executor.execute {
             if (!initialized) {
                 initialized = true
-                audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
                 if (audioManager == null) {
                     failReason = INTERNAL_ERROR
                     setState(FAILED)
                     return@execute
                 }
+                audioManager?.registerAudioDeviceCallback(audioDeviceCallback, null)
                 incomingCallRinger = IncomingCallRinger(this)
                 outgoingCallRinger = OutgoingCallRinger(this)
                 soundPool = SoundPool.Builder()
@@ -1021,21 +1028,11 @@ class WebrtcCallService : Service() {
                 ) {
                     readCallStatePermissionGranted()
                 }
-                if (VERSION.SDK_INT < VERSION_CODES.S ||
-                    ContextCompat.checkSelfPermission(
-                        this,
-                        permission.BLUETOOTH_CONNECT
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    bluetoothPermissionGranted()
-                }
                 @Suppress("DEPRECATION")
                 audioManager!!.isSpeakerphoneOn = false
-                @Suppress("DEPRECATION")
-                wiredHeadsetConnected = audioManager!!.isWiredHeadsetOn
                 updateAvailableAudioOutputsList()
                 updateCameraList()
-                registerWiredHeadsetReceiver()
+
 
                 screenWidth = resources.displayMetrics.widthPixels
                 screenHeight = resources.displayMetrics.heightPixels
@@ -1132,14 +1129,6 @@ class WebrtcCallService : Service() {
         }
     }
 
-    fun bluetoothPermissionGranted() {
-        executor.execute {
-            if (bluetoothHeadsetManager == null) {
-                bluetoothHeadsetManager = BluetoothHeadsetManager(this)
-                bluetoothHeadsetManager!!.start()
-            }
-        }
-    }
 
     fun readCallStatePermissionGranted() {
         executor.execute {
@@ -1228,9 +1217,9 @@ class WebrtcCallService : Service() {
                         string.preference_filename_call_credentials_cache
                     ), MODE_PRIVATE
                 )
-                val editor = callCredentialsCacheSharedPreference.edit()
-                editor.clear()
-                editor.apply()
+                callCredentialsCacheSharedPreference.edit {
+                    clear()
+                }
             }
         }
     }
@@ -2051,7 +2040,10 @@ class WebrtcCallService : Service() {
         jsonIceCandidate: JsonIceCandidate
     ) {
         executor.execute {
-            Logger.d("☎ received new ICE candidate")
+            Logger.d(
+                """☎ received new ICE candidate for call ${Logger.getUuidString(callIdentifier)}
+${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
+            )
             if (bytesOwnedIdentity.contentEquals(this.bytesOwnedIdentity) && callIdentifier == this.callIdentifier) {
                 // we are in the right call, handle the message directly (if the participant is in the call)
                 val callParticipant = getCallParticipant(bytesContactIdentity)
@@ -2312,7 +2304,7 @@ class WebrtcCallService : Service() {
                             createScreenCapturer(it)
                         }
                     }
-                } ?: {
+                } ?: run {
                     screenShareActive = false
                 }
             } else {
@@ -2439,16 +2431,9 @@ class WebrtcCallService : Service() {
         screenCapturerAndroid!!.startCapture(screenWidth, screenHeight, 0)
     }
 
-    //
+    // endregion
 
-    fun bluetoothDisconnected() {
-        executor.execute {
-            if (selectedAudioOutput != BLUETOOTH) {
-                return@execute
-            }
-            selectAudioOutput(availableAudioOutputs[0])
-        }
-    }
+    // region Audio outputs
 
     fun selectAudioOutput(audioOutput: AudioOutput) {
         executor.execute {
@@ -2458,8 +2443,10 @@ class WebrtcCallService : Service() {
             if (audioOutput == selectedAudioOutput) {
                 return@execute
             }
-            if (selectedAudioOutput == BLUETOOTH && bluetoothHeadsetManager != null) {
-                bluetoothHeadsetManager!!.disconnectAudio()
+
+            if (selectedAudioOutput == BLUETOOTH) {
+                audioManager?.stopBluetoothSco()
+                audioManager?.isBluetoothScoOn = false
             }
 
             audioDeviceModule?.setSpeakerMute(audioOutput == MUTED)
@@ -2489,13 +2476,12 @@ class WebrtcCallService : Service() {
                     audioManager!!.isSpeakerphoneOn = true
                 }
 
-                BLUETOOTH -> if (bluetoothHeadsetManager != null) {
+                BLUETOOTH -> {
                     if (audioManager!!.isSpeakerphoneOn) {
                         audioManager!!.isSpeakerphoneOn = false
                     }
-                    bluetoothHeadsetManager!!.connectAudio()
-                } else {
-                    return@execute
+                    audioManager!!.startBluetoothSco()
+                    audioManager!!.isBluetoothScoOn = true
                 }
             }
             selectedAudioOutput = audioOutput
@@ -2586,20 +2572,43 @@ class WebrtcCallService : Service() {
     fun updateAvailableAudioOutputsList() {
         executor.execute {
             val audioOutputs = mutableListOf<AudioOutput>()
-            if (wiredHeadsetConnected) {
+            val devices = if (VERSION.SDK_INT >= VERSION_CODES.S) {
+                audioManager?.availableCommunicationDevices
+            } else {
+                audioManager?.getDevices(AudioManager.GET_DEVICES_OUTPUTS)?.toList()
+            }.orEmpty()
+            var headsetConnected = false
+            var bluetoothConnected = false
+            for (device in devices) {
+                if (device.type == AudioDeviceInfo.TYPE_WIRED_HEADSET || device.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES) {
+                    headsetConnected = true
+                } else if (device.type in listOf(
+                        AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
+                        AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+                        AudioDeviceInfo.TYPE_BLE_HEADSET,
+                        AudioDeviceInfo.TYPE_BLE_SPEAKER,
+                        AudioDeviceInfo.TYPE_BLE_BROADCAST,
+                        AudioDeviceInfo.TYPE_HEARING_AID,
+                    )
+                ) {
+                    bluetoothConnected = true
+                }
+            }
+
+            if (headsetConnected) {
                 audioOutputs.add(HEADSET)
             } else {
                 audioOutputs.add(PHONE)
+                audioOutputs.add(LOUDSPEAKER)
             }
-            audioOutputs.add(LOUDSPEAKER)
-            if (bluetoothHeadsetManager != null) {
-                if (bluetoothHeadsetManager!!.state != HEADSET_UNAVAILABLE) {
-                    audioOutputs.add(BLUETOOTH)
-                    if (bluetoothAutoConnect) {
-                        bluetoothAutoConnect = false
-                        selectAudioOutput(BLUETOOTH)
-                    }
+            if (bluetoothConnected) {
+                audioOutputs.add(BLUETOOTH)
+                if (bluetoothAutoConnect) {
+                    bluetoothAutoConnect = false
+                    selectAudioOutput(BLUETOOTH)
                 }
+            } else {
+                bluetoothAutoConnect = true
             }
             audioOutputs.add(MUTED)
             if (!audioOutputs.contains(selectedAudioOutput)) {
@@ -2941,7 +2950,7 @@ class WebrtcCallService : Service() {
             return
         }
         val endCallIntent = Intent(this, WebrtcCallService::class.java)
-        endCallIntent.setAction(ACTION_HANG_UP)
+        endCallIntent.action = ACTION_HANG_UP
         endCallIntent.putExtra(
             CALL_IDENTIFIER_INTENT_EXTRA,
             callIdentifier?.let { Logger.getUuidString(it) } ?: "")
@@ -3034,14 +3043,14 @@ class WebrtcCallService : Service() {
         val size = App.getContext().resources.getDimensionPixelSize(dimen.notification_icon_size)
         initialView.setSize(size, size)
         setupInitialView.forEach { it.invoke(initialView) }
-        val largeIcon = Bitmap.createBitmap(size, size, ARGB_8888)
+        val largeIcon = createBitmap(size, size)
         initialView.drawOnCanvas(Canvas(largeIcon))
         CallNotificationManager.currentCallData = CallData(
             initialViewSetup = { iv ->
                 setupInitialView.forEach { it.invoke(iv) }
             },
             title = notificationName ?: "",
-            subtitle = getString(R.string.call_notification_ongoing_call),
+            subtitle = getString(string.call_notification_ongoing_call),
             fullScreenIntent = callActivityIntent,
             rejectCall = { startService(endCallIntent) }
         )
@@ -3113,7 +3122,7 @@ class WebrtcCallService : Service() {
         participantCount: Int
     ) {
         val rejectCallIntent = Intent(this, WebrtcCallService::class.java)
-        rejectCallIntent.setAction(ACTION_REJECT_CALL)
+        rejectCallIntent.action = ACTION_REJECT_CALL
         rejectCallIntent.putExtra(
             CALL_IDENTIFIER_INTENT_EXTRA,
             Logger.getUuidString(callIdentifier)
@@ -3129,13 +3138,13 @@ class WebrtcCallService : Service() {
             PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val answerCallIntent = Intent(this, WebrtcCallActivity::class.java)
-        answerCallIntent.setAction(ANSWER_CALL_ACTION)
+        answerCallIntent.action = ANSWER_CALL_ACTION
         answerCallIntent.putExtra(
             WebrtcCallActivity.ANSWER_CALL_EXTRA_CALL_IDENTIFIER,
             Logger.getUuidString(callIdentifier)
         )
         answerCallIntent.putExtra(BYTES_OWNED_IDENTITY_INTENT_EXTRA, contact.bytesOwnedIdentity)
-        answerCallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        answerCallIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         val answerCallPendingIntent = PendingIntent.getActivity(
             this,
             0,
@@ -3153,7 +3162,7 @@ class WebrtcCallService : Service() {
         val size = App.getContext().resources.getDimensionPixelSize(dimen.notification_icon_size)
         initialView.setSize(size, size)
         initialView.setContact(contact)
-        val largeIcon = Bitmap.createBitmap(size, size, ARGB_8888)
+        val largeIcon = createBitmap(size, size)
         initialView.drawOnCanvas(Canvas(largeIcon))
         CallNotificationManager.currentCallData = CallData(
             initialViewSetup = { it.setContact(contact) },
@@ -3164,7 +3173,7 @@ class WebrtcCallService : Service() {
                     participantCount - 1,
                     participantCount - 1
                 )
-            } else getString(R.string.call_notification_incoming_call),
+            } else getString(string.call_notification_incoming_call),
             fullScreenIntent = fullScreenIntent,
             rejectCall = { startService(rejectCallIntent) },
             acceptCall = { startActivity(answerCallIntent) },
@@ -3371,7 +3380,7 @@ class WebrtcCallService : Service() {
         screenCapturerAndroid?.dispose()
         screenCapturerAndroid = null
         unregisterScreenOffReceiver()
-        unregisterWiredHeadsetReceiver()
+
         timeoutTimer.cancel()
         releaseWakeLocks(ALL)
         for (callParticipant in callParticipants.values) {
@@ -3408,10 +3417,9 @@ class WebrtcCallService : Service() {
         if (callDurationTimer != null) {
             callDurationTimer!!.cancel()
         }
-        if (bluetoothHeadsetManager != null) {
-            bluetoothHeadsetManager!!.disconnectAudio()
-            bluetoothHeadsetManager!!.stop()
-        }
+
+        audioManager?.unregisterAudioDeviceCallback(audioDeviceCallback)
+
     }
 
     override fun onBind(intent: Intent): IBinder {
@@ -3442,15 +3450,6 @@ class WebrtcCallService : Service() {
         }
     }
 
-    private inner class WiredHeadsetReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == null || AudioManager.ACTION_HEADSET_PLUG != intent.action) {
-                return
-            }
-            wiredHeadsetConnected = 1 == intent.getIntExtra("state", 0)
-            updateAvailableAudioOutputsList()
-        }
-    }
 
     private fun registerScreenOffReceiver() {
         if (screenOffReceiver == null) {
@@ -3466,13 +3465,6 @@ class WebrtcCallService : Service() {
         }
     }
 
-    private fun registerWiredHeadsetReceiver() {
-        registerReceiver(wiredHeadsetReceiver, IntentFilter(AudioManager.ACTION_HEADSET_PLUG))
-    }
-
-    private fun unregisterWiredHeadsetReceiver() {
-        unregisterReceiver(wiredHeadsetReceiver)
-    }
 
     private inner class EngineTurnCredentialsReceiver : EngineNotificationListener {
         private var registrationNumber: Long? = null
@@ -3512,15 +3504,15 @@ class WebrtcCallService : Service() {
                                         string.preference_filename_call_credentials_cache
                                     ), MODE_PRIVATE
                                 )
-                            val editor = callCredentialsCacheSharedPreference.edit()
-                            editor.clear()
-                            editor.putLong(PREF_KEY_TIMESTAMP, System.currentTimeMillis())
-                            editor.putString(PREF_KEY_USERNAME1, callerUsername)
-                            editor.putString(PREF_KEY_PASSWORD1, callerPassword)
-                            editor.putString(PREF_KEY_USERNAME2, recipientUsername)
-                            editor.putString(PREF_KEY_PASSWORD2, recipientPassword)
-                            editor.putStringSet(PREF_KEY_TURN_SERVERS, HashSet(turnServers))
-                            editor.apply()
+                            callCredentialsCacheSharedPreference.edit {
+                                clear()
+                                putLong(PREF_KEY_TIMESTAMP, System.currentTimeMillis())
+                                putString(PREF_KEY_USERNAME1, callerUsername)
+                                putString(PREF_KEY_PASSWORD1, callerPassword)
+                                putString(PREF_KEY_USERNAME2, recipientUsername)
+                                putString(PREF_KEY_PASSWORD2, recipientPassword)
+                                putStringSet(PREF_KEY_TURN_SERVERS, HashSet(turnServers))
+                            }
                         }
                     }
                 }

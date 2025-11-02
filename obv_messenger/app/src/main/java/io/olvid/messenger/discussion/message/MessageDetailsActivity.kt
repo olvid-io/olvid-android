@@ -89,8 +89,8 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.MessageMetadata
 import io.olvid.messenger.databases.entity.MessageRecipientInfo
-import io.olvid.messenger.discussion.message.MessageDetailsActivity.RecipientInfosAdapter.ViewHolder
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
+import io.olvid.messenger.discussion.message.MessageDetailsActivity.RecipientInfosAdapter.ViewHolder
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.viewModels.MessageDetailsViewModel
@@ -509,7 +509,7 @@ class MessageDetailsActivity : LockableActivity() {
                     val builder = SecureAlertDialogBuilder(this@MessageDetailsActivity, R.style.CustomAlertDialog)
                         .setTitle(recipientNameTextView.text)
                         .setMessage(
-                            if (messageRecipientInfo.engineMessageIdentifier?.size == 0) {
+                            if (messageRecipientInfo.engineMessageIdentifier?.isEmpty() == true) {
                                 getString(
                                     R.string.dialog_message_recipient_details_other_device,
                                     deliveredTime,

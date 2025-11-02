@@ -47,8 +47,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -77,7 +75,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.UnreadCountsSingleton
@@ -88,6 +85,8 @@ import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.message.attachments.Attachments
 import io.olvid.messenger.discussion.message.attachments.constantSp
@@ -122,9 +121,7 @@ fun LocationSharing(
     }
 
     Surface(
-        modifier = Modifier.clickable(onClick = { locationGoToMessageOrShowPopup() }),
-        border =
-        BorderStroke(
+        border = BorderStroke(
             width = 1.dp,
             color = colorResource(id = R.color.red)
         ).takeIf { isDiscussionSharingLocation },
@@ -133,7 +130,14 @@ fun LocationSharing(
         shadowElevation = 4.dp
     ) {
         Row(
-            modifier = Modifier.padding(start = 12.dp),
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(),
+                    onClick = { locationGoToMessageOrShowPopup() }
+                )
+                .padding(start = 12.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -165,7 +169,9 @@ fun LocationSharing(
                 style = OlvidTypography.body2
             )
             Box {
-                IconButton(onClick = { menuOpened = true }) {
+                IconButton(
+                    onClick = { menuOpened = true }
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_three_dots_grey),
                         tint = colorResource(
@@ -174,67 +180,45 @@ fun LocationSharing(
                         contentDescription = null
                     )
                 }
-                DropdownMenu(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .background(
-                            color = colorResource(id = R.color.dialogBackground)
-                        )
-                        .clip(RoundedCornerShape(8.dp)),
+                OlvidDropdownMenu(
+                    modifier = Modifier.align(Alignment.BottomEnd),
                     expanded = menuMessageOpened,
                     onDismissRequest = { menuMessageOpened = false }) {
                     messages.find { it.messageType == Message.TYPE_OUTBOUND_MESSAGE }?.let {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = stringResource(id = R.string.text_you),
-                                    color = colorResource(id = R.color.almostBlack)
-                                )
-                            },
+                        OlvidDropdownMenuItem(
+                            text = stringResource(id = R.string.text_you),
                             onClick = { onGotoMessage(it.id) })
                     }
                     messages.filter { it.messageType != Message.TYPE_OUTBOUND_MESSAGE }.forEach {
-                        DropdownMenuItem(text = {
-                            Text(
-                                text = ContactCacheSingleton.getContactCustomDisplayName(it.senderIdentifier)
-                                    ?: stringResource(
-                                        id = R.string.text_unknown_sender
-                                    ),
-                                color = colorResource(id = R.color.almostBlack)
-                            )
-                        }, onClick = { onGotoMessage(it.id) })
+                        OlvidDropdownMenuItem(
+                            text = ContactCacheSingleton.getContactCustomDisplayName(it.senderIdentifier)
+                                ?: stringResource(
+                                    id = R.string.text_unknown_sender
+                                ),
+                            onClick = { onGotoMessage(it.id) })
                     }
                 }
-                DropdownMenu(
-                    modifier = Modifier
-                        .background(
-                            color = colorResource(id = R.color.dialogBackground)
-                        )
-                        .clip(RoundedCornerShape(8.dp)),
-                    expanded = menuOpened, onDismissRequest = { menuOpened = false }) {
-                    DropdownMenuItem(text = {
-                        Text(
-                            text = stringResource(id = R.string.menu_action_go_to_message),
-                            color = colorResource(id = R.color.almostBlack)
-                        )
-                    }, onClick = {
-                        if (messages.size == 1) {
-                            onGotoMessage(messages.first().id)
-                        } else {
-                            menuMessageOpened = true
-                        }
-                        menuOpened = false
-                    })
-                    if (isDiscussionSharingLocation) {
-                        DropdownMenuItem(text = {
-                            Text(
-                                text = stringResource(id = R.string.menu_action_location_message_stop_sharing),
-                                color = colorResource(id = R.color.almostBlack)
-                            )
-                        }, onClick = {
-                            onStopSharingLocation()
+                OlvidDropdownMenu(
+                    expanded = menuOpened,
+                    onDismissRequest = { menuOpened = false }
+                ) {
+                    OlvidDropdownMenuItem(
+                        text = stringResource(id = R.string.menu_action_go_to_message),
+                        onClick = {
+                            if (messages.size == 1) {
+                                onGotoMessage(messages.first().id)
+                            } else {
+                                menuMessageOpened = true
+                            }
                             menuOpened = false
                         })
+                    if (isDiscussionSharingLocation) {
+                        OlvidDropdownMenuItem(
+                            text = stringResource(id = R.string.menu_action_location_message_stop_sharing),
+                            onClick = {
+                                onStopSharingLocation()
+                                menuOpened = false
+                            })
                     }
                     if (listOf(
                             SettingsActivity.LocationIntegrationEnum.OSM,
@@ -242,15 +226,12 @@ fun LocationSharing(
                             SettingsActivity.LocationIntegrationEnum.MAPS
                         ).contains(SettingsActivity.locationIntegration)
                     ) {
-                        DropdownMenuItem(text = {
-                            Text(
-                                text = stringResource(id = R.string.menu_action_open_map),
-                                color = colorResource(id = R.color.almostBlack)
-                            )
-                        }, onClick = {
-                            onOpenMap()
-                            menuOpened = false
-                        })
+                        OlvidDropdownMenuItem(
+                            text = stringResource(id = R.string.menu_action_open_map),
+                            onClick = {
+                                onOpenMap()
+                                menuOpened = false
+                            })
                     }
                 }
             }
@@ -261,15 +242,13 @@ fun LocationSharing(
 @Preview
 @Composable
 fun LocationSharingPreview() {
-    AppCompatTheme {
-        LocationSharing(
-            messages = emptyList(),
-            isDiscussionSharingLocation = true,
-            onGotoMessage = {},
-            onStopSharingLocation = {},
-            onOpenMap = {}
-        )
-    }
+    LocationSharing(
+        messages = emptyList(),
+        isDiscussionSharingLocation = true,
+        onGotoMessage = {},
+        onStopSharingLocation = {},
+        onOpenMap = {}
+    )
 }
 
 @Composable
@@ -280,7 +259,8 @@ fun LocationMessage(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     highlighter: ((Context, AnnotatedString) -> AnnotatedString)? = null,
-    ) {
+    blockClicks: Boolean,
+) {
     val context = LocalContext.current
     val jsonMessage = message.jsonMessage
 
@@ -372,6 +352,7 @@ fun LocationMessage(
         onClick = onClick,
         onLongClick = onLongClick,
         highlighter = highlighter,
+        blockClicks = blockClicks,
     )
 }
 
@@ -391,6 +372,7 @@ private fun LocationMessageContent(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     highlighter: ((Context, AnnotatedString) -> AnnotatedString)?,
+    blockClicks: Boolean,
 ) {
     if (message.hasAttachments()) {
         BoxWithConstraints {
@@ -402,14 +384,24 @@ private fun LocationMessageContent(
                 onLocationClicked = onClick,
                 discussionSearchViewModel = null,
                 saveAttachment = {},
-                saveAllAttachments = {}
+                saveAllAttachments = {},
+                blockClicks = blockClicks,
             )
         }
     } else if (message.isContentHidden.not()){
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .combinedClickable(onLongClick = onLongClick, onClick = onClick)
+                .then(if (blockClicks)
+                    Modifier
+                else
+                    Modifier.combinedClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple(),
+                        onLongClick = onLongClick,
+                        onClick = onClick
+                    )
+                )
                 .border(
                     width = 1.dp, color = colorResource(
                         id = R.color.locationBorder
@@ -521,7 +513,11 @@ private fun LocationMessageContent(
                         modifier = Modifier
                             .size(24.dp)
                             .padding(4.dp),
-                        onClick = onCopyCoordinates
+                        onClick = {
+                            if (!blockClicks) {
+                                onCopyCoordinates()
+                            }
+                        }
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_swipe_copy),
@@ -540,12 +536,17 @@ private fun LocationMessageContent(
             modifier = Modifier
                 .padding(4.dp)
                 .fillMaxWidth()
-                .clickable(
-                    interactionSource = remember {
-                        MutableInteractionSource()
-                    },
-                    indication = ripple()
-                ) { onStopSharingLocation() },
+                .then(
+                    if (blockClicks)
+                        Modifier
+                    else
+                        Modifier.clickable(
+                            interactionSource = remember {
+                                MutableInteractionSource()
+                            },
+                            indication = ripple()
+                        ) { onStopSharingLocation() }
+                ),
             text = stringResource(id = R.string.title_stop_sharing_location),
             color = colorResource(
                 id = R.color.red
@@ -593,28 +594,27 @@ private fun LocationMessageContent(
 @Preview
 @Composable
 fun LocationMessageContentPreview() {
-    AppCompatTheme {
-        Column(
-            Modifier
-                .background(colorResource(id = R.color.almostWhite))
-                .padding(8.dp)
-        ) {
-            LocationMessageContent(
-                message = messageOutboundLocation,
-                title = "Location: 42.424242, -21.212121",
-                precision = "Precision: 5m",
-                altitude = "Altitude: 12m",
-                lastUpdated = "Latest update: 01/04/2021 12:20",
-                explanation = "Sharing location until 16:55",
-                scale = 1f,
-                address = "2, rue de la Paix, 75000 Paris, France",
-                onClick = {},
-                onLongClick = {},
-                onStopSharingLocation = {},
-                onCopyCoordinates = {},
-                highlighter = null
-            )
-        }
+    Column(
+        Modifier
+            .background(colorResource(id = R.color.almostWhite))
+            .padding(8.dp)
+    ) {
+        LocationMessageContent(
+            message = messageOutboundLocation,
+            title = "Location: 42.424242, -21.212121",
+            precision = "Precision: 5m",
+            altitude = "Altitude: 12m",
+            lastUpdated = "Latest update: 01/04/2021 12:20",
+            explanation = "Sharing location until 16:55",
+            scale = 1f,
+            address = "2, rue de la Paix, 75000 Paris, France",
+            onClick = {},
+            onLongClick = {},
+            onStopSharingLocation = {},
+            onCopyCoordinates = {},
+            highlighter = null,
+            blockClicks = false,
+        )
     }
 }
 

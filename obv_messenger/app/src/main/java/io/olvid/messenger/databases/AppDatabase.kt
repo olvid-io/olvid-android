@@ -33,6 +33,7 @@ import io.olvid.messenger.databases.dao.ContactDao
 import io.olvid.messenger.databases.dao.ContactGroupJoinDao
 import io.olvid.messenger.databases.dao.DiscussionCustomizationDao
 import io.olvid.messenger.databases.dao.DiscussionDao
+import io.olvid.messenger.databases.dao.EmojiDao
 import io.olvid.messenger.databases.dao.FyleDao
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao
 import io.olvid.messenger.databases.dao.FyleMessageTextBlockDao
@@ -64,6 +65,7 @@ import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.ContactGroupJoin
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.DiscussionCustomization
+import io.olvid.messenger.databases.entity.Emoji
 import io.olvid.messenger.databases.entity.Fyle
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatusFTS
@@ -88,6 +90,7 @@ import io.olvid.messenger.databases.entity.PollVote
 import io.olvid.messenger.databases.entity.Reaction
 import io.olvid.messenger.databases.entity.RemoteDeleteAndEditRequest
 import io.olvid.messenger.databases.entity.TextBlock
+import io.olvid.messenger.settings.SettingsActivity
 import net.zetetic.database.sqlcipher.SQLiteDatabase
 import java.io.File
 
@@ -122,6 +125,7 @@ import java.io.File
         TextBlock::class,
         PollVote::class,
         OnHoldInboxMessage::class,
+        Emoji::class
     ],
     version = AppDatabase.DB_SCHEMA_VERSION
 )
@@ -187,13 +191,26 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun onHoldInboxMessageDao(): OnHoldInboxMessageDao
 
+    abstract fun emojiDao(): EmojiDao
+
     companion object {
-        const val DB_SCHEMA_VERSION: Int = 79
+        const val DB_SCHEMA_VERSION: Int = 81
         const val DB_FTS_GLOBAL_SEARCH_VERSION: Int = 1
         const val DB_FILE_NAME: String = "app_database"
         const val TMP_ENCRYPTED_DB_FILE_NAME: String = "encrypted_app_database"
 
         private val roomDatabaseOpenCallback: Callback = object : Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                super.onCreate(db)
+                SettingsActivity.PREF_KEY_PREFERRED_REACTIONS_DEFAULT.forEachIndexed { index, reaction ->
+                    val values = android.content.ContentValues()
+                    values.put(Emoji.EMOJI, reaction)
+                    values.put(Emoji.IS_FAVORITE, true)
+                    values.put(Emoji.LAST_USED, 0)
+                    db.insert(Emoji.TABLE_NAME, SQLiteDatabase.CONFLICT_IGNORE, values)
+                }
+            }
+
             override fun onOpen(db: SupportSQLiteDatabase) {
                 super.onOpen(db)
                 App.runThread(AppDatabaseOpenCallback(instance))

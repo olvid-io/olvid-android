@@ -20,6 +20,7 @@ package io.olvid.messenger.onboarding
 
 import android.content.Context
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.ViewGroup
 import android.view.WindowManager.LayoutParams
@@ -53,11 +54,15 @@ class OnboardingActivity : AppCompatActivity() {
 
         App.setAppDialogsBlocked(true)
 
-        val window = window
-        window?.setFlags(
-            LayoutParams.FLAG_SECURE,
-            LayoutParams.FLAG_SECURE
-        )
+        window?.apply {
+            setFlags(
+                LayoutParams.FLAG_SECURE,
+                LayoutParams.FLAG_SECURE
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                setHideOverlayWindows(true)
+            }
+        }
 
         viewModel.setForceDisabled(false)
         // set the server to the hardcoded server

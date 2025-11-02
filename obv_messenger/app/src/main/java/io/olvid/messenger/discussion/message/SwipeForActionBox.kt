@@ -21,7 +21,6 @@ package io.olvid.messenger.discussion.message
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -175,7 +174,6 @@ fun SwipeForActionBox(
 
         Box(
             modifier = Modifier
-                .fillMaxSize()
                 .offset {
                     IntOffset(offset, 0)
                 }

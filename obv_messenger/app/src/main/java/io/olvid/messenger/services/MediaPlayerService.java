@@ -25,11 +25,9 @@ import static androidx.media3.common.C.WAKE_MODE_LOCAL;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ServiceInfo;
 import android.media.AudioDeviceCallback;
 import android.media.AudioDeviceInfo;
@@ -43,7 +41,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.os.HandlerCompat;
 import androidx.media.AudioAttributesCompat;
@@ -90,7 +87,6 @@ public class MediaPlayerService extends Service {
     private final Timer timer = new Timer("MediaPlayerService-Timer");
 
     private final Handler mainThreadHandler = HandlerCompat.createAsync(Looper.getMainLooper());
-    private final WiredHeadsetReceiver wiredHeadsetReceiver = new WiredHeadsetReceiver();
     private ConnectedDevicesCallback connectedDevicesCallback = null;
 
     TimerTask timerTask = null;
@@ -195,7 +191,8 @@ public class MediaPlayerService extends Service {
                     if (mediaPlaying) {
                         try {
                             Thread.sleep(200);
-                        } catch (InterruptedException ignored) {}
+                        } catch (InterruptedException ignored) {
+                        }
                         internalSetPlaybackSpeed(false);
                         mediaPlayer.play();
                     }
@@ -229,7 +226,7 @@ public class MediaPlayerService extends Service {
             SettingsActivity.setPlaybackSpeedForMediaPlayer(playbackSpeed);
 
             if (mediaPlayer != null) {
-               internalSetPlaybackSpeed(true);
+                internalSetPlaybackSpeed(true);
             }
         }
     }
@@ -571,36 +568,16 @@ public class MediaPlayerService extends Service {
 
 
     private void registerReceivers() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            connectedDevicesCallback = new ConnectedDevicesCallback();
-            audioManager.registerAudioDeviceCallback(connectedDevicesCallback, null);
-        } else {
-            registerReceiver(wiredHeadsetReceiver, new IntentFilter(AudioManager.ACTION_HEADSET_PLUG));
-        }
+        connectedDevicesCallback = new ConnectedDevicesCallback();
+        audioManager.registerAudioDeviceCallback(connectedDevicesCallback, null);
     }
 
     private void unregisterReceivers() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (connectedDevicesCallback != null) {
-                audioManager.unregisterAudioDeviceCallback(connectedDevicesCallback);
-            }
-        } else {
-            unregisterReceiver(wiredHeadsetReceiver);
+        if (connectedDevicesCallback != null) {
+            audioManager.unregisterAudioDeviceCallback(connectedDevicesCallback);
         }
     }
 
-    private class WiredHeadsetReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction() == null || !AudioManager.ACTION_HEADSET_PLUG.equals(intent.getAction())) {
-                return;
-            }
-            wiredHeadsetConnected = (1 == intent.getIntExtra("state", 0));
-            updateAudioOutputs();
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
     private class ConnectedDevicesCallback extends AudioDeviceCallback {
         @Override
         public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) {
@@ -617,10 +594,22 @@ public class MediaPlayerService extends Service {
         private void refreshDevices() {
             wiredHeadsetConnected = false;
             bluetoothHeadsetConnected = false;
-            for (AudioDeviceInfo audioDeviceInfo : audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
-                if (audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET) {
+            AudioDeviceInfo[] devices;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                devices = audioManager.getAvailableCommunicationDevices().toArray(new AudioDeviceInfo[0]);
+            } else {
+                devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+            }
+            for (AudioDeviceInfo audioDeviceInfo : devices) {
+                if (audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET || audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES) {
                     wiredHeadsetConnected = true;
-                } else if (audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP) {
+                } else if (audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
+                        || audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO
+                        || audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_BLE_HEADSET
+                        || audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_BLE_SPEAKER
+                        || audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_BLE_BROADCAST
+                        || audioDeviceInfo.getType() == AudioDeviceInfo.TYPE_HEARING_AID
+                ) {
                     bluetoothHeadsetConnected = true;
                 }
             }
@@ -635,7 +624,6 @@ public class MediaPlayerService extends Service {
         BLUETOOTH
     }
 
-    // must be called on executor
     private void updateAudioOutputs() {
         mainThreadHandler.post(() -> {
             if (wiredHeadsetConnected) {

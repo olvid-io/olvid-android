@@ -23,6 +23,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize.Min
@@ -36,9 +37,8 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,11 +55,12 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.databases.dao.CallLogItemDao.CallLogItemAndContacts
 import io.olvid.messenger.databases.entity.CallLogItem
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.InitialView
 
@@ -89,6 +90,8 @@ fun CallLogItemView(
                 .height(Min)
                 .fillMaxWidth()
                 .combinedClickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(),
                     onClick = { },
                     onLongClick = { menuOpened = true },
                 ), verticalAlignment = CenterVertically
@@ -155,30 +158,27 @@ fun CallLogMenu(
     callLogItemAndContacts: CallLogItemAndContacts,
     onDeleteCallLogItem: (callLogItem: CallLogItem) -> Unit,
 ) {
-    DropdownMenu(expanded = menuOpened, onDismissRequest = onDismissRequest) {
+    OlvidDropdownMenu(expanded = menuOpened, onDismissRequest = onDismissRequest) {
         //delete
-        DropdownMenuItem(onClick = {
-            onDeleteCallLogItem(callLogItemAndContacts.callLogItem)
-            onDismissRequest()
-        }) {
-            Text(
-                text = stringResource(id = R.string.menu_action_delete_log_entry),
-            )
-        }
+        OlvidDropdownMenuItem(
+            onClick = {
+                onDeleteCallLogItem(callLogItemAndContacts.callLogItem)
+                onDismissRequest()
+            },
+            text = stringResource(id = R.string.menu_action_delete_log_entry),
+        )
     }
 }
 
 @Preview
 @Composable
 private fun CallLogItemPreview() {
-    AppCompatTheme {
-        CallLogItemView(
-            callLogItemAndContacts = CallLogItemAndContacts(),
-            initialViewSetup = { initialView -> initialView.setInitial(byteArrayOf(), "A") },
-            title = AnnotatedString("Call Title"),
-            date = AnnotatedString("timestamp"),
-            onClick = {},
-            onDeleteCallLogItem = {}
-        )
-    }
+    CallLogItemView(
+        callLogItemAndContacts = CallLogItemAndContacts(),
+        initialViewSetup = { initialView -> initialView.setInitial(byteArrayOf(), "A") },
+        title = AnnotatedString("Call Title"),
+        date = AnnotatedString("timestamp"),
+        onClick = {},
+        onDeleteCallLogItem = {}
+    )
 }

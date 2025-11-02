@@ -89,22 +89,18 @@ public class PrivacyPreferenceFragment extends PreferenceFragmentCompat {
 
         SwitchPreference exposeRecentDiscussionsPreference = screen.findPreference(SettingsActivity.PREF_KEY_EXPOSE_RECENT_DISCUSSIONS);
         if (exposeRecentDiscussionsPreference != null) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                screen.removePreference(exposeRecentDiscussionsPreference);
-            } else {
-                exposeRecentDiscussionsPreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
-                    App.runThread(() -> {
-                        try {
-                            // wait 1 second for the setting to actually be updated
-                            Thread.sleep(1_000);
-                        } catch (InterruptedException e) {
-                            // do nothing
-                        }
-                        ShortcutActivity.startPublishingShareTargets(App.getContext());
-                    });
-                    return true;
+            exposeRecentDiscussionsPreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
+                App.runThread(() -> {
+                    try {
+                        // wait 1 second for the setting to actually be updated
+                        Thread.sleep(1_000);
+                    } catch (InterruptedException e) {
+                        // do nothing
+                    }
+                    ShortcutActivity.startPublishingShareTargets(App.getContext());
                 });
-            }
+                return true;
+            });
         }
 
         Preference hiddenProfileClosePolicyPreference = screen.findPreference(SettingsActivity.PREF_KEY_HIDDEN_PROFILE_CLOSE_POLICY);

@@ -169,7 +169,10 @@ fun handleNormalMessage(
                             messageSender.senderIdentity,
                             jsonMessage.senderThreadIdentifier,
                             0,
-                            0
+                            0,
+                            0,
+                            0,
+                            null
                         )
 
                         message.missedMessageCount = processSequenceNumber(db, discussion.id, messageSender.senderIdentity, jsonMessage.senderThreadIdentifier, jsonMessage.senderSequenceNumber)
@@ -228,8 +231,11 @@ fun handleNormalMessage(
         } else {
             val attachmentMetadatas: Array<JsonMetadata?> = arrayOfNulls(obvMessage.attachments.size)
 
-            var imageCount = 0
             var attachmentCount = 0
+            var imageAndVideoCount = 0
+            var videoCount = 0
+            var audioCount = 0
+            var firstAttachmentName: String? = null
             for (i in 0..<obvMessage.attachments.size) {
                 try {
                     val metadata = AppSingleton.getJsonObjectMapper().readValue(obvMessage.attachments[i].metadata, JsonMetadata::class.java)
@@ -241,7 +247,16 @@ fun handleNormalMessage(
                     if (mimeType == OpenGraph.MIME_TYPE) {
                         continue
                     } else if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(mimeType)) {
-                        imageCount++
+                        imageAndVideoCount++
+                        if (mimeType.startsWith("video/")) {
+                            videoCount++
+                        }
+                    } else if (mimeType.startsWith("audio/")) {
+                        audioCount++
+                    } else {
+                        if (firstAttachmentName == null) {
+                            firstAttachmentName = metadata.fileName
+                        }
                     }
                     attachmentCount++
                 } catch (e: Exception) {
@@ -293,7 +308,10 @@ fun handleNormalMessage(
                     messageSender.senderIdentity,
                     jsonMessage.senderThreadIdentifier,
                     attachmentCount,
-                    imageCount
+                    imageAndVideoCount,
+                    videoCount,
+                    audioCount,
+                    firstAttachmentName
                 )
                 message.missedMessageCount = processSequenceNumber(db, discussion.id, messageSender.senderIdentity, jsonMessage.senderThreadIdentifier, jsonMessage.senderSequenceNumber)
                 message.forwarded = jsonMessage.isForwarded == true

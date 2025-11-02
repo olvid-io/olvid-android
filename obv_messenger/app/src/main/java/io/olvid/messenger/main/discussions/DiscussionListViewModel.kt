@@ -29,6 +29,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -492,6 +493,7 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
 
                 Message.TYPE_GROUP_MEMBER_LEFT -> {
                     val byYou = bytesOwnedIdentity.contentEquals(message.senderIdentifier)
+                    val kicked = bytesOwnedIdentity.contentEquals(message.mentions?.firstOrNull()?.userIdentifier)
                     var displayName =
                         ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
                     var mentionCount = 0
@@ -514,7 +516,13 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                         append(
                             if (mention != null) {
-                                if (displayName != null) {
+                                if (kicked) {
+                                    if (displayName != null) {
+                                        context.getString(R.string.text_removed_from_group_by, displayName)
+                                    } else {
+                                        context.getString(R.string.text_removed_from_group)
+                                    }
+                                } else if (displayName != null) {
                                     if (byYou) {
                                         context.getString(
                                             string.text_left_the_group_by_you,
@@ -591,11 +599,10 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                         statusAndCallLogItemId?.firstOrNull()?.let {
                             callStatus = it.toInt()
                         }
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         // do nothing
                     }
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-
                         append(
                             when (callStatus) {
                                 -CallLogItem.STATUS_BUSY -> {
@@ -664,14 +671,24 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                 }
 
                 Message.TYPE_RE_JOINED_GROUP -> {
+                    val inviterName = ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                        append(context.getString(string.text_group_re_joined))
+                        if (inviterName != null) {
+                            append(context.getString(string.text_group_re_joined_by, inviterName))
+                        } else {
+                            append(context.getString(string.text_group_re_joined))
+                        }
                     }
                 }
 
                 Message.TYPE_JOINED_GROUP -> {
+                    val inviterName = ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                        append(context.getString(string.text_group_joined))
+                        if (inviterName != null) {
+                            append(context.getString(string.text_group_joined_by, inviterName))
+                        } else {
+                            append(context.getString(string.text_group_joined))
+                        }
                     }
                 }
 
@@ -764,18 +781,19 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
 
                 else -> {
                     if (discussionType == Discussion.TYPE_GROUP || discussionType == Discussion.TYPE_GROUP_V2) {
-                        (if (SettingsActivity.allowContactFirstName)
+                        val senderName = if (SettingsActivity.allowContactFirstName)
                             ContactCacheSingleton.getContactFirstName(message.senderIdentifier)
                         else
                             ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
-                                )?.let {
-                                append(
-                                    context.getString(
+
+                        senderName?.let {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(context.getString(
                                         string.text_inbound_group_message_prefix,
                                         it
-                                    )
-                                )
+                                    ))
                             }
+                        }
                     }
                     val body = message.getStringContent(context)
                     if (message.wipeStatus == Message.WIPE_STATUS_WIPED || message.wipeStatus == Message.WIPE_STATUS_REMOTE_DELETED || message.isLocationMessage) {

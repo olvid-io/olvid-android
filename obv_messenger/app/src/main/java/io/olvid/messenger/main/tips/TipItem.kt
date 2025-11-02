@@ -64,6 +64,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
@@ -73,6 +74,7 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.AccessibilityManager
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.formatMarkdown
 import io.olvid.messenger.designsystem.components.OlvidTextButton
@@ -457,6 +459,36 @@ fun TipItem(
             )
         }
 
+        Tip.UNTRUSTED_ACCESSIBILITY_SERVICE -> {
+            TipBubble(
+                icon = R.drawable.ic_error_outline,
+                title = R.string.tip_untrusted_accessibility_service_title,
+                messageString = "${stringResource(R.string.tip_untrusted_accessibility_service_message)}\n\n**${AccessibilityManager.untrustedAccessibilityServices.firstOrNull()}**",
+                action = R.string.button_label_open_settings,
+                onAction = {
+                    try {
+                        val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Logger.x(e)
+                    }
+                },
+                onDismiss = null
+            ) {
+                OlvidTextButton(
+                    modifier = Modifier
+                        .padding(end = 8.dp, bottom = 4.dp)
+                        .height(40.dp),
+                    text = stringResource(R.string.button_label_trust_service),
+                    onClick = {
+                        AccessibilityManager.untrustedAccessibilityServices.firstOrNull()?.let {
+                            AccessibilityManager.addToWhitelist(context, it)
+                            refreshTipState()
+                        }
+                    }
+                )
+            }
+        }
     }
 }
 

@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Napustili ste grupu</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Ponovno ste se pridružili grupi</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Pridružili ste se grupi</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s vas je dodao/dodala u ovu grupu</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s vas ponovno dodao/dodala u ovu grupu</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Grupa koju upravlja %1$s</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">Pridružio se grupi: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">Pridružio se grupi: %1$s</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s je dodao/dodala %2$s u grupu.</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Dodali ste %2$s u grupu</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s je uklonio/uklonila %2$s iz grupe.</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">Uklonili ste %2$s iz grupe</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s vas uklonio/uklonila iz grupe</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">Izbačen/a ste iz grupe</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">nepoznato</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Nitko</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Nacrt:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Nepoznata licenca</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Valjana licenca</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">Istečena licenca</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">Nemoguće aktivirati licencu</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">Podijeli ID kontakta</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">Isprobavanje beta značajki</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">Premium značajke dostupne besplatno</string>
@@ -1206,7 +1209,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">vaša poruka</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d reakcija na: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s je reagirao na %2$s</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">Umetni emoji</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Umetni emoji</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Dugo pritisnite za dodavanje/uklanjanje iz favorita</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Informacije za otklanjanje pogrešaka</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Broj kanala/uređaja:</string>
@@ -1217,7 +1220,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Grupe v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">Koristite animirane emotikone (ako su dostupne)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Koristite animirane emotikone (ako su dostupne)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Prostor za pohranu profila</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">Fotografije</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">Videozapisi</string>
@@ -1478,7 +1481,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Napredno</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Oslobodite punu snagu Olvid grupa!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Administratori grupe</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Sada ste administrator ove grupe</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">Sada ste administrator grupe</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Više niste administrator ove grupe</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Sada ste ovlašteni objavljivati poruke</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">Ne možete više objavljivati poruke ovdje</string>
@@ -1856,6 +1859,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">Mogući statusi poruka</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">Za grupne poruke</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">Ostali statusi</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Potvrde o čitanju su opcionalne u Olvidu.\nVaši kontakti možda su odabrali da vas ne obavijeste kada pročitaju vaše poruke.</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">Kontakt je offline već duže vrijeme</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">Čini se da ovaj kontakt nije koristio Olvid dulje vrijeme. Ne možemo jamčiti da će se vaše poruke ispravno dostaviti.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">Nije pronađen preglednik</string>
@@ -2070,7 +2074,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Nova poruka</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Novi kontakt</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Licem u lice</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Daljinski</string>
+	<string name="new_contact_remotely" hash="-1391656952">Na daljinu</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Skenirajte QR kodove jedni drugih</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Neka %1$s skenira vaš kod</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Kod je skeniran!</string>
@@ -2096,4 +2100,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">Pozivi</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Prikovana rasprava</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">Ne može %1$s skenirati vaš kod?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">Nepouzdan</string>
+	<string name="label_offline" state="needs_review" hash="315122527">Izvan mreže</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">Kako želite dodati ovaj kontakt?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">Nepoznata služba za pristupnost</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">Uočena je nepoznata služba za pristupnost. Ako niste namjerno omogućili takvu uslugu, to bi mogao biti zlonamjerni softver. Molimo provjerite je li usluga navedena u nastavku sigurna za korištenje:</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">Vjerujte ovoj usluzi</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">Usluge pristupačnosti</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">Popis pouzdanih usluga pristupačnosti:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Nema otkrivene nepoznate usluge pristupačnosti.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Nepoznata služba za pristupnost</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Uočena je nepoznata služba za pristupnost. Provjerite je li sigurna za korištenje:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Pretraži emoji</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Nedavno</string>
 </resources>

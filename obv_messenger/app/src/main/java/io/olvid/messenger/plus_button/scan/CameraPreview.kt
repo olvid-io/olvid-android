@@ -19,19 +19,30 @@
 package io.olvid.messenger.plus_button.scan
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.util.Size
+import android.view.MotionEvent
+import android.view.View
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.MeteringPointFactory
 import androidx.camera.core.Preview
+import androidx.camera.core.SurfaceOrientedMeteringPointFactory
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +51,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -51,6 +64,8 @@ import io.olvid.messenger.R
 import io.olvid.messenger.fragments.QRCodeScannerFragment
 import java.util.concurrent.Executors
 
+
+@SuppressLint("ClickableViewAccessibility")
 @Composable
 fun CameraPreview(
     modifier: Modifier = Modifier,
@@ -102,6 +117,10 @@ fun CameraPreview(
         val cameraProvider = cameraProviderFuture.get()
         if (paused) {
             cameraProvider.unbindAll()
+            // remove any touch listener
+            previewView.setOnTouchListener { v: View?, event: MotionEvent? ->
+                return@setOnTouchListener false
+            }
         } else {
             val preview = Preview.Builder()
                 .setResolutionSelector(
@@ -138,12 +157,25 @@ fun CameraPreview(
 
             try {
                 cameraProvider.unbindAll() // Unbind use cases before rebinding
-                cameraProvider.bindToLifecycle(
+                val camera = cameraProvider.bindToLifecycle(
                     lifecycleOwner,
                     cameraSelector,
                     preview,
                     imageAnalyzer
                 )
+                // add a touch listener to trigger auto-focus/auto-metering
+                previewView.setOnTouchListener { v: View?, event: MotionEvent? ->
+                    if (event?.action == MotionEvent.ACTION_DOWN && v != null) {
+                        val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(v.width.toFloat(), v.height.toFloat())
+                        val point = factory.createPoint(event.x, event.y)
+                        val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF)
+                            .addPoint(point, FocusMeteringAction.FLAG_AE)
+                            .build()
+                        camera.cameraControl.startFocusAndMetering(action)
+                        return@setOnTouchListener true
+                    }
+                    return@setOnTouchListener false
+                }
             } catch (exc: Exception) {
                 Logger.e("CameraPreview: Use case binding failed", exc)
             }
@@ -152,6 +184,16 @@ fun CameraPreview(
 
     Box(modifier = modifier) {
         AndroidView({ previewView }, modifier = modifier)
+        AnimatedVisibility(
+            modifier = modifier,
+            visible = paused,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize().background(colorResource(R.color.blackDarkOverlay))
+            )
+        }
     }
 }
 

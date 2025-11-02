@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Ai părăsit grupul</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Ai reintrat în grup</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Ai aderat la grup</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s v-a adăugat în acest grup</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s te-a readăugat în acest grup</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Grup gestionat de %1$s</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">A aderat la grup: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">A aderat la grupul: %1$s</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s a adăugat %2$s la grup</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Ai adăugat %2$s la grup</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s l-a scos pe %2$s din grup</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">L-ați eliminat pe %2$s din grup</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s v-a scos din grup</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">Ai fost eliminat din grup</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">necunoscut</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Nimeni</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Schită:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Licență necunoscută</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Licență validă</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">Licență expirată</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">Nu se poate activa licența</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">Partajează ID-ul de contact</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">Testarea funcțiilor beta</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">Funcții premium disponibile gratuit</string>
@@ -1206,7 +1209,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">mesajul tău</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d reacții la: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s a reacționat la %2$s</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">Inserează un emoji</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Insere un emoji</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Apăsați lung pentru a adăuga/elimina din favorite</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Informații de depanare</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Număr de canale/dispozitive:</string>
@@ -1217,7 +1220,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Grupuri v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">Utilizați emoji-uri animate (dacă sunt disponibile)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Utilizați emoji animate (dacă sunt disponibile)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Utilizarea spațiului de stocare al profilului</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">Fotografii</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">Videoclipuri</string>
@@ -1478,7 +1481,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Avansat</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Dezlănțuie întreaga putere a grupurilor Olvid!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Administratori de grup</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Acum sunteți administrator de grup</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">Acum ești administratorul grupului</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Nu mai sunteți administratorul acestui grup</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Acum aveți permisiunea de a trimite mesaje</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">Nu mai poți trimite mesaje aici</string>
@@ -1856,6 +1859,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">Posibile stări ale mesajelor</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">Pentru mesaje de grup</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">Alte stări</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Confirmările de citire sunt opționale în Olvid.\nContactele tale pot alege să nu te notifice când citesc mesajele tale</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">Contact offline pentru o perioadă lungă de timp</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">Se pare că acest contact nu a mai folosit Olvid de o perioadă lungă de timp. Nu putem garanta că mesajele vor fi livrate corespunzător.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">Nu a fost detectat niciun browser</string>
@@ -2070,7 +2074,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Mesaj nou</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Contact nou</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Față în față</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">De la distanță</string>
+	<string name="new_contact_remotely" hash="-1391656952">De la distanță</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Scanați codurile QR ale fiecăruia</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Roagă-l pe %1$s să scaneze codul tău</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Cod scanat!</string>
@@ -2096,4 +2100,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">Apeluri</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Conversație fixată</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">%1$s nu poate scana codul dumneavoastră?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">Nesigur</string>
+	<string name="label_offline" state="needs_review" hash="315122527">Offline</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">Cum doriți să adăugați acest contact?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">Serviciu de accesibilitate necunoscut</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">A fost detectat un serviciu de accesibilitate necunoscut. Dacă nu ați activat voluntar acest serviciu, acesta ar putea fi un software malițios. Vă rugăm să verificați dacă serviciul listat mai jos este sigur de utilizat:</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">Încredere în acest serviciu</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">Servicii de accesibilitate</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">Lista serviciilor de accesibilitate de încredere:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Nu a fost detectat niciun serviciu de accesibilitate necunoscut.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Serviciu de accesibilitate necunoscut</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">A fost detectat un serviciu de accesibilitate necunoscut, vă rugăm să verificați dacă este sigur de utilizat:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Caută un emoji</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Recente</string>
 </resources>

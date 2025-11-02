@@ -20,8 +20,8 @@
 package io.olvid.messenger.designsystem.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons.Filled
@@ -38,8 +39,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SearchBarColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,10 +53,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
@@ -71,11 +77,18 @@ import io.olvid.messenger.designsystem.theme.OlvidTypography
 @Composable
 fun SearchBar(
     modifier: Modifier = Modifier,
+    backgroundColor: Color? = null,
     searchText: String = "",
     placeholderText: String = "",
     onSearchTextChanged: (String) -> Unit = {},
     onClearClick: () -> Unit = {},
+    onFocus: (() -> Unit)? = null,
     selectAllBeacon: Any? = null, // any time selectAllBeacon object changes, the text of the search bar is fully selected
+    colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = colorResource(R.color.olvid_gradient_dark),
+        unfocusedBorderColor = colorResource(R.color.lightGrey),
+        cursorColor = colorResource(R.color.olvid_gradient_light)
+    )
 ) {
 
     Box {
@@ -83,24 +96,30 @@ fun SearchBar(
             modifier = modifier
         ) {
             SearchBarInput(
+                backgroundColor = backgroundColor,
                 searchText = searchText,
                 placeholderText = placeholderText,
                 onSearchTextChanged = onSearchTextChanged,
+                onFocus = onFocus,
                 onClearClick = onClearClick,
                 selectAllBeacon = selectAllBeacon,
+                colors = colors,
             )
         }
     }
 }
 
 @Composable
-fun SearchBarInput(
+private fun SearchBarInput(
+    backgroundColor: Color? = null,
     searchText: String,
     placeholderText: String = "",
     onSearchTextChanged: (String) -> Unit = {},
     onClearClick: () -> Unit = {},
+    onFocus: (() -> Unit)? = null,
     selectAllBeacon: Any? = null,
-    requestFocus: Boolean = false
+    requestFocus: Boolean = false,
+    colors: TextFieldColors
 ) {
     var showClearButton by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -132,7 +151,13 @@ fun SearchBarInput(
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
+            then(
+                backgroundColor?.let {
+                    Modifier.clip(RoundedCornerShape(16.dp)).background(backgroundColor)
+                } ?: Modifier
+            )
             .onFocusChanged { focusState ->
+                onFocus?.takeIf { focusState.isFocused }?.invoke()
                 showClearButton = (focusState.isFocused)
             }
             .focusRequester(focusRequester),
@@ -159,35 +184,31 @@ fun SearchBarInput(
         leadingIcon = {
             Icon(
                 painter = painterResource(R.drawable.ic_search_blue),
-                contentDescription = stringResource(R.string.menu_action_search)
+                contentDescription = stringResource(R.string.menu_action_search),
+                tint = colors.unfocusedIndicatorColor,
             )
         },
         trailingIcon = {
-            AnimatedVisibility(
-                visible = showClearButton,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                IconButton(onClick = {
+            val alpha by animateFloatAsState(if (showClearButton) 1f else 0f)
+            IconButton(
+                modifier = Modifier.alpha(alpha),
+                onClick = {
                     onClearClick()
                     focusManager.clearFocus()
-                }) {
-                    Icon(
-                        imageVector = Filled.Close,
-                        contentDescription = "Close",
-                    )
                 }
-
+            ) {
+                Icon(
+                    imageVector = Filled.Close,
+                    contentDescription = "Close",
+                    tint = colors.unfocusedIndicatorColor,
+                )
             }
         },
         textStyle = OlvidTypography.body1.copy(color = colorResource(R.color.almostBlack)),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = colorResource(R.color.olvid_gradient_dark),
-            unfocusedBorderColor = colorResource(R.color.lightGrey),
-            cursorColor = colorResource(R.color.olvid_gradient_light)
-        ),
+        colors = colors,
         maxLines = 1,
         singleLine = true,
+        shape = RoundedCornerShape(16.dp),
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = {
             keyboardController?.hide()
@@ -247,6 +268,7 @@ fun ExpandableSearchBar(
                     ),
                     value = value,
                     onValueChange = onValueChange,
+                    shape = RectangleShape,
                     trailingIcon = {
                         IconButton(onClick = {
                             expanded = false

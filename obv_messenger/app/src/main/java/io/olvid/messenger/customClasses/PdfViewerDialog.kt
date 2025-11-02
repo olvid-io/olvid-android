@@ -72,7 +72,7 @@ class PdfViewerDialog(val fyleAndStatus: FyleAndStatus) : DialogFragment() {
             setContent {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                     color = colorResource(R.color.lightGrey)
+                    color = colorResource(R.color.lightGrey)
                 ) {
                     PdfViewerScreen(Modifier.fillMaxSize(), pdfFyleAndStatus = fyleAndStatus, onClose = { dismiss() } )
                 }

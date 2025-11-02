@@ -165,6 +165,7 @@ public class NotificationActionService extends IntentService {
                 final long discussionId = intent.getLongExtra(EXTRA_DISCUSSION_ID, -1);
                 if (discussionId != -1) {
                     AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionId);
+                    AndroidNotificationManager.clearMissedCallNotification(discussionId);
                     markAllDiscussionMessagesRead(discussionId);
                 }
                 break;
@@ -211,7 +212,10 @@ public class NotificationActionService extends IntentService {
                                                 discussion.bytesOwnedIdentity,
                                                 discussion.senderThreadIdentifier,
                                                 0,
-                                                0
+                                                0,
+                                                0,
+                                                0,
+                                                null
                                         );
                                         message.id = db.messageDao().insert(message);
                                         message.post(false, null);
@@ -273,7 +277,10 @@ public class NotificationActionService extends IntentService {
                                                 discussion.bytesOwnedIdentity,
                                                 discussion.senderThreadIdentifier,
                                                 0,
-                                                0
+                                                0,
+                                                0,
+                                                0,
+                                                null
                                         );
                                         message.id = db.messageDao().insert(message);
                                         message.post(false, null);

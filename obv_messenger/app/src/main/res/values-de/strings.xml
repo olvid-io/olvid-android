@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Du hast die Gruppe verlassen</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Du bist der Gruppe erneut beigetreten</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Du bist der Gruppe beigetreten</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s hat dich zu dieser Gruppe hinzugefügt</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s hat dich wieder zu dieser Gruppe hinzugefügt</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Gruppe verwaltet von %1$s</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">Beigetreten zum Gruppenchat: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">Beigetreten der Gruppe: %1$s</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s hat %2$s zur Gruppe hinzugefügt</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Du hast %2$s zur Gruppe hinzugefügt</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s hat %2$s aus der Gruppe entfernt</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">Du hast %2$s aus der Gruppe entfernt</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s hat dich aus der Gruppe entfernt</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">Du wurdest aus der Gruppe entfernt</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">unbekannt</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Niemand</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Entwurf:</string>
@@ -625,7 +629,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Unbekannte Lizenz</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Gültige Lizenz</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">Abgelaufene Lizenz</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">Lizenz konnte nicht aktiviert werden</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">Kontakt-ID teilen</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">Beta-Funktionen ausprobieren</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">Premium-Funktionen kostenlos erhältlich</string>
@@ -1205,7 +1208,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">deine Nachricht</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d Reaktionen zu: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s hat auf %2$s reagiert</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">Emoji einfügen</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Füge ein Emoji hinzu</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Lange drücken, um zu Favoriten hinzuzufügen/dort zu entfernen</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Debug-Informationen</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Anzahl der Kanäle/Geräte:</string>
@@ -1216,7 +1219,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Gruppen v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">Animierte Emojis verwenden (falls verfügbar)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Animierte Emojis verwenden (falls verfügbar)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Profilspeicherplatz</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">Fotos</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">Videos</string>
@@ -1474,7 +1477,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Erweitert</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Entfessle die volle Leistung der Olvid-Gruppen!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Gruppenadministratoren</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Du bist jetzt ein Gruppenadministrator</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">Du bist jetzt Gruppenadministrator</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Du bist nicht mehr Gruppenadministrator</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Du darfst jetzt Nachrichten senden</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">Du kannst hier keine Nachrichten mehr senden</string>
@@ -1852,6 +1855,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">Mögliche Nachrichtenstatus</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">Für Gruppenchats</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">Andere Statusmeldungen</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Lesebestätigungen sind in Olvid optional.\nIhre Kontakte haben möglicherweise entschieden, Sie nicht zu benachrichtigen, wenn sie Ihre Nachrichten lesen.</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">Kontakt ist seit längerer Zeit offline</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">Es scheint, als ob dieser Kontakt Olvid seit längerer Zeit nicht mehr verwendet hat. Wir können nicht garantieren, dass Nachrichten korrekt zugestellt werden.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">Kein Browser gefunden</string>
@@ -2066,7 +2070,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Neue Nachricht</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Neuer Kontakt</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Von Angesicht zu Angesicht</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Fernsteuerung</string>
+	<string name="new_contact_remotely" hash="-1391656952">Aus der Ferne</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Scannt gegenseitig eure QR-Codes</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Lass %1$s deinen Code scannen</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Code gescannt!</string>
@@ -2092,4 +2096,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">Anrufe</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Angepinnte Konversation</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">Kann %1$s Ihren Code nicht scannen?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">Nicht vertrauenswürdig</string>
+	<string name="label_offline" state="needs_review" hash="315122527">Offline</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">Wie möchtest du diesen Kontakt hinzufügen?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">Unbekannter Barrierefreiheitsdienst</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">Ein unbekannter Barrierefreiheitsdienst wurde erkannt. Wenn Sie diesen Dienst nicht selbst aktiviert haben, könnte es sich um eine Schadsoftware handeln. Bitte überprüfen Sie, ob der unten aufgeführte Dienst sicher zu verwenden ist:</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">Diesen Dienst vertrauen</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">Barrierefreiheit-Dienste</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">Liste der vertrauenswürdigen Barrierefreiheitsdienste:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Keine unbekannten Barrierefreiheitsdienste gefunden.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Unbekannter Barrierefreiheitsdienst</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Ein unbekannter Barrierefreiheitsdienst wurde erkannt. Bitte prüfen Sie, ob die Nutzung sicher ist:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Emoji suchen</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Kürzlich</string>
 </resources>

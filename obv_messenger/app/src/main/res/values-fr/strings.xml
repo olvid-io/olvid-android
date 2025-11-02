@@ -235,12 +235,16 @@
     <string name="text_group_left">Vous avez quitté le groupe</string>
     <string name="text_group_re_joined">Vous avez réintégré le groupe</string>
     <string name="text_group_joined">Vous avez rejoint le groupe</string>
+    <string name="text_group_joined_by">%1$s vous a ajouté au groupe</string>
+    <string name="text_group_re_joined_by">%1$s vous a réintégré au groupe</string>
     <string name="text_group_managed_by">Groupe administré par %1$s</string>
-    <string name="text_joined_group">A rejoint le groupe : %1$s</string>
+    <string name="text_joined_group">A rejoint le groupe : %1$s</string>
     <string name="text_joined_the_group_by">%1$s a ajouté %2$s au groupe</string>
     <string name="text_joined_the_group_by_you">Vous avez ajouté %2$s au groupe</string>
     <string name="text_left_the_group_by">%1$s a retiré %2$s du groupe</string>
     <string name="text_left_the_group_by_you">Vous avez retiré %2$s du groupe</string>
+    <string name="text_removed_from_group_by">%1$s vous a retiré du groupe</string>
+    <string name="text_removed_from_group">Vous avez été retiré du groupe</string>
     <string name="text_unknown_member">inconnu</string>
     <string name="text_nobody">Personne</string>
     <string name="text_draft_message_prefix">"Brouillon : "</string>
@@ -626,7 +630,6 @@
     <string name="text_unknown_license">Licence inconnue</string>
     <string name="text_valid_license">Licence valide</string>
     <string name="text_expired_license">Licence expirée</string>
-    <string name="text_unable_to_activate_license">Impossible d\'activer la licence</string>
     <string name="button_label_share_contact_id">Partager le contact</string>
     <string name="text_beta_feature_tryout">Essai de fonctionnalités en bêta</string>
     <string name="text_premium_features_available">Fonctionnalités premiums disponibles gratuitement</string>
@@ -1207,7 +1210,7 @@
     <string name="your_message">votre message</string>
     <string name="x_reactions_to">%1$d réactions à\u00a0: %2$s</string>
     <string name="notification_text_xx_reacted">%1$s a réagi %2$s</string>
-    <string name="label_attach_emoji">Insérer un emoji</string>
+    <string name="label_attach_emoji">Insérer un émoji</string>
     <string name="label_long_press_for_favorite">Appui long pour ajouter/retirer des favoris</string>
     <string name="menu_action_debug_information">Informations de debug</string>
     <string name="debug_label_number_of_channels_and_devices">Nombre de canaux/appareils :</string>
@@ -1218,7 +1221,7 @@
     <string name="debug_label_capability_continuous_gathering">VoIP v2\u00a0: %1$b</string>
     <string name="debug_label_capability_groups_v2">Groupes v2\u00a0: %1$b</string>
     <string name="bullet">\u2022</string>
-    <string name="pref_use_animated_emojis_title">Utiliser les emojis animés (si disponible)</string>
+    <string name="pref_use_animated_emojis_title">Utiliser les émojis animés (si disponible)</string>
     <string name="label_profile_storage_usage">Espace de stockage du profil</string>
     <string name="label_photos">Photos</string>
     <string name="label_videos">Vidéos</string>
@@ -1473,7 +1476,7 @@
     <string name="label_group_custom_title">Avancé</string>
     <string name="label_group_custom_subtitle">Libérez toutes la puissance des groupes Olvid !</string>
     <string name="label_group_choose_admins">Administrateurs</string>
-    <string name="text_you_became_admin">Vous êtes maintenant un administrateur de ce groupe</string>
+    <string name="text_you_became_admin">Vous êtes maintenant administrateur de ce groupe</string>
     <string name="text_you_are_no_longer_admin">Vous n\'êtes plus administrateur de ce groupe</string>
     <string name="text_you_became_writer">Vous êtes maintenant autorisé à poster des messages</string>
     <string name="text_you_are_no_longer_writer">Vous ne pouvez plus poster de messages ici</string>
@@ -1852,6 +1855,7 @@
     <string name="dialog_title_message_status_explanations">Différents statuts de message</string>
     <string name="label_for_group_messages">Pour les messages de groupe</string>
     <string name="label_other_statuses">Autres statuts</string>
+    <string name="explanation_message_status_read_receipts">Les accusés de lecture sont facultatifs dans Olvid.\nVos contacts ont peut-être choisi de ne pas vous avertir lorsqu\'ils lisent vos messages</string>
     <string name="label_contact_offline_extended_period">Contact hors-ligne depuis longtemps</string>
     <string name="explanation_contact_offline_extended_period">Il semble que ce contact n\'a pas utilisé Olvid depuis un certain temps. Nous ne pouvons pas garantir que vos messages lui parviendront normalement.</string>
     <string name="dialog_title_no_browser_found">Aucun navigateur détecté</string>
@@ -2092,4 +2096,17 @@
     <string name="tab_title_calls">Appels</string>
     <string name="content_description_pinned_discussion">Discussion épinglée</string>
     <string name="scan_screen_share_contact_cant_scan_title">%1$s ne peut pas scanner votre code?</string>
+    <string name="label_untrusted_device">Non-approuvé</string>
+    <string name="label_offline">Hors-ligne</string>
+    <string name="dialog_message_how_add_contact">Comment souhaitez-vous ajouter ce contact ?</string>
+    <string name="tip_untrusted_accessibility_service_title">Service d\'accessibilité inconnu</string>
+    <string name="tip_untrusted_accessibility_service_message">Un service d\'accessibilité inconnu a été détecté. Si vous n\'avez pas volontairement activé un tel service, cela pourrait être un logiciel malveillant. Veuillez vérifier que le service ci-dessous peut être utilisé en toute sécurité :</string>
+    <string name="button_label_trust_service">Faire confiance à ce service</string>
+    <string name="troubleshooting_accessibility_services_valid_title">Services d\'accessibilité</string>
+    <string name="troubleshooting_accessibility_services_whitelist_description">Liste des services d\'accessibilité autorisés :</string>
+    <string name="troubleshooting_accessibility_services_valid_description">Aucun service d\'accessibilité inconnu détecté.</string>
+    <string name="troubleshooting_accessibility_services_invalid_title">Service d\'accessibilité inconnu</string>
+    <string name="troubleshooting_accessibility_services_invalid_description">Un service d\'accessibilité inconnu a été détecté. Veuillez vérifier s\'il peut être utilisé en toute sécurité :</string>
+    <string name="hint_search_emoji">Rechercher un émoji</string>
+    <string name="label_emoji_recents">Récents</string>
 </resources>

@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkRequest;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 
@@ -88,16 +87,14 @@ public class NetworkStateMonitorReceiver extends BroadcastReceiver {
 
 
     public static void monitorNetworkWhileOff(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkRequest networkRequest = new NetworkRequest.Builder().build();
-            if (connectivityManager != null) {
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent(context, NetworkStateMonitorReceiver.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-                try {
-                    connectivityManager.registerNetworkCallback(networkRequest, pendingIntent);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkRequest networkRequest = new NetworkRequest.Builder().build();
+        if (connectivityManager != null) {
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, new Intent(context, NetworkStateMonitorReceiver.class), PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            try {
+                connectivityManager.registerNetworkCallback(networkRequest, pendingIntent);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

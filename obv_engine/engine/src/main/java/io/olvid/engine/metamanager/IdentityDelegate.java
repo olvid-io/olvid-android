@@ -36,18 +36,18 @@ import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.GroupMembersChangedCallback;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.PreKeyBlobOnServer;
-import io.olvid.engine.datatypes.containers.EncodedOwnedPreKey;
-import io.olvid.engine.datatypes.containers.OwnedDeviceAndPreKey;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.TrustLevel;
 import io.olvid.engine.datatypes.UID;
+import io.olvid.engine.datatypes.containers.EncodedOwnedPreKey;
 import io.olvid.engine.datatypes.containers.Group;
 import io.olvid.engine.datatypes.containers.GroupInformation;
 import io.olvid.engine.datatypes.containers.GroupV2;
 import io.olvid.engine.datatypes.containers.GroupWithDetails;
 import io.olvid.engine.datatypes.containers.IdentityWithSerializedDetails;
 import io.olvid.engine.datatypes.containers.KeycloakGroupV2UpdateOutput;
+import io.olvid.engine.datatypes.containers.OwnedDeviceAndPreKey;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.datatypes.containers.UidAndPreKey;
 import io.olvid.engine.datatypes.containers.UserData;
@@ -227,10 +227,10 @@ public interface IdentityDelegate {
     // region groups v2
 
     void createNewGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, String serializedGroupDetails, String absolutePhotoUrl, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, HashSet<GroupV2.IdentityAndPermissionsAndDetails> otherGroupMembers, String serializedGroupType) throws Exception;
-    boolean createJoinedGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.BlobKeys blobKeys, GroupV2.ServerBlob serverBlob, boolean createdByMeOnOtherDevice) throws Exception;
+    boolean createJoinedGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.BlobKeys blobKeys, GroupV2.ServerBlob serverBlob, boolean createdByMeOnOtherDevice, Identity inviterIdentity) throws Exception;
     GroupV2.ServerBlob getGroupV2ServerBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     String getGroupV2PhotoUrl(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
-    void deleteGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
+    void deleteGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, Identity deletedBy) throws SQLException;
     void freezeGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     void unfreezeGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;
     Integer getGroupV2Version(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException;

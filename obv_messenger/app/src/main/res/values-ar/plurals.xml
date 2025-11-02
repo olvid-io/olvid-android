@@ -1,15 +1,23 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 	<plurals name="text_files" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1591553998">ملف</item>
-		<item quantity="other" state="needs_review" hash="-129414826">%1$d ملفات</item>
+		<item quantity="other" state="needs_review" hash="2115209750">%1$d ملفات</item>
+	</plurals>
+	<plurals name="text_audios" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-779820608">صوت</item>
+		<item quantity="other" state="needs_review" hash="1428618080">%1$d ملفات صوتية</item>
+	</plurals>
+	<plurals name="text_others" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1866852709">%1$d آخر</item>
+		<item quantity="other" state="needs_review" hash="-2006565347">%1$d آخرون</item>
 	</plurals>
 	<plurals name="text_images" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1471675200">صورة</item>
-		<item quantity="other" state="needs_review" hash="1017714912">%1$d صور</item>
+		<item quantity="other" state="needs_review" hash="1150196960">%1$d صور</item>
 	</plurals>
 	<plurals name="text_videos" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="366973148">فيديو</item>
-		<item quantity="other" state="needs_review" hash="-200168444">%1$d مقاطع فيديو</item>
+		<item quantity="other" state="needs_review" hash="-67686396">%1$d مقاطع فيديو</item>
 	</plurals>
 	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" ومجموعة أخرى مشتركة</item>

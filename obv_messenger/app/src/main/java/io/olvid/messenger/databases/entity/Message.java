@@ -85,9 +85,9 @@ import io.olvid.messenger.services.UnifiedForegroundService;
 @Entity(
         tableName = Message.TABLE_NAME,
         foreignKeys = @ForeignKey(entity = Discussion.class,
-                                  parentColumns = "id",
-                                  childColumns = Message.DISCUSSION_ID,
-                                  onDelete = ForeignKey.CASCADE),
+                parentColumns = "id",
+                childColumns = Message.DISCUSSION_ID,
+                onDelete = ForeignKey.CASCADE),
         indices = {
                 @Index(Message.DISCUSSION_ID),
                 @Index(Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER),
@@ -120,6 +120,9 @@ public class Message {
     public static final String SENDER_THREAD_IDENTIFIER = "sender_thread_identifier";
     public static final String TOTAL_ATTACHMENT_COUNT = "total_attachment_count";
     public static final String IMAGE_COUNT = "image_count";
+    public static final String VIDEO_COUNT = "video_count";
+    public static final String AUDIO_COUNT = "audio_count";
+    public static final String FIRST_ATTACHMENT_NAME = "first_attachment_name";
     public static final String WIPED_ATTACHMENT_COUNT = "wiped_attachment_count";
     public static final String EDITED = "edited";
     public static final String FORWARDED = "forwarded";
@@ -133,7 +136,6 @@ public class Message {
     public static final String LINK_PREVIEW_FYLE_ID = "link_preview_fyle_id"; // id of attached link preview
     public static final String JSON_MENTIONS = "json_mentions"; // this is also used to store the list of group members that were added/removed from a group
     public static final String JSON_POLL = "json_poll";
-
 
 
     // This enum is used in protobuf for webclient, please send notification if you modify anything
@@ -151,7 +153,6 @@ public class Message {
     public static final int STATUS_DELIVERED_ALL = 11;
     public static final int STATUS_DELIVERED_ALL_READ_ONE = 12;
     public static final int STATUS_DELIVERED_ALL_READ_ALL = 13;
-
 
 
     public static final int WIPE_STATUS_NONE = 0;
@@ -264,6 +265,16 @@ public class Message {
     @ColumnInfo(name = IMAGE_COUNT)
     public int imageCount;
 
+    @ColumnInfo(name = VIDEO_COUNT)
+    public int videoCount;
+
+    @ColumnInfo(name = AUDIO_COUNT)
+    public int audioCount;
+
+    @ColumnInfo(name = FIRST_ATTACHMENT_NAME)
+    @Nullable
+    public String firstAttachmentName;
+
     @ColumnInfo(name = WIPED_ATTACHMENT_COUNT)
     public int wipedAttachmentCount;
 
@@ -313,7 +324,7 @@ public class Message {
     }
 
     // default constructor required by Room
-    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, @Nullable String jsonLocation, int locationType, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, @Nullable byte[] inboundMessageEngineIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int wipedAttachmentCount, int edited, boolean forwarded, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount, long expirationStartTimestamp, boolean limitedVisibility, @Nullable Long linkPreviewFyleId, @Nullable String jsonMentions, boolean mentioned, @Nullable String jsonPoll) {
+    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, @Nullable String jsonLocation, int locationType, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, @Nullable byte[] inboundMessageEngineIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int videoCount, int audioCount, @Nullable String firstAttachmentName, int wipedAttachmentCount, int edited, boolean forwarded, boolean mentioned, boolean bookmarked, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount, long expirationStartTimestamp, boolean limitedVisibility, @Nullable Long linkPreviewFyleId, @Nullable String jsonMentions, @Nullable String jsonPoll) {
         this.senderSequenceNumber = senderSequenceNumber;
         this.contentBody = contentBody;
         this.jsonReply = jsonReply;
@@ -332,9 +343,14 @@ public class Message {
         this.senderThreadIdentifier = senderThreadIdentifier;
         this.totalAttachmentCount = totalAttachmentCount;
         this.imageCount = imageCount;
+        this.videoCount = videoCount;
+        this.audioCount = audioCount;
+        this.firstAttachmentName = firstAttachmentName;
         this.wipedAttachmentCount = wipedAttachmentCount;
         this.edited = edited;
         this.forwarded = forwarded;
+        this.mentioned = mentioned;
+        this.bookmarked = bookmarked;
         this.reactions = reactions;
         this.imageResolutions = imageResolutions;
         this.missedMessageCount = missedMessageCount;
@@ -342,7 +358,6 @@ public class Message {
         this.limitedVisibility = limitedVisibility;
         this.linkPreviewFyleId = linkPreviewFyleId;
         this.jsonMentions = jsonMentions;
-        this.mentioned = mentioned;
         this.jsonPoll = jsonPoll;
     }
 
@@ -353,7 +368,7 @@ public class Message {
     // constructor used for inbound and outbound messages
     /////////////////////
     @Ignore
-    public Message(AppDatabase db, long senderSequenceNumber, @NonNull JsonMessage jsonMessage, JsonReturnReceipt jsonReturnReceipt, long timestamp, int status, int messageType, long discussionId, @Nullable byte[] inboundMessageEngineIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount) {
+    public Message(AppDatabase db, long senderSequenceNumber, @NonNull JsonMessage jsonMessage, JsonReturnReceipt jsonReturnReceipt, long timestamp, int status, int messageType, long discussionId, @Nullable byte[] inboundMessageEngineIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageAndVideoCount, int videoCount, int audioCount, @Nullable String firstAttachmentName) {
         this.senderSequenceNumber = senderSequenceNumber;
         this.setJsonMessage(jsonMessage);
         try {
@@ -370,16 +385,20 @@ public class Message {
         this.senderIdentifier = senderIdentifier;
         this.senderThreadIdentifier = senderThreadIdentifier;
         this.totalAttachmentCount = totalAttachmentCount;
-        this.imageCount = imageCount;
+        this.imageCount = imageAndVideoCount;
+        this.videoCount = videoCount;
+        this.audioCount = audioCount;
+        this.firstAttachmentName = firstAttachmentName;
         this.wipedAttachmentCount = 0;
         this.edited = EDITED_NONE;
         this.forwarded = false;
+        this.mentioned = false;
+        this.bookmarked = false;
         this.reactions = null;
         this.imageResolutions = null;
         this.missedMessageCount = 0;
         this.expirationStartTimestamp = 0;
         this.linkPreviewFyleId = null;
-        this.mentioned = false;
 
         if (messageType == TYPE_OUTBOUND_MESSAGE && status != STATUS_SENT_FROM_ANOTHER_DEVICE) {
             computeOutboundSortIndex(db);
@@ -431,7 +450,8 @@ public class Message {
     }
 
     public static Message createEmptyDraft(long discussionId, byte[] senderIdentifier, UUID senderThreadIdentifier) {
-        return new Message(0,
+        return new Message(
+                0,
                 null,
                 null,
                 null,
@@ -447,9 +467,11 @@ public class Message {
                 null,
                 senderIdentifier,
                 senderThreadIdentifier,
-                0, 0, 0,
+                0, 0, 0, 0, null, 0,
                 EDITED_NONE,
                 false,
+                false,
+                false,
                 null,
                 null,
                 0,
@@ -457,39 +479,46 @@ public class Message {
                 false,
                 null,
                 null,
-                false,
                 null
         );
     }
 
     // a zero-length senderIdentity indicates no one is responsible for this member entering/leaving the group
-    private static Message createOrMergeInfoMessage(AppDatabase db, int messageType, long discussionId, @NonNull byte[] senderIdentity, @NonNull byte[] mention, long timestamp) {
+    private static Message createOrMergeInfoMessage(AppDatabase db, int messageType, long discussionId, @NonNull byte[] senderIdentity, @NonNull byte[] mention, long timestamp, boolean neverMerge) {
         String jsonMention = null;
-
-        if (messageType == TYPE_GROUP_MEMBER_JOINED || messageType == TYPE_GROUP_MEMBER_LEFT) {
-            // Consolidate added or removed members messages
-            Message lastMessage = db.messageDao().getLastDiscussionMessage(discussionId);
+        if (messageType == TYPE_GROUP_MEMBER_JOINED || messageType == TYPE_GROUP_MEMBER_LEFT || messageType == TYPE_JOINED_GROUP || messageType == TYPE_RE_JOINED_GROUP) {
             try {
-                if (lastMessage != null
-                        && lastMessage.messageType == messageType
-                        && lastMessage.jsonMentions != null
-                        && Arrays.equals(senderIdentity, lastMessage.senderIdentifier)
-                ) {
-                    List<JsonUserMention> mentions = AppSingleton.getJsonObjectMapper().readValue(lastMessage.jsonMentions, new TypeReference<>() { });
-                    mentions.add(new JsonUserMention(mention, 0, 0));
-                    jsonMention = AppSingleton.getJsonObjectMapper().writeValueAsString(mentions);
-                    lastMessage.jsonMentions = jsonMention;
-                    lastMessage.timestamp = timestamp; // also update the message timestamp
-                    return lastMessage;
-                } else {
-                    jsonMention = AppSingleton.getJsonObjectMapper().writeValueAsString(new JsonUserMention[]{new JsonUserMention(mention, 0, 0)});
+                if (!neverMerge) {
+                    // Consolidate added or removed members messages
+                    Message lastMessage = db.messageDao().getLastDiscussionMessage(discussionId);
+                    if (lastMessage != null
+                            && lastMessage.messageType == messageType
+                            && lastMessage.jsonMentions != null
+                            && Arrays.equals(senderIdentity, lastMessage.senderIdentifier)
+                    ) {
+                        List<JsonUserMention> mentions = AppSingleton.getJsonObjectMapper().readValue(lastMessage.jsonMentions, new TypeReference<>() {
+                        });
+                        mentions.add(new JsonUserMention(mention, 0, 0));
+                        jsonMention = AppSingleton.getJsonObjectMapper().writeValueAsString(mentions);
+                        lastMessage.jsonMentions = jsonMention;
+                        lastMessage.timestamp = timestamp; // also update the message timestamp
+                        return lastMessage;
+                    }
                 }
+
+                // if no previous message was found, or if neverMerge is true, simply create a new json from scratch
+                jsonMention = AppSingleton.getJsonObjectMapper().writeValueAsString(new JsonUserMention[]{new JsonUserMention(mention, 0, 0)});
             } catch (Exception ignored) { }
         }
 
         if (jsonMention == null) {
             // if jsonMention cannot be build, revert to the traditional info message type
-            return createInfoMessage(db, messageType, discussionId, mention, timestamp, false);
+            if (messageType == TYPE_GROUP_MEMBER_LEFT && neverMerge) {
+                // Special case for TYPE_GROUP_MEMBER_LEFT which can also be disguised TYPE_LEFT_GROUP messages!
+                return createInfoMessage(db, TYPE_LEFT_GROUP, discussionId, mention, timestamp, false);
+            } else {
+                return createInfoMessage(db, messageType, discussionId, mention, timestamp, false);
+            }
         }
 
         return new Message(
@@ -509,8 +538,10 @@ public class Message {
                 null,
                 senderIdentity,
                 new UUID(0, 0),
-                0, 0, 0,
+                0, 0, 0, 0, null, 0,
                 EDITED_NONE,
+                false,
+                false,
                 false,
                 null,
                 null,
@@ -519,7 +550,6 @@ public class Message {
                 false,
                 null,
                 jsonMention,
-                false,
                 null
         );
     }
@@ -543,9 +573,11 @@ public class Message {
                 null,
                 senderIdentity,
                 new UUID(0, 0),
-                0, 0, 0,
+                0, 0, 0, 0, null, 0,
                 EDITED_NONE,
                 false,
+                false,
+                false,
                 null,
                 null,
                 0,
@@ -553,7 +585,6 @@ public class Message {
                 false,
                 null,
                 null,
-                false,
                 null
         );
         if (!useActualTimestampForSorting) {
@@ -563,15 +594,19 @@ public class Message {
     }
 
     public static Message createMemberJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesMemberIdentity, @Nullable byte[] addedBy) {
-            return createOrMergeInfoMessage(db, TYPE_GROUP_MEMBER_JOINED, discussionId, (addedBy == null) ? new byte[0] : addedBy, bytesMemberIdentity, System.currentTimeMillis());
+        return createOrMergeInfoMessage(db, TYPE_GROUP_MEMBER_JOINED, discussionId, (addedBy == null) ? new byte[0] : addedBy, bytesMemberIdentity, System.currentTimeMillis(), false);
     }
 
     public static Message createMemberLeftGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesMemberIdentity, @Nullable byte[] removedBy) {
-        return createOrMergeInfoMessage(db, TYPE_GROUP_MEMBER_LEFT, discussionId, (removedBy == null) ? new byte[0] : removedBy,  bytesMemberIdentity, System.currentTimeMillis());
+        return createOrMergeInfoMessage(db, TYPE_GROUP_MEMBER_LEFT, discussionId, (removedBy == null) ? new byte[0] : removedBy, bytesMemberIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createLeftGroupMessage(@NonNull AppDatabase db, long discussionId, byte[] bytesOwnedIdentity) {
-        return createInfoMessage(db, TYPE_LEFT_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    public static Message createLeftGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, @Nullable byte[] removedBy) {
+        if (removedBy == null) {
+            return createInfoMessage(db, TYPE_LEFT_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+        } else {
+            return createOrMergeInfoMessage(db, TYPE_GROUP_MEMBER_LEFT, discussionId, removedBy, bytesOwnedIdentity, System.currentTimeMillis(), true);
+        }
     }
 
     public static Message createContactDeletedMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesContactIdentity) {
@@ -582,12 +617,20 @@ public class Message {
         return createInfoMessage(db, TYPE_CONTACT_RE_ADDED, discussionId, bytesContactIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createReJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
-        return createInfoMessage(db, TYPE_RE_JOINED_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    public static Message createReJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, @Nullable byte[] inviterIdentity) {
+        if (inviterIdentity != null) {
+            return createOrMergeInfoMessage(db, TYPE_RE_JOINED_GROUP, discussionId, inviterIdentity, bytesOwnedIdentity, System.currentTimeMillis(), false);
+        } else {
+            return createInfoMessage(db, TYPE_RE_JOINED_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+        }
     }
 
-    public static Message createJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
-        return createInfoMessage(db, TYPE_JOINED_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    public static Message createJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, @Nullable byte[] inviterIdentity) {
+        if (inviterIdentity != null) {
+            return createOrMergeInfoMessage(db, TYPE_JOINED_GROUP, discussionId, inviterIdentity, bytesOwnedIdentity, System.currentTimeMillis(), false);
+        } else {
+            return createInfoMessage(db, TYPE_JOINED_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+        }
     }
 
     public static Message createGainedGroupAdminMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
@@ -1007,7 +1050,7 @@ public class Message {
                 status = STATUS_SENT;
                 db.messageDao().updateStatus(id, status);
             }
-        }  catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -1504,9 +1547,13 @@ public class Message {
         return AppDatabase.getInstance().discussionDao().getBytesOwnedIdentityForDiscussionId(discussionId);
     }
 
-
     @NonNull
     public String getStringContent(Context context) {
+        return getStringContent(context, false);
+    }
+
+    @NonNull
+    public String getStringContent(Context context, Boolean withAttachmentsDescription) {
         if (messageType == TYPE_INBOUND_EPHEMERAL_MESSAGE) {
             return context.getString(R.string.text_message_content_hidden);
         } else if (wipeStatus == WIPE_STATUS_WIPED) {
@@ -1555,8 +1602,16 @@ public class Message {
         } else if (messageType == Message.TYPE_CONTACT_RE_ADDED) {
             return context.getString(R.string.text_user_added_to_contacts);
         } else if (messageType == Message.TYPE_RE_JOINED_GROUP) {
+            String inviterName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(senderIdentifier);
+            if (inviterName != null) {
+                return context.getString(R.string.text_group_re_joined_by, inviterName);
+            }
             return context.getString(R.string.text_group_re_joined);
         } else if (messageType == Message.TYPE_JOINED_GROUP) {
+            String inviterName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(senderIdentifier);
+            if (inviterName != null) {
+                return context.getString(R.string.text_group_joined_by, inviterName);
+            }
             return context.getString(R.string.text_group_joined);
         } else if (messageType == Message.TYPE_GAINED_GROUP_ADMIN) {
             return context.getString(R.string.text_you_became_admin);
@@ -1581,7 +1636,7 @@ public class Message {
                     contentBody
             );
         } else if (messageType == Message.TYPE_SCREEN_SHOT_DETECTED) {
-            if (Arrays.equals(senderIdentifier,AppSingleton.getBytesCurrentIdentity())) {
+            if (Arrays.equals(senderIdentifier, AppSingleton.getBytesCurrentIdentity())) {
                 return context.getString(R.string.text_you_captured_sensitive_message);
             } else {
                 String displayName =
@@ -1592,11 +1647,60 @@ public class Message {
                     return context.getString(R.string.text_unknown_member_captured_sensitive_message);
                 }
             }
-        } else if (contentBody == null) {
-            return "";
+        } else if (contentBody == null || withAttachmentsDescription) {
+            StringBuilder sb = new StringBuilder();
+            if (contentBody != null) {
+                sb.append(contentBody);
+            }
+            if (hasAttachments() && withAttachmentsDescription) {
+                if (contentBody != null) {
+                    sb.append(context.getString(R.string.attachments_joiner));
+                }
+                sb.append(getAttachmentsStringContent(context));
+            }
+            return sb.toString();
         } else {
             return contentBody;
         }
+    }
+
+    public String getAttachmentsStringContent(Context context) {
+        StringBuilder sb = new StringBuilder();
+        int fileCount = totalAttachmentCount - imageCount - videoCount - audioCount;
+        if (fileCount > 0) {
+            sb.append("📎 ");
+            if (firstAttachmentName != null) {
+                sb.append(firstAttachmentName);
+                if (fileCount > 1) {
+                    sb.append(context.getString(R.string.attachments_files_joiner));
+                    sb.append(context.getResources().getQuantityString(R.plurals.text_others, fileCount - 1, fileCount - 1));
+                }
+            } else {
+                sb.append(context.getResources().getQuantityString(R.plurals.text_files, fileCount, fileCount));
+            }
+        }
+        if (audioCount > 0) {
+            if (sb.length() > 0) {
+                sb.append(context.getString(R.string.attachments_joiner));
+            }
+            sb.append("🎤 ");
+            sb.append(context.getResources().getQuantityString(R.plurals.text_audios, audioCount, audioCount));
+        }
+        if (imageCount > 0) {
+            if (sb.length() > 0) {
+                sb.append(context.getString(R.string.attachments_joiner));
+            }
+            sb.append("📷 ");
+            sb.append(context.getResources().getQuantityString(R.plurals.text_images, imageCount, imageCount));
+        }
+        if (videoCount > 0) {
+            if (sb.length() > 0) {
+                sb.append(context.getString(R.string.attachments_joiner));
+            }
+            sb.append("🎥 ");
+            sb.append(context.getResources().getQuantityString(R.plurals.text_videos, videoCount, videoCount));
+        }
+        return sb.toString();
     }
 
     // check whether a Message has an empty body and no attachment (it should then be deleted)
@@ -1884,7 +1988,8 @@ public class Message {
     public List<JsonUserMention> getMentions() {
         if (jsonMentions != null) {
             try {
-                return AppSingleton.getJsonObjectMapper().readValue(jsonMentions, new TypeReference<>() { });
+                return AppSingleton.getJsonObjectMapper().readValue(jsonMentions, new TypeReference<>() {
+                });
             } catch (Exception e) {
                 Logger.w("Error decoding mentions!\n" + jsonMentions);
             }
@@ -1908,11 +2013,16 @@ public class Message {
     public boolean recomputeAttachmentCount(AppDatabase db) {
         int totalCount = 0;
         int imageCount = 0;
+        int videoCount = 0;
+        int audioCount = 0;
+        String firstAttachmentName = null;
+
         StringBuilder sb = new StringBuilder();
-        boolean first = true;
+        boolean firstImage = true;
         boolean hasLinkPreview = false;
         for (FyleMessageJoinWithStatus fmjoin : db.fyleMessageJoinWithStatusDao().getStatusesForMessage(this.id)) {
-            if (fmjoin.getNonNullMimeType().equals(OpenGraph.MIME_TYPE)) {
+            String mimeType = fmjoin.getNonNullMimeType();
+            if (mimeType.equals(OpenGraph.MIME_TYPE)) {
                 if (!hasLinkPreview) {
                     // always consider only the first link-preview attachment
                     hasLinkPreview = true;
@@ -1922,15 +2032,22 @@ public class Message {
                     }
                 }
                 continue;
-            } else if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(fmjoin.getNonNullMimeType())) {
+            } else if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(mimeType)) {
                 imageCount++;
                 if (fmjoin.imageResolution != null && !fmjoin.imageResolution.isEmpty()) {
-                    if (!first) {
+                    if (!firstImage) {
                         sb.append(";");
                     }
-                    first = false;
+                    firstImage = false;
                     sb.append(fmjoin.imageResolution);
                 }
+                if (mimeType.startsWith("video/")) {
+                    videoCount++;
+                }
+            } else if (mimeType.startsWith("audio/")) {
+                audioCount++;
+            } else if (firstAttachmentName == null) {
+                firstAttachmentName = fmjoin.fileName;
             }
             totalCount++;
         }
@@ -1939,9 +2056,18 @@ public class Message {
             db.messageDao().updateLinkPreviewFyleId(this.id, null);
         }
         String imageResolutions = sb.toString();
-        if (this.totalAttachmentCount != totalCount || this.imageCount != imageCount || !Objects.equals(this.imageResolutions, imageResolutions)) {
+        if (this.totalAttachmentCount != totalCount
+                || this.imageCount != imageCount
+                || this.videoCount != videoCount
+                || this.audioCount != audioCount
+                || !Objects.equals(this.firstAttachmentName, firstAttachmentName)
+                || !Objects.equals(this.imageResolutions, imageResolutions)
+        ) {
             this.totalAttachmentCount = totalCount;
             this.imageCount = imageCount;
+            this.videoCount = videoCount;
+            this.audioCount = audioCount;
+            this.firstAttachmentName = firstAttachmentName;
             this.imageResolutions = imageResolutions;
             return true;
         }
@@ -1969,7 +2095,7 @@ public class Message {
             wipedAttachmentCount = totalAttachmentCount;
         }
         List<FyleMessageJoinWithStatusDao.FyleAndStatus> fyleAndStatuses = db.fyleMessageJoinWithStatusDao().getFylesAndStatusForMessageSync(id);
-        for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus: fyleAndStatuses) {
+        for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : fyleAndStatuses) {
             db.fyleMessageJoinWithStatusDao().delete(fyleAndStatus.fyleMessageJoinWithStatus);
             switch (fyleAndStatus.fyleMessageJoinWithStatus.status) {
                 case FyleMessageJoinWithStatus.STATUS_DOWNLOADING:
@@ -2000,8 +2126,11 @@ public class Message {
         }
         totalAttachmentCount = 0;
         imageCount = 0;
+        videoCount = 0;
+        audioCount = 0;
+        firstAttachmentName = null;
         imageResolutions = null;
-        db.messageDao().updateAttachmentCount(id, 0, 0, wipedAttachmentCount, null);
+        db.messageDao().updateAttachmentCount(id, 0, 0, 0, 0, null, wipedAttachmentCount, null);
         linkPreviewFyleId = null;
         db.messageDao().updateLinkPreviewFyleId(id, null);
     }
@@ -2058,7 +2187,8 @@ public class Message {
     }
 
 
-    private static final Message EMPTY_MESSAGE = new Message(0, null, null, null, null, null, 0, 0, 0, 0, 0, 0, 0, null, new byte[0], UUID.randomUUID(), 0, 0, 0, 0, false, null, null, 0, 0, false, null, null, false, null);
+    private static final Message EMPTY_MESSAGE = new Message(0, null, null, null, null, null, 0, 0, 0, 0, 0, 0, 0, null, new byte[0], UUID.randomUUID(), 0, 0, 0, 0, null, 0, 0, false, false, false, null, null, 0, 0, false, null, null, null);
+
     public static Message emptyMessage() {
         return EMPTY_MESSAGE;
     }

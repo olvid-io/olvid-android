@@ -36,9 +36,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Text
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -64,7 +65,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
@@ -370,16 +370,20 @@ fun NavGraphBuilder.sourceConfirmation(
                 }
             }
 
-            Button(
+            OutlinedButton(
                 modifier = Modifier.padding(top = 24.dp),
-                elevation = null,
                 onClick = {
                     if (clicked.not()) {
                         clicked = true
                         onFinalize.invoke()
                     }
                 },
-                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 24.dp)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.olvid_gradient_light),
+                    contentColor = colorResource(R.color.alwaysWhite),
+                ),
+                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 24.dp),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 AnimatedVisibility(visible = clicked) {
                     CircularProgressIndicator(
@@ -405,24 +409,24 @@ fun NavGraphBuilder.sourceConfirmation(
 private fun Preview() {
     val navController = rememberNavController()
 
-    AppCompatTheme {
-        NavHost(
-            navController = navController,
-            startDestination = OnboardingRoutes.TRANSFER_SOURCE_CONFIRMATION
-        ) {
-            sourceConfirmation(
-                onboardingFlowViewModel = OnboardingFlowViewModel().apply {
-                    this.updateDeviceName("My Phone")
-                    this.updateTransferSelectedDevice(Device(
+    NavHost(
+        navController = navController,
+        startDestination = OnboardingRoutes.TRANSFER_SOURCE_CONFIRMATION
+    ) {
+        sourceConfirmation(
+            onboardingFlowViewModel = OnboardingFlowViewModel().apply {
+                this.updateDeviceName("My Phone")
+                this.updateTransferSelectedDevice(
+                    Device(
                         name = "Selected device",
                         uid = ByteArray(0)
-                    ))
-                },
-                onFinalize = {},
-                onBack = {},
-                onClose = {},
-                ownedIdentity = null
-            )
-        }
+                    )
+                )
+            },
+            onFinalize = {},
+            onBack = {},
+            onClose = {},
+            ownedIdentity = null
+        )
     }
 }

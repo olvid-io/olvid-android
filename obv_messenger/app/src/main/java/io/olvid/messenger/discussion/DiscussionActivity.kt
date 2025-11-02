@@ -52,6 +52,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.BackHandler
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
@@ -62,6 +63,8 @@ import androidx.appcompat.view.ActionMode.Callback
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -146,7 +149,6 @@ import androidx.paging.compose.itemKey
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat.AnimationCallback
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import coil.compose.AsyncImage
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.engine.Logger
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.engine.engine.types.identities.ObvContactActiveOrInactiveReason.FORCEFULLY_UNBLOCKED
@@ -192,6 +194,7 @@ import io.olvid.messenger.databases.tasks.SaveMultipleAttachmentsTask
 import io.olvid.messenger.databases.tasks.SetDraftReplyTask
 import io.olvid.messenger.databases.tasks.propagateMuteSettings
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
+import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.compose.ComposeMessageFragment
 import io.olvid.messenger.discussion.compose.ComposeMessageFragment.EmojiKeyboardAttachDelegate
@@ -202,6 +205,7 @@ import io.olvid.messenger.discussion.mention.MentionViewModel
 import io.olvid.messenger.discussion.message.DateHeader
 import io.olvid.messenger.discussion.message.LocationSharing
 import io.olvid.messenger.discussion.message.Message
+import io.olvid.messenger.discussion.message.MessageActionMenu
 import io.olvid.messenger.discussion.message.MessageDisclaimer
 import io.olvid.messenger.discussion.message.MissedMessageCount
 import io.olvid.messenger.discussion.message.ScrollDownButton
@@ -232,7 +236,6 @@ import java.io.FileInputStream
 import java.io.IOException
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 
 class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongClickListener,
@@ -337,18 +340,19 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
     private var discussionSearch by mutableStateOf<DiscussionSearch?>(null)
 
-    private val closeFragmentBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(enabled = false) {
-        override fun handleOnBackPressed() {
-            isEnabled = false
-            supportFragmentManager.findFragmentByTag(FULL_SCREEN_IMAGE_FRAGMENT_TAG)
-                ?.let {
-                    supportFragmentManager.beginTransaction()
-                        .setCustomAnimations(0, R.anim.fade_out)
-                        .remove(it)
-                        .commit()
-                }
+    private val closeFragmentBackPressedCallback: OnBackPressedCallback =
+        object : OnBackPressedCallback(enabled = false) {
+            override fun handleOnBackPressed() {
+                isEnabled = false
+                supportFragmentManager.findFragmentByTag(FULL_SCREEN_IMAGE_FRAGMENT_TAG)
+                    ?.let {
+                        supportFragmentManager.beginTransaction()
+                            .setCustomAnimations(0, R.anim.fade_out)
+                            .remove(it)
+                            .commit()
+                    }
+            }
         }
-    }
 
     private val FACTORY: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -374,7 +378,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
     }
 
 
-    @OptIn(ExperimentalFoundationApi::class)
+    @OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
     @SuppressLint(
         "UnsupportedChromeOsCameraSystemFeature",
         "ClickableViewAccessibility",
@@ -382,8 +386,14 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+            statusBarStyle = SystemBarStyle.light(
+                Color.Transparent.toArgb(),
+                Color.Transparent.toArgb()
+            ),
+            navigationBarStyle = SystemBarStyle.light(
+                Color.Transparent.toArgb(),
+                ContextCompat.getColor(this, R.color.blackOverlay)
+            )
         )
 
         super.onCreate(savedInstanceState)
@@ -408,12 +418,12 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
         ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { view, windowInsets ->
             val insets =
-                windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+                windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime() or WindowInsetsCompat.Type.displayCutout())
             statusBarTopPadding = insets.top
             view.updateLayoutParams<MarginLayoutParams> {
                 updateMargins(bottom = insets.bottom)
             }
-            toolBar.updatePadding(top = insets.top)
+            toolBar.updatePadding(top = insets.top, left = insets.left, right = insets.right)
             windowInsets
         }
 
@@ -422,233 +432,244 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
             val resources = LocalResources.current
             val context = LocalContext.current
             val density = LocalDensity.current
+            var selectedMessageInfo by remember { mutableStateOf<Message?>(null) }
+
+            BackHandler {
+                if (selectedMessageInfo != null) {
+                    selectedMessageInfo = null
+                } else {
+                    finishAndClearViewModel()
+                }
+            }
+
             CompositionLocalProvider(LocalUriHandler provides SecureUriHandler(context)) {
-                AppCompatTheme {
-                    val messages = discussionViewModel.pagedMessages.collectAsLazyPagingItems()
-                    val invitations by discussionViewModel.invitations.observeAsState()
-                    LaunchedEffect(Unit) {
-                        if (composeAreaBottomPadding == null) {
-                            setComposeAreaBottomPadding(with(density) { 44.dp.toPx() }.toInt())
+                val messages = discussionViewModel.pagedMessages.collectAsLazyPagingItems()
+                val invitations by discussionViewModel.invitations.observeAsState()
+                LaunchedEffect(Unit) {
+                    if (composeAreaBottomPadding == null) {
+                        setComposeAreaBottomPadding(with(density) { 44.dp.toPx() }.toInt())
+                    }
+                }
+                LaunchedEffect(invitations) {
+                    if (discussionViewModel.discussion.value?.isPreDiscussion == true && invitations.isNullOrEmpty()
+                            .not()
+                    ) {
+                        invitations?.firstOrNull()?.let {
+                            invitationViewModel.initialViewSetup(
+                                toolBarInitialView,
+                                it
+                            )
                         }
                     }
-                    LaunchedEffect(invitations) {
-                        if (discussionViewModel.discussion.value?.isPreDiscussion == true && invitations.isNullOrEmpty()
-                                .not()
-                        ) {
-                            invitations?.firstOrNull()?.let {
-                                invitationViewModel.initialViewSetup(
-                                    toolBarInitialView,
-                                    it
+                }
+                val selectedMessageIds by discussionViewModel.selectedMessageIds.observeAsState()
+                LaunchedEffect(selectedMessageIds) {
+                    if (selectedMessageIds.isNullOrEmpty().not()) {
+                        actionMode?.title =
+                            getResources().getQuantityString(
+                                R.plurals.action_mode_title_discussion,
+                                selectedMessageIds?.size ?: 0,
+                                selectedMessageIds?.size ?: 0
+                            )
+                        actionMode?.invalidate()
+                    }
+                }
+                LaunchedEffect(discussionViewModel.isSelectingForDeletion) {
+                    if (discussionViewModel.isSelectingForDeletion) {
+                        // if selection for deletion just started, create the actionMode
+                        actionMode?.finish()
+                        actionMode =
+                            actionModeCallback?.let { callback ->
+                                startSupportActionMode(
+                                    callback
                                 )
+                            }.apply {
+                                this?.title =
+                                    getResources().getQuantityString(
+                                        R.plurals.action_mode_title_discussion,
+                                        selectedMessageIds?.size ?: 0,
+                                        selectedMessageIds?.size ?: 0
+                                    )
                             }
-                        }
+                    } else {
+                        actionMode?.finish()
                     }
-                    val selectedMessageIds by discussionViewModel.selectedMessageIds.observeAsState()
-                    LaunchedEffect(selectedMessageIds) {
-                        if (selectedMessageIds.isNullOrEmpty().not()) {
-                            actionMode?.title =
-                                getResources().getQuantityString(
-                                    R.plurals.action_mode_title_discussion,
-                                    selectedMessageIds?.size ?: 0,
-                                    selectedMessageIds?.size ?: 0
+                }
+                val unreadCountAndFirstMessage by discussionViewModel.unreadCountAndFirstMessage.observeAsState()
+                val lazyListState = rememberLazyListState()
+                var searchInProgress by remember {
+                    mutableStateOf(false)
+                }
+                LaunchedEffect(lazyListState.isScrollInProgress) {
+                    if (lazyListState.isScrollInProgress && !searchInProgress) {
+                        composeMessageDelegate.hideSoftInputKeyboard()
+                    }
+                }
+                var highlightMessageId by remember {
+                    mutableLongStateOf(-1L)
+                }
+
+                // this method returns true if the messageId was found and a scroll was indeed initiated
+                // if it returns false, it attempts to load more messages
+                suspend fun scrollTo(scrollRequest: ScrollRequest): Boolean {
+                    try {
+                        if (scrollRequest.triggeredBySearch) {
+                            searchInProgress = true
+                        }
+                        val snapshot = messages.itemSnapshotList
+                        val pos = snapshot.indexOfFirst { it?.id == scrollRequest.messageId }
+
+                        if (pos != -1) {
+                            if (searchInProgress) {
+                                lazyListState.scrollToItem(
+                                    index = 1 + pos,
+                                    scrollOffset = -(lockGroupBottomPadding + (composeAreaBottomPadding
+                                        ?: 0))
                                 )
-                            actionMode?.invalidate()
-                        }
-                    }
-                    LaunchedEffect(discussionViewModel.isSelectingForDeletion) {
-                        if (discussionViewModel.isSelectingForDeletion) {
-                            // if selection for deletion just started, create the actionMode
-                            actionMode?.finish()
-                            actionMode =
-                                actionModeCallback?.let { callback ->
-                                    startSupportActionMode(
-                                        callback
-                                    )
-                                }.apply {
-                                    this?.title =
-                                        getResources().getQuantityString(
-                                            R.plurals.action_mode_title_discussion,
-                                            selectedMessageIds?.size ?: 0,
-                                            selectedMessageIds?.size ?: 0
-                                        )
-                                }
-                        } else {
-                            actionMode?.finish()
-                        }
-                    }
-                    val unreadCountAndFirstMessage by discussionViewModel.unreadCountAndFirstMessage.observeAsState()
-                    val lazyListState = rememberLazyListState()
-                    var searchInProgress by remember {
-                        mutableStateOf(false)
-                    }
-                    LaunchedEffect(lazyListState.isScrollInProgress) {
-                        if (lazyListState.isScrollInProgress && !searchInProgress) {
-                            composeMessageDelegate.hideSoftInputKeyboard()
-                        }
-                    }
-                    var highlightMessageId by remember {
-                        mutableLongStateOf(-1L)
-                    }
-
-                    // this method returns true if the messageId was found and a scroll was indeed initiated
-                    // if it returns false, it attempts to load more messages
-                    suspend fun scrollTo(scrollRequest: ScrollRequest): Boolean {
-                        try {
-                            if (scrollRequest.triggeredBySearch) {
-                                searchInProgress = true
-                            }
-                            val snapshot = messages.itemSnapshotList
-                            val pos = snapshot.indexOfFirst { it?.id == scrollRequest.messageId }
-
-                            if (pos != -1) {
-                                if (searchInProgress) {
-                                    lazyListState.scrollToItem(
-                                        index = 1 + pos,
-                                        scrollOffset = -(lockGroupBottomPadding + (composeAreaBottomPadding
-                                            ?: 0))
-                                    )
-                                } else {
-                                    Handler(mainLooper).postDelayed({
-                                        startCollectingMessagesToMarkAsRead = true
-                                    }, 300)
-                                    lazyListState.scrollToItem(
-                                        index = 2 + pos,
-                                        scrollOffset = -2 * resources.displayMetrics.heightPixels / 3
-                                    )
-                                }
-                                highlightMessageId =
-                                    if (scrollRequest.highlight) scrollRequest.messageId else -1L
                             } else {
-                                val firstNull = snapshot.indexOfFirst { it == null }
-                                if (firstNull != -1) {
-                                    // access the last snapshot message to force fetching more messages
-                                    messages[firstNull]
-                                    return false
-                                }
-                            }
-                        } finally {
-                            if (scrollRequest.triggeredBySearch) {
-                                searchInProgress = false
-                            }
-                        }
-                        return true
-                    }
-                    LaunchedEffect(discussionSearch) {
-                        discussionSearch?.apply {
-                            this.lazyListState = lazyListState
-                            scrollTo = { messageId ->
-                                scrollToMessageRequest =
-                                    ScrollRequest(messageId = messageId, triggeredBySearch = true)
-                            }
-                            intent.getStringExtra(SEARCH_QUERY_INTENT_EXTRA)?.let { searchQuery ->
-                                intent.removeExtra(SEARCH_QUERY_INTENT_EXTRA)
-                                val messageId = intent.getLongExtra(MESSAGE_ID_INTENT_EXTRA, -1)
-                                searchItem.expandActionView()
-                                muted = true
-                                (searchItem.actionView as? SearchView?)?.apply {
-                                    clearFocus()
-                                    setQuery(
-                                        searchQuery,
-                                        false
-                                    )
-                                }
-                                muted = false
-                                setInitialSearchQuery(
-                                    searchQuery,
-                                    messageId.takeUnless { it < 0 }
+                                Handler(mainLooper).postDelayed({
+                                    startCollectingMessagesToMarkAsRead = true
+                                }, 300)
+                                lazyListState.scrollToItem(
+                                    index = 2 + pos,
+                                    scrollOffset = -2 * resources.displayMetrics.heightPixels / 3
                                 )
                             }
+                            highlightMessageId =
+                                if (scrollRequest.highlight) scrollRequest.messageId else -1L
+                        } else {
+                            val firstNull = snapshot.indexOfFirst { it == null }
+                            if (firstNull != -1) {
+                                // access the last snapshot message to force fetching more messages
+                                messages[firstNull]
+                                return false
+                            }
+                        }
+                    } finally {
+                        if (scrollRequest.triggeredBySearch) {
+                            searchInProgress = false
                         }
                     }
-                    LaunchedEffect(
-                        scrollToMessageRequest,
-                        messages.itemCount,
-                        messages.itemSnapshotList.indexOfFirst { it == null }) {
-                        when (scrollToMessageRequest) {
-                            ScrollRequest.None -> Unit
-                            ScrollRequest.ToBottom -> {
-                                lazyListState.animateScrollToItem(0)
+                    return true
+                }
+                LaunchedEffect(discussionSearch) {
+                    discussionSearch?.apply {
+                        this.lazyListState = lazyListState
+                        scrollTo = { messageId ->
+                            scrollToMessageRequest =
+                                ScrollRequest(messageId = messageId, triggeredBySearch = true)
+                        }
+                        intent.getStringExtra(SEARCH_QUERY_INTENT_EXTRA)?.let { searchQuery ->
+                            intent.removeExtra(SEARCH_QUERY_INTENT_EXTRA)
+                            val messageId = intent.getLongExtra(MESSAGE_ID_INTENT_EXTRA, -1)
+                            searchItem.expandActionView()
+                            muted = true
+                            (searchItem.actionView as? SearchView?)?.apply {
+                                clearFocus()
+                                setQuery(
+                                    searchQuery,
+                                    false
+                                )
+                            }
+                            muted = false
+                            setInitialSearchQuery(
+                                searchQuery,
+                                messageId.takeUnless { it < 0 }
+                            )
+                        }
+                    }
+                }
+                LaunchedEffect(
+                    scrollToMessageRequest,
+                    messages.itemCount,
+                    messages.itemSnapshotList.indexOfFirst { it == null }) {
+                    when (scrollToMessageRequest) {
+                        ScrollRequest.None -> Unit
+                        ScrollRequest.ToBottom -> {
+                            lazyListState.animateScrollToItem(0)
+                            scrollToMessageRequest = ScrollRequest.None
+                        }
+
+                        else -> {
+                            if (messages.itemCount > 0 && scrollTo(scrollToMessageRequest)) {
+                                // if the scroll was successful, reset the scroll request
                                 scrollToMessageRequest = ScrollRequest.None
                             }
-
-                            else -> {
-                                if (messages.itemCount > 0 && scrollTo(scrollToMessageRequest)) {
-                                    // if the scroll was successful, reset the scroll request
-                                    scrollToMessageRequest = ScrollRequest.None
-                                }
+                        }
+                    }
+                }
+                LaunchedEffect(scrollToFirstUnread, unreadCountAndFirstMessage?.messageId) {
+                    if (scrollToFirstUnread) {
+                        unreadCountAndFirstMessage?.messageId?.let {
+                            if (it > 0) {
+                                scrollToMessageRequest =
+                                    ScrollRequest(messageId = it, highlight = false)
+                                scrollToFirstUnread = false
+                            } else {
+                                startCollectingMessagesToMarkAsRead = true
                             }
                         }
                     }
-                    LaunchedEffect(scrollToFirstUnread, unreadCountAndFirstMessage?.messageId) {
-                        if (scrollToFirstUnread) {
-                            unreadCountAndFirstMessage?.messageId?.let {
-                                if (it > 0) {
-                                    scrollToMessageRequest = ScrollRequest(messageId = it, highlight = false)
-                                    scrollToFirstUnread = false
-                                } else {
-                                    startCollectingMessagesToMarkAsRead = true
+                }
+                val showScrollDownButton by remember {
+                    derivedStateOf {
+                        lazyListState.firstVisibleItemIndex > 1
+                    }
+                }
+                val stickyDate by remember {
+                    derivedStateOf {
+                        lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()
+                            ?.takeIf { it.contentType != "DateHeader" }?.key?.run {
+                                messages.itemSnapshotList.items.find { it.id == this }?.timestamp?.let {
+                                    StringUtils.getDayOfDateString(context, it)
                                 }
                             }
-                        }
                     }
-                    val showScrollDownButton by remember {
-                        derivedStateOf {
-                            lazyListState.firstVisibleItemIndex > 1
-                        }
-                    }
-                    val stickyDate by remember {
-                        derivedStateOf {
-                            lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()
-                                ?.takeIf { it.contentType != "DateHeader" }?.key?.run {
-                                    messages.itemSnapshotList.items.find { it.id == this }?.timestamp?.let {
-                                        StringUtils.getDayOfDateString(context, it)
-                                    }
-                                }
-                        }
-                    }
-                    var scale by remember { mutableFloatStateOf(1f) }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(Unit) {
-                                var initialSize: Float? = null
-                                var initialScale = 1f
-                                awaitPointerEventScope {
-                                    while (true) {
-                                        val event = awaitPointerEvent(PointerEventPass.Initial)
-                                        if (event.changes.size == 2) {
-                                            event.changes.forEach { it.consume() }
-                                            if (event.type == PointerEventType.Press) {
-                                                initialSize = null
-                                            } else if (event.type == PointerEventType.Move) {
-                                                val initSize = initialSize
-                                                if (initSize == null) {
-                                                    initialSize = event.calculateCentroidSize(true)
-                                                    initialScale = scale
-                                                } else {
-                                                    scale =
-                                                        (initialScale * event.calculateCentroidSize(
-                                                            true
-                                                        ) / initSize).coerceIn(1f, 3f)
-                                                }
+                }
+                var scale by remember { mutableFloatStateOf(1f) }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            var initialSize: Float? = null
+                            var initialScale = 1f
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent(PointerEventPass.Initial)
+                                    if (event.changes.size == 2) {
+                                        event.changes.forEach { it.consume() }
+                                        if (event.type == PointerEventType.Press) {
+                                            initialSize = null
+                                        } else if (event.type == PointerEventType.Move) {
+                                            val initSize = initialSize
+                                            if (initSize == null) {
+                                                initialSize = event.calculateCentroidSize(true)
+                                                initialScale = scale
+                                            } else {
+                                                scale =
+                                                    (initialScale * event.calculateCentroidSize(
+                                                        true
+                                                    ) / initSize).coerceIn(1f, 3f)
                                             }
                                         }
                                     }
                                 }
                             }
-                            .background(color = colorResource(id = R.color.almostWhite))
-                    ) {
-                        // discussion custom background
-                        // TODO get rid of rootBackgroundImageView wrapper
-                        AsyncImage(
-                            modifier = Modifier.fillMaxSize(),
-                            model = rootBackgroundImageView.drawable
-                                ?: rootBackgroundImageView.background,
-                            contentScale = ContentScale.Crop,
-                            contentDescription = null,
-                            imageLoader = App.imageLoader
-                        )
+                        }
+                        .background(color = colorResource(id = R.color.almostWhite))
+                ) {
+                    // discussion custom background
+                    // TODO get rid of rootBackgroundImageView wrapper
+                    AsyncImage(
+                        modifier = Modifier.fillMaxSize(),
+                        model = rootBackgroundImageView.drawable
+                            ?: rootBackgroundImageView.background,
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null,
+                        imageLoader = App.imageLoader
+                    )
 
+                    SharedTransitionLayout {
                         Box(modifier = Modifier.fillMaxSize()) {
                             LazyColumn(
                                 modifier = Modifier
@@ -803,7 +824,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                         .padding(vertical = 2.dp)
                                                         .padding(
                                                             start =
-                                                            if (discussionViewModel.discussion.value?.discussionType != Discussion.TYPE_CONTACT) 48.dp else 8.dp
+                                                                if (discussionViewModel.discussion.value?.discussionType != Discussion.TYPE_CONTACT) 48.dp else 8.dp
                                                         ),
                                                     missedMessageCount = message.missedMessageCount.toInt()
                                                 )
@@ -826,6 +847,12 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                             Message(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
+                                                    .sharedElementWithCallerManagedVisibility(
+                                                        visible = selectedMessageInfo == null,
+                                                        sharedContentState = rememberSharedContentState(
+                                                            message.id
+                                                        )
+                                                    )
                                                     .then(
                                                         if (!discussionViewModel.isSelectingForDeletion)
                                                             Modifier.combinedClickable(
@@ -836,13 +863,17 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                                     )
                                                                 ),
                                                                 onDoubleClick = {
-                                                                    enterEditModeIfAllowed(message)
+                                                                    enterEditModeIfAllowed(
+                                                                        message
+                                                                    )
                                                                 },
                                                                 onLongClick = {
-                                                                    messageLongClicked(
-                                                                        message = message,
-                                                                        offset = offset
-                                                                    )
+                                                                    if (discussionViewModel.isSelectingForDeletion) {
+                                                                        messageClicked(message = message)
+                                                                    } else {
+                                                                        composeMessageDelegate.hideSoftInputKeyboard()
+                                                                        selectedMessageInfo = message
+                                                                    }
                                                                 }) { messageClicked(message = message) }
                                                         else
                                                             Modifier.clickable(
@@ -862,16 +893,19 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                     )
                                                     .padding(horizontal = 8.dp, vertical = 2.dp)
                                                     .cutoutHorizontalPadding()
+                                                    .systemBarsHorizontalPadding()
                                                     .onGloballyPositioned {
                                                         offset = it.positionOnScreen()
                                                     },
                                                 message = it,
                                                 onClick = { messageClicked(it) },
                                                 onLongClick = {
-                                                    messageLongClicked(
-                                                        it,
-                                                        offset
-                                                    )
+                                                    if (discussionViewModel.isSelectingForDeletion) {
+                                                        messageClicked(message = message)
+                                                    } else {
+                                                        composeMessageDelegate.hideSoftInputKeyboard()
+                                                        selectedMessageInfo = message
+                                                    }
                                                 },
                                                 onDoubleClick = {
                                                     enterEditModeIfAllowed(message)
@@ -924,15 +958,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                     }
                                                 },
                                                 menuAction = {
-                                                    MessageLongPressPopUp(
-                                                        activity = this@DiscussionActivity,
-                                                        discussionDelegate = discussionDelegate,
-                                                        parentView = composeView.parent as View,
-                                                        clickX = offset.x.roundToInt(),
-                                                        clickY = offset.y.roundToInt(),
-                                                        messageId = message.id,
-                                                        statusBarTopPadding = statusBarTopPadding
-                                                    )
+                                                    composeMessageDelegate.hideSoftInputKeyboard()
+                                                    selectedMessageInfo = message
                                                 },
                                                 showSender = message.isInbound && discussionViewModel.discussion.value?.discussionType != Discussion.TYPE_CONTACT,
                                                 lastFromSender = messages.itemSnapshotList.getOrNull(
@@ -940,7 +967,10 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                 )?.let {
                                                     !it.senderIdentifier.contentEquals(message.senderIdentifier)
                                                             || (it.messageType != Message.TYPE_INBOUND_MESSAGE && it.messageType != Message.TYPE_INBOUND_EPHEMERAL_MESSAGE)
-                                                            || Utils.notTheSameDay(message.timestamp, it.timestamp)
+                                                            || Utils.notTheSameDay(
+                                                        message.timestamp,
+                                                        it.timestamp
+                                                    )
                                                             || !message.isTextOnly
                                                             || (message.status == Message.STATUS_UNREAD && it.status != Message.STATUS_UNREAD)
                                                 } != false,
@@ -952,9 +982,11 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                                 openDiscussionDetailsCallback = {
                                                     toolbarClickedCallback?.run()
                                                 },
-                                                openViewerCallback = { markAsReadOnPause = false },
+                                                openViewerCallback = {
+                                                    markAsReadOnPause = false
+                                                },
                                                 saveAttachment = { saveAttachment() },
-                                                saveAllAttachments = { saveAllAttachments() }
+                                                saveAllAttachments = { saveAllAttachments() },
                                             )
                                         }
                                         // date header
@@ -1006,7 +1038,11 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                 verticalArrangement = spacedBy(8.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                var cachedCallData by remember { mutableStateOf(CallNotificationManager.currentCallData) }
+                                var cachedCallData by remember {
+                                    mutableStateOf(
+                                        CallNotificationManager.currentCallData
+                                    )
+                                }
                                 LaunchedEffect(CallNotificationManager.currentCallData) {
                                     if (CallNotificationManager.currentCallData != null) {
                                         cachedCallData = CallNotificationManager.currentCallData
@@ -1037,10 +1073,12 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                             )
                                         } == true
                                     locationMessages?.let { messages ->
-                                        LocationSharing(messages = messages,
+                                        LocationSharing(
+                                            messages = messages,
                                             isDiscussionSharingLocation = isDiscussionSharingLocation,
                                             onGotoMessage = { messageId ->
-                                                scrollToMessageRequest = ScrollRequest(messageId)
+                                                scrollToMessageRequest =
+                                                    ScrollRequest(messageId)
                                             },
                                             onStopSharingLocation = {
                                                 discussionViewModel.discussionId?.let {
@@ -1080,6 +1118,21 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                 stickyDate?.let {
                                     DateHeader(date = it.toString())
                                 }
+                            }
+                        }
+
+                        selectedMessageInfo?.let { message ->
+                            val discussion by discussionViewModel.discussion.observeAsState()
+                            discussion?.let {
+                                MessageActionMenu(
+                                    message = message,
+                                    discussion = it,
+                                    discussionDelegate = discussionDelegate,
+                                    onDismiss = { selectedMessageInfo = null },
+                                    sharedTransitionScope = this,
+                                    discussionViewModel = discussionViewModel,
+                                    linkPreviewViewModel = linkPreviewViewModel,
+                                )
                             }
                         }
                     }
@@ -1338,7 +1391,11 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                 finishAndClearViewModel()
                 return@observe
             }
-            if (optionsMenuHash != computeOptionsMenuHash(discussionViewModel.discussion.value, discussionViewModel.discussionCustomization.value)) {
+            if (optionsMenuHash != computeOptionsMenuHash(
+                    discussionViewModel.discussion.value,
+                    discussionViewModel.discussionCustomization.value
+                )
+            ) {
                 invalidateOptionsMenu()
             }
 
@@ -1564,7 +1621,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
 
             // background color and image
             if (discussionCustomization != null) {
-                val backgroundImageAbsolutePath = App.absolutePathFromRelative(discussionCustomization.backgroundImageUrl)
+                val backgroundImageAbsolutePath =
+                    App.absolutePathFromRelative(discussionCustomization.backgroundImageUrl)
                 if (backgroundImageAbsolutePath != null) {
                     App.runThread {
                         var bitmap = BitmapFactory.decodeFile(backgroundImageAbsolutePath)
@@ -2139,6 +2197,7 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         discussionViewModel.discussionId?.let { discussionId ->
             AndroidNotificationManager.setCurrentShowingDiscussionId(discussionId)
             AndroidNotificationManager.clearReceivedMessageAndReactionsNotification(discussionId)
+            AndroidNotificationManager.clearMissedCallNotification(discussionId)
         }
     }
 
@@ -2174,7 +2233,10 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         return super.dispatchTouchEvent(event)
     }
 
-    fun computeOptionsMenuHash(discussion: Discussion?, discussionCustomization: DiscussionCustomization?) : Int {
+    fun computeOptionsMenuHash(
+        discussion: Discussion?,
+        discussionCustomization: DiscussionCustomization?
+    ): Int {
         if (discussion == null) {
             return -1
         }
@@ -2183,10 +2245,10 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         }
         var hash = 1
         if (discussion.isNormalOrReadOnly) {
-            if (discussion.discussionType == Discussion.TYPE_CONTACT) {
-                hash += 2
+            hash += if (discussion.discussionType == Discussion.TYPE_CONTACT) {
+                2
             } else {
-                hash += 4
+                4
             }
             discussionCustomization?.let {
                 if (it.shouldMuteNotifications()) {
@@ -2201,7 +2263,10 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        optionsMenuHash = computeOptionsMenuHash(discussionViewModel.discussion.value, discussionViewModel.discussionCustomization.value)
+        optionsMenuHash = computeOptionsMenuHash(
+            discussionViewModel.discussion.value,
+            discussionViewModel.discussionCustomization.value
+        )
         val discussion = discussionViewModel.discussion.value
         if (discussion != null) {
             if (discussion.isPreDiscussion) {
@@ -2296,11 +2361,12 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                                         bytesContactIdentities.add(BytesKey(contact.bytesContactIdentity))
                                     }
                                 }
-                                val multiCallStartDialogFragment = MultiCallStartDialogFragment.newInstance(
-                                    discussion.bytesOwnedIdentity,
-                                    discussion.bytesDiscussionIdentifier,
-                                    bytesContactIdentities
-                                )
+                                val multiCallStartDialogFragment =
+                                    MultiCallStartDialogFragment.newInstance(
+                                        discussion.bytesOwnedIdentity,
+                                        discussion.bytesDiscussionIdentifier,
+                                        bytesContactIdentities
+                                    )
                                 multiCallStartDialogFragment.show(supportFragmentManager, "dialog")
                             }
                         }
@@ -2417,14 +2483,16 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                             .setTitle(R.string.dialog_title_unmute_notifications)
                             .setPositiveButton(R.string.button_label_unmute_notifications) { _: DialogInterface?, _: Int ->
                                 App.runThread {
-                                    val reDiscussionCustomization = AppDatabase.getInstance().discussionCustomizationDao()[discussionCustomization.discussionId]
+                                    val reDiscussionCustomization = AppDatabase.getInstance()
+                                        .discussionCustomizationDao()[discussionCustomization.discussionId]
                                     reDiscussionCustomization?.let {
                                         reDiscussionCustomization.prefMuteNotifications = false
                                         AppDatabase.getInstance().discussionCustomizationDao()
                                             .update(reDiscussionCustomization)
                                         discussionViewModel.discussion.value?.let {
                                             it.propagateMuteSettings(reDiscussionCustomization)
-                                            AppSingleton.getEngine().profileBackupNeeded(it.bytesOwnedIdentity)
+                                            AppSingleton.getEngine()
+                                                .profileBackupNeeded(it.bytesOwnedIdentity)
                                         }
                                     }
                                 }
@@ -2754,25 +2822,6 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
         discussionNoChannelGroup.addOnLayoutChangeListener(l)
     }
 
-    private fun messageLongClicked(message: Message, offset: Offset = Offset.Zero) {
-        if (discussionViewModel.isSelectingForDeletion) {
-            discussionViewModel.selectMessageId(
-                message.id,
-                message.isForwardable,
-                if (message.isBookmarkableAndDetailable) message.bookmarked else null
-            )
-        } else {
-            MessageLongPressPopUp(
-                this@DiscussionActivity,
-                discussionDelegate,
-                composeView.parent as View,
-                offset.x.roundToInt(),
-                offset.y.roundToInt(),
-                message.id,
-                statusBarTopPadding
-            )
-        }
-    }
 
     private fun messageClicked(message: Message) {
         if (discussionViewModel.isSelectingForDeletion) {
@@ -2916,7 +2965,8 @@ class DiscussionActivity : LockableActivity(), OnClickListener, AttachmentLongCl
                         Intent.EXTRA_STREAM,
                         discussionViewModel.longClickedFyleAndStatus?.contentUriForExternalSharing
                     )
-                    intent.setType(discussionViewModel.longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.nonNullMimeType)
+                    intent.type =
+                        discussionViewModel.longClickedFyleAndStatus?.fyleMessageJoinWithStatus?.nonNullMimeType
                     startActivity(
                         Intent.createChooser(
                             intent,

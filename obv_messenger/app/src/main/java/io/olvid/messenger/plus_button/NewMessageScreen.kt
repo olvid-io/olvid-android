@@ -27,6 +27,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -67,6 +69,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -79,7 +84,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
@@ -118,7 +122,7 @@ fun NewMessageScreen(
         modifier = Modifier
             .consumeWindowInsets(WindowInsets.safeDrawing)
             .nestedScroll(scrollBehavior.nestedScrollConnection),
-        containerColor = colorResource(R.color.almostWhite),
+        containerColor = Color.Transparent,
         contentColor = colorResource(R.color.almostBlack),
         topBar = {
             Box(
@@ -128,15 +132,18 @@ fun NewMessageScreen(
                     modifier = Modifier.align(Alignment.TopCenter),
                     title = {
                         if (showHeader) {
-                            Logger.e("Keycloak ${contactListViewModel.keycloakManaged.value}")
-
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(end = 16.dp),
+                                    .padding(end = 16.dp)
+                                    .requiredHeight(if (LocalTextStyle.current.fontSize > 23.sp) 192.dp else 64.dp),
                             ) {
+                                if (LocalTextStyle.current.fontSize <= 23.sp) {
+                                    Spacer(Modifier.height(4.dp))
+                                }
                                 // Search bar
                                 SearchBar(
+                                    backgroundColor = colorResource(R.color.almostWhite),
                                     searchText = contactListViewModel.getFilter().orEmpty(),
                                     placeholderText = stringResource(R.string.hint_search_contact_name),
                                     onSearchTextChanged = { contactListViewModel.setFilter(it) },
@@ -147,61 +154,67 @@ fun NewMessageScreen(
                                 if (LocalTextStyle.current.fontSize > 23.sp) {
                                     // Buttons
                                     Spacer(Modifier.height(8.dp))
-                                    TextButton(
-                                        modifier = Modifier.height(48.dp),
-                                        contentPadding = PaddingValues.Zero,
-                                        onClick = onNewContact,
-                                        colors = ButtonDefaults.textButtonColors(
-                                            contentColor = colorResource(R.color.almostBlack),
-                                        ),
-                                        shape = RoundedCornerShape(8.dp)
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .background(colorResource(R.color.almostWhite))
                                     ) {
-                                        Icon(
-                                            modifier = Modifier
-                                                .size(40.dp)
-                                                .border(width = 1.dp, color = colorResource(R.color.greyTint), shape = CircleShape)
-                                                .padding(10.dp),
-                                            painter = painterResource(R.drawable.ic_add_member),
-                                            contentDescription = null
-                                        )
-                                        Spacer(modifier = Modifier.width(16.dp))
-                                        Text(
-                                            modifier = Modifier.weight(1f, true),
-                                            text = stringResource(R.string.button_label_new_contact),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                            style = OlvidTypography.body1.copy(fontWeight = FontWeight.Medium)
-                                        )
-                                    }
+                                        TextButton(
+                                            modifier = Modifier.height(56.dp),
+                                            contentPadding = PaddingValues(horizontal = 16.dp),
+                                            onClick = onNewContact,
+                                            colors = ButtonDefaults.textButtonColors(
+                                                contentColor = colorResource(R.color.almostBlack),
+                                            ),
+                                            shape = RectangleShape
+                                        ) {
+                                            Icon(
+                                                modifier = Modifier
+                                                    .size(40.dp)
+                                                    .border(width = 1.dp, color = colorResource(R.color.greyTint), shape = CircleShape)
+                                                    .padding(10.dp),
+                                                painter = painterResource(R.drawable.ic_add_member),
+                                                contentDescription = null
+                                            )
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                            Text(
+                                                modifier = Modifier.weight(1f, true),
+                                                text = stringResource(R.string.button_label_new_contact),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                style = OlvidTypography.body1.copy(fontWeight = FontWeight.Medium)
+                                            )
+                                        }
 
+                                        TextButton(
+                                            modifier = Modifier.height(56.dp),
+                                            contentPadding = PaddingValues(horizontal = 16.dp),
+                                            onClick = onNewGroup,
+                                            colors = ButtonDefaults.textButtonColors(
+                                                contentColor = colorResource(R.color.almostBlack),
+                                            ),
+                                            shape = RectangleShape
+                                        ) {
+                                            Icon(
+                                                modifier = Modifier
+                                                    .size(40.dp)
+                                                    .border(width = 1.dp, color = colorResource(R.color.greyTint), shape = CircleShape)
+                                                    .padding(8.dp),
+                                                painter = painterResource(R.drawable.ic_group),
+                                                contentDescription = null
+                                            )
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                            Text(
+                                                modifier = Modifier.weight(1f, true),
+                                                text = stringResource(R.string.button_label_new_group),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                style = OlvidTypography.body1.copy(fontWeight = FontWeight.Medium)
+                                            )
+                                        }
+                                    }
                                     Spacer(Modifier.height(8.dp))
-
-                                    TextButton(
-                                        modifier = Modifier.height(48.dp),
-                                        contentPadding = PaddingValues.Zero,
-                                        onClick = onNewGroup,
-                                        colors = ButtonDefaults.textButtonColors(
-                                            contentColor = colorResource(R.color.almostBlack),
-                                        ),
-                                        shape = RoundedCornerShape(8.dp)
-                                    ) {
-                                        Icon(
-                                            modifier = Modifier
-                                                .size(40.dp)
-                                                .border(width = 1.dp, color = colorResource(R.color.greyTint), shape = CircleShape)
-                                                .padding(8.dp),
-                                            painter = painterResource(R.drawable.ic_group),
-                                            contentDescription = null
-                                        )
-                                        Spacer(modifier = Modifier.width(16.dp))
-                                        Text(
-                                            modifier = Modifier.weight(1f, true),
-                                            text = stringResource(R.string.button_label_new_group),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                            style = OlvidTypography.body1.copy(fontWeight = FontWeight.Medium)
-                                        )
-                                    }
                                 }
                             }
                         }
@@ -255,11 +268,11 @@ fun NewMessageScreen(
                         }
                     },
                     collapsedHeight = 64.dp,
-                    expandedHeight = if (showHeader) 232.dp else 64.dp,
+                    expandedHeight = if (showHeader) 256.dp else 64.dp,
                     scrollBehavior = scrollBehavior,
-                    colors = TopAppBarDefaults.mediumTopAppBarColors(
-                        containerColor = colorResource(id = R.color.almostWhite),
-                        scrolledContainerColor = colorResource(id = R.color.almostWhite),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = Color.Transparent,
                         titleContentColor = colorResource(id = R.color.almostBlack),
                     ),
                 )
@@ -299,7 +312,10 @@ fun NewMessageScreen(
             ContactListScreen(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = contentPadding.calculateTopPadding()),
+                    .padding(top = contentPadding.calculateTopPadding())
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(colorResource(R.color.almostWhite)),
                 contactListViewModel = contactListViewModel,
                 refreshing = false,
                 onRefresh = null,
@@ -322,18 +338,16 @@ fun NewMessageScreen(
                         KEYCLOAK -> if (contactOrKeycloakDetails.keycloakUserDetails != null
                             && ContactCacheSingleton.getContactCacheInfo(
                                 contactOrKeycloakDetails.keycloakUserDetails.identity
-                            ) == null
+                            )?.oneToOne != true
                         ) {
                             contactListViewModel.contactInvitation = contactOrKeycloakDetails
                         } else {
-                            ContactCacheSingleton.getContactCacheInfo(
-                                contactOrKeycloakDetails.keycloakUserDetails?.identity
-                            )
                             contactOrKeycloakDetails.keycloakUserDetails?.identity?.let { contactBytes ->
-                                App.openContactDetailsActivity(
+                                App.openOneToOneDiscussionActivity(
                                     context,
                                     ownedIdentity.bytesOwnedIdentity,
-                                    contactBytes
+                                    contactBytes,
+                                    false
                                 )
                                 dismissParent.invoke()
                             }

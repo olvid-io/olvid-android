@@ -39,7 +39,7 @@ public class UpdateMessageImageResolutionsTask implements Runnable {
         }
 
         if (message.recomputeAttachmentCount(db)) {
-            db.messageDao().updateAttachmentCount(messageId, message.totalAttachmentCount, message.imageCount, message.wipedAttachmentCount, message.imageResolutions);
+            db.messageDao().updateAttachmentCount(messageId, message.totalAttachmentCount, message.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
         }
     }
 }

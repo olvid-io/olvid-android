@@ -27,6 +27,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,7 +37,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,7 +53,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
@@ -82,6 +84,8 @@ fun FyleListItem(
             .height(64.dp)
             .padding(horizontal = extraHorizontalPadding)
             .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
@@ -154,54 +158,52 @@ fun FyleListItem(
 @Preview(widthDp = 240)
 @Composable
 private fun FyleListItemPreview() {
-    AppCompatTheme {
-        Column {
-            FyleListItem(
-                modifier = Modifier.background(colorResource(id = R.color.almostWhite)),
-                fyleAndStatus = FyleAndStatus().apply {
-                    fyle = Fyle()
-                    fyleMessageJoinWithStatus = FyleMessageJoinWithStatus(
-                        0,
-                        0,
-                        byteArrayOf(),
-                        "",
-                        "",
-                        "txt/plain",
-                        0,
-                        1024,
-                        byteArrayOf(),
-                        0,
-                        null
-                    )
-                },
-                onClick = {},
-                fileName = AnnotatedString("myFile with a long wrapping name.txt"),
-            )
+    Column {
+        FyleListItem(
+            modifier = Modifier.background(colorResource(id = R.color.almostWhite)),
+            fyleAndStatus = FyleAndStatus().apply {
+                fyle = Fyle()
+                fyleMessageJoinWithStatus = FyleMessageJoinWithStatus(
+                    0,
+                    0,
+                    byteArrayOf(),
+                    "",
+                    "",
+                    "txt/plain",
+                    0,
+                    1024,
+                    byteArrayOf(),
+                    0,
+                    null
+                )
+            },
+            onClick = {},
+            fileName = AnnotatedString("myFile with a long wrapping name.txt"),
+        )
 
-            Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-            FyleListItem(
-                modifier = Modifier.background(colorResource(id = R.color.almostWhite)),
-                fyleAndStatus = FyleAndStatus().apply {
-                    fyle = Fyle()
-                    fyleMessageJoinWithStatus = FyleMessageJoinWithStatus(
-                        0,
-                        0,
-                        byteArrayOf(),
-                        "",
-                        "",
-                        "application/pdf",
-                        FyleMessageJoinWithStatus.STATUS_DOWNLOADING,
-                        1024,
-                        byteArrayOf(),
-                        0,
-                        null
-                    )
-                },
-                onClick = {},
-                fileName = AnnotatedString("normal name.pdf"),
-            )
-        }
+        FyleListItem(
+            modifier = Modifier.background(colorResource(id = R.color.almostWhite)),
+            fyleAndStatus = FyleAndStatus().apply {
+                fyle = Fyle()
+                fyleMessageJoinWithStatus = FyleMessageJoinWithStatus(
+                    0,
+                    0,
+                    byteArrayOf(),
+                    "",
+                    "",
+                    "application/pdf",
+                    FyleMessageJoinWithStatus.STATUS_DOWNLOADING,
+                    1024,
+                    byteArrayOf(),
+                    0,
+                    null
+                )
+            },
+            onClick = {},
+            fileName = AnnotatedString("normal name.pdf"),
+        )
     }
 }
 

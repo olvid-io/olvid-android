@@ -234,12 +234,16 @@
 	<string name="text_group_left" state="needs_review" hash="-1226070602">Ви вийшли з групи</string>
 	<string name="text_group_re_joined" state="needs_review" hash="-1371581573">Ви знову приєдналися до групи</string>
 	<string name="text_group_joined" state="needs_review" hash="5321597">Ви приєдналися до групи</string>
+	<string name="text_group_joined_by" state="needs_review" hash="-1985882315">%1$s додав вас до цієї групи</string>
+	<string name="text_group_re_joined_by" state="needs_review" hash="661402160">%1$s знову додав вас до цієї групи</string>
 	<string name="text_group_managed_by" state="needs_review" hash="1055633872">Групу адмініструє %1$s</string>
-	<string name="text_joined_group" state="needs_review" hash="369878021">Приєднався до групи: %1$s</string>
+	<string name="text_joined_group" state="needs_review" hash="-1993767803">Приєднався до групи: %1$s</string>
 	<string name="text_joined_the_group_by" state="needs_review" hash="1662956304">%1$s додав/додала %2$s до групи</string>
 	<string name="text_joined_the_group_by_you" state="needs_review" hash="1120940527">Ви додали %2$s до групи</string>
 	<string name="text_left_the_group_by" state="needs_review" hash="231862247">%1$s видалив %2$s з групи</string>
 	<string name="text_left_the_group_by_you" state="needs_review" hash="1952902344">Ви видалили %2$s з групи</string>
+	<string name="text_removed_from_group_by" state="needs_review" hash="1806705815">%1$s видалив вас з групи</string>
+	<string name="text_removed_from_group" state="needs_review" hash="380049818">Вас видалено з групи</string>
 	<string name="text_unknown_member" state="needs_review" hash="-698194630">невідомо</string>
 	<string name="text_nobody" state="needs_review" hash="1557873647">Ніхто</string>
 	<string name="text_draft_message_prefix" state="needs_review" hash="963275241">Чернетка:</string>
@@ -626,7 +630,6 @@
 	<string name="text_unknown_license" state="needs_review" hash="1324601723">Невідома ліцензія</string>
 	<string name="text_valid_license" state="needs_review" hash="170588661">Дійсна ліцензія</string>
 	<string name="text_expired_license" state="needs_review" hash="-1518743219">Ліцензія прострочена</string>
-	<string name="text_unable_to_activate_license" state="needs_review" hash="447026154">Не вдалося активувати ліцензію</string>
 	<string name="button_label_share_contact_id" state="needs_review" hash="-2143526569">Поділитися ID контакту</string>
 	<string name="text_beta_feature_tryout" state="needs_review" hash="-1888178551">Тестування бета-функції</string>
 	<string name="text_premium_features_available" state="needs_review" hash="580187949">Преміум-функції доступні безкоштовно</string>
@@ -1207,7 +1210,7 @@
 	<string name="your_message" state="needs_review" hash="1739533147">ваше повідомлення</string>
 	<string name="x_reactions_to" state="needs_review" hash="177752739">%1$d реакцій на: %2$s</string>
 	<string name="notification_text_xx_reacted" state="needs_review" hash="647790513">%1$s відреагував на %2$s</string>
-	<string name="label_attach_emoji" state="needs_review" hash="-1964110667">Вставити емодзі</string>
+	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Вставити емодзі</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Натисніть і утримуйте, щоб додати/видалити з улюблених</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Інформація для налагодження</string>
 	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Кількість каналів/пристроїв:</string>
@@ -1218,7 +1221,7 @@
 	<string name="debug_label_capability_continuous_gathering" state="needs_review" hash="-5497208">VoIP v2: %1$b</string>
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Групи v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
-	<string name="pref_use_animated_emojis_title" state="needs_review" hash="285205826">Використовуйте анімовані емодзі (за наявності)</string>
+	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Використовуйте анімовані емодзі (за наявності)</string>
 	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Використання пам\'яті профілю</string>
 	<string name="label_photos" state="needs_review" hash="1539779714">Фотографії</string>
 	<string name="label_videos" state="needs_review" hash="-101497740">Відео</string>
@@ -1478,7 +1481,7 @@
 	<string name="label_group_custom_title" state="needs_review" hash="-462706070">Розширені</string>
 	<string name="label_group_custom_subtitle" state="needs_review" hash="-1499851202">Розкрийте всю силу груп Olvid!</string>
 	<string name="label_group_choose_admins" state="needs_review" hash="-1053855050">Адміністратори групи</string>
-	<string name="text_you_became_admin" state="needs_review" hash="-806884370">Тепер ви адміністратор групи</string>
+	<string name="text_you_became_admin" state="needs_review" hash="2137006821">Тепер ви адміністратор групи</string>
 	<string name="text_you_are_no_longer_admin" state="needs_review" hash="1766709431">Ви більше не є адміністратором групи</string>
 	<string name="text_you_became_writer" state="needs_review" hash="-1671425999">Тепер вам дозволено надсилати повідомлення</string>
 	<string name="text_you_are_no_longer_writer" state="needs_review" hash="-762273585">Ви більше не можете надсилати повідомлення тут</string>
@@ -1856,6 +1859,7 @@
 	<string name="dialog_title_message_status_explanations" state="needs_review" hash="1675814346">Можливі статуси повідомлень</string>
 	<string name="label_for_group_messages" state="needs_review" hash="-907675849">Для групових повідомлень</string>
 	<string name="label_other_statuses" state="needs_review" hash="-473122800">Інші статуси</string>
+	<string name="explanation_message_status_read_receipts" state="needs_review" hash="-1575996031">Квитанції про прочитання в Olvid необов’язкові.\nВаші контакти могли вибрати не повідомляти вас, коли вони читають ваші повідомлення.</string>
 	<string name="label_contact_offline_extended_period" state="needs_review" hash="-806132936">Контакт недоступний тривалий час</string>
 	<string name="explanation_contact_offline_extended_period" state="needs_review" hash="796677586">Схоже, цей контакт вже тривалий час не використовував Olvid. Ми не можемо гарантувати, що повідомлення будуть правильно доставлені йому.</string>
 	<string name="dialog_title_no_browser_found" state="needs_review" hash="1038746081">Не знайдено браузер</string>
@@ -2070,7 +2074,7 @@
 	<string name="label_new_message_title" state="needs_review" hash="-451735433">Нове повідомлення</string>
 	<string name="button_label_new_contact" state="needs_review" hash="1577401175">Новий контакт</string>
 	<string name="new_contact_double_scan" state="needs_review" hash="-715168511">Віч-на-віч</string>
-	<string name="new_contact_remotely" state="needs_review" hash="-1391656952">Віддалено</string>
+	<string name="new_contact_remotely" hash="-1391656952">Віддалено</string>
 	<string name="scan_screen_mutual_scan_title" state="needs_review" hash="521465485">Відскануйте QR-коди один одного</string>
 	<string name="scan_screen_mutual_scan_yours_title" state="needs_review" hash="762882994">Попросіть %1$s відсканувати ваш код</string>
 	<string name="label_scan_screen_code_scanned" state="needs_review" hash="1933572552">Код скановано!</string>
@@ -2096,4 +2100,17 @@
 	<string name="tab_title_calls" state="needs_review" hash="541245696">Дзвінки</string>
 	<string name="content_description_pinned_discussion" state="needs_review" hash="1485295573">Закріплений чат</string>
 	<string name="scan_screen_share_contact_cant_scan_title" state="needs_review" hash="1963801470">%1$s не може сканувати ваш код?</string>
+	<string name="label_untrusted_device" state="needs_review" hash="-683121720">Неперевірений</string>
+	<string name="label_offline" state="needs_review" hash="315122527">Офлайн</string>
+	<string name="dialog_message_how_add_contact" state="needs_review" hash="122779442">Як ви хочете додати цей контакт?</string>
+	<string name="tip_untrusted_accessibility_service_title" state="needs_review" hash="-2051880277">Невідома служба спеціального доступу</string>
+	<string name="tip_untrusted_accessibility_service_message" state="needs_review" hash="-1047878675">Виявлено невідому службу спеціального доступу. Якщо ви не вмикали цю службу свідомо, це може бути шкідливе програмне забезпечення. Будь ласка, перевірте, чи служба, перелічена нижче, безпечна у використанні:</string>
+	<string name="button_label_trust_service" state="needs_review" hash="-931120323">Довіряйте цьому сервісу</string>
+	<string name="troubleshooting_accessibility_services_valid_title" state="needs_review" hash="-679638591">Служби спеціального доступу</string>
+	<string name="troubleshooting_accessibility_services_whitelist_description" state="needs_review" hash="983644129">Список довірених служб спеціального доступу:</string>
+	<string name="troubleshooting_accessibility_services_valid_description" state="needs_review" hash="-1934676804">Не виявлено невідомих служб спеціального доступу.</string>
+	<string name="troubleshooting_accessibility_services_invalid_title" state="needs_review" hash="-2051880277">Невідома служба спеціального доступу</string>
+	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Виявлено невідому службу спеціального доступу. Будь ласка, перевірте, чи безпечно її використовувати:</string>
+	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Пошук емодзі</string>
+	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Останні</string>
 </resources>

@@ -231,6 +231,7 @@ class GroupV2DetailsActivity : LockableActivity() {
                                     }) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.ic_pencil),
+                                            tint = colorResource(R.color.almostBlack),
                                             contentDescription = stringResource(R.string.menu_action_edit_group_details)
                                         )
                                     }
@@ -242,6 +243,7 @@ class GroupV2DetailsActivity : LockableActivity() {
                                     }) {
                                         Icon(
                                             imageVector = Icons.Default.MoreVert,
+                                            tint = colorResource(R.color.almostBlack),
                                             contentDescription = "menu"
                                         )
                                         OlvidDropdownMenu(

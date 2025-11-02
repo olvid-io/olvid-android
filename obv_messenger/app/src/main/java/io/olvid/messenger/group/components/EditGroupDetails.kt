@@ -116,7 +116,8 @@ fun EditGroupDetailsScreen(
                     })
                 OlvidDropdownMenu(
                     expanded = photoMenuExpanded,
-                    onDismissRequest = { photoMenuExpanded = false }) {
+                    onDismissRequest = { photoMenuExpanded = false }
+                ) {
                     if (initialViewContent?.absolutePhotoUrl != null) {
                         OlvidDropdownMenuItem(
                             text = stringResource(R.string.menu_action_remove_image),

@@ -184,7 +184,9 @@ public abstract class DiscussionDao {
             Message.DISCUSSION_ID + ", " + Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER + ", " +
             Message.SENDER_IDENTIFIER + ", " + Message.SENDER_THREAD_IDENTIFIER + ", " +
             Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
-            Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " + Message.FORWARDED + ", " +
+            Message.VIDEO_COUNT + ", " + Message.AUDIO_COUNT + ", " +
+            Message.FIRST_ATTACHMENT_NAME + ", " + Message.WIPED_ATTACHMENT_COUNT + ", " +
+            Message.EDITED + ", " + Message.FORWARDED + ", " +
             Message.REACTIONS + ", " + Message.IMAGE_RESOLUTIONS + ", " + Message.MISSED_MESSAGE_COUNT + ", " +
             Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " + Message.JSON_MENTIONS + ", " + Message.MENTIONED + ", " + Message.BOOKMARKED + ", " + Message.JSON_POLL + ", " +
             " MAX(" + Message.SORT_INDEX + ") AS " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME + " GROUP BY " + Message.DISCUSSION_ID + " ) AS message " +
@@ -227,7 +229,9 @@ public abstract class DiscussionDao {
             Message.DISCUSSION_ID + ", " + Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER + ", " +
             Message.SENDER_IDENTIFIER + ", " + Message.SENDER_THREAD_IDENTIFIER + ", " +
             Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
-            Message.WIPED_ATTACHMENT_COUNT + ", " + Message.EDITED + ", " + Message.FORWARDED + ", " +
+            Message.VIDEO_COUNT + ", " + Message.AUDIO_COUNT + ", " +
+            Message.FIRST_ATTACHMENT_NAME + ", " + Message.WIPED_ATTACHMENT_COUNT + ", " +
+            Message.EDITED + ", " + Message.FORWARDED + ", " +
             Message.REACTIONS + ", " + Message.IMAGE_RESOLUTIONS + ", " + Message.MISSED_MESSAGE_COUNT + ", " +
             Message.EXPIRATION_START_TIMESTAMP + ", " + Message.LIMITED_VISIBILITY + ", " + Message.LINK_PREVIEW_FYLE_ID + ", " + Message.JSON_MENTIONS + ", " + Message.MENTIONED + ", " + Message.BOOKMARKED + ", " + Message.JSON_POLL + ", " +
             " MAX(" + Message.SORT_INDEX + ") AS " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " != " + Message.STATUS_DRAFT + " GROUP BY " + Message.DISCUSSION_ID + " ) AS message " +

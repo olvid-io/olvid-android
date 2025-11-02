@@ -133,6 +133,9 @@ public class LockScreenActivity extends AppCompatActivity {
             WindowCompat.setDecorFitsSystemWindows(window, false);
             WindowCompat.getInsetsController(window, window.getDecorView()).setAppearanceLightNavigationBars(false);
             WindowCompat.getInsetsController(window, window.getDecorView()).setAppearanceLightStatusBars(false);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                window.setHideOverlayWindows(true);
+            }
         }
 
         setContentView(R.layout.activity_lock_screen);

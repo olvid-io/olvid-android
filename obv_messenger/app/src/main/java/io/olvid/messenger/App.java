@@ -28,16 +28,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Spannable;
-import android.util.DisplayMetrics;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -45,7 +41,6 @@ import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,7 +51,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.emoji2.bundled.BundledEmojiCompatConfig;
 import androidx.emoji2.text.EmojiCompat;
 import androidx.fragment.app.Fragment;
@@ -67,16 +61,9 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -613,7 +600,13 @@ public class App extends Application implements DefaultLifecycleObserver {
     }
 
     public static void openFyleViewer(Context context, FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, Runnable onOpenCallback) {
-        if (SettingsActivity.useInternalPdfViewer() && fyleAndStatus.fyle.isComplete() && fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().equalsIgnoreCase("application/pdf") && context instanceof AppCompatActivity) {
+        if (SettingsActivity.useInternalPdfViewer()
+                && fyleAndStatus.fyle.isComplete()
+                && fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().equalsIgnoreCase("application/pdf")
+                && context instanceof AppCompatActivity) {
+            if (onOpenCallback != null) {
+                onOpenCallback.run();
+            }
             new PdfViewerDialog(fyleAndStatus).show(((AppCompatActivity) context).getSupportFragmentManager(), null);
         } else {
             openFyleInExternalViewer(context, fyleAndStatus, onOpenCallback);
@@ -789,8 +782,7 @@ public class App extends Application implements DefaultLifecycleObserver {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({android.widget.Toast.LENGTH_SHORT, android.widget.Toast.LENGTH_LONG})
-    public @interface ToastLength {
-    }
+    public @interface ToastLength { }
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({android.view.Gravity.CENTER, android.view.Gravity.BOTTOM, android.view.Gravity.TOP})
@@ -805,6 +797,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         toast(getContext().getString(resId), duration, gravity);
     }
 
+    @SuppressLint("WrongConstant")
     public static void toast(final String message, @ToastLength final int duration, @ToastGravity final int gravity) {
         new Handler(Looper.getMainLooper()).post(() -> {
             Toast toast;
@@ -1121,61 +1114,6 @@ public class App extends Application implements DefaultLifecycleObserver {
                 runnable.run();
             } catch (Exception e) {
                 Logger.x(e);
-            }
-        });
-    }
-
-    public static void setQrCodeImage(@NonNull ImageView imageView, @NonNull final String qrCodeData) {
-        final WeakReference<ImageView> imageViewWeakReference = new WeakReference<>(imageView);
-        App.runThread(() -> {
-            try {
-                HashMap<EncodeHintType, Object> hints = new HashMap<>();
-                hints.put(EncodeHintType.MARGIN, 0);
-
-                switch (SettingsActivity.getQrCorrectionLevel()) {
-                    case "L":
-                        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-                        break;
-                    case "Q":
-                        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.Q);
-                        break;
-                    case "H":
-                        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
-                        break;
-                    case "M":
-                    default:
-                        hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
-                }
-                BitMatrix qrcode = new MultiFormatWriter().encode(qrCodeData, BarcodeFormat.QR_CODE, 0, 0, hints);
-                int w = qrcode.getWidth();
-                int h = qrcode.getHeight();
-                int onColor = ContextCompat.getColor(App.getContext(), R.color.black);
-                int offColor = Color.TRANSPARENT;
-
-                int[] pixels = new int[h * w];
-                int offset = 0;
-                for (int y = 0; y < h; y++) {
-                    for (int x = 0; x < w; x++) {
-                        pixels[offset++] = qrcode.get(x, y) ? onColor : offColor;
-                    }
-                }
-                final Bitmap smallQrCodeBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-                smallQrCodeBitmap.setPixels(pixels, 0, w, 0, 0, w, h);
-                DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-                int width = metrics.widthPixels;
-                int height = metrics.heightPixels;
-                final int size = Math.min(height, width);
-                final ImageView imageView1 = imageViewWeakReference.get();
-                final Bitmap scaledBitmap = Bitmap.createScaledBitmap(smallQrCodeBitmap, size, size, false);
-                if (imageView1 != null) {
-                    new Handler(Looper.getMainLooper()).post(() -> imageView1.setImageBitmap(scaledBitmap));
-                }
-            } catch (Exception e) {
-                final ImageView imageView1 = imageViewWeakReference.get();
-                if (imageView1 != null) {
-                    new Handler(Looper.getMainLooper()).post(() -> imageView1.setImageDrawable(null));
-                }
-                e.printStackTrace();
             }
         });
     }

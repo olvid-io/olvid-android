@@ -114,7 +114,9 @@ class EngineNotificationProcessorForGroupsV2 internal constructor(engine: Engine
                     userInfo[EngineNotifications.GROUP_V2_DELETED_BYTES_OWNED_IDENTITY] as ByteArray?
                 val bytesGroupIdentifier =
                     userInfo[EngineNotifications.GROUP_V2_DELETED_BYTES_GROUP_IDENTIFIER_KEY] as ByteArray?
-                if (bytesOwnedIdentity == null || bytesGroupIdentifier == null) {
+                val deletedBy =
+                    userInfo[EngineNotifications.GROUP_V2_DELETED_DELETED_BY_KEY] as ByteArray?
+                 if (bytesOwnedIdentity == null || bytesGroupIdentifier == null) {
                     return
                 }
                 val group2 = db.group2Dao()[bytesOwnedIdentity, bytesGroupIdentifier]
@@ -122,7 +124,7 @@ class EngineNotificationProcessorForGroupsV2 internal constructor(engine: Engine
                     db.runInTransaction {
                         val discussion = db.discussionDao()
                             .getByGroupIdentifier(bytesOwnedIdentity, bytesGroupIdentifier)
-                        discussion?.lockWithMessage(db)
+                        discussion?.lockWithMessage(db, deletedBy)
                         db.group2Dao().delete(group2)
                     }
                 }

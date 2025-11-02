@@ -44,8 +44,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -73,6 +77,8 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle.State.RESUMED
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -83,9 +89,12 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.AccessibilityManager
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.AppDatabaseOpenCallback
+import io.olvid.messenger.designsystem.components.OlvidTextButton
+import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.firebase.ObvFirebaseMessagingService
 import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.services.AvailableSpaceHelper
@@ -93,8 +102,6 @@ import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
-import androidx.core.view.WindowCompat
 
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -111,7 +118,9 @@ class TroubleshootingActivity : AppCompatActivity() {
             (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
             (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-
+        if (VERSION.SDK_INT >= VERSION_CODES.S) {
+            window?.setHideOverlayWindows(true)
+        }
         setContent {
             val context = LocalContext.current
             val coroutineScope = rememberCoroutineScope()
@@ -199,46 +208,11 @@ class TroubleshootingActivity : AppCompatActivity() {
                     list.add(Triple(true, false, TroubleshootingItemType.NOTIFICATIONS))
                 }
 
-                if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                    list.add(
-                        Triple(
-                            cameraState.status.isGranted,
-                            false,
-                            TroubleshootingItemType.CAMERA
-                        )
-                    )
-                }
-
-                if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                    list.add(
-                        Triple(
-                            microphoneState.status.isGranted,
-                            false,
-                            TroubleshootingItemType.MICROPHONE
-                        )
-                    )
-                }
-
+                list.add(Triple(cameraState.status.isGranted, false, TroubleshootingItemType.CAMERA))
+                list.add(Triple(microphoneState.status.isGranted, false, TroubleshootingItemType.MICROPHONE))
                 list.add(Triple(locationState.valid, false, TroubleshootingItemType.LOCATION))
-                if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                    list.add(
-                        Triple(
-                            locationPermissionState.allPermissionsGranted,
-                            false,
-                            TroubleshootingItemType.LOCATION_PERMISSIONS
-                        )
-                    )
-                }
-
-                if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                    list.add(
-                        Triple(
-                            batteryOptimizationState.valid,
-                            true,
-                            TroubleshootingItemType.BATTERY_OPTIMIZATION
-                        )
-                    )
-                }
+                list.add(Triple(locationPermissionState.allPermissionsGranted, false, TroubleshootingItemType.LOCATION_PERMISSIONS))
+                list.add(Triple(batteryOptimizationState.valid, true, TroubleshootingItemType.BATTERY_OPTIMIZATION))
 
                 if (VERSION.SDK_INT >= VERSION_CODES.P) {
                     list.add(
@@ -290,6 +264,8 @@ class TroubleshootingActivity : AppCompatActivity() {
                 list.add(Triple(storageState.valid, true, TroubleshootingItemType.STORAGE))
 
                 list.add(Triple(storageState.valid, true, TroubleshootingItemType.DB_SYNC))
+
+                list.add(Triple(AccessibilityManager.untrustedAccessibilityServices.isEmpty(), true, TroubleshootingItemType.ACCESSIBILITY_SERVICES))
 
                 val updateAvailable = SettingsActivity.isUpdateAvailable()
                 val versionOutdated = SettingsActivity.isVersionOutdated()
@@ -345,13 +321,11 @@ class TroubleshootingActivity : AppCompatActivity() {
                             val notificationsPermissionLauncher = rememberLauncherForActivityResult(
                                 contract = RequestPermission(),
                                 onResult = { granted ->
-                                    if (VERSION.SDK_INT >= VERSION_CODES.M) {
-                                        if (granted.not() && postNotificationsState.status.shouldShowRationale.not() && shouldShowRequestPermissionRationale(
-                                                permission.POST_NOTIFICATIONS
-                                            ).not()
-                                        ) {
-                                            openAppNotificationSettings(context = context)
-                                        }
+                                    if (granted.not() && postNotificationsState.status.shouldShowRationale.not() && shouldShowRequestPermissionRationale(
+                                            permission.POST_NOTIFICATIONS
+                                        ).not()
+                                    ) {
+                                        openAppNotificationSettings(context = context)
                                     }
                                 }
                             )
@@ -776,6 +750,75 @@ class TroubleshootingActivity : AppCompatActivity() {
                                     }
                                 }
                             ) { }
+                        }
+
+                        TroubleshootingItemType.ACCESSIBILITY_SERVICES -> {
+                            var whitelist by remember { mutableStateOf(AccessibilityManager.getWhitelist(context)) }
+                            val valid = AccessibilityManager.untrustedAccessibilityServices.isEmpty()
+
+                            TroubleShootItem(
+                                title = stringResource(id = if (valid) R.string.troubleshooting_accessibility_services_valid_title else R.string.troubleshooting_accessibility_services_invalid_title),
+                                description = stringResource(id = if (valid) R.string.troubleshooting_accessibility_services_valid_description else R.string.troubleshooting_accessibility_services_invalid_description),
+                                valid = valid,
+                                critical = true,
+                                additionalContent = {
+                                        Column(
+                                            modifier = Modifier.padding(
+                                                vertical = 8.dp
+                                            )
+                                        ) {
+                                            AccessibilityManager.untrustedAccessibilityServices.forEach { serviceId ->
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Text(
+                                                        text = serviceId,
+                                                        modifier = Modifier.weight(1f, true),
+                                                        style = OlvidTypography.body2.copy(
+                                                            color = colorResource(R.color.red),
+                                                        )
+                                                    )
+                                                    OlvidTextButton(
+                                                        modifier = Modifier.weight(.8f, false),
+                                                        allowTwoLines = true,
+                                                        text = stringResource(id = R.string.button_label_trust_service)
+                                                    ) {
+                                                        AccessibilityManager.addToWhitelist(context, serviceId)
+                                                        whitelist = AccessibilityManager.getWhitelist(context)
+                                                    }
+                                                }
+                                            }
+                                            if (whitelist.isNotEmpty()) {
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                Text(
+                                                    stringResource(R.string.troubleshooting_accessibility_services_whitelist_description),
+                                                    color = colorResource(R.color.greyTint),
+                                                    style = OlvidTypography.h3
+                                                )
+                                                whitelist.forEach { serviceId ->
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text(
+                                                            text = serviceId,
+                                                            modifier = Modifier.weight(1f, true),
+                                                            style = OlvidTypography.body2.copy(
+                                                                color = colorResource(R.color.almostBlack),
+                                                            )
+                                                        )
+                                                        OlvidTextButton(
+                                                            text = stringResource(id = R.string.button_label_remove),
+                                                            contentColor = colorResource(R.color.red),
+                                                        ) {
+                                                            AccessibilityManager.removeFromWhitelist(context, serviceId)
+                                                            whitelist = AccessibilityManager.getWhitelist(context)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                            ) {}
                         }
 
                         TroubleshootingItemType.UPDATE_AVAILABLE -> {

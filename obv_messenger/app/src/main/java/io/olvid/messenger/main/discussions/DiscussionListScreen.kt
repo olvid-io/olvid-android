@@ -662,9 +662,9 @@ fun DiscussionListScreen(
                                                             ?: 0,
                                                         imageAndVideoCount = if (message?.isLocationMessage == true) 0 else message?.imageCount
                                                             ?: 0,
-                                                        videoCount = if (message?.isLocationMessage == true) 0 else message?.imageResolutions?.let {
-                                                            it.split(";").count { it.startsWith("v") }
-                                                        } ?: 0,
+                                                        videoCount = message?.videoCount ?: 0,
+                                                        audioCount = message?.audioCount ?: 0,
+                                                        firstFileName = message?.firstAttachmentName,
                                                         onClick = { onClick(discussion) },
                                                         selected = discussionListViewModel.isSelected(
                                                             discussion

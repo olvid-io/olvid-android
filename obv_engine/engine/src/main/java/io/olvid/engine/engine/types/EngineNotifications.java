@@ -359,6 +359,7 @@ public abstract class EngineNotifications {
     public static final String GROUP_V2_DELETED = "engine_notification_group_v2_deleted";
     public static final String GROUP_V2_DELETED_BYTES_OWNED_IDENTITY = "bytes_owned_identity"; // byte[]
     public static final String GROUP_V2_DELETED_BYTES_GROUP_IDENTIFIER_KEY = "bytes_group_identifier"; // byte[]
+    public static final String GROUP_V2_DELETED_DELETED_BY_KEY = "deleted_by"; // byte[]
 
     public static final String GROUP_V2_UPDATE_FAILED = "engine_notification_group_v2_update_failed";
     public static final String GROUP_V2_UPDATE_FAILED_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
@@ -404,4 +405,7 @@ public abstract class EngineNotifications {
     public static final String OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER = "engine_notification_owned_identity_synchronizing_with_server";
     public static final String OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
     public static final String OWNED_IDENTITY_SYNCHRONIZING_WITH_SERVER_STATUS_KEY = "status"; // OwnedIdentitySynchronizationStatus
+
+    public static final String OWNED_DEVICE_DISCOVERY_DONE = "engine_notification_owned_device_discovery_done";
+    public static final String OWNED_DEVICE_DISCOVERY_DONE_BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"; // byte[]
 }

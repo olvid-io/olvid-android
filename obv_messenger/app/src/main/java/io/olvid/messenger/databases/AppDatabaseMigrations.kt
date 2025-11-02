@@ -18,6 +18,9 @@
  */
 package io.olvid.messenger.databases
 
+
+import android.content.ContentValues
+import android.database.sqlite.SQLiteDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import io.olvid.engine.Logger
@@ -26,22 +29,68 @@ import io.olvid.engine.crypto.Suite
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.databases.entity.Emoji
+import io.olvid.messenger.databases.entity.Reaction
+import io.olvid.messenger.settings.SettingsActivity
 import java.nio.charset.StandardCharsets
 import java.text.Collator
 import java.util.regex.Pattern
 
-
 internal object AppDatabaseMigrations {
     val MIGRATIONS: Array<Migration> = arrayOf(
+        object : Migration(80, 81) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                Logger.w("ROOM MIGRATING FROM VERSION 80 TO 81")
+                db.beginTransaction()
+                try {
+                    db.execSQL("CREATE TABLE IF NOT EXISTS `${Emoji.TABLE_NAME}` (`${Emoji.EMOJI}` TEXT NOT NULL, `${Emoji.IS_FAVORITE}` INTEGER NOT NULL, `${Emoji.LAST_USED}` INTEGER NOT NULL, PRIMARY KEY(`${Emoji.EMOJI}`))")
+
+                    db.query("SELECT ${Reaction.EMOJI}, ${Reaction.TIMESTAMP} FROM ${Reaction.TABLE_NAME} WHERE ${Reaction.EMOJI} IS NOT NULL AND ${Reaction.BYTES_IDENTITY} IS NULL ORDER BY timestamp DESC LIMIT 10")
+                        .use { cursor ->
+                            while (cursor.moveToNext()) {
+                                val emoji = cursor.getString(0)
+                                val timestamp = cursor.getLong(1)
+
+                                val values = ContentValues()
+                                values.put(Emoji.EMOJI, emoji)
+                                values.put(Emoji.IS_FAVORITE, false)
+                                values.put(Emoji.LAST_USED, timestamp)
+                                db.insert(Emoji.TABLE_NAME, SQLiteDatabase.CONFLICT_IGNORE, values)
+                            }
+
+                            @Suppress("DEPRECATION")
+                            SettingsActivity.preferredReactions.forEachIndexed { index, reaction ->
+                                val values = ContentValues()
+                                values.put(Emoji.EMOJI, reaction)
+                                values.put(Emoji.IS_FAVORITE, true)
+                                values.put(Emoji.LAST_USED, 0)
+                                db.insert(Emoji.TABLE_NAME, SQLiteDatabase.CONFLICT_REPLACE, values)
+                            }
+                        }
+                    db.setTransactionSuccessful()
+                } finally {
+                    db.endTransaction()
+                }
+            }
+        },
+
+        object : Migration(79, 80) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                Logger.w("ROOM MIGRATING FROM VERSION 79 TO 80")
+                db.execSQL("ALTER TABLE `message_table` ADD COLUMN `video_count` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE `message_table` ADD COLUMN `audio_count` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE `message_table` ADD COLUMN `first_attachment_name` TEXT DEFAULT NULL")
+            }
+        },
 
         object : Migration(78, 79) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 Logger.w("ROOM MIGRATING FROM VERSION 78 TO 79")
-                db.execSQL( "CREATE TABLE IF NOT EXISTS `on_hold_inbox_message_table` (`bytes_owned_identity` BLOB NOT NULL, `engine_message_identifier` BLOB NOT NULL, `waiting_for_message` INTEGER NOT NULL, `server_timestamp` INTEGER NOT NULL, `expiration_timestamp` INTEGER, `bytes_contact_identity` BLOB, `bytes_group_owner_and_uid` BLOB, `bytes_group_identifier` BLOB, `sender_identifier` BLOB, `sender_thread_identifier` TEXT, `sender_sequence_number` INTEGER, `ready_to_process` INTEGER NOT NULL, PRIMARY KEY(`bytes_owned_identity`, `engine_message_identifier`, `waiting_for_message`))")
-                db.execSQL( "CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_expiration_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `expiration_timestamp`)")
-                db.execSQL( "CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_waiting_for_message_bytes_contact_identity_bytes_group_owner_and_uid_bytes_group_identifier_server_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `waiting_for_message`, `bytes_contact_identity`, `bytes_group_owner_and_uid`, `bytes_group_identifier`, `server_timestamp`)")
-                db.execSQL( "CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_sender_identifier_sender_thread_identifier_sender_sequence_number_server_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `sender_identifier`, `sender_thread_identifier`, `sender_sequence_number`, `server_timestamp`)")
-                db.execSQL( "CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_ready_to_process_server_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `ready_to_process`, `server_timestamp`)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `on_hold_inbox_message_table` (`bytes_owned_identity` BLOB NOT NULL, `engine_message_identifier` BLOB NOT NULL, `waiting_for_message` INTEGER NOT NULL, `server_timestamp` INTEGER NOT NULL, `expiration_timestamp` INTEGER, `bytes_contact_identity` BLOB, `bytes_group_owner_and_uid` BLOB, `bytes_group_identifier` BLOB, `sender_identifier` BLOB, `sender_thread_identifier` TEXT, `sender_sequence_number` INTEGER, `ready_to_process` INTEGER NOT NULL, PRIMARY KEY(`bytes_owned_identity`, `engine_message_identifier`, `waiting_for_message`))")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_expiration_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `expiration_timestamp`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_waiting_for_message_bytes_contact_identity_bytes_group_owner_and_uid_bytes_group_identifier_server_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `waiting_for_message`, `bytes_contact_identity`, `bytes_group_owner_and_uid`, `bytes_group_identifier`, `server_timestamp`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_sender_identifier_sender_thread_identifier_sender_sequence_number_server_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `sender_identifier`, `sender_thread_identifier`, `sender_sequence_number`, `server_timestamp`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_on_hold_inbox_message_table_bytes_owned_identity_ready_to_process_server_timestamp` ON `on_hold_inbox_message_table` (`bytes_owned_identity`, `ready_to_process`, `server_timestamp`)")
 
                 db.execSQL("DROP INDEX `index_reaction_request_table_discussion_id`")
                 db.execSQL("DROP INDEX `index_reaction_request_table_server_timestamp`")
@@ -962,9 +1011,10 @@ internal object AppDatabaseMigrations {
                                 if (m.find()) {
                                     try {
                                         val serverBytes =
-                                            (m.group(1)?.replace("https:/", "https://"))?.toByteArray(
-                                                StandardCharsets.UTF_8
-                                            ) ?: ByteArray(0)
+                                            (m.group(1)
+                                                ?.replace("https:/", "https://"))?.toByteArray(
+                                                    StandardCharsets.UTF_8
+                                                ) ?: ByteArray(0)
                                         val compactAuthKey = Logger.fromHexString(m.group(2))
                                         val compactEncKey = Logger.fromHexString(m.group(3))
                                         val suffix = m.group(4)
@@ -1372,7 +1422,8 @@ internal object AppDatabaseMigrations {
                             val groupId = cursor.getBlob(0)
                             val bytesOwnedIdentity = cursor.getBlob(1)
                             val name = cursor.getString(2)
-                            var bytesGroupOwnerIdentity: ByteArray? = groupId.copyOfRange(0, groupId.size - 32)
+                            var bytesGroupOwnerIdentity: ByteArray? =
+                                groupId.copyOfRange(0, groupId.size - 32)
                             db.query(
                                 "SELECT * FROM `contact_table` WHERE `bytes_contact_identity` = ? AND `bytes_owned_identity` = ?",
                                 arrayOf<Any?>(bytesGroupOwnerIdentity, bytesOwnedIdentity)
