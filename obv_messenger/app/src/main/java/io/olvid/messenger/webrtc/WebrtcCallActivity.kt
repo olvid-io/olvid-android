@@ -628,7 +628,7 @@ class WebrtcCallActivity : AppCompatActivity() {
     }
 
     private fun closeActivity() {
-        Handler(Looper.getMainLooper()).postDelayed({ finishAndRemoveTask() }, 0) // TODO: put back the 3000 wait once we remove the black screen
+        Handler(Looper.getMainLooper()).post({ finishAndRemoveTask() })
     }
 
     private fun initWebrtcCallService(webrtcCallService: WebrtcCallService?) {

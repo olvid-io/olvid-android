@@ -300,7 +300,8 @@ public class KeycloakServer implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?);")) {
             statement.setString(1, serverUrl);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setString(3, serializedJwks);
@@ -323,7 +324,8 @@ public class KeycloakServer implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setString(1, serverUrl);
@@ -337,7 +339,8 @@ public class KeycloakServer implements ObvDatabase {
     // region getters
 
     public static KeycloakServer get(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + SERVER_URL + " = ?" +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setString(1, serverUrl);
@@ -353,7 +356,8 @@ public class KeycloakServer implements ObvDatabase {
     }
 
     public static List<KeycloakServer> getAllWithPushTopic(IdentityManagerSession identityManagerSession, String pushTopic) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.getAllWithPushTopic",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + SERIALIZED_PUSH_TOPICS + " LIKE ?;")) {
             statement.setBytes(1, ("%" + pushTopic + "%").getBytes(StandardCharsets.UTF_8));
             try (ResultSet res = statement.executeQuery()) {
@@ -371,7 +375,8 @@ public class KeycloakServer implements ObvDatabase {
     // region setters
 
     public static void saveAuthState(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, String serializedAuthState) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.saveAuthState",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_AUTH_STATE + " = ? " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -383,7 +388,8 @@ public class KeycloakServer implements ObvDatabase {
     }
 
     public static void saveJwks(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, String serializedJwks) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.saveJwks",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_JWKS + " = ? " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -395,7 +401,8 @@ public class KeycloakServer implements ObvDatabase {
     }
 
     public static void saveApiKey(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, String apiKey) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.saveApiKey",
+                "UPDATE " + TABLE_NAME +
                 " SET " + OWN_API_KEY + " = ? " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -407,7 +414,8 @@ public class KeycloakServer implements ObvDatabase {
     }
 
     public static void setKeycloakUserId(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, String userId) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.setKeycloakUserId",
+                "UPDATE " + TABLE_NAME +
                 " SET " + KEYCLOAK_USER_ID + " = ? " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -419,7 +427,8 @@ public class KeycloakServer implements ObvDatabase {
     }
 
     public void setKeycloakUserId(String userId) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.setKeycloakUserId",
+                "UPDATE " + TABLE_NAME +
                 " SET " + KEYCLOAK_USER_ID + " = ? " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -432,7 +441,8 @@ public class KeycloakServer implements ObvDatabase {
     }
 
     public void setTransferRestricted(boolean transferRestricted) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.setTransferRestricted",
+                "UPDATE " + TABLE_NAME +
                 " SET " + TRANSFER_RESTRICTED + " = ? " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -464,7 +474,8 @@ public class KeycloakServer implements ObvDatabase {
             }
         }
 
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.setPushTopics",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_PUSH_TOPICS + " = ? " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -477,7 +488,8 @@ public class KeycloakServer implements ObvDatabase {
     }
 
     public void setSelfRevocationTestNonce(String selfRevocationTestNonce) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.setSelfRevocationTestNonce",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SELF_REVOCATION_TEST_NONCE + " = ? " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -491,7 +503,8 @@ public class KeycloakServer implements ObvDatabase {
 
     public static void setSignatureKey(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, JsonWebKey signatureKey) throws SQLException {
         // everytime we reset the signature key, we also reset the latestGroupUpdateTimestamp to re-download all groups
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.setSignatureKey",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_SIGNATURE_KEY + " = ?, " +
                 LATEST_GROUP_UPDATE_TIMESTAMP + " = 0 " +
                 " WHERE " + SERVER_URL + " = ? " +
@@ -504,7 +517,8 @@ public class KeycloakServer implements ObvDatabase {
     }
 
     public static void setLatestRevocationListTimestamp(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, long latestRevocationListTimetamp) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.setLatestRevocationListTimestamp",
+                "UPDATE " + TABLE_NAME +
                 " SET " + LATEST_REVOCATION_LIST_TIMESTAMP + " = ? " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -516,7 +530,8 @@ public class KeycloakServer implements ObvDatabase {
     }
 
     public void setLatestGroupUpdateTimestamp(long latestGroupUpdateTimestamp) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.setLatestGroupUpdateTimestamp",
+                "UPDATE " + TABLE_NAME +
                 " SET " + LATEST_GROUP_UPDATE_TIMESTAMP + " = ? " +
                 " WHERE " + SERVER_URL + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {

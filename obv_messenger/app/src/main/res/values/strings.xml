@@ -537,7 +537,7 @@
     <string name="hint_notification_message">Message</string>
     <string name="notification_action_send_message">Send message</string>
     <string name="text_name_and_message_separator">": "</string>
-    <string name="webrtc_status_initializing_call">Initializing call</string>
+    <string name="webrtc_status_initial">Initializing call</string>
     <string name="webrtc_status_waiting_for_permission">Waiting for audio permission</string>
     <string name="webrtc_status_verifying_credentials">Verifying credentials</string>
     <string name="webrtc_status_connecting_to_peer">Securing connection</string>
@@ -1229,7 +1229,10 @@
     <string name="label_attach_emoji">Insert an emoji</string>
     <string name="label_long_press_for_favorite">Long press to add/remove from favorites</string>
     <string name="menu_action_debug_information">Debug information</string>
-    <string name="debug_label_number_of_channels_and_devices">Number of channels/devices:</string>
+    <string name="debug_label_number_of_devices">Number of devices:</string>
+    <string name="debug_label_number_of_devices_no_channel">Without secure channel:</string>
+    <string name="debug_label_number_of_devices_pre_key" translatable="false">Pre-key:</string>
+    <string name="debug_label_number_of_devices_oblivious_channel" translatable="false">Oblivious channel:</string>
     <string name="debug_label_server">Server:</string>
     <string name="debug_label_identity_provider">Identity provider:</string>
     <string name="debug_label_identity_link">ID link:</string>
@@ -2035,7 +2038,7 @@
     <string name="explanation_backup_key_found_in_settings">This key can also be found later in your settings.</string>
     <string name="tip_setup_new_backups_title">Don\'t loose access to your profiles!</string>
     <string name="tip_setup_new_backups_message">Backups allow to restore your profiles if you lose access to this device. The new experience is easier than ever 😉, and can be setup in a few seconds.</string>
-    <string name="button_label_configure_backups">Configure backups</string>
+    <string name="button_label_configure_backups">Enable backups</string>
     <string name="tip_write_backup_key_title">Do not forget to write down your backup key 😇</string>
     <string name="tip_write_backup_key_message">Your backup key is essential for restoring your profiles if you lose access to this device.</string>
     <string name="tip_troubleshooting_title">Improve your Olvid experience 🚀</string>
@@ -2144,4 +2147,9 @@
     <string name="troubleshooting_accessibility_services_invalid_description">An unknown accessibility service has been detected, please check that it is safe to use:</string>
     <string name="hint_search_emoji">Search an emoji</string>
     <string name="label_emoji_recents">Recent</string>
+    <string name="menu_action_refresh_status">Refresh contact status</string>
+    <string name="pref_show_engine_database_statistics_title">Display engine database query timings</string>
+    <string name="dialog_title_engine_db_statistics">Engine database query timings</string>
+    <string name="webrtc_status_initializing_call">Waiting for peer\'s device to respond</string>
+    <string name="webrtc_status_start_call_timeout">Peer device unreachable</string>
 </resources>

@@ -29,6 +29,7 @@ import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.OperationQueue;
+import io.olvid.engine.datatypes.PriorityOperation;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.protocol.databases.LinkBetweenProtocolInstances;
 import io.olvid.engine.protocol.databases.ProtocolInstance;
@@ -37,7 +38,7 @@ import io.olvid.engine.protocol.datatypes.GenericProtocolMessageToSend;
 import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;
 import io.olvid.engine.protocol.datatypes.ProtocolManagerSessionFactory;
 
-public final class ProtocolOperation extends Operation {
+public final class ProtocolOperation extends PriorityOperation {
     // possible reasons for cancel
     public static final int RFC_DELEGATE_NOT_SET = 1;
     public static final int RFC_MESSAGE_NOT_FOUND = 2;
@@ -50,15 +51,22 @@ public final class ProtocolOperation extends Operation {
 
     private final ProtocolManagerSessionFactory protocolManagerSessionFactory;
     private final UID receivedMessageUid;
+    private final int protocolId;
+    private final int failedAttempts;
+    private final long creationTime;
     private final PRNGService prng;
     private final ObjectMapper jsonObjectMapper;
 
-    // The following 2 variables are set during operation execution to used in the onFinishCallback of the coordinator
+    // The following 2 variables are set during operation execution to be used in the onFinishCallback of the coordinator
     private UID protocolInstanceUid;
     private Identity protocolOwnedIdentity;
 
     public UID getReceivedMessageUid() {
         return receivedMessageUid;
+    }
+
+    public int getProtocolId() {
+        return protocolId;
     }
 
     public UID getProtocolInstanceUid() {
@@ -69,12 +77,24 @@ public final class ProtocolOperation extends Operation {
         return protocolOwnedIdentity;
     }
 
-    public ProtocolOperation(ProtocolManagerSessionFactory protocolManagerSessionFactory, UID receivedMessageUid, PRNGService prng, ObjectMapper jsonObjectMapper, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
+    public ProtocolOperation(ProtocolManagerSessionFactory protocolManagerSessionFactory, UID receivedMessageUid, int protocolId, int failedAttempts, PRNGService prng, ObjectMapper jsonObjectMapper, Operation.OnFinishCallback onFinishCallback, Operation.OnCancelCallback onCancelCallback) {
         super(receivedMessageUid, onFinishCallback, onCancelCallback);
         this.protocolManagerSessionFactory = protocolManagerSessionFactory;
         this.receivedMessageUid = receivedMessageUid;
+        this.protocolId = protocolId;
+        this.failedAttempts = failedAttempts;
+        this.creationTime = System.currentTimeMillis();
         this.prng = prng;
         this.jsonObjectMapper = jsonObjectMapper;
+    }
+
+    @Override
+    public long getPriority() {
+        // failed ProtocolOperation go to the back of the queue,
+        // we add the creationTimestamp to preserve some kind of FIFO for same priority protocols
+        return ((long) failedAttempts) << 60 + // max failedAttempts is 5, so it fits on 3 bits
+                ConcreteProtocol.getProtocolPriority(protocolId) << 50 + // priority fits on 10 bits
+                creationTime; // currentTimeMillis() should fit on 50 bits for quite some time
     }
 
     @Override
@@ -93,7 +113,6 @@ public final class ProtocolOperation extends Operation {
                     return;
                 }
 
-                int protocolId = message.getProtocolId();
                 // Set this for use in the onFinishCallback
                 this.protocolInstanceUid = message.getProtocolInstanceUid();
                 this.protocolOwnedIdentity = message.getToIdentity();

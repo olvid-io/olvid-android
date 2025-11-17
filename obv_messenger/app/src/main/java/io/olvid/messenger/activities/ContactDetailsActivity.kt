@@ -19,6 +19,8 @@
 package io.olvid.messenger.activities
 
 import android.animation.LayoutTransition
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -1277,6 +1279,11 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                     .show(supportFragmentManager, "dialog")
             }
             return true
+        } else if (itemId == R.id.action_refresh_status) {
+            contactDetailsViewModel.contactAndInvitation?.value?.contact?.let { contact ->
+                AppSingleton.getEngine().forceContactDeviceDiscovery(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
+            }
+            return true
         } else if (itemId == R.id.action_recreate_channels) {
             val contactAndInvitation = contactDetailsViewModel.contactAndInvitation.value
             if (contactAndInvitation != null) {
@@ -1313,11 +1320,17 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
             val contactAndInvitation = contactDetailsViewModel.contactAndInvitation.value
             if (contactAndInvitation != null) {
                 val contact = contactAndInvitation.contact
+
+                val link = ObvUrlIdentity(
+                    contact.bytesContactIdentity,
+                    contact.displayName
+                ).getUrlRepresentation(false)
+
                 val sb = StringBuilder()
-                sb.append(getString(R.string.debug_label_number_of_channels_and_devices))
-                    .append("\n")
-                sb.append(contact.establishedChannelCount).append("+").append(contact.preKeyCount)
-                    .append("/").append(contact.deviceCount).append("\n\n")
+                sb.append(getString(R.string.debug_label_number_of_devices)).append(" ").append(contact.deviceCount).append("\n")
+                sb.append("- ").append(getString(R.string.debug_label_number_of_devices_no_channel)).append(" ").append(contact.deviceCount - contact.establishedChannelCount - contact.preKeyCount).append("\n")
+                sb.append("- ").append(getString(R.string.debug_label_number_of_devices_pre_key)).append(" ").append(contact.preKeyCount).append("\n")
+                sb.append("- ").append(getString(R.string.debug_label_number_of_devices_oblivious_channel)).append(" ").append(contact.establishedChannelCount).append("\n\n")
                 try {
                     val contactIdentity = Identity.of(contact.bytesContactIdentity)
                     sb.append(getString(R.string.debug_label_server)).append(" ")
@@ -1325,12 +1338,7 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                 } catch (_: DecodingException) {
                 }
                 sb.append(getString(R.string.debug_label_identity_link)).append("\n")
-                sb.append(
-                    ObvUrlIdentity(
-                        contact.bytesContactIdentity,
-                        contact.displayName
-                    ).getUrlRepresentation(false)
-                ).append("\n\n")
+                sb.append(link).append("\n\n")
                 sb.append(getString(R.string.debug_label_capabilities)).append("\n")
                 sb.append(getString(R.string.bullet)).append(" ").append(
                     getString(
@@ -1362,6 +1370,11 @@ class ContactDetailsActivity : LockableActivity(), OnClickListener,
                 val builder = SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
                     .setTitle(R.string.menu_action_debug_information)
                     .setView(textView)
+                    .setNeutralButton(R.string.button_label_copy) { _, _ ->
+                        val clipboardManager: ClipboardManager? = getSystemService(CLIPBOARD_SERVICE) as? ClipboardManager
+                        clipboardManager?.setPrimaryClip(ClipData.newPlainText(link, link))
+                        App.toast(R.string.toast_message_clipboard_copied, Toast.LENGTH_SHORT);
+                    }
                     .setPositiveButton(R.string.button_label_ok, null)
                 builder.create().show()
             }

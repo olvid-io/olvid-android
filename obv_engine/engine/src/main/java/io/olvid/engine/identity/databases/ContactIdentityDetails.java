@@ -222,7 +222,8 @@ public class ContactIdentityDetails implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentityDetails.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?);")) {
             statement.setBytes(1, contactIdentity.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setInt(3, version);
@@ -236,7 +237,8 @@ public class ContactIdentityDetails implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentityDetails.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ? " +
                 " AND " + VERSION + " = ?;")) {
@@ -255,7 +257,8 @@ public class ContactIdentityDetails implements ObvDatabase {
         if (ownedIdentity == null) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentityDetails.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + CONTACT_IDENTITY + " = ?" +
                 " AND " + OWNED_IDENTITY + " = ?" +
                 " AND " +  VERSION + " = ?;")) {
@@ -273,7 +276,8 @@ public class ContactIdentityDetails implements ObvDatabase {
     }
 
     public static List<String> getAllPhotoUrl(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + PHOTO_URL + " FROM " + TABLE_NAME + " WHERE " + PHOTO_URL + " IS NOT NULL;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentityDetails.getAllPhotoUrl",
+                "SELECT " + PHOTO_URL + " FROM " + TABLE_NAME + " WHERE " + PHOTO_URL + " IS NOT NULL;")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<String> list = new ArrayList<>();
                 while (res.next()) {
@@ -285,7 +289,8 @@ public class ContactIdentityDetails implements ObvDatabase {
     }
 
     public static List<ContactIdentityDetails> getAllWithMissingPhotoUrl(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentityDetails.getAllWithMissingPhotoUrl",
+                "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + PHOTO_URL + " IS NULL " +
                         " AND " + PHOTO_SERVER_KEY + " IS NOT NULL " +
                         " AND " + PHOTO_SERVER_LABEL + " IS NOT NULL;")) {
@@ -304,7 +309,8 @@ public class ContactIdentityDetails implements ObvDatabase {
     // region setters
 
     public void setPhotoUrl(String photoUrl) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentityDetails.setPhotoUrl",
+                "UPDATE " + TABLE_NAME +
                 " SET " + PHOTO_URL + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ? " +
@@ -319,7 +325,8 @@ public class ContactIdentityDetails implements ObvDatabase {
     }
 
     public void setSerializedJsonDetails(String serializedJsonDetails) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentityDetails.setSerializedJsonDetails",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_JSON_DETAILS + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ? " +
@@ -334,7 +341,8 @@ public class ContactIdentityDetails implements ObvDatabase {
     }
 
     public static void cleanup(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity, int publishedVersion, int trustedVersion) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentityDetails.cleanup",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + CONTACT_IDENTITY + " = ? " +
                 " AND " +  VERSION + " NOT IN (?,?);")) {

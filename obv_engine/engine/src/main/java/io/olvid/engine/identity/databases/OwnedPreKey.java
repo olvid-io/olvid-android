@@ -192,7 +192,8 @@ public class OwnedPreKey implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedPreKey.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
             statement.setBytes(1, keyId.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setLong(3, expirationTimestamp);
@@ -204,7 +205,8 @@ public class OwnedPreKey implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + KEY_ID + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedPreKey.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + KEY_ID + " = ?;")) {
             statement.setBytes(1, keyId.getBytes());
             statement.executeUpdate();
         }
@@ -212,7 +214,8 @@ public class OwnedPreKey implements ObvDatabase {
 
 
     public static OwnedPreKey get(IdentityManagerSession identityManagerSession, Identity ownedIdentity, KeyId keyId) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedPreKey.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + KEY_ID + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, keyId.getBytes());
@@ -229,7 +232,8 @@ public class OwnedPreKey implements ObvDatabase {
 
 
     public static OwnedPreKey getLatest(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedPreKey.getLatest",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " ORDER BY " + EXPIRATION_TIMESTAMP + " DESC LIMIT 1;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -244,7 +248,8 @@ public class OwnedPreKey implements ObvDatabase {
     }
 
     public static void deleteExpired(IdentityManagerSession identityManagerSession, Identity ownedIdentity, long timestamp) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedPreKey.deleteExpired",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + EXPIRATION_TIMESTAMP + " < ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());

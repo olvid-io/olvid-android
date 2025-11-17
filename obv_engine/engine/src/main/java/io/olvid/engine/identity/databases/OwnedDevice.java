@@ -258,7 +258,8 @@ public class OwnedDevice implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?);")) {
             statement.setBytes(1, uid.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setBoolean(3, isCurrentDevice);
@@ -298,7 +299,8 @@ public class OwnedDevice implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + UID_ + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + UID_ + " = ?;")) {
             statement.setBytes(1, uid.getBytes());
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_CAPABILITIES_UPDATED | HOOK_BIT_DEVICES_CHANGED;
@@ -308,7 +310,8 @@ public class OwnedDevice implements ObvDatabase {
 
 
     public static OwnedDevice get(IdentityManagerSession identityManagerSession, UID ownedDeviceUid) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " +
                 UID_ + " = ?;")) {
             statement.setBytes(1, ownedDeviceUid.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -327,7 +330,8 @@ public class OwnedDevice implements ObvDatabase {
         if ((identity == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.getCurrentDeviceOfOwnedIdentity",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " +
                 OWNED_IDENTITY + " = ? AND " +
                 IS_CURRENT_DEVICE + " = 1;")) {
             statement.setBytes(1, identity.getBytes());
@@ -342,7 +346,8 @@ public class OwnedDevice implements ObvDatabase {
     }
 
     public static OwnedDevice[] getOtherDevicesOfOwnedIdentity(IdentityManagerSession identityManagerSession, Identity identity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.getOtherDevicesOfOwnedIdentity",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " +
                 OWNED_IDENTITY + " = ? AND " +
                 IS_CURRENT_DEVICE + " = 0;")) {
             statement.setBytes(1, identity.getBytes());
@@ -357,7 +362,8 @@ public class OwnedDevice implements ObvDatabase {
     }
 
     public static List<OwnedDevice> getAllDevicesOfIdentity(IdentityManagerSession identityManagerSession, Identity identity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.getAllDevicesOfIdentity",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, identity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -371,7 +377,8 @@ public class OwnedDevice implements ObvDatabase {
     }
 
     public static List<OwnedDevice> getAllWithExpiredPreKey(IdentityManagerSession identityManagerSession, Identity ownedIdentity, long expirationTimestamp) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.getAllWithExpiredPreKey",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + PRE_KEY_EXPIRATION_TIMESTAMP + " < ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -387,7 +394,8 @@ public class OwnedDevice implements ObvDatabase {
     }
 
     public static UID[] getAllDeviceUidsOfIdentity(IdentityManagerSession identityManagerSession, Identity identity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT "  + UID_ + " FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.getAllDeviceUidsOfIdentity",
+                "SELECT "  + UID_ + " FROM " + TABLE_NAME + " WHERE " +
                 OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, identity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -407,7 +415,8 @@ public class OwnedDevice implements ObvDatabase {
             return;
         }
 
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.setRawDeviceCapabilities",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_DEVICE_CAPABILITIES + " = ? " +
                 " WHERE " + UID_ + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -422,7 +431,8 @@ public class OwnedDevice implements ObvDatabase {
     }
 
     public void setDisplayName(String displayName) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.setDisplayName",
+                "UPDATE " + TABLE_NAME +
                 " SET " + DISPLAY_NAME + " = ? " +
                 " WHERE " + UID_ + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -437,7 +447,8 @@ public class OwnedDevice implements ObvDatabase {
     }
 
     public void setLatestChannelCreationPingTimestamp(long timestamp) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.setLatestChannelCreationPingTimestamp",
+                "UPDATE " + TABLE_NAME +
                 " SET " + LATEST_CHANNEL_CREATION_PING_TIMESTAMP + " = ? " +
                 " WHERE " + UID_ + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -450,7 +461,8 @@ public class OwnedDevice implements ObvDatabase {
     }
 
     public void setTimestamps(Long expirationTimestamp, Long lastRegistrationTimestamp) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.setTimestamps",
+                "UPDATE " + TABLE_NAME +
                 " SET " + EXPIRATION_TIMESTAMP + " = ?, " +
                 LAST_REGISTRATION_TIMESTAMP + " = ? " +
                 " WHERE " + UID_ + " = ? " +
@@ -476,7 +488,8 @@ public class OwnedDevice implements ObvDatabase {
     }
 
     public void setPreKey(PreKey preKey) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedDevice.setPreKey",
+                "UPDATE " + TABLE_NAME +
                 " SET " + PRE_KEY_ID + " = ?, " +
                 PRE_KEY_ENCRYPTION_PUBLIC_KEY + " = ?, " +
                 PRE_KEY_EXPIRATION_TIMESTAMP + " = ? " +

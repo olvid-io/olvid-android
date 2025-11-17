@@ -41,6 +41,7 @@ import io.olvid.engine.datatypes.containers.ReceptionChannelInfo;
 import io.olvid.engine.datatypes.containers.SendChannelInfo;
 import io.olvid.engine.datatypes.containers.TrustOrigin;
 import io.olvid.engine.encoder.Encoded;
+import io.olvid.engine.metamanager.IdentityDelegate;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
 import io.olvid.engine.protocol.databases.TrustEstablishmentCommitmentReceived;
 import io.olvid.engine.protocol.datatypes.CoreProtocolMessage;
@@ -1106,7 +1107,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
-            Seed seedBobForSas = protocolManagerSession.identityDelegate.getDeterministicSeedForOwnedIdentity(getOwnedIdentity(), startState.commitment);
+            Seed seedBobForSas = protocolManagerSession.identityDelegate.getDeterministicSeedForOwnedIdentity(getOwnedIdentity(), startState.commitment, IdentityDelegate.DeterministicSeedContext.COMPUTE_SAS);
             UID[] ownedDeviceUids = protocolManagerSession.identityDelegate.getDeviceUidsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
             String ownSerializedDetails = protocolManagerSession.identityDelegate.getSerializedPublishedDetailsOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
             {
@@ -1158,7 +1159,7 @@ public class TrustEstablishmentWithSasProtocol extends ConcreteProtocol {
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             }
 
-            Seed seedBobForSas = protocolManagerSession.identityDelegate.getDeterministicSeedForOwnedIdentity(getOwnedIdentity(), startState.commitment);
+            Seed seedBobForSas = protocolManagerSession.identityDelegate.getDeterministicSeedForOwnedIdentity(getOwnedIdentity(), startState.commitment, IdentityDelegate.DeterministicSeedContext.COMPUTE_SAS);
 
             return new WaitingForDecommitmentState(
                     startState.contactIdentity,

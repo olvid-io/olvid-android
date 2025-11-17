@@ -111,7 +111,7 @@ public class SendReturnReceiptCoordinator implements ReturnReceipt.NewReturnRece
                 queue.add(new IdentityAndLong(ownedIdentity, returnReceiptId));
             }
         }
-        UploadReturnReceiptOperation op = new UploadReturnReceiptOperation(sendManagerSessionFactory, sslSocketFactory, server, prng, () -> {
+        UploadReturnReceiptOperation op = new UploadReturnReceiptOperation(sendManagerSessionFactory, sslSocketFactory, server, () -> {
             List<IdentityAndLong> returnReceiptOwnedIdentityAndId = new ArrayList<>();
             synchronized (returnReceiptOwnedIdentityAndIdByServer) {
                 Queue<IdentityAndLong> queue = returnReceiptOwnedIdentityAndIdByServer.get(server);

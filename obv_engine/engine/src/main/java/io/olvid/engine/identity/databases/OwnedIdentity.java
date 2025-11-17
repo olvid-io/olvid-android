@@ -256,7 +256,8 @@ public class OwnedIdentity implements ObvDatabase {
         OwnedIdentityDetails ownedIdentityDetails;
         if (publishedDetailsVersion == latestDetailsVersion) {
             ownedIdentityDetails = OwnedIdentityDetails.copy(identityManagerSession, ownedIdentity, publishedDetailsVersion);
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.setLatestDetails",
+                    "UPDATE " + TABLE_NAME + " SET " +
                     LATEST_DETAILS_VERSION + " = ? " +
                     " WHERE " + OWNED_IDENTITY + " = ?;")) {
                 statement.setInt(1, ownedIdentityDetails.getVersion());
@@ -278,7 +279,8 @@ public class OwnedIdentity implements ObvDatabase {
             OwnedIdentityDetails ownedIdentityDetails;
             if (publishedDetailsVersion == latestDetailsVersion) {
                 ownedIdentityDetails = OwnedIdentityDetails.copy(identityManagerSession, ownedIdentity, publishedDetailsVersion);
-                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.setPhoto",
+                        "UPDATE " + TABLE_NAME + " SET " +
                         LATEST_DETAILS_VERSION + " = ? " +
                         " WHERE " + OWNED_IDENTITY + " = ?;")) {
                     statement.setInt(1, ownedIdentityDetails.getVersion());
@@ -300,7 +302,8 @@ public class OwnedIdentity implements ObvDatabase {
             OwnedIdentityDetails ownedIdentityDetails;
             if (publishedDetailsVersion == latestDetailsVersion) {
                 ownedIdentityDetails = OwnedIdentityDetails.copy(identityManagerSession, ownedIdentity, publishedDetailsVersion);
-                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.setPhoto",
+                        "UPDATE " + TABLE_NAME + " SET " +
                         LATEST_DETAILS_VERSION + " = ? " +
                         " WHERE " + OWNED_IDENTITY + " = ?;")) {
                     statement.setInt(1, ownedIdentityDetails.getVersion());
@@ -369,7 +372,8 @@ public class OwnedIdentity implements ObvDatabase {
         }
 
         // finally, set the newly created OwnedIdentityDetails as the published ones and cleanup
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.setOwnedIdentityDetailsFromOtherDevice",
+                "UPDATE " + TABLE_NAME + " SET " +
                 PUBLISHED_DETAILS_VERSION + " = ?, " +
                 LATEST_DETAILS_VERSION + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
@@ -434,7 +438,8 @@ public class OwnedIdentity implements ObvDatabase {
         }
         OwnedIdentityDetails publishedDetails = getPublishedDetails();
         OwnedIdentityDetails latestDetails = getLatestDetails();
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.publishLatestDetails",
+                "UPDATE " + TABLE_NAME + " SET " +
                 PUBLISHED_DETAILS_VERSION + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setInt(1, latestDetailsVersion);
@@ -460,7 +465,8 @@ public class OwnedIdentity implements ObvDatabase {
         if (latestDetailsVersion == publishedDetailsVersion) {
             return;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.discardLatestDetails",
+                "UPDATE " + TABLE_NAME + " SET " +
                 LATEST_DETAILS_VERSION + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setInt(1, publishedDetailsVersion);
@@ -473,7 +479,8 @@ public class OwnedIdentity implements ObvDatabase {
     }
 
     public void setActive(boolean active) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.setActive",
+                "UPDATE " + TABLE_NAME +
                 " SET " + ACTIVE + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBoolean(1, active);
@@ -488,7 +495,8 @@ public class OwnedIdentity implements ObvDatabase {
     public void setKeycloakServerUrl(String keycloakServerUrl) throws SQLException {
         boolean deleteAllKeycloakGroups = !Objects.equals(keycloakServerUrl, this.keycloakServerUrl);
 
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.setKeycloakServerUrl",
+                "UPDATE " + TABLE_NAME +
                 " SET " + KEYCLOAK_SERVER_URL + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setString(1, keycloakServerUrl);
@@ -505,7 +513,8 @@ public class OwnedIdentity implements ObvDatabase {
     }
 
     public void markForDeletion() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.markedForDeletion",
+                "UPDATE " + TABLE_NAME +
                 " SET " + MARKED_FOR_DELETION + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBoolean(1, true);
@@ -518,7 +527,8 @@ public class OwnedIdentity implements ObvDatabase {
     }
 
     public void setBackupSeed(BackupSeed backupSeed) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.setBackupSeed",
+                "UPDATE " + TABLE_NAME +
                 " SET " + BACKUP_SEED + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, backupSeed.getBackupSeedBytes());
@@ -723,7 +733,8 @@ public class OwnedIdentity implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, privateIdentityBytes);
             statement.setInt(3, publishedDetailsVersion);
@@ -744,13 +755,15 @@ public class OwnedIdentity implements ObvDatabase {
             Logger.e("Running OwnedIdentity delete outside a transaction");
             throw new SQLException();
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_IDENTITY_LIST_CHANGED;
             identityManagerSession.session.addSessionCommitListener(this);
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + OwnedIdentityDetails.TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.delete",
+                "DELETE FROM " + OwnedIdentityDetails.TABLE_NAME +
                 " WHERE " + OwnedIdentityDetails.OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
@@ -765,7 +778,8 @@ public class OwnedIdentity implements ObvDatabase {
         if ((ownedIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
@@ -781,7 +795,8 @@ public class OwnedIdentity implements ObvDatabase {
         if ((ownedIdentity == null)) {
             return false;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + ACTIVE + " FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.isActive",
+                "SELECT " + ACTIVE + " FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
@@ -795,7 +810,8 @@ public class OwnedIdentity implements ObvDatabase {
 
     // only returns owned identities that have not been marked for deletion
     public static OwnedIdentity[] getAll(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.getAll",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + MARKED_FOR_DELETION + " == 0;")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<OwnedIdentity> list = new ArrayList<>();
@@ -808,7 +824,7 @@ public class OwnedIdentity implements ObvDatabase {
     }
 
     public static String getSerializedPublishedDetails(IdentityManagerSession identityManagerSession, Identity ownedIdentity) {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentity.getSerializedPublishedDetails",
                 "SELECT details." + OwnedIdentityDetails.SERIALIZED_JSON_DETAILS +
                         " FROM " + TABLE_NAME + " AS identity " +
                         " INNER JOIN " + OwnedIdentityDetails.TABLE_NAME + " AS details " +

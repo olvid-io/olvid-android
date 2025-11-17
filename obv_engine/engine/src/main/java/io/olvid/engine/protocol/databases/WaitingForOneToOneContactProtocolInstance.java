@@ -128,7 +128,8 @@ public class WaitingForOneToOneContactProtocolInstance implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("WaitingForOneToOneContactProtocolInstance.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
             statement.setBytes(1, protocolUid.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setBytes(3, contactIdentity.getBytes());
@@ -140,7 +141,8 @@ public class WaitingForOneToOneContactProtocolInstance implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("WaitingForOneToOneContactProtocolInstance.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + PROTOCOL_UID + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ? " +
                 " AND " + CONTACT_IDENTITY + " = ?;")) {
@@ -200,7 +202,8 @@ public class WaitingForOneToOneContactProtocolInstance implements ObvDatabase {
         if (protocolUid == null || ownedIdentity == null || contactIdentity == null) {
             return null;
         }
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("WaitingForOneToOneContactProtocolInstance.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + PROTOCOL_UID + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ? " +
                 " AND " + CONTACT_IDENTITY + " = ?;")) {
@@ -223,7 +226,8 @@ public class WaitingForOneToOneContactProtocolInstance implements ObvDatabase {
         if (ownedIdentity == null || contactIdentity == null) {
             return new WaitingForOneToOneContactProtocolInstance[0];
         }
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("WaitingForOneToOneContactProtocolInstance.getAllForContact",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + CONTACT_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -241,7 +245,8 @@ public class WaitingForOneToOneContactProtocolInstance implements ObvDatabase {
     }
 
     public static WaitingForOneToOneContactProtocolInstance[] getAll(ProtocolManagerSession protocolManagerSession) {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("WaitingForOneToOneContactProtocolInstance.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<WaitingForOneToOneContactProtocolInstance> list = new ArrayList<>();
                 while (res.next()) {
@@ -264,7 +269,8 @@ public class WaitingForOneToOneContactProtocolInstance implements ObvDatabase {
     }
 
     public static void deleteAllForOwnedIdentity(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("WaitingForOneToOneContactProtocolInstance.deleteAllForOwnedIdentity",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }

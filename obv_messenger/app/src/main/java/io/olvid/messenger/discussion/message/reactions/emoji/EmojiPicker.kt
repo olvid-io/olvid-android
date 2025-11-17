@@ -122,7 +122,7 @@ fun EmojiPicker(
 
     Box(modifier = modifier) {
         Column {
-            if (!isSearch) {
+            AnimatedVisibility(visible = isSearch.not()) {
                 val selectedTabIndex by remember {
                     derivedStateOf {
                         EmojiList.EmojiGroup.entries.indexOfLast {

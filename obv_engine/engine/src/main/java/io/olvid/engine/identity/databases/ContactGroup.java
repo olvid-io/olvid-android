@@ -159,7 +159,8 @@ public class ContactGroup implements ObvDatabase {
                 if (zeroedDetails == null) {
                     throw new Exception("Failed to copy contact groupd details to version 0");
                 }
-                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.updatePublishedDetails",
+                        "UPDATE " + TABLE_NAME +
                         " SET " + LATEST_OR_TRUSTED_DETAILS_VERSION + " = ?, " +
                         PUBLISHED_DETAILS_VERSION + " = ? " +
                         " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
@@ -174,7 +175,8 @@ public class ContactGroup implements ObvDatabase {
                 }
                 trustedDetails.delete();
             } else {
-                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.updatePublishedDetails",
+                        "UPDATE " + TABLE_NAME +
                         " SET " + LATEST_OR_TRUSTED_DETAILS_VERSION + " = ?, " +
                         PUBLISHED_DETAILS_VERSION + " = ? " +
                         " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
@@ -203,7 +205,8 @@ public class ContactGroup implements ObvDatabase {
                     newPublishedDetails.setPhotoUrl(publishedDetails.getPhotoUrl(), false);
                 }
             }
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.updatePublishedDetails",
+                    "UPDATE " + TABLE_NAME +
                     " SET " + PUBLISHED_DETAILS_VERSION + " = ? " +
                     " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                     " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -225,7 +228,8 @@ public class ContactGroup implements ObvDatabase {
                     newPublishedDetails.setPhotoUrl(publishedDetails.getPhotoUrl(), false);
                 }
             }
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.updatePublishedDetails",
+                    "UPDATE " + TABLE_NAME +
                     " SET " + PUBLISHED_DETAILS_VERSION + " = ? " +
                     " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                     " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -249,7 +253,8 @@ public class ContactGroup implements ObvDatabase {
         if (latestOrTrustedDetailsVersion == publishedDetailsVersion) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.trustPublishedDetails",
+                "UPDATE " + TABLE_NAME +
                 " SET " + LATEST_OR_TRUSTED_DETAILS_VERSION + " = ? " +
                 " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -287,7 +292,8 @@ public class ContactGroup implements ObvDatabase {
         ContactGroupDetails contactGroupDetails;
         if (publishedDetailsVersion == latestOrTrustedDetailsVersion) {
             contactGroupDetails = ContactGroupDetails.copy(identityManagerSession, ownedIdentity, groupOwnerAndUid, publishedDetailsVersion, null);
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.setLatestDetails",
+                    "UPDATE " + TABLE_NAME + " SET " +
                     LATEST_OR_TRUSTED_DETAILS_VERSION + " = ? " +
                     " WHERE " + GROUP_OWNER_AND_UID + " = ?" +
                     " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -312,7 +318,8 @@ public class ContactGroup implements ObvDatabase {
             ContactGroupDetails contactGroupDetails;
             if (publishedDetailsVersion == latestOrTrustedDetailsVersion) {
                 contactGroupDetails = ContactGroupDetails.copy(identityManagerSession, ownedIdentity, groupOwnerAndUid, publishedDetailsVersion, null);
-                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.setOwnedGroupPhoto",
+                        "UPDATE " + TABLE_NAME + " SET " +
                         LATEST_OR_TRUSTED_DETAILS_VERSION + " = ? " +
                         " WHERE " + GROUP_OWNER_AND_UID + " = ?" +
                         " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -337,7 +344,8 @@ public class ContactGroup implements ObvDatabase {
             } else {
                 if (publishedDetailsVersion == latestOrTrustedDetailsVersion) {
                     contactGroupDetails = ContactGroupDetails.copy(identityManagerSession, ownedIdentity, groupOwnerAndUid, publishedDetailsVersion, null);
-                    try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+                    try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.setOwnedGroupPhoto",
+                            "UPDATE " + TABLE_NAME + " SET " +
                             LATEST_OR_TRUSTED_DETAILS_VERSION + " = ? " +
                             " WHERE " + GROUP_OWNER_AND_UID + " = ?" +
                             " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -392,7 +400,8 @@ public class ContactGroup implements ObvDatabase {
         }
         ContactGroupDetails publishedDetails = getPublishedDetails();
         ContactGroupDetails latestDetails = getLatestOrTrustedDetails();
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.publishLatestDetails",
+                "UPDATE " + TABLE_NAME + " SET " +
                 PUBLISHED_DETAILS_VERSION + " = ? " +
                 " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -418,7 +427,8 @@ public class ContactGroup implements ObvDatabase {
         if (latestOrTrustedDetailsVersion == publishedDetailsVersion) {
             return;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.discardLatestDetails",
+                "UPDATE " + TABLE_NAME + " SET " +
                 LATEST_OR_TRUSTED_DETAILS_VERSION + " = ? " +
                 " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -473,7 +483,8 @@ public class ContactGroup implements ObvDatabase {
             Logger.e("Called incrementGroupMembersVersion outside a transaction");
             throw new Exception();
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.incrementGroupMembersVersion",
+                "UPDATE " + TABLE_NAME +
                 " SET " + GROUP_MEMBERS_VERSION + " = ? " +
                 " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -487,7 +498,8 @@ public class ContactGroup implements ObvDatabase {
 
     // for groups you do not own
     public void setGroupMembersVersion(long groupMembersVersion) throws Exception {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.setGroupMembersVersion",
+                "UPDATE " + TABLE_NAME +
                 " SET " + GROUP_MEMBERS_VERSION + " = ? " +
                 " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -650,7 +662,8 @@ public class ContactGroup implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?);")) {
             statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setBytes(3, (groupOwner==null)?null:groupOwner.getBytes());
@@ -669,14 +682,16 @@ public class ContactGroup implements ObvDatabase {
             Logger.e("Running ContactGroup.delete() outside a transaction");
             throw new SQLException();
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.executeUpdate();
             commitHookBits |= HOOK_BIT_DELETED;
             identityManagerSession.session.addSessionCommitListener(this);
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + ContactGroupDetails.TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.delete",
+                "DELETE FROM " + ContactGroupDetails.TABLE_NAME +
                 " WHERE " + ContactGroupDetails.GROUP_OWNER_AND_UID + " = ? " +
                 " AND " + ContactGroupDetails.OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, groupOwnerAndUid);
@@ -691,7 +706,8 @@ public class ContactGroup implements ObvDatabase {
     // region getters
 
     public static ContactGroup get(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -705,7 +721,8 @@ public class ContactGroup implements ObvDatabase {
     }
 
     public static ContactGroup[] getAll(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<ContactGroup> list = new ArrayList<>();
                 while (res.next()) {
@@ -718,7 +735,8 @@ public class ContactGroup implements ObvDatabase {
     }
 
     public static ContactGroup[] getAllForIdentity(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.getAllForIdentity",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 List<ContactGroup> list = new ArrayList<>();
@@ -733,7 +751,8 @@ public class ContactGroup implements ObvDatabase {
 
     public static ContactGroup[] getAllForOwnedIdentityAndOwner(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity groupOwner) throws SQLException {
         if (ownedIdentity.equals(groupOwner)) {
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.getAllForOwnedIdentityAndOwner",
+                    "SELECT * FROM " + TABLE_NAME +
                     " WHERE " + OWNED_IDENTITY + " = ? " +
                     " AND " + GROUP_OWNER + " IS NULL;")) {
                 statement.setBytes(1, ownedIdentity.getBytes());
@@ -747,7 +766,8 @@ public class ContactGroup implements ObvDatabase {
                 }
             }
         } else {
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.getAllForOwnedIdentityAndOwner",
+                    "SELECT * FROM " + TABLE_NAME +
                     " WHERE " + OWNED_IDENTITY + " = ? " +
                     " AND " + GROUP_OWNER + " = ?;")) {
                 statement.setBytes(1, ownedIdentity.getBytes());
@@ -765,7 +785,8 @@ public class ContactGroup implements ObvDatabase {
     }
 
     public static byte[][] getGroupOwnerAndUidsOfGroupsOwnedByContact(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + GROUP_OWNER_AND_UID + " FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ? AND "  + GROUP_OWNER + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.getGroupOwnerAndUidsOfOwnedGroupsWithContact",
+                "SELECT " + GROUP_OWNER_AND_UID + " FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ? AND "  + GROUP_OWNER + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, contactIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -779,7 +800,7 @@ public class ContactGroup implements ObvDatabase {
     }
 
     public static byte[][] getGroupOwnerAndUidsOfOwnedGroupsWithContact(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroup.getGroupOwnerAndUidsOfOwnedGroupsWithContact",
                 "SELECT g." + GROUP_OWNER_AND_UID +
                         " FROM " + TABLE_NAME + " AS g " +
                         " INNER JOIN " + ContactGroupMembersJoin.TABLE_NAME + " AS j " +

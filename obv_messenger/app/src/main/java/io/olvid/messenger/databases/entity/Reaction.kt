@@ -39,7 +39,7 @@ import androidx.room.PrimaryKey
 )
 data class Reaction(
     @JvmField @ColumnInfo(name = MESSAGE_ID) var messageId: Long,
-    @JvmField @ColumnInfo(name = BYTES_IDENTITY) var bytesIdentity: ByteArray? = null,
+    @JvmField @ColumnInfo(name = BYTES_IDENTITY) var bytesIdentity: ByteArray? = null, // null for own reactions
     @JvmField @ColumnInfo(name = EMOJI) var emoji: String? = null,
     @JvmField @ColumnInfo(name = TIMESTAMP) var timestamp: Long
 ) {

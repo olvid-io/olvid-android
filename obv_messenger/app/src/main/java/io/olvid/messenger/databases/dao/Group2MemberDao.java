@@ -48,6 +48,13 @@ public interface Group2MemberDao {
     @Update
     void update(@NonNull Group2Member groupMember);
 
+    @Query("UPDATE " + Group2Member.TABLE_NAME +
+            " SET " + Group2Member.PENDING_CREATION_TIMESTAMP + " = NULL " +
+            " WHERE " + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
+            " AND " + Group2Member.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity ")
+    void clearPendingCreationTimestamp(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier, @NonNull byte[] bytesContactIdentity);
+
     @Query("SELECT * FROM " + Group2Member.TABLE_NAME +
             " WHERE " + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier " +
@@ -216,6 +223,16 @@ public interface Group2MemberDao {
             " WHERE " + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND " + Group2Member.BYTES_GROUP_IDENTIFIER + " = :bytesGroupIdentifier )")
     boolean groupHasMembers(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesGroupIdentifier);
+
+    @Query("SELECT * FROM " + Group2Member.TABLE_NAME +
+            " WHERE " + Group2Member.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND " + Group2Member.BYTES_CONTACT_IDENTITY + " = :bytesContactIdentity " +
+            " AND " + Group2Member.PENDING_CREATION_TIMESTAMP + " IS NOT NULL")
+    List<Group2Member> getAllForContactWithPendingCreationTimestamp(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] bytesContactIdentity);
+
+    @Query("SELECT * FROM " + Group2Member.TABLE_NAME +
+            " WHERE " + Group2Member.PENDING_CREATION_TIMESTAMP + " IS NOT NULL")
+    List<Group2Member> getAllWithPendingCreationTimestamp();
 
 
     class Group2MemberOrPending {

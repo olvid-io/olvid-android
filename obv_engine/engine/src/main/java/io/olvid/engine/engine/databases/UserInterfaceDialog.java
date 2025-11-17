@@ -60,7 +60,8 @@ public class UserInterfaceDialog implements ObvDatabase {
     }
 
     public void update(Encoded encodedDialog) {
-        try (PreparedStatement statement = engineSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = engineSession.session.prepareStatement("UserInterfaceDialog.update",
+                "UPDATE " + TABLE_NAME + " SET " +
                 ENCODED_DIALOG + " = ?, " +
                 CREATION_TIMESTAMP + " = ? " +
                 " WHERE " + UUID_ + " = ?;")) {
@@ -167,7 +168,8 @@ public class UserInterfaceDialog implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = engineSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
+        try (PreparedStatement statement = engineSession.session.prepareStatement("UserInterfaceDialog.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
             statement.setString(1, Logger.getUuidString(uuid));
             statement.setBytes(2, encodedDialog.getBytes());
             statement.setLong(3, creationTimestamp);
@@ -179,7 +181,8 @@ public class UserInterfaceDialog implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = engineSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + UUID_  + " = ?;")) {
+        try (PreparedStatement statement = engineSession.session.prepareStatement("UserInterfaceDialog.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + UUID_  + " = ?;")) {
             statement.setString(1, Logger.getUuidString(uuid));
             statement.executeUpdate();
             this.commitHookBits |= HOOK_BIT_DELETED;
@@ -192,7 +195,8 @@ public class UserInterfaceDialog implements ObvDatabase {
         if (uuid == null) {
             return null;
         }
-        try (PreparedStatement statement = engineSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + UUID_  + " = ?;")) {
+        try (PreparedStatement statement = engineSession.session.prepareStatement("UserInterfaceDialog.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + UUID_  + " = ?;")) {
             statement.setString(1, Logger.getUuidString(uuid));
             try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
@@ -207,7 +211,8 @@ public class UserInterfaceDialog implements ObvDatabase {
     }
 
     public static UserInterfaceDialog[] getAll(EngineSession engineSession) {
-        try (PreparedStatement statement = engineSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = engineSession.session.prepareStatement("UserInterfaceDialog.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<UserInterfaceDialog> list = new ArrayList<>();
                 while (res.next()) {

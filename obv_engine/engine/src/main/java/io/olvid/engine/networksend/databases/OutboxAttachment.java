@@ -186,7 +186,8 @@ public class OutboxAttachment implements ObvDatabase {
     // region setters
 
     public void setCancelExternallyRequested() throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxAttachment.setCancelExternallyRequested",
+                "UPDATE " + TABLE_NAME + " SET " +
                 CANCEL_EXTERNALLY_REQUESTED + " = 1 " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ? " +
@@ -202,7 +203,8 @@ public class OutboxAttachment implements ObvDatabase {
     }
 
     public void setCancelProcessed() throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxAttachment.setCancelProcessed",
+                "UPDATE " + TABLE_NAME + " SET " +
                 ACKNOWLEDGED + " = 1 " +
                 " WHERE " + CANCEL_EXTERNALLY_REQUESTED + " = 1 " +
                 " AND " + OWNED_IDENTITY + " = ? " +
@@ -237,7 +239,7 @@ public class OutboxAttachment implements ObvDatabase {
                 " AND " + MESSAGE_UID + " = ? " +
                 " AND " + ATTACHMENT_NUMBER + " = ?;";
 
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement(sqlQueryString)) {
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxAttachment.setAcknowledgedChunkCount", sqlQueryString)) {
             statement.setLong(1, acknowledgedChunkCount);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setBytes(3, messageUid.getBytes());
@@ -268,7 +270,8 @@ public class OutboxAttachment implements ObvDatabase {
             }
             serialized = sb.toString();
         }
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " + CHUNK_UPLOAD_PRIVATE_URLS + " = ? " +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxAttachment.setChunkUploadPrivateUrls",
+                "UPDATE " + TABLE_NAME + " SET " + CHUNK_UPLOAD_PRIVATE_URLS + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ? " +
                 " AND " + ATTACHMENT_NUMBER + " = ?;")) {
@@ -427,7 +430,8 @@ public class OutboxAttachment implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxAttachment.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, messageUid.getBytes());
             statement.setInt(3, attachmentNumber);
@@ -448,7 +452,8 @@ public class OutboxAttachment implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxAttachment.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ? " +
                 " AND " + ATTACHMENT_NUMBER + " = ?;")) {
@@ -460,7 +465,8 @@ public class OutboxAttachment implements ObvDatabase {
     }
 
     static void deleteAll(SendManagerSession sendManagerSession, Identity ownedIdentity, UID messageUid) throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxAttachment.deleteAll",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -476,7 +482,7 @@ public class OutboxAttachment implements ObvDatabase {
         if (ownedIdentity == null || messageUid == null) {
             return null;
         }
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxAttachment.getAll",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + OWNED_IDENTITY + " = ? " +
                         " AND " + MESSAGE_UID + " = ? " +
@@ -499,7 +505,8 @@ public class OutboxAttachment implements ObvDatabase {
         if (ownedIdentity == null || messageUid == null) {
             return null;
         }
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxAttachment.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ? " +
                 " AND " + ATTACHMENT_NUMBER + " = ?;")) {
@@ -517,7 +524,7 @@ public class OutboxAttachment implements ObvDatabase {
     }
 
     public static OutboxAttachment[] getAllToCancel(SendManagerSession sendManagerSession) {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxAttachment.getAllToCancel",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + CANCEL_EXTERNALLY_REQUESTED + " = 1 " +
                         " AND " + ACKNOWLEDGED + " = 0")) {

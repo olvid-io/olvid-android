@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">הודעה</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">שלח הודעה</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">אתחול שיחה</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">אתחול שיחה</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">ממתין לאישור גישה לאודיו</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">בדיקת פרטי הכניסה</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">אישור החיבור</string>
@@ -1212,7 +1212,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">הוסף אימוג\'י</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">החזק לחיצה ארוכה כדי להוסיף/להסיר ממועדפים</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">מידע ניפוי שגיאות</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">מספר ערוצים/מכשירים:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">מספר מכשירים:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">ללא ערוץ מאובטח:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">שרת:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">ספק זהות:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">קישור מזהה:</string>
@@ -2007,7 +2008,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">ניתן למצוא מפתח זה גם מאוחר יותר בהגדרות שלך.</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">אל תאבד גישה לפרופילים שלך!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">גיבויים מאפשרים לשחזר את הפרופילים שלך אם איבדת גישה למכשיר זה. החוויה החדשה קלה מתמיד 😉 וניתן להגדיר אותה תוך שניות ספורות.</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">הגדרת גיבויים</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">הפעל גיבויים</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">אל תשכח לרשום את מפתח הגיבוי שלך â</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">מפתח הגיבוי שלך חיוני לשחזור הפרופילים שלך אם תאבד גישה למכשיר זה.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">שפר את חוויית Olvid שלך 🚀</string>
@@ -2113,4 +2114,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">זוהתה שירות נגישות לא ידוע. אנא בדוק שהוא בטוח לשימוש:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">חפש אמוג\'י</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">האחרונים</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">רענן את סטטוס איש הקשר</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">הצג את זמני השאילתות למסד הנתונים של המנוע</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">זמני שאילתות מסד הנתונים של המנוע</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">ממתין לתגובה מהמכשיר של הצד השני</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">מכשיר העמית אינו נגיש</string>
 </resources>

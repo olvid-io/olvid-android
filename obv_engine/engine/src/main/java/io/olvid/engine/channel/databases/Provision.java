@@ -100,7 +100,8 @@ public class Provision implements ObvDatabase {
             selfRatchetingCount++;
         }
         // Then update the current Provision
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("Provision.selfRatchet",
+                "UPDATE " + TABLE_NAME + " SET " +
                 SEED_FOR_NEXT_PROVISIONED_RECEIVE_KEY + " = ?, " +
                 SELF_RATCHETING_COUNT + " = ? " +
                 " WHERE " + FULL_RATCHETING_COUNT + " = ? AND " +
@@ -128,7 +129,8 @@ public class Provision implements ObvDatabase {
 
     public static void deleteAllEmpty(ChannelManagerSession channelManagerSession) {
         // delete all Provision, with no ProvisionedKeyMaterial.
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " AS p " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("Provision.deleteAllEmpty",
+                "DELETE FROM " + TABLE_NAME + " AS p " +
                     " WHERE NOT EXISTS (" +
                     " SELECT 1 FROM " + ProvisionedKeyMaterial.TABLE_NAME +
                     " WHERE " + ProvisionedKeyMaterial.PROVISION_FULL_RATCHETING_COUNT + " = p." + FULL_RATCHETING_COUNT +
@@ -228,7 +230,8 @@ public class Provision implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("INSERT OR REPLACE INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("Provision.insert",
+                "INSERT OR REPLACE INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?);")) {
             statement.setInt(1, fullRatchetingCount);
             statement.setInt(2, selfRatchetingCount);
             statement.setBytes(3, seedForNextProvisionedReceiveKey.getBytes());
@@ -242,7 +245,8 @@ public class Provision implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + FULL_RATCHETING_COUNT + " = ? AND " + OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ? AND " + OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + " = ? AND " + OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("Provision.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + FULL_RATCHETING_COUNT + " = ? AND " + OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ? AND " + OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + " = ? AND " + OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + " = ?;")) {
             statement.setInt(1, fullRatchetingCount);
             statement.setBytes(2, obliviousChannelCurrentDeviceUid.getBytes());
             statement.setBytes(3, obliviousChannelRemoteDeviceUid.getBytes());
@@ -258,7 +262,8 @@ public class Provision implements ObvDatabase {
         if ((obliviousChannelCurrentDeviceUid == null) || (obliviousChannelRemoteDeviceUid == null) || (obliviousChannelRemoteIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("Provision.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " +
                 FULL_RATCHETING_COUNT + " = ? AND " +
                 OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ? AND " +
                 OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + " = ? AND " +
@@ -279,29 +284,6 @@ public class Provision implements ObvDatabase {
         }
     }
 
-
-//    public static Provision[] getAll(ChannelManagerSession channelManagerSession, UID obliviousChannelCurrentDeviceUid, UID obliviousChannelRemoteDeviceUid, Identity obliviousChannelRemoteIdentity) {
-//        if ((obliviousChannelCurrentDeviceUid == null) || (obliviousChannelRemoteDeviceUid == null) || (obliviousChannelRemoteIdentity == null)) {
-//            return new Provision[0];
-//        }
-//        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
-//                OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ? AND " +
-//                OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + " = ? AND " +
-//                OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + " = ?;")) {
-//            statement.setBytes(1, obliviousChannelCurrentDeviceUid.getBytes());
-//            statement.setBytes(2, obliviousChannelRemoteDeviceUid.getBytes());
-//            statement.setBytes(3, obliviousChannelRemoteIdentity.getBytes());
-//            try (ResultSet res = statement.executeQuery()) {
-//                List<Provision> list = new ArrayList<>();
-//                while (res.next()) {
-//                    list.add(new Provision(channelManagerSession, res));
-//                }
-//                return list.toArray(new Provision[0]);
-//            }
-//        } catch (SQLException e) {
-//            return new Provision[0];
-//        }
-//    }
 
 
     @Override

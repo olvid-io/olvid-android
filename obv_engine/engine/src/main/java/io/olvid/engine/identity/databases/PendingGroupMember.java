@@ -157,7 +157,8 @@ public class PendingGroupMember implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("PendingGroupMember.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
             statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setBytes(3, contactIdentity.getBytes());
@@ -171,7 +172,8 @@ public class PendingGroupMember implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ? AND " + CONTACT_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("PendingGroupMember.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ? AND " + CONTACT_IDENTITY + " = ?;")) {
             statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setBytes(3, contactIdentity.getBytes());
@@ -190,7 +192,8 @@ public class PendingGroupMember implements ObvDatabase {
         if ((groupOwnerAndUid == null) || (ownedIdentity == null)) {
             return new IdentityWithSerializedDetails[0];
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("PendingGroupMember.getPendingMembersInGroup",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -210,7 +213,8 @@ public class PendingGroupMember implements ObvDatabase {
         if ((groupOwnerAndUid == null) || (ownedIdentity == null)) {
             return new Identity[0];
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ? AND " + DECLINED + " = 1;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("PendingGroupMember.getDeclinedPendingMembersInGroup",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ? AND " + DECLINED + " = 1;")) {
             statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -230,7 +234,8 @@ public class PendingGroupMember implements ObvDatabase {
         if ((groupUid == null) || (ownedIdentity == null) || (contactIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ? AND " + CONTACT_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("PendingGroupMember.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ? AND " + CONTACT_IDENTITY + " = ?;")) {
             statement.setBytes(1, groupUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setBytes(3, contactIdentity.getBytes());
@@ -248,7 +253,8 @@ public class PendingGroupMember implements ObvDatabase {
         if ((groupOwnerAndUid == null) || (ownedIdentity == null)) {
             return new PendingGroupMember[0];
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("PendingGroupMember.getAllInGroup",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -268,7 +274,7 @@ public class PendingGroupMember implements ObvDatabase {
         if ((ownedIdentity == null) || (contactIdentity == null)) {
             return new byte[0][];
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("PendingGroupMember.getGroupOwnerAndUidOfGroupsWhereContactIsPending",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + CONTACT_IDENTITY + " = ? " +
                         " AND " + OWNED_IDENTITY + " = ? " +
@@ -297,7 +303,8 @@ public class PendingGroupMember implements ObvDatabase {
 
 
     public void setDeclined(boolean declined) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("PendingGroupMember.setDeclined",
+                "UPDATE " + TABLE_NAME +
                 " SET " + DECLINED + " = ? " +
                 " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ? " +

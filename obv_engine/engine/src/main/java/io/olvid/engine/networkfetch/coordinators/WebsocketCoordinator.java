@@ -694,7 +694,7 @@ public class WebsocketCoordinator implements Operation.OnCancelCallback {
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_WEBSOCKET_CONNECTION_STATE_CHANGED, userInfo);
             }
 
-            Logger.d("Websocket received message " + message);
+//            Logger.d("Websocket received message " + message);
             Map<String, Object> receivedMessage;
             String action;
             try {

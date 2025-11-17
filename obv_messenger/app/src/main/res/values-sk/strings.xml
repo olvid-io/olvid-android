@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">Správa</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">Poslať správu</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">Inicializácia hovoru</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">Inicializácia hovoru</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">Čakám na povolenie pre zvuk</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">Overovanie poverení</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">Zabezpečovanie pripojenia</string>
@@ -1212,7 +1212,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Vložiť emoji</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Dlhým stlačením pridáte/odstránite z obľúbených</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Ladiace informácie</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Počet kanálov/zariadení:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Počet zariadení:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">Bez zabezpečeného kanála:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">Server:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">Poskytovateľ identity:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">ID odkaz:</string>
@@ -2006,7 +2007,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">Tento kľúč nájdete aj neskôr v nastaveniach.</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Nestratťte prístup k svojim profilom!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Zálohy vám umožňujú obnoviť vaše profily, ak stratíte prístup k tomuto zariadeniu. Nové prostredie je jednoduchšie ako kedykoľvek predtým 😉 a dá sa nastaviť v priebehu niekoľkých sekúnd.</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Nastaviť zálohy</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">Povoliť zálohovanie</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Nezabudnite si zapísať záložný kľúč 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Váš záložný kľúč je nevyhnutný na obnovenie vašich profilov, ak stratíte prístup k tomuto zariadeniu.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Vylepšite si svoj zážitok z Olvidu 🚀</string>
@@ -2112,4 +2113,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Zistila sa neznáma služba prístupnosti. Skontrolujte, či je bezpečné ju používať:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Vyhľadať emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Nedávne</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Obnoviť stav kontaktu</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">Zobraziť časovanie databázových dopytov enginu</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Časy dopytov do databázy enginu</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Čakám na odpoveď od zariadenia kontaktu</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Nedostupné zariadenie kontaktu</string>
 </resources>

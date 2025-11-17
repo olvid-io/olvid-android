@@ -26,8 +26,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 23
         targetSdk 36
-        versionCode 278
-        versionName "4.1"
+        versionCode 279
+        versionName "4.1.1"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr', 'af', 'ar', 'ca', 'cs', 'da', 'de', 'el', 'es', 'fa', 'fi', 'hi', 'hr', 'hu', 'it', 'iw', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-rBR', 'ro', 'ru', 'sk', 'sl', 'sv', 'tr', 'uk', 'vi', 'zh', 'zh-rTW']
@@ -195,7 +195,7 @@ dependencies {
     implementation "androidx.camera:camera-lifecycle:$camera_version"
     implementation "androidx.camera:camera-view:$camera_version"
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    implementation 'androidx.core:core-splashscreen:1.0.1'
+    implementation 'androidx.core:core-splashscreen:1.2.0'
     implementation 'androidx.credentials:credentials:1.5.0'
     fullImplementation 'androidx.credentials:credentials-play-services-auth:1.5.0'
     implementation 'androidx.documentfile:documentfile:1.1.0'
@@ -207,7 +207,7 @@ dependencies {
     implementation "androidx.media3:media3-exoplayer:$media3_version"
     implementation "androidx.media3:media3-ui:$media3_version"
     implementation 'androidx.media:media:1.7.1'
-    final def navigation_version = '2.9.5'
+    final def navigation_version = '2.9.6'
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
     implementation "androidx.navigation:navigation-compose:$navigation_version"
@@ -222,7 +222,7 @@ dependencies {
     implementation 'androidx.work:work-runtime:2.10.5'
     implementation 'androidx.datastore:datastore-preferences:1.1.7'
     implementation 'androidx.security:security-crypto-ktx:1.1.0'
-    implementation 'com.airbnb.android:lottie-compose:6.6.10'
+    implementation 'com.airbnb.android:lottie-compose:6.7.1'
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
     implementation 'org.jsoup:jsoup:1.21.2'
@@ -253,7 +253,7 @@ dependencies {
     ///////////
 
     // Billing
-    fullImplementation 'com.android.billingclient:billing:8.0.0'
+    fullImplementation 'com.android.billingclient:billing:8.1.0'
 
     // Firebase
     fullImplementation('com.google.firebase:firebase-messaging:25.0.1') {

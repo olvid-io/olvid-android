@@ -16,8 +16,10 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.ConfigurationPojo
 import io.olvid.messenger.databases.entity.OwnedIdentity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 class LicenseActivationViewModel : ViewModel() {
@@ -143,10 +145,11 @@ class LicenseActivationViewModel : ViewModel() {
     fun activateLicense(onSuccess: () -> Unit) {
         activating = true
         viewModelScope.launch {
-            val result =
+            val result = withContext(Dispatchers.IO) {
                 AppSingleton.getEngine().registerOwnedIdentityApiKeyOnServer(
                     ownedIdentity?.bytesOwnedIdentity, configurationApiKeyUuid
                 )
+            }
             when (result) {
                 RegisterApiKeyResult.SUCCESS -> onSuccess()
                 RegisterApiKeyResult.INVALID_KEY -> App.toast(

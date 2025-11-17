@@ -268,7 +268,8 @@ public class ReceivedMessage implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?);")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ReceivedMessage.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?);")) {
             statement.setBytes(1, uid.getBytes());
             statement.setBytes(2, toIdentity.getBytes());
             statement.setBytes(3, Encoded.of(inputs).getBytes());
@@ -298,7 +299,8 @@ public class ReceivedMessage implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + UID_ + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ReceivedMessage.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + UID_ + " = ?;")) {
             statement.setBytes(1, uid.getBytes());
             statement.executeUpdate();
         }
@@ -307,7 +309,7 @@ public class ReceivedMessage implements ObvDatabase {
 
 
     public static void deleteExpiredMessagesWithNoProtocol(ProtocolManagerSession protocolManagerSession) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ReceivedMessage.deleteExpiredMessagesWithNoProtocol",
                 "DELETE FROM " + TABLE_NAME + " WHERE " + UID_ + " IN "+
                         " (SELECT " + TABLE_NAME + "." + UID_ + " FROM " + TABLE_NAME +
                         " LEFT JOIN " + ProtocolInstance.TABLE_NAME + " ON " + ProtocolInstance.TABLE_NAME + "." + ProtocolInstance.UID_ + " = " + TABLE_NAME + "." + PROTOCOL_INSTANCE_UID  +
@@ -320,7 +322,8 @@ public class ReceivedMessage implements ObvDatabase {
     }
 
     public static void deleteAllTransfer(ProtocolManagerSession protocolManagerSession) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + PROTOCOL_ID + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ReceivedMessage.deleteAllTransfer",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + PROTOCOL_ID + " = ?;")) {
             statement.setInt(1, ConcreteProtocol.OWNED_IDENTITY_TRANSFER_PROTOCOL_ID);
             statement.executeUpdate();
         }
@@ -334,7 +337,8 @@ public class ReceivedMessage implements ObvDatabase {
         if ((receivedMessageUid == null)) {
             return null;
         }
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + UID_ + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ReceivedMessage.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + UID_ + " = ?;")) {
             statement.setBytes(1, receivedMessageUid.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
@@ -350,7 +354,8 @@ public class ReceivedMessage implements ObvDatabase {
     }
 
     public static ReceivedMessage[] getAll(ProtocolManagerSession protocolManagerSession, UID protocolInstanceUid, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + TO_IDENTITY + " = ? AND " + PROTOCOL_INSTANCE_UID + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ReceivedMessage.getAll",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + TO_IDENTITY + " = ? AND " + PROTOCOL_INSTANCE_UID + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, protocolInstanceUid.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -364,7 +369,8 @@ public class ReceivedMessage implements ObvDatabase {
     }
 
     public static ReceivedMessage[] getAll(ProtocolManagerSession protocolManagerSession) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ReceivedMessage.getAll2",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<ReceivedMessage> list = new ArrayList<>();
                 while (res.next()) {
@@ -376,7 +382,8 @@ public class ReceivedMessage implements ObvDatabase {
     }
 
     public static void deleteAllForOwnedIdentity(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + TO_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ReceivedMessage.deleteAllForOwnedIdentity",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + TO_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }
@@ -395,7 +402,7 @@ public class ReceivedMessage implements ObvDatabase {
     public void wasCommitted() {
         if ((commitHookBits & HOOK_BIT_INSERTED) != 0) {
             if (protocolManagerSession.protocolReceivedMessageProcessorDelegate != null) {
-                protocolManagerSession.protocolReceivedMessageProcessorDelegate.processReceivedMessage(uid);
+                protocolManagerSession.protocolReceivedMessageProcessorDelegate.processReceivedMessage(uid, protocolId);
             }
         }
         commitHookBits = 0;

@@ -58,7 +58,8 @@ public class Backup implements ObvDatabase {
     public static final int STATUS_FAILED = -1;
 
     public static void cleanup(BackupManagerSession backupManagerSession, UID backupKeyUid, Integer uploadedBackupVersion, Integer exportedBackupVersion, Integer latestBackupVersion) throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("Backup.cleanup",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + BACKUP_KEY_UID + " = ? " +
                 " AND " +  VERSION + " NOT IN (?,?,?);")) {
             statement.setBytes(1, backupKeyUid.getBytes());
@@ -150,7 +151,8 @@ public class Backup implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("Backup.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?);")) {
             statement.setBytes(1, backupKeyUid.getBytes());
             statement.setInt(2, version);
             statement.setBoolean(3, forExport);
@@ -164,7 +166,8 @@ public class Backup implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + BACKUP_KEY_UID + " = ? AND " + VERSION + " = ?;")) {
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("Backup.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + BACKUP_KEY_UID + " = ? AND " + VERSION + " = ?;")) {
             statement.setBytes(1, backupKeyUid.getBytes());
             statement.setInt(2, version);
             statement.executeUpdate();
@@ -172,14 +175,16 @@ public class Backup implements ObvDatabase {
     }
 
     static void deleteAll(BackupManagerSession backupManagerSession) throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("Backup.deleteAll",
+               " DELETE FROM " + TABLE_NAME + ";")) {
             statement.executeUpdate();
         }
     }
 
 
     public static Backup get(BackupManagerSession backupManagerSession, UID backupKeyUid, int version) {
-        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + BACKUP_KEY_UID + " = ? AND " + VERSION + " = ?;")){
+        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("Backup.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + BACKUP_KEY_UID + " = ? AND " + VERSION + " = ?;")){
             preparedStatement.setBytes(1, backupKeyUid.getBytes());
             preparedStatement.setInt(2, version);
             ResultSet res = preparedStatement.executeQuery();
@@ -194,7 +199,8 @@ public class Backup implements ObvDatabase {
     }
 
     public void setReady(byte[] encryptedContent) throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("Backup.setReady",
+                "UPDATE " + TABLE_NAME +
                 " SET " + STATUS + " = ?, " +
                 ENCRYPTED_CONTENT + " = ?, " +
                 STATUS_CHANGE_TIMESTAMP + " = ? " +
@@ -214,7 +220,8 @@ public class Backup implements ObvDatabase {
     }
 
     public void setUploadedOrExported() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("Backup.setUploadedOrExported",
+                "UPDATE " + TABLE_NAME +
                 " SET " + STATUS + " = ?, " +
                 STATUS_CHANGE_TIMESTAMP + " = ? " +
                 " WHERE " + BACKUP_KEY_UID + " = ? AND " +
@@ -232,7 +239,8 @@ public class Backup implements ObvDatabase {
     }
 
     public void setFailed() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("Backup.setFailed",
+                "UPDATE " + TABLE_NAME +
                 " SET " + STATUS + " = ?, " +
                 STATUS_CHANGE_TIMESTAMP + " = ? " +
                 " WHERE " + BACKUP_KEY_UID + " = ? AND " +

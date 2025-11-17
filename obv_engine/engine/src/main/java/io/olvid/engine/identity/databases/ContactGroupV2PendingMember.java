@@ -143,7 +143,8 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
         if ((ownedIdentity == null) || (groupIdentifier == null) || (contactIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2PendingMember.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +
@@ -168,7 +169,8 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
         if ((ownedIdentity == null) || (groupIdentifier == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2PendingMember.getAll",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +
@@ -193,7 +195,8 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
             throw new Exception("Unable to serialize permissions");
         }
 
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2PendingMember.setPermissions",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_PERMISSIONS + " = ? " +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
@@ -211,7 +214,8 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
     }
 
     public void setGroupInvitationNonce(byte[] groupInvitationNonce) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2PendingMember.setGroupInvitationNonce",
+                "UPDATE " + TABLE_NAME +
                 " SET " + GROUP_INVITATION_NONCE + " = ? " +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
@@ -229,7 +233,8 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
     }
 
     public void setSerializedContactDetails(String serializedContactDetails) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2PendingMember.setSerializedContactDetails",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_CONTACT_DETAILS + " = ? " +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
@@ -250,7 +255,8 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
         if ((ownedIdentity == null) || (contactIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + GROUP_UID + " as uid, " + SERVER_URL + " as url FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2PendingMember.getKeycloakGroupV2IdentifiersWhereContactIsPending",
+                "SELECT " + GROUP_UID + " as uid, " + SERVER_URL + " as url FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + CONTACT_IDENTITY + " = ?" +
                 " AND " + CATEGORY + " = " + GroupV2.Identifier.CATEGORY_KEYCLOAK + ";")) {
@@ -318,7 +324,8 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2PendingMember.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?);")) {
             statement.setBytes(1, groupUid.getBytes());
             statement.setString(2, serverUrl);
             statement.setInt(3, category);
@@ -334,7 +341,8 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2PendingMember.delete",
+               " DELETE FROM " + TABLE_NAME +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +

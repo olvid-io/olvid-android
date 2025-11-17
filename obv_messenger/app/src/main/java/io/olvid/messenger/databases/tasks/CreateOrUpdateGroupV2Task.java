@@ -104,6 +104,9 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     }
                 }
 
+                // this is the timestamp of the server group blob, we will adjust it by a few milliseconds to ensure proper discussion message ordering
+                long groupUpdateTimestamp = groupV2.lastModificationTimestamp == 0 ? System.currentTimeMillis() : groupV2.lastModificationTimestamp;
+
                 //////////
                 // check if published details should be accepted or not
                 //////////
@@ -196,7 +199,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
 
                 Discussion discussion = db.discussionDao().getByGroupIdentifier(groupV2.bytesOwnedIdentity, bytesGroupIdentifier);
                 if (discussion == null) {
-                    discussion = Discussion.createOrReuseGroupV2Discussion(db, group, groupWasJustCreatedByMe, createdOnOtherDevice, updatedBy);
+                    discussion = Discussion.createOrReuseGroupV2Discussion(db, group, groupWasJustCreatedByMe, createdOnOtherDevice, updatedBy, groupUpdateTimestamp); // pass the update timestamp for joined/re-joined messages timestamp
                     groupWasJoinedOrRejoined = true;
 
                     if (discussion == null) {
@@ -223,7 +226,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 }
 
                 if (insertDetailsUpdatedMessage) {
-                    Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                    Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, discussion.bytesOwnedIdentity); // always use Syste.currentTimeMillis() for this
                     newDetailsMessage.id = db.messageDao().insert(newDetailsMessage);
                     UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
                     if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
@@ -237,13 +240,13 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 }
 
                 if (insertGainedAdminMessage) {
-                    Message adminMessage = Message.createGainedGroupAdminMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                    Message adminMessage = Message.createGainedGroupAdminMessage(db, discussion.id, discussion.bytesOwnedIdentity, groupUpdateTimestamp + 1);
                     db.messageDao().insert(adminMessage);
                     if (discussion.updateLastMessageTimestamp(adminMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }
                 } else if (insertLostAdminMessage && !insertLostSendMessage) { // only insert lost admin if we did not lose write permission too
-                    Message adminMessage = Message.createLostGroupAdminMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                    Message adminMessage = Message.createLostGroupAdminMessage(db, discussion.id, discussion.bytesOwnedIdentity, groupUpdateTimestamp + 1);
                     db.messageDao().insert(adminMessage);
                     if (discussion.updateLastMessageTimestamp(adminMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
@@ -251,13 +254,13 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 }
 
                 if (!insertGainedAdminMessage && insertGainedSendMessage) { // only insert a "can write" message if we are not an admin
-                    Message gainedSendMessage = Message.createGainedGroupSendMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                    Message gainedSendMessage = Message.createGainedGroupSendMessage(db, discussion.id, discussion.bytesOwnedIdentity, groupUpdateTimestamp + 1);
                     db.messageDao().insert(gainedSendMessage);
                     if (discussion.updateLastMessageTimestamp(gainedSendMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }
                 } else if (insertLostSendMessage) {
-                    Message lostSendMessage = Message.createLostGroupSendMessage(db, discussion.id, discussion.bytesOwnedIdentity);
+                    Message lostSendMessage = Message.createLostGroupSendMessage(db, discussion.id, discussion.bytesOwnedIdentity, groupUpdateTimestamp + 1);
                     db.messageDao().insert(lostSendMessage);
                     if (discussion.updateLastMessageTimestamp(lostSendMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
@@ -419,7 +422,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         // for keycloak groups, only insert a left group message if the user's keycloakUserId actually left the group
                         if (!keycloakGroup || !addedKeycloakUserIds.contains(memberBytesIdentityToKeycloakUserIdMap.get(key))) {
                             messageInserted = true;
-                            Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2Member.bytesContactIdentity, leavers.contains(key) ? null : updateAuthor);
+                            Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2Member.bytesContactIdentity, leavers.contains(key) ? null : updateAuthor, groupUpdateTimestamp + 3); // add 3ms to ensure these messages are after the joined group and gained admin messages
                             db.messageDao().upsert(groupLeftMessage);
                         }
 
@@ -443,17 +446,27 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     if (contact == null) {
                         Logger.w("Failed to add group2 member: contact does not exist");
                     } else {
-                        Group2Member group2Member = new Group2Member(groupV2.bytesOwnedIdentity, bytesGroupIdentifier, key.bytes, permissions);
+                        Group2PendingMember correspondingPending = pendingToRemove.get(key);
+                        Group2Member group2Member = new Group2Member(
+                                groupV2.bytesOwnedIdentity,
+                                bytesGroupIdentifier,
+                                key.bytes,
+                                correspondingPending == null ? null : correspondingPending.creationTimestamp,
+                                permissions
+                        );
                         db.group2MemberDao().insert(group2Member);
                         if (group2Member.permissionChangeSettings) {
                             bytesIdentitiesOfNewMembersWithChangeSettingsPermission.add(key.bytes);
                         }
+                        if (correspondingPending != null && contact.hasChannelOrPreKey()) {
+                            runAfterTransaction.add(new ResendReactionsAndPollVotesForGroupV2MemberTask(group2Member));
+                        }
 
-                        if (!pendingToRemove.containsKey(key)) {
+                        if (correspondingPending == null) {
                             // for keycloak groups, only insert a joined group message if the user's keycloakUserId actually joined the group
                             if (!groupWasJoinedOrRejoined && (!keycloakGroup || !removedKeycloakUserIds.contains(memberBytesIdentityToKeycloakUserIdMap.get(key)))) {
                                 messageInserted = true;
-                                Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, key.bytes, updateAuthor);
+                                Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, key.bytes, updateAuthor, groupUpdateTimestamp + 3); // add 3ms to ensure these messages are after the joined group and gained admin messages
                                 db.messageDao().upsert(groupJoinedMessage);
                             }
                             membersWereAdded = true;
@@ -469,7 +482,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                                     if (discussionCustomization != null) {
                                         JsonSharedSettings sharedSettings = discussionCustomization.getSharedSettingsJson();
                                         if (sharedSettings != null) {
-                                            Message message = Message.createDiscussionSettingsUpdateMessage(db, discussionId, sharedSettings, contact.bytesOwnedIdentity, true, null);
+                                            Message message = Message.createDiscussionSettingsUpdateMessage(db, discussionId, sharedSettings, contact.bytesOwnedIdentity, true, groupUpdateTimestamp + 2);
                                             if (message != null) {
                                                 message.postSettingsMessage(true, contact.bytesContactIdentity);
                                             }
@@ -496,7 +509,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         // for keycloak groups, only insert a left group message if the user's keycloakUserId actually left the group
                         if (!keycloakGroup || !addedKeycloakUserIds.contains(pendingMemberBytesIdentityToKeycloakUserIdMap.get(key))) {
                             messageInserted = true;
-                            Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2PendingMember.bytesContactIdentity, leavers.contains(key) ? null : updateAuthor);
+                            Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, group2PendingMember.bytesContactIdentity, leavers.contains(key) ? null : updateAuthor, groupUpdateTimestamp + 3); // add 3ms to ensure these messages are after the joined group and gained admin messages
                             db.messageDao().upsert(groupLeftMessage);
                         }
 
@@ -522,7 +535,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                     BytesKey key = mapEntry.getKey();
                     ObvGroupV2.ObvGroupV2PendingMember obvGroupV2PendingMember = mapEntry.getValue();
 
-                    Group2PendingMember group2PendingMember = new Group2PendingMember(groupV2.bytesOwnedIdentity, bytesGroupIdentifier, obvGroupV2PendingMember.bytesIdentity, obvGroupV2PendingMember.serializedDetails, obvGroupV2PendingMember.permissions);
+                    Group2PendingMember group2PendingMember = new Group2PendingMember(groupV2.bytesOwnedIdentity, bytesGroupIdentifier, obvGroupV2PendingMember.bytesIdentity, obvGroupV2PendingMember.serializedDetails, obvGroupV2PendingMember.permissions, groupUpdateTimestamp);
                     db.group2PendingMemberDao().insert(group2PendingMember);
                     if (Arrays.equals(AppSingleton.getBytesCurrentIdentity(), groupV2.bytesOwnedIdentity)
                             && ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(group2PendingMember.bytesContactIdentity) == null) {
@@ -532,7 +545,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                         // for keycloak groups, only insert a joined group message if the user's keycloakUserId actually joined the group
                         if (!groupWasJoinedOrRejoined && (!keycloakGroup || !removedKeycloakUserIds.contains(pendingMemberBytesIdentityToKeycloakUserIdMap.get(key)))) {
                             messageInserted = true;
-                            Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, obvGroupV2PendingMember.bytesIdentity, updateAuthor);
+                            Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, obvGroupV2PendingMember.bytesIdentity, updateAuthor, groupUpdateTimestamp + 3); // add 3ms to ensure these messages are after the joined group and gained admin messages
                             db.messageDao().upsert(groupJoinedMessage);
                         }
                         membersWereAdded = true;

@@ -233,7 +233,8 @@ public class BackupKey implements ObvDatabase {
 
     // delete all BackupKey and all Backup
     public static void deleteAll(BackupManagerSession backupManagerSession) throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("BackupKey.deleteAll",
+                "DELETE FROM " + TABLE_NAME + ";")) {
             statement.executeUpdate();
         }
         Backup.deleteAll(backupManagerSession);
@@ -241,7 +242,8 @@ public class BackupKey implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?);")) {
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("BackupKey.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?);")) {
             statement.setBytes(1, uid.getBytes());
             statement.setBytes(2, Encoded.of(encryptionPublicKey).getBytes());
             statement.setBytes(3, Encoded.of(macKey).getBytes());
@@ -270,7 +272,8 @@ public class BackupKey implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + UID_ + " = ?;")) {
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("BackupKey.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + UID_ + " = ?;")) {
             statement.setBytes(1, uid.getBytes());
             statement.executeUpdate();
         }
@@ -281,7 +284,8 @@ public class BackupKey implements ObvDatabase {
     // region setters
 
     public void addSuccessfulVerification() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("BackupKey.addSuccessfulVerification",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SUCCESSFUL_VERIFICATION_COUNT + " = ?, " +
                 LAST_SUCCESSFUL_KEY_VERIFICATION_TIMESTAMP + " = ? " +
                 " WHERE " + UID_ + " = ?;")) {
@@ -297,7 +301,8 @@ public class BackupKey implements ObvDatabase {
 
 
     public void setLastKeyVerificationPromptTimestamp() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("BackupKey.setLastKeyVerificationPromptTimestamp",
+                "UPDATE " + TABLE_NAME +
                 " SET " + LAST_KEY_VERIFICATION_PROMPT_TIMESTAMP + " = ? " +
                 " WHERE " + UID_ + " = ?;")) {
             long timestamp = System.currentTimeMillis();
@@ -309,7 +314,8 @@ public class BackupKey implements ObvDatabase {
     }
 
     public void setLatestBackupVersion(int version) throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("BackupKey.setLatestBackupVersion",
+                "UPDATE " + TABLE_NAME +
                 " SET " + LATEST_BACKUP_VERSION + " = ? " +
                 " WHERE " + UID_ + " = ?;")) {
             statement.setInt(1, version);
@@ -320,7 +326,8 @@ public class BackupKey implements ObvDatabase {
     }
 
     public void setExportedBackupVersion(int version) throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("BackupKey.setExportedBackupVersion",
+                "UPDATE " + TABLE_NAME +
                 " SET " + EXPORTED_BACKUP_VERSION + " = ? " +
                 " WHERE " + UID_ + " = ?;")) {
             statement.setInt(1, version);
@@ -331,7 +338,8 @@ public class BackupKey implements ObvDatabase {
     }
 
     public void setUploadedBackupVersion(int version) throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("BackupKey.setUploadedBackupVersion",
+                "UPDATE " + TABLE_NAME +
                 " SET " + UPLOADED_BACKUP_VERSION + " = ? " +
                 " WHERE " + UID_ + " = ?;")) {
             statement.setInt(1, version);
@@ -345,7 +353,8 @@ public class BackupKey implements ObvDatabase {
     // region getters
 
     public static BackupKey get(BackupManagerSession backupManagerSession, UID backupKeyUid) {
-        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + UID_ + " = ?;")){
+        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("BackupKey.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + UID_ + " = ?;")){
             preparedStatement.setBytes(1, backupKeyUid.getBytes());
             ResultSet res = preparedStatement.executeQuery();
             if (res.next()) {
@@ -359,7 +368,8 @@ public class BackupKey implements ObvDatabase {
     }
 
     public static BackupKey[] getAll(BackupManagerSession backupManagerSession) {
-        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")){
+        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("BackupKey.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")){
             ResultSet res = preparedStatement.executeQuery();
             List<BackupKey> list = new ArrayList<>();
             while (res.next()) {

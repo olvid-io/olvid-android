@@ -38,14 +38,16 @@ public class ObvGroupV2 {
     public final HashSet<ObvGroupV2Member> otherGroupMembers;
     public final HashSet<ObvGroupV2PendingMember> pendingGroupMembers;
     public final ObvGroupV2DetailsAndPhotos detailsAndPhotos;
+    public final long lastModificationTimestamp; // for invitations, this timestamp is set to 0 and should be ignored
 
-    public ObvGroupV2(byte[] bytesOwnedIdentity, GroupV2.Identifier groupIdentifier, HashSet<GroupV2.Permission> ownPermissions, HashSet<ObvGroupV2Member> otherGroupMembers, HashSet<ObvGroupV2PendingMember> pendingGroupMembers, String serializedGroupDetails, String photoUrl, String serializedPublishedDetails, String publishedPhotoUrl) {
+    public ObvGroupV2(byte[] bytesOwnedIdentity, GroupV2.Identifier groupIdentifier, HashSet<GroupV2.Permission> ownPermissions, HashSet<ObvGroupV2Member> otherGroupMembers, HashSet<ObvGroupV2PendingMember> pendingGroupMembers, String serializedGroupDetails, String photoUrl, String serializedPublishedDetails, String publishedPhotoUrl, long lastModificationTimestamp) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.groupIdentifier = groupIdentifier;
         this.ownPermissions = ownPermissions;
         this.otherGroupMembers = otherGroupMembers;
         this.pendingGroupMembers = pendingGroupMembers;
         this.detailsAndPhotos = new ObvGroupV2DetailsAndPhotos(serializedGroupDetails, photoUrl, serializedPublishedDetails, publishedPhotoUrl);
+        this.lastModificationTimestamp = lastModificationTimestamp;
     }
 
     private ObvGroupV2(byte[] bytesOwnedIdentity, GroupV2.Identifier groupIdentifier, HashSet<GroupV2.Permission> ownPermissions, HashSet<ObvGroupV2Member> otherGroupMembers, HashSet<ObvGroupV2PendingMember> pendingGroupMembers, ObvGroupV2DetailsAndPhotos detailsAndPhotos) {
@@ -55,6 +57,7 @@ public class ObvGroupV2 {
         this.otherGroupMembers = otherGroupMembers;
         this.pendingGroupMembers = pendingGroupMembers;
         this.detailsAndPhotos = detailsAndPhotos;
+        this.lastModificationTimestamp = 0; // this constructor is only used when deserializing a group invitation message, so the lastModificationTimestamp is ignored
     }
 
     public Encoded encode() {

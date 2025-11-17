@@ -23,6 +23,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -194,15 +195,20 @@ fun MessageActionMenu(
                         maxWidth > 600.dp && LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
                     val showSender = message.isInbound && discussion.discussionType != Discussion.TYPE_CONTACT
+                    var minHeight by remember(largeScreen) { mutableIntStateOf(0) }
 
                     val messageContent: @Composable (((LayoutCoordinates) -> Unit)?) -> Unit = @Composable { onMessageGloballyPositioned ->
                         Column(
                             modifier = Modifier.heightIn(max = 280.dp),
                             horizontalAlignment = if (message.isInbound) Alignment.Start else Alignment.End
                         ) {
-                            var showReactionBar by remember { mutableStateOf(false) }
+                            val showReactionBar = remember(minHeight) {
+                                MutableTransitionState(initialState = false).apply {
+                                    targetState = message.isReactable && discussion.isNormalOrReadOnly && minHeight != 0
+                                }
+                            }
                             AnimatedVisibility(
-                                visible = showReactionBar,
+                                visibleState = showReactionBar,
                                 enter = fadeIn(),
                                 exit = fadeOut(),
                             ) {
@@ -220,9 +226,6 @@ fun MessageActionMenu(
                                     useAnimatedEmojis = remember { useAnimatedEmojis() },
                                     loopAnimatedEmojis = remember { loopAnimatedEmojis() },
                                 )
-                            }
-                            LaunchedEffect(message.isReactable, discussion.isNormalOrReadOnly) {
-                                showReactionBar = message.isReactable && discussion.isNormalOrReadOnly
                             }
                             val messageExpiration by AppDatabase.getInstance()
                                 .messageExpirationDao().getLive(message.id)
@@ -255,7 +258,6 @@ fun MessageActionMenu(
                     }
 
                     val actionsAndPicker = @Composable {
-                        var minHeight by remember(largeScreen) { mutableIntStateOf(0) }
                         val density = LocalDensity.current
                         Box(
                             modifier = Modifier
@@ -287,6 +289,7 @@ fun MessageActionMenu(
                                         contentColor = colorResource(R.color.almostBlack)
                                     ),
                                 ) {
+                                    val focusState = remember { mutableStateOf(false) }
                                     Column {
                                         SearchBar(
                                             modifier = Modifier.padding(8.dp),
@@ -297,11 +300,7 @@ fun MessageActionMenu(
                                                     it
                                                 )
                                             },
-                                            onFocus = {
-                                                emojiSearchViewModel.shownEmojiVariants.value?.let {
-                                                    emojiSearchViewModel.shownEmojiVariants.value = null
-                                                }
-                                            },
+                                            focusState = focusState,
                                             onClearClick = { emojiSearchViewModel.reset() },
                                             colors = OutlinedTextFieldDefaults.colors(
                                                 focusedBorderColor = colorResource(R.color.olvid_gradient_light),
@@ -309,13 +308,18 @@ fun MessageActionMenu(
                                                 cursorColor = colorResource(R.color.olvid_gradient_light)
                                             )
                                         )
+                                        LaunchedEffect(focusState.value) {
+                                            if (focusState.value) {
+                                                emojiSearchViewModel.shownEmojiVariants.value = null
+                                            }
+                                        }
                                         EmojiPicker(
                                             modifier = Modifier
                                                 .height(280.dp),
                                             gridState = emojiPickerGridState,
                                             onReact = onReact,
                                             onToggleFavorite = onToggleFavorite,
-                                            isSearch = emojiSearchViewModel.searchText.isNotEmpty(),
+                                            isSearch = emojiSearchViewModel.searchText.isNotEmpty() || focusState.value,
                                             recentEmojis = recentReactions,
                                             emojis = emojiSearchViewModel.emojis,
                                             shownEmojiVariants = emojiSearchViewModel.shownEmojiVariants
@@ -371,13 +375,12 @@ fun MessageActionMenu(
                                 .fillMaxSize(),
                             contentAlignment = if (message.isInbound) Alignment.CenterStart else Alignment.CenterEnd,
                         ) {
-                            var messageLayout: LayoutCoordinates? by remember { mutableStateOf(null) }
-                            val onMessageGloballyPositioned: ((LayoutCoordinates) -> Unit)? = { layout ->
-                                messageLayout = layout
+                            var messageWidth: Int? by remember { mutableStateOf(null) }
+                            val onMessageGloballyPositioned: ((LayoutCoordinates) -> Unit) = { layout ->
+                                messageWidth = layout.size.width
                             }
                             messageContent(onMessageGloballyPositioned)
-
-                            messageLayout?.size?.width?.let { messageWidth ->
+                            messageWidth?.let { messageWidth ->
                                 val density = LocalDensity.current.density
                                 val availableWidth = maxWidthDp - // total screen width
                                         8.dp - // message outer padding

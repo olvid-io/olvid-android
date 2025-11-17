@@ -69,7 +69,8 @@ public class EngineDbSchemaVersion implements ObvDatabase {
     }
 
     public static EngineDbSchemaVersion get(EngineSession engineSession) {
-        try (PreparedStatement statement = engineSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = engineSession.session.prepareStatement("EngineDbSchemaVersion.get",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
                     return new EngineDbSchemaVersion(engineSession, res);
@@ -83,7 +84,8 @@ public class EngineDbSchemaVersion implements ObvDatabase {
     }
 
     public void update(int version) throws SQLException {
-        try (PreparedStatement statement = engineSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = engineSession.session.prepareStatement("EngineDbSchemaVersion.update",
+                "UPDATE " + TABLE_NAME +
                 " SET " + VERSION + " = ?;")) {
             statement.setInt(1, version);
             statement.executeUpdate();

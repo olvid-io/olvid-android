@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">Besked</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">Send besked</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">Opkald initialiseres</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">Opkald initialiseres</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">Venter på lydtilladelse</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">Bekræfter legitimationsoplysninger</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">Sikrer forbindelse</string>
@@ -1212,7 +1212,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Indsæt en emoji</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Hold nede for at tilføje/fjerne fra favoritter</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Fejlfindingsinformation</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Antal kanaler/enheder:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Antal enheder:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">Uden sikker kanal:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">Server:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">Identitetsudbyder:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">ID-link:</string>
@@ -2006,7 +2007,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">Denne nøgle kan også findes senere i dine indstillinger.</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Glem ikke adgangen til dine profiler!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Backup giver dig mulighed for at gendanne dine profiler, hvis du mister adgangen til denne enhed. Den nye oplevelse er nemmere end nogensinde 😉 og kan konfigureres på få sekunder.</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Konfigurer sikkerhedskopier</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">Slå sikkerhedskopier til</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Glem ikke at notere din backup-nøgle 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Din backup-nøgle er afgørende for at gendanne dine profiler, hvis du mister adgangen til denne enhed.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Forbedr din Olvid-oplevelse 🚀</string>
@@ -2112,4 +2113,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">En ukendt tilgængelighedstjeneste er blevet registreret. Kontroller venligst, at det er sikkert at bruge den:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Søg efter en emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Seneste</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Opdater kontaktstatus</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">Vis databaseforespørgselstider for engine</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Databaseforespørgsler fra engine</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Venter på svar fra modpartens enhed</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Enhed til kontaktperson utilgængelig</string>
 </resources>

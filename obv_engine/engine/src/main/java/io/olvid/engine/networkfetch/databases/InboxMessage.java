@@ -163,7 +163,8 @@ public class InboxMessage implements ObvDatabase {
     // region setters
 
     public void markForDeletion() {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.markForDeletion",
+                "UPDATE " + TABLE_NAME +
                 " SET " + MARKED_FOR_DELETION + " = 1 " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + UID_ + " = ?;")) {
@@ -176,7 +177,8 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public void markAsOnHold() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.markAsOnHold",
+                "UPDATE " + TABLE_NAME +
                 " SET " + ON_HOLD + " = 1 " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + UID_ + " = ?;")) {
@@ -188,7 +190,8 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public void setPayloadAndFromIdentity(byte[] payload, Identity fromIdentity, UID fromDeviceUid, AuthEncKey extendedPayloadKey, InboxAttachment[] attachments) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.setPayloadAndFromIdentity",
+                "UPDATE " + TABLE_NAME +
                 " SET " + PAYLOAD + " = ?, " +
                 FROM_IDENTITY + " = ?, " +
                 FROM_DEVICE_UID + " = ?, " +
@@ -215,7 +218,8 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public void setFromIdentityForMissingPreKeyContact(Identity fromIdentity) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.setFromIdentityForMissingPreKeyContact",
+                "UPDATE " + TABLE_NAME +
                 " SET " + FROM_IDENTITY + " = ? " +
                 "WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + UID_ + " = ?;")) {
@@ -230,7 +234,8 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public void setExtendedPayload(byte[] extendedPayload) throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.setExtendedPayload",
+                "UPDATE " + TABLE_NAME +
                 " SET " + EXTENDED_PAYLOAD + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + UID_ + " = ?;")) {
@@ -245,7 +250,8 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public static void clearExtendedPayload(FetchManagerSession fetchManagerSession, Identity ownedIdentity, UID messageUid) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.clearExtendedPayload",
+                "UPDATE " + TABLE_NAME +
                 " SET " + HAS_EXTENDED_PAYLOAD + " = 0, " +
                 EXTENDED_PAYLOAD_KEY + " = NULL, " +
                 EXTENDED_PAYLOAD + " = NULL " +
@@ -351,7 +357,8 @@ public class InboxMessage implements ObvDatabase {
         if (uid == null) {
             return null;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + UID_ + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -373,7 +380,8 @@ public class InboxMessage implements ObvDatabase {
         if (uid == null) {
             return false;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.exists",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + UID_ + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -388,7 +396,8 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public static InboxMessage[] getAllForOwnedIdentity(FetchManagerSession fetchManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.getAllForOwnedIdentity",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 List<InboxMessage> list = new ArrayList<>();
@@ -403,7 +412,8 @@ public class InboxMessage implements ObvDatabase {
 
     // this method only returns truly unprocessed messages, not PreKey messages without a contact
     public static InboxMessage[] getUnprocessedMessagesForOwnedIdentity(FetchManagerSession fetchManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.getUnprocessedMessagesForOwnedIdentity",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ?" +
                 " AND " + PAYLOAD + " IS NULL " +
                 " AND " + FROM_IDENTITY + " IS NULL " +
@@ -422,7 +432,7 @@ public class InboxMessage implements ObvDatabase {
 
     // this method return unprocessed messages, but also PreKey messages where the contact was not yet a contact
     public static InboxMessage[] getUnprocessedMessages(FetchManagerSession fetchManagerSession) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.getUnprocessedMessages",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + PAYLOAD + " IS NULL " +
                         " AND " + MARKED_FOR_DELETION + " = 0" +
@@ -440,7 +450,7 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public static List<InboxMessage> getPendingPreKeyMessages(FetchManagerSession fetchManagerSession, Identity ownedIdentity, Identity contactIdentity) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.getPendingPreKeyMessages",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + PAYLOAD + " IS NULL " +
                         " AND " + OWNED_IDENTITY + " = ? " +
@@ -462,7 +472,7 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public static List<InboxMessage> getExpiredPendingPreKeyMessages(FetchManagerSession fetchManagerSession, long timestamp) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.getExpiredPendingPreKeyMessages",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + PAYLOAD + " IS NULL " +
                         " AND " + FROM_IDENTITY + " IS NOT NULL " +
@@ -481,7 +491,7 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public static InboxMessage[] getDecryptedMessages(FetchManagerSession fetchManagerSession) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.getDecryptedMessages",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + PAYLOAD + " NOT NULL " +
                         " AND " + MARKED_FOR_DELETION + " = 0" +
@@ -500,7 +510,7 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public static InboxMessage[] getMarkedForDeletionMessages(FetchManagerSession fetchManagerSession) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.getMarkedForDeletionMessages",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + MARKED_FOR_DELETION + " = 1;")) {
             try (ResultSet res = statement.executeQuery()) {
@@ -516,7 +526,8 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public static InboxMessage[] getExtendedPayloadMessages(FetchManagerSession fetchManagerSession) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.getExtendedPayloadMessages",
+
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + EXTENDED_PAYLOAD + " IS NOT NULL;")) {
             try (ResultSet res = statement.executeQuery()) {
@@ -532,7 +543,7 @@ public class InboxMessage implements ObvDatabase {
     }
 
     public static InboxMessage[] getMissingExtendedPayloadMessages(FetchManagerSession fetchManagerSession) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.getMissingExtendedPayloadMessages",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + EXTENDED_PAYLOAD_KEY + " IS NOT NULL" +
                         " AND " + EXTENDED_PAYLOAD + " IS NULL;")) {
@@ -693,7 +704,8 @@ public class InboxMessage implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?);")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, uid.getBytes());
             statement.setBytes(3, wrappedKey.getBytes());
@@ -750,7 +762,8 @@ public class InboxMessage implements ObvDatabase {
             }
             inboxAttachment.delete();
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxMessage.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + UID_ + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());

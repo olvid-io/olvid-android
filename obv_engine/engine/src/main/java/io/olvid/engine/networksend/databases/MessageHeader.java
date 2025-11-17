@@ -118,7 +118,8 @@ public class MessageHeader implements ObvDatabase {
         if (messageUid == null) {
             return null;
         }
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("MessageHeader.getAll",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -186,7 +187,8 @@ public class MessageHeader implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("MessageHeader.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, messageUid.getBytes());
             statement.setBytes(3, deviceUid.getBytes());
@@ -198,7 +200,8 @@ public class MessageHeader implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("MessageHeader.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ? " +
                 " AND " + DEVICE_UID + " = ? " +
@@ -212,7 +215,8 @@ public class MessageHeader implements ObvDatabase {
     }
 
     static void deleteAll(SendManagerSession sendManagerSession, Identity ownedIdentity, UID messageUid) throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("MessageHeader.deleteAll",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());

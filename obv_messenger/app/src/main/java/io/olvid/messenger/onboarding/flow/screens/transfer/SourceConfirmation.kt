@@ -378,6 +378,7 @@ fun NavGraphBuilder.sourceConfirmation(
                         onFinalize.invoke()
                     }
                 },
+                border = null,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorResource(R.color.olvid_gradient_light),
                     contentColor = colorResource(R.color.alwaysWhite),

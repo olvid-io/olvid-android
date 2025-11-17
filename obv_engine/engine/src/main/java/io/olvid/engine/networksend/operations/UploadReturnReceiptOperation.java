@@ -36,10 +36,12 @@ import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
+import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.ServerMethod;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.IdentityAndLong;
 import io.olvid.engine.encoder.Encoded;
+import io.olvid.engine.metamanager.IdentityDelegate;
 import io.olvid.engine.networksend.coordinators.SendReturnReceiptCoordinator;
 import io.olvid.engine.networksend.databases.ReturnReceipt;
 import io.olvid.engine.networksend.datatypes.SendManagerSession;
@@ -47,23 +49,18 @@ import io.olvid.engine.networksend.datatypes.SendManagerSessionFactory;
 
 
 public class UploadReturnReceiptOperation extends Operation {
-
-    public static final int RFC_RETURN_RECEIPT_NOT_FOUND = 1;
-
     private final SendManagerSessionFactory sendManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
     private final String server;
-    private final PRNG prng;
     private final SendReturnReceiptCoordinator.ReturnReceiptBatchProvider returnReceiptBatchProvider;
     private final List<IdentityAndLong> identityInactiveReturnReceiptIds;
     private IdentityAndLong[] returnReceiptOwnedIdentitiesAndIds;
 
-    public UploadReturnReceiptOperation(SendManagerSessionFactory sendManagerSessionFactory, SSLSocketFactory sslSocketFactory, String server, PRNG prng, SendReturnReceiptCoordinator.ReturnReceiptBatchProvider returnReceiptBatchProvider , OnFinishCallback onFinishCallback, OnCancelCallback onCancelCallback) {
+    public UploadReturnReceiptOperation(SendManagerSessionFactory sendManagerSessionFactory, SSLSocketFactory sslSocketFactory, String server, SendReturnReceiptCoordinator.ReturnReceiptBatchProvider returnReceiptBatchProvider , OnFinishCallback onFinishCallback, OnCancelCallback onCancelCallback) {
         super(computeUniqueUid(server), onFinishCallback, onCancelCallback);
         this.sendManagerSessionFactory = sendManagerSessionFactory;
         this.sslSocketFactory = sslSocketFactory;
         this.server = server;
-        this.prng = prng;
         this.returnReceiptBatchProvider = returnReceiptBatchProvider;
         this.identityInactiveReturnReceiptIds = new ArrayList<>();
     }
@@ -114,7 +111,7 @@ public class UploadReturnReceiptOperation extends Operation {
                     Identity ownedIdentity = entry.getKey();
                     List<Long> returnReceiptIds = entry.getValue();
                     // we need to block sending return receipts for any inactive ownedIdentity
-                    if (!sendManagerSession.identityDelegate.isActiveOwnedIdentity(sendManagerSession.session,ownedIdentity)) {
+                    if (!sendManagerSession.identityDelegate.isActiveOwnedIdentity(sendManagerSession.session, ownedIdentity)) {
                         for (Long returnReceiptId : returnReceiptIds) {
                             identityInactiveReturnReceiptIds.add(new IdentityAndLong(ownedIdentity, returnReceiptId));
                         }
@@ -135,6 +132,10 @@ public class UploadReturnReceiptOperation extends Operation {
                                         Encoded.of(returnReceipt.getAttachmentNumber()),
                                 });
                             }
+
+                            Seed prngSeed = sendManagerSession.identityDelegate.getDeterministicSeedForOwnedIdentity(ownedIdentity, returnReceipt.getNonce(), IdentityDelegate.DeterministicSeedContext.ENCRYPT_RETURN_RECEIPT);
+                            PRNG prng = Suite.getPRNG(PRNG.PRNG_HMAC_SHA256, prngSeed);
+
                             AuthEnc authEnc = Suite.getAuthEnc(returnReceipt.getKey());
                             EncryptedBytes encryptedPayload = authEnc.encrypt(returnReceipt.getKey(), payload.getBytes(), prng);
 

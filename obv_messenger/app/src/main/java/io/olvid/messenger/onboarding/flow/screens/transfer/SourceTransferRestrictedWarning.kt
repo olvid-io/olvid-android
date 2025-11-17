@@ -28,7 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -71,7 +71,6 @@ fun NavGraphBuilder.sourceTransferRestrictedWarning(
                     ),
                     OnboardingAction(
                         label = AnnotatedString(stringResource(id = R.string.button_label_ok)),
-                        icon = R.drawable.ic_message_status_delivered_and_read_one,
                         type = BUTTON,
                         onClick = onContinue
                     )

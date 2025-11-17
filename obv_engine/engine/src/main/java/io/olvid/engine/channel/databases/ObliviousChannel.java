@@ -151,7 +151,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
 
     public void aSendSeedFullRatchetMessageWasSent() {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.aSendSeedFullRatchetMessageWasSent",
+                "UPDATE " + TABLE_NAME + " SET " +
                 FULL_RATCHET_OF_THE_SEND_SEED_IN_PROGRESS + " = 1, " +
                 TIMESTAMP_OF_LAST_FULL_RATCHET_SENT_MESSAGE + " = ? " +
                 " WHERE " + CURRENT_DEVICE_UID + " = ? AND " + REMOTE_DEVICE_UID + " = ? AND " + REMOTE_IDENTITY + " = ?;")) {
@@ -170,7 +171,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         if (confirmed) {
             return;
         }
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.confirm",
+                "UPDATE " + TABLE_NAME + " SET " +
                 CONFIRMED + " = 1 " +
                 " WHERE " + CURRENT_DEVICE_UID + " = ? " +
                 " AND " + REMOTE_DEVICE_UID + " = ? " +
@@ -188,7 +190,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
     // This method is called after a send full ratchet
     public void updateSendSeed(Seed seed, int obliviousEngineVersion) {
         Seed sendSeed = generateDiversifiedSeed(seed, currentDeviceUid, obliviousEngineVersion);
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.updateSendSeed",
+                "UPDATE " + TABLE_NAME + " SET " +
                 SEED_FOR_NEXT_SEND_KEY + " = ?, " +
                 OBLIVIOUS_ENGINE_VERSION + " = ?, " +
                 NUMBER_OF_ENCRYPTED_MESSAGES_AT_THE_TIME_OF_THE_LAST_FULL_RATCHET + " = ?, " +
@@ -219,7 +222,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         if (provision == null) {
             throw new SQLException();
         }
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.createNewProvision",
+                "UPDATE " + TABLE_NAME + " SET " +
                 FULL_RATCHETING_COUNT_OF_LAST_PROVISION + " = ? " +
                 " WHERE " + CURRENT_DEVICE_UID + " = ? AND " + REMOTE_DEVICE_UID + " = ? AND " + REMOTE_IDENTITY + " = ?;")) {
             statement.setInt(1, fullRatchetingCountOfLastProvision + 1);
@@ -362,7 +366,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?);")) {
             statement.setBytes(1, currentDeviceUid.getBytes());
             statement.setBytes(2, remoteDeviceUid.getBytes());
             statement.setBytes(3, remoteIdentity.getBytes());
@@ -383,7 +388,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + CURRENT_DEVICE_UID + " = ? AND " + REMOTE_DEVICE_UID + " = ? AND " + REMOTE_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + CURRENT_DEVICE_UID + " = ? AND " + REMOTE_DEVICE_UID + " = ? AND " + REMOTE_IDENTITY + " = ?;")) {
             statement.setBytes(1, currentDeviceUid.getBytes());
             statement.setBytes(2, remoteDeviceUid.getBytes());
             statement.setBytes(3, remoteIdentity.getBytes());
@@ -400,7 +406,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         if ((currentDeviceUid == null) || (remoteDeviceUid == null) || (remoteIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " +
                 (necessarilyConfirmed ? (CONFIRMED + " = 1 AND ") : "") +
                 CURRENT_DEVICE_UID + " = ? AND " + REMOTE_DEVICE_UID + " = ? AND " + REMOTE_IDENTITY + " = ?;")) {
             statement.setBytes(1, currentDeviceUid.getBytes());
@@ -418,7 +425,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
     }
 
     public static ObliviousChannel[] getAll(ChannelManagerSession channelManagerSession) {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME)) {
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.getAll",
+                "SELECT * FROM " + TABLE_NAME)) {
             try (ResultSet res = statement.executeQuery()) {
                 List<ObliviousChannel> list = new ArrayList<>();
                 while (res.next()) {
@@ -461,7 +469,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             }
         }
         questionMarks += ")";
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.getMany",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " +
                 (necessarilyConfirmed ? (CONFIRMED + " = 1 AND ") : "") +
                 CURRENT_DEVICE_UID + " = ? AND " +
                 REMOTE_IDENTITY + " = ? AND " +
@@ -497,7 +506,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
             }
         }
         questionMarks += ")";
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.deleteMany",
+                "DELETE FROM " + TABLE_NAME + " WHERE " +
                 CURRENT_DEVICE_UID + " = ? AND " +
                 REMOTE_IDENTITY + " = ? AND " +
                 REMOTE_DEVICE_UID + " IN " + questionMarks + ";")) {
@@ -522,7 +532,7 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         if (currentDeviceUid == null) {
             return;
         }
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.deleteAll",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + CURRENT_DEVICE_UID + " = ?;")) {
             statement.setBytes(1, currentDeviceUid.getBytes());
@@ -775,7 +785,8 @@ public class ObliviousChannel extends NetworkChannel implements ObvDatabase {
         System.arraycopy(encryptedMessageKey.getBytes(), 0, headerBytes, KeyId.KEYID_LENGTH, encryptedMessageKey.length);
 
         MessageToSend.Header header = new MessageToSend.Header(remoteDeviceUid, remoteIdentity, new EncryptedBytes(headerBytes));
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ObliviousChannel.wrapMessageKey",
+                "UPDATE " + TABLE_NAME + " SET " +
                 SEED_FOR_NEXT_SEND_KEY + " = ?, " +
                 NUMBER_OF_ENCRYPTED_MESSAGES + " = ? " +
                 " WHERE " + CURRENT_DEVICE_UID + " = ? AND " + REMOTE_DEVICE_UID + " = ? AND " + REMOTE_IDENTITY + " = ?;")) {

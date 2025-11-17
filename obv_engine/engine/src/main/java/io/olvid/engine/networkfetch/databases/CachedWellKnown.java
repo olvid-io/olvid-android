@@ -59,7 +59,8 @@ public class CachedWellKnown implements ObvDatabase {
     // region getters
 
     public static List<CachedWellKnown> getAll(FetchManagerSession fetchManagerSession) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("CachedWellKnown.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<CachedWellKnown> list = new ArrayList<>();
                 while (res.next()) {
@@ -76,7 +77,8 @@ public class CachedWellKnown implements ObvDatabase {
         if (server == null) {
             return null;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("CachedWellKnown.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + SERVER + " = ?;")) {
             statement.setString(1, server);
             try (ResultSet res = statement.executeQuery()) {
@@ -149,7 +151,8 @@ public class CachedWellKnown implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("CachedWellKnown.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
             statement.setString(1, server);
             statement.setString(2, serializedWellKnown);
             statement.setLong(3, downloadTimestamp);
@@ -159,14 +162,16 @@ public class CachedWellKnown implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + SERVER  + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("CachedWellKnown.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + SERVER  + " = ?;")) {
             statement.setString(1, server);
             statement.executeUpdate();
         }
     }
 
     public void update(String serializedWellKnown) throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("CachedWellKnown.update",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_WELL_KNOWN + " = ?, " +
                 DOWNLOAD_TIMESTAMP + " = ? " +
                 " WHERE " + SERVER + " = ?;")) {

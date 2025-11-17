@@ -121,7 +121,8 @@ public class OutboxMessage implements ObvDatabase {
 
     public void setUidFromServer(UID uidFromServer, byte[] nonce, long timestampFromServer) {
         if (this.uidFromServer != uidFromServer) {
-            try (PreparedStatement statement = sendManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+            try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxMessage.setUidFromServer",
+                    "UPDATE " + TABLE_NAME +
                     " SET " + UID_FROM_SERVER + " = ?, " +
                     NONCE + " = ? " +
                     " WHERE " + OWNED_IDENTITY + " = ? " +
@@ -207,7 +208,8 @@ public class OutboxMessage implements ObvDatabase {
         if (ownedIdentity == null || uid == null) {
             return null;
         }
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxMessage.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + UID_ + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -235,7 +237,8 @@ public class OutboxMessage implements ObvDatabase {
         }
         sb.append("?");
 
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxMessage.getManyWithoutUidFromServer",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + SERVER + " = ? " +
                 " AND " + UID_FROM_SERVER + " IS NULL " +
@@ -256,7 +259,8 @@ public class OutboxMessage implements ObvDatabase {
     }
 
     public static OutboxMessage[] getAll(SendManagerSession sendManagerSession) {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxMessage.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<OutboxMessage> list = new ArrayList<>();
                 while (res.next()) {
@@ -271,7 +275,8 @@ public class OutboxMessage implements ObvDatabase {
     }
 
     public static OutboxMessage[] getAllForOwnedIdentity(SendManagerSession sendManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxMessage.getAllForOwnedIdentity",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 List<OutboxMessage> list = new ArrayList<>();
@@ -411,7 +416,8 @@ public class OutboxMessage implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?);")) {
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxMessage.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, uid.getBytes());
             statement.setBytes(3, (uidFromServer==null)?null:uidFromServer.getBytes());
@@ -436,7 +442,8 @@ public class OutboxMessage implements ObvDatabase {
         MessageHeader.deleteAll(sendManagerSession, ownedIdentity, uid);
         OutboxAttachment.deleteAll(sendManagerSession, ownedIdentity, uid);
         // Then actually delete the OutboxMessage
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("OutboxMessage.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + UID_ + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());

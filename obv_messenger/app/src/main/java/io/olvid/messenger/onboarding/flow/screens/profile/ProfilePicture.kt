@@ -35,6 +35,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -46,14 +47,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -69,10 +65,9 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
-import io.olvid.messenger.R.color
-import io.olvid.messenger.R.drawable
-import io.olvid.messenger.R.string
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.designsystem.components.OlvidActionButton
+import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.onboarding.flow.OnboardingFlowViewModel
@@ -160,7 +155,7 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
                 cameraLauncher.launch(photoUri)
             } else {
                 App.toast(
-                    string.toast_message_camera_permission_denied,
+                    R.string.toast_message_camera_permission_denied,
                     Toast.LENGTH_SHORT
                 )
             }
@@ -170,10 +165,10 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
         OnboardingScreen(
             step = OnboardingStep(
                 title = stringResource(
-                    id = string.onboarding_picture_title,
+                    id = R.string.onboarding_picture_title,
                     ownedIdentity?.getCustomDisplayName()
                         ?: ""),
-                subtitle = stringResource(id = string.onboarding_picture_subtitle),
+                subtitle = stringResource(id = R.string.onboarding_picture_subtitle),
             ),
             onClose = { finishAndOpenDiscussionsTab() }
         ) {
@@ -199,9 +194,13 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
                             .align(Alignment.TopEnd)
                             .padding(8.dp)
                             .requiredSize(32.dp)
-                            .clickable { onboardingFlowViewModel.absolutePhotoUrl = null },
-                        painter = painterResource(id = drawable.ic_remove),
-                        contentDescription = stringResource(id = string.content_description_remove_picture)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = ripple(bounded = false),
+                                onClick = { onboardingFlowViewModel.absolutePhotoUrl = null },
+                            ),
+                        painter = painterResource(id = R.drawable.ic_remove),
+                        contentDescription = stringResource(id = R.string.content_description_remove_picture)
                     )
                 }
             }
@@ -211,49 +210,39 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
             Row (
                 modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             ) {
-                OutlinedButton(
+                OlvidActionButton(
                     modifier = Modifier.weight(1f, true).fillMaxHeight(),
-                    elevation = null,
-                    onClick = {
-                        val permissionCheckResult =
-                            ContextCompat.checkSelfPermission(
-                                context,
-                                permission.CAMERA
-                            )
-                        if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
-                            cameraLauncher.launch(photoUri)
-                        } else {
-                            permissionLauncher.launch(permission.CAMERA)
-                        }
-                    },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorResource(id = color.blueOrWhite))
+                    text = stringResource(id = R.string.menu_action_take_photo),
+                    icon = R.drawable.ic_attach_camera,
+                    outlinedColor = colorResource(R.color.olvid_gradient_light),
+                    containerColor = Color.Transparent,
+                    allowTwoLines = true,
+                    contentColor = colorResource(R.color.olvid_gradient_light),
                 ) {
-                    Icon(
-                        modifier = Modifier.size(20.dp),
-                        painter = painterResource(id = drawable.ic_attach_camera),
-                        contentDescription = ""
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = stringResource(id = string.menu_action_take_photo))
+                    val permissionCheckResult =
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            permission.CAMERA
+                        )
+                    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                        cameraLauncher.launch(photoUri)
+                    } else {
+                        permissionLauncher.launch(permission.CAMERA)
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                OutlinedButton(
+                OlvidActionButton(
                     modifier = Modifier.weight(1f, true).fillMaxHeight(),
-                    elevation = null,
-                    onClick = {
-                        getContent.launch("image/*")
-                    },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colorResource(id = color.blueOrWhite))
+                    text = stringResource(id = R.string.menu_action_choose_picture),
+                    icon = R.drawable.ic_attach_image,
+                    outlinedColor = colorResource(R.color.olvid_gradient_light),
+                    containerColor = Color.Transparent,
+                    allowTwoLines = true,
+                    contentColor = colorResource(R.color.olvid_gradient_light),
                 ) {
-                    Icon(
-                        modifier = Modifier.size(20.dp),
-                        painter = painterResource(id = drawable.ic_attach_image),
-                        contentDescription = ""
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = stringResource(id = string.menu_action_choose_picture))
+                    getContent.launch("image/*")
                 }
             }
 
@@ -263,37 +252,27 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                TextButton(
+                OlvidTextButton(
                     enabled = onboardingFlowViewModel.absolutePhotoUrl == null,
                     onClick = ::finishAndOpenDiscussionsTab,
-                    colors = ButtonDefaults.textButtonColors(contentColor = colorResource(id = color.olvid_gradient_contrasted), disabledContentColor = Color.Transparent)
-                ) {
-                    Text(text = stringResource(id = R.string.button_label_maybe_later))
-                }
+                    text = stringResource(id = R.string.button_label_maybe_later),
+                )
 
-                Button(
+                OlvidActionButton(
                     enabled = onboardingFlowViewModel.absolutePhotoUrl != null,
-                    elevation = null,
-                    colors = ButtonDefaults.buttonColors(
-                        contentColor = colorResource(R.color.alwaysWhite),
-                        backgroundColor = colorResource(R.color.olvid_gradient_light),
-                        disabledBackgroundColor = colorResource(R.color.olvid_gradient_light).copy(alpha = .5f)
-                    ),
-                    onClick = {
-                        try {
-                            AppSingleton.getEngine().updateOwnedIdentityPhoto(
-                                ownedIdentity?.bytesOwnedIdentity,
-                                onboardingFlowViewModel.absolutePhotoUrl ?: ""
-                            )
-                            AppSingleton.getEngine()
-                                .publishLatestIdentityDetails(ownedIdentity?.bytesOwnedIdentity)
-                        } catch (_: Exception) {
-                        } finally {
-                            finishAndOpenDiscussionsTab()
-                        }
-                    }
+                    text = stringResource(id = R.string.button_label_done)
                 ) {
-                    Text(text = stringResource(id = string.button_label_done))
+                    try {
+                        AppSingleton.getEngine().updateOwnedIdentityPhoto(
+                            ownedIdentity?.bytesOwnedIdentity,
+                            onboardingFlowViewModel.absolutePhotoUrl ?: ""
+                        )
+                        AppSingleton.getEngine()
+                            .publishLatestIdentityDetails(ownedIdentity?.bytesOwnedIdentity)
+                    } catch (_: Exception) {
+                    } finally {
+                        finishAndOpenDiscussionsTab()
+                    }
                 }
             }
         }

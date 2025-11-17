@@ -181,7 +181,8 @@ public class PushNotificationConfiguration implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("PushNotificationConfiguration.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, deviceUid.getBytes());
             statement.setByte(3, pushNotificationType);
@@ -197,7 +198,8 @@ public class PushNotificationConfiguration implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("PushNotificationConfiguration.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }
@@ -211,7 +213,8 @@ public class PushNotificationConfiguration implements ObvDatabase {
         if (ownedIdentity == null) {
             return null;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("PushNotificationConfiguration.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
@@ -227,7 +230,8 @@ public class PushNotificationConfiguration implements ObvDatabase {
     }
 
     public static PushNotificationConfiguration[] getAll(FetchManagerSession fetchManagerSession) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("PushNotificationConfiguration.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<PushNotificationConfiguration> list = new ArrayList<>();
                 while (res.next()) {
@@ -245,7 +249,8 @@ public class PushNotificationConfiguration implements ObvDatabase {
     // region setters
 
     public void clearKickOtherDevices() {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("PushNotificationConfiguration.clearKickOtherDevices",
+                "UPDATE " + TABLE_NAME +
                 " SET " + MULTI_DEVICE_CONFIGURATION + " = ?, " +
                 DEVICE_UID_TO_REPLACE + " = NULL " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
@@ -260,7 +265,8 @@ public class PushNotificationConfiguration implements ObvDatabase {
     }
 
     public static void deleteForOwnedIdentity(FetchManagerSession fetchManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("PushNotificationConfiguration.deleteForOwnedIdentity",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }

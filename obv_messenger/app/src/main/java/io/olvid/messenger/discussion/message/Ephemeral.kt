@@ -114,12 +114,10 @@ fun EphemeralVisibilityExplanation(
 @Preview
 @Composable
 private fun EphemeralExplanationPreview() {
-    AppCompatTheme {
-        EphemeralVisibilityExplanation(
-            duration = null,
-            readOnce = true
-        ) {}
-    }
+    EphemeralVisibilityExplanation(
+        duration = null,
+        readOnce = true
+    ) {}
 }
 
 @Composable
@@ -228,18 +226,16 @@ fun MessageExpiration?.getTimerResources(
 @Preview
 @Composable
 private fun EphemeralTimerPreview() {
-    AppCompatTheme {
-        EphemeralTimer(
-            expiration = MessageExpiration(
-                id = 0,
-                messageId = 0,
-                expirationTimestamp = System.currentTimeMillis() + 60_000,
-                wipeOnly = false
-            ),
-            readOnce = true,
-            bookmarked = false
-        )
-    }
+    EphemeralTimer(
+        expiration = MessageExpiration(
+            id = 0,
+            messageId = 0,
+            expirationTimestamp = System.currentTimeMillis() + 60_000,
+            wipeOnly = false
+        ),
+        readOnce = true,
+        bookmarked = false
+    )
 }
 
 @Composable

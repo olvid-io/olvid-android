@@ -316,7 +316,7 @@ public class Discussion {
             }
         } else if (!discussion.isNormal()) {
             if (discussion.isLocked()) {
-                Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, null);
+                Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, null, System.currentTimeMillis());
                 db.messageDao().insert(reJoinedGroup);
             }
 
@@ -336,7 +336,7 @@ public class Discussion {
     }
 
     @Ignore
-    public static Discussion createOrReuseGroupV2Discussion(AppDatabase db, @NonNull Group2 group2, boolean groupWasJustCreatedByMe, boolean createdOnOtherDevice, byte[] updatedBy) {
+    public static Discussion createOrReuseGroupV2Discussion(AppDatabase db, @NonNull Group2 group2, boolean groupWasJustCreatedByMe, boolean createdOnOtherDevice, byte[] updatedBy, long groupUpdateTimestamp) {
         if (!db.inTransaction()) {
             Logger.e("ERROR: running discussion createOrReuseGroupV2Discussion outside a transaction");
             return null;
@@ -371,15 +371,15 @@ public class Discussion {
                     setDefaultEphemeralMessageSettings(discussion, db, group2.bytesOwnedIdentity);
                 }
             } else {
-                Message reJoinedGroup = Message.createJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, updatedBy);
+                Message reJoinedGroup = Message.createJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, updatedBy, groupUpdateTimestamp);
                 db.messageDao().insert(reJoinedGroup);
             }
         } else if (!discussion.isNormal()) {
             if (discussion.isLocked()) {
-                Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, updatedBy);
+                Message reJoinedGroup = Message.createReJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, updatedBy, groupUpdateTimestamp);
                 db.messageDao().insert(reJoinedGroup);
             } else if (discussion.isPreDiscussion()) {
-                Message joinedGroup = Message.createJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, updatedBy);
+                Message joinedGroup = Message.createJoinedGroupMessage(db, discussion.id, discussion.bytesOwnedIdentity, updatedBy, groupUpdateTimestamp);
                 db.messageDao().insert(joinedGroup);
             }
 

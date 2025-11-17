@@ -23,6 +23,11 @@ import android.content.Intent
 import android.content.res.Configuration
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -415,32 +420,42 @@ fun DiscussionListScreen(
                                 tipsViewModel.tipToShow?.let { tip ->
                                     item(key = -3L) {
                                         val activity = LocalActivity.current
-                                        Column {
-                                            TipItem(
-                                                refreshTipState = {
-                                                    (activity as? MainActivity)?.let {
-                                                        App.runThread {
-                                                            tipsViewModel.refreshTipToShow(
-                                                                it
-                                                            )
+                                        val visibleState = remember {
+                                            MutableTransitionState(initialState = false).apply {
+                                                targetState = true
+                                            }
+                                        }
+                                        AnimatedVisibility(
+                                            visibleState = visibleState,
+                                            enter = expandVertically(tween(durationMillis = 500, delayMillis = 500)),
+                                        ) {
+                                            Column {
+                                                TipItem(
+                                                    refreshTipState = {
+                                                        (activity as? MainActivity)?.let {
+                                                            App.runThread {
+                                                                tipsViewModel.refreshTipToShow(
+                                                                    it
+                                                                )
+                                                            }
                                                         }
-                                                    }
-                                                },
-                                                tipToShow = tip,
-                                                expirationDays = tipsViewModel.deviceExpirationDays,
-                                            )
-                                            Spacer(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(
-                                                        start = 84.dp,
-                                                        end = 12.dp
-                                                    )
-                                                    .requiredHeight(1.dp)
-                                                    .background(
-                                                        color = colorResource(id = R.color.lightGrey)
-                                                    )
-                                            )
+                                                    },
+                                                    tipToShow = tip,
+                                                    expirationDays = tipsViewModel.deviceExpirationDays,
+                                                )
+                                                Spacer(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(
+                                                            start = 84.dp,
+                                                            end = 12.dp
+                                                        )
+                                                        .requiredHeight(1.dp)
+                                                        .background(
+                                                            color = colorResource(id = R.color.lightGrey)
+                                                        )
+                                                )
+                                            }
                                         }
                                     }
                                 }

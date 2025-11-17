@@ -51,6 +51,7 @@ import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Group;
 import io.olvid.messenger.databases.entity.Group2;
+import io.olvid.messenger.databases.entity.Group2Member;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
@@ -60,6 +61,7 @@ import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.databases.tasks.ApplyDiscussionRetentionPoliciesTask;
 import io.olvid.messenger.databases.tasks.CreateOrUpdateGroupV2Task;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
+import io.olvid.messenger.databases.tasks.ResendReactionsAndPollVotesForGroupV2MemberTask;
 import io.olvid.messenger.databases.tasks.UpdateAllGroupMembersNames;
 import io.olvid.messenger.databases.tasks.new_message.ProcessReadyToProcessOnHoldMessagesTask;
 import io.olvid.messenger.settings.SettingsActivity;
@@ -222,6 +224,11 @@ public class AppDatabaseOpenCallback implements Runnable {
         } catch (Exception e) {
             Logger.x(e);
             Logger.w("Error refreshing Fyle statuses.");
+        }
+
+        // Resend reactions and poll votes to group2members who deserve it
+        for (Group2Member group2Member : db.group2MemberDao().getAllWithPendingCreationTimestamp()) {
+            new ResendReactionsAndPollVotesForGroupV2MemberTask(group2Member).run();
         }
 
 
@@ -598,7 +605,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                                         ContactGroupJoin contactGroupJoin = new ContactGroupJoin(newGroup.bytesGroupOwnerAndUid, newGroup.bytesOwnedIdentity, bytesContactIdentity);
                                         db.contactGroupJoinDao().insert(contactGroupJoin);
 
-                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, bytesContactIdentity, null);
+                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, bytesContactIdentity, null, System.currentTimeMillis());
                                         db.messageDao().upsert(groupJoinedMessage);
                                         messageInserted = true;
                                     }
@@ -680,13 +687,13 @@ public class AppDatabaseOpenCallback implements Runnable {
                                         if (contactGroupJoin != null) {
                                             db.contactGroupJoinDao().delete(contactGroupJoin);
                                         }
-                                        Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, bytesKey.bytes, null);
+                                        Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, bytesKey.bytes, null, System.currentTimeMillis());
                                         db.messageDao().upsert(groupLeftMessage);
                                     }
                                     for (BytesKey bytesKey : contactToAdd) {
                                         ContactGroupJoin contactGroupJoin = new ContactGroupJoin(finalGroup.bytesGroupOwnerAndUid, finalGroup.bytesOwnedIdentity, bytesKey.bytes);
                                         db.contactGroupJoinDao().insert(contactGroupJoin);
-                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, bytesKey.bytes, null);
+                                        Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, bytesKey.bytes, null, System.currentTimeMillis());
                                         db.messageDao().upsert(groupJoinedMessage);
                                     }
 

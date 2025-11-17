@@ -61,12 +61,12 @@ public class UpdateReactionsTask implements Runnable {
         List<Reaction> reactions = db.reactionDao().getAllForMessage(messageId);
         Reaction updatedReaction = null; // will be non-null if this is a reaction update. Will remain null for new reactions
 
-        if (emoji != null && (emoji.length() == 0 || emoji.contains(":") || emoji.contains("|"))) {
+        if (emoji != null && (emoji.isEmpty() || emoji.contains(":") || emoji.contains("|"))) {
             Logger.e("UpdateReactionsTask: Invalid emoji (length 0 or contained ':' or '|')");
             return;
         }
 
-        if (message == null || reactions == null) {
+        if (message == null) {
             Logger.e("UpdateReactionsTask: Unable to find message or reactions in database");
             return;
         }

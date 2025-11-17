@@ -528,7 +528,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">Повідомлення</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">Надіслати повідомлення</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">Ініціалізація дзвінка</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">Ініціалізація дзвінка</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">Очікується дозвіл на доступ до аудіо</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">Перевірка облікових даних</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">Забезпечення з’єднання</string>
@@ -1213,7 +1213,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Вставити емодзі</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Натисніть і утримуйте, щоб додати/видалити з улюблених</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Інформація для налагодження</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Кількість каналів/пристроїв:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Кількість пристроїв:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">Без захищеного каналу:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">Сервер:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">Постачальник ідентифікаційних даних:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">ID-посилання:</string>
@@ -2007,7 +2008,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">Ви також зможете знайти цей ключ пізніше в налаштуваннях.</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Не втрачайте доступ до своїх профілів!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Резервні копії дозволяють відновити ваші профілі, якщо ви втратите доступ до цього пристрою. Новий досвід простіший, ніж будь-коли 😉, і його можна налаштувати за лічені секунди.</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Налаштувати резервні копії</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">Увімкнути резервне копіювання</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Не забудьте записати ваш ключ резервної копії‍ ☕</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Ваш ключ резервного копіювання є важливим для відновлення ваших профілів, якщо ви втратите доступ до цього пристрою.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Покращте свій досвід використання Olvid 🚀</string>
@@ -2113,4 +2114,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Виявлено невідому службу спеціального доступу. Будь ласка, перевірте, чи безпечно її використовувати:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Пошук емодзі</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Останні</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Оновити статус контакту</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">Відображати час виконання запитів до бази даних двигуна</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Час виконання запитів до бази даних двигуна</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Очікування відповіді від пристрою співрозмовника</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Пристрій співрозмовника недоступний</string>
 </resources>

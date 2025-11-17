@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -105,26 +106,27 @@ fun ReactionBar(
             items(items = displayReactions, key = { it }) { emoji ->
                 Box(
                     modifier = Modifier.animateItem()
-                    .combinedClickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple(
-                            bounded = false,
-                            color = colorResource(R.color.almostBlack),
-                            radius = 16.dp
-                        ),
-                        onClick = { onReact(if (emoji == currentReaction) null else emoji) },
-                        onLongClick = { onToggleFavorite(emoji) }
-                    )
-                    .background(
-                        color = if (emoji == currentReaction) colorResource(R.color.blueOverlay) else Color.Transparent,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = if (emoji == currentReaction) colorResource(R.color.olvid_gradient_light) else Color.Transparent,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .padding(6.dp)
+                        .width(50.dp)
+                        .combinedClickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(
+                                bounded = false,
+                                color = colorResource(R.color.almostBlack),
+                                radius = 16.dp
+                            ),
+                            onClick = { onReact(if (emoji == currentReaction) null else emoji) },
+                            onLongClick = { onToggleFavorite(emoji) }
+                        )
+                        .background(
+                            color = if (emoji == currentReaction) colorResource(R.color.blueOverlay) else Color.Transparent,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = if (emoji == currentReaction) colorResource(R.color.olvid_gradient_light) else Color.Transparent,
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        .padding(6.dp)
                 ) {
                     if (useAnimatedEmojis) {
                         AnimatedEmoji(

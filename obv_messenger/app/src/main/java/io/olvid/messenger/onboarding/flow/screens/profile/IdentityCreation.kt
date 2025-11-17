@@ -28,9 +28,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -142,7 +143,7 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
                     Text(text = stringResource(id = string.hint_first_name))
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, capitalization = KeyboardCapitalization.Words),
-                colors = TextFieldDefaults.outlinedTextFieldColors(focusedLabelColor = colorResource(id = color.olvid_gradient_contrasted), focusedBorderColor = colorResource(id = color.olvid_gradient_contrasted), cursorColor = colorResource(id = color.olvid_gradient_contrasted))
+                colors = OutlinedTextFieldDefaults.colors(focusedLabelColor = colorResource(id = color.olvid_gradient_contrasted), focusedBorderColor = colorResource(id = color.olvid_gradient_contrasted), cursorColor = colorResource(id = color.olvid_gradient_contrasted))
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
@@ -159,7 +160,7 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
                 keyboardActions = KeyboardActions(
                     onDone = { onboardingFlowViewModel.createSimpleIdentity(onSuccess = { onIdentityCreated.invoke() }) }
                 ),
-                colors = TextFieldDefaults.outlinedTextFieldColors(focusedLabelColor = colorResource(id = color.olvid_gradient_contrasted), focusedBorderColor = colorResource(id = color.olvid_gradient_contrasted), cursorColor = colorResource(id = color.olvid_gradient_contrasted))
+                colors = OutlinedTextFieldDefaults.colors(focusedLabelColor = colorResource(id = color.olvid_gradient_contrasted), focusedBorderColor = colorResource(id = color.olvid_gradient_contrasted), cursorColor = colorResource(id = color.olvid_gradient_contrasted))
             )
         }
     }

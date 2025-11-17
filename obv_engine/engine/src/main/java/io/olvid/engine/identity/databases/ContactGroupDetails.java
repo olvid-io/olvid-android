@@ -116,7 +116,8 @@ public class ContactGroupDetails implements ObvDatabase {
     // region setters
 
     public static void cleanup(IdentityManagerSession identityManagerSession, Identity ownedIdentity, byte[] groupOwnerAndUid, int publishedVersion, int latestOrTrustedVersion) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupDetails.cleanup",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + GROUP_OWNER_AND_UID + " = ? " +
                 " AND " +  VERSION + " NOT IN (?,?);")) {
@@ -134,7 +135,8 @@ public class ContactGroupDetails implements ObvDatabase {
             throw new Exception();
         }
         String serializedJsonDetails = identityManagerSession.jsonObjectMapper.writeValueAsString(jsonGroupDetails);
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupDetails.setJsonDetails",
+                "UPDATE " + TABLE_NAME + " SET " +
                 SERIALIZED_JSON_DETAILS + " = ? " +
                 " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ? " +
@@ -150,7 +152,8 @@ public class ContactGroupDetails implements ObvDatabase {
 
     public void setPhotoUrl(String photoUrl, boolean clearLabelAndKey) throws SQLException {
         if (clearLabelAndKey) {
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupDetails.setPhotoUrl",
+                    "UPDATE " + TABLE_NAME +
                     " SET " + PHOTO_URL + " = ?, " +
                     PHOTO_SERVER_LABEL + " = NULL, " +
                     PHOTO_SERVER_KEY + " = NULL " +
@@ -167,7 +170,8 @@ public class ContactGroupDetails implements ObvDatabase {
                 this.photoServerLabel = null;
             }
         } else {
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupDetails.setPhotoUrl",
+                    "UPDATE " + TABLE_NAME +
                     " SET " + PHOTO_URL + " = ? " +
                     " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                     " AND " + OWNED_IDENTITY + " = ? " +
@@ -183,7 +187,8 @@ public class ContactGroupDetails implements ObvDatabase {
     }
 
     public void setPhotoServerLabelAndKey(UID photoServerLabel, AuthEncKey photoServerKey) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupDetails.setPhotoServerLabelAndKey",
+                "UPDATE " + TABLE_NAME + " SET " +
                 PHOTO_SERVER_LABEL + " = ?, " +
                 PHOTO_SERVER_KEY + " = ? " +
                 " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
@@ -230,7 +235,8 @@ public class ContactGroupDetails implements ObvDatabase {
         try {
             if (newVersion == null) {
                 newVersion = version + 1;
-                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupDetails.copy",
+                        "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                         " AND " + OWNED_IDENTITY + " = ? " +
                         " ORDER BY " + VERSION + " DESC LIMIT 1;")) {
@@ -322,7 +328,8 @@ public class ContactGroupDetails implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupDetails.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?);")) {
             statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setInt(3, version);
@@ -336,7 +343,8 @@ public class ContactGroupDetails implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupDetails.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ? " +
                 " AND " + VERSION + " = ?;")) {
@@ -355,7 +363,8 @@ public class ContactGroupDetails implements ObvDatabase {
         if ((ownedIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupDetails.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + GROUP_OWNER_AND_UID + " = ?" +
                 " AND " + OWNED_IDENTITY + " = ?" +
                 " AND " +  VERSION + " = ?;")) {
@@ -373,7 +382,8 @@ public class ContactGroupDetails implements ObvDatabase {
     }
 
     public static List<String> getAllPhotoUrl(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + PHOTO_URL + " FROM " + TABLE_NAME + " WHERE " + PHOTO_URL + " IS NOT NULL;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupDetails.getAllPhotoUrl",
+                "SELECT " + PHOTO_URL + " FROM " + TABLE_NAME + " WHERE " + PHOTO_URL + " IS NOT NULL;")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<String> list = new ArrayList<>();
                 while (res.next()) {
@@ -385,7 +395,8 @@ public class ContactGroupDetails implements ObvDatabase {
     }
 
     public static List<ContactGroupDetails> getAllWithMissingPhotoUrl(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupDetails.getAllWithMissingPhotoUrl",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + PHOTO_URL + " IS NULL " +
                 " AND " + PHOTO_SERVER_KEY + " IS NOT NULL " +
                 " AND " + PHOTO_SERVER_LABEL + " IS NOT NULL;")) {

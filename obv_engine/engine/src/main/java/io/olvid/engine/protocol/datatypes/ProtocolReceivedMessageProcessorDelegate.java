@@ -23,5 +23,5 @@ package io.olvid.engine.protocol.datatypes;
 import io.olvid.engine.datatypes.UID;
 
 public interface ProtocolReceivedMessageProcessorDelegate {
-    void processReceivedMessage(UID messageUid);
+    void processReceivedMessage(UID messageUid, int protocolId);
 }

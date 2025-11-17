@@ -147,7 +147,8 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?,?);")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("LinkBetweenProtocolInstances.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?,?);")) {
             statement.setBytes(1, childProtocolInstanceUid.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setInt(3, expectedChildStateId);
@@ -160,7 +161,8 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + CHILD_PROTOCOL_INSTANCE_UID + " = ? AND " + OWNED_IDENTITY  + " = ? AND " + EXPECTED_CHILD_STATE_ID + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("LinkBetweenProtocolInstances.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + CHILD_PROTOCOL_INSTANCE_UID + " = ? AND " + OWNED_IDENTITY  + " = ? AND " + EXPECTED_CHILD_STATE_ID + " = ?;")) {
             statement.setBytes(1, childProtocolInstanceUid.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setInt(3, expectedChildStateId);
@@ -174,7 +176,8 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
         if ((childProtocolInstanceUid == null) || (ownedIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + CHILD_PROTOCOL_INSTANCE_UID + " = ? AND " + OWNED_IDENTITY  + " = ? AND " + EXPECTED_CHILD_STATE_ID + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("LinkBetweenProtocolInstances.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + CHILD_PROTOCOL_INSTANCE_UID + " = ? AND " + OWNED_IDENTITY  + " = ? AND " + EXPECTED_CHILD_STATE_ID + " = ?;")) {
             statement.setBytes(1, childProtocolInstanceUid.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setInt(3, expectedChildStateId);
@@ -191,7 +194,8 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
     }
 
     public static LinkBetweenProtocolInstances[] getAllParentLinks(ProtocolManagerSession protocolManagerSession, UID childProtocolInstanceUid, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + CHILD_PROTOCOL_INSTANCE_UID + " = ? AND " + OWNED_IDENTITY  + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("LinkBetweenProtocolInstances.getAllParentLinks",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + CHILD_PROTOCOL_INSTANCE_UID + " = ? AND " + OWNED_IDENTITY  + " = ?;")) {
             statement.setBytes(1, childProtocolInstanceUid.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -205,7 +209,8 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
     }
 
     public static LinkBetweenProtocolInstances[] getAllChildLinks(ProtocolManagerSession protocolManagerSession, UID parentProtocolInstanceUid, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + PARENT_PROTOCOL_INSTANCE_UID + " = ? AND " + OWNED_IDENTITY  + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("LinkBetweenProtocolInstances.getAllChildLinks",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + PARENT_PROTOCOL_INSTANCE_UID + " = ? AND " + OWNED_IDENTITY  + " = ?;")) {
             statement.setBytes(1, parentProtocolInstanceUid.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -219,7 +224,8 @@ public class LinkBetweenProtocolInstances implements ObvDatabase {
     }
 
     public static void deleteAllForOwnedIdentity(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("LinkBetweenProtocolInstances.deleteAllForOwnedIdentity",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }

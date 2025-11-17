@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">메시지</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">메시지 보내기</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">통화 초기화 중</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">통화 초기화 중</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">오디오 권한을 기다리는 중입니다</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">자격 증명 확인</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">연결을 보호하는 중입니다</string>
@@ -1212,7 +1212,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">이모지 삽입</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">즐겨찾기에 추가/제거하려면 길게 누르세요</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">디버그 정보</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">채널/기기 수:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">기기 수:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">안전 채널 없이:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">서버:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">ID 제공업체:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">ID 링크:</string>
@@ -2007,7 +2008,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">이 키는 나중에 설정에서도 찾을 수 있습니다.</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">프로필에 대한 액세스 권한을 잃지 마세요!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">백업을 사용하면 이 장치에 대한 액세스 권한을 잃은 경우 프로필을 복원할 수 있습니다. 새로운 경험은 그 어느 때보다 쉽고 😉 몇 초 만에 설정할 수 있습니다.</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">백업 설정하기</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">백업 활성화</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">백업 키를 적어두지 마세요 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">이 장치에 대한 액세스 권한을 잃은 경우 프로필을 복원하려면 백업 키가 필수적입니다.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Olvid 경험을 향상해 보세요🚀</string>
@@ -2113,4 +2114,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">알 수 없는 접근성 서비스가 감지되었습니다. 사용하기에 안전한지 확인해 주세요:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">이모지 검색</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">최근</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">연락처 상태 새로 고침</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">엔진 데이터베이스 쿼리 시간을 표시합니다.</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">엔진 데이터베이스 쿼리 시간</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">상대방 기기 응답 대기 중</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">상대방 기기에 연결할 수 없습니다.</string>
 </resources>

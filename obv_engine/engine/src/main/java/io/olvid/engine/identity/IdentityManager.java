@@ -1324,7 +1324,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     GroupV2.Identifier groupIdentifier = new GroupV2.Identifier(groupUid, keycloakServer.getServerUrl(), GroupV2.Identifier.CATEGORY_KEYCLOAK);
 
                     if (keycloakGroupBlob.timestamp < keycloakCurrentTimestamp - Constants.KEYCLOAK_SIGNATURE_VALIDITY_MILLIS) {
-                        Logger.w("Received a signed keyclaok groupblob with an outdated signature");
+                        Logger.w("Received a signed keycloak group blob with an outdated signature");
                         continue;
                     }
 
@@ -1685,18 +1685,18 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     public ObvContactDeviceCount getContactDeviceCounts(Session session, Identity ownedIdentity, Identity contactIdentity) throws Exception {
         int count = 0;
-        int establihed = 0;
+        int established = 0;
         int preKey = 0;
         HashSet<UID> confirmedChannelUids = new HashSet<>(Arrays.asList(channelDelegate.getConfirmedObliviousChannelDeviceUids(session, ownedIdentity, contactIdentity)));
         for (UidAndPreKey uidAndPreKey : getDeviceUidsAndPreKeysOfContactIdentity(session, ownedIdentity, contactIdentity)) {
             count++;
             if (confirmedChannelUids.contains(uidAndPreKey.uid)) {
-                establihed++;
+                established++;
             } else if (uidAndPreKey.preKey != null) {
                 preKey++;
             }
         }
-        return new ObvContactDeviceCount(count, establihed, preKey);
+        return new ObvContactDeviceCount(count, established, preKey);
     }
 
     public List<ObvContactInfo> getContactsInfoOfOwnedIdentity(Session session, Identity ownedIdentity) throws Exception {
@@ -2213,7 +2213,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public Seed getDeterministicSeedForOwnedIdentity(Identity ownedIdentity, byte[] diversificationTag) throws Exception {
+    public Seed getDeterministicSeedForOwnedIdentity(Identity ownedIdentity, byte[] diversificationTag, DeterministicSeedContext context) throws Exception {
         if (diversificationTag.length == 0) {
             throw new Exception();
         }
@@ -2223,7 +2223,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 throw new SQLException("OwnedIdentity not found");
             }
             PrivateIdentity privateIdentity = ownedIdentityObject.getPrivateIdentity();
-            return privateIdentity.getDeterministicSeedForOwnedIdentity(diversificationTag);
+            return privateIdentity.getDeterministicSeedForOwnedIdentity(diversificationTag, context);
         }
     }
 
@@ -3103,7 +3103,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public boolean createJoinedGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.BlobKeys blobKeys, GroupV2.ServerBlob serverBlob, boolean createdByMeOnOtherDevice, Identity inviterIdentity) throws Exception {
+    public boolean createJoinedGroupV2(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.BlobKeys blobKeys, GroupV2.ServerBlob serverBlob, boolean createdByMeOnOtherDevice, Identity inviterIdentity, Long groupUpdateTimestamp) throws Exception {
         if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) || (serverBlob == null)) {
             throw new Exception();
         }
@@ -3150,7 +3150,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 ownIdentityAndPermissionsAndDetails.permissionStrings,
                 serverBlob.serializedGroupType,
                 createdByMeOnOtherDevice,
-                inviterIdentity
+                inviterIdentity,
+                groupUpdateTimestamp
         );
         if (group == null) {
             throw new Exception("Unable to create joined ContactGroupV2");
@@ -3300,7 +3301,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public List<Identity> updateGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe, Identity updatedBy, List<Identity> leavers) throws SQLException {
+    public List<Identity> updateGroupV2WithNewBlob(Session session, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe, Identity updatedBy, List<Identity> leavers, Long groupUpdateTimestamp) throws SQLException {
         if ((ownedIdentity == null) || (groupIdentifier == null) || (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) || (serverBlob == null) || (blobKeys == null)) {
             return null;
         }
@@ -3312,7 +3313,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         session.addSessionCommitListener(backupNeededSessionCommitListener);
         session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
 
-        return groupV2.updateWithNewBlob(serverBlob, blobKeys, updatedByMe, updatedBy, leavers);
+        return groupV2.updateWithNewBlob(serverBlob, blobKeys, updatedByMe, updatedBy, leavers, groupUpdateTimestamp);
     }
 
     @Override
@@ -3438,7 +3439,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                 serializedGroupDetails,
                 photoUrl,
                 serializedPublishedDetails,
-                publishedPhotoUrl
+                publishedPhotoUrl,
+                groupV2.getLastModificationTimestamp()
         );
     }
 
@@ -4232,7 +4234,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public AuthEncKeyAndChannelInfo unwrapWithPreKey(Session session, EncryptedBytes wrappedKey, Identity ownedIdentity) throws SQLException {
+    public AuthEncKeyAndChannelInfo unwrapWithPreKey(Session session, EncryptedBytes wrappedKey, Identity ownedIdentity) {
         try {
             if (wrappedKey.length < KeyId.KEYID_LENGTH) {
                 return null;
@@ -4325,7 +4327,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     }
 
     @Override
-    public RestoreFinishedCallback restoreSyncSnapshot(ObvSyncSnapshotNode node) throws Exception {
+    public RestoreFinishedCallback restoreSyncSnapshot(ObvSyncSnapshotNode node) {
         try (IdentityManagerSession identityManagerSession = getSession()) {
             boolean transactionSuccessful = false;
             try {

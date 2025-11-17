@@ -194,7 +194,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun emojiDao(): EmojiDao
 
     companion object {
-        const val DB_SCHEMA_VERSION: Int = 81
+        const val DB_SCHEMA_VERSION: Int = 82
         const val DB_FTS_GLOBAL_SEARCH_VERSION: Int = 1
         const val DB_FILE_NAME: String = "app_database"
         const val TMP_ENCRYPTED_DB_FILE_NAME: String = "encrypted_app_database"

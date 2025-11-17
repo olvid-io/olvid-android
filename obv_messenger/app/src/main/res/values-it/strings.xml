@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">Messaggio</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">Invia messaggio</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">Inizializzazione chiamata</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">Inizializzazione chiamata</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">In attesa del permesso audio</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">Verifica delle credenziali</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">Connessione in corso</string>
@@ -1212,7 +1212,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Inserisci un emoji</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Tieni premuto per aggiungere/rimuovere dai preferiti</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Informazioni di debug</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Numero di canali/dispositivi:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Numero di dispositivi:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">Senza canale sicuro:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">Server:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">Fornitore di identità:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">Link ID:</string>
@@ -2007,7 +2008,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">Puoi trovare questa chiave anche in seguito nelle impostazioni.</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Non perdere l\'accesso ai tuoi profili!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">I backup ti permettono di ripristinare i tuoi profili se perdi l\'accesso a questo dispositivo. La nuova esperienza è più semplice che mai 😉 e può essere configurata in pochi secondi.</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Configura backup</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">Abilita backup</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Non dimenticare di annotare la tua chiave di backup â</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">La tua chiave di backup è essenziale per ripristinare i tuoi profili se perdi l\'accesso a questo dispositivo.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Migliora la tua esperienza Olvid 🚀</string>
@@ -2113,4 +2114,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">È stato rilevato un servizio di accessibilità sconosciuto. Si prega di verificare che sia sicuro da utilizzare:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Cerca un emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Recenti</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Aggiorna stato contatto</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">Visualizza i tempi di esecuzione delle query del database del motore</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Tempi delle query del database del motore</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">In attesa di una risposta dal dispositivo del contatto</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Dispositivo del peer irraggiungibile</string>
 </resources>

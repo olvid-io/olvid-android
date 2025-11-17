@@ -146,13 +146,15 @@ public class KeycloakRevokedIdentity implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + "(" +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakRevokedIdentity.insert",
+                "INSERT INTO " + TABLE_NAME + "(" +
                 OWNED_IDENTITY + ", " +
                 KEYCLOAK_SERVER_URL + ", " +
                 REVOKED_IDENTITY + ", " +
                 REVOCATION_TYPE + ", " +
                 REVOCATION_TIMESTAMP + ") " +
-                " VALUES (?,?,?,?,?);", Statement.RETURN_GENERATED_KEYS)) {
+                " VALUES (?,?,?,?,?);",
+                true)) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setString(2, keycloakServerUrl);
             statement.setBytes(3, revokedIdentity.getBytes());
@@ -170,7 +172,8 @@ public class KeycloakRevokedIdentity implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakRevokedIdentity.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + ROW_ID + " = ?;")) {
             statement.setLong(1, rowId);
             statement.executeUpdate();
@@ -183,7 +186,8 @@ public class KeycloakRevokedIdentity implements ObvDatabase {
         if ((ownedIdentity == null) || (identityToVerify == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT kr.* FROM " + TABLE_NAME + " AS kr " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakRevokedIdentity.get",
+                "SELECT kr.* FROM " + TABLE_NAME + " AS kr " +
                 " INNER JOIN " + OwnedIdentity.TABLE_NAME + " AS oi " +
                 " ON kr." + OWNED_IDENTITY + " = oi." + OwnedIdentity.OWNED_IDENTITY +
                 " AND kr." + KEYCLOAK_SERVER_URL + " = oi." + OwnedIdentity.KEYCLOAK_SERVER_URL +
@@ -205,7 +209,8 @@ public class KeycloakRevokedIdentity implements ObvDatabase {
         if ((ownedIdentity == null) || (keycloakServerUrl == null)) {
             return;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakRevokedIdentity.prune",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + KEYCLOAK_SERVER_URL + " = ? " +
                 " AND " + REVOCATION_TIMESTAMP + " < ?;")) {

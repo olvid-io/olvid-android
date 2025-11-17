@@ -23,6 +23,7 @@ package io.olvid.engine.crypto;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -256,13 +257,15 @@ abstract class SignatureECSdsa extends Signature {
             System.arraycopy(Encoded.bytesFromBigUInt(publicKey.getAy(), l), 0, hashInput, l, l);
             System.arraycopy(message, 0, hashInput, 2*l, message.length);
 
+            boolean found = false;
             for (EdwardCurvePoint point: points) {
                 System.arraycopy(Encoded.bytesFromBigUInt(point.getY(), l), 0, hashInput, 0, l);
                 byte[] recomputedHash = isSha512 ? new HashSHA512().digest(hashInput) : new HashSHA256().digest(hashInput);;
-                if (Arrays.equals(hash, recomputedHash)) {
-                    return true;
+                if (MessageDigest.isEqual(hash, recomputedHash)) {
+                    found = true;
                 }
             }
+            return found;
         } catch (EncodingException ignored) {}
         return false;
     }

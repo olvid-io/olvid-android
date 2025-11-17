@@ -201,7 +201,8 @@ public class InboxAttachment implements ObvDatabase {
     // region setters
 
     public void requestDownload(int priorityCategory) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.requestDownload",
+                "UPDATE " + TABLE_NAME +
                 " SET " + DOWNLOAD_REQUESTED + " = 1, " +
                 PRIORITY_CATEGORY + " = ?, " +
                 TIMESTAMP_OF_FETCH_REQUEST + " = ? " +
@@ -226,7 +227,8 @@ public class InboxAttachment implements ObvDatabase {
     }
 
     public void pauseDownload() {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.pauseDownload",
+                "UPDATE " + TABLE_NAME +
                 " SET " + DOWNLOAD_REQUESTED + " = 0 " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ? " +
@@ -243,7 +245,8 @@ public class InboxAttachment implements ObvDatabase {
     }
 
     public void markForDeletion() {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.markForDeletion",
+                "UPDATE " + TABLE_NAME + " SET " +
                 MARKED_FOR_DELETION + " = 1 " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ? " +
@@ -266,7 +269,8 @@ public class InboxAttachment implements ObvDatabase {
         if (this.key != null || this.metadata != null) {
             throw new Exception("Attachment key and metadata were already set.");
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.setKeyAndMetadata",
+                "UPDATE " + TABLE_NAME +
                 " SET " + KEY + " = ?, " + METADATA + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ? " +
@@ -298,7 +302,8 @@ public class InboxAttachment implements ObvDatabase {
         }
         String serialized = sb.toString();
 
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.setChunkDownloadPrivateUrls",
+                "UPDATE " + TABLE_NAME +
                 " SET " + CHUNK_DOWNLOAD_PRIVATE_URLS + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ?" +
                 " AND " + MESSAGE_UID + " = ? " +
@@ -347,7 +352,8 @@ public class InboxAttachment implements ObvDatabase {
             f.seek(fileSize);
             f.write(attachmentBytes);
 
-            try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+            try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.writeToAttachmentFile",
+                    "UPDATE " + TABLE_NAME + " SET " +
                     RECEIVED_LENGTH + " = ?, " +
                     FILE_SIZE + " = ? " +
                     " WHERE " + OWNED_IDENTITY + " = ? " +
@@ -459,7 +465,8 @@ public class InboxAttachment implements ObvDatabase {
         if (ownedIdentity == null || messageUid == null) {
             return null;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ? " +
                 " AND " + ATTACHMENT_NUMBER + " = ?;")) {
@@ -480,7 +487,7 @@ public class InboxAttachment implements ObvDatabase {
         if (ownedIdentity == null || messageUid == null) {
             return null;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.getAll",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + OWNED_IDENTITY + " = ? " +
                         " AND " + MESSAGE_UID + " = ? " +
@@ -500,7 +507,7 @@ public class InboxAttachment implements ObvDatabase {
     }
 
     public static InboxAttachment[] getAllDownloaded(FetchManagerSession fetchManagerSession) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.getAllDownloaded",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + RECEIVED_LENGTH + " = " + EXPECTED_LENGTH  +
                         " AND " + MARKED_FOR_DELETION + " = 0;")) {
@@ -518,7 +525,7 @@ public class InboxAttachment implements ObvDatabase {
 
 
     public static InboxAttachment[] getAllAttachmentsToResume(FetchManagerSession fetchManagerSession) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.getAllAttachmentsToResume",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + DOWNLOAD_REQUESTED + " = 1 " +
                         " AND " + KEY + " NOT NULL " +
@@ -537,7 +544,7 @@ public class InboxAttachment implements ObvDatabase {
     }
 
     public static InboxAttachment[] getAllPartialAttachmentsNotToResume(FetchManagerSession fetchManagerSession) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.getAllPartialAttachmentsNotToResume",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + DOWNLOAD_REQUESTED + " = 0 " +
                         " AND " + KEY + " NOT NULL " +
@@ -693,7 +700,8 @@ public class InboxAttachment implements ObvDatabase {
     }
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?);")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, messageUid.getBytes());
             statement.setInt(3, attachmentNumber);
@@ -724,7 +732,8 @@ public class InboxAttachment implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("InboxAttachment.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + MESSAGE_UID + " = ? " +
                 " AND " + ATTACHMENT_NUMBER + " = ?;")) {

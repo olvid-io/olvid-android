@@ -222,6 +222,7 @@ class WebrtcCallService : Service() {
         ///////
         // the following states are caller-only states --> the recipient stays in INITIAL during this time
         START_CALL_MESSAGE_SENT,
+        START_CALL_TIME_OUT,
         RINGING,
         BUSY,
         CALL_REJECTED,
@@ -232,6 +233,7 @@ class WebrtcCallService : Service() {
         RECONNECTING,
         HANGED_UP,
         KICKED,
+        ENDING_CALL,
         FAILED
     }
 
@@ -247,7 +249,8 @@ class WebrtcCallService : Service() {
         SERVER_AUTHENTICATION_ERROR,
         ICE_CONNECTION_ERROR,
         CALL_INITIATION_NOT_SUPPORTED,
-        KICKED
+        KICKED,
+        INITIALIZATION_TIMEOUT,
     }
 
     enum class WakeLock {
@@ -434,7 +437,12 @@ class WebrtcCallService : Service() {
                 if (VERSION.SDK_INT < VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     unregisterDeviceOrientationChange()
                 }
-                Handler(Looper.getMainLooper()).postDelayed({ this.stopSelf() }, 300)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    // recheck before stoping service
+                    if (queuedIncomingCalls.isEmpty() && role == Role.NONE) {
+                        this.stopSelf()
+                    }
+                }, PEER_CALL_ENDED_WAIT_MILLIS)
             }
             currentIncomingCallLiveData.postValue(null)
         }
@@ -1465,10 +1473,15 @@ class WebrtcCallService : Service() {
     }
 
     fun hangUpCall() {
-        executor.execute { hangUpCallInternal(true) }
+        executor.execute {
+            if (role == Role.NONE) {
+                closeCallActivity()
+            }
+            hangUpCallInternal(true)
+        }
     }
 
-    private fun hangUpCallInternal(notifyPeers: Boolean, closeActivity: Boolean = true) {
+    private fun hangUpCallInternal(notifyPeers: Boolean) {
         if (role != NONE) {
             if (notifyPeers) {
                 // notify peer that you hung up (it's not just a connection loss)
@@ -1478,8 +1491,14 @@ class WebrtcCallService : Service() {
                 soundPool?.play(disconnectSound, 1f, 1f, 0, 0, 1f)
             }
             outgoingCallRinger?.stop()
-            if (_state != FAILED) {
+            if (_state != FAILED && _state != CALL_ENDED) {
                 setState(CALL_ENDED)
+                if (notifyPeers) {
+                    callParticipants.values.forEach {
+                        it.setPeerState(PeerState.ENDING_CALL)
+                    }
+                    notifyCallParticipantsChanged()
+                }
             }
             createLogEntry(CallLogItem.STATUS_MISSED) // this only create the log if it was not yet created
             resetCallLogItem()
@@ -1500,7 +1519,6 @@ class WebrtcCallService : Service() {
             } finally {
                 videoCapturer = null
             }
-
             requestingScreenCast = false
             screenShareActive = false
             try {
@@ -1510,9 +1528,6 @@ class WebrtcCallService : Service() {
             } finally {
                 screenCapturerAndroid?.dispose()
                 screenCapturerAndroid = null
-            }
-            if (closeActivity) {
-                closeCallActivity()
             }
             stopThisServiceOrRefreshNotificationAndRingers()
         }
@@ -1678,7 +1693,7 @@ class WebrtcCallService : Service() {
             }?.let { call ->
                 // stop current call if any
                 if (role != NONE) {
-                    hangUpCallInternal(notifyPeers = true, closeActivity = false)
+                    hangUpCallInternal(notifyPeers = true)
                 }
                 // apply call object to start
                 callParticipants.clear()
@@ -1843,14 +1858,14 @@ class WebrtcCallService : Service() {
                     }
                 }
             }
+            if (timeoutTimerTask != null) {
+                timeoutTimerTask!!.cancel()
+                timeoutTimerTask = null
+            }
             // we call updateStateFromPeerStates here so we get a chance to stop playing the reconnecting sound
             updateStateFromPeerStates()
             if (_state == CALL_IN_PROGRESS) {
                 return@execute
-            }
-            if (timeoutTimerTask != null) {
-                timeoutTimerTask!!.cancel()
-                timeoutTimerTask = null
             }
             acquireWakeLock(WIFI)
             createLogEntry(CallLogItem.STATUS_SUCCESSFUL)
@@ -2533,28 +2548,37 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
                 toggleScreenShare()
             }
         }
+        updateStateFromPeerStates()
     }
 
     private fun updateStateFromPeerStates() {
-        var allPeersAreInFinalState = true
         var allReconnecting = true
+        var reconnectingCount = 0
+        var allTimeout = true
+        var timeoutCount = 0
+        var allPeersAreInFinalState = true
         for (callParticipant in callParticipants.values) {
             when (callParticipant.peerState) {
                 PeerState.INITIAL, START_CALL_MESSAGE_SENT, RINGING, PeerState.BUSY, CONNECTING_TO_PEER, CONNECTED -> {
                     allReconnecting = false
-                    run { allPeersAreInFinalState = false }
+                    allTimeout = false
+                    allPeersAreInFinalState = false
                 }
 
                 RECONNECTING -> {
                     allPeersAreInFinalState = false
+                    allTimeout = false
+                    reconnectingCount++
                 }
 
-                CALL_REJECTED, HANGED_UP, KICKED, PeerState.FAILED -> {
-                    allReconnecting = false
+                PeerState.START_CALL_TIME_OUT -> {
+                    timeoutCount++
                 }
+
+                CALL_REJECTED, HANGED_UP, KICKED, PeerState.FAILED, PeerState.ENDING_CALL -> Unit
             }
         }
-        if (callParticipants.size == 1 && allReconnecting) {
+        if (reconnectingCount > 0 && allReconnecting) {
             if (reconnectingStreamId == null && selectedAudioOutput != MUTED) {
                 reconnectingStreamId = soundPool?.play(reconnectingSound, .5f, .5f, 0, -1, 1f)
             }
@@ -2562,6 +2586,12 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
             reconnectingStreamId?.let {
                 soundPool?.stop(it)
                 reconnectingStreamId = null
+            }
+        }
+        if (allTimeout && timeoutCount > 0) {
+            if (_state != State.CALL_ENDED && _state != State.FAILED) {
+                failReason = FailReason.INITIALIZATION_TIMEOUT
+                setState(State.FAILED)
             }
         }
         if (allPeersAreInFinalState) {
@@ -4309,13 +4339,39 @@ ${jsonIceCandidate.sdpMLineIndex} -> ${jsonIceCandidate.sdp}"""
 
         fun setPeerState(peerState: PeerState) {
             this.peerState = peerState
-            notifyCallParticipantsChanged()
+            if (peerState != PeerState.ENDING_CALL) {
+                notifyCallParticipantsChanged()
+            }
             when (peerState) {
-                PeerState.INITIAL, CONNECTED, START_CALL_MESSAGE_SENT, PeerState.BUSY, RINGING, RECONNECTING, CONNECTING_TO_PEER -> {}
+                START_CALL_MESSAGE_SENT -> createInitializingTimeout()
+                RINGING -> cancelTimeout()
+                PeerState.INITIAL, CONNECTED, PeerState.BUSY, RECONNECTING, CONNECTING_TO_PEER, PeerState.ENDING_CALL -> Unit
 
-                CALL_REJECTED, HANGED_UP, KICKED, PeerState.FAILED -> {
-                    createRemovePeerTimeout()
+                PeerState.START_CALL_TIME_OUT, CALL_REJECTED, HANGED_UP, KICKED, PeerState.FAILED -> createRemovePeerTimeout()
+            }
+        }
+
+        private fun cancelTimeout() {
+            if (timeoutTask != null) {
+                timeoutTask!!.cancel()
+                timeoutTask = null
+            }
+        }
+
+        private fun createInitializingTimeout() {
+            if (timeoutTask != null) {
+                timeoutTask!!.cancel()
+                timeoutTask = null
+            }
+            timeoutTask = object : TimerTask() {
+                override fun run() {
+                    executor.execute { setPeerState(PeerState.START_CALL_TIME_OUT) }
                 }
+            }
+            try {
+                timeoutTimer.schedule(timeoutTask, CALL_TIMEOUT_MILLIS)
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
             }
         }
 

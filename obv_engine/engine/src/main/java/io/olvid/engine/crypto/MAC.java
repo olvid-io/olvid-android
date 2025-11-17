@@ -20,8 +20,8 @@
 package io.olvid.engine.crypto;
 
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -75,7 +75,7 @@ class MACHmacSha256 implements MAC {
     @Override
     public boolean verify(MACKey key, byte[] bytes, byte[] mac) throws InvalidKeyException {
         byte[] newMac = digest(key, bytes);
-        return Arrays.equals(mac, newMac);
+        return MessageDigest.isEqual(mac, newMac);
     }
 
     @Override

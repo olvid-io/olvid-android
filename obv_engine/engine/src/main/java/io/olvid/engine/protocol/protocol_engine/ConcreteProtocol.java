@@ -229,8 +229,68 @@ public abstract class ConcreteProtocol {
                 Logger.w("Unknown protocol id: " + protocolId);
                 return null;
         }
-
     }
+
+    // defines a priority between different protocol to allow running important operations faster
+    //   --> range is 0 - 1023 to fit on 10 bits
+    public static long getProtocolPriority(int protocolId) {
+        switch (protocolId) {
+            case DEVICE_DISCOVERY_PROTOCOL_ID:
+                return 599L;
+            case CHANNEL_CREATION_WITH_CONTACT_DEVICE_PROTOCOL_ID:
+                return 300L;
+            case DEVICE_DISCOVERY_CHILD_PROTOCOL_ID:
+                return 600L;
+            case CONTACT_MUTUAL_INTRODUCTION_PROTOCOL_ID:
+                return 13L;
+            case IDENTITY_DETAILS_PUBLICATION_PROTOCOL_ID:
+                return 150L;
+            case DOWNLOAD_IDENTITY_PHOTO_CHILD_PROTOCOL_ID:
+                return 200L;
+            case GROUP_INVITATION_PROTOCOL_ID:
+                return 101L;
+            case GROUP_MANAGEMENT_PROTOCOL_ID:
+                return 102L;
+            case CONTACT_MANAGEMENT_PROTOCOL_ID:
+                return 12L;
+            case TRUST_ESTABLISHMENT_WITH_SAS_PROTOCOL_ID:
+                return 9L;
+            case TRUST_ESTABLISHMENT_WITH_MUTUAL_SCAN_PROTOCOL_ID:
+                return 8L;
+            case FULL_RATCHET_PROTOCOL_ID:
+                return 1023L;
+            case DOWNLOAD_GROUP_PHOTO_CHILD_PROTOCOL_ID:
+                return 202L;
+            case KEYCLOAK_CONTACT_ADDITION_PROTOCOL_ID:
+                return 11L;
+            case DEVICE_CAPABILITIES_DISCOVERY_PROTOCOL_ID:
+                return 500L;
+            case LEGACY_KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID:
+            case KEYCLOAK_BINDING_AND_UNBINDING_PROTOCOL_ID:
+                return 5L;
+            case ONE_TO_ONE_CONTACT_INVITATION_PROTOCOL_ID:
+                return 10L;
+            case GROUPS_V2_PROTOCOL_ID:
+                return 100L;
+            case DOWNLOAD_GROUPS_V2_PHOTO_PROTOCOL_ID:
+                return 201L;
+            case OWNED_IDENTITY_DELETION_PROTOCOL_ID:
+                return 1L;
+            case OWNED_DEVICE_DISCOVERY_PROTOCOL_ID:
+                return 50L;
+            case CHANNEL_CREATION_WITH_OWNED_DEVICE_PROTOCOL_ID:
+                return 51L;
+            case OWNED_DEVICE_MANAGEMENT_PROTOCOL_ID:
+                return 20L;
+            case SYNCHRONIZATION_PROTOCOL_ID:
+                return 900L;
+            case OWNED_IDENTITY_TRANSFER_PROTOCOL_ID:
+                return 0L;
+            default:
+                throw new RuntimeException("Unknown protocol type!!!");
+        }
+    }
+
 
     public abstract int getProtocolId();
 

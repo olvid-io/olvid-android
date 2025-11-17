@@ -103,7 +103,8 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
 
 
     public void setExpirationTimestampsOfOlderProvisionedKeyMaterials() {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ProvisionedKeyMaterial.setExpirationTimestampsOfOlderProvisionedKeyMaterials",
+                "UPDATE " + TABLE_NAME + " SET " +
                 EXPIRATION_TIMESTAMP + " = ? " +
                 " WHERE " + EXPIRATION_TIMESTAMP + " IS NULL AND " +
                 PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ? AND " +
@@ -125,7 +126,7 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
     }
 
     public static void deleteAllExpired(ChannelManagerSession channelManagerSession) {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ProvisionedKeyMaterial.deleteAllExpired",
                 "DELETE FROM " + TABLE_NAME + " WHERE " + EXPIRATION_TIMESTAMP + " IS NOT NULL AND " + EXPIRATION_TIMESTAMP + " < ?;")) {
             statement.setLong(1, System.currentTimeMillis());
             statement.executeUpdate();
@@ -231,7 +232,8 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?);")) {
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ProvisionedKeyMaterial.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?);")) {
             statement.setBytes(1, keyId.getBytes());
             statement.setBytes(2, Encoded.of(authEncKey).getBytes());
             if (expirationTimestamp == null) {
@@ -250,7 +252,8 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + SELF_RATCHETING_COUNT + " = ? AND " + PROVISION_FULL_RATCHETING_COUNT + " = ? AND " + PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ? AND " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + " = ? AND " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ProvisionedKeyMaterial.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + SELF_RATCHETING_COUNT + " = ? AND " + PROVISION_FULL_RATCHETING_COUNT + " = ? AND " + PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ? AND " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_DEVICE_UID + " = ? AND " + PROVISION_OBLIVIOUS_CHANNEL_REMOTE_IDENTITY + " = ?;")) {
             statement.setInt(1, selfRatchetingCount);
             statement.setInt(2, provisionFullRatchetingCount);
             statement.setBytes(3, provisionObliviousChannelCurrentDeviceUid.getBytes());
@@ -266,7 +269,7 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
         if ((keyId == null) || (currentDeviceUid == null)) {
             return new ProvisionedKeyMaterial[0];
         }
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ProvisionedKeyMaterial.getAll",
                 "SELECT * FROM " + TABLE_NAME + " WHERE " +
                         KEY_ID + " = ? AND " +
                         PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ?;")) {
@@ -287,7 +290,8 @@ public class ProvisionedKeyMaterial implements ObvDatabase {
 
     static int countNotExpiringProvisionedReceiveKey(ChannelManagerSession channelManagerSession, Provision provision) {
         final String COUNT = "count";
-        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("SELECT COUNT(*) AS " + COUNT + " FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = channelManagerSession.session.prepareStatement("ProvisionedKeyMaterial.countNotExpiringProvisionedReceiveKey",
+                "SELECT COUNT(*) AS " + COUNT + " FROM " + TABLE_NAME + " WHERE " +
                 EXPIRATION_TIMESTAMP + " IS NULL AND " +
                 PROVISION_FULL_RATCHETING_COUNT + " = ? AND " +
                 PROVISION_OBLIVIOUS_CHANNEL_CURRENT_DEVICE_UID + " = ? AND " +

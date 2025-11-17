@@ -532,7 +532,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         const val PREF_KEY_EXPORT_APP_DATABASES: String = "pref_key_export_app_databases"
         const val PREF_KEY_STORAGE_EXPLORER: String = "pref_key_storage_explorer"
-
+        const val PREF_KEY_SHOW_ENGINE_DATABASE_STATISTICS: String = "pref_key_show_engine_database_statistics"
 
         // NOTIFICATIONS
         val VIBRATION_PATTERN_1_SHORT: LongArray = longArrayOf(0, 100, 2900)

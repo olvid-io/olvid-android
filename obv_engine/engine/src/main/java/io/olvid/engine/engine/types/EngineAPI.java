@@ -26,6 +26,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -77,6 +78,7 @@ public interface EngineAPI {
         HIGH,
     }
 
+    Map<String, EngineDbQueryStatisticsEntry> getEngineDbQueryStatistics();
 
     // ObvOwnedIdentity
     String getServerOfIdentity(byte[] bytesIdentity);
@@ -134,6 +136,7 @@ public interface EngineAPI {
     boolean isContactOneToOne(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
 
     ObvContactDeviceCount getContactDeviceCounts(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
+    void forceContactDeviceDiscovery(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);
     String getContactTrustedDetailsPhotoUrl(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     JsonIdentityDetailsWithVersionAndPhoto[] getContactPublishedAndTrustedDetails(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void trustPublishedContactDetails(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity);

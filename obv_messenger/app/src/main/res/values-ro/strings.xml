@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">Mesaj</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">Trimite mesaj</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">Inițializare apel</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">Inițializare apel</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">Așteptare permisiune audio</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">Verificarea datelor de autentificare</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">Secretează conexiunea</string>
@@ -1212,7 +1212,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Insere un emoji</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Apăsați lung pentru a adăuga/elimina din favorite</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Informații de depanare</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Număr de canale/dispozitive:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Număr de dispozitive:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">Fără canal securizat:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">Server:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">Furnizor de identitate:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">Link ID:</string>
@@ -2007,7 +2008,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">Această cheie poate fi găsită și mai târziu în setările tale.</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Nu pierdeți accesul la profilurile dumneavoastră!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Backup-urile vă permit să restaurați profilurile dacă pierdeți accesul la acest dispozitiv. Experiența nouă este mai ușoară ca niciodată 😉 și poate fi configurată în câteva secunde.</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Configurare copii de siguranță</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">Activați copiile de rezervă</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Nu uitați să notați cheia de rezervă 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Cheia de backup este esențială pentru a restaura profilurile tale dacă pierzi accesul la acest dispozitiv.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Îmbunătățește-ți experiența Olvid 🚀</string>
@@ -2113,4 +2114,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">A fost detectat un serviciu de accesibilitate necunoscut, vă rugăm să verificați dacă este sigur de utilizat:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Caută un emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Recente</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Reîmprospătează starea contactului</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">Afișează timpii de interogare a bazei de date a motorului</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Timp de interogare a bazei de date a motorului</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Aștept răspuns de la dispozitivul contactului</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Dispozitivul contactului este inaccesibil</string>
 </resources>

@@ -148,7 +148,8 @@ public class ContactGroupMembersJoin implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupMembersJoin.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
             statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setBytes(3, contactIdentity.getBytes());
@@ -160,7 +161,8 @@ public class ContactGroupMembersJoin implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ? AND " + CONTACT_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupMembersJoin.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + GROUP_OWNER_AND_UID + " = ? AND " + OWNED_IDENTITY + " = ? AND " + CONTACT_IDENTITY + " = ?;")) {
             statement.setBytes(1, groupOwnerAndUid);
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setBytes(3, contactIdentity.getBytes());
@@ -178,7 +180,7 @@ public class ContactGroupMembersJoin implements ObvDatabase {
     // region getters
 
     public static ContactGroupMembersJoin get(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupMembersJoin.get",
                 "SELECT * FROM " + TABLE_NAME +
                         " WHERE " + GROUP_OWNER_AND_UID + " = ? " +
                         " AND " + OWNED_IDENTITY + " = ? " +
@@ -198,7 +200,7 @@ public class ContactGroupMembersJoin implements ObvDatabase {
 
 
     public static Identity[] getContactIdentitiesInGroup(IdentityManagerSession identityManagerSession, byte[] groupOwnerAndUid, Identity ownedIdentity) {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupMembersJoin.getContactIdentitiesInGroup",
                 "SELECT contact." + ContactIdentity.CONTACT_IDENTITY + " FROM " + TABLE_NAME + " AS joiin " +
                         " INNER JOIN " + ContactIdentity.TABLE_NAME + " AS contact " +
                         " ON contact." + ContactIdentity.CONTACT_IDENTITY + " = joiin." + CONTACT_IDENTITY +
@@ -224,7 +226,8 @@ public class ContactGroupMembersJoin implements ObvDatabase {
     }
 
     public static byte[][] getGroupOwnerAndUidsOfGroupsContainingContact(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + CONTACT_IDENTITY + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupMembersJoin.getGroupOwnerAndUidsOfGroupsContainingContact",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + CONTACT_IDENTITY + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, contactIdentity.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {

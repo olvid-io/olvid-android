@@ -282,22 +282,24 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         private final Identity inviterIdentity;
         private final GroupV2.ServerBlob serverBlob;
         private final GroupV2.BlobKeys blobKeys;
+        private final Long groupUpdateTimestamp;
 
 
-        public InvitationReceivedState(GroupV2.Identifier groupIdentifier, UUID dialogUuid, Identity inviterIdentity, GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys) {
+        public InvitationReceivedState(GroupV2.Identifier groupIdentifier, UUID dialogUuid, Identity inviterIdentity, GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, Long groupUpdateTimestamp) {
             super(INVITATION_RECEIVED_STATE_ID);
             this.groupIdentifier = groupIdentifier;
             this.dialogUuid = dialogUuid;
             this.inviterIdentity = inviterIdentity;
             this.serverBlob = serverBlob;
             this.blobKeys = blobKeys;
+            this.groupUpdateTimestamp = groupUpdateTimestamp;
         }
 
         @SuppressWarnings("unused")
         public InvitationReceivedState(Encoded encodedState) throws Exception {
             super(INVITATION_RECEIVED_STATE_ID);
             Encoded[] list = encodedState.decodeList();
-            if (list.length != 5) {
+            if (list.length != 5 && list.length != 6) {
                 throw new Exception();
             }
             this.groupIdentifier = GroupV2.Identifier.of(list[0]);
@@ -305,17 +307,33 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.inviterIdentity = list[2].decodeIdentity();
             this.serverBlob = GroupV2.ServerBlob.of(list[3]);
             this.blobKeys = GroupV2.BlobKeys.of(list[4]);
+            if (list.length == 6) { // this also ensures backward compatibility with old encoded states
+                this.groupUpdateTimestamp = list[5].decodeLong();
+            } else {
+                this.groupUpdateTimestamp = null;
+            }
         }
 
         @Override
         public Encoded encode() {
-            return Encoded.of(new Encoded[]{
-                    groupIdentifier.encode(),
-                    Encoded.of(dialogUuid),
-                    Encoded.of(inviterIdentity),
-                    serverBlob.encode(),
-                    blobKeys.encode(),
-            });
+            if (groupUpdateTimestamp == null) {
+                return Encoded.of(new Encoded[]{
+                        groupIdentifier.encode(),
+                        Encoded.of(dialogUuid),
+                        Encoded.of(inviterIdentity),
+                        serverBlob.encode(),
+                        blobKeys.encode(),
+                });
+            } else {
+                return Encoded.of(new Encoded[]{
+                        groupIdentifier.encode(),
+                        Encoded.of(dialogUuid),
+                        Encoded.of(inviterIdentity),
+                        serverBlob.encode(),
+                        blobKeys.encode(),
+                        Encoded.of(groupUpdateTimestamp),
+                });
+            }
         }
     }
 
@@ -967,6 +985,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
         protected final List<byte[]> logEntries;
         protected final ServerAuthenticationPublicKey groupAdminPublicKey;
         protected final byte[] serverQueryNonce;
+        protected final Long groupUpdateTimestamp;
         protected final boolean deletedFromServer;
 
         private DownloadGroupBlobMessage(CoreProtocolMessage coreProtocolMessage) {
@@ -975,6 +994,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
             this.logEntries = null;
             this.groupAdminPublicKey = null;
             this.serverQueryNonce = null;
+            this.groupUpdateTimestamp = null;
             this.deletedFromServer = false;
         }
 
@@ -986,6 +1006,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 this.logEntries = null;
                 this.groupAdminPublicKey = null;
                 this.serverQueryNonce = null;
+                this.groupUpdateTimestamp = null;
                 this.deletedFromServer = false;
             } else {
                 Encoded[] list = receivedMessage.getEncodedResponse().decodeList();
@@ -994,6 +1015,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     this.logEntries = null;
                     this.groupAdminPublicKey = null;
                     this.serverQueryNonce = null;
+                    this.groupUpdateTimestamp = null;
                     this.deletedFromServer = true;
                 } else {
                     this.encryptedServerBlob = list[0].decodeEncryptedData();
@@ -1003,6 +1025,12 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                     }
                     this.groupAdminPublicKey = (ServerAuthenticationPublicKey) list[2].decodePublicKey();
                     this.serverQueryNonce = list[3].decodeBytes();
+                    if (list.length == 5) { // backward compatibility with old received messages
+                        long timestamp = list[4].decodeLong();
+                        this.groupUpdateTimestamp = (timestamp == 0) ? null : timestamp;
+                    } else {
+                        this.groupUpdateTimestamp = null;
+                    }
                     this.deletedFromServer = false;
                 }
             }
@@ -2429,7 +2457,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                             null,
                             groupV2PendingMembers,
                             ((InvitationReceivedState) startState).serverBlob.serializedGroupDetails,
-                            null, null, null
+                            null, null, null, 0
                     )), ((InvitationReceivedState) startState).dialogUuid));
                     ChannelMessageToSend messageToSend = new DialogAcceptGroupInvitationMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
@@ -2655,7 +2683,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
                             if (protocolManagerSession.identityDelegate.getGroupV2Version(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier) != null) {
                                 // update the group from what we downloaded, and retrieve the list of new members to "ping"
-                                List<Identity> newGroupMembers = protocolManagerSession.identityDelegate.updateGroupV2WithNewBlob(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, serverBlob, blobKeys, false, signerIdentity, leavers);
+                                List<Identity> newGroupMembers = protocolManagerSession.identityDelegate.updateGroupV2WithNewBlob(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, serverBlob, blobKeys, false, signerIdentity, leavers, receivedMessage.groupUpdateTimestamp);
 
                                 if (newGroupMembers == null) {
                                     // We were not able to update the group, return null to retry...
@@ -2705,7 +2733,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                                 // In both case the group can be safely created and joined
 
                                 // create the group in DB (we use the createJoinedGroupV2 method which is better suited here, even if another of my devices created the group)
-                                boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, blobKeys, serverBlob, true, null);
+                                boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, blobKeys, serverBlob, true, null, receivedMessage.groupUpdateTimestamp);
 
                                 // if success == false, this is not a retry-able failure, so we do nothing
                                 if (success) {
@@ -2786,7 +2814,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                                             null,
                                             groupV2PendingMembers,
                                             serverBlob.serializedGroupDetails,
-                                            null, null, null
+                                            null, null, null, 0
                                     )), startState.dialogUuid));
                                     ChannelMessageToSend messageToSend = new DialogAcceptGroupInvitationMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
                                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
@@ -2798,7 +2826,8 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                                         startState.dialogUuid,
                                         inviterIdentityAndBlobMainSeedCandidate.getKey(),
                                         serverBlob,
-                                        blobKeys);
+                                        blobKeys,
+                                        receivedMessage.groupUpdateTimestamp);
                             }
                         } catch (DecryptionException | InvalidKeyException ignored) {
                             // it is normal that some seed candidates are not able to decrypt
@@ -3174,7 +3203,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                 ((InvitationReceivedState) startState).serverBlob.administratorsChain.integrityWasChecked = true;
 
                 // create the group in db
-                boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier, ((InvitationReceivedState) startState).blobKeys, ((InvitationReceivedState) startState).serverBlob, false, ((InvitationReceivedState) startState).inviterIdentity);
+                boolean success = protocolManagerSession.identityDelegate.createJoinedGroupV2(protocolManagerSession.session, getOwnedIdentity(), groupIdentifier, ((InvitationReceivedState) startState).blobKeys, ((InvitationReceivedState) startState).serverBlob, false, ((InvitationReceivedState) startState).inviterIdentity, ((InvitationReceivedState) startState).groupUpdateTimestamp);
 
                 // if success == false, this is not a retry-able failure, so we do nothing
                 if (success) {
@@ -3463,7 +3492,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
                             null,
                             groupV2PendingMembers,
                             ((InvitationReceivedState) startState).serverBlob.serializedGroupDetails,
-                            null, null, null
+                            null, null, null, 0
                     )), ((InvitationReceivedState) startState).dialogUuid));
                     ChannelMessageToSend messageToSend = new DialogAcceptGroupInvitationMessage(coreProtocolMessage).generateChannelDialogMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
@@ -4083,7 +4112,7 @@ public class GroupsV2Protocol extends ConcreteProtocol {
 
             // validate integrity of the chain so that the IdentityManager accepts it
             startState.updatedBlob.administratorsChain.withCheckedIntegrity(startState.groupIdentifier.groupUid, null, protocolManagerSession.identityDelegate.getGroupV2AdministratorsChain(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier));
-            List<Identity> updateOutput = protocolManagerSession.identityDelegate.updateGroupV2WithNewBlob(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, startState.updatedBlob, startState.updatedBlobKeys, true, null, null);
+            List<Identity> updateOutput = protocolManagerSession.identityDelegate.updateGroupV2WithNewBlob(protocolManagerSession.session, getOwnedIdentity(), startState.groupIdentifier, startState.updatedBlob, startState.updatedBlobKeys, true, null, null, System.currentTimeMillis());
 
             if (updateOutput == null) {
                 // update failed, return null to try again

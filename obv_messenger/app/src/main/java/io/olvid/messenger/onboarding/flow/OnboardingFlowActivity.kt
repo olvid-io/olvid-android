@@ -45,7 +45,6 @@ import androidx.core.view.WindowCompat
 import androidx.credentials.CredentialManager
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.engine.Logger
 import io.olvid.engine.engine.types.EngineNotifications
 import io.olvid.engine.engine.types.JsonIdentityDetails
@@ -109,7 +108,7 @@ import java.util.concurrent.Executor
 
 enum class OnboardingActionType {
     CHOICE,
-    TEXT,
+//    TEXT,
     BUTTON,
     BUTTON_OUTLINED,
 }
@@ -215,405 +214,411 @@ class OnboardingFlowActivity : AppCompatActivity() {
                 credentialManager.checkIfAvailable(executor, backupsV2ViewModel.credentialManagerAvailable)
             }
 
-            AppCompatTheme {
-                NavHost(
-                    navController = navController,
-                    startDestination = startDestination
-                ) {
+            NavHost(
+                navController = navController,
+                startDestination = startDestination
+            ) {
 
-                    welcomeScreen(
-                        onExistingProfile = {
-                            navController.navigate(OnboardingRoutes.EXISTING_PROFILE)
-                        },
-                        onNewProfile = {
-                            // mdm forwards to legacy activity
-                            try {
-                                if (MDMConfigurationSingleton.getKeycloakConfigurationUri() != null) {
-                                    startActivity(
-                                        Intent(this@OnboardingFlowActivity, OnboardingActivity::class.java)
-                                            .putExtra(OnboardingActivity.FIRST_ID_INTENT_EXTRA, true)
-                                    )
-                                    finish()
-                                } else {
-                                    navController.navigate(OnboardingRoutes.IDENTITY_CREATION)
-                                }
-                            } catch (_: Exception) {
-                                navController.navigate(OnboardingRoutes.IDENTITY_CREATION)
-                            }
-                        },
-                        onClose = { finish() }
-                    )
-                    newProfileScreen(
-                        onImportProfile = {
-                            navController.navigate(OnboardingRoutes.EXISTING_PROFILE)
-                        },
-                        onNewProfile = {
-                            startActivity(
-                                Intent(this@OnboardingFlowActivity, OnboardingActivity::class.java)
-                                    .putExtra(OnboardingActivity.PROFILE_CREATION, true)
-                            )
-                            finish()
-                        },
-                        onClose = {finish()}
-                    )
-                    identityCreation(onboardingFlowViewModel = onboardingFlowViewModel,
-                        onIdentityCreated = {
-                            runOnUiThread {
-                                navController.navigate(
-                                    OnboardingRoutes.PROFILE_PICTURE
+                welcomeScreen(
+                    onExistingProfile = {
+                        navController.navigate(OnboardingRoutes.EXISTING_PROFILE)
+                    },
+                    onNewProfile = {
+                        // mdm forwards to legacy activity
+                        try {
+                            if (MDMConfigurationSingleton.getKeycloakConfigurationUri() != null) {
+                                startActivity(
+                                    Intent(this@OnboardingFlowActivity, OnboardingActivity::class.java)
+                                        .putExtra(OnboardingActivity.FIRST_ID_INTENT_EXTRA, true)
                                 )
-                            }
-                        },
-                        onBack = { navController.navigateUp() },
-                        onClose = { finish() })
-                    profilePicture(this@OnboardingFlowActivity, onboardingFlowViewModel)
-                    existingProfile(
-                        onReactivate = { navController.navigate(OnboardingRoutes.TRANSFER_TARGET_DEVICE_NAME) },
-                        onRestoreBackup = {
-                            backupsV2ViewModel.resetBackupKey()
-                            navController.navigate(OnboardingRoutes.BACKUP_V2_LOAD_OR_INPUT)
-                        },
-                        onBack = { navController.navigateUp() },
-                        onClose = { finish() }
-                    )
-
-
-
-
-                    backupV2LoadOrInput(
-                        credentialManagerAvailable = backupsV2ViewModel.credentialManagerAvailable,
-                        backupKeyState = backupsV2ViewModel.backupKeyCheckState,
-                        onInputKey = {
-                            backupsV2ViewModel.resetBackupKey()
-                            navController.navigate(OnboardingRoutes.BACKUP_V2_ENTER_KEY)
-                        },
-                        onLoadFromBackupManager = {
-                            credentialManager.loadCredentials(this@OnboardingFlowActivity, executor, onNoCredential = {
-                                App.toast(R.string.toast_message_no_key_found, Toast.LENGTH_SHORT)
-                            }) { key ->
-                                backupsV2ViewModel.backupKey.value = key
-                                backupsV2ViewModel.checkBackupSeed()
-                            }
-                        },
-                        onLoadFailed = {
-                            navController.navigate(OnboardingRoutes.BACKUP_V2_ENTER_KEY)
-                        },
-                        onDeviceBackupLoaded = {
-                            navController.navigate(OnboardingRoutes.BACKUP_V2_SELECT_PROFILE)
-                        },
-                        onChooseCredentialManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                            {
-                                credentialManager.createSettingsPendingIntent().send(this@OnboardingFlowActivity, 0, null)
-                            }
-                        } else {
-                            null
-                        },
-                        onCreateNewProfile = {
-                            navController.popBackStack(OnboardingRoutes.WELCOME_SCREEN, false)
-                            navController.popBackStack(OnboardingRoutes.NEW_PROFILE_SCREEN, false)
-                            Handler(mainLooper).postDelayed({
-                                if (newProfile) {
-                                    startActivity(
-                                        Intent(this@OnboardingFlowActivity, OnboardingActivity::class.java)
-                                            .putExtra(OnboardingActivity.PROFILE_CREATION, true)
-                                    )
-                                    finish()
-                                } else {
-                                    navController.navigate(OnboardingRoutes.IDENTITY_CREATION)
-                                }
-                            }, 300)
-                        },
-                        onBack = { navController.navigateUp() },
-                        onClose = { finish() }
-                    )
-                    backupV2EnterKey(
-                        newProfile = newProfile,
-                        backupSeed = backupsV2ViewModel.backupKey,
-                        backupKeyState = backupsV2ViewModel.backupKeyCheckState,
-                        onValidateSeed = {
-                            runBlocking {  }
-                            backupsV2ViewModel.checkBackupSeed()
-                        },
-                        onDeviceBackupLoaded = {
-                            navController.navigate(OnboardingRoutes.BACKUP_V2_SELECT_PROFILE)
-                        },
-                        onRestoreLegacyBackup = {
-                            onboardingFlowViewModel.updateBackupSeed(backupsV2ViewModel.backupKey.value)
-                            navController.navigate(OnboardingRoutes.BACKUP_CHOOSE_FILE)
-                        },
-                        onBack = { navController.navigateUp() },
-                        onClose = { finish() }
-                    )
-                    backupV2SelectProfile(
-                        profileBackups = backupsV2ViewModel.deviceBackup,
-                        onProfileSelected = {deviceBackupProfile ->
-                            backupsV2ViewModel.fetchProfileSnapshots(deviceBackupProfile)
-                            navController.navigate(OnboardingRoutes.BACKUP_V2_SELECT_SNAPSHOT)
-                        },
-                        onManuallyEnterKey = {
-                            navController.popBackStack(OnboardingRoutes.BACKUP_V2_LOAD_OR_INPUT, false)
-                            backupsV2ViewModel.resetBackupKey()
-                            Handler(mainLooper).postDelayed({
-                                navController.navigate(OnboardingRoutes.BACKUP_V2_ENTER_KEY)
-                            }, 300)
-                        },
-                        onBack = { navController.navigateUp() },
-                        onClose = { finish() }
-                    )
-                    backupV2SelectSnapshot(
-                        backupSnapshotsFetchState = backupsV2ViewModel.backupProfileSnapshotsFetchState,
-                        profileSnapshots = backupsV2ViewModel.profileSnapshots,
-                        onRetry = {
-                            backupsV2ViewModel.retryFetchProfileSnapshots()
-                        },
-                        onRestore = { profileBackupSnapshot ->
-                            backupsV2ViewModel.setSnapshotToRestore(profileBackupSnapshot)
-
-                            if (profileBackupSnapshot.keycloakStatus == ObvProfileBackupsForRestore.KeycloakStatus.TRANSFER_RESTRICTED) {
-                                navController.navigate(OnboardingRoutes.BACKUP_V2_KEYCLOAK_AUTHENTICATION_REQUIRED)
-                            } else if (backupsV2ViewModel.selectedProfileDeviceList.value?.multiDevice != true
-                                && !backupsV2ViewModel.selectedProfileDeviceList.value?.deviceUidsAndServerInfo.isNullOrEmpty()) {
-                                navController.navigate(OnboardingRoutes.BACKUP_V2_EXPIRING_DEVICES_EXPLANATION)
-                            } else {
-                                backupsV2ViewModel.restoreSelectedSnapshot()
-                                navController.navigate(OnboardingRoutes.BACKUP_V2_RESTORE_RESULT)
-                            }
-                        },
-                        onBack = { navController.navigateUp() },
-                        onClose = { finish() }
-                    )
-                    backupV2RestoreResult(
-                        backupRestoreState = backupsV2ViewModel.backupRestoreState,
-                        restoredProfile = backupsV2ViewModel.selectedDeviceBackupProfile,
-                        onOpenProfile = {
-                            startActivity(Intent(this@OnboardingFlowActivity, MainActivity::class.java))
-                            finish()
-                        },
-                        onRestoreOther = {
-                            navController.popBackStack(OnboardingRoutes.BACKUP_V2_SELECT_PROFILE, false)
-                        },
-                        onBackAfterFail = { navController.navigateUp() },
-                        onClose = { finish() }
-                    )
-                    backupV2KeycloakAuthenticationRequired(
-                        keycloakInfo = backupsV2ViewModel.keycloakInfo,
-                        onAuthenticationSuccess = { authState ->
-                            backupsV2ViewModel.setKeycloakAuthState(authState)
-
-                            if (backupsV2ViewModel.selectedProfileDeviceList.value?.multiDevice != true
-                                && !backupsV2ViewModel.selectedProfileDeviceList.value?.deviceUidsAndServerInfo.isNullOrEmpty()) {
-                                navController.navigate(OnboardingRoutes.BACKUP_V2_EXPIRING_DEVICES_EXPLANATION)
-                            } else {
-                                backupsV2ViewModel.restoreSelectedSnapshot()
-                                navController.navigate(OnboardingRoutes.BACKUP_V2_RESTORE_RESULT)
-                            }
-                        },
-                        onBack = { navController.navigateUp() },
-                        onClose = { finish() }
-                    )
-                    backupV2ExpiringDevicesExplanation(
-                        firstAndLastName = derivedStateOf {
-                            backupsV2ViewModel
-                                .selectedDeviceBackupProfile
-                                .value
-                                ?.identityDetails
-                                ?.formatFirstAndLastName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST, false)
-                                ?: ""
-                        },
-                        nickname = derivedStateOf { backupsV2ViewModel.selectedDeviceBackupProfile.value?.nickName },
-                        devices = backupsV2ViewModel.selectedProfileDeviceList,
-                        onConfirm = {
-                            backupsV2ViewModel.restoreSelectedSnapshot()
-                            navController.navigate(OnboardingRoutes.BACKUP_V2_RESTORE_RESULT)
-                        },
-                        onCancel = {
-                            if (restoreBackup) {
                                 finish()
                             } else {
-                                navController.popBackStack(OnboardingRoutes.BACKUP_V2_SELECT_PROFILE, false)
+                                navController.navigate(OnboardingRoutes.IDENTITY_CREATION)
                             }
-                        },
-                        onClose = { finish() }
-                    )
+                        } catch (_: Exception) {
+                            navController.navigate(OnboardingRoutes.IDENTITY_CREATION)
+                        }
+                    },
+                    onClose = { finish() }
+                )
+                newProfileScreen(
+                    onImportProfile = {
+                        navController.navigate(OnboardingRoutes.EXISTING_PROFILE)
+                    },
+                    onNewProfile = {
+                        startActivity(
+                            Intent(this@OnboardingFlowActivity, OnboardingActivity::class.java)
+                                .putExtra(OnboardingActivity.PROFILE_CREATION, true)
+                        )
+                        finish()
+                    },
+                    onClose = { finish() }
+                )
+                identityCreation(
+                    onboardingFlowViewModel = onboardingFlowViewModel,
+                    onIdentityCreated = {
+                        runOnUiThread {
+                            navController.navigate(
+                                OnboardingRoutes.PROFILE_PICTURE
+                            )
+                        }
+                    },
+                    onBack = { navController.navigateUp() },
+                    onClose = { finish() })
+                profilePicture(this@OnboardingFlowActivity, onboardingFlowViewModel)
+                existingProfile(
+                    onReactivate = { navController.navigate(OnboardingRoutes.TRANSFER_TARGET_DEVICE_NAME) },
+                    onRestoreBackup = {
+                        backupsV2ViewModel.resetBackupKey()
+                        navController.navigate(OnboardingRoutes.BACKUP_V2_LOAD_OR_INPUT)
+                    },
+                    onBack = { navController.navigateUp() },
+                    onClose = { finish() }
+                )
 
 
-                    backupChooseFile(
-                        onboardingFlowViewModel = onboardingFlowViewModel,
-                        onBackupCloudSelected = {
-                            onboardingFlowViewModel.selectBackupCloud(this@OnboardingFlowActivity) {
-                                runOnUiThread { navController.navigate(OnboardingRoutes.BACKUP_FILE_SELECTED) }
-                            }
-                        },
-                        onBackupFileSelected = {
-                            runOnUiThread {
-                                navController.navigate(OnboardingRoutes.BACKUP_FILE_SELECTED)
-                            }
-                        },
-                        onBack = {
-                            onboardingFlowViewModel.clearSelectedBackup()
-                            navController.navigateUp()
-                        },
-                        onClose = { finish() })
-                    backupFileSelected(onboardingFlowViewModel = onboardingFlowViewModel,
-                        onBackupKeySelected = {
-                            navController.navigate(OnboardingRoutes.BACKUP_KEY_VALIDATION)
-                        },
-                        onBack = {
-                            navController.navigateUp()
-                        },
-                        onClose = { finish() })
 
-                    backupKeyValidation(onboardingFlowViewModel = onboardingFlowViewModel,
-                        onBackupKeyValidation = {
-                            onboardingFlowViewModel.validateBackupSeed()
-                            if (onboardingFlowViewModel.backupKeyValid) {
-                                AppSingleton.getInstance().restoreBackup(
-                                    this@OnboardingFlowActivity,
-                                    onboardingFlowViewModel.backupSeed,
-                                    onboardingFlowViewModel.backupContent, { finish() }
-                                ) {
-                                    App.toast(
-                                        R.string.toast_message_unable_to_load_backup_configuration,
-                                        Toast.LENGTH_SHORT
-                                    )
-                                }
+
+                backupV2LoadOrInput(
+                    credentialManagerAvailable = backupsV2ViewModel.credentialManagerAvailable,
+                    backupKeyState = backupsV2ViewModel.backupKeyCheckState,
+                    onInputKey = {
+                        backupsV2ViewModel.resetBackupKey()
+                        navController.navigate(OnboardingRoutes.BACKUP_V2_ENTER_KEY)
+                    },
+                    onLoadFromBackupManager = {
+                        credentialManager.loadCredentials(this@OnboardingFlowActivity, executor, onNoCredential = {
+                            App.toast(R.string.toast_message_no_key_found, Toast.LENGTH_SHORT)
+                        }) { key ->
+                            backupsV2ViewModel.backupKey.value = key
+                            backupsV2ViewModel.checkBackupSeed()
+                        }
+                    },
+                    onLoadFailed = {
+                        navController.navigate(OnboardingRoutes.BACKUP_V2_ENTER_KEY)
+                    },
+                    onDeviceBackupLoaded = {
+                        navController.navigate(OnboardingRoutes.BACKUP_V2_SELECT_PROFILE)
+                    },
+                    onChooseCredentialManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        {
+                            credentialManager.createSettingsPendingIntent().send(this@OnboardingFlowActivity, 0, null)
+                        }
+                    } else {
+                        null
+                    },
+                    onCreateNewProfile = {
+                        navController.popBackStack(OnboardingRoutes.WELCOME_SCREEN, false)
+                        navController.popBackStack(OnboardingRoutes.NEW_PROFILE_SCREEN, false)
+                        Handler(mainLooper).postDelayed({
+                            if (newProfile) {
+                                startActivity(
+                                    Intent(this@OnboardingFlowActivity, OnboardingActivity::class.java)
+                                        .putExtra(OnboardingActivity.PROFILE_CREATION, true)
+                                )
+                                finish()
                             } else {
+                                navController.navigate(OnboardingRoutes.IDENTITY_CREATION)
+                            }
+                        }, 300)
+                    },
+                    onBack = { navController.navigateUp() },
+                    onClose = { finish() }
+                )
+                backupV2EnterKey(
+                    newProfile = newProfile,
+                    backupSeed = backupsV2ViewModel.backupKey,
+                    backupKeyState = backupsV2ViewModel.backupKeyCheckState,
+                    onValidateSeed = {
+                        runBlocking { }
+                        backupsV2ViewModel.checkBackupSeed()
+                    },
+                    onDeviceBackupLoaded = {
+                        navController.navigate(OnboardingRoutes.BACKUP_V2_SELECT_PROFILE)
+                    },
+                    onRestoreLegacyBackup = {
+                        onboardingFlowViewModel.updateBackupSeed(backupsV2ViewModel.backupKey.value)
+                        navController.navigate(OnboardingRoutes.BACKUP_CHOOSE_FILE)
+                    },
+                    onBack = { navController.navigateUp() },
+                    onClose = { finish() }
+                )
+                backupV2SelectProfile(
+                    profileBackups = backupsV2ViewModel.deviceBackup,
+                    onProfileSelected = { deviceBackupProfile ->
+                        backupsV2ViewModel.fetchProfileSnapshots(deviceBackupProfile)
+                        navController.navigate(OnboardingRoutes.BACKUP_V2_SELECT_SNAPSHOT)
+                    },
+                    onManuallyEnterKey = {
+                        navController.popBackStack(OnboardingRoutes.BACKUP_V2_LOAD_OR_INPUT, false)
+                        backupsV2ViewModel.resetBackupKey()
+                        Handler(mainLooper).postDelayed({
+                            navController.navigate(OnboardingRoutes.BACKUP_V2_ENTER_KEY)
+                        }, 300)
+                    },
+                    onBack = { navController.navigateUp() },
+                    onClose = { finish() }
+                )
+                backupV2SelectSnapshot(
+                    backupSnapshotsFetchState = backupsV2ViewModel.backupProfileSnapshotsFetchState,
+                    profileSnapshots = backupsV2ViewModel.profileSnapshots,
+                    onRetry = {
+                        backupsV2ViewModel.retryFetchProfileSnapshots()
+                    },
+                    onRestore = { profileBackupSnapshot ->
+                        backupsV2ViewModel.setSnapshotToRestore(profileBackupSnapshot)
+
+                        if (profileBackupSnapshot.keycloakStatus == ObvProfileBackupsForRestore.KeycloakStatus.TRANSFER_RESTRICTED) {
+                            navController.navigate(OnboardingRoutes.BACKUP_V2_KEYCLOAK_AUTHENTICATION_REQUIRED)
+                        } else if (backupsV2ViewModel.selectedProfileDeviceList.value?.multiDevice != true
+                            && !backupsV2ViewModel.selectedProfileDeviceList.value?.deviceUidsAndServerInfo.isNullOrEmpty()
+                        ) {
+                            navController.navigate(OnboardingRoutes.BACKUP_V2_EXPIRING_DEVICES_EXPLANATION)
+                        } else {
+                            backupsV2ViewModel.restoreSelectedSnapshot()
+                            navController.navigate(OnboardingRoutes.BACKUP_V2_RESTORE_RESULT)
+                        }
+                    },
+                    onBack = { navController.navigateUp() },
+                    onClose = { finish() }
+                )
+                backupV2RestoreResult(
+                    backupRestoreState = backupsV2ViewModel.backupRestoreState,
+                    restoredProfile = backupsV2ViewModel.selectedDeviceBackupProfile,
+                    onOpenProfile = {
+                        startActivity(Intent(this@OnboardingFlowActivity, MainActivity::class.java))
+                        finish()
+                    },
+                    onRestoreOther = {
+                        navController.popBackStack(OnboardingRoutes.BACKUP_V2_SELECT_PROFILE, false)
+                    },
+                    onBackAfterFail = { navController.navigateUp() },
+                    onClose = { finish() }
+                )
+                backupV2KeycloakAuthenticationRequired(
+                    keycloakInfo = backupsV2ViewModel.keycloakInfo,
+                    onAuthenticationSuccess = { authState ->
+                        backupsV2ViewModel.setKeycloakAuthState(authState)
+
+                        if (backupsV2ViewModel.selectedProfileDeviceList.value?.multiDevice != true
+                            && !backupsV2ViewModel.selectedProfileDeviceList.value?.deviceUidsAndServerInfo.isNullOrEmpty()
+                        ) {
+                            navController.navigate(OnboardingRoutes.BACKUP_V2_EXPIRING_DEVICES_EXPLANATION)
+                        } else {
+                            backupsV2ViewModel.restoreSelectedSnapshot()
+                            navController.navigate(OnboardingRoutes.BACKUP_V2_RESTORE_RESULT)
+                        }
+                    },
+                    onBack = { navController.navigateUp() },
+                    onClose = { finish() }
+                )
+                backupV2ExpiringDevicesExplanation(
+                    firstAndLastName = derivedStateOf {
+                        backupsV2ViewModel
+                            .selectedDeviceBackupProfile
+                            .value
+                            ?.identityDetails
+                            ?.formatFirstAndLastName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST, false)
+                            ?: ""
+                    },
+                    nickname = derivedStateOf { backupsV2ViewModel.selectedDeviceBackupProfile.value?.nickName },
+                    devices = backupsV2ViewModel.selectedProfileDeviceList,
+                    onConfirm = {
+                        backupsV2ViewModel.restoreSelectedSnapshot()
+                        navController.navigate(OnboardingRoutes.BACKUP_V2_RESTORE_RESULT)
+                    },
+                    onCancel = {
+                        if (restoreBackup) {
+                            finish()
+                        } else {
+                            navController.popBackStack(OnboardingRoutes.BACKUP_V2_SELECT_PROFILE, false)
+                        }
+                    },
+                    onClose = { finish() }
+                )
+
+
+                backupChooseFile(
+                    onboardingFlowViewModel = onboardingFlowViewModel,
+                    onBackupCloudSelected = {
+                        onboardingFlowViewModel.selectBackupCloud(this@OnboardingFlowActivity) {
+                            runOnUiThread { navController.navigate(OnboardingRoutes.BACKUP_FILE_SELECTED) }
+                        }
+                    },
+                    onBackupFileSelected = {
+                        runOnUiThread {
+                            navController.navigate(OnboardingRoutes.BACKUP_FILE_SELECTED)
+                        }
+                    },
+                    onBack = {
+                        onboardingFlowViewModel.clearSelectedBackup()
+                        navController.navigateUp()
+                    },
+                    onClose = { finish() })
+                backupFileSelected(
+                    onboardingFlowViewModel = onboardingFlowViewModel,
+                    onBackupKeySelected = {
+                        navController.navigate(OnboardingRoutes.BACKUP_KEY_VALIDATION)
+                    },
+                    onBack = {
+                        navController.navigateUp()
+                    },
+                    onClose = { finish() })
+
+                backupKeyValidation(
+                    onboardingFlowViewModel = onboardingFlowViewModel,
+                    onBackupKeyValidation = {
+                        onboardingFlowViewModel.validateBackupSeed()
+                        if (onboardingFlowViewModel.backupKeyValid) {
+                            AppSingleton.getInstance().restoreBackup(
+                                this@OnboardingFlowActivity,
+                                onboardingFlowViewModel.backupSeed,
+                                onboardingFlowViewModel.backupContent, { finish() }
+                            ) {
                                 App.toast(
-                                    R.string.text_backup_key_verification_failed,
+                                    R.string.toast_message_unable_to_load_backup_configuration,
                                     Toast.LENGTH_SHORT
                                 )
                             }
-                        }, onBack = { navController.navigateUp() },
-                        onClose = { finish() })
-
-                    sourceTransferRestrictedWarning(
-                        onContinue = {
-                            onboardingFlowViewModel.updateTransferRestricted(true)
-                            navController.navigate(OnboardingRoutes.TRANSFER_SOURCE_SESSION)
-                        },
-                        onClose = {
-                            onboardingFlowViewModel.abortTransfer()
-                            finish()
+                        } else {
+                            App.toast(
+                                R.string.text_backup_key_verification_failed,
+                                Toast.LENGTH_SHORT
+                            )
                         }
-                    )
+                    }, onBack = { navController.navigateUp() },
+                    onClose = { finish() })
 
-                    sourceSession(onboardingFlowViewModel = onboardingFlowViewModel,
-                        onSasValidated = { navController.navigate(OnboardingRoutes.TRANSFER_ACTIVE_DEVICES) },
-                        onClose = {
-                            onboardingFlowViewModel.abortTransfer()
-                            finish()
-                        })
-                    targetDeviceName(onboardingFlowViewModel = onboardingFlowViewModel,
-                        onDeviceNameValidated = {
-                            navController.navigate(OnboardingRoutes.TRANSFER_TARGET_SESSION_INPUT)
-                            App.runThread {
-                                AppSingleton.getEngine()
-                                    .initiateOwnedIdentityTransferProtocolOnTargetDevice(
-                                        onboardingFlowViewModel.deviceName.trim().ifEmpty { AppSingleton.DEFAULT_DEVICE_DISPLAY_NAME }
-                                    )
-                            }
-                        },
-                        onBack = {
-                            navController.navigateUp()
-                        },
-                        onClose = { finish() })
-                    targetSessionInput(onboardingFlowViewModel = onboardingFlowViewModel,
-                        onDeviceSessionValidated = {
-                            try {
-                                onboardingFlowViewModel.dialog?.apply {
-                                    setTransferSessionNumber(
-                                        try {
-                                            onboardingFlowViewModel.sessionNumber.toLong()
-                                        } catch (_: Exception) {
-                                            0L
-                                        }
-                                    )
-                                    AppSingleton.getEngine().respondToDialog(this)
-                                }
-                            } catch (_: Exception) {
-                                onboardingFlowViewModel.updateValidationInProgress(false)
-                                App.toast(R.string.toast_message_profile_activation_failed, Toast.LENGTH_SHORT, Gravity.BOTTOM)
-                            }
-                        },
-                        onClose = {
-                            onboardingFlowViewModel.abortTransfer()
-                            finish()
-                        })
-                    targetShowSas(
-                        onboardingFlowViewModel = onboardingFlowViewModel,
-                        onClose = {
-                            onboardingFlowViewModel.abortTransfer()
-                            finish()
-                        })
-                    targetRestoreSuccessful(
-                        onNewTransfer = {
-                            reEnableDialogsOnFinish = false
-                            finish()
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                startActivity(
-                                    Intent(this@OnboardingFlowActivity, OnboardingFlowActivity::class.java)
-                                        .putExtra(TRANSFER_TARGET_INTENT_EXTRA, true)
+                sourceTransferRestrictedWarning(
+                    onContinue = {
+                        onboardingFlowViewModel.updateTransferRestricted(true)
+                        navController.navigate(OnboardingRoutes.TRANSFER_SOURCE_SESSION)
+                    },
+                    onClose = {
+                        onboardingFlowViewModel.abortTransfer()
+                        finish()
+                    }
+                )
+
+                sourceSession(
+                    onboardingFlowViewModel = onboardingFlowViewModel,
+                    onSasValidated = { navController.navigate(OnboardingRoutes.TRANSFER_ACTIVE_DEVICES) },
+                    onClose = {
+                        onboardingFlowViewModel.abortTransfer()
+                        finish()
+                    })
+                targetDeviceName(
+                    onboardingFlowViewModel = onboardingFlowViewModel,
+                    onDeviceNameValidated = {
+                        navController.navigate(OnboardingRoutes.TRANSFER_TARGET_SESSION_INPUT)
+                        App.runThread {
+                            AppSingleton.getEngine()
+                                .initiateOwnedIdentityTransferProtocolOnTargetDevice(
+                                    onboardingFlowViewModel.deviceName.trim().ifEmpty { AppSingleton.DEFAULT_DEVICE_DISPLAY_NAME }
                                 )
-                            }, 300)
-                        },
-                        onClose = {
-                            App.openCurrentOwnedIdentityDetails(this@OnboardingFlowActivity)
-                            finish()
-                        })
-                    targetKeycloakAuthenticationRequired(
-                        onboardingFlowViewModel = onboardingFlowViewModel,
-                        onAuthenticated = {authState, transferProof ->
-                            onboardingFlowViewModel.saveTransferKeycloakAuthState(authState)
-                            try {
-                                onboardingFlowViewModel.dialog?.apply {
-                                    setTransferAuthenticationProof(transferProof, authState.jsonSerializeString())
-                                    AppSingleton.getEngine().respondToDialog(this)
-                                }
-                                runOnUiThread {
-                                    navController.navigate(OnboardingRoutes.TRANSFER_TARGET_AUTHENTICATION_SUCCESSFUL)
-                                }
-                            } catch (e: Exception) {
-                                Logger.x(e)
-                                runOnUiThread {
-                                    onboardingFlowViewModel.abortTransfer()
-                                    finish()
-                                }
+                        }
+                    },
+                    onBack = {
+                        navController.navigateUp()
+                    },
+                    onClose = { finish() })
+                targetSessionInput(
+                    onboardingFlowViewModel = onboardingFlowViewModel,
+                    onDeviceSessionValidated = {
+                        try {
+                            onboardingFlowViewModel.dialog?.apply {
+                                setTransferSessionNumber(
+                                    try {
+                                        onboardingFlowViewModel.sessionNumber.toLong()
+                                    } catch (_: Exception) {
+                                        0L
+                                    }
+                                )
+                                AppSingleton.getEngine().respondToDialog(this)
                             }
-                        },
-                        onClose = {
-                            onboardingFlowViewModel.abortTransfer()
-                            finish()
+                        } catch (_: Exception) {
+                            onboardingFlowViewModel.updateValidationInProgress(false)
+                            App.toast(R.string.toast_message_profile_activation_failed, Toast.LENGTH_SHORT, Gravity.BOTTOM)
                         }
-                    )
-                    targetAuthenticationSuccessful(
-                        onClose = {
-                            onboardingFlowViewModel.abortTransfer()
-                            finish()
+                    },
+                    onClose = {
+                        onboardingFlowViewModel.abortTransfer()
+                        finish()
+                    })
+                targetShowSas(
+                    onboardingFlowViewModel = onboardingFlowViewModel,
+                    onClose = {
+                        onboardingFlowViewModel.abortTransfer()
+                        finish()
+                    })
+                targetRestoreSuccessful(
+                    onNewTransfer = {
+                        reEnableDialogsOnFinish = false
+                        finish()
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            startActivity(
+                                Intent(this@OnboardingFlowActivity, OnboardingFlowActivity::class.java)
+                                    .putExtra(TRANSFER_TARGET_INTENT_EXTRA, true)
+                            )
+                        }, 300)
+                    },
+                    onClose = {
+                        App.openCurrentOwnedIdentityDetails(this@OnboardingFlowActivity)
+                        finish()
+                    })
+                targetKeycloakAuthenticationRequired(
+                    onboardingFlowViewModel = onboardingFlowViewModel,
+                    onAuthenticated = { authState, transferProof ->
+                        onboardingFlowViewModel.saveTransferKeycloakAuthState(authState)
+                        try {
+                            onboardingFlowViewModel.dialog?.apply {
+                                setTransferAuthenticationProof(transferProof, authState.jsonSerializeString())
+                                AppSingleton.getEngine().respondToDialog(this)
+                            }
+                            runOnUiThread {
+                                navController.navigate(OnboardingRoutes.TRANSFER_TARGET_AUTHENTICATION_SUCCESSFUL)
+                            }
+                        } catch (e: Exception) {
+                            Logger.x(e)
+                            runOnUiThread {
+                                onboardingFlowViewModel.abortTransfer()
+                                finish()
+                            }
                         }
-                    )
-                    sourceConfirmation(
-                        onboardingFlowViewModel = onboardingFlowViewModel,
-                        onFinalize = {
-                            onboardingFlowViewModel.finalizeTransfer()
-                        },
-                        onBack = { navController.navigateUp() },
-                        onClose = {
-                            onboardingFlowViewModel.abortTransfer()
-                            finish()
-                        },
-                        ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
-                    )
-                    activeDeviceSelection(
-                        activity = this@OnboardingFlowActivity,
-                        onboardingFlowViewModel = onboardingFlowViewModel,
-                        onProceed = {
-                            navController.navigate(OnboardingRoutes.TRANSFER_SOURCE_CONFIRMATION)
-                        },
-                        onClose = {
-                            onboardingFlowViewModel.abortTransfer()
-                            finish()
-                        })
-                }
+                    },
+                    onClose = {
+                        onboardingFlowViewModel.abortTransfer()
+                        finish()
+                    }
+                )
+                targetAuthenticationSuccessful(
+                    onClose = {
+                        onboardingFlowViewModel.abortTransfer()
+                        finish()
+                    }
+                )
+                sourceConfirmation(
+                    onboardingFlowViewModel = onboardingFlowViewModel,
+                    onFinalize = {
+                        onboardingFlowViewModel.finalizeTransfer()
+                    },
+                    onBack = { navController.navigateUp() },
+                    onClose = {
+                        onboardingFlowViewModel.abortTransfer()
+                        finish()
+                    },
+                    ownedIdentity = AppSingleton.getCurrentIdentityLiveData().value
+                )
+                activeDeviceSelection(
+                    activity = this@OnboardingFlowActivity,
+                    onboardingFlowViewModel = onboardingFlowViewModel,
+                    onProceed = {
+                        navController.navigate(OnboardingRoutes.TRANSFER_SOURCE_CONFIRMATION)
+                    },
+                    onClose = {
+                        onboardingFlowViewModel.abortTransfer()
+                        finish()
+                    })
             }
 
             TransferListener { dialog ->
@@ -673,10 +678,10 @@ class OnboardingFlowActivity : AppCompatActivity() {
                         SOURCE_SAS_INPUT -> {
                             onboardingFlowViewModel.updateValidationInProgress(false)
                             onboardingFlowViewModel.updateDeviceName(
-                                (dialog.category?.obvTransferStep as? SourceSasInput)?.targetDeviceName?.toString()
+                                (dialog.category?.obvTransferStep as? SourceSasInput)?.targetDeviceName
                                     ?: ""
                             )
-                            onboardingFlowViewModel.updateCorrectSas((dialog.category?.obvTransferStep as? SourceSasInput)?.correctSas?.toString())
+                            onboardingFlowViewModel.updateCorrectSas((dialog.category?.obvTransferStep as? SourceSasInput)?.correctSas)
                         }
 
                         SOURCE_SNAPSHOT_SENT -> {

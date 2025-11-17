@@ -156,7 +156,8 @@ public class ContactTrustOrigin implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + "(" +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactTrustOrigin.insert",
+                "INSERT INTO " + TABLE_NAME + "(" +
                 CONTACT_IDENTITY + ", " +
                 OWNED_IDENTITY + ", " +
                 TIMESTAMP + ", " +
@@ -165,7 +166,8 @@ public class ContactTrustOrigin implements ObvDatabase {
                 MEDIATOR_OR_GROUP_OWNER_TRUST_LEVEL_MAJOR + ", " +
                 IDENTITY_SERVER +  ", " +
                 SERIALIZED_GROUP_IDENTIFIER + ") " +
-                " VALUES (?,?,?,?,?, ?,?,?);", Statement.RETURN_GENERATED_KEYS)) {
+                " VALUES (?,?,?,?,?, ?,?,?);",
+                true)) {
             statement.setBytes(1, contactIdentity.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setLong(3, timestamp);
@@ -192,7 +194,8 @@ public class ContactTrustOrigin implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactTrustOrigin.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + ROW_ID + " = ?;")) {
             statement.setLong(1, rowId);
             statement.executeUpdate();
@@ -307,7 +310,8 @@ public class ContactTrustOrigin implements ObvDatabase {
     // region getters
 
     public static ContactTrustOrigin[] getAll(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity) {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactTrustOrigin.getAll",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?" +
                 " ORDER BY " + TIMESTAMP + " DESC;")) {

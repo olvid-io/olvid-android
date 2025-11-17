@@ -1,5 +1,14 @@
+# Build 279 (4.1.1)
+2025-11-17
+
+- Improve processing of received return receipt and implement "deduplication" of return receipt in a multi-device context.
+- Improved tips visibility with a small animation.
+- Implement a priority queue for the processing of cryptographic protocol messages.
+- Resend relevant reactions and poll votes to group members when they join a group.
+- Small changes to call states and the handling of timeouts.
+
 # Build 278 (4.1)
-2025-10-02
+2025-11-02
 
 - You can now create polls to ask a question to all members of a group.
 - Rework of the reaction/contextual menu for messages.

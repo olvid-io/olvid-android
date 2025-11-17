@@ -140,7 +140,8 @@ public class ReturnReceipt implements ObvDatabase {
 
 
     public static ReturnReceipt get(SendManagerSession sendManagerSession, long returnReceiptId) throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + ID + " = ?;")) {
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("ReturnReceipt.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + ID + " = ?;")) {
             statement.setLong(1, returnReceiptId);
             try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
@@ -166,7 +167,8 @@ public class ReturnReceipt implements ObvDatabase {
         }
         sb.append("?");
 
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("ReturnReceipt.getMany",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + ID + " IN (" + sb + ");")) {
             for (int i = 0; i < ids.length; i++) {
                 statement.setLong(i + 1, ids[i]);
@@ -183,7 +185,8 @@ public class ReturnReceipt implements ObvDatabase {
 
 
     public static ReturnReceipt[] getAll(SendManagerSession sendManagerSession) throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("ReturnReceipt.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<ReturnReceipt> list = new ArrayList<>();
                 while (res.next()) {
@@ -195,7 +198,8 @@ public class ReturnReceipt implements ObvDatabase {
     }
 
     public static void deleteAllForOwnedIdentity(SendManagerSession sendManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("ReturnReceipt.deleteAllForOwnedIdentity",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }
@@ -227,14 +231,16 @@ public class ReturnReceipt implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME +
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("ReturnReceipt.insert",
+                "INSERT INTO " + TABLE_NAME +
                 "(" + OWNED_IDENTITY + ", " +
                 CONTACT_IDENTITY + ", " +
                 CONTACT_DEVICE_UIDS + ", " +
                 STATUS + ", " +
                 NONCE + ", " +
                 KEY + ", " +
-                ATTACHMENT_NUMBER + ") VALUES (?,?,?,?,?, ?,?);", Statement.RETURN_GENERATED_KEYS)) {
+                ATTACHMENT_NUMBER + ") VALUES (?,?,?,?,?, ?,?);",
+                true)) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, contactIdentity.getBytes());
             statement.setBytes(3, Encoded.of(contactDeviceUids).getBytes());
@@ -259,7 +265,8 @@ public class ReturnReceipt implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + ID + " = ?;")) {
+        try (PreparedStatement statement = sendManagerSession.session.prepareStatement("ReturnReceipt.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + ID + " = ?;")) {
             statement.setLong(1, id);
             statement.executeUpdate();
         }

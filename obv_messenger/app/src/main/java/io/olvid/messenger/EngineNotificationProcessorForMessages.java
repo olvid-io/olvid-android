@@ -46,6 +46,7 @@ import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
 import io.olvid.messenger.databases.tasks.HandleMessageExtendedPayloadTask;
 import io.olvid.messenger.databases.tasks.HandleReceiveReturnReceipt;
 import io.olvid.messenger.databases.tasks.new_message.HandleNewMessageTask;
+import io.olvid.messenger.services.ReturnReceiptProcessor;
 import io.olvid.messenger.services.UnifiedForegroundService;
 
 public class EngineNotificationProcessorForMessages implements EngineNotificationListener {
@@ -107,7 +108,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                     break;
                 }
 
-                new HandleReceiveReturnReceipt(engine, bytesOwnedIdentity, serverUid, returnReceiptNonce, encryptedPayload, timestamp).run();
+                ReturnReceiptProcessor.INSTANCE.processReturnReceipt(bytesOwnedIdentity, serverUid, returnReceiptNonce, encryptedPayload, timestamp);
                 break;
             }
             case EngineNotifications.ATTACHMENT_DOWNLOADED: {

@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">Poruka</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">Pošalji poruku</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916" />
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">Uspostavljanje poziva</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">Uspostavljanje poziva</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">Čekam dozvolu za zvuk</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">Provjera vjerodajnica</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">Uspostavljanje sigurne veze</string>
@@ -1212,7 +1212,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Umetni emoji</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Dugo pritisnite za dodavanje/uklanjanje iz favorita</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Informacije za otklanjanje pogrešaka</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Broj kanala/uređaja:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Broj uređaja:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">Bez sigurnog kanala:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">Poslužitelj:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">Davatelj identiteta:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">ID veza:</string>
@@ -2007,7 +2008,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">Ovaj ključ možete pronaći i kasnije u postavkama.</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">Nemojte izgubiti pristup svojim profilima!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Sigurnosne kopije omogućuju vam da vratite svoje profile ako izgubite pristup ovom uređaju. Novo iskustvo je lakše nego ikad 😉 i može se postaviti u nekoliko sekundi.</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Konfiguriraj sigurnosne kopije</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">Omogući sigurnosne kopije</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">Ne zaboravite zapisati svoju ključ za sigurnosnu kopiju â</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">Vaš ključ za sigurnosnu kopiju je ključan za vraćanje vaših profila ako izgubite pristup ovom uređaju.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Poboljšajte svoje Olvid iskustvo 🚀</string>
@@ -2113,4 +2114,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">Uočena je nepoznata služba za pristupnost. Provjerite je li sigurna za korištenje:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Pretraži emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Nedavno</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Osvježi status kontakta</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">Prikaži vrijeme izvršavanja upita baze podataka motora</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Vremena upita baze podataka motora</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Čekam na odgovor uređaja sugovornika</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Uređaj sugovornika je nedostižan</string>
 </resources>

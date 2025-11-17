@@ -92,7 +92,17 @@
     </style>
 
     <!-- AppBar style to use for "blue/black" AppBar to force light icons -->
-    <style name="AppTheme.DarkAppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.DarkAppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:actionButtonStyle">@style/ActionButtonStyle</item>
+        <item name="android:paddingEnd">4dp</item>
+    </style>
+
+    <style name="ActionButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
+        <item name="android:minWidth">40dp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+    </style>
+
 
     <!-- AppBar style to use for "white" AppBar for dark icons, and still force white icons when in actionMode -->
     <style name="AppTheme.LightAppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar">

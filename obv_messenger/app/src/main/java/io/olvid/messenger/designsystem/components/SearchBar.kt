@@ -39,13 +39,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SearchBarColors
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -82,7 +82,7 @@ fun SearchBar(
     placeholderText: String = "",
     onSearchTextChanged: (String) -> Unit = {},
     onClearClick: () -> Unit = {},
-    onFocus: (() -> Unit)? = null,
+    focusState: MutableState<Boolean>? = null,
     selectAllBeacon: Any? = null, // any time selectAllBeacon object changes, the text of the search bar is fully selected
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = colorResource(R.color.olvid_gradient_dark),
@@ -100,7 +100,7 @@ fun SearchBar(
                 searchText = searchText,
                 placeholderText = placeholderText,
                 onSearchTextChanged = onSearchTextChanged,
-                onFocus = onFocus,
+                focusState = focusState,
                 onClearClick = onClearClick,
                 selectAllBeacon = selectAllBeacon,
                 colors = colors,
@@ -116,7 +116,7 @@ private fun SearchBarInput(
     placeholderText: String = "",
     onSearchTextChanged: (String) -> Unit = {},
     onClearClick: () -> Unit = {},
-    onFocus: (() -> Unit)? = null,
+    focusState: MutableState<Boolean>? = null,
     selectAllBeacon: Any? = null,
     requestFocus: Boolean = false,
     colors: TextFieldColors
@@ -156,9 +156,11 @@ private fun SearchBarInput(
                     Modifier.clip(RoundedCornerShape(16.dp)).background(backgroundColor)
                 } ?: Modifier
             )
-            .onFocusChanged { focusState ->
-                onFocus?.takeIf { focusState.isFocused }?.invoke()
-                showClearButton = (focusState.isFocused)
+            .onFocusChanged { focus ->
+                focusState?.let {
+                    it.value = focus.isFocused
+                }
+                showClearButton = (focus.isFocused)
             }
             .focusRequester(focusRequester),
         value = textFieldValue,

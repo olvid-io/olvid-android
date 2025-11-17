@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">Missatge</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">Enviar missatge</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">S\'està inicialitzant la trucada</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">S\'està inicialitzant la trucada</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">Esperant permís d\'àudio</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">Verificant les credencials</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">Connectant de manera segura</string>
@@ -1212,7 +1212,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">Insere un emoji</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">Mantén premut per afegir/eliminar dels favorits</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">Informació de depuració</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">Nombre de canals/dispositius:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">Nombre de dispositius:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">Sense un canal segur:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">Servidor:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">Proveïdor d\'identitat:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">Enllaç d\'ID:</string>
@@ -2006,7 +2007,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">També pots trobar aquesta clau més tard a la configuració.</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">No perdis l\'accés als teus perfils!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">Les còpies de seguretat et permeten restaurar els teus perfils si perds l\'accés a aquest dispositiu. La nova experiència és més fàcil que mai 😉 i es pot configurar en pocs segons.</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">Configurar copies de seguretat</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">Activar les còpies de seguretat</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">No us oblidis d\'anotar la teva clau de seguretat ☺</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">La teva clau de còpia de seguretat és essencial per restaurar els teus perfils si perds l\'accés a aquest dispositiu.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Millora la teva experiència a Olvid 🚀</string>
@@ -2112,4 +2113,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">S\'ha detectat un servei d\'accessibilitat desconegut. Si us plau, comproveu que és segur d\'utilitzar:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">Cerca un emoji</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">Recents</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">Actualitza l\'estat del contacte</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">Mostra els temps d\'execució de les consultes a la base de dades del motor</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Temps d\'execució de les consultes a la base de dades del motor</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Esperant la resposta del dispositiu del destinatari</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Dispositiu del destinatari inassolible</string>
 </resources>

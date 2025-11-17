@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">メッセージ</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">メッセージを送信</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">通話を開始しています</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">通話を開始しています</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">音声アクセスの許可を待っています</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">認証情報の確認</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">接続を保護しています</string>
@@ -1211,7 +1211,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">絵文字を挿入</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">お気に入りに追加/削除するには、長押ししてください</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">デバッグ情報</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">チャンネル/デバイスの数:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">デバイス数:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">安全なチャンネルなし:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">サーバー:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">IDプロバイダー:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">IDリンク:</string>
@@ -2004,7 +2005,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">このキーは、後で設定からも確認できます。</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">プロフィールへのアクセスを失わないでください！</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">バックアップを使用すると、このデバイスへのアクセスを失った場合にプロファイルを復元できます。新しいエクスペリエンスはこれまで以上に簡単 😉 で、数秒で設定できます。</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">バックアップを設定</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">バックアップを有効にする</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">バックアップキーを書き留めるのを忘れないでください 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">このデバイスへのアクセスを失った場合に、プロファイルを復元するには、バックアップキーが不可欠です。</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">Olvid体験を向上させましょう🚀</string>
@@ -2110,4 +2111,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">不明なアクセシビリティサービスが検出されました。安全に使用できるか確認してください。</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">絵文字を検索</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">最近</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">連絡先のステータスを更新</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">エンジンのデータベースクエリの実行時間を表示</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">エンジンデータベースクエリのタイミング</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">相手のデバイスからの応答を待っています</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">相手のデバイスに接続できません</string>
 </resources>

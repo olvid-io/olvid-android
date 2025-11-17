@@ -116,7 +116,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
         }
         try {
             int newVersion = 1;
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.create",
+                    "SELECT * FROM " + TABLE_NAME +
                     " WHERE " + OWNED_IDENTITY + " = ? " +
                     " ORDER BY " + VERSION + " DESC LIMIT 1;")){
                 statement.setBytes(1, ownedIdentity.getBytes());
@@ -157,7 +158,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
         }
         try {
             int newVersion = version + 1;
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.copy",
+                    "SELECT * FROM " + TABLE_NAME +
                     " WHERE " + OWNED_IDENTITY + " = ? " +
                     " ORDER BY " + VERSION + " DESC LIMIT 1;")){
                 statement.setBytes(1, ownedIdentity.getBytes());
@@ -253,7 +255,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setInt(2, version);
             statement.setString(3, serializedJsonDetails);
@@ -266,7 +269,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + VERSION + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -283,7 +287,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
         if ((ownedIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ?" +
                 " AND " +  VERSION + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -299,7 +304,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
     }
 
     public static List<String> getAllPhotoUrl(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + PHOTO_URL + " FROM " + TABLE_NAME + " WHERE " + PHOTO_URL + " IS NOT NULL;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.getAllPhotoUrl",
+                "SELECT " + PHOTO_URL + " FROM " + TABLE_NAME + " WHERE " + PHOTO_URL + " IS NOT NULL;")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<String> list = new ArrayList<>();
                 while (res.next()) {
@@ -311,7 +317,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
     }
 
     public static List<OwnedIdentityDetails> getAllWithMissingPhotoUrl(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.getAllWithMissingPhotoUrl",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + PHOTO_URL + " IS NULL " +
                 " AND " + PHOTO_SERVER_KEY + " IS NOT NULL " +
                 " AND " + PHOTO_SERVER_LABEL + " IS NOT NULL;")) {
@@ -326,7 +333,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
     }
 
     public static List<OwnedIdentityDetails> getAllForOwnedIdentity(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.getAllForOwnedIdentity",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -344,7 +352,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
     // region setters
 
     public static void cleanup(IdentityManagerSession identityManagerSession, Identity ownedIdentity, int publishedVersion, int latestVersion) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.cleanup",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " +  VERSION + " NOT IN (?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -360,7 +369,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
             throw new Exception();
         }
         String serializedJsonDetails = identityManagerSession.jsonObjectMapper.writeValueAsString(jsonIdentityDetails);
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.setJsonDetails",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_JSON_DETAILS + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + VERSION + " = ?;")) {
@@ -374,7 +384,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
 
     public void setPhotoUrl(String photoUrl, boolean clearLabelAndKey) throws SQLException {
         if (clearLabelAndKey) {
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.setPhotoUrl",
+                    "UPDATE " + TABLE_NAME + " SET " +
                     PHOTO_URL + " = ?, " +
                     PHOTO_SERVER_LABEL + " = NULL, " +
                     PHOTO_SERVER_KEY + " = NULL " +
@@ -389,7 +400,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
                 this.photoServerLabel = null;
             }
         } else {
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.setPhotoUrl",
+                    "UPDATE " + TABLE_NAME + " SET " +
                     PHOTO_URL + " = ? " +
                     " WHERE " + OWNED_IDENTITY + " = ? " +
                     " AND " + VERSION + " = ?;")) {
@@ -403,7 +415,8 @@ public class OwnedIdentityDetails implements ObvDatabase {
     }
 
     public void setPhotoServerLabelAndKey(UID photoServerLabel, AuthEncKey photoServerKey) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("OwnedIdentityDetails.setPhotoServerLabelAndKey",
+                "UPDATE " + TABLE_NAME + " SET " +
                 PHOTO_SERVER_LABEL + " = ?, " +
                 PHOTO_SERVER_KEY + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +

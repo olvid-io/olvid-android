@@ -22,9 +22,9 @@ package io.olvid.messenger.onboarding.flow.screens.backup
 import android.graphics.Typeface
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -77,7 +77,7 @@ fun NavGraphBuilder.backupKeyValidation(
         ) {
             OutlinedTextField(
                 modifier = Modifier
-                    .widthIn(max = 240.dp)
+                    .widthIn(max = 250.dp)
                     .focusRequester(focusRequester),
                 value = onboardingFlowViewModel.backupSeed ?: "",
                 minLines = 2,
@@ -98,7 +98,11 @@ fun NavGraphBuilder.backupKeyValidation(
                     lineHeight = 20.sp,
                     fontFamily = FontFamily(Typeface.MONOSPACE)
                 ),
-                colors = TextFieldDefaults.outlinedTextFieldColors(focusedLabelColor = colorResource(id = R.color.olvid_gradient_contrasted), focusedBorderColor = colorResource(id = R.color.olvid_gradient_contrasted), cursorColor = colorResource(id = R.color.olvid_gradient_contrasted))
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedLabelColor = colorResource(id = R.color.olvid_gradient_contrasted),
+                    focusedBorderColor = colorResource(id = R.color.olvid_gradient_contrasted),
+                    cursorColor = colorResource(id = R.color.olvid_gradient_contrasted)
+                )
             )
         }
         LaunchedEffect(Unit) {

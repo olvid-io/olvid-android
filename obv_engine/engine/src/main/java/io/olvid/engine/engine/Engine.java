@@ -89,6 +89,7 @@ import io.olvid.engine.engine.datatypes.EngineSession;
 import io.olvid.engine.engine.datatypes.EngineSessionFactory;
 import io.olvid.engine.engine.datatypes.UserInterfaceDialogListener;
 import io.olvid.engine.engine.types.EngineAPI;
+import io.olvid.engine.engine.types.EngineDbQueryStatisticsEntry;
 import io.olvid.engine.engine.types.EngineNotificationListener;
 import io.olvid.engine.engine.types.EngineNotifications;
 import io.olvid.engine.engine.types.JsonGroupDetails;
@@ -745,6 +746,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     // region Public API
     // region Managing Owned Identities
 
+    @Override
+    public Map<String, EngineDbQueryStatisticsEntry> getEngineDbQueryStatistics() {
+        return Session.queryStatistics;
+    }
 
     @Override
     public String getServerOfIdentity(byte[] bytesIdentity) {
@@ -1364,6 +1369,17 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     public ObvContactDeviceCount getContactDeviceCounts(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception {
         try (EngineSession engineSession = getSession()) {
             return identityManager.getContactDeviceCounts(engineSession.session, Identity.of(bytesOwnedIdentity), Identity.of(bytesContactIdentity));
+        }
+    }
+
+    @Override
+    public void forceContactDeviceDiscovery(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) {
+        try {
+            Identity contactIdentity = Identity.of(bytesContactIdentity);
+            Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+            protocolManager.startDeviceDiscoveryProtocol(ownedIdentity, contactIdentity);
+        } catch (Exception e) {
+            Logger.x(e);
         }
     }
 
@@ -2921,7 +2937,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     @Override
     public void vacuumDatabase() throws Exception {
         try (EngineSession engineSession = getSession()) {
-            try (Statement statement = engineSession.session.createStatement()) {
+            try (Statement statement = engineSession.session.createStatement("Engine.vacuumDatabase")) {
                 statement.execute("VACUUM");
                 statement.execute("PRAGMA wal_checkpoint(TRUNCATE)");
                 engineSession.session.commit();

@@ -375,6 +375,13 @@ public interface MessageDao {
             " LIMIT 1")
     @Nullable Message getPreviousMessageBySequenceNumber(long senderSequenceNumber, @NonNull UUID senderThreadIdentifier, @NonNull byte[] senderIdentifier, long discussionId);
 
+    @Query("SELECT * FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND " + Message.SORT_INDEX + " <= :maxSortIndex " +
+            " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " ORDER BY " + Message.SORT_INDEX + " DESC " +
+            " LIMIT 1")
+    @Nullable Message getPreviousMessageBySortIndex(double maxSortIndex, long discussionId);
 
     @Query("SELECT " + Message.SORT_INDEX + " FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +

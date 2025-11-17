@@ -214,7 +214,7 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
 
-    public static ContactGroupV2 createJoined(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, String serializedGroupDetails, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, String serializedGroupType, boolean createdByMeOnOtherDevice, Identity inviterIdentity) {
+    public static ContactGroupV2 createJoined(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, String serializedGroupDetails, GroupV2.ServerPhotoInfo serverPhotoInfo, byte[] verifiedAdministratorsChain, GroupV2.BlobKeys blobKeys, byte[] ownGroupInvitationNonce, List<String> ownPermissionStrings, String serializedGroupType, boolean createdByMeOnOtherDevice, Identity inviterIdentity, Long groupUpdateTimestamp) {
         if ((ownedIdentity == null) || (groupIdentifier == null) || (serializedGroupDetails == null) || (verifiedAdministratorsChain == null) || (blobKeys == null) || (ownGroupInvitationNonce == null) || (ownPermissionStrings == null)) {
             return null;
         }
@@ -229,7 +229,22 @@ public class ContactGroupV2 implements ObvDatabase {
                 return null;
             }
 
-            ContactGroupV2 contactGroup = new ContactGroupV2(identityManagerSession, groupIdentifier.groupUid, groupIdentifier.serverUrl, groupIdentifier.category, ownedIdentity, GroupV2.Permission.serializePermissionStrings(ownPermissionStrings), contactGroupDetails.getVersion(), verifiedAdministratorsChain, blobKeys, ownGroupInvitationNonce, false, System.currentTimeMillis(), null, null, serializedGroupType);
+            ContactGroupV2 contactGroup = new ContactGroupV2(
+                    identityManagerSession,
+                    groupIdentifier.groupUid,
+                    groupIdentifier.serverUrl,
+                    groupIdentifier.category,
+                    ownedIdentity,
+                    GroupV2.Permission.serializePermissionStrings(ownPermissionStrings),
+                    contactGroupDetails.getVersion(),
+                    verifiedAdministratorsChain,
+                    blobKeys,
+                    ownGroupInvitationNonce,
+                    false,
+                    (groupUpdateTimestamp == null) ? System.currentTimeMillis() : groupUpdateTimestamp,
+                    null,
+                    null,
+                    serializedGroupType);
             contactGroup.inviterIdentity = inviterIdentity;
             contactGroup.insert();
             if (createdByMeOnOtherDevice) {
@@ -386,7 +401,7 @@ public class ContactGroupV2 implements ObvDatabase {
 
         {
             // add group members
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getServerBlob_members",
                     "SELECT " +
                             " gm." + ContactGroupV2Member.CONTACT_IDENTITY + " AS ci, " +
                             " gm." + ContactGroupV2Member.SERIALIZED_PERMISSIONS + " AS sp, " +
@@ -432,7 +447,8 @@ public class ContactGroupV2 implements ObvDatabase {
 
         {
             // add pending group members
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + ContactGroupV2PendingMember.TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getServerBlob_pendings",
+                    "SELECT * FROM " + ContactGroupV2PendingMember.TABLE_NAME +
                             " WHERE " + ContactGroupV2Member.GROUP_UID + " = ? " +
                             " AND " + ContactGroupV2Member.SERVER_URL + " = ? " +
                             " AND " + ContactGroupV2Member.CATEGORY + " = ? " +
@@ -466,7 +482,8 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public static String getPhotoUrl(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT det." + ContactGroupV2Details.PHOTO_URL + " AS photo " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getPhotoUrl",
+                "SELECT det." + ContactGroupV2Details.PHOTO_URL + " AS photo " +
                 " FROM " + TABLE_NAME + " AS g " +
                 " INNER JOIN " + ContactGroupV2Details.TABLE_NAME + " AS det " +
                 " ON g." + GROUP_UID + " = det." + ContactGroupV2Details.GROUP_UID +
@@ -493,7 +510,8 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public static Long getLastModificationTimestamp(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + LAST_MODIFICATION_TIMESTAMP +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getLastModificationTimestamp",
+                "SELECT " + LAST_MODIFICATION_TIMESTAMP +
                 " FROM " + TABLE_NAME +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
@@ -516,7 +534,8 @@ public class ContactGroupV2 implements ObvDatabase {
 
 
     public static GroupV2.ServerPhotoInfo getServerPhotoInfo(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getServerPhotoInfo",
+                "SELECT " +
                 " det." + ContactGroupV2Details.PHOTO_SERVER_IDENTITY + " AS ident, " +
                 " det." + ContactGroupV2Details.PHOTO_SERVER_LABEL + " AS label, " +
                 " det." + ContactGroupV2Details.PHOTO_SERVER_KEY + " AS key " +
@@ -612,8 +631,8 @@ public class ContactGroupV2 implements ObvDatabase {
         if ((ownedIdentity == null) || (groupIdentifier == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
-                        " SELECT " + ContactGroupV2Member.CONTACT_IDENTITY + " AS id," +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getGroupV2OtherMembersAndPermissions",
+                " SELECT " + ContactGroupV2Member.CONTACT_IDENTITY + " AS id," +
                         ContactGroupV2Member.OWNED_IDENTITY + " AS oid, " +
                         ContactGroupV2Member.SERIALIZED_PERMISSIONS + " AS perm " +
                         " FROM " + ContactGroupV2Member.TABLE_NAME +
@@ -654,7 +673,7 @@ public class ContactGroupV2 implements ObvDatabase {
         if ((ownedIdentity == null) || (groupIdentifier == null)) {
             throw new Exception();
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getGroupV2HasOtherAdminMember",
                 " SELECT " + ContactGroupV2Member.SERIALIZED_PERMISSIONS + " AS perm " +
                         " FROM " + ContactGroupV2Member.TABLE_NAME +
                         " WHERE " + ContactGroupV2Member.GROUP_UID + " = ? " +
@@ -682,7 +701,8 @@ public class ContactGroupV2 implements ObvDatabase {
         if (ownedIdentity == null) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getAllKeycloakPushTopics",
+
                 " SELECT " + ContactGroupV2.PUSH_TOPIC + " AS pt " +
                         " FROM " + ContactGroupV2.TABLE_NAME +
                         " WHERE " + ContactGroupV2.CATEGORY + " = " + GroupV2.Identifier.CATEGORY_KEYCLOAK +
@@ -700,7 +720,8 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public static List<ContactGroupV2> getAllWithPushTopic(IdentityManagerSession identityManagerSession, String pushTopic) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getAllWithPushTopic",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + PUSH_TOPIC + " = ?;")) {
             statement.setString(1, pushTopic);
             try (ResultSet res = statement.executeQuery()) {
@@ -717,7 +738,8 @@ public class ContactGroupV2 implements ObvDatabase {
         if ((ownedIdentity == null) || (groupIdentifier == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +
@@ -737,7 +759,8 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public static List<ContactGroupV2> getAllForIdentity(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getAllForIdentity",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -751,7 +774,8 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public static List<ContactGroupV2> getAllKeycloakForIdentity(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getAllKeycloakForIdentity",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + CATEGORY + " = " + GroupV2.Identifier.CATEGORY_KEYCLOAK + ";")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -766,7 +790,8 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public static List<ContactGroupV2> getAll(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<ContactGroupV2> list = new ArrayList<>();
                 while (res.next()) {
@@ -778,7 +803,8 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public static List<ContactGroupV2> getAllKeycloak(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getAllKeycloak",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + CATEGORY + " = " + GroupV2.Identifier.CATEGORY_KEYCLOAK + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<ContactGroupV2> list = new ArrayList<>();
@@ -795,7 +821,8 @@ public class ContactGroupV2 implements ObvDatabase {
         if (this.frozen == frozen) {
             return;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.setFrozen",
+                "UPDATE " + TABLE_NAME +
                 " SET " + FROZEN + " = ? " +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
@@ -814,7 +841,8 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public void setTrustedDetailsVersion(int trustedDetailsVersion) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.setTrustedDetailsVersion",
+                "UPDATE " + TABLE_NAME +
                 " SET " + TRUSTED_DETAILS_VERSION + " = ? " +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
@@ -835,7 +863,8 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public void setAlreadyTrustedDetailsVersion(Integer alreadyTrustedDetailsVersion) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.setAlreadyTrustedDetailsVersion",
+                "UPDATE " + TABLE_NAME +
                 " SET " + ALREADY_TRUSTED_DETAILS_VERSION + " = ? " +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
@@ -857,7 +886,7 @@ public class ContactGroupV2 implements ObvDatabase {
 
 
 
-    public List<Identity> updateWithNewBlob(GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe, Identity updatedBy, List<Identity> leavers) throws SQLException {
+    public List<Identity> updateWithNewBlob(GroupV2.ServerBlob serverBlob, GroupV2.BlobKeys blobKeys, boolean updatedByMe, Identity updatedBy, List<Identity> leavers, Long groupUpdateTimestamp) throws SQLException {
         if (!identityManagerSession.session.isInTransaction()) {
             throw new SQLException("Calling ContactGroupV2.updateGroupV2WithNewBlob outside a transaction!");
         }
@@ -904,7 +933,7 @@ public class ContactGroupV2 implements ObvDatabase {
         blobMainSeed = blobKeys.blobMainSeed;
         blobVersionSeed = blobKeys.blobVersionSeed;
         groupAdminServerAuthenticationPrivateKey = blobKeys.groupAdminServerAuthenticationPrivateKey;
-        lastModificationTimestamp = System.currentTimeMillis();
+        lastModificationTimestamp = (groupUpdateTimestamp == null) ? System.currentTimeMillis() : groupUpdateTimestamp;
         serializedJsonGroupType = serverBlob.serializedGroupType;
 
         if (serverBlob.version - version == 1) {
@@ -1038,7 +1067,7 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public static List<Identity> getGroupV2MembersAndPendingMembersFromNonce(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, byte[] groupMemberInvitationNonce) throws Exception {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getGroupV2MembersAndPendingMembersFromNonce",
                 " SELECT " + ContactGroupV2Member.CONTACT_IDENTITY + " AS id " +
                         " FROM " + ContactGroupV2Member.TABLE_NAME +
                         " WHERE " + ContactGroupV2Member.GROUP_UID + " = ? " +
@@ -1124,7 +1153,7 @@ public class ContactGroupV2 implements ObvDatabase {
 
 
     public static GroupV2.IdentifierVersionAndKeys[] getServerGroupsV2IdentifierVersionAndKeysForContact(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getServerGroupsV2IdentifierVersionAndKeysForContact",
                 "SELECT * FROM (SELECT " + ContactGroupV2Member.GROUP_UID + " AS uid, " +
                         ContactGroupV2Member.SERVER_URL + " AS url, " +
                         ContactGroupV2Member.SERIALIZED_PERMISSIONS + " AS perms " +
@@ -1190,7 +1219,7 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public static GroupV2.IdentifierVersionAndKeys[] getAllServerGroupsV2IdentifierVersionAndKeys(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getAllServerGroupsV2IdentifierVersionAndKeys",
                 "SELECT * FROM " + ContactGroupV2.TABLE_NAME +
                         " WHERE " + ContactGroupV2.CATEGORY + " = " + GroupV2.Identifier.CATEGORY_SERVER +
                         " AND " + ContactGroupV2.OWNED_IDENTITY + " = ?;"
@@ -1232,7 +1261,7 @@ public class ContactGroupV2 implements ObvDatabase {
 
 
     public static GroupV2.IdentifierAndAdminStatus[] getServerGroupsV2IdentifierAndMyAdminStatusForContact(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.getServerGroupsV2IdentifierAndMyAdminStatusForContact",
                 "SELECT * FROM (SELECT " + ContactGroupV2Member.GROUP_UID + " AS uid, " +
                         ContactGroupV2Member.SERVER_URL + " AS url " +
                         " FROM " + ContactGroupV2Member.TABLE_NAME +
@@ -1547,7 +1576,8 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?);")) {
             statement.setBytes(1, groupUid.getBytes());
             statement.setString(2, serverUrl);
             statement.setInt(3, category);
@@ -1586,7 +1616,8 @@ public class ContactGroupV2 implements ObvDatabase {
             throw new SQLException();
         }
 
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +
@@ -1599,7 +1630,8 @@ public class ContactGroupV2 implements ObvDatabase {
             commitHookBits |= HOOK_BIT_DELETED;
             identityManagerSession.session.addSessionCommitListener(this);
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + ContactGroupV2Details.TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.delete",
+                "DELETE FROM " + ContactGroupV2Details.TABLE_NAME +
                 " WHERE " + ContactGroupV2Details.GROUP_UID + " = ? " +
                 " AND " + ContactGroupV2Details.SERVER_URL + " = ? " +
                 " AND " + ContactGroupV2Details.CATEGORY + " = ? " +
@@ -1613,7 +1645,8 @@ public class ContactGroupV2 implements ObvDatabase {
     }
 
     private void update() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2.update",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_OWN_PERMISSIONS + " = ?, " +
                 VERSION + " = ?, " +
                 TRUSTED_DETAILS_VERSION + " = ?, " +

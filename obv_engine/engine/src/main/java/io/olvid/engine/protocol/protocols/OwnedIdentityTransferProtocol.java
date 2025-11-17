@@ -43,6 +43,7 @@ import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NotificationListener;
+import io.olvid.engine.datatypes.PrivateIdentity;
 import io.olvid.engine.datatypes.Seed;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
@@ -65,6 +66,7 @@ import io.olvid.engine.engine.types.sync.ObvBackupAndSyncDelegate;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshot;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
 import io.olvid.engine.identity.databases.sync.IdentityManagerSyncSnapshot;
+import io.olvid.engine.metamanager.IdentityDelegate;
 import io.olvid.engine.protocol.databases.ReceivedMessage;
 import io.olvid.engine.protocol.datatypes.CoreProtocolMessage;
 import io.olvid.engine.protocol.datatypes.ProtocolManagerSession;
@@ -1426,7 +1428,8 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
             }
 
             // compute Target part of the SAS
-            Seed seedTargetForSas = getDeterministicSeed(startState.macKey, commitment);
+            PrivateIdentity privateIdentity = new PrivateIdentity(getOwnedIdentity(), startState.serverAuthenticationPrivateKey, startState.encryptionPrivateKey, startState.macKey);
+            Seed seedTargetForSas = privateIdentity.getDeterministicSeedForOwnedIdentity(commitment, IdentityDelegate.DeterministicSeedContext.COMPUTE_TRANSFER_SAS);
 
             {
                 // send the seedTargetForSas to Source
@@ -1441,17 +1444,6 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
             }
 
             return new TargetWaitingForDecommitmentState(startState.dialogUuid, startState.deviceName, otherConnectionIdentifier, transferredIdentity, commitment, seedTargetForSas, startState.serverAuthenticationPrivateKey, startState.encryptionPrivateKey, startState.macKey, startState.sessionNumber);
-        }
-
-        private static Seed getDeterministicSeed(MACKey macKey, byte[] commitment) throws Exception {
-            MAC mac = Suite.getMAC(macKey);
-            byte[] digest = mac.digest(macKey, new byte[]{0x56}); // we use a different constant than in the SAS protocol here
-            byte[] hashInput = new byte[digest.length + commitment.length];
-            System.arraycopy(digest, 0, hashInput, 0, digest.length);
-            System.arraycopy(commitment, 0, hashInput, digest.length, commitment.length);
-            Hash sha256 = Suite.getHash(Hash.SHA256);
-            byte[] hash = sha256.digest(hashInput);
-            return new Seed(hash);
         }
     }
 

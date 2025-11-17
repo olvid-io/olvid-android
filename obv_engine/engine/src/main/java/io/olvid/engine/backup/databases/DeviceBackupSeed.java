@@ -137,7 +137,8 @@ public class DeviceBackupSeed implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?);")) {
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("DeviceBackupSeed.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?);")) {
             statement.setBytes(1, backupSeed.getBackupSeedBytes());
             statement.setString(2, server);
             statement.setBoolean(3, active);
@@ -148,7 +149,8 @@ public class DeviceBackupSeed implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + BACKUP_SEED + " = ?;")) {
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("DeviceBackupSeed.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + BACKUP_SEED + " = ?;")) {
             statement.setBytes(1, backupSeed.getBackupSeedBytes());
             statement.executeUpdate();
         }
@@ -159,7 +161,8 @@ public class DeviceBackupSeed implements ObvDatabase {
     // region setters
 
     public void markBackupKeyInactive() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("DeviceBackupSeed.markBackupKeyInactive",
+                "UPDATE " + TABLE_NAME +
                 " SET " + ACTIVE + " = ? " +
                 " WHERE " + BACKUP_SEED + " = ?;")) {
             statement.setBoolean(1, false);
@@ -173,7 +176,8 @@ public class DeviceBackupSeed implements ObvDatabase {
         if (!active) {
             return;
         }
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("DeviceBackupSeed.setNextBackupTimestamp",
+                "UPDATE " + TABLE_NAME +
                 " SET " + NEXT_BACKUP_TIMESTAMP + " = ? " +
                 " WHERE " + BACKUP_SEED + " = ?;")) {
             statement.setLong(1, nextBackupTimestamp);
@@ -188,7 +192,8 @@ public class DeviceBackupSeed implements ObvDatabase {
     // region getters
 
     public static DeviceBackupSeed get(BackupManagerSession backupManagerSession, BackupSeed backupSeed) throws SQLException {
-        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + BACKUP_SEED + " = ?;")){
+        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("DeviceBackupSeed.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + BACKUP_SEED + " = ?;")){
             preparedStatement.setBytes(1, backupSeed.getBackupSeedBytes());
             ResultSet res = preparedStatement.executeQuery();
             if (res.next()) {
@@ -200,7 +205,8 @@ public class DeviceBackupSeed implements ObvDatabase {
     }
 
     public static DeviceBackupSeed getActive(BackupManagerSession backupManagerSession) throws SQLException {
-        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + ACTIVE + " = ?;")){
+        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("DeviceBackupSeed.getActive",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + ACTIVE + " = ?;")){
             preparedStatement.setBoolean(1, true);
             ResultSet res = preparedStatement.executeQuery();
             if (res.next()) {
@@ -212,7 +218,8 @@ public class DeviceBackupSeed implements ObvDatabase {
     }
 
     public static DeviceBackupSeed[] getAllInactive(BackupManagerSession backupManagerSession) throws SQLException {
-        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + ACTIVE + " = ?;")){
+        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("DeviceBackupSeed.getAllInactive",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + ACTIVE + " = ?;")){
             preparedStatement.setBoolean(1, false);
             ResultSet res = preparedStatement.executeQuery();
             List<DeviceBackupSeed> list = new ArrayList<>();

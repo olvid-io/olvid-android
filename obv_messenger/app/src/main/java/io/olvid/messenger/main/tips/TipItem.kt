@@ -26,11 +26,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +58,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -104,6 +110,7 @@ fun TipItem(
                 title = R.string.tip_setup_new_backups_title,
                 message = R.string.tip_setup_new_backups_message,
                 action = R.string.button_label_configure_backups,
+                tint = R.color.green,
                 onAction = {
                     val intent = Intent(context, SettingsActivity::class.java)
                     intent.putExtra(
@@ -465,6 +472,7 @@ fun TipItem(
                 title = R.string.tip_untrusted_accessibility_service_title,
                 messageString = "${stringResource(R.string.tip_untrusted_accessibility_service_message)}\n\n**${AccessibilityManager.untrustedAccessibilityServices.firstOrNull()}**",
                 action = R.string.button_label_open_settings,
+                tint = R.color.red,
                 onAction = {
                     try {
                         val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
@@ -495,6 +503,7 @@ fun TipItem(
 @Composable
 private fun TipBubble(
     @StringRes title: Int,
+    @ColorRes tint: Int = R.color.olvid_gradient_light,
     @StringRes message: Int? = null,
     messageString: String? = null,
     @StringRes action: Int? = null,
@@ -509,7 +518,18 @@ private fun TipBubble(
             .cutoutHorizontalPadding()
             .padding(8.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(colorResource(R.color.lighterGrey)),
+            .background(colorResource(R.color.lighterGrey))
+            .border(
+                width = 1.dp,
+                brush =  Brush.linearGradient(
+                    colors = listOf(
+                        colorResource(tint),
+                        Color.Transparent,
+                    ),
+                    end = Offset( 150f, 100f)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ),
         horizontalAlignment = Alignment.End,
     ) {
         Row(
@@ -521,7 +541,7 @@ private fun TipBubble(
                 Icon(
                     modifier = Modifier.size(24.dp),
                     painter = painterResource(it),
-                    tint = colorResource(R.color.olvid_gradient_light),
+                    tint = colorResource(tint),
                     contentDescription = null,
                 )
             }
@@ -576,6 +596,7 @@ private fun TipBubble(
                     .padding(end = 8.dp, bottom = 4.dp)
                     .height(40.dp),
                 text = stringResource(action),
+                contentColor = colorResource(tint),
                 onClick = { onAction?.invoke() }
             )
         }

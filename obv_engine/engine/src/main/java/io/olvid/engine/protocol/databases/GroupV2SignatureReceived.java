@@ -106,7 +106,8 @@ public class GroupV2SignatureReceived implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?);")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("GroupV2SignatureReceived.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, signature);
             statement.executeUpdate();
@@ -115,7 +116,8 @@ public class GroupV2SignatureReceived implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY  + " = ? AND " + SIGNATURE + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("GroupV2SignatureReceived.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY  + " = ? AND " + SIGNATURE + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, signature);
             statement.executeUpdate();
@@ -128,7 +130,8 @@ public class GroupV2SignatureReceived implements ObvDatabase {
         if (ownedIdentity == null || commitment == null) {
             return false;
         }
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT 1 FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ? AND " + SIGNATURE + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("GroupV2SignatureReceived.exists",
+                "SELECT 1 FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ? AND " + SIGNATURE + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, commitment);
             try (ResultSet res = statement.executeQuery()) {
@@ -138,7 +141,8 @@ public class GroupV2SignatureReceived implements ObvDatabase {
     }
 
     public static void deleteAllForOwnedIdentity(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("GroupV2SignatureReceived.deleteAllForOwnedIdentity",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }

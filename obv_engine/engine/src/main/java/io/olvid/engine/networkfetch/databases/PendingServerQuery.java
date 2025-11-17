@@ -135,7 +135,8 @@ public class PendingServerQuery implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?);")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("PendingServerQuery.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?);")) {
             statement.setBytes(1, uid.getBytes());
             statement.setBytes(2, encodedQuery.getBytes());
             statement.setLong(3, creationTimestamp);
@@ -148,7 +149,8 @@ public class PendingServerQuery implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + UID_  + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("PendingServerQuery.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + UID_  + " = ?;")) {
             statement.setBytes(1, uid.getBytes());
             statement.executeUpdate();
         }
@@ -162,7 +164,8 @@ public class PendingServerQuery implements ObvDatabase {
         if (uid == null) {
             return null;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + UID_  + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("PendingServerQuery.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + UID_  + " = ?;")) {
             statement.setBytes(1, uid.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
@@ -177,7 +180,8 @@ public class PendingServerQuery implements ObvDatabase {
     }
 
     public static PendingServerQuery[] getAll(FetchManagerSession fetchManagerSession) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("PendingServerQuery.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<PendingServerQuery> list = new ArrayList<>();
                 while (res.next()) {

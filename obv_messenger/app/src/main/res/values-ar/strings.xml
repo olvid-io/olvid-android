@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">رسالة</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">إرسال رسالة</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">بدء المكالمة</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">بدء المكالمة</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">في انتظار إذن الوصول إلى الصوت</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">التحقق من بيانات الاعتماد</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">تأمين الاتصال</string>
@@ -1212,7 +1212,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">إدراج رمز تعبيري</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">اضغط مع الاستمرار للإضافة/الإزالة من المفضلة</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">معلومات التصحيح</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">عدد القنوات/الأجهزة:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">عدد الأجهزة:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">بدون قناة آمنة:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">خادم:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">مُزوِّد الهُوِيَّة:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">رابط المعرّف:</string>
@@ -2006,7 +2007,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">يمكنك أيضاً العثور على هذا المفتاح لاحقاً في إعداداتك.</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">لا تفقد الوصول إلى ملفاتك الشخصية!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">تتيح لك النسخ الاحتياطية استعادة ملفاتك الشخصية في حال فقدت الوصول إلى هذا الجهاز. التجربة الجديدة أسهل من أي وقت مضى 😉 ويمكن إعدادها في ثوانٍ قليلة.</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">تهيئة النسخ الاحتياطي</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">تمكين النسخ الاحتياطي</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">لتنسي ما تنسي تدوين مفتاح الانساخ الانساءيم عينيم الملائكيم عينيم‍☺</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">مفتاح النسخ الاحتياطي الخاص بك ضروري لاستعادة ملفاتك الشخصية في حال فقدت الوصول إلى هذا الجهاز.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">حسّن تجربتك في أولفيد 🚀</string>
@@ -2112,4 +2113,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">تم اكتشاف خدمة إمكانية وصول غير معروفة. يرجى التحقق من أنها آمنة للاستخدام:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">ابحث عن رمز تعبيري</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">الأحدث</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">تحديث حالة جهة الاتصال</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">عرض توقيتات استعلامات قاعدة بيانات المحرك</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">توقيتات استعلام قاعدة بيانات المحرك</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">في انتظار رد جهاز الطرف الآخر</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">الجهاز المقابل غير قابل للوصول</string>
 </resources>

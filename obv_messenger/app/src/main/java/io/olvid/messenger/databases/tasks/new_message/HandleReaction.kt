@@ -21,6 +21,7 @@ package io.olvid.messenger.databases.tasks.new_message
 
 import io.olvid.engine.engine.types.ObvMessage
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.jsons.JsonReaction
 import io.olvid.messenger.databases.tasks.UpdateReactionsTask
@@ -81,11 +82,18 @@ fun handleReaction(
                         messageSender.contact!! // the messageSender type is CONTACT, so contact is non-null
                     )
                 }
+
+                var messageServerTimestamp = obvMessage.serverTimestamp
+                if (jsonReaction.originalServerTimestamp != null && discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                    messageServerTimestamp = messageServerTimestamp.coerceAtMost(jsonReaction.originalServerTimestamp)
+                }
+
+
                 UpdateReactionsTask(
                     message.id,
                     jsonReaction.reaction,
                     messageSender.senderIdentity.takeIf { messageSender.type == MessageSender.Type.CONTACT },
-                    obvMessage.serverTimestamp,
+                    messageServerTimestamp,
                     false
                 ).run()
             } ?: run {

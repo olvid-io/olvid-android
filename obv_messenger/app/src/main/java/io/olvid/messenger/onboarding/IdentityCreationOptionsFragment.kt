@@ -138,14 +138,14 @@ class IdentityCreationOptionsFragment : Fragment(), OnClickListener,
         serverEditText?.addTextChangedListener(object : TextChangeListener() {
             override fun afterTextChanged(s: Editable) {
                 if (started) {
-                    viewModel.validateServer(s?.toString())
+                    viewModel.validateServer(s.toString())
                 }
             }
         })
         apiKeyEditText?.addTextChangedListener(object : TextChangeListener() {
             override fun afterTextChanged(s: Editable) {
                 if (started) {
-                    viewModel.setApiKey(s?.toString())
+                    viewModel.setApiKey(s.toString())
                 }
             }
         })
@@ -293,6 +293,7 @@ class IdentityCreationOptionsFragment : Fragment(), OnClickListener,
 
                 val apiKeyStatus =
                     userInfo[EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_API_KEY_STATUS_KEY] as ApiKeyStatus?
+                @Suppress("UNCHECKED_CAST")
                 val permissions =
                     userInfo[EngineNotifications.API_KEY_STATUS_QUERY_SUCCESS_PERMISSIONS_KEY] as List<ApiKeyPermission>?
                 val apiKeyExpirationTimestamp =
@@ -309,13 +310,13 @@ class IdentityCreationOptionsFragment : Fragment(), OnClickListener,
 
                         val newSubscriptionStatusFragment =
                             SubscriptionStatusFragment.newInstance(
-                                bytesOwnedIdentity ?: byteArrayOf(),
-                                apiKeyStatus,
-                                apiKeyExpirationTimestamp,
-                                permissions,
-                                true,
-                                false,
-                                false
+                                bytesOwnedIdentity = bytesOwnedIdentity ?: byteArrayOf(),
+                                apiKeyStatus = apiKeyStatus,
+                                apiKeyExpirationTimestamp = apiKeyExpirationTimestamp,
+                                apiKeyPermissions = permissions,
+                                licenseQuery = true,
+                                showInAppPurchase = false,
+                                anotherIdentityHasCallsPermission = false
                             )
                         val transaction =
                             childFragmentManager.beginTransaction()

@@ -21,6 +21,7 @@ package io.olvid.messenger.databases.tasks.new_message
 
 import io.olvid.engine.engine.types.ObvMessage
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.PollVote
 import io.olvid.messenger.databases.entity.jsons.JsonPollVote
@@ -77,19 +78,24 @@ fun handlePollVote(
                 val poll = message.poll
                     ?: return HandleMessageOutput.DELETE_MESSAGE_AND_ATTACHMENTS
 
+                var messageServerTimestamp = obvMessage.serverTimestamp
+                if (jsonPollVote.originalServerTimestamp != null && discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                    messageServerTimestamp = messageServerTimestamp.coerceAtMost(jsonPollVote.originalServerTimestamp)
+                }
+
                 if (poll.multipleChoice) {
                     var pollVote = db.pollVoteDao().get(message.id, messageSender.senderIdentity, jsonPollVote.pollCandidateUuid)
                     if (pollVote != null) {
                         if (pollVote.version > jsonPollVote.version) {
                             return HandleMessageOutput.DELETE_MESSAGE_AND_ATTACHMENTS
                         }
-                        pollVote.serverTimestamp = obvMessage.serverTimestamp
+                        pollVote.serverTimestamp = messageServerTimestamp
                         pollVote.version = jsonPollVote.version
                         pollVote.voted = jsonPollVote.voted
                     } else {
                         pollVote = PollVote(
                             message.id,
-                            obvMessage.serverTimestamp,
+                            messageServerTimestamp,
                             jsonPollVote.version,
                             jsonPollVote.pollCandidateUuid,
                             messageSender.senderIdentity,
@@ -111,7 +117,7 @@ fun handlePollVote(
                     // if we reach this point, all previous poll votes for this sender had a smaller version and were deleted
                     val pollVote = PollVote(
                         message.id,
-                        obvMessage.serverTimestamp,
+                        messageServerTimestamp,
                         jsonPollVote.version,
                         jsonPollVote.pollCandidateUuid,
                         messageSender.senderIdentity,

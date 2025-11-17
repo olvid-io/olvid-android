@@ -22,10 +22,13 @@ package io.olvid.messenger.databases.dao
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Embedded
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import androidx.room.Upsert
+import io.olvid.messenger.databases.entity.Discussion
+import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.PollVote
 import java.util.UUID
 
@@ -106,4 +109,33 @@ interface PollVoteDao {
         messageId: Long,
         noneVoteUuidString: String = "00000000-0000-0000-0000-000000000000"
     ): LiveData<List<PollVote>>
+
+
+    @Query(
+        """
+        SELECT pv.*, ${MessageDao.PREFIX_MESSAGE_COLUMNS} FROM ${PollVote.TABLE_NAME} AS pv 
+        INNER JOIN ${Message.TABLE_NAME} AS mess
+        ON mess.id = pv.${PollVote.MESSAGE_ID}
+        INNER JOIN ${Discussion.TABLE_NAME} AS disc
+        ON disc.id = mess.${Message.DISCUSSION_ID}
+        WHERE disc.${Discussion.BYTES_OWNED_IDENTITY} = :bytesOwnedIdentity
+        AND disc.${Discussion.DISCUSSION_TYPE} = ${Discussion.TYPE_GROUP_V2}
+        AND disc.${Discussion.BYTES_DISCUSSION_IDENTIFIER} = :bytesGroupIdentifier
+        AND mess.${Message.TIMESTAMP} > :pendingCreationTimestamp
+        AND mess.${Message.TIMESTAMP} < :creationTimestamp
+        AND pv.${PollVote.VOTER} = :bytesOwnedIdentity
+        AND pv.${PollVote.VOTED} = 1
+        """
+    )
+    fun getAllMineInGroupV2DiscussionWithinTimeInterval(
+        bytesOwnedIdentity: ByteArray,
+        bytesGroupIdentifier: ByteArray,
+        pendingCreationTimestamp: Long,
+        creationTimestamp: Long,
+    ): List<PollVoteAndMessage>
+
+    data class PollVoteAndMessage(
+        @Embedded val pollVote: PollVote,
+        @Embedded(prefix = "mess_") val message: Message
+    )
 }

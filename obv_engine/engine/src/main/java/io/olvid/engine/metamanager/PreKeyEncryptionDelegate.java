@@ -32,5 +32,5 @@ import io.olvid.engine.datatypes.key.symmetric.AuthEncKey;
 
 public interface PreKeyEncryptionDelegate {
     EncryptedBytes wrapWithPreKey(Session session, AuthEncKey messageKey, Identity ownedIdentity, Identity remoteIdentity, UID remoteDeviceUid, PRNGService prng);
-    AuthEncKeyAndChannelInfo unwrapWithPreKey(Session session, EncryptedBytes wrappedKey, Identity ownedIdentity) throws SQLException;
+    AuthEncKeyAndChannelInfo unwrapWithPreKey(Session session, EncryptedBytes wrappedKey, Identity ownedIdentity);
 }

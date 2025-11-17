@@ -489,8 +489,8 @@ public class Message {
         if (messageType == TYPE_GROUP_MEMBER_JOINED || messageType == TYPE_GROUP_MEMBER_LEFT || messageType == TYPE_JOINED_GROUP || messageType == TYPE_RE_JOINED_GROUP) {
             try {
                 if (!neverMerge) {
-                    // Consolidate added or removed members messages
-                    Message lastMessage = db.messageDao().getLastDiscussionMessage(discussionId);
+                    // Consolidate added or removed members messages with the previous message
+                    Message lastMessage = db.messageDao().getPreviousMessageBySortIndex((double) timestamp, discussionId);
                     if (lastMessage != null
                             && lastMessage.messageType == messageType
                             && lastMessage.jsonMentions != null
@@ -501,7 +501,7 @@ public class Message {
                         mentions.add(new JsonUserMention(mention, 0, 0));
                         jsonMention = AppSingleton.getJsonObjectMapper().writeValueAsString(mentions);
                         lastMessage.jsonMentions = jsonMention;
-                        lastMessage.timestamp = timestamp; // also update the message timestamp
+                        lastMessage.timestamp = Math.max(lastMessage.timestamp, timestamp); // also update the message timestamp, but never in the past
                         return lastMessage;
                     }
                 }
@@ -521,7 +521,7 @@ public class Message {
             }
         }
 
-        return new Message(
+        Message message = new Message(
                 0,
                 null,
                 null,
@@ -552,6 +552,8 @@ public class Message {
                 jsonMention,
                 null
         );
+        message.computeOutboundSortIndex(db);
+        return message;
     }
 
 
@@ -593,12 +595,12 @@ public class Message {
         return message;
     }
 
-    public static Message createMemberJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesMemberIdentity, @Nullable byte[] addedBy) {
-        return createOrMergeInfoMessage(db, TYPE_GROUP_MEMBER_JOINED, discussionId, (addedBy == null) ? new byte[0] : addedBy, bytesMemberIdentity, System.currentTimeMillis(), false);
+    public static Message createMemberJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesMemberIdentity, @Nullable byte[] addedBy, long groupUpdateTimestamp) {
+        return createOrMergeInfoMessage(db, TYPE_GROUP_MEMBER_JOINED, discussionId, (addedBy == null) ? new byte[0] : addedBy, bytesMemberIdentity, groupUpdateTimestamp, false);
     }
 
-    public static Message createMemberLeftGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesMemberIdentity, @Nullable byte[] removedBy) {
-        return createOrMergeInfoMessage(db, TYPE_GROUP_MEMBER_LEFT, discussionId, (removedBy == null) ? new byte[0] : removedBy, bytesMemberIdentity, System.currentTimeMillis(), false);
+    public static Message createMemberLeftGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesMemberIdentity, @Nullable byte[] removedBy, long groupUpdateTimestamp) {
+        return createOrMergeInfoMessage(db, TYPE_GROUP_MEMBER_LEFT, discussionId, (removedBy == null) ? new byte[0] : removedBy, bytesMemberIdentity, groupUpdateTimestamp, false);
     }
 
     public static Message createLeftGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, @Nullable byte[] removedBy) {
@@ -617,36 +619,36 @@ public class Message {
         return createInfoMessage(db, TYPE_CONTACT_RE_ADDED, discussionId, bytesContactIdentity, System.currentTimeMillis(), false);
     }
 
-    public static Message createReJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, @Nullable byte[] inviterIdentity) {
+    public static Message createReJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, @Nullable byte[] inviterIdentity, long groupUpdateTimestamp) {
         if (inviterIdentity != null) {
-            return createOrMergeInfoMessage(db, TYPE_RE_JOINED_GROUP, discussionId, inviterIdentity, bytesOwnedIdentity, System.currentTimeMillis(), false);
+            return createOrMergeInfoMessage(db, TYPE_RE_JOINED_GROUP, discussionId, inviterIdentity, bytesOwnedIdentity, groupUpdateTimestamp, false);
         } else {
-            return createInfoMessage(db, TYPE_RE_JOINED_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+            return createInfoMessage(db, TYPE_RE_JOINED_GROUP, discussionId, bytesOwnedIdentity, groupUpdateTimestamp, false);
         }
     }
 
-    public static Message createJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, @Nullable byte[] inviterIdentity) {
+    public static Message createJoinedGroupMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, @Nullable byte[] inviterIdentity, long groupUpdateTimestamp) {
         if (inviterIdentity != null) {
-            return createOrMergeInfoMessage(db, TYPE_JOINED_GROUP, discussionId, inviterIdentity, bytesOwnedIdentity, System.currentTimeMillis(), false);
+            return createOrMergeInfoMessage(db, TYPE_JOINED_GROUP, discussionId, inviterIdentity, bytesOwnedIdentity, groupUpdateTimestamp, false);
         } else {
-            return createInfoMessage(db, TYPE_JOINED_GROUP, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+            return createInfoMessage(db, TYPE_JOINED_GROUP, discussionId, bytesOwnedIdentity, groupUpdateTimestamp, false);
         }
     }
 
-    public static Message createGainedGroupAdminMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
-        return createInfoMessage(db, TYPE_GAINED_GROUP_ADMIN, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    public static Message createGainedGroupAdminMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, long groupUpdateTimestamp) {
+        return createInfoMessage(db, TYPE_GAINED_GROUP_ADMIN, discussionId, bytesOwnedIdentity, groupUpdateTimestamp, false);
     }
 
-    public static Message createLostGroupAdminMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
-        return createInfoMessage(db, TYPE_LOST_GROUP_ADMIN, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    public static Message createLostGroupAdminMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, long groupUpdateTimestamp) {
+        return createInfoMessage(db, TYPE_LOST_GROUP_ADMIN, discussionId, bytesOwnedIdentity, groupUpdateTimestamp, false);
     }
 
-    public static Message createGainedGroupSendMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
-        return createInfoMessage(db, TYPE_GAINED_GROUP_SEND_MESSAGE, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    public static Message createGainedGroupSendMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, long groupUpdateTimestamp) {
+        return createInfoMessage(db, TYPE_GAINED_GROUP_SEND_MESSAGE, discussionId, bytesOwnedIdentity, groupUpdateTimestamp, false);
     }
 
-    public static Message createLostGroupSendMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity) {
-        return createInfoMessage(db, TYPE_LOST_GROUP_SEND_MESSAGE, discussionId, bytesOwnedIdentity, System.currentTimeMillis(), false);
+    public static Message createLostGroupSendMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesOwnedIdentity, long groupUpdateTimestamp) {
+        return createInfoMessage(db, TYPE_LOST_GROUP_SEND_MESSAGE, discussionId, bytesOwnedIdentity, groupUpdateTimestamp, false);
     }
 
     public static Message createScreenShotDetectedMessage(@NonNull AppDatabase db, long discussionId, @NonNull byte[] bytesIdentity, long serverTimestamp) {
@@ -961,7 +963,7 @@ public class Message {
 
         try {
             JsonReaction jsonReaction = JsonReaction.of(discussion, message);
-            jsonReaction.setReaction(emoji);
+            jsonReaction.reaction = emoji;
             JsonPayload jsonPayload = new JsonPayload();
             jsonPayload.setJsonReaction(jsonReaction);
 

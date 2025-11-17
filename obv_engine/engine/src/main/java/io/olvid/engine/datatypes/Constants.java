@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 
 public abstract class Constants {
     public static final int CURRENT_ENGINE_DB_SCHEMA_VERSION = 48;
-    public static final int SERVER_API_VERSION = 19;
+    public static final int SERVER_API_VERSION = 20;
     public static final int CURRENT_BACKUP_JSON_VERSION = 0;
 
     // files / folders

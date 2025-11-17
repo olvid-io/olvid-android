@@ -156,37 +156,6 @@ class OnboardingActivity : AppCompatActivity() {
                         )
                         return
                     }
-                    // we disable this for now, we'll see if we re-implement this in the OnboardingFlowActivity
-                    /* else if (ObvLinkActivity.INVITATION_PATTERN.matcher(uri).find()) {
-                        ObvUrlIdentity obvUrlIdentity = ObvUrlIdentity.fromUrlRepresentation(uri);
-                        if (obvUrlIdentity != null) {
-                            AlertDialog.Builder builder = new SecureAlertDialogBuilder(this, R.style.CustomAlertDialog)
-                                    .setTitle(R.string.dialog_title_invitation_link_clicked)
-                                    .setPositiveButton(R.string.button_label_proceed, (DialogInterface dialog, int which) -> {
-                                        if (dialog instanceof AlertDialog) {
-                                            ((AlertDialog) dialog).setOnDismissListener(null);
-                                        }
-                                        viewModel.setInvitationLink(uri);
-                                    })
-                                    .setNegativeButton(R.string.button_label_cancel, null)
-                                    .setOnDismissListener((DialogInterface dialog) -> {
-                                        if (firstIdentity) {
-                                            finishAndRemoveTask();
-                                        } else {
-                                            finish();
-                                        }
-                                    });
-                            if (firstIdentity) {
-                                builder.setMessage(getString(R.string.dialog_message_invitation_link_clicked_onboarding, obvUrlIdentity.displayName));
-                            } else {
-                                builder.setMessage(getString(R.string.dialog_message_invitation_link_clicked_add_profile, obvUrlIdentity.displayName));
-                                navHostFragment.getNavController().popBackStack(R.id.welcome_screen, true);
-                                navHostFragment.getNavController().navigate(R.id.new_profile);
-                            }
-                            builder.create().show();
-                            return;
-                        }
-                    }*/
                 }
                 App.toast(R.string.toast_message_invalid_link, Toast.LENGTH_SHORT)
             }

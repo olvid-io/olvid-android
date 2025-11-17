@@ -29,6 +29,7 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.NoDuplicateOperationQueue;
+import io.olvid.engine.datatypes.NoDuplicatePriorityOperationQueue;
 import io.olvid.engine.datatypes.Operation;
 import io.olvid.engine.datatypes.UID;
 import io.olvid.engine.datatypes.containers.ChannelMessageToSend;
@@ -47,7 +48,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
     private final PRNGService prng;
     private final ObjectMapper jsonObjectMapper;
 
-    private final NoDuplicateOperationQueue protocolOperationQueue;
+    private final NoDuplicatePriorityOperationQueue protocolOperationQueue;
     private final HashMap<UID, Integer> stepFailedAttemptCount;
 
     public ProtocolStepCoordinator(ProtocolManagerSessionFactory protocolManagerSessionFactory, PRNGService prng, ObjectMapper jsonObjectMapper) {
@@ -55,7 +56,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
         this.prng = prng;
         this.jsonObjectMapper = jsonObjectMapper;
 
-        protocolOperationQueue = new NoDuplicateOperationQueue();
+        protocolOperationQueue = new NoDuplicatePriorityOperationQueue();
         stepFailedAttemptCount = new HashMap<>();
     }
 
@@ -63,8 +64,8 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
         protocolOperationQueue.execute(1, "Engine-ProtocolStepCoordinator");
     }
 
-    private void queueNewProtocolOperation(UID receivedMessageUid) {
-        ProtocolOperation op = new ProtocolOperation(protocolManagerSessionFactory, receivedMessageUid, prng, jsonObjectMapper, this, this);
+    private void queueNewProtocolOperation(UID receivedMessageUid, int protocolId, int failedAttemptsCount) {
+        ProtocolOperation op = new ProtocolOperation(protocolManagerSessionFactory, receivedMessageUid, protocolId, failedAttemptsCount, prng, jsonObjectMapper, this, this);
         protocolOperationQueue.queue(op);
     }
 
@@ -78,7 +79,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
             if (receivedMessages.length > 0) {
                 Logger.i("Found " + receivedMessages.length + " ReceivedMessage to (attempt to) process.");
                 for (ReceivedMessage receivedMessage : receivedMessages) {
-                    queueNewProtocolOperation(receivedMessage.getUid());
+                    queueNewProtocolOperation(receivedMessage.getUid(), receivedMessage.getProtocolId(), 0);
                 }
             }
             protocolManagerSession.session.commit();
@@ -88,8 +89,8 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
     }
 
     @Override
-    public void processReceivedMessage(UID messageUid) {
-        queueNewProtocolOperation(messageUid);
+    public void processReceivedMessage(UID messageUid, int protocolId) {
+        queueNewProtocolOperation(messageUid, protocolId, 0);
     }
 
     @Override
@@ -104,7 +105,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
         }
         try (ProtocolManagerSession protocolManagerSession = protocolManagerSessionFactory.getSession()){
             for (ReceivedMessage receivedMessage : ReceivedMessage.getAll(protocolManagerSession, protocolInstanceUid, protocolOwnedIdentity)) {
-                protocolManagerSession.protocolReceivedMessageProcessorDelegate.processReceivedMessage(receivedMessage.getUid());
+                protocolManagerSession.protocolReceivedMessageProcessorDelegate.processReceivedMessage(receivedMessage.getUid(), receivedMessage.getProtocolId());
             }
         } catch (SQLException e) {
             Logger.x(e);
@@ -126,6 +127,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
             case ProtocolOperation.RFC_THE_STEP_TO_EXECUTE_FAILED: {
                 // check how many times this step has failed before
                 UID messageUid = ((ProtocolOperation) operation).getReceivedMessageUid();
+                int protocolId = ((ProtocolOperation) operation).getProtocolId();
                 Integer failedAttempts = stepFailedAttemptCount.get(messageUid);
                 if (failedAttempts == null) {
                     failedAttempts = 0;
@@ -143,7 +145,7 @@ public class ProtocolStepCoordinator implements ProtocolReceivedMessageProcessor
                 } else {
                     // retry to execute the step
                     stepFailedAttemptCount.put(messageUid, failedAttempts);
-                    queueNewProtocolOperation(messageUid);
+                    queueNewProtocolOperation(messageUid, protocolId, failedAttempts);
                 }
                 break;
             }

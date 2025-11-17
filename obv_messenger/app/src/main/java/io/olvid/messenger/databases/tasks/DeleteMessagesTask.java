@@ -62,7 +62,6 @@ public class DeleteMessagesTask implements Runnable {
     }
 
     // Used to delete a specific set of messages. If deletionChoice is not LOCAL, all messages have to be in the same discussion
-    // bytesOwnedIdentity should never be null if deletionChoice != LOCAL
     public DeleteMessagesTask(List<Long> selectedMessageIds, SecureDeleteEverywhereDialogBuilder.DeletionChoice deletionChoice) {
         this.wholeDiscussion = false;
         this.discussionId = null;

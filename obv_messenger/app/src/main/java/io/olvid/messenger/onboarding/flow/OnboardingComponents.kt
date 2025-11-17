@@ -47,7 +47,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -89,7 +88,6 @@ import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.BUTTON
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.BUTTON_OUTLINED
 import io.olvid.messenger.onboarding.flow.OnboardingActionType.CHOICE
-import io.olvid.messenger.onboarding.flow.OnboardingActionType.TEXT
 import io.olvid.messenger.onboarding.flow.animations.shake
 import io.olvid.messenger.onboarding.flow.animations.shimmer
 
@@ -149,19 +147,19 @@ fun OnboardingScreen(
                     Spacer(modifier = Modifier.height(16.dp)).takeIf { index != step.actions.lastIndex }
                 }
 
-                step.actions.filter { it.type == TEXT }.forEach { action ->
-                    Spacer(modifier = Modifier.height(24.dp))
-                    ClickableText(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        text = action.label,
-                        style = OlvidTypography.body2.copy(
-                            color = Color(0xFF8B8D97),
-                            textAlign = TextAlign.Center
-                        )
-                    ) {
-                        action.onClick.invoke()
-                    }
-                }
+//                step.actions.filter { it.type == TEXT }.forEach { action ->
+//                    Spacer(modifier = Modifier.height(24.dp))
+//                    ClickableText(
+//                        modifier = Modifier.padding(horizontal = 16.dp),
+//                        text = action.label,
+//                        style = OlvidTypography.body2.copy(
+//                            color = Color(0xFF8B8D97),
+//                            textAlign = TextAlign.Center
+//                        )
+//                    ) {
+//                        action.onClick.invoke()
+//                    }
+//                }
 
                 step.actions.filter { it.type == BUTTON || it.type == BUTTON_OUTLINED }
                     .takeIf { it.isNotEmpty() }?.run {
@@ -182,7 +180,7 @@ fun OnboardingScreen(
                                     modifier = Modifier.weight(weight = 1f, fill = false)
                                         .fillMaxHeight(),
                                     elevation = null,
-                                    shape = RoundedCornerShape(6.dp),
+                                    shape = RoundedCornerShape(8.dp),
                                     colors = ButtonDefaults.buttonColors(
                                         contentColor = colorResource(R.color.alwaysWhite),
                                         containerColor = colorResource(R.color.olvid_gradient_light),
@@ -200,6 +198,7 @@ fun OnboardingScreen(
                                     }
                                     Text(
                                         text = action.label,
+                                        style = OlvidTypography.body1,
                                         textAlign = if (action.icon == null) TextAlign.Center else TextAlign.Start
                                     )
                                 }
@@ -208,7 +207,7 @@ fun OnboardingScreen(
                                     modifier = Modifier.weight(weight = 1f, fill = false)
                                         .fillMaxHeight(),
                                     elevation = null,
-                                    shape = RoundedCornerShape(6.dp),
+                                    shape = RoundedCornerShape(8.dp),
                                     border = BorderStroke(
                                         1.dp,
                                         colorResource(R.color.olvid_gradient_light)
@@ -229,6 +228,7 @@ fun OnboardingScreen(
                                     }
                                     Text(
                                         text = action.label,
+                                        style = OlvidTypography.body1,
                                         textAlign = if (action.icon == null) TextAlign.Center else TextAlign.Start
                                     )
                                 }
@@ -509,38 +509,6 @@ private fun BoxedChar(
     )
 }
 
-//@Composable
-//fun BoxScope.Indicators(size: Int, index: Int) {
-//    Row(
-//        verticalAlignment = Alignment.CenterVertically,
-//        horizontalArrangement = Arrangement.spacedBy(12.dp),
-//        modifier = Modifier.align(Alignment.CenterStart)
-//    ) {
-//        repeat(size) {
-//            Indicator(isSelected = it == index)
-//        }
-//    }
-//}
-
-//@Composable
-//fun Indicator(isSelected: Boolean) {
-//    val width = animateDpAsState(
-//        targetValue = if (isSelected) 25.dp else 10.dp,
-//        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy), label = ""
-//    )
-//
-//    Box(
-//        modifier = Modifier
-//            .height(10.dp)
-//            .width(width.value)
-//            .clip(CircleShape)
-//            .background(
-//                color = if (isSelected) MaterialTheme.colors.primary else Color(0XFFF8E2E7)
-//            )
-//    ) {
-//
-//    }
-//}
 
 @Preview(showBackground = true)
 @Composable
@@ -559,7 +527,7 @@ fun OnboardingPreview() {
     )
 }
 
-@Preview()
+@Preview
 @Composable
 fun OnboardingPreview2() {
     OnboardingScreen(
@@ -572,9 +540,7 @@ fun OnboardingPreview2() {
         ),
         onBack = {},
         onClose = {},
-        footer = {
-
-        }
+        footer = {}
     )
 }
 

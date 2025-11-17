@@ -23,16 +23,13 @@ import android.os.Handler
 import android.os.Looper
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,7 +40,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,6 +50,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import io.olvid.messenger.R
+import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.flow.OnboardingFlowViewModel
 import io.olvid.messenger.onboarding.flow.OnboardingRoutes
@@ -130,104 +127,93 @@ fun NavGraphBuilder.targetKeycloakAuthenticationRequired(
                 modifier = Modifier.padding(top = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Button(
+                OlvidActionButton(
                     modifier = Modifier.weight(1f, true),
-                    elevation = null,
                     enabled = !clicked,
-                    onClick = {
-                        clicked = true
-                        errorMessage = null
-                        onboardingFlowViewModel.keycloakServerUrl?.let { serverUrl ->
-                            onboardingFlowViewModel.keycloakClientId?.let { clientId ->
-                                onboardingFlowViewModel.keycloakSas?.let { sas ->
-                                    onboardingFlowViewModel.keycloakSessionNumber?.let { sessionNumber ->
-                                        KeycloakTasks.discoverKeycloakServer(
-                                            serverUrl,
-                                            object : KeycloakTasks.DiscoverKeycloakServerCallback {
-                                                override fun success(
-                                                    serverUrl: String,
-                                                    discoveryAuthState: AuthState,
-                                                    jwks: JsonWebKeySet
-                                                ) {
-                                                    Handler(Looper.getMainLooper()).run {
-                                                        fragment?.authenticate(
-                                                            discoveryAuthState.jsonSerializeString(),
-                                                            clientId,
-                                                            onboardingFlowViewModel.keycloakClientSecret,
-                                                            object :
-                                                                KeycloakTasks.AuthenticateCallback {
-                                                                override fun success(authState: AuthState) {
-                                                                    KeycloakTasks.getAuthenticationProof(
-                                                                        serverUrl,
-                                                                        authState,
-                                                                        sas,
-                                                                        String.format(
-                                                                            Locale.ENGLISH,
-                                                                            "%08d",
-                                                                            sessionNumber
-                                                                        ),
-                                                                        object :
-                                                                            KeycloakManager.KeycloakCallback<String?> {
-                                                                            override fun success(
-                                                                                authenticationProof: String?
-                                                                            ) {
-                                                                                authenticationProof?.let { p2 ->
-                                                                                    onAuthenticated(
-                                                                                        authState,
-                                                                                        p2
-                                                                                    )
-                                                                                }
-                                                                                clicked = false
+                    text = stringResource(id = R.string.button_label_authenticate),
+                ) {
+                    clicked = true
+                    errorMessage = null
+                    onboardingFlowViewModel.keycloakServerUrl?.let { serverUrl ->
+                        onboardingFlowViewModel.keycloakClientId?.let { clientId ->
+                            onboardingFlowViewModel.keycloakSas?.let { sas ->
+                                onboardingFlowViewModel.keycloakSessionNumber?.let { sessionNumber ->
+                                    KeycloakTasks.discoverKeycloakServer(
+                                        serverUrl,
+                                        object : KeycloakTasks.DiscoverKeycloakServerCallback {
+                                            override fun success(
+                                                serverUrl: String,
+                                                discoveryAuthState: AuthState,
+                                                jwks: JsonWebKeySet
+                                            ) {
+                                                Handler(Looper.getMainLooper()).run {
+                                                    fragment?.authenticate(
+                                                        discoveryAuthState.jsonSerializeString(),
+                                                        clientId,
+                                                        onboardingFlowViewModel.keycloakClientSecret,
+                                                        object :
+                                                            KeycloakTasks.AuthenticateCallback {
+                                                            override fun success(authState: AuthState) {
+                                                                KeycloakTasks.getAuthenticationProof(
+                                                                    serverUrl,
+                                                                    authState,
+                                                                    sas,
+                                                                    String.format(
+                                                                        Locale.ENGLISH,
+                                                                        "%08d",
+                                                                        sessionNumber
+                                                                    ),
+                                                                    object :
+                                                                        KeycloakManager.KeycloakCallback<String?> {
+                                                                        override fun success(
+                                                                            authenticationProof: String?
+                                                                        ) {
+                                                                            authenticationProof?.let { p2 ->
+                                                                                onAuthenticated(
+                                                                                    authState,
+                                                                                    p2
+                                                                                )
                                                                             }
+                                                                            clicked = false
+                                                                        }
 
-                                                                            override fun failed(rfc: Int) {
-                                                                                errorMessage =
-                                                                                    R.string.onboarding_transfer_keycloak_error_message_authentication_proof_error
-                                                                                clicked = false
-                                                                            }
-                                                                        })
-                                                                }
-
-                                                                override fun failed(rfc: Int) {
-                                                                    errorMessage =
-                                                                        R.string.onboarding_transfer_keycloak_error_message_authentication_failed
-                                                                    clicked = false
-                                                                }
+                                                                        override fun failed(rfc: Int) {
+                                                                            errorMessage =
+                                                                                R.string.onboarding_transfer_keycloak_error_message_authentication_proof_error
+                                                                            clicked = false
+                                                                        }
+                                                                    })
                                                             }
-                                                        )
-                                                    }
-                                                }
 
-                                                override fun failed() {
-                                                    errorMessage =
-                                                        R.string.onboarding_transfer_keycloak_error_message_unreachable
-                                                    clicked = false
+                                                            override fun failed(rfc: Int) {
+                                                                errorMessage =
+                                                                    R.string.onboarding_transfer_keycloak_error_message_authentication_failed
+                                                                clicked = false
+                                                            }
+                                                        }
+                                                    )
                                                 }
-                                            })
-                                    }
+                                            }
+
+                                            override fun failed() {
+                                                errorMessage =
+                                                    R.string.onboarding_transfer_keycloak_error_message_unreachable
+                                                clicked = false
+                                            }
+                                        })
                                 }
                             }
                         }
-                    },
-                    contentPadding = PaddingValues(vertical = 16.dp, horizontal = 24.dp)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.button_label_authenticate),
-                        textAlign = TextAlign.Center
-                    )
+                    }
                 }
 
                 val context = LocalContext.current
-                Button(elevation = null,
+                OlvidActionButton(
                     enabled = !clicked,
-                    onClick = {
-                        KeycloakBrowserChooserDialog.openBrowserChoiceDialog(context)
-                    }
+                    icon = R.drawable.ic_settings,
+                    text = null,
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_settings),
-                        contentDescription = stringResource(R.string.content_description_authentication_browser_choice)
-                    )
+                    KeycloakBrowserChooserDialog.openBrowserChoiceDialog(context)
                 }
             }
         }
@@ -244,7 +230,7 @@ private fun Preview() {
     ) {
         targetKeycloakAuthenticationRequired(
             onboardingFlowViewModel = OnboardingFlowViewModel(),
-            onAuthenticated = { a, b -> },
+            onAuthenticated = { _, _ -> },
             onClose = {}
         )
     }

@@ -79,7 +79,9 @@ public class ExpiringOutboundMessageSent implements Runnable {
             // readOnce
             if (jsonExpiration.getReadOnce() != null && jsonExpiration.getReadOnce()) {
                 // read once message --> if discussion is currently opened, mark as wipe_on_read, else wipe it directly
-                if (AndroidNotificationManager.getCurrentShowingDiscussionId() != null && AndroidNotificationManager.getCurrentShowingDiscussionId() == discussion.id) {
+                if (AndroidNotificationManager.getCurrentShowingDiscussionId() != null
+                        && discussion != null
+                        && AndroidNotificationManager.getCurrentShowingDiscussionId() == discussion.id) {
                     // discussion is visible, only mark for wipe
                     db.messageDao().updateWipeStatus(message.id, Message.WIPE_STATUS_WIPE_ON_READ);
                 } else {

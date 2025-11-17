@@ -43,10 +43,6 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
-import io.olvid.messenger.R.id
-import io.olvid.messenger.R.layout
-import io.olvid.messenger.R.string
-import io.olvid.messenger.R.style
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.fragments.dialog.CloudProviderSignInDialogFragment
@@ -195,11 +191,8 @@ class OnboardingFlowViewModel : ViewModel() {
         creatingSimpleIdentity = true
         val apiKey: UUID?
         @Suppress("SENSELESS_COMPARISON")
-        if (BuildConfig.HARDCODED_API_KEY != null) {
-            apiKey = UUID.fromString(BuildConfig.HARDCODED_API_KEY)
-        } else {
-            apiKey = null
-        }
+        apiKey = if (BuildConfig.HARDCODED_API_KEY != null) UUID.fromString(BuildConfig.HARDCODED_API_KEY) else null
+
         AppSingleton.getInstance().generateIdentity(
             BuildConfig.SERVER_NAME,
             apiKey,
@@ -311,19 +304,19 @@ class OnboardingFlowViewModel : ViewModel() {
                         override fun onListSuccess(backupTimestampAndNames: List<BackupItem>) {
                             if (backupTimestampAndNames.isEmpty()) {
                                 App.toast(
-                                    string.toast_message_error_no_backup_on_account,
+                                    R.string.toast_message_error_no_backup_on_account,
                                     Toast.LENGTH_SHORT
                                 )
                                 return
                             }
                             Handler(Looper.getMainLooper()).post {
                                 val builder =
-                                    SecureAlertDialogBuilder(activity, style.CustomAlertDialog)
-                                        .setTitle(string.dialog_title_select_cloud_backup_file)
+                                    SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                                        .setTitle(R.string.dialog_title_select_cloud_backup_file)
                                         .setAdapter(
                                             object : ArrayAdapter<BackupItem?>(
                                                 activity,
-                                                layout.item_view_cloud_backup_item,
+                                                R.layout.item_view_cloud_backup_item,
                                                 backupTimestampAndNames
                                             ) {
                                                 val layoutInflater =
@@ -348,14 +341,14 @@ class OnboardingFlowViewModel : ViewModel() {
                                                 ): View {
                                                     val view: View = convertView
                                                         ?: layoutInflater.inflate(
-                                                            layout.item_view_cloud_backup_item,
+                                                            R.layout.item_view_cloud_backup_item,
                                                             parent,
                                                             false
                                                         )
                                                     val deviceTextView =
-                                                        view.findViewById<TextView>(id.backup_device_text_view)
+                                                        view.findViewById<TextView>(R.id.backup_device_text_view)
                                                     val timestampTextView =
-                                                        view.findViewById<TextView>(id.backup_timestamp_text_view)
+                                                        view.findViewById<TextView>(R.id.backup_timestamp_text_view)
                                                     val backupItem = getItem(position) ?: return view
                                                     deviceTextView.text = backupItem.deviceName
                                                     timestampTextView.text =
@@ -366,7 +359,7 @@ class OnboardingFlowViewModel : ViewModel() {
                                                     return view
                                                 }
                                             }
-                                        ) { dialog: DialogInterface?, which: Int ->
+                                        ) { _: DialogInterface?, which: Int ->
                                             clearSelectedBackup()
                                             val backupItem =
                                                 backupTimestampAndNames[which]
@@ -389,7 +382,7 @@ class OnboardingFlowViewModel : ViewModel() {
 
                                                     override fun onDownloadFailure(error: Int) {
                                                         App.toast(
-                                                            string.toast_message_error_while_downloading_selected_backup,
+                                                            R.string.toast_message_error_while_downloading_selected_backup,
                                                             Toast.LENGTH_SHORT
                                                         )
                                                     }
@@ -404,21 +397,21 @@ class OnboardingFlowViewModel : ViewModel() {
                             when (error) {
                                 BackupCloudProviderService.ERROR_SIGN_IN_REQUIRED -> {
                                     App.toast(
-                                        string.toast_message_error_selecting_automatic_backup_account,
+                                        R.string.toast_message_error_selecting_automatic_backup_account,
                                         Toast.LENGTH_SHORT
                                     )
                                 }
 
                                 BackupCloudProviderService.ERROR_UNKNOWN -> {
                                     App.toast(
-                                        string.toast_message_error_while_searching_for_backup_on_account,
+                                        R.string.toast_message_error_while_searching_for_backup_on_account,
                                         Toast.LENGTH_SHORT
                                     )
                                 }
 
                                 else -> {
                                     App.toast(
-                                        string.toast_message_error_while_searching_for_backup_on_account,
+                                        R.string.toast_message_error_while_searching_for_backup_on_account,
                                         Toast.LENGTH_SHORT
                                     )
                                 }

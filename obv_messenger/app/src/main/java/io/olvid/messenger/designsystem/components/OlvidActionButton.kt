@@ -56,8 +56,9 @@ fun OlvidActionButton(
     containerColor: Color = colorResource(R.color.olvid_gradient_light),
     contentColor: Color = colorResource(R.color.alwaysWhite),
     @DrawableRes icon: Int? = null,
-    text: String,
+    text: String?,
     outlinedColor: Color? = null,
+    allowTwoLines: Boolean = false,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
@@ -87,17 +88,21 @@ fun OlvidActionButton(
                 painter = painterResource(icon),
                 contentDescription = null
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            if (text != null) {
+                Spacer(modifier = Modifier.width(8.dp))
+            }
         }
-        Text(
-            modifier = Modifier.weight(1f, false),
-            text = text,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = OlvidTypography.body2.copy(
-                fontWeight = FontWeight.Medium
+        text?.let {
+            Text(
+                modifier = Modifier.weight(1f, false),
+                text = text,
+                maxLines = if (allowTwoLines) 2 else 1,
+                overflow = TextOverflow.Ellipsis,
+                style = OlvidTypography.body2.copy(
+                    fontWeight = FontWeight.Medium
+                )
             )
-        )
+        }
     }
 }
 
@@ -150,7 +155,7 @@ fun OlvidTextButton(
 
 @Preview
 @Composable
-fun OlvidActionButtonPreview() {
+private fun OlvidActionButtonPreview() {
     Column(
         modifier = Modifier
             .background(colorResource(R.color.dialogBackground))

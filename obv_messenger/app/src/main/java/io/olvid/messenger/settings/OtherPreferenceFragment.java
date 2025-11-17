@@ -19,6 +19,9 @@
 
 package io.olvid.messenger.settings;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -47,12 +50,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Locale;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Session;
+import io.olvid.engine.engine.types.EngineDbQueryStatisticsEntry;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.BuildConfig;
@@ -166,6 +174,36 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
         SwitchPreference useLegacyZxingScannerPreference = screen.findPreference(SettingsActivity.PREF_KEY_USE_LEGACY_ZXING_SCANNER);
         if (useLegacyZxingScannerPreference != null && !BuildConfig.USE_GOOGLE_LIBS) {
             screen.removePreference(useLegacyZxingScannerPreference);
+        }
+
+        Preference engineDbTimings = screen.findPreference(SettingsActivity.PREF_KEY_SHOW_ENGINE_DATABASE_STATISTICS);
+        if (engineDbTimings != null) {
+            if (SettingsActivity.getBetaFeaturesEnabled()) {
+                engineDbTimings.setVisible(true);
+                engineDbTimings.setOnPreferenceClickListener((Preference preference) -> {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("query,count,time_µs\n");
+                    ArrayList<Map.Entry<String, EngineDbQueryStatisticsEntry>> entries = new ArrayList<>(AppSingleton.getEngine().getEngineDbQueryStatistics().entrySet());
+                    entries.sort(Comparator.comparingLong(e -> -e.getValue().totalTimeMicro));
+                    for (Map.Entry<String, EngineDbQueryStatisticsEntry> entry : entries) {
+                        sb.append(String.format(Locale.ENGLISH, "%s,%d,%d\n", entry.getKey(), entry.getValue().count, entry.getValue().totalTimeMicro));
+                    }
+                    String stats = sb.toString();
+                    AlertDialog dialog = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                            .setTitle(R.string.dialog_title_engine_db_statistics)
+                            .setMessage(stats)
+                            .setNeutralButton(R.string.button_label_copy, (di, which) -> {
+                                ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+                                ClipData clip = ClipData.newPlainText("db_stats", stats);
+                                clipboard.setPrimaryClip(clip);
+                                App.toast(R.string.toast_message_clipboard_copied, Toast.LENGTH_SHORT);
+                            })
+                            .setPositiveButton(R.string.button_label_ok, null)
+                            .create();
+                    dialog.show();
+                    return true;
+                });
+            }
         }
 
         Preference exportAppDbPreference = screen.findPreference(SettingsActivity.PREF_KEY_EXPORT_APP_DATABASES);

@@ -194,7 +194,8 @@ public class ContactIdentity implements ObvDatabase {
             ContactIdentityDetails trustedDetails = getTrustedDetails();
             if (trustedDetailsVersion != -1) {
                 ContactIdentityDetails.copy(identityManagerSession, ownedIdentity, contactIdentity, trustedDetailsVersion, -1);
-                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.updatePublishedDetails",
+                        "UPDATE " + TABLE_NAME +
                         " SET " + TRUSTED_DETAILS_VERSION + " = ?, " +
                         PUBLISHED_DETAILS_VERSION + " = ? " +
                         " WHERE " + CONTACT_IDENTITY + " = ? " +
@@ -209,7 +210,8 @@ public class ContactIdentity implements ObvDatabase {
                 }
                 trustedDetails.delete();
             } else {
-                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+                try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.updatePublishedDetails",
+                        "UPDATE " + TABLE_NAME +
                         " SET " + TRUSTED_DETAILS_VERSION + " = ?, " +
                         PUBLISHED_DETAILS_VERSION + " = ? " +
                         " WHERE " + CONTACT_IDENTITY + " = ? " +
@@ -238,7 +240,8 @@ public class ContactIdentity implements ObvDatabase {
                     newPublishedDetails.setPhotoUrl(publishedDetails.getPhotoUrl());
                 }
             }
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.updatePublishedDetails",
+                    "UPDATE " + TABLE_NAME +
                     " SET " + PUBLISHED_DETAILS_VERSION + " = ? " +
                     " WHERE " + CONTACT_IDENTITY + " = ? " +
                     " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -272,7 +275,8 @@ public class ContactIdentity implements ObvDatabase {
                 }
             } catch (Exception ignored) { }
 
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.updatePublishedDetails",
+                    "UPDATE " + TABLE_NAME +
                     " SET " + PUBLISHED_DETAILS_VERSION + " = ? " +
                     " WHERE " + CONTACT_IDENTITY + " = ? " +
                     " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -328,7 +332,8 @@ public class ContactIdentity implements ObvDatabase {
     // when certifiedByOwnKeycloak is false, if possible, try providing the last known certified details
     // this allows settings these details for the pending member after a keycloak group member is demoted
     public void setCertifiedByOwnKeycloak(boolean certifiedByOwnKeycloak, String lastKnownSerializedCertifiedDetails) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.setCertifiedByOwnKeycloak",
+                "UPDATE " + TABLE_NAME +
                 " SET " + CERTIFIED_BY_OWN_KEYCLOAK + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -346,7 +351,8 @@ public class ContactIdentity implements ObvDatabase {
 
     // this method always sets to ONE_TO_ONE_STATUS_TRUE or ONE_TO_ONE_STATUS_FALSE, but never leaves in ONE_TO_ONE_STATUS_UNKNOWN
     public void setOneToOne(boolean oneToOne) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.setOneToOne",
+                "UPDATE " + TABLE_NAME +
                 " SET " + ONE_TO_ONE + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -365,7 +371,8 @@ public class ContactIdentity implements ObvDatabase {
 
     public void setRecentlyOnline(boolean recentlyOnline) throws SQLException {
         if (this.recentlyOnline != recentlyOnline) {
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.setRecentlyOnline",
+                    "UPDATE " + TABLE_NAME +
                     " SET " + RECENTLY_ONLINE + " = ? " +
                     " WHERE " + CONTACT_IDENTITY + " = ? " +
                     " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -381,7 +388,8 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     public void setRevokedAsCompromised(boolean revokedAsCompromised) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.setRevokedAsCompromised",
+                "UPDATE " + TABLE_NAME +
                 " SET " + REVOKED_AS_COMPROMISED + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -399,7 +407,8 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     public void setForcefullyTrustedByUser(boolean forcefullyTrustedByUser) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.setForcefullyTrustedByUser",
+                "UPDATE " + TABLE_NAME +
                 " SET " + FORCEFULLY_TRUSTED_BY_USER + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -457,7 +466,8 @@ public class ContactIdentity implements ObvDatabase {
     public static void unmarkAllCertifiedByOwnKeycloakContacts(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
         // get the list of all certified contacts
         List<ContactIdentity> certifiedContacts = new LinkedList<>();
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM  " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.unmarkAllCertifiedByOwnKeycloakContacts",
+                "SELECT * FROM  " + TABLE_NAME +
                 " WHERE " + CERTIFIED_BY_OWN_KEYCLOAK + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBoolean(1, true);
@@ -481,7 +491,8 @@ public class ContactIdentity implements ObvDatabase {
         if (trustedDetailsVersion == publishedDetailsVersion) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.trustPublishedDetails",
+                "UPDATE " + TABLE_NAME +
                 " SET " + TRUSTED_DETAILS_VERSION + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -558,7 +569,8 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     private void setTrustLevel(TrustLevel trustLevel) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.setTrustLevel",
+                "UPDATE " + TABLE_NAME +
                 " SET " + TRUST_LEVEL + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -573,7 +585,8 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     public void setLastContactDeviceDiscoveryTimestamp(long lastNoDeviceContactDeviceDiscovery) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.setLastContactDeviceDiscoveryTimestamp",
+                "UPDATE " + TABLE_NAME +
                 " SET " + LAST_CONTACT_DEVICE_DISCOVERY + " = ? " +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -909,7 +922,8 @@ public class ContactIdentity implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?, ?);")) {
             statement.setBytes(1, contactIdentity.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setInt(3, trustedDetailsVersion);
@@ -935,7 +949,8 @@ public class ContactIdentity implements ObvDatabase {
             Logger.e("Running ContactIdentity delete outside a transaction");
             throw new SQLException();
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, contactIdentity.getBytes());
@@ -944,7 +959,8 @@ public class ContactIdentity implements ObvDatabase {
             commitHookBits |= HOOK_BIT_DELETED;
             identityManagerSession.session.addSessionCommitListener(this);
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + ContactIdentityDetails.TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.delete",
+                "DELETE FROM " + ContactIdentityDetails.TABLE_NAME +
                 " WHERE " + ContactIdentityDetails.CONTACT_IDENTITY + " = ? " +
                 " AND " + ContactIdentityDetails.OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, contactIdentity.getBytes());
@@ -961,7 +977,8 @@ public class ContactIdentity implements ObvDatabase {
         if ((contactIdentity == null) || (ownedIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + CONTACT_IDENTITY + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + CONTACT_IDENTITY + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, contactIdentity.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -975,7 +992,8 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     public static ContactIdentity[] getAll(IdentityManagerSession identityManagerSession, Identity ownedIdentity) {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.getAll",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -991,7 +1009,8 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     public static List<ContactIdentity> getAllCertifiedByKeycloak(IdentityManagerSession identityManagerSession, Identity ownedIdentity) {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.getAllCertifiedByKeycloak",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + CERTIFIED_BY_OWN_KEYCLOAK + " = 1;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -1008,7 +1027,8 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     public static ContactIdentity[] getAllForAllOwnedIdentities(IdentityManagerSession identityManagerSession) {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME)) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.getAllForAllOwnedIdentities",
+                "SELECT * FROM " + TABLE_NAME)) {
             try (ResultSet res = statement.executeQuery()) {
                 List<ContactIdentity> list = new ArrayList<>();
                 while (res.next()) {
@@ -1022,7 +1042,7 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     public static ContactIdentity[] getAllActiveWithoutDevices(IdentityManagerSession identityManagerSession,  long timestamp) {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.getAllActiveWithoutDevices",
                 "SELECT * FROM " + TABLE_NAME + " AS c WHERE " +
                         " (c." + REVOKED_AS_COMPROMISED + " = 0 OR c." + FORCEFULLY_TRUSTED_BY_USER + " = 1) " +
                         " AND c." + LAST_CONTACT_DEVICE_DISCOVERY + " < ? " +
@@ -1044,7 +1064,7 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     public static ContactIdentity[] getAllInactiveWithDevices(IdentityManagerSession identityManagerSession) {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.getAllInactiveWithDevices",
                 "SELECT * FROM " + TABLE_NAME + " AS c WHERE " +
                         " (c." + REVOKED_AS_COMPROMISED + " = 1 AND c." + FORCEFULLY_TRUSTED_BY_USER + " = 0) " +
                         " AND EXISTS (" +
@@ -1065,7 +1085,7 @@ public class ContactIdentity implements ObvDatabase {
 
 
     public static ContactIdentity[] getAllActiveWithDevicesAndOldDiscovery(IdentityManagerSession identityManagerSession, long timestamp) {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.getAllActiveWithDevicesAndOldDiscovery",
                 "SELECT * FROM " + TABLE_NAME + " AS c WHERE " +
                         " (c." + REVOKED_AS_COMPROMISED + " = 0 OR c." + FORCEFULLY_TRUSTED_BY_USER + " = 1) " +
                         " AND c." + LAST_CONTACT_DEVICE_DISCOVERY + " < ? " +
@@ -1087,7 +1107,7 @@ public class ContactIdentity implements ObvDatabase {
     }
 
     public static String getSerializedPublishedDetails(IdentityManagerSession identityManagerSession, Identity ownedIdentity, Identity contactIdentity) {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement(
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactIdentity.getSerializedPublishedDetails",
                 "SELECT details." + ContactIdentityDetails.SERIALIZED_JSON_DETAILS +
                         " FROM " + TABLE_NAME + " AS contact " +
                         " INNER JOIN " + ContactIdentityDetails.TABLE_NAME + " AS details " +

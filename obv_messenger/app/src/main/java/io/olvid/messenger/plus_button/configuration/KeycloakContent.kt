@@ -195,11 +195,13 @@ internal fun KeycloakContent(
         Column(modifier = Modifier.padding(16.dp)) {
             if (discovering) {
                 OlvidCircularProgress(
-                    size = 128.dp
+                    modifier = Modifier.padding(16.dp),
+                    size = 64.dp,
                 )
             } else if (errorMessage != null) {
                 errorMessage?.let {
                     Text(
+                        modifier = Modifier.fillMaxWidth(),
                         text = it,
                         color = colorResource(R.color.red),
                         style = OlvidTypography.body1,
@@ -215,6 +217,7 @@ internal fun KeycloakContent(
                 )
             } else {
                 Text(
+                    modifier = Modifier.fillMaxWidth(),
                     color = if (ownedIdentityAlreadyManaged)
                         colorResource(R.color.orange)
                     else

@@ -23,9 +23,9 @@ import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -99,7 +99,7 @@ fun NavGraphBuilder.targetDeviceName(onboardingFlowViewModel : OnboardingFlowVie
                     keyboardController?.hide()
                     onDeviceNameValidated.invoke()
                 }),
-                colors = TextFieldDefaults.outlinedTextFieldColors(focusedLabelColor = colorResource(id = R.color.olvid_gradient_contrasted), focusedBorderColor = colorResource(id = R.color.olvid_gradient_contrasted), cursorColor = colorResource(id = R.color.olvid_gradient_contrasted))
+                colors = OutlinedTextFieldDefaults.colors(focusedLabelColor = colorResource(id = R.color.olvid_gradient_contrasted), focusedBorderColor = colorResource(id = R.color.olvid_gradient_contrasted), cursorColor = colorResource(id = R.color.olvid_gradient_contrasted))
             )
         }
         LaunchedEffect(Unit) {

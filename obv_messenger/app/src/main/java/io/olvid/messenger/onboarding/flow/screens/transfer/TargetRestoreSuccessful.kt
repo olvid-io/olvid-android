@@ -133,15 +133,13 @@ fun NavGraphBuilder.targetRestoreSuccessful(onNewTransfer: () -> Unit, onClose: 
 private fun Preview() {
     val navController = rememberNavController()
 
-    AppCompatTheme {
-        NavHost(
-            navController = navController,
-            startDestination = OnboardingRoutes.TRANSFER_TARGET_RESTORE_SUCCESSFUL
-        ) {
-            targetRestoreSuccessful(
-                onNewTransfer = {},
-                onClose = {}
-            )
-        }
+    NavHost(
+        navController = navController,
+        startDestination = OnboardingRoutes.TRANSFER_TARGET_RESTORE_SUCCESSFUL
+    ) {
+        targetRestoreSuccessful(
+            onNewTransfer = {},
+            onClose = {}
+        )
     }
 }

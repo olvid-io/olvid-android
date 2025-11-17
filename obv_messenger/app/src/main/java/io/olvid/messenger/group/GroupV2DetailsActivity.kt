@@ -280,7 +280,7 @@ class GroupV2DetailsActivity : LockableActivity() {
                                             }) {
                                             Icon(
                                                 painter = painterResource(id = if (groupDetailsViewModel.isEditingAdmins) R.drawable.ic_close else R.drawable.ic_pencil),
-                                                tint = colorResource(id = R.color.alwaysWhite),
+                                                tint = colorResource(id = R.color.almostBlack),
                                                 contentDescription = stringResource(R.string.label_group_choose_admins)
                                             )
                                         }

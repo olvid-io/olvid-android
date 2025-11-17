@@ -8,6 +8,11 @@
         android:title="@string/menu_action_rename"
         app:showAsAction="ifRoom"/>
     <item
+        android:id="@+id/action_refresh_status"
+        android:orderInCategory="280"
+        android:title="@string/menu_action_refresh_status"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_debug_information"
         android:orderInCategory="290"
         android:title="@string/menu_action_debug_information"

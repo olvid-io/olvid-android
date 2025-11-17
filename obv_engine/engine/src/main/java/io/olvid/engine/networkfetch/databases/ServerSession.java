@@ -147,7 +147,8 @@ public class ServerSession implements ObvDatabase {
     }
 
     public void setChallengeAndNonce(byte[] challenge, byte[] nonce) {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " + CHALLENGE + " = ?, " + NONCE + " = ? WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("ServerSession.setChallengeAndNonce",
+                "UPDATE " + TABLE_NAME + " SET " + CHALLENGE + " = ?, " + NONCE + " = ? WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, challenge);
             statement.setBytes(2, nonce);
             statement.setBytes(3, ownedIdentity.getBytes());
@@ -163,7 +164,8 @@ public class ServerSession implements ObvDatabase {
         if (response == null || challenge == null) {
             return;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("ServerSession.setResponseForChallenge",
+                "UPDATE " + TABLE_NAME +
                 " SET " + RESPONSE + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + CHALLENGE + " = ?;")) {
@@ -183,7 +185,8 @@ public class ServerSession implements ObvDatabase {
         if (token == null) {
             return;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("ServerSession.setTokenAndPermissions",
+                "UPDATE " + TABLE_NAME +
                 " SET " + TOKEN + " = ?, " +
                 API_KEY_STATUS + " = ?, " +
                 PERMISSIONS + " = ?, " +
@@ -208,7 +211,8 @@ public class ServerSession implements ObvDatabase {
         if (ownedIdentity == null) {
             return;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ? AND " + TOKEN + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("ServerSession.deleteCurrentTokenIfEqualTo",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ? AND " + TOKEN + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, token);
             statement.executeUpdate();
@@ -221,7 +225,8 @@ public class ServerSession implements ObvDatabase {
         if (ownedIdentity == null) {
             return;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("ServerSession.deleteForIdentity",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -283,7 +288,8 @@ public class ServerSession implements ObvDatabase {
         if (ownedIdentity == null) {
             return null;
         }
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("ServerSession.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
                 if (res.next()) {
@@ -299,7 +305,7 @@ public class ServerSession implements ObvDatabase {
     }
 
     public static ServerSession[] getAll(FetchManagerSession fetchManagerSession) throws SQLException {
-        try (Statement statement = fetchManagerSession.session.createStatement()) {
+        try (Statement statement = fetchManagerSession.session.createStatement("ServerSession.getAll")) {
             try (ResultSet res = statement.executeQuery("SELECT * FROM " + TABLE_NAME)) {
                 List<ServerSession> list = new ArrayList<>();
                 while (res.next()) {
@@ -346,7 +352,8 @@ public class ServerSession implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?);")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("ServerSession.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES(?,?,?,?,?, ?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, nonce);
             statement.setBytes(3, challenge);
@@ -362,7 +369,8 @@ public class ServerSession implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = fetchManagerSession.session.prepareStatement("ServerSession.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }

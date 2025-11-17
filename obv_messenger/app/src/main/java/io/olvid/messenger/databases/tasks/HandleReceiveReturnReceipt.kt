@@ -26,6 +26,7 @@ import io.olvid.messenger.databases.entity.MessageReturnReceipt
 
 
 class HandleReceiveReturnReceipt(
+    private val db: AppDatabase,
     private val engine: Engine,
     private val bytesOwnedIdentity: ByteArray,
     private val serverUid: ByteArray,
@@ -35,8 +36,6 @@ class HandleReceiveReturnReceipt(
 ) :
     Runnable {
     override fun run() {
-        val db = AppDatabase.getInstance()
-
         val returnReceiptKeys = db.messageRecipientInfoDao().getReturnReceiptKeysForNonce(
             returnReceiptNonce
         )
@@ -64,7 +63,6 @@ class HandleReceiveReturnReceipt(
         }
         engine.deleteReturnReceipt(bytesOwnedIdentity, serverUid)
     }
-
 }
 
 

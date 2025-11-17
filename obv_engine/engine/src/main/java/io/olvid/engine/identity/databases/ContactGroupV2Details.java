@@ -332,7 +332,8 @@ public class ContactGroupV2Details implements ObvDatabase {
         if ((groupIdentifier == null) || (ownedIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.get",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +
@@ -358,7 +359,8 @@ public class ContactGroupV2Details implements ObvDatabase {
         if ((groupIdentifier == null) || (ownedIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.getAll",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +
@@ -380,7 +382,8 @@ public class ContactGroupV2Details implements ObvDatabase {
 
 
     public void setPhotoUrl(String photoUrl) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.setPhotoUrl",
+                "UPDATE " + TABLE_NAME +
                 " SET " + PHOTO_URL + " = ? " +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
@@ -424,7 +427,8 @@ public class ContactGroupV2Details implements ObvDatabase {
         photoUrl = randFileName;
 
         // update the DB
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.setAbsolutePhotoUrl",
+                "UPDATE " + TABLE_NAME +
                 " SET " + PHOTO_URL + " = ? " +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
@@ -442,7 +446,8 @@ public class ContactGroupV2Details implements ObvDatabase {
     }
 
     public static void cleanup(IdentityManagerSession identityManagerSession, Identity ownedIdentity, GroupV2.Identifier groupIdentifier, int version, int trustedVersion) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.cleanup",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +
@@ -464,7 +469,8 @@ public class ContactGroupV2Details implements ObvDatabase {
             return null;
         }
         if (groupIdentifier.category == GroupV2.Identifier.CATEGORY_KEYCLOAK) {
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.getByGroupIdentifierAndServerPhotoInfo",
+                    "SELECT * FROM " + TABLE_NAME +
                     " WHERE " + GROUP_UID + " = ? " +
                     " AND " + SERVER_URL + " = ? " +
                     " AND " + CATEGORY + " = ? " +
@@ -488,7 +494,8 @@ public class ContactGroupV2Details implements ObvDatabase {
                 }
             }
         } else {
-            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+            try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.getByGroupIdentifierAndServerPhotoInfo",
+                    "SELECT * FROM " + TABLE_NAME +
                     " WHERE " + GROUP_UID + " = ? " +
                     " AND " + SERVER_URL + " = ? " +
                     " AND " + CATEGORY + " = ? " +
@@ -516,7 +523,8 @@ public class ContactGroupV2Details implements ObvDatabase {
     }
 
     public static List<String> getAllPhotoUrl(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT " + PHOTO_URL + " FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.getAllPhotoUrl",
+                "SELECT " + PHOTO_URL + " FROM " + TABLE_NAME +
                 " WHERE " + PHOTO_URL + " IS NOT NULL;")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<String> list = new ArrayList<>();
@@ -529,7 +537,8 @@ public class ContactGroupV2Details implements ObvDatabase {
     }
 
     public static List<ContactGroupV2Details> getAllWithMissingPhotoUrl(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.getAllWithMissingPhotoUrl",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + PHOTO_URL + " IS NULL " +
                 " AND (" + PHOTO_SERVER_IDENTITY + " IS NOT NULL" +
                 " OR " + CATEGORY + " = " + GroupV2.Identifier.CATEGORY_KEYCLOAK + ") " +
@@ -591,7 +600,8 @@ public class ContactGroupV2Details implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?,?,?);")) {
             statement.setBytes(1, groupUid.getBytes());
             statement.setString(2, serverUrl);
             statement.setInt(3, category);
@@ -608,7 +618,8 @@ public class ContactGroupV2Details implements ObvDatabase {
     }
 
     public void update() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.update",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_JSON_DETAILS + " = ?, " +
                 PHOTO_URL + " = ?, " +
                 PHOTO_SERVER_IDENTITY + " = ?, " +
@@ -637,7 +648,8 @@ public class ContactGroupV2Details implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactGroupV2Details.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + GROUP_UID + " = ? " +
                 " AND " + SERVER_URL + " = ? " +
                 " AND " + CATEGORY + " = ? " +

@@ -25,10 +25,8 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
 import java.sql.Blob;
-import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -39,13 +37,10 @@ import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
-import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.SQLXML;
-import java.sql.Savepoint;
 import java.sql.Statement;
-import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -56,15 +51,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.olvid.engine.Logger;
+import io.olvid.engine.engine.types.EngineDbQueryStatisticsEntry;
 
-public class Session implements Connection {
-    final static ReentrantLock globalWriteLock = new ReentrantLock();
-    private final static HashMap<String, List<Session>> sessionPool = new HashMap<>();
-    private final static ReentrantLock sessionPoolLock = new ReentrantLock();
+public class Session implements AutoCloseable {
+    public static final Map<String, EngineDbQueryStatisticsEntry> queryStatistics = new ConcurrentHashMap<>();
+
+    static final ReentrantLock globalWriteLock = new ReentrantLock();
+    private static final HashMap<String, List<Session>> sessionPool = new HashMap<>();
+    private static final ReentrantLock sessionPoolLock = new ReentrantLock();
 
     private final Connection connection;
     private final Set<SessionCommitListener> sessionCommitListeners;
@@ -154,7 +152,6 @@ public class Session implements Connection {
         }
     }
 
-    @Override
     public void commit() throws SQLException {
         if (!connection.getAutoCommit()) {
             connection.commit();
@@ -167,7 +164,6 @@ public class Session implements Connection {
         sessionCommitListeners.clear();
     }
 
-    @Override
     public void rollback() throws SQLException {
         if (!connection.getAutoCommit()) {
             try {
@@ -182,19 +178,28 @@ public class Session implements Connection {
         }
     }
 
-    @Override
     public Statement createStatement() throws SQLException {
-        return new DeferrableStatement(connection.createStatement(), this);
+        return createStatement(null);
     }
 
-    @Override
+    public Statement createStatement(String tag) throws SQLException {
+        return new DeferrableStatement(tag, connection.createStatement(), this);
+    }
+
     public PreparedStatement prepareStatement(String s) throws SQLException {
-        return new DeferrablePreparedStatement(connection.prepareStatement(s), this);
+        return prepareStatement(null, s);
     }
 
-    @Override
-    public PreparedStatement prepareStatement(String s, int i) throws SQLException {
-        return new DeferrablePreparedStatement(connection.prepareStatement(s, i), this);
+    public PreparedStatement prepareStatement(String tag, String s) throws SQLException {
+        return new DeferrablePreparedStatement(tag, connection.prepareStatement(s), this);
+    }
+
+    public PreparedStatement prepareStatement(String s, boolean returnGeneratedKeys) throws SQLException {
+        return prepareStatement(null, s, returnGeneratedKeys);
+    }
+
+    public PreparedStatement prepareStatement(String tag, String s, boolean returnGeneratedKeys) throws SQLException {
+        return new DeferrablePreparedStatement(tag, connection.prepareStatement(s, returnGeneratedKeys ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS), this);
     }
 
     @Override
@@ -224,248 +229,20 @@ public class Session implements Connection {
         }
     }
 
-    @Override
-    public void setAutoCommit(boolean b) throws SQLException {
-        Logger.e("Calling setAutocommit on a Session is forbidden");
-        throw new SQLException("Calling setAutocommit on a Session is forbidden");
-    }
-
-
-    // Proxy implementation of all the remaining Connection interface methods
-
-    @Override
     public boolean getAutoCommit() throws SQLException {
         return connection.getAutoCommit();
     }
 
-    @Override
-    public boolean isClosed() throws SQLException {
-        return connection.isClosed();
-    }
-
-    @Override
-    public DatabaseMetaData getMetaData() throws SQLException {
-        return connection.getMetaData();
-    }
-
-    @Override
-    public void setReadOnly(boolean b) throws SQLException {
-        connection.setReadOnly(b);
-    }
-
-    @Override
-    public boolean isReadOnly() throws SQLException {
-        return connection.isReadOnly();
-    }
-
-    @Override
-    public void setCatalog(String s) throws SQLException {
-        connection.setCatalog(s);
-    }
-
-    @Override
-    public String getCatalog() throws SQLException {
-        return connection.getCatalog();
-    }
-
-    @Override
-    public void setTransactionIsolation(int i) throws SQLException {
-        connection.setTransactionIsolation(i);
-    }
-
-    @Override
-    public int getTransactionIsolation() throws SQLException {
-        return connection.getTransactionIsolation();
-    }
-
-    @Override
-    public SQLWarning getWarnings() throws SQLException {
-        return connection.getWarnings();
-    }
-
-    @Override
-    public void clearWarnings() throws SQLException {
-        connection.clearWarnings();
-    }
-
-    @Override
-    public Statement createStatement(int i, int i1) throws SQLException {
-        return connection.createStatement(i, i1);
-    }
-
-    @Override
-    public PreparedStatement prepareStatement(String s, int i, int i1) throws SQLException {
-        return connection.prepareStatement(s, i, i1);
-    }
-
-    @Override
-    public CallableStatement prepareCall(String s, int i, int i1) throws SQLException {
-        return connection.prepareCall(s, i, i1);
-    }
-
-    @Override
-    public Map<String, Class<?>> getTypeMap() throws SQLException {
-        return connection.getTypeMap();
-    }
-
-    @Override
-    public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-        connection.setTypeMap(map);
-    }
-
-    @Override
-    public void setHoldability(int i) throws SQLException {
-        connection.setHoldability(i);
-    }
-
-    @Override
-    public int getHoldability() throws SQLException {
-        return connection.getHoldability();
-    }
-
-    @Override
-    public CallableStatement prepareCall(String s) throws SQLException {
-        throw new SQLException("Not implemented");
-    }
-
-    @Override
-    public String nativeSQL(String s) throws SQLException {
-        throw new SQLException("Not implemented");
-    }
-
-    @Override
-    public Savepoint setSavepoint() throws SQLException {
-        throw new SQLException("Savepoints not implemented");
-    }
-
-    @Override
-    public Savepoint setSavepoint(String s) throws SQLException {
-        throw new SQLException("Savepoints not implemented");
-    }
-
-    @Override
-    public void rollback(Savepoint savepoint) throws SQLException {
-        throw new SQLException("Savepoints not implemented");
-    }
-
-    @Override
-    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        throw new SQLException("Savepoints not implemented");
-    }
-
-    @Override
-    public Statement createStatement(int i, int i1, int i2) throws SQLException {
-        throw new SQLException("Not implemented");
-    }
-
-    @Override
-    public PreparedStatement prepareStatement(String s, int i, int i1, int i2) throws SQLException {
-        throw new SQLException("Not implemented");
-    }
-
-    @Override
-    public CallableStatement prepareCall(String s, int i, int i1, int i2) throws SQLException {
-        throw new SQLException("Not implemented");
-    }
-
-    @Override
-    public PreparedStatement prepareStatement(String s, int[] ints) throws SQLException {
-        throw new SQLException("Not implemented");
-    }
-
-    @Override
-    public PreparedStatement prepareStatement(String s, String[] strings) throws SQLException {
-        throw new SQLException("Not implemented");
-    }
-
-    @Override
-    public Clob createClob() throws SQLException {
-        return connection.createClob();
-    }
-
-    @Override
-    public Blob createBlob() throws SQLException {
-        return connection.createBlob();
-    }
-
-    @Override
-    public NClob createNClob() throws SQLException {
-        return connection.createNClob();
-    }
-
-    @Override
-    public SQLXML createSQLXML() throws SQLException {
-        return connection.createSQLXML();
-    }
-
-    @Override
-    public boolean isValid(int i) throws SQLException {
-        return connection.isValid(i);
-    }
-
-    @Override
-    public void setClientInfo(String s, String s1) throws SQLClientInfoException {
-        connection.setClientInfo(s, s1);
-    }
-
-    @Override
-    public void setClientInfo(Properties properties) throws SQLClientInfoException {
-        connection.setClientInfo(properties);
-    }
-
-    @Override
-    public String getClientInfo(String s) throws SQLException {
-        return connection.getClientInfo(s);
-    }
-
-    @Override
-    public Properties getClientInfo() throws SQLException {
-        return connection.getClientInfo();
-    }
-
-    @Override
-    public Array createArrayOf(String s, Object[] objects) throws SQLException {
-        return connection.createArrayOf(s, objects);
-    }
-
-    @Override
-    public Struct createStruct(String s, Object[] objects) throws SQLException {
-        return connection.createStruct(s, objects);
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        return connection.unwrap(iface);
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return connection.isWrapperFor(iface);
-    }
-
-    @Override
-    public void setSchema(String s) throws SQLException {
-        connection.setSchema(s);
-    }
-
-    @Override
-    public String getSchema() throws SQLException {
-        return connection.getSchema();
-    }
-
-    @Override
-    public void abort(Executor executor) throws SQLException {
-        connection.abort(executor);
-    }
-
-    @Override
-    public void setNetworkTimeout(Executor executor, int i) throws SQLException {
-        connection.setNetworkTimeout(executor, i);
-    }
-
-    @Override
-    public int getNetworkTimeout() throws SQLException {
-        return connection.getNetworkTimeout();
+    static void registerQueryTime(String tag, long timeMicro) {
+        if (tag == null) {
+            return;
+        }
+        queryStatistics.compute(tag, (key, val) -> {
+            if (val == null) {
+                return EngineDbQueryStatisticsEntry.create(timeMicro);
+            }
+            return val.increment(timeMicro);
+        });
     }
 }
 
@@ -473,10 +250,12 @@ public class Session implements Connection {
 
 
 class DeferrableStatement implements Statement {
+    private final String tag;
     private final Statement statement;
     private final Session session;
 
-    DeferrableStatement(Statement statement, Session session) {
+    DeferrableStatement(String tag, Statement statement, Session session) {
+        this.tag = tag;
         this.statement = statement;
         this.session = session;
     }
@@ -488,35 +267,50 @@ class DeferrableStatement implements Statement {
 
     @Override
     public boolean execute(final String s) throws SQLException {
+        boolean res;
+        long startTime;
         if (session.getAutoCommit()) {
             try {
                 Session.globalWriteLock.lock();
-                return statement.execute(s);
+                startTime = System.nanoTime();
+                res = statement.execute(s);
             } finally {
                 Session.globalWriteLock.unlock();
             }
         } else {
-            return statement.execute(s);
+            startTime = System.nanoTime();
+            res = statement.execute(s);
         }
+        Session.registerQueryTime(tag, (System.nanoTime() - startTime)/1000);
+        return res;
     }
 
     @Override
     public ResultSet executeQuery(String s) throws SQLException {
-        return statement.executeQuery(s);
+        long startTime = System.nanoTime();
+        ResultSet res = statement.executeQuery(s);
+        Session.registerQueryTime(tag, (System.nanoTime() - startTime)/1000);
+        return res;
     }
 
     @Override
     public int executeUpdate(final String s) throws SQLException {
+        int res;
+        long startTime;
         if (session.getAutoCommit()) {
             try {
                 Session.globalWriteLock.lock();
-                return statement.executeUpdate(s);
+                startTime = System.nanoTime();
+                res = statement.executeUpdate(s);
             } finally {
                 Session.globalWriteLock.unlock();
             }
         } else {
-            return statement.executeUpdate(s);
+            startTime = System.nanoTime();
+            res = statement.executeUpdate(s);
         }
+        Session.registerQueryTime(tag, (System.nanoTime() - startTime)/1000);
+        return res;
     }
 
     @Override
@@ -723,31 +517,42 @@ class DeferrableStatement implements Statement {
 
 
 class DeferrablePreparedStatement implements PreparedStatement {
+    private final String tag;
     private final PreparedStatement statement;
     private final Session session;
 
-    DeferrablePreparedStatement(PreparedStatement statement, Session session) {
+    DeferrablePreparedStatement(String tag, PreparedStatement statement, Session session) {
+        this.tag = tag;
         this.statement = statement;
         this.session = session;
     }
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        return statement.executeQuery();
+        long startTime = System.nanoTime();
+        ResultSet res = statement.executeQuery();
+        Session.registerQueryTime(tag, (System.nanoTime() - startTime)/1000);
+        return res;
     }
 
     @Override
     public int executeUpdate() throws SQLException {
+        int res;
+        long startTime;
         if (session.getAutoCommit()) {
             try {
                 Session.globalWriteLock.lock();
-                return statement.executeUpdate();
+                startTime = System.nanoTime();
+                res = statement.executeUpdate();
             } finally {
                 Session.globalWriteLock.unlock();
             }
         } else {
-            return statement.executeUpdate();
+            startTime = System.nanoTime();
+            res = statement.executeUpdate();
         }
+        Session.registerQueryTime(tag, (System.nanoTime() - startTime)/1000);
+        return res;
     }
 
     @Override
@@ -838,6 +643,7 @@ class DeferrablePreparedStatement implements PreparedStatement {
     @Deprecated
     @Override
     public void setUnicodeStream(int i, InputStream inputStream, int i1) throws SQLException {
+        //noinspection deprecation
         statement.setUnicodeStream(i, inputStream, i1);
     }
 
@@ -1198,7 +1004,7 @@ class DeferrablePreparedStatement implements PreparedStatement {
 
     @Override
     public int getResultSetHoldability() throws SQLException {
-        return 0;
+        return statement.getResultSetHoldability();
     }
 
     @Override
@@ -1208,7 +1014,7 @@ class DeferrablePreparedStatement implements PreparedStatement {
 
     @Override
     public void setPoolable(boolean b) throws SQLException {
-
+        statement.setPoolable(b);
     }
 
     @Override
@@ -1218,7 +1024,7 @@ class DeferrablePreparedStatement implements PreparedStatement {
 
     @Override
     public <T> T unwrap(Class<T> aClass) throws SQLException {
-        return null;
+        return statement.unwrap(aClass);
     }
 
     @Override

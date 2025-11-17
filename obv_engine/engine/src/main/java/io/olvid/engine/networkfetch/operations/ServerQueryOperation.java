@@ -760,7 +760,7 @@ class GetGroupBlobServerMethod extends ServerQueryServerMethod {
         super.parseReceivedData(receivedData);
         if (returnStatus == ServerMethod.OK) {
             try {
-                if (receivedData.length != 3) {
+                if (receivedData.length != 4) {
                     throw new DecodingException();
                 }
                 //noinspection unused
@@ -771,11 +771,14 @@ class GetGroupBlobServerMethod extends ServerQueryServerMethod {
                 }
                 //noinspection unused
                 ServerAuthenticationPublicKey groupAdminPublicKey = (ServerAuthenticationPublicKey) receivedData[2].decodePublicKey();
+                //noinspection unused
+                long updateTimestamp = receivedData[3].decodeLong();
                 serverResponse = Encoded.of(new Encoded[]{
                         receivedData[0],
                         receivedData[1],
                         receivedData[2],
                         Encoded.of(nonce),
+                        receivedData[3],
                 });
             } catch (Exception e) {
                 Logger.x(e);
@@ -837,7 +840,7 @@ class LockGroupBlobServerMethod extends ServerQueryServerMethod {
         super.parseReceivedData(receivedData);
         if (returnStatus == ServerMethod.OK) {
             try {
-                if (receivedData.length != 3) {
+                if (receivedData.length != 4) {
                     throw new DecodingException();
                 }
                 //noinspection unused
@@ -848,11 +851,14 @@ class LockGroupBlobServerMethod extends ServerQueryServerMethod {
                 }
                 //noinspection unused
                 ServerAuthenticationPublicKey groupAdminPublicKey = (ServerAuthenticationPublicKey) receivedData[2].decodePublicKey();
+                //noinspection unused
+                long updateTimestamp = receivedData[3].decodeLong();
                 serverResponse = Encoded.of(new Encoded[]{
                         receivedData[0],
                         receivedData[1],
                         receivedData[2],
                         Encoded.of(lockNonce),
+                        receivedData[3],
                 });
             } catch (Exception e) {
                 Logger.x(e);

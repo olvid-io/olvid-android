@@ -134,7 +134,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
@@ -204,7 +203,8 @@ import java.util.Locale
 @Composable
 fun WebrtcCallService.State.humanReadable(failReason: FailReason): String {
     return when (this) {
-        INITIAL, INITIALIZING_CALL -> stringResource(id = R.string.webrtc_status_initializing_call)
+        INITIAL -> stringResource(id = R.string.webrtc_status_initial)
+        INITIALIZING_CALL -> stringResource(R.string.webrtc_status_initializing_call)
         WAITING_FOR_AUDIO_PERMISSION -> stringResource(id = R.string.webrtc_status_waiting_for_permission)
         GETTING_TURN_CREDENTIALS -> stringResource(id = R.string.webrtc_status_verifying_credentials)
         RINGING -> stringResource(id = R.string.webrtc_status_ringing)
@@ -225,6 +225,7 @@ fun WebrtcCallService.State.humanReadable(failReason: FailReason): String {
                 PERMISSION_DENIED, CALL_INITIATION_NOT_SUPPORTED -> stringResource(id = R.string.webrtc_failed_no_call_permission)
                 ICE_CONNECTION_ERROR -> stringResource(id = R.string.webrtc_failed_connection_to_contact_lost)
                 KICKED -> stringResource(id = R.string.webrtc_failed_kicked)
+                FailReason.INITIALIZATION_TIMEOUT -> stringResource(id = R.string.webrtc_status_start_call_timeout)
             }
     }
 }
@@ -232,7 +233,9 @@ fun WebrtcCallService.State.humanReadable(failReason: FailReason): String {
 @Composable
 fun PeerState.humanReadable(): String {
     return when (this) {
-        PeerState.INITIAL, START_CALL_MESSAGE_SENT -> stringResource(id = R.string.webrtc_status_initializing_call)
+        PeerState.INITIAL -> stringResource(id = R.string.webrtc_status_initial)
+        START_CALL_MESSAGE_SENT -> stringResource(id = R.string.webrtc_status_initializing_call)
+        PeerState.START_CALL_TIME_OUT -> stringResource(id = R.string.webrtc_status_start_call_timeout)
         CONNECTING_TO_PEER -> stringResource(id = R.string.webrtc_status_connecting_to_peer)
         PeerState.RINGING -> stringResource(id = R.string.webrtc_status_ringing)
         PeerState.BUSY -> stringResource(id = R.string.webrtc_status_contact_busy)
@@ -242,6 +245,7 @@ fun PeerState.humanReadable(): String {
         HANGED_UP -> stringResource(id = R.string.webrtc_status_contact_hanged_up)
         PeerState.KICKED -> stringResource(id = R.string.webrtc_status_contact_kicked)
         PeerState.FAILED -> stringResource(id = R.string.webrtc_status_contact_failed)
+        PeerState.ENDING_CALL -> stringResource(R.string.webrtc_status_ending_call)
     }
 }
 
@@ -274,12 +278,11 @@ fun getPeerStateText(
 
         HANGED_UP -> stringResource(id = R.string.webrtc_status_contact_hanged_up)
         PeerState.KICKED -> stringResource(id = R.string.webrtc_status_contact_kicked)
+        PeerState.ENDING_CALL -> stringResource(R.string.webrtc_status_ending_call)
         PeerState.FAILED -> stringResource(id = R.string.webrtc_status_contact_failed)
-        PeerState.INITIAL, START_CALL_MESSAGE_SENT -> if (singleContact) {
-            null
-        } else {
-            stringResource(id = R.string.webrtc_status_initializing_call)
-        }
+        PeerState.INITIAL -> if (singleContact) null else stringResource(id = R.string.webrtc_status_initial)
+        START_CALL_MESSAGE_SENT -> if (singleContact) null else stringResource(id = R.string.webrtc_status_initializing_call)
+        PeerState.START_CALL_TIME_OUT -> if (singleContact) null else stringResource(id = R.string.webrtc_status_start_call_timeout)
     }
 
 fun AudioOutput.drawableResource() = when (this) {
@@ -393,6 +396,11 @@ private fun BoxScope.PreCall(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
+                modifier = Modifier.background(
+                    colorResource(id = R.color.blackOverlay),
+                    RoundedCornerShape(12.dp)
+                )
+                    .padding(vertical = 8.dp, horizontal = 12.dp),
                 text = status,
                 textAlign = TextAlign.Center,
                 style = OlvidTypography.body2,
@@ -603,6 +611,7 @@ fun CallScreen(
                 },
                 sheetPeekHeight = peekHeight
             ) {
+                var callWasStarted by remember { mutableStateOf(false) }
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -621,7 +630,8 @@ fun CallScreen(
                         }
                         .statusBarsPadding()
                 ) {
-                    if (callState?.value == CALL_IN_PROGRESS || callState?.value == CALL_ENDED) {
+                    if (callState?.value == CALL_IN_PROGRESS || (callWasStarted && callState?.value == CALL_ENDED)) {
+                        callWasStarted = true
                         VideoCallContent(
                             participants = participants,
                             webrtcCallService = webrtcCallService,
@@ -1209,7 +1219,7 @@ private fun VideoCallContent(
             webrtcCallService.getCallParticipant(participants.firstOrNull()?.bytesContactIdentity)?.peerConnectionHolder?.remoteVideoTrack
         val remoteScreenTrack =
             webrtcCallService.getCallParticipant(participants.firstOrNull()?.bytesContactIdentity)?.peerConnectionHolder?.remoteScreenTrack
-        if (webrtcCallService.selectedParticipant.contentEquals(webrtcCallService.bytesOwnedIdentity)
+        if (webrtcCallService.bytesOwnedIdentity == null || webrtcCallService.selectedParticipant.contentEquals(webrtcCallService.bytesOwnedIdentity)
                 .not()
         ) {
             CallParticipant(

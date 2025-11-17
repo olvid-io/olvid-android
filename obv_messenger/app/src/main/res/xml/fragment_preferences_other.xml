@@ -2,90 +2,97 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-        <Preference
-            android:title="@string/pref_category_webclient_title"
-            android:summary="@string/pref_category_webclient_summary"
-            android:fragment="io.olvid.messenger.settings.WebClientPreferenceFragment"
-            android:icon="@drawable/ic_pref_webclient"
-            android:widgetLayout="@layout/preference_widget_header_chevron" />
-        <Preference
-            android:key="pref_key_reset_dialogs"
-            android:summary="@string/pref_reset_dialogs_summary"
-            android:title="@string/pref_reset_dialogs_title"
-            android:icon="@drawable/ic_pref_reset"
-            android:order="10" />
-        <SwitchPreference
-            android:key="pref_key_share_app_version"
-            android:defaultValue="true"
-            android:summary="@string/pref_share_app_version_summary"
-            android:title="@string/pref_share_app_version_title"
-            android:icon="@drawable/ic_pref_share"
-            android:order="20" />
-        <SwitchPreference
-            android:key="pref_key_use_internal_image_viewer"
-            android:defaultValue="true"
-            android:title="@string/pref_use_internal_image_viewer_title"
-            android:summary="@string/pref_use_internal_image_viewer_summary"
-            android:icon="@drawable/ic_pref_image"
-            android:order="23" />
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="pref_key_use_internal_pdf_viewer"
-            android:title="@string/pref_use_internal_pdf_viewer_title"
-            android:summary="@string/pref_use_internal_pdf_viewer_summary"
-            android:icon="@drawable/ic_pref_pdf"
-            android:order="24" />
-        <SwitchPreference
-            android:key="pref_key_sending_foreground_service"
-            android:defaultValue="true"
-            android:title="@string/pref_sending_foreground_service"
-            android:summary="@string/pref_sending_foreground_service_summary"
-            android:icon="@drawable/ic_pref_sync"
-            android:order="28" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="pref_key_permanent_foreground_service"
-            android:title="@string/pref_permanent_foreground_service_title"
-            android:summary="@string/pref_permanent_foreground_service_summary"
-            android:icon="@drawable/ic_pref_foreground_service"
-            android:order="29"/>
-        <DropDownPreference
-            android:defaultValue="M"
-            android:entries="@array/QR_correction_levels"
-            android:entryValues="@array/QR_correction_levels_values"
-            android:key="pref_key_qr_correction_level"
-            android:title="@string/pref_qr_correction_level_title"
-            app:useSimpleSummaryProvider="true"
-            android:icon="@drawable/ic_pref_qr"
-            android:order="31" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="pref_key_use_legacy_zxing_scanner"
-            android:title="@string/pref_use_legacy_zxing_scanner_title"
-            android:summary="@string/pref_use_legacy_zxing_scanner_summary"
-            android:icon="@drawable/ic_pref_qr_code"
-            android:order="32" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="pref_key_debug_log_level"
-            android:summary="@string/pref_debug_log_level_summary"
-            android:title="@string/pref_debug_log_level_title"
-            android:icon="@drawable/ic_pref_debug_log"
-            android:order="40" />
-        <Preference
-            app:isPreferenceVisible="false"
-            tools:isPreferenceVisible="true"
-            android:key="pref_key_export_app_databases"
-            android:summary="@string/pref_export_app_databases_summary"
-            android:title="@string/pref_export_app_databases_title"
-            android:icon="@drawable/ic_pref_database"
-            android:order="50" />
-        <Preference
-            app:isPreferenceVisible="false"
-            tools:isPreferenceVisible="true"
-            android:key="pref_key_storage_explorer"
-            android:title="@string/pref_storage_explorer_title"
-            android:summary="@string/pref_storage_explorer_summary"
-            android:icon="@drawable/ic_pref_explorer"
-            android:order="60" />
+    <Preference
+        android:title="@string/pref_category_webclient_title"
+        android:summary="@string/pref_category_webclient_summary"
+        android:fragment="io.olvid.messenger.settings.WebClientPreferenceFragment"
+        android:icon="@drawable/ic_pref_webclient"
+        android:widgetLayout="@layout/preference_widget_header_chevron" />
+    <Preference
+        android:key="pref_key_reset_dialogs"
+        android:summary="@string/pref_reset_dialogs_summary"
+        android:title="@string/pref_reset_dialogs_title"
+        android:icon="@drawable/ic_pref_reset"
+        android:order="10" />
+    <SwitchPreference
+        android:key="pref_key_share_app_version"
+        android:defaultValue="true"
+        android:summary="@string/pref_share_app_version_summary"
+        android:title="@string/pref_share_app_version_title"
+        android:icon="@drawable/ic_pref_share"
+        android:order="20" />
+    <SwitchPreference
+        android:key="pref_key_use_internal_image_viewer"
+        android:defaultValue="true"
+        android:title="@string/pref_use_internal_image_viewer_title"
+        android:summary="@string/pref_use_internal_image_viewer_summary"
+        android:icon="@drawable/ic_pref_image"
+        android:order="23" />
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="pref_key_use_internal_pdf_viewer"
+        android:title="@string/pref_use_internal_pdf_viewer_title"
+        android:summary="@string/pref_use_internal_pdf_viewer_summary"
+        android:icon="@drawable/ic_pref_pdf"
+        android:order="24" />
+    <SwitchPreference
+        android:key="pref_key_sending_foreground_service"
+        android:defaultValue="true"
+        android:title="@string/pref_sending_foreground_service"
+        android:summary="@string/pref_sending_foreground_service_summary"
+        android:icon="@drawable/ic_pref_sync"
+        android:order="28" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="pref_key_permanent_foreground_service"
+        android:title="@string/pref_permanent_foreground_service_title"
+        android:summary="@string/pref_permanent_foreground_service_summary"
+        android:icon="@drawable/ic_pref_foreground_service"
+        android:order="29"/>
+    <DropDownPreference
+        android:defaultValue="M"
+        android:entries="@array/QR_correction_levels"
+        android:entryValues="@array/QR_correction_levels_values"
+        android:key="pref_key_qr_correction_level"
+        android:title="@string/pref_qr_correction_level_title"
+        app:useSimpleSummaryProvider="true"
+        android:icon="@drawable/ic_pref_qr"
+        android:order="31" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="pref_key_use_legacy_zxing_scanner"
+        android:title="@string/pref_use_legacy_zxing_scanner_title"
+        android:summary="@string/pref_use_legacy_zxing_scanner_summary"
+        android:icon="@drawable/ic_pref_qr_code"
+        android:order="32" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="pref_key_debug_log_level"
+        android:summary="@string/pref_debug_log_level_summary"
+        android:title="@string/pref_debug_log_level_title"
+        android:icon="@drawable/ic_pref_debug_log"
+        android:order="40" />
+    <Preference
+        app:isPreferenceVisible="false"
+        tools:isPreferenceVisible="true"
+        android:key="pref_key_show_engine_database_statistics"
+        android:title="@string/pref_show_engine_database_statistics_title"
+        android:icon="@drawable/ic_pref_statistics"
+        android:order="49" />
+    <Preference
+        app:isPreferenceVisible="false"
+        tools:isPreferenceVisible="true"
+        android:key="pref_key_export_app_databases"
+        android:summary="@string/pref_export_app_databases_summary"
+        android:title="@string/pref_export_app_databases_title"
+        android:icon="@drawable/ic_pref_database"
+        android:order="50" />
+    <Preference
+        app:isPreferenceVisible="false"
+        tools:isPreferenceVisible="true"
+        android:key="pref_key_storage_explorer"
+        android:title="@string/pref_storage_explorer_title"
+        android:summary="@string/pref_storage_explorer_summary"
+        android:icon="@drawable/ic_pref_explorer"
+        android:order="60" />
 </PreferenceScreen>

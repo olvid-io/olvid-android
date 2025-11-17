@@ -127,7 +127,8 @@ public class ChannelCreationProtocolInstance implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?);")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ChannelCreationProtocolInstance.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?);")) {
             statement.setBytes(1, contactDeviceUid.getBytes());
             statement.setBytes(2, contactIdentity.getBytes());
             statement.setBytes(3, ownedIdentity.getBytes());
@@ -138,7 +139,8 @@ public class ChannelCreationProtocolInstance implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + CONTACT_DEVICE_UID + " = ? AND " + CONTACT_IDENTITY + " = ? AND " + OWNED_IDENTITY  + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ChannelCreationProtocolInstance.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + CONTACT_DEVICE_UID + " = ? AND " + CONTACT_IDENTITY + " = ? AND " + OWNED_IDENTITY  + " = ?;")) {
             statement.setBytes(1, contactDeviceUid.getBytes());
             statement.setBytes(2, contactIdentity.getBytes());
             statement.setBytes(3, ownedIdentity.getBytes());
@@ -152,7 +154,8 @@ public class ChannelCreationProtocolInstance implements ObvDatabase {
         if ((contactDeviceUid == null) || (ownedIdentity == null) || (contactIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + CONTACT_DEVICE_UID + " = ? AND " + CONTACT_IDENTITY + " = ? AND " + OWNED_IDENTITY  + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ChannelCreationProtocolInstance.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + CONTACT_DEVICE_UID + " = ? AND " + CONTACT_IDENTITY + " = ? AND " + OWNED_IDENTITY  + " = ?;")) {
             statement.setBytes(1, contactDeviceUid.getBytes());
             statement.setBytes(2, contactIdentity.getBytes());
             statement.setBytes(3, ownedIdentity.getBytes());
@@ -170,7 +173,8 @@ public class ChannelCreationProtocolInstance implements ObvDatabase {
         if ((ownedIdentity == null) || (contactIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + CONTACT_IDENTITY + " = ? AND " + OWNED_IDENTITY  + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ChannelCreationProtocolInstance.getAllForContact",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + CONTACT_IDENTITY + " = ? AND " + OWNED_IDENTITY  + " = ?;")) {
             statement.setBytes(1, contactIdentity.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -184,7 +188,8 @@ public class ChannelCreationProtocolInstance implements ObvDatabase {
     }
 
     public static void deleteAllForOwnedIdentity(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ChannelCreationProtocolInstance.deleteAllForOwnedIdentity",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }

@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">संदेश</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">संदेश भेजें</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">कॉल आरंभ किया जा रहा है</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">कॉल आरंभ किया जा रहा है</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">ऑडियो अनुमति का इंतज़ार कर रहे हैं</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">क्रेडेंशियल सत्यापित करना</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">कनेक्शन सुरक्षित किया जा रहा है</string>
@@ -1211,7 +1211,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">एक इमोजी डालें</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">पसंदीदा में जोड़ने/निकालने के लिए लंबे समय तक दबाएं</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">डीबग जानकारी</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">चैनल/डिवाइस की संख्या:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">उपकरणों की संख्या:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">सुरक्षित चैनल के बिना:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">सर्वर:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">पहचान प्रदाता:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">आईडी लिंक:</string>
@@ -2006,7 +2007,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">आप यह कुंजी बाद में अपनी सेटिंग्स में भी पा सकते हैं।</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">अपने प्रोफाइल तक पहुंच न खोएं!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">बैकअप आपको अपने प्रोफाइल को पुनर्स्थापित करने की अनुमति देते हैं यदि आप इस डिवाइस तक पहुंच खो देते हैं। नया अनुभव पहले से कहीं अधिक आसान है 😉 और इसे कुछ ही सेकंड में सेट किया जा सकता है।</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">बैकअप कॉन्फ़िगर करें</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">बैकअप सक्षम करें</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">अपने बैकअप कुंजी को लिखना न भूलें ‌😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">आपकी बैकअप कुंजी आपके प्रोफाइल को पुनर्स्थापित करने के लिए आवश्यक है यदि आप इस डिवाइस तक पहुंच खो देते हैं।</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">अपने Olvid अनुभव को बेहतर बनाएं 🚀</string>
@@ -2112,4 +2113,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">एक अज्ञात एक्सेसिबिलिटी सेवा का पता चला है, कृपया जांच करें कि इसका उपयोग करना सुरक्षित है:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">इमोजी खोजें</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">नवीनतम</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">संपर्क स्थिति ताज़ा करें</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">इंजन डेटाबेस क्वेरी समय प्रदर्शित करें</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">इंजन डेटाबेस क्वेरी समय</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">साथी के डिवाइस के जवाब का इंतज़ार कर रहे हैं</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">पीयर डिवाइस अनुपलब्ध है</string>
 </resources>

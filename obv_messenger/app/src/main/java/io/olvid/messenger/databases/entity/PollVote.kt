@@ -37,8 +37,7 @@ import java.util.UUID
         Index(PollVote.MESSAGE_ID),
     ]
 )
-data class PollVote // default constructor required by Room
-    (
+data class PollVote(
     @JvmField @ColumnInfo(name = MESSAGE_ID) var messageId: Long,
     @JvmField @ColumnInfo(name = SERVER_TIMESTAMP) var serverTimestamp: Long,
     @JvmField @ColumnInfo(name = VERSION) var version: Int,

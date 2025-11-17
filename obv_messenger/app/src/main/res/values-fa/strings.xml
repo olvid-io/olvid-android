@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">پیام</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">ارسال پیام</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916" />
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">در حال برقراری تماس</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">در حال برقراری تماس</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">در حال انتظار برای مجوز دسترسی به صدا</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">تأیید اعتبارنامه‌ها</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">برقراری ارتباط امن</string>
@@ -1212,7 +1212,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">یک ایموجی وارد کنید</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">برای افزودن یا حذف از علاقه‌مندی‌ها، طولانی فشار دهید</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">اطلاعات اشکال‌زدایی</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">تعداد کانال‌ها/دستگاه‌ها:</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">تعداد دستگاه‌ها:</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">بدون کانال امن:</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">سرور:</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">ارائه‌دهنده هویت:</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">پیوند شناسه:</string>
@@ -2007,7 +2008,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">شما می‌توانید این کلید را بعداً در تنظیمات خود پیدا کنید.</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">به دسترسی به پروفایل‌های خود توجه کنید!</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">پشتیبان‌گیری به شما امکان می‌دهد پروفایل‌های خود را در صورت از دست دادن دسترسی به این دستگاه بازیابی کنید. تجربه‌ی جدید آسان‌تر از همیشه است 😉 و می‌توان آن را در عرض چند ثانیه تنظیم کرد.</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">پیکربندی پشتیبان‌گیری</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">فعال کردن پشتیبان‌گیری</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">کلید پشتیبان‌گیری خود را فراموش نکنید‌ 😇</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">کلید پشتیبان‌گیری شما برای بازیابی پروفایل‌هایتان در صورت از دست دادن دسترسی به این دستگاه ضروری است.</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">تجربه Olvid خود را ارتقا دهید 🚀</string>
@@ -2114,4 +2115,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">یک سرویس دسترسی ناشناس شناسایی شد، لطفاً بررسی کنید که استفاده از آن ایمن است:</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">جستجوی ایموجی</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">آخرین‌ها</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">وضعیت مخاطب را به‌روزرسانی کنید</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">نمایش زمان‌بندی پرس‌وجوهای پایگاه داده موتور</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">زمان‌بندی پرس‌وجوهای پایگاه داده موتور</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">در حال انتظار پاسخ دستگاه طرف مقابل</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">دستگاه همتا در دسترس نیست</string>
 </resources>

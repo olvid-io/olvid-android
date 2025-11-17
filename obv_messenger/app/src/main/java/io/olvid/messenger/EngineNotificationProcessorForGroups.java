@@ -126,7 +126,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                 fullSearchItems.add(contact.fullSearchDisplayName);
                                 ContactGroupJoin contactGroupJoin = new ContactGroupJoin(bytesGroupOwnerAndUid, contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                                 db.contactGroupJoinDao().insert(contactGroupJoin);
-                                Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity, bytesGroupOwnerIdentity);
+                                Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity, bytesGroupOwnerIdentity, System.currentTimeMillis());
                                 db.messageDao().upsert(groupJoinedMessage);
                                 messageInserted = true;
                             }
@@ -225,7 +225,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                                     );
                                     db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.fullSearchField + " " + contact.fullSearchDisplayName);
 
-                                    Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity, Arrays.copyOfRange(group.bytesGroupOwnerAndUid, 0, group.bytesGroupOwnerAndUid.length - UID.UID_LENGTH));
+                                    Message groupJoinedMessage = Message.createMemberJoinedGroupMessage(db, discussion.id, contact.bytesContactIdentity, Arrays.copyOfRange(group.bytesGroupOwnerAndUid, 0, group.bytesGroupOwnerAndUid.length - UID.UID_LENGTH), System.currentTimeMillis());
                                     db.messageDao().upsert(groupJoinedMessage);
                                     if (discussion.updateLastMessageTimestamp(System.currentTimeMillis())) {
                                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
@@ -332,7 +332,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
 
                                     db.groupDao().updateGroupMembersNames(group.bytesOwnedIdentity, group.bytesGroupOwnerAndUid, group.groupMembersNames, group.computeFullSearch(fullSearchItems));
 
-                                    Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, contact.bytesContactIdentity, null);
+                                    Message groupLeftMessage = Message.createMemberLeftGroupMessage(db, discussion.id, contact.bytesContactIdentity, null, System.currentTimeMillis());
                                     db.messageDao().upsert(groupLeftMessage);
                                     if (discussion.updateLastMessageTimestamp(System.currentTimeMillis())) {
                                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);

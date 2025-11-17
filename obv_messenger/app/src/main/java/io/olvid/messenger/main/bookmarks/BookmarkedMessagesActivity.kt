@@ -151,9 +151,7 @@ class BookmarkedMessagesActivity : LockableActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(
-//                            start = contentPadding.calculateStartPadding(layoutDirection),
                             top = contentPadding.calculateTopPadding(),
-//                            end = contentPadding.calculateEndPadding(layoutDirection),
                             bottom = 0.dp,
                         )
                 ) {
@@ -275,7 +273,7 @@ class BookmarkedMessagesActivity : LockableActivity() {
                                         muted = false,
                                         locked = false,
                                         mentioned = false,
-                                        pinned = discussionAndMessage.discussion.pinned != 0,
+                                        pinned = false,
                                         reorderableScope = null,
                                         locationsShared = false,
                                         pendingContact = false,

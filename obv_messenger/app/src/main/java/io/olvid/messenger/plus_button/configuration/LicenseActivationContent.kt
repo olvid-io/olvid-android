@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -79,7 +80,7 @@ internal fun LicenseActivationContent(
                     anotherIdentityHasCallsPermission = false
                 )
             } else {
-                OlvidCircularProgress(modifier = Modifier.align(Alignment.CenterHorizontally))
+                OlvidCircularProgress(modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 16.dp))
             }
 
             Row(
@@ -106,7 +107,10 @@ internal fun LicenseActivationContent(
                         text = stringResource(R.string.button_label_activate_license)
                     )
                 } else if (licenseActivationViewModel.activating) {
-                    OlvidCircularProgress()
+                    OlvidCircularProgress(
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
+                        size = 24.dp,
+                    )
                 }
             }
 

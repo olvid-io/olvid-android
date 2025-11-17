@@ -102,7 +102,7 @@ object KeycloakManager {
             )
 
             val identityBytesKey = BytesKey(keycloakManagerState.bytesOwnedIdentity)
-            ownedIdentityStates.put(identityBytesKey, keycloakManagerState)
+            ownedIdentityStates[identityBytesKey] = keycloakManagerState
             if (!firstKeycloakBinding) {
                 synchronizeIdentityWithKeycloak(identityBytesKey, 0)
             }
@@ -115,6 +115,7 @@ object KeycloakManager {
             val identityBytesKey = BytesKey(bytesOwnedIdentity)
             ownedIdentityStates.remove(identityBytesKey)
             currentlySyncingOwnedIdentities.remove(identityBytesKey)
+            authenticationRequiredOwnedIdentities.remove(identityBytesKey)
             AndroidNotificationManager.clearKeycloakAuthenticationRequiredNotification(
                 bytesOwnedIdentity
             )
@@ -135,9 +136,7 @@ object KeycloakManager {
 
             authenticationRequiredOwnedIdentities.remove(identityBytesKey)
             val kms = ownedIdentityStates.get(identityBytesKey)
-            if (kms == null) {
-                return@execute
-            }
+                ?: return@execute
             // reset the synchronization time to force a full re-sync
             kms.lastSynchronization = 0
             kms.jwks = jwks
@@ -383,9 +382,7 @@ object KeycloakManager {
     private fun synchronizeIdentityWithKeycloak(identityBytesKey: BytesKey, failedAttempts: Int) {
         executor.execute {
             val kms = ownedIdentityStates[identityBytesKey]
-            if (kms == null) {
-                return@execute
-            }
+                ?: return@execute
 
             if (System.currentTimeMillis() - kms.lastSynchronization < SYNCHRONIZATION_INTERVAL_MS) {
                 return@execute
@@ -435,9 +432,8 @@ object KeycloakManager {
                                 Logger.d("Successfully downloaded own details from keycloak server")
 
                                 val kms = ownedIdentityStates[identityBytesKey]
-                                if (kms == null) {
-                                    return@execute
-                                }
+                                    ?: return@execute
+
                                 if (kms.authState == null) {
                                     synchronizeIdentityWithKeycloak(identityBytesKey, 0)
                                     return@execute

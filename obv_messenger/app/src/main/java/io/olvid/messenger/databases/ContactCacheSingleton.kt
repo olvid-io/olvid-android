@@ -108,7 +108,7 @@ object ContactCacheSingleton {
                 contactNamesHashMap[key] = ContactCacheDisplayNames.of(
                     displayName = pendingMember.displayName,
                     customDisplayName = null,
-                    firstName = pendingMember.firstName,
+                    firstName = pendingMember.getNonNullFirstName(),
                     identityDetails = kotlin.runCatching { AppSingleton.getJsonObjectMapper().readValue(pendingMember.identityDetails, JsonIdentityDetails::class.java) }.getOrNull(),
                 )
             }
@@ -173,7 +173,7 @@ object ContactCacheSingleton {
             mutableMap[BytesKey(pendingMember.bytesContactIdentity)] = ContactCacheDisplayNames.of(
                 displayName = pendingMember.displayName,
                 customDisplayName = null,
-                firstName = pendingMember.firstName,
+                firstName = pendingMember.getNonNullFirstName(),
                 identityDetails = kotlin.runCatching { AppSingleton.getJsonObjectMapper().readValue(pendingMember.identityDetails, JsonIdentityDetails::class.java) }.getOrNull(),
             )
             contactNamesCache.postValue(mutableMap)

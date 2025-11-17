@@ -618,7 +618,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                             )
                         } catch (e: Exception) {
                             // nothing to do
-                            e.printStackTrace()
+                            Logger.x(e)
                         }
                     } else if (ObvLinkActivity.INVITATION_PATTERN.matcher(uri).find()) {
                         // offer to chose a profile

@@ -33,12 +33,21 @@ import io.olvid.messenger.databases.entity.Message;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JsonReaction {
     @Nullable
-    String reaction; // reaction is null to remove previous reaction
-    byte[] groupUid;
-    byte[] groupOwner;
-    byte[] groupV2Identifier;
+    @JsonProperty("reac")
+    public String reaction; // reaction is null to remove previous reaction
+    @JsonProperty("guid")
+    public byte[] groupUid;
+    @JsonProperty("go")
+    public byte[] groupOwner;
+    @JsonProperty("gid2")
+    public byte[] groupV2Identifier;
+    @JsonProperty("o2oi")
     public JsonOneToOneMessageIdentifier oneToOneIdentifier;
-    JsonMessageReference messageReference;
+    @JsonProperty("ref")
+    public JsonMessageReference messageReference;
+    @JsonProperty("ost")
+    public Long originalServerTimestamp;
+
 
     public static JsonReaction of(Discussion discussion, Message message) throws Exception {
         JsonReaction jsonReaction = new JsonReaction();
@@ -59,66 +68,6 @@ public class JsonReaction {
         return jsonReaction;
     }
 
-    @JsonProperty("reac")
-    @Nullable
-    public String getReaction() {
-        return reaction;
-    }
-
-    @JsonProperty("reac")
-    public void setReaction(@Nullable String reaction) {
-        this.reaction = reaction;
-    }
-
-    @JsonProperty("guid")
-    public byte[] getGroupUid() {
-        return groupUid;
-    }
-
-    @JsonProperty("guid")
-    public void setGroupUid(byte[] groupUid) {
-        this.groupUid = groupUid;
-    }
-
-    @JsonProperty("go")
-    public byte[] getGroupOwner() {
-        return groupOwner;
-    }
-
-    @JsonProperty("go")
-    public void setGroupOwner(byte[] groupOwner) {
-        this.groupOwner = groupOwner;
-    }
-
-    @JsonProperty("gid2")
-    public byte[] getGroupV2Identifier() {
-        return groupV2Identifier;
-    }
-
-    @JsonProperty("gid2")
-    public void setGroupV2Identifier(byte[] groupV2Identifier) {
-        this.groupV2Identifier = groupV2Identifier;
-    }
-
-    @JsonProperty("o2oi")
-    public JsonOneToOneMessageIdentifier getOneToOneIdentifier() {
-        return oneToOneIdentifier;
-    }
-
-    @JsonProperty("o2oi")
-    public void setOneToOneIdentifier(JsonOneToOneMessageIdentifier oneToOneIdentifier) {
-        this.oneToOneIdentifier = oneToOneIdentifier;
-    }
-
-    @JsonProperty("ref")
-    public JsonMessageReference getMessageReference() {
-        return messageReference;
-    }
-
-    @JsonProperty("ref")
-    public void setMessageReference(JsonMessageReference messageReference) {
-        this.messageReference = messageReference;
-    }
 
     @JsonIgnore
     public void setGroupOwnerAndUid(byte[] bytesGroupOwnerAndUid) throws Exception {
@@ -127,7 +76,7 @@ public class JsonReaction {
         }
         byte[] bytesGroupOwner = Arrays.copyOfRange(bytesGroupOwnerAndUid, 0, bytesGroupOwnerAndUid.length - 32);
         byte[] bytesGroupUid = Arrays.copyOfRange(bytesGroupOwnerAndUid, bytesGroupOwnerAndUid.length - 32, bytesGroupOwnerAndUid.length);
-        setGroupOwner(bytesGroupOwner);
-        setGroupUid(bytesGroupUid);
+        groupOwner = bytesGroupOwner;
+        groupUid = bytesGroupUid;
     }
 }

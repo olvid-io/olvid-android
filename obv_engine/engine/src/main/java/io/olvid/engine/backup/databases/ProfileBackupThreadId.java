@@ -128,7 +128,8 @@ public class ProfileBackupThreadId implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("ProfileBackupThreadId.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, threadId.getBytes());
             statement.setLong(3, nextBackupTimestamp);
@@ -138,7 +139,8 @@ public class ProfileBackupThreadId implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("ProfileBackupThreadId.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }
@@ -149,7 +151,8 @@ public class ProfileBackupThreadId implements ObvDatabase {
     // region setters
 
     public void setNextBackupTimestamp(long nextBackupTimestamp) throws SQLException {
-        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = backupManagerSession.session.prepareStatement("ProfileBackupThreadId.setNextBackupTimestamp",
+                "UPDATE " + TABLE_NAME +
                 " SET " + NEXT_BACKUP_TIMESTAMP + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setLong(1, nextBackupTimestamp);
@@ -164,7 +167,8 @@ public class ProfileBackupThreadId implements ObvDatabase {
     // region getters
 
     public static ProfileBackupThreadId get(BackupManagerSession backupManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")){
+        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("ProfileBackupThreadId.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")){
             preparedStatement.setBytes(1, ownedIdentity.getBytes());
             ResultSet res = preparedStatement.executeQuery();
             if (res.next()) {
@@ -176,7 +180,8 @@ public class ProfileBackupThreadId implements ObvDatabase {
     }
 
     public static List<ProfileBackupThreadId> getAll(BackupManagerSession backupManagerSession) throws SQLException {
-        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")){
+        try (PreparedStatement preparedStatement = backupManagerSession.session.prepareStatement("ProfileBackupThreadId.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")){
             ResultSet res = preparedStatement.executeQuery();
             List<ProfileBackupThreadId> list = new ArrayList<>();
             while (res.next()) {

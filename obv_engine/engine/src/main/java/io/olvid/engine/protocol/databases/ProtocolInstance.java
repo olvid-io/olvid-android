@@ -87,7 +87,8 @@ public class ProtocolInstance implements ObvDatabase {
         if (protocolInstanceNeedsToBeInserted) {
             insert();
         } else {
-            try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME + " SET " +
+            try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ProtocolInstance.updateCurrentState",
+                    "UPDATE " + TABLE_NAME + " SET " +
                     CURRENT_STATE_ID + " = ?, " +
                     ENCODED_CURRENT_STATE + " = ? " +
                     " WHERE " + UID_ + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
@@ -183,7 +184,8 @@ public class ProtocolInstance implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ProtocolInstance.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
             statement.setBytes(1, uid.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.setInt(3, protocolId);
@@ -199,7 +201,8 @@ public class ProtocolInstance implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + UID_ + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ProtocolInstance.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + UID_ + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, uid.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             statement.executeUpdate();
@@ -211,7 +214,8 @@ public class ProtocolInstance implements ObvDatabase {
         if ((protocolInstanceUid == null) || (ownedIdentity == null)) {
             return null;
         }
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + UID_ + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ProtocolInstance.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " + UID_ + " = ? AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, protocolInstanceUid.getBytes());
             statement.setBytes(2, ownedIdentity.getBytes());
             try (ResultSet res = statement.executeQuery()) {
@@ -227,7 +231,8 @@ public class ProtocolInstance implements ObvDatabase {
     }
 
 //    public static List<ProtocolInstance> getAllForProtocolId(ProtocolManagerSession protocolManagerSession, int protocolId) {
-//        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " + PROTOCOL_ID + " = ?;")) {
+//        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ProtocolInstance.getAllForProtocolId",
+//        "SELECT * FROM " + TABLE_NAME + " WHERE " + PROTOCOL_ID + " = ?;")) {
 //            statement.setInt(1, protocolId);
 //            try (ResultSet res = statement.executeQuery()) {
 //                List<ProtocolInstance> list = new ArrayList<>();
@@ -242,7 +247,8 @@ public class ProtocolInstance implements ObvDatabase {
 //    }
 //
 //    public static List<ProtocolInstance> getAllForOwnedIdentityProtocolId(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity, int protocolId) {
-//        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+//        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ProtocolInstance.getAllForOwnedIdentityProtocolId",
+//        "SELECT * FROM " + TABLE_NAME +
 //                " WHERE " + PROTOCOL_ID + " = ? " +
 //                " AND " + OWNED_IDENTITY + " = ?;")) {
 //            statement.setInt(1, protocolId);
@@ -261,12 +267,14 @@ public class ProtocolInstance implements ObvDatabase {
 
     public static void deleteAllForOwnedIdentity(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity, UID excludedProtocolInstanceUid) throws SQLException {
         if (excludedProtocolInstanceUid == null) {
-            try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+            try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ProtocolInstance.deleteAllForOwnedIdentity",
+                    "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
                 statement.setBytes(1, ownedIdentity.getBytes());
                 statement.executeUpdate();
             }
         } else {
-            try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+            try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ProtocolInstance.deleteAllForOwnedIdentity",
+                    "DELETE FROM " + TABLE_NAME +
                     " WHERE " + OWNED_IDENTITY + " = ?" +
                     " AND " + UID_ + " != ?;")) {
                 statement.setBytes(1, ownedIdentity.getBytes());
@@ -277,7 +285,8 @@ public class ProtocolInstance implements ObvDatabase {
     }
 
     public static void deleteAllTransfer(ProtocolManagerSession protocolManagerSession) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + PROTOCOL_ID + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ProtocolInstance.deleteAllTransfer",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + PROTOCOL_ID + " = ?;")) {
             statement.setInt(1, ConcreteProtocol.OWNED_IDENTITY_TRANSFER_PROTOCOL_ID);
             statement.executeUpdate();
         }

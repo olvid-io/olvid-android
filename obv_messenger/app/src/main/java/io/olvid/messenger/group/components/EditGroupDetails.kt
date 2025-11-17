@@ -55,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.App
@@ -157,7 +158,10 @@ fun EditGroupDetailsScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = olvidDefaultTextFieldColors(),
                 onValueChange = { editGroupDetailsViewModel.setGroupName(it) },
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Next
+                ),
                 maxLines = 1,
                 label = {
                     Text(stringResource(R.string.hint_group_name))

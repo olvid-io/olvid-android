@@ -191,7 +191,8 @@ public class ServerUserData implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ServerUserData.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, label.getBytes());
             statement.setLong(3, nextRefreshTimestamp);
@@ -203,7 +204,8 @@ public class ServerUserData implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ServerUserData.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + LABEL + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -217,7 +219,8 @@ public class ServerUserData implements ObvDatabase {
     // region getters
 
     public static ServerUserData get(IdentityManagerSession identityManagerSession, Identity ownedIdentity, UID label) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ServerUserData.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " +
                 OWNED_IDENTITY + " = ? AND " +
                 LABEL + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -233,14 +236,16 @@ public class ServerUserData implements ObvDatabase {
     }
 
     public static void deleteAllForOwnedIdentity(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ServerUserData.deleteAllForOwnedIdentity",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }
     }
 
     public static ServerUserData[] getAll(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ServerUserData.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<ServerUserData> list = new ArrayList<>();
                 while (res.next()) {
@@ -257,7 +262,8 @@ public class ServerUserData implements ObvDatabase {
     // region setters
 
     public void updateNextRefreshTimestamp() {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ServerUserData.updateNextRefreshTimestamp",
+                "UPDATE " + TABLE_NAME +
                 " SET " + NEXT_REFRESH_TIMESTAMP + " = ? " +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + LABEL + " = ?;")) {

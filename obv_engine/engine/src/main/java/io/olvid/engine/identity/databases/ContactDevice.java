@@ -211,7 +211,8 @@ public class ContactDevice implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?);")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactDevice.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?,?,?,?, ?,?,?);")) {
             statement.setBytes(1, uid.getBytes());
             statement.setBytes(2, contactIdentity.getBytes());
             statement.setBytes(3, ownedIdentity.getBytes());
@@ -238,7 +239,8 @@ public class ContactDevice implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactDevice.delete",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + UID_ + " = ? " +
                 " AND " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -256,7 +258,8 @@ public class ContactDevice implements ObvDatabase {
 
 
     public static ContactDevice get(IdentityManagerSession identityManagerSession, UID contactDeviceUid, Identity contactIdentity, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactDevice.get",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " +
                 UID_ + " = ? AND " +
                 CONTACT_IDENTITY + " = ? AND " +
                 OWNED_IDENTITY + " = ?;")) {
@@ -274,7 +277,8 @@ public class ContactDevice implements ObvDatabase {
     }
 
     public static boolean exists(IdentityManagerSession identityManagerSession, UID contactDeviceUid, Identity contactIdentity, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactDevice.exists",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + UID_ + " = ? " +
                 " AND " + CONTACT_IDENTITY + " = ? " +
                 " AND " + OWNED_IDENTITY + " = ?;")) {
@@ -288,7 +292,8 @@ public class ContactDevice implements ObvDatabase {
     }
 
     public static ContactDevice[] getAll(IdentityManagerSession identityManagerSession, Identity contactIdentity, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + " WHERE " +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactDevice.getAllForContact",
+                "SELECT * FROM " + TABLE_NAME + " WHERE " +
                 CONTACT_IDENTITY + " = ? AND " +
                 OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, contactIdentity.getBytes());
@@ -304,7 +309,8 @@ public class ContactDevice implements ObvDatabase {
     }
 
     public static ContactDevice[] getAll(IdentityManagerSession identityManagerSession) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME + ";")) {
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactDevice.getAll",
+                "SELECT * FROM " + TABLE_NAME + ";")) {
             try (ResultSet res = statement.executeQuery()) {
                 List<ContactDevice> list = new ArrayList<>();
                 while (res.next()) {
@@ -316,7 +322,8 @@ public class ContactDevice implements ObvDatabase {
     }
 
     public static List<ContactDevice> getAllWithExpiredPreKey(IdentityManagerSession identityManagerSession, Identity ownedIdentity, long expirationTimestamp) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("SELECT * FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactDevice.getAllWithExpiredPreKey",
+                "SELECT * FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ? " +
                 " AND " + PRE_KEY_EXPIRATION_TIMESTAMP + " < ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
@@ -334,7 +341,8 @@ public class ContactDevice implements ObvDatabase {
     // region setters
 
     public static void deleteAll(IdentityManagerSession identityManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactDevice.deleteAll",
+                "DELETE FROM " + TABLE_NAME +
                 " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
@@ -349,7 +357,8 @@ public class ContactDevice implements ObvDatabase {
             return false;
         }
 
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactDevice.setRawDeviceCapabilities",
+                "UPDATE " + TABLE_NAME +
                 " SET " + SERIALIZED_DEVICE_CAPABILITIES + " = ? " +
                 " WHERE " + UID_ + " = ? " +
                 " AND " + CONTACT_IDENTITY + " = ? " +
@@ -367,7 +376,8 @@ public class ContactDevice implements ObvDatabase {
     }
 
     public void setLatestChannelCreationPingTimestamp(long timestamp) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactDevice.setLatestChannelCreationPingTimestamp",
+                "UPDATE " + TABLE_NAME +
                 " SET " + LATEST_CHANNEL_CREATION_PING_TIMESTAMP + " = ? " +
                 " WHERE " + UID_ + " = ? " +
                 " AND " + CONTACT_IDENTITY + " = ? " +
@@ -383,7 +393,8 @@ public class ContactDevice implements ObvDatabase {
 
 
     public void setPreKey(PreKeyBlobOnServer preKeyBlob) throws SQLException {
-        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("UPDATE " + TABLE_NAME +
+        try (PreparedStatement statement = identityManagerSession.session.prepareStatement("ContactDevice.setPreKey",
+                "UPDATE " + TABLE_NAME +
                 " SET " + PRE_KEY_ID + " = ?, " +
                 PRE_KEY_ENCRYPTION_PUBLIC_KEY + " = ?, " +
                 PRE_KEY_EXPIRATION_TIMESTAMP + " = ? " +

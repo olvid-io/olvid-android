@@ -527,7 +527,7 @@
 	<string name="hint_notification_message" state="needs_review" hash="809999904">消息</string>
 	<string name="notification_action_send_message" state="needs_review" hash="971643531">发送消息</string>
 	<string name="text_name_and_message_separator" state="needs_review" hash="319802916">": "</string>
-	<string name="webrtc_status_initializing_call" state="needs_review" hash="368407976">正在初始化通话</string>
+	<string name="webrtc_status_initial" state="needs_review" hash="368407976">正在初始化通话</string>
 	<string name="webrtc_status_waiting_for_permission" state="needs_review" hash="-2003476717">等待音频权限</string>
 	<string name="webrtc_status_verifying_credentials" state="needs_review" hash="2019581458">验证凭据</string>
 	<string name="webrtc_status_connecting_to_peer" state="needs_review" hash="7619368">正在建立安全连接</string>
@@ -1212,7 +1212,8 @@
 	<string name="label_attach_emoji" state="needs_review" hash="-1842205895">插入表情符号</string>
 	<string name="label_long_press_for_favorite" state="needs_review" hash="1284446174">长按添加/移除收藏夹</string>
 	<string name="menu_action_debug_information" state="needs_review" hash="-919213138">调试信息</string>
-	<string name="debug_label_number_of_channels_and_devices" state="needs_review" hash="2044496046">频道/设备数量：</string>
+	<string name="debug_label_number_of_devices" state="needs_review" hash="1662862352">设备数量：</string>
+	<string name="debug_label_number_of_devices_no_channel" state="needs_review" hash="808299225">无安全通道：</string>
 	<string name="debug_label_server" state="needs_review" hash="910507791">服务器：</string>
 	<string name="debug_label_identity_provider" state="needs_review" hash="1970248721">身份提供商：</string>
 	<string name="debug_label_identity_link" state="needs_review" hash="-1861051963">ID 链接：</string>
@@ -2007,7 +2008,7 @@
 	<string name="explanation_backup_key_found_in_settings" state="needs_review" hash="530003837">您稍后也可以在设置中找到此密钥。</string>
 	<string name="tip_setup_new_backups_title" state="needs_review" hash="-1244364247">请勿丢失您账户的访问权限！</string>
 	<string name="tip_setup_new_backups_message" state="needs_review" hash="1009448435">备份可以帮助您在丢失设备访问权限时恢复您的资料。 新体验比以往任何时候都更简单😉，并且可以在几秒钟内设置完成。</string>
-	<string name="button_label_configure_backups" state="needs_review" hash="-671160147">配置备份</string>
+	<string name="button_label_configure_backups" state="needs_review" hash="-990646398">启用备份</string>
 	<string name="tip_write_backup_key_title" state="needs_review" hash="-1652757003">请不要忘记记录您的备份密钥‍☕</string>
 	<string name="tip_write_backup_key_message" state="needs_review" hash="931018791">如果您丢失了对设备的访问权限，您的备份密钥对于恢复您的资料至关重要。</string>
 	<string name="tip_troubleshooting_title" state="needs_review" hash="-393739108">提升您的 Olvid 体验🚀</string>
@@ -2113,4 +2114,9 @@
 	<string name="troubleshooting_accessibility_services_invalid_description" state="needs_review" hash="-1566232358">检测到未知辅助服务，请检查其安全性。</string>
 	<string name="hint_search_emoji" state="needs_review" hash="1350396609">搜索表情符号</string>
 	<string name="label_emoji_recents" state="needs_review" hash="-1327240071">最近</string>
+	<string name="menu_action_refresh_status" state="needs_review" hash="-1161371171">刷新联系人状态</string>
+	<string name="pref_show_engine_database_statistics_title" state="needs_review" hash="827733585">显示引擎数据库查询时间</string>
+	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">引擎数据库查询时序</string>
+	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">等待对方设备响应</string>
+	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">对端设备无法访问</string>
 </resources>

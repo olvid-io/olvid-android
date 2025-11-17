@@ -91,7 +91,8 @@ public class ChannelCreationPingSignatureReceived implements ObvDatabase {
 
     @Override
     public void insert() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("INSERT INTO " + TABLE_NAME + " VALUES (?,?);")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ChannelCreationPingSignatureReceived.insert",
+                "INSERT INTO " + TABLE_NAME + " VALUES (?,?);")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, signature);
             statement.executeUpdate();
@@ -100,7 +101,8 @@ public class ChannelCreationPingSignatureReceived implements ObvDatabase {
 
     @Override
     public void delete() throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY  + " = ? AND " + SIGNATURE  + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ChannelCreationPingSignatureReceived.delete",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY  + " = ? AND " + SIGNATURE  + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, signature);
             statement.executeUpdate();
@@ -113,7 +115,8 @@ public class ChannelCreationPingSignatureReceived implements ObvDatabase {
         if ((ownedIdentity == null) || (signature == null)) {
             return false;
         }
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("SELECT 1 FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ? AND " + SIGNATURE  + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ChannelCreationPingSignatureReceived.exists",
+                "SELECT 1 FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ? AND " + SIGNATURE  + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, signature);
             try (ResultSet res = statement.executeQuery()) {
@@ -123,7 +126,8 @@ public class ChannelCreationPingSignatureReceived implements ObvDatabase {
     }
 
     public static void deleteAllForOwnedIdentity(ProtocolManagerSession protocolManagerSession, Identity ownedIdentity) throws SQLException {
-        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
+        try (PreparedStatement statement = protocolManagerSession.session.prepareStatement("ChannelCreationPingSignatureReceived.deleteAllForOwnedIdentity",
+                "DELETE FROM " + TABLE_NAME + " WHERE " + OWNED_IDENTITY + " = ?;")) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.executeUpdate();
         }

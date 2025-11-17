@@ -38,10 +38,12 @@ import io.olvid.messenger.databases.dao.MessageRecipientInfoDao;
 import io.olvid.messenger.databases.entity.Contact;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
+import io.olvid.messenger.databases.entity.Group2Member;
 import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.jsons.JsonSharedSettings;
 import io.olvid.messenger.databases.tasks.InsertContactRevokedMessageTask;
 import io.olvid.messenger.databases.tasks.OwnedDevicesSynchronisationWithEngineTask;
+import io.olvid.messenger.databases.tasks.ResendReactionsAndPollVotesForGroupV2MemberTask;
 import io.olvid.messenger.databases.tasks.UpdateContactActiveTask;
 import io.olvid.messenger.databases.tasks.UpdateContactDisplayNameAndPhotoTask;
 import io.olvid.messenger.databases.tasks.UpdateContactKeycloakManagedTask;
@@ -97,13 +99,21 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
 
                             if (contact.hasChannelOrPreKey()) {
                                 // Search for MessageRecipientInfo indicating a message was not sent to this user
-                                List<MessageRecipientInfoDao.MessageRecipientInfoAndMessage> messageRecipientInfoAndMessages = db.messageRecipientInfoDao().getAllUnsentForContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                                 App.runThread(() -> db.runInTransaction(() -> {
+                                    List<MessageRecipientInfoDao.MessageRecipientInfoAndMessage> messageRecipientInfoAndMessages = db.messageRecipientInfoDao().getAllUnsentForContact(contact.bytesOwnedIdentity, contact.bytesContactIdentity);
                                     for (MessageRecipientInfoDao.MessageRecipientInfoAndMessage messageRecipientInfoAndMessage : messageRecipientInfoAndMessages) {
                                         messageRecipientInfoAndMessage.message.repost(messageRecipientInfoAndMessage.messageRecipientInfo, null);
                                     }
                                 }));
 
+                                // Search for all groups v2 of this contact and see if there are reactions/poll votes to repost
+                                App.runThread(() -> {
+                                    for (Group2Member group2Member : db.group2MemberDao().getAllForContactWithPendingCreationTimestamp(contact.bytesOwnedIdentity, contact.bytesContactIdentity)) {
+                                        new ResendReactionsAndPollVotesForGroupV2MemberTask(group2Member).run();
+                                    }
+                                });
+
+                                // TODO: only post this to the device with a new channel, not to all the devices
                                 // resend all discussion shared ephemeral message settings
                                 List<Long> discussionIds = new ArrayList<>();
                                 // direct discussion
@@ -130,7 +140,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                                         // send the json to contact
                                         Message message = Message.createDiscussionSettingsUpdateMessage(db, discussionId, jsonSharedSettings, bytesOwnedIdentity, true, null);
                                         if (message != null) {
-                                            message.postSettingsMessage(true, null);
+                                            message.postSettingsMessage(true, bytesContactIdentity);
                                         }
                                     }
                                 }

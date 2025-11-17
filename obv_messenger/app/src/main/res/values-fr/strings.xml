@@ -528,7 +528,7 @@
     <string name="hint_notification_message">Message</string>
     <string name="notification_action_send_message">Envoyer un message</string>
     <string name="text_name_and_message_separator">" : "</string>
-    <string name="webrtc_status_initializing_call">Initialisation de l\'appel</string>
+    <string name="webrtc_status_initial">Initialisation de l\'appel</string>
     <string name="webrtc_status_waiting_for_permission">En attente des permissions audio</string>
     <string name="webrtc_status_verifying_credentials">Vérification des identifiants</string>
     <string name="webrtc_status_connecting_to_peer">Sécurisation de la connexion</string>
@@ -1213,7 +1213,8 @@
     <string name="label_attach_emoji">Insérer un émoji</string>
     <string name="label_long_press_for_favorite">Appui long pour ajouter/retirer des favoris</string>
     <string name="menu_action_debug_information">Informations de debug</string>
-    <string name="debug_label_number_of_channels_and_devices">Nombre de canaux/appareils :</string>
+    <string name="debug_label_number_of_devices">Nombre d\'appareils :</string>
+    <string name="debug_label_number_of_devices_no_channel">Sans canal sécurisé :</string>
     <string name="debug_label_server">Serveur :</string>
     <string name="debug_label_identity_provider">Fournisseur d\'identité :</string>
     <string name="debug_label_identity_link">Lien d\'ID :</string>
@@ -2005,7 +2006,7 @@
     <string name="explanation_backup_key_found_in_settings">Vous pourrez retrouver cette clé plus tard dans les paramètres.</string>
     <string name="tip_setup_new_backups_title">Ne perdez pas l’accès à vos profils !</string>
     <string name="tip_setup_new_backups_message">Les sauvegardes vous permettent de restaurer vos profils si vous perdez l’accès à cet appareil. La nouvelle expérience est plus simple que jamais 😉 et peut être configurée en quelques secondes.</string>
-    <string name="button_label_configure_backups">Configurer les sauvegardes</string>
+    <string name="button_label_configure_backups">Activer les sauvegardes</string>
     <string name="tip_write_backup_key_title">N\'oubliez pas de noter votre clé de sauvegarde 😇</string>
     <string name="tip_write_backup_key_message">Votre clé de sauvegarde est essentielle pour restaurer votre profil si vous perdez l\'accès à cet appareil.</string>
     <string name="tip_troubleshooting_title">Améliorez votre expérience d\'Olvid 🚀</string>
@@ -2109,4 +2110,9 @@
     <string name="troubleshooting_accessibility_services_invalid_description">Un service d\'accessibilité inconnu a été détecté. Veuillez vérifier s\'il peut être utilisé en toute sécurité :</string>
     <string name="hint_search_emoji">Rechercher un émoji</string>
     <string name="label_emoji_recents">Récents</string>
+    <string name="menu_action_refresh_status">Actualiser le contact</string>
+    <string name="pref_show_engine_database_statistics_title">Afficher les durées des requêtes à la base de donnée de l\'engine</string>
+    <string name="dialog_title_engine_db_statistics">Requêtes à la base de donnée de l\'engine</string>
+    <string name="webrtc_status_initializing_call">Attente d\'une réponse de l\'appareil du correspondant</string>
+    <string name="webrtc_status_start_call_timeout">Appareil du correspondant injoignable</string>
 </resources>

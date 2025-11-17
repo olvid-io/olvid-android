@@ -49,6 +49,8 @@ public class JsonPollVote {
     public JsonOneToOneMessageIdentifier oneToOneIdentifier;
     @JsonProperty("ref")
     public JsonMessageReference messageReference;
+    @JsonProperty("ost")
+    public Long originalServerTimestamp;
 
     public static JsonPollVote of(Discussion discussion, Message message) throws Exception {
         JsonPollVote jsonPollVote = new JsonPollVote();

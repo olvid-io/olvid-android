@@ -38,6 +38,15 @@ import java.util.regex.Pattern
 
 internal object AppDatabaseMigrations {
     val MIGRATIONS: Array<Migration> = arrayOf(
+        object : Migration(81, 82) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                Logger.w("ROOM MIGRATING FROM VERSION 81 TO 82")
+                db.execSQL("ALTER TABLE `group2_member_table` ADD COLUMN `creation_timestamp` INTEGER NOT NULL DEFAULT " + System.currentTimeMillis())
+                db.execSQL("ALTER TABLE `group2_member_table` ADD COLUMN `pending_creation_timestamp` INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE `group2_pending_member_table` ADD COLUMN `creation_timestamp` INTEGER NOT NULL DEFAULT " + System.currentTimeMillis())
+            }
+        },
+
         object : Migration(80, 81) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 Logger.w("ROOM MIGRATING FROM VERSION 80 TO 81")
