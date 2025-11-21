@@ -495,7 +495,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         intent.setAction(WebrtcCallService.ACTION_MESSAGE);
         intent.putExtra(WebrtcCallService.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         intent.putExtra(WebrtcCallService.BYTES_CONTACT_IDENTITY_INTENT_EXTRA, bytesContactIdentity);
-        if (bytesContactIdentity != null) {
+        if (bytesContactDeviceUid != null) {
             intent.putExtra(WebrtcCallService.BYTES_CONTACT_DEVICE_UID_INTENT_EXTRA, bytesContactDeviceUid);
         }
         intent.putExtra(WebrtcCallService.CALL_IDENTIFIER_INTENT_EXTRA, Logger.getUuidString(jsonWebrtcMessage.getCallIdentifier()));

@@ -44,7 +44,6 @@ import io.olvid.messenger.databases.entity.MessageMetadata;
 import io.olvid.messenger.databases.entity.MessageRecipientInfo;
 import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
 import io.olvid.messenger.databases.tasks.HandleMessageExtendedPayloadTask;
-import io.olvid.messenger.databases.tasks.HandleReceiveReturnReceipt;
 import io.olvid.messenger.databases.tasks.new_message.HandleNewMessageTask;
 import io.olvid.messenger.services.ReturnReceiptProcessor;
 import io.olvid.messenger.services.UnifiedForegroundService;
@@ -140,7 +139,7 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                                 Message message = db.messageDao().get(fyleMessageJoinWithStatus.messageId);
                                 if (message != null) {
                                     message.recomputeAttachmentCount(db);
-                                    db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, 0, message.imageResolutions);
+                                    db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageAndVideoCount, message.videoCount, message.audioCount, message.firstAttachmentName, 0, message.imageResolutions);
                                 }
                             } else {
                                 // the file matches its metadata sha256, move the file to the Fyle directory and mark it as complete

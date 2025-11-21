@@ -354,7 +354,7 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                             pendingContact = discussionAndMessage.discussion.isLocked && invitation != null,
                                             attachmentCount = if (discussionAndMessage.message?.isLocationMessage == true) 0 else discussionAndMessage.message?.totalAttachmentCount
                                                 ?: 0,
-                                            imageAndVideoCount = if (discussionAndMessage.message?.isLocationMessage == true) 0 else discussionAndMessage.message?.imageCount
+                                            imageAndVideoCount = if (discussionAndMessage.message?.isLocationMessage == true) 0 else discussionAndMessage.message?.imageAndVideoCount
                                                 ?: 0,
                                             videoCount = discussionAndMessage.message?.videoCount ?: 0,
                                             audioCount = discussionAndMessage.message?.audioCount ?: 0,

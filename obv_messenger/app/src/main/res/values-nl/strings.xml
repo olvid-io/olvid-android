@@ -2118,4 +2118,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Engine database query timings</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Wachten op reactie van het apparaat van de contactpersoon</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Apparaat van de contactpersoon is onbereikbaar.</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Alle beveiligde kanalen opnieuw aanmaken.</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Het opnieuw aanmaken van alle beveiligde kanalen dwingt Olvid om nieuwe beveiligde communicatiekanalen met alle apparaten van je contacten te creëren. Dit is over het algemeen niet nuttig, maar kan zeldzame situaties oplossen waarin sommige van deze kanalen \"niet gesynchroniseerd\" zijn.\n\n**Waarschuwing:** als je veel contacten hebt, kan deze bewerking enkele minuten duren en kun je mogelijk enkele inkomende berichten mislopen tijdens het uitvoeren ervan.</string>
 </resources>

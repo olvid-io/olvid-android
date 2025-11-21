@@ -21,8 +21,10 @@ package io.olvid.messenger.designsystem.components
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.Dp
@@ -30,11 +32,13 @@ import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 
 @Composable
-fun OlvidCircularProgress(modifier: Modifier = Modifier, size : Dp = 64.dp) {
+fun OlvidCircularProgress(modifier: Modifier = Modifier,
+                          color: Color = colorResource(id = R.color.olvid_gradient_light),
+                          size : Dp = 64.dp) {
     CircularProgressIndicator(
         modifier = modifier
             .size(size),
-        color = colorResource(id = R.color.olvid_gradient_light),
+        color = color,
         strokeWidth = 5.dp,
         strokeCap = StrokeCap.Round,
     )

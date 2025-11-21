@@ -2118,4 +2118,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Motor adatbázis lekérdezések időzítése</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Várakozom a másik fél eszközének válaszára</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">A társ eszköz nem elérhető</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Biztonságos csatornák újjáalkotása</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Az összes biztonságos csatorna újra létrehozása arra kényszeríti az Olvidot, hogy új biztonságos kommunikációs csatornákat hozzon létre a kapcsolataid minden eszközével. Ez általában nem hasznos, de megoldhatja azokat a ritka helyzeteket, amikor ezek a csatornák «szinkronizálatlanok».\n\n**Figyelem:** Ha sok a kapcsolatod, ez a művelet néhány percet is igénybe vehet, és ezalatt elveszíthetsz néhány beérkező üzenetet.</string>
 </resources>

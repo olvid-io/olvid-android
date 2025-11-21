@@ -2119,4 +2119,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">引擎資料庫查詢時序</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">等待對方的裝置回應</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">對端裝置無法連線</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">重新建立所有安全通道</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">重建所有安全通道會強制 Olvid 與您聯絡人的所有裝置建立新的安全通訊管道。 通常情況下這沒有用處，但可以解決一些罕見的情況，即這些管道中的某些管道「不同步」。\n\n**警告：**如果您有很多聯絡人，此操作可能需要幾分鐘，並且您可能會在執行過程中遺失一些傳入訊息。</string>
 </resources>

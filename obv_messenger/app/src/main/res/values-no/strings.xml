@@ -2119,4 +2119,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Tidsbruk for database-spørringer i motoren</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Venter på svar fra enhetens mottaker</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Enhet for kontaktpersonen er utilgjengelig.</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Opprett alle sikre kanaler på nytt.</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Å gjenskape alle sikre kanaler vil tvinge Olvid til å opprette nye sikre kommunikasjonskanaler med alle enhetene til kontaktene dine. Dette er vanligvis ikke nyttig, men kan løse sjeldne situasjoner der noen av disse kanalene er «ute av synk».\n\n**Advarsel:** Hvis du har mange kontakter, kan denne operasjonen ta noen minutter, og du kan miste noen innkommende meldinger mens den kjører.</string>
 </resources>

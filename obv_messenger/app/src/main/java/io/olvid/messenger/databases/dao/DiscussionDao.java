@@ -183,7 +183,7 @@ public abstract class DiscussionDao {
             Message.STATUS + ", " + Message.WIPE_STATUS + ", " + Message.MESSAGE_TYPE + ", " +
             Message.DISCUSSION_ID + ", " + Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER + ", " +
             Message.SENDER_IDENTIFIER + ", " + Message.SENDER_THREAD_IDENTIFIER + ", " +
-            Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
+            Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_AND_VIDEO_COUNT + ", " +
             Message.VIDEO_COUNT + ", " + Message.AUDIO_COUNT + ", " +
             Message.FIRST_ATTACHMENT_NAME + ", " + Message.WIPED_ATTACHMENT_COUNT + ", " +
             Message.EDITED + ", " + Message.FORWARDED + ", " +
@@ -228,7 +228,7 @@ public abstract class DiscussionDao {
             Message.STATUS + ", " + Message.WIPE_STATUS + ", " + Message.MESSAGE_TYPE + ", " +
             Message.DISCUSSION_ID + ", " + Message.INBOUND_MESSAGE_ENGINE_IDENTIFIER + ", " +
             Message.SENDER_IDENTIFIER + ", " + Message.SENDER_THREAD_IDENTIFIER + ", " +
-            Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_COUNT + ", " +
+            Message.TOTAL_ATTACHMENT_COUNT + ", " + Message.IMAGE_AND_VIDEO_COUNT + ", " +
             Message.VIDEO_COUNT + ", " + Message.AUDIO_COUNT + ", " +
             Message.FIRST_ATTACHMENT_NAME + ", " + Message.WIPED_ATTACHMENT_COUNT + ", " +
             Message.EDITED + ", " + Message.FORWARDED + ", " +

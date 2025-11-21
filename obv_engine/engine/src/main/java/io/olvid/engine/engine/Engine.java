@@ -1922,6 +1922,21 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
     }
 
     @Override
+    public void recreateAllChannels(byte[] bytesOwnedIdentity) throws Exception {
+        Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
+        try (EngineSession engineSession = getSession()) {
+            engineSession.session.startTransaction();
+            Identity[] contactIdentities = identityManager.getContactsOfOwnedIdentity(engineSession.session, ownedIdentity);
+            for (Identity contactIdentity : contactIdentities) {
+                channelManager.deleteObliviousChannelsWithContact(engineSession.session, ownedIdentity, contactIdentity);
+                identityManager.removeAllDevicesForContactIdentity(engineSession.session, ownedIdentity, contactIdentity);
+                protocolManager.startDeviceDiscoveryProtocolWithinTransaction(engineSession.session, ownedIdentity, contactIdentity);
+            }
+            engineSession.session.commit();
+        }
+    }
+
+    @Override
     public void inviteContactsToGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, byte[][] bytesNewMemberIdentities) throws Exception {
         Identity ownedIdentity = Identity.of(bytesOwnedIdentity);
         HashSet<Identity> newMembersIdentity = new HashSet<>();

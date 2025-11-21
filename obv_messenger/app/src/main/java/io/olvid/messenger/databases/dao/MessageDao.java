@@ -66,7 +66,7 @@ public interface MessageDao {
             "mess." + Message.SENDER_IDENTIFIER + " AS mess_" + Message.SENDER_IDENTIFIER + ", " +
             "mess." + Message.SENDER_THREAD_IDENTIFIER + " AS mess_" + Message.SENDER_THREAD_IDENTIFIER + ", " +
             "mess." + Message.TOTAL_ATTACHMENT_COUNT + " AS mess_" + Message.TOTAL_ATTACHMENT_COUNT + ", " +
-            "mess." + Message.IMAGE_COUNT + " AS mess_" + Message.IMAGE_COUNT + ", " +
+            "mess." + Message.IMAGE_AND_VIDEO_COUNT + " AS mess_" + Message.IMAGE_AND_VIDEO_COUNT + ", " +
             "mess." + Message.VIDEO_COUNT + " AS mess_" + Message.VIDEO_COUNT + ", " +
             "mess." + Message.AUDIO_COUNT + " AS mess_" + Message.AUDIO_COUNT + ", " +
             "mess." + Message.FIRST_ATTACHMENT_NAME + " AS mess_" + Message.FIRST_ATTACHMENT_NAME + ", " +
@@ -141,7 +141,7 @@ public interface MessageDao {
 
     @Query("UPDATE " + Message.TABLE_NAME +
             " SET " + Message.TOTAL_ATTACHMENT_COUNT + " = :totalAttachmentCount, " +
-            Message.IMAGE_COUNT + " = :imageCount, " +
+            Message.IMAGE_AND_VIDEO_COUNT + " = :imageCount, " +
             Message.IMAGE_RESOLUTIONS + " = :imageResolutions, " +
             Message.VIDEO_COUNT + " = :videoCount, " +
             Message.AUDIO_COUNT + " = :audioCount, " +
@@ -480,7 +480,7 @@ public interface MessageDao {
     List<Message> getAllUnreadDiscussionMessagesSync(long discussionId);
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +
-            " WHERE " + Message.IMAGE_COUNT + " != 0")
+            " WHERE " + Message.IMAGE_AND_VIDEO_COUNT + " != 0")
     List<Message> getAllWithImages();
 
     @Query("SELECT * FROM " + Message.TABLE_NAME +

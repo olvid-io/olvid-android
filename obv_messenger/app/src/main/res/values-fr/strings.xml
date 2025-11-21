@@ -2115,4 +2115,6 @@
     <string name="dialog_title_engine_db_statistics">Requêtes à la base de donnée de l\'engine</string>
     <string name="webrtc_status_initializing_call">Attente d\'une réponse de l\'appareil du correspondant</string>
     <string name="webrtc_status_start_call_timeout">Appareil du correspondant injoignable</string>
+    <string name="recreate_all_secure_channels">Recréer tous les canaux sécurisés</string>
+    <string name="recreate_all_secure_channels_explanation">Recréer tous les canaux sécurisés forcera Olvid à créer de nouveaux canaux de communication sécurisés avec tous les appareils de vos contacts. Ceci n\'est généralement pas utile, mais peut débloquer de rares situations où certains de ces canaux sont « désynchronisés ».\n\n**Attention :** si vous avez de nombreux contacts, cette opération peut prendre quelques minutes et vous pourriez perdre certains messages reçus pendant qu\'elle s\'exécute.</string>
 </resources>

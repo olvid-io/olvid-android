@@ -2116,4 +2116,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Motor veritabanı sorgu süreleri</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Karşı tarafın cihazından yanıt bekleniyor</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Karşı cihaz erişilemiyor</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Tüm güvenli kanalları yeniden oluştur</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Tüm güvenli kanalları yeniden oluşturmak, Olvid\'i kişilerinize ait tüm cihazlarla yeni güvenli iletişim kanalları oluşturmaya zorlayacaktır. Bu genellikle kullanışlı değildir, ancak bazı kanalların \"senkronizasyon dışı\" olduğu nadir durumlarda sorunu çözebilir.\n\n**Uyarı:** Çok sayıda kişiniz varsa, bu işlem birkaç dakika sürebilir ve bu sırada bazı gelen mesajları kaybedebilirsiniz.</string>
 </resources>

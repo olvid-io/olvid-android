@@ -2119,4 +2119,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Tempi delle query del database del motore</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">In attesa di una risposta dal dispositivo del contatto</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Dispositivo del peer irraggiungibile</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Ricrea tutti i canali sicuri</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Ricreare tutti i canali sicuri forzerà Olvid a creare nuovi canali di comunicazione sicuri con tutti i dispositivi dei tuoi contatti. Questo generalmente non è utile, ma può risolvere rare situazioni in cui alcuni di questi canali sono \"fuori sincronia\".\n\n**Attenzione:** se hai molti contatti, questa operazione potrebbe richiedere alcuni minuti e potresti perdere alcuni messaggi in arrivo durante la sua esecuzione.</string>
 </resources>

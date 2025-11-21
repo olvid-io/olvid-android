@@ -2120,4 +2120,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">زمان‌بندی پرس‌وجوهای پایگاه داده موتور</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">در حال انتظار پاسخ دستگاه طرف مقابل</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">دستگاه همتا در دسترس نیست</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">بازسازی همه کانال‌های امن</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">بازسازی تمام کانال‌های امن، اولوید را مجبور می‌کند تا کانال‌های ارتباطی امن جدیدی با تمام دستگاه‌های مخاطبین شما ایجاد کند. این کار معمولاً مفید نیست، اما می‌تواند موقعیت‌های نادری را که در آن برخی از این کانال‌ها «همگام‌سازی نشده‌اند» حل کند.\n\n**هشدار:** اگر مخاطبین زیادی دارید، این عملیات ممکن است چند دقیقه طول بکشد و ممکن است در حین انجام آن برخی از پیام‌های دریافتی را از دست بدهید.</string>
 </resources>

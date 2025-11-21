@@ -425,7 +425,7 @@ public class MessageListener {
                     messageBuilder.setImageCount(0);
                 } else {
                     messageBuilder.setTotalAttachmentCount(message.totalAttachmentCount);
-                    messageBuilder.setImageCount(message.imageCount);
+                    messageBuilder.setImageCount(message.imageAndVideoCount);
                 }
                 messageBuilder.setSenderIdentifier(ByteString.copyFrom(message.senderIdentifier));
                 String contactName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(message.senderIdentifier);

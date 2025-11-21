@@ -1,3 +1,13 @@
+# Build 281 (4.1.2)
+2025-11-21
+
+- Add a troubleshooting option to recreate secure channels with all contacts at once.
+
+# ~~Build 280 (4.1.2)~~
+2025-11-18
+
+- Fix an NPE for inbox messages with a null sender device UID.
+
 # Build 279 (4.1.1)
 2025-11-17
 

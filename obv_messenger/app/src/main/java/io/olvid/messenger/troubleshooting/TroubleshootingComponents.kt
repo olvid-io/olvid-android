@@ -76,6 +76,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -392,7 +393,10 @@ fun TroubleShootItem(
                     Column {
                         Text(
                             modifier = Modifier.padding(top = 4.dp, bottom = if (valid && additionalContent == null) 4.dp else 0.dp),
-                            text = if (valid) description else descriptionInvalid ?: description,
+                            text = AnnotatedString(if (valid) description else descriptionInvalid ?: description).formatMarkdown(
+                                complete = true,
+                                context = LocalContext.current,
+                            ),
                             color = colorResource(id = R.color.greyTint),
                             style = OlvidTypography.body2,
                         )
@@ -473,7 +477,8 @@ enum class TroubleshootingItemType {
     STORAGE,
     DB_SYNC,
     UPDATE_AVAILABLE,
-    ACCESSIBILITY_SERVICES
+    ACCESSIBILITY_SERVICES,
+    RECREATE_ALL_CHANNELS,
 }
 
 @Preview

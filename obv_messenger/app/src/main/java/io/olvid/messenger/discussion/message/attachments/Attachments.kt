@@ -397,7 +397,7 @@ fun Attachments(
                         Image(
                             modifier = Modifier
                                 .width(if (wide || imageCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
-                                .requiredHeight(if (message.imageCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
+                                .requiredHeight(if (message.imageAndVideoCount == 1) maxWidth else (maxWidth / 2 - 2.dp))
                                 .border(
                                     width = 1.dp,
                                     color = colorResource(id = R.color.attachmentBorder),
@@ -997,7 +997,7 @@ fun getMinimumHeight(
         ImageResolution.parseMultiple(message.imageResolutions)
     }.getOrNull()
 
-    if (!imageResolutions.isNullOrEmpty() && imageResolutions.size == message.imageCount) {
+    if (!imageResolutions.isNullOrEmpty() && imageResolutions.size == message.imageAndVideoCount) {
         when (imageResolutions.size) {
             1 -> {
                 attachmentsHeight += imageResolutions[0].getPreferredHeight(
@@ -1052,24 +1052,24 @@ fun getMinimumHeight(
         }
     } else {
         // images
-        if (message.imageCount == 1) {
+        if (message.imageAndVideoCount == 1) {
             attachmentsHeight += displayWidth
-        } else if (message.imageCount == 2) {
+        } else if (message.imageAndVideoCount == 2) {
             attachmentsHeight += displayWidth
-        } else if (message.imageCount > 2) {
-            if ((message.imageCount and 1) != 0) {
-                attachmentsHeight += ((displayWidth + attachmentSpace) / 2) * (message.imageCount / 2)
+        } else if (message.imageAndVideoCount > 2) {
+            if ((message.imageAndVideoCount and 1) != 0) {
+                attachmentsHeight += ((displayWidth + attachmentSpace) / 2) * (message.imageAndVideoCount / 2)
                 attachmentsHeight += (displayWidth - attachmentSpace) / 2
             } else {
-                attachmentsHeight += ((displayWidth + attachmentSpace) / 2) * (message.imageCount / 2)
+                attachmentsHeight += ((displayWidth + attachmentSpace) / 2) * (message.imageAndVideoCount / 2)
                 attachmentsHeight -= attachmentSpace
             }
         }
     }
 
     // files
-    attachmentsHeight += (attachmentFileHeight + attachmentSpace) * (message.totalAttachmentCount - message.imageCount)
-    if (message.imageCount == 0) {
+    attachmentsHeight += (attachmentFileHeight + attachmentSpace) * (message.totalAttachmentCount - message.imageAndVideoCount)
+    if (message.imageAndVideoCount == 0) {
         attachmentsHeight -= attachmentSpace
     }
 

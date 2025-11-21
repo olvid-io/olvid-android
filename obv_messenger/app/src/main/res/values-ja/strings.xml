@@ -2116,4 +2116,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">エンジンデータベースクエリのタイミング</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">相手のデバイスからの応答を待っています</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">相手のデバイスに接続できません</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">すべての安全なチャンネルを再作成する</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">すべての安全なチャンネルを再作成すると、Olvidはすべての連絡先のデバイスと新しい安全な通信チャンネルを作成するように強制されます。通常は役に立ちませんが、これらのチャンネルのいくつかが「同期されていない」という珍しい状況を解決できる場合があります。\n\n**警告：** 連絡先が多い場合、この操作には数分かかる可能性があり、実行中に一部の受信メッセージを失う可能性があります。</string>
 </resources>

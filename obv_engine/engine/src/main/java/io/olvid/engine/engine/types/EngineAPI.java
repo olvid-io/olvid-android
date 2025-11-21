@@ -186,6 +186,7 @@ public interface EngineAPI {
     void startGroupV2CreationProtocol(String serializedGroupDetails, String absolutePhotoUrl, byte[] bytesOwnedIdentity, HashSet<GroupV2.Permission> ownPermissions, HashMap<ObvBytesKey, HashSet<GroupV2.Permission>> otherGroupMembers, String serializedGroupType) throws Exception;
     void restartAllOngoingChannelEstablishmentProtocols(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
     void recreateAllChannels(byte[] bytesOwnedIdentity, byte[] bytesContactIdentity) throws Exception;
+    void recreateAllChannels(byte[] bytesOwnedIdentity) throws Exception;
     void inviteContactsToGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, byte[][] bytesNewMemberIdentities) throws Exception;
     void removeContactsFromGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, byte[][] bytesRemovedMemberIdentities) throws Exception;
     void reinvitePendingToGroup(byte[] bytesOwnedIdentity, byte[] bytesGroupOwnerAndUid, byte[] bytesPendingMemberIdentity) throws Exception;

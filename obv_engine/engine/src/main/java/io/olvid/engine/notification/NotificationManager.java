@@ -112,7 +112,11 @@ public class NotificationManager implements NotificationListeningDelegate, Notif
                     removeListener(notificationName, entry.getKey());
                 } else {
                     // call callback method
-                    listener.callback(notificationName, userInfo);
+                    try {
+                        listener.callback(notificationName, userInfo);
+                    } catch (Exception e) {
+                        Logger.x(e);
+                    }
                 }
             }
         } else {

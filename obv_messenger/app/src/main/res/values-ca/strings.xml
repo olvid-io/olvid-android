@@ -2118,4 +2118,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Temps d\'execució de les consultes a la base de dades del motor</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Esperant la resposta del dispositiu del destinatari</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Dispositiu del destinatari inassolible</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Recrea tots els canals segurs</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Recrear tots els canals segurs forçarà Olvid a crear nous canals de comunicació segura amb tots els dispositius dels teus contactes. Això generalment no és útil, però pot resoldre situacions rares on alguns d\'aquests canals estan \"desincronitzats\".\n\n**Advertència:** si tens molts contactes, aquesta operació pot trigar uns minuts i podries perdre alguns missatges entrants mentre s\'executa.</string>
 </resources>

@@ -2119,4 +2119,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Tempos de consulta à base de dados do motor</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Aguardando resposta do dispositivo do contato</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Dispositivo do contato inacessível</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Recriar todos os canais seguros</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Recriar todos os canais seguros forçará o Olvid a criar novos canais de comunicação seguros com todos os dispositivos dos seus contactos. Geralmente não é útil, mas pode resolver situações raras onde alguns destes canais estão \"fora de sincronia\".\n\n**Aviso:** se tiver muitos contactos, esta operação pode demorar alguns minutos e poderá perder algumas mensagens recebidas durante a sua execução.</string>
 </resources>

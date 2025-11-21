@@ -2117,4 +2117,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Časy dotazů databáze enginu</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Čekám na odpověď zařízení protějška</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Zařízení protistrany je nedostupné</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Obnovit všechny zabezpečené kanály</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Obnovení všech zabezpečených kanálů donutí Olvid vytvořit nové zabezpečené komunikační kanály se všemi zařízeními vašich kontaktů. To obvykle není užitečné, ale může vyřešit vzácné situace, kdy jsou některé z těchto kanálů „nesynchronizované“.\n\n**Upozornění:** pokud máte mnoho kontaktů, může tato operace trvat několik minut a můžete ztratit některé příchozí zprávy během jejího provádění.</string>
 </resources>

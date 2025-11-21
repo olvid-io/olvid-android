@@ -247,70 +247,72 @@ public class OtherPreferenceFragment extends PreferenceFragmentCompat {
         if (!StringUtils.validateUri(uri)) {
             return;
         }
-        try (OutputStream os = activity.getContentResolver().openOutputStream(uri)) {
-            try (ZipOutputStream zipOutputStream = new ZipOutputStream(os)) {
-                File plaintextDbFile = new File(App.absolutePathFromRelative("plaintext.db"));
-                if (plaintextDbFile.exists()) {
-                    //noinspection ResultOfMethodCallIgnored
-                    plaintextDbFile.delete();
-                }
+        App.runThread(() -> {
+            try (OutputStream os = activity.getContentResolver().openOutputStream(uri)) {
+                try (ZipOutputStream zipOutputStream = new ZipOutputStream(os)) {
+                    File plaintextDbFile = new File(App.absolutePathFromRelative("plaintext.db"));
+                    if (plaintextDbFile.exists()) {
+                        //noinspection ResultOfMethodCallIgnored
+                        plaintextDbFile.delete();
+                    }
 
-                {
-                    String engineDbKey = DatabaseKey.get(DatabaseKey.ENGINE_DATABASE_SECRET);
-                    if (engineDbKey != null) {
-                        try (Session session = Session.getUpgradeTablesSession(App.absolutePathFromRelative(Constants.ENGINE_DB_FILENAME), engineDbKey)) {
-                            try (Statement statement = session.createStatement()) {
-                                statement.execute("ATTACH DATABASE '" + plaintextDbFile.getPath() + "' AS plaintext KEY ''");
-                                statement.execute("SELECT sqlcipher_export('plaintext');");
-                                statement.execute("DETACH DATABASE plaintext;");
+                    {
+                        String engineDbKey = DatabaseKey.get(DatabaseKey.ENGINE_DATABASE_SECRET);
+                        if (engineDbKey != null) {
+                            try (Session session = Session.getUpgradeTablesSession(App.absolutePathFromRelative(Constants.ENGINE_DB_FILENAME), engineDbKey)) {
+                                try (Statement statement = session.createStatement()) {
+                                    statement.execute("ATTACH DATABASE '" + plaintextDbFile.getPath() + "' AS plaintext KEY ''");
+                                    statement.execute("SELECT sqlcipher_export('plaintext');");
+                                    statement.execute("DETACH DATABASE plaintext;");
+                                }
+                            } catch (Exception e) {
+                                Logger.e("Unable to decrypt engine database", e);
                             }
-                        } catch (Exception e) {
-                            Logger.e("Unable to decrypt engine database", e);
                         }
-                    }
-                    ZipEntry engineDb = new ZipEntry(Constants.ENGINE_DB_FILENAME);
-                    zipOutputStream.putNextEntry(engineDb);
-                    try (FileInputStream fis = new FileInputStream(plaintextDbFile.getPath())) {
-                        byte[] buffer = new byte[262_144];
-                        int c;
-                        while ((c = fis.read(buffer)) != -1) {
-                            zipOutputStream.write(buffer, 0, c);
+                        ZipEntry engineDb = new ZipEntry(Constants.ENGINE_DB_FILENAME);
+                        zipOutputStream.putNextEntry(engineDb);
+                        try (FileInputStream fis = new FileInputStream(plaintextDbFile.getPath())) {
+                            byte[] buffer = new byte[262_144];
+                            int c;
+                            while ((c = fis.read(buffer)) != -1) {
+                                zipOutputStream.write(buffer, 0, c);
+                            }
                         }
+                        //noinspection ResultOfMethodCallIgnored
+                        plaintextDbFile.delete();
                     }
-                    //noinspection ResultOfMethodCallIgnored
-                    plaintextDbFile.delete();
-                }
 
-                {
-                    String appDbKey = DatabaseKey.get(DatabaseKey.APP_DATABASE_SECRET);
-                    if (appDbKey != null) {
-                        try (SQLiteDatabase db = SQLiteDatabase.openDatabase(App.absolutePathFromRelative(AppDatabase.DB_FILE_NAME), appDbKey, null, SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY, null)) {
-                            db.rawExecSQL("ATTACH DATABASE '" + plaintextDbFile.getPath() + "' AS plaintext KEY '';");
-                            db.rawExecSQL("SELECT sqlcipher_export('plaintext');");
-                            db.rawExecSQL("DETACH DATABASE plaintext;");
-                        } catch (Exception ex) {
-                            Logger.e("Unable to decrypt app database", ex);
+                    {
+                        String appDbKey = DatabaseKey.get(DatabaseKey.APP_DATABASE_SECRET);
+                        if (appDbKey != null) {
+                            try (SQLiteDatabase db = SQLiteDatabase.openDatabase(App.absolutePathFromRelative(AppDatabase.DB_FILE_NAME), appDbKey, null, SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY, null)) {
+                                db.rawExecSQL("ATTACH DATABASE '" + plaintextDbFile.getPath() + "' AS plaintext KEY '';");
+                                db.rawExecSQL("SELECT sqlcipher_export('plaintext');");
+                                db.rawExecSQL("DETACH DATABASE plaintext;");
+                            } catch (Exception ex) {
+                                Logger.e("Unable to decrypt app database", ex);
+                            }
                         }
-                    }
-                    ZipEntry appDb = new ZipEntry(AppDatabase.DB_FILE_NAME);
-                    zipOutputStream.putNextEntry(appDb);
-                    try (FileInputStream fis = new FileInputStream(plaintextDbFile.getPath())) {
-                        byte[] buffer = new byte[262_144];
-                        int c;
-                        while ((c = fis.read(buffer)) != -1) {
-                            zipOutputStream.write(buffer, 0, c);
+                        ZipEntry appDb = new ZipEntry(AppDatabase.DB_FILE_NAME);
+                        zipOutputStream.putNextEntry(appDb);
+                        try (FileInputStream fis = new FileInputStream(plaintextDbFile.getPath())) {
+                            byte[] buffer = new byte[262_144];
+                            int c;
+                            while ((c = fis.read(buffer)) != -1) {
+                                zipOutputStream.write(buffer, 0, c);
+                            }
                         }
+                        //noinspection ResultOfMethodCallIgnored
+                        plaintextDbFile.delete();
                     }
-                    //noinspection ResultOfMethodCallIgnored
-                    plaintextDbFile.delete();
-                }
 
-                App.toast(R.string.toast_message_success_exporting_db, Toast.LENGTH_SHORT);
+                    App.toast(R.string.toast_message_success_exporting_db, Toast.LENGTH_SHORT);
+                }
+            } catch (IOException e) {
+                Logger.x(e);
+                App.toast(R.string.toast_message_error_exporting_db, Toast.LENGTH_SHORT);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            App.toast(R.string.toast_message_error_exporting_db, Toast.LENGTH_SHORT);
-        }
+        });
     }
 
     @Override

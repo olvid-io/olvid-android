@@ -198,7 +198,7 @@ public class ForwardMessagesTask implements Runnable {
                   }
                }
                newMessage.recomputeAttachmentCount(db);
-               db.messageDao().updateAttachmentCount(newMessage.id, newMessage.totalAttachmentCount, newMessage.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, 0, newMessage.imageResolutions);
+               db.messageDao().updateAttachmentCount(newMessage.id, newMessage.totalAttachmentCount, newMessage.imageAndVideoCount, message.videoCount, message.audioCount, message.firstAttachmentName, 0, newMessage.imageResolutions);
 
                newMessage.post(false, null);
             });

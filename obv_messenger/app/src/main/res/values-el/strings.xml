@@ -2118,4 +2118,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Χρόνοι εκτέλεσης ερωτημάτων της μηχανής</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Περιμένω απάντηση από τη συσκευή του άλλου χρήστη</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Μη προσβάσιμη συσκευή συνομηλίκου</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Επαναδημιουργία όλων των ασφαλών καναλιών</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Η επαναδημιουργία όλων των ασφαλών καναλιών θα αναγκάσει το Olvid να δημιουργήσει νέους ασφαλείς καναλους επικοινωνίας με όλες τις συσκευές των επαφών σας. Αυτό γενικά δεν είναι χρήσιμο, αλλά μπορεί να επιλύσει σπάνιες καταστάσεις όπου ορισμένοι από αυτούς τους καναλους είναι «εκτός συγχρονισμού».\n\n**Προειδοποίηση:** Εάν έχετε πολλούς επαφές, αυτή η λειτουργία μπορεί να διαρκέσει μερικά λεπτά και ενδέχεται να χάσετε ορισμένα εισερχόμενα μηνύματα κατά τη διάρκεια της εκτέλεσής της.</string>
 </resources>

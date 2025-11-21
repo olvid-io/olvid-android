@@ -35,6 +35,7 @@ import android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
 import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
 import android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
 import android.text.format.Formatter
+import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -93,6 +94,7 @@ import io.olvid.messenger.customClasses.AccessibilityManager
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.AppDatabaseOpenCallback
+import io.olvid.messenger.designsystem.components.OlvidCircularProgress
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.firebase.ObvFirebaseMessagingService
@@ -277,6 +279,7 @@ class TroubleshootingActivity : AppCompatActivity() {
                     )
                 )
 
+                list.add(Triple(true, false, TroubleshootingItemType.RECREATE_ALL_CHANNELS))
 
                 list.sortBy {
                     when {
@@ -726,8 +729,7 @@ class TroubleshootingActivity : AppCompatActivity() {
                                                             AppDatabase.getInstance()
                                                         )
                                                         Thread.sleep(1000)
-                                                    } catch (_: Exception) {
-                                                    }
+                                                    } catch (_: Exception) { }
                                                     inProgress = false
                                                 }
                                             },
@@ -865,6 +867,59 @@ class TroubleshootingActivity : AppCompatActivity() {
                                 }
 
                             }
+                        }
+
+                        TroubleshootingItemType.RECREATE_ALL_CHANNELS -> {
+                            TroubleShootItem(
+                                title = stringResource(R.string.recreate_all_secure_channels),
+                                description = stringResource(R.string.recreate_all_secure_channels_explanation),
+                                valid = true,
+                                critical = false,
+                                additionalContent = {
+                                    var inProgress by remember { mutableStateOf(false) }
+                                    AnimatedVisibility(visible = inProgress) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier
+                                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                                                .size(24.dp),
+                                            color = colorResource(id = R.color.red),
+                                            strokeWidth = 2.dp
+                                        )
+                                    }
+                                    AnimatedVisibility(visible = !inProgress) {
+                                        OlvidTextButton(
+                                            text = stringResource(R.string.recreate_all_secure_channels),
+                                            contentColor = colorResource(R.color.red),
+                                            allowTwoLines = true
+                                        ) {
+                                            App.runThread {
+                                                runCatching {
+                                                    inProgress = true
+                                                    AppSingleton.getBytesCurrentIdentity()
+                                                        ?.let { bytesCurrentIdentity ->
+                                                            AppSingleton.getEngine()
+                                                                .recreateAllChannels(
+                                                                    bytesCurrentIdentity
+                                                                )
+                                                        }
+                                                }.onSuccess {
+                                                    App.toast(
+                                                        R.string.toast_message_channel_restart_sucessful,
+                                                        Toast.LENGTH_SHORT
+                                                    )
+                                                    inProgress = false
+                                                }.onFailure {
+                                                    App.toast(
+                                                        R.string.toast_message_channel_restart_failed,
+                                                        Toast.LENGTH_SHORT
+                                                    )
+                                                    inProgress = false
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                            ) {}
                         }
                     }
                 }

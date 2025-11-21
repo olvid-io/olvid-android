@@ -991,7 +991,7 @@ public class AppSingleton {
                 List<Message> messages = db.messageDao().getAllWithImages();
                 for (Message message: messages) {
                     if (message.recomputeAttachmentCount(db)) {
-                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
+                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageAndVideoCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
                     }
                 }
                 Logger.i("Build 126/127 image migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
@@ -1022,7 +1022,7 @@ public class AppSingleton {
                 List<Message> messages = db.messageDao().getAllWithLinkPreview();
                 for (Message message: messages) {
                     if (message.recomputeAttachmentCount(db)) {
-                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
+                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageAndVideoCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
                     }
                 }
                 Logger.i("Build 193 link-preview migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
@@ -1055,7 +1055,7 @@ public class AppSingleton {
                 List<Message> messages = db.messageDao().getAllWithAttachments();
                 for (Message message: messages) {
                     if (message.recomputeAttachmentCount(db)) {
-                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
+                        db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageAndVideoCount, message.videoCount, message.audioCount, message.firstAttachmentName, message.wipedAttachmentCount, message.imageResolutions);
                     }
                 }
                 Logger.i("🔫🔫 Build 277->278 attachment count migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");

@@ -2118,4 +2118,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Časi poizvedb v bazo podatkov mehanizma</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Čakam na odgovor od naprave sogovornika</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Naprava sogovornika je nedostopna</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Ponovno ustvari vse varne kanale</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Ponovna ustvaritev vseh varnih kanalov bo Olvidu naložila, da ustvari nove varne komunikacijske kanale z vsemi napravami vaših kontaktov. To na splošno ni koristno, vendar lahko reši redke situacije, ko so nekateri od teh kanalov »nesinkronizirani«.\n\n**Opozorilo:** če imate veliko kontaktov, lahko ta operacija traja nekaj minut in med izvajanjem lahko izgubite nekaj dohodnih sporočil.</string>
 </resources>

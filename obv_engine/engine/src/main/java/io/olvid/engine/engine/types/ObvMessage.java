@@ -77,9 +77,9 @@ public class ObvMessage {
         this.serverTimestamp = receivedMessage.getServerTimestamp();
         this.downloadTimestamp = receivedMessage.getDownloadTimestamp();
         this.localDownloadTimestamp = receivedMessage.getLocalDownloadTimestamp();
-        this.bytesFromIdentity = receivedMessage.getFromIdentity().getBytes();
-        this.bytesFromDeviceUid = receivedMessage.getFromDeviceUid().getBytes();
-        this.bytesToIdentity = receivedMessage.getToIdentity().getBytes();
+        this.bytesFromIdentity = receivedMessage.getFromIdentity() != null ? receivedMessage.getFromIdentity().getBytes() : null;
+        this.bytesFromDeviceUid = receivedMessage.getFromDeviceUid() != null ? receivedMessage.getFromDeviceUid().getBytes() : null;
+        this.bytesToIdentity = receivedMessage.getToIdentity() != null ? receivedMessage.getToIdentity().getBytes() : null;
 
         this.attachments = new ObvAttachment[receivedAttachments.length];
         for (int i = 0; i < this.attachments.length; i++) {

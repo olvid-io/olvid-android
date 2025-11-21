@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import io.olvid.engine.Logger
 import io.olvid.messenger.App
+import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.services.MDMConfigurationSingleton
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.webrtc.WebrtcCallService.CallParticipant
@@ -135,26 +136,10 @@ class WebrtcPeerConnectionHolder(
         const val VIDEO_STREAM_ID = "video"
         const val SCREENCAST_STREAM_ID = "screencast"
 
-        private val TURN_SCALED_SERVERS: List<String> = mutableListOf(
-            "turn:turn-scaled.olvid.io:5349?transport=udp",
-            "turn:turn-scaled.olvid.io:443?transport=tcp",
-            "turns:turn-scaled.olvid.io:443?transport=tcp"
-        )
-        private val TURN_SCALED_SERVERS_EU: List<String> = mutableListOf(
-            "turn:eu.turn-scaled.olvid.io:5349?transport=udp",
-            "turn:eu.turn-scaled.olvid.io:443?transport=tcp",
-            "turns:eu.turn-scaled.olvid.io:443?transport=tcp"
-        )
-        private val TURN_SCALED_SERVERS_US: List<String> = mutableListOf(
-            "turn:us.turn-scaled.olvid.io:5349?transport=udp",
-            "turn:us.turn-scaled.olvid.io:443?transport=tcp",
-            "turns:us.turn-scaled.olvid.io:443?transport=tcp"
-        )
-        private val TURN_SCALED_SERVERS_AP: List<String> = mutableListOf(
-            "turn:ap.turn-scaled.olvid.io:5349?transport=udp",
-            "turn:ap.turn-scaled.olvid.io:443?transport=tcp",
-            "turns:ap.turn-scaled.olvid.io:443?transport=tcp"
-        )
+        private val TURN_SCALED_SERVERS: List<String> = BuildConfig.TURN_SERVERS.toMutableList()
+        private val TURN_SCALED_SERVERS_EU: List<String> = BuildConfig.TURN_SERVERS_EU.toMutableList()
+        private val TURN_SCALED_SERVERS_US: List<String> = BuildConfig.TURN_SERVERS_US.toMutableList()
+        private val TURN_SCALED_SERVERS_AP: List<String> = BuildConfig.TURN_SERVERS_AP.toMutableList()
         private val AUDIO_CODECS: Set<String> =
             HashSet(mutableListOf("opus", "PCMU", "PCMA", "telephone-event", "red"))
         private const val ADDITIONAL_OPUS_OPTIONS =
@@ -229,16 +214,12 @@ class WebrtcPeerConnectionHolder(
         }
 
         private fun getIceServer(username: String?, password: String?): IceServer {
-            val servers: List<String> = if (SettingsActivity.scaledTurn != null) {
-                when (SettingsActivity.scaledTurn) {
-                    "par" -> TURN_SCALED_SERVERS_EU
-                    "nyc" -> TURN_SCALED_SERVERS_US
-                    "sng" -> TURN_SCALED_SERVERS_AP
-                    "global" -> TURN_SCALED_SERVERS
-                    else -> TURN_SCALED_SERVERS
-                }
-            } else {
-                TURN_SCALED_SERVERS
+            val servers: List<String> = when (SettingsActivity.scaledTurn) {
+                "par" -> TURN_SCALED_SERVERS_EU
+                "nyc" -> TURN_SCALED_SERVERS_US
+                "sng" -> TURN_SCALED_SERVERS_AP
+                "global" -> TURN_SCALED_SERVERS
+                else -> TURN_SCALED_SERVERS
             }
             return IceServer.builder(servers)
                 .setUsername(username)

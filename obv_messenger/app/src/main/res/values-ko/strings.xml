@@ -2119,4 +2119,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">엔진 데이터베이스 쿼리 시간</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">상대방 기기 응답 대기 중</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">상대방 기기에 연결할 수 없습니다.</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">모든 보안 채널을 다시 생성합니다.</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">모든 보안 채널을 재구성하면 Olvid가 연락처의 모든 기기와 새로운 보안 통신 채널을 생성하도록 강제합니다. 일반적으로 유용하지 않지만, 일부 채널이 \"동기화되지 않은\" 드문 상황을 해결할 수 있습니다.\n\n**경고:** 연락처가 많을 경우 이 작업은 몇 분이 걸릴 수 있으며, 작업 중 일부 수신 메시지를 놓칠 수 있습니다.</string>
 </resources>

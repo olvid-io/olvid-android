@@ -2119,4 +2119,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Timp de interogare a bazei de date a motorului</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Aștept răspuns de la dispozitivul contactului</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Dispozitivul contactului este inaccesibil</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Recreează toate canalele securizate</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Recrearea tuturor canalelor securizate va forța Olvid să creeze canale noi de comunicare securizate cu toate dispozitivele contactelor tale. În general, nu este util, dar poate rezolva situații rare în care unele dintre aceste canale sunt \"nesincronizate\".\n\n**Atenție:** dacă ai mulți contacte, această operațiune poate dura câteva minute și este posibil să pierzi unele mesaje primite în timp ce rulează.</string>
 </resources>

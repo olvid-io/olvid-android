@@ -2118,4 +2118,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">इंजन डेटाबेस क्वेरी समय</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">साथी के डिवाइस के जवाब का इंतज़ार कर रहे हैं</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">पीयर डिवाइस अनुपलब्ध है</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">सभी सुरक्षित चैनलों को फिर से बनाएँ</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">सभी सुरक्षित चैनलों को फिर से बनाने से Olvid आपके संपर्कों के सभी उपकरणों के साथ नए सुरक्षित संचार चैनल बनाने के लिए मजबूर हो जाएगा। यह आमतौर पर उपयोगी नहीं है, लेकिन दुर्लभ स्थितियों को हल कर सकता है जहां ये चैनल «सिंक से बाहर» हैं।\n\n**चेतावनी:** यदि आपके पास बहुत सारे संपर्क हैं, तो इस ऑपरेशन में कुछ मिनट लग सकते हैं और आप इसके चलने के दौरान कुछ आने वाले संदेश खो सकते हैं।</string>
 </resources>

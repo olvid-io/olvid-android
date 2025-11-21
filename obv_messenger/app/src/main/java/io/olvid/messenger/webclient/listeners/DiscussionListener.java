@@ -198,7 +198,7 @@ public class DiscussionListener {
             } else if (element1.message == null || element2.message == null) {
                 return false;
             } else if (element1.unreadCount != element2.unreadCount
-                    || element1.message.imageCount != element2.message.imageCount
+                    || element1.message.imageAndVideoCount != element2.message.imageAndVideoCount
                     || element1.message.edited != element2.message.edited
                     || element1.message.wipeStatus != element2.message.wipeStatus
                     || !Objects.equals(element1.message.contentBody, element2.message.contentBody)) {

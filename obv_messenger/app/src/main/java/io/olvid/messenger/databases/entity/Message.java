@@ -119,7 +119,7 @@ public class Message {
     public static final String SENDER_IDENTIFIER = "sender_identifier";
     public static final String SENDER_THREAD_IDENTIFIER = "sender_thread_identifier";
     public static final String TOTAL_ATTACHMENT_COUNT = "total_attachment_count";
-    public static final String IMAGE_COUNT = "image_count";
+    public static final String IMAGE_AND_VIDEO_COUNT = "image_count";
     public static final String VIDEO_COUNT = "video_count";
     public static final String AUDIO_COUNT = "audio_count";
     public static final String FIRST_ATTACHMENT_NAME = "first_attachment_name";
@@ -262,8 +262,8 @@ public class Message {
     @ColumnInfo(name = TOTAL_ATTACHMENT_COUNT)
     public int totalAttachmentCount;
 
-    @ColumnInfo(name = IMAGE_COUNT)
-    public int imageCount;
+    @ColumnInfo(name = IMAGE_AND_VIDEO_COUNT)
+    public int imageAndVideoCount; // For legacy reasons, this is actually the number of images AND videos. The actual image count is imageCount - videoCount
 
     @ColumnInfo(name = VIDEO_COUNT)
     public int videoCount;
@@ -324,7 +324,7 @@ public class Message {
     }
 
     // default constructor required by Room
-    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, @Nullable String jsonLocation, int locationType, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, @Nullable byte[] inboundMessageEngineIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageCount, int videoCount, int audioCount, @Nullable String firstAttachmentName, int wipedAttachmentCount, int edited, boolean forwarded, boolean mentioned, boolean bookmarked, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount, long expirationStartTimestamp, boolean limitedVisibility, @Nullable Long linkPreviewFyleId, @Nullable String jsonMentions, @Nullable String jsonPoll) {
+    public Message(long senderSequenceNumber, @Nullable String contentBody, @Nullable String jsonReply, @Nullable String jsonExpiration, @Nullable String jsonReturnReceipt, @Nullable String jsonLocation, int locationType, double sortIndex, long timestamp, int status, int wipeStatus, int messageType, long discussionId, @Nullable byte[] inboundMessageEngineIdentifier, @NonNull byte[] senderIdentifier, @NonNull UUID senderThreadIdentifier, int totalAttachmentCount, int imageAndVideoCount, int videoCount, int audioCount, @Nullable String firstAttachmentName, int wipedAttachmentCount, int edited, boolean forwarded, boolean mentioned, boolean bookmarked, @Nullable String reactions, @Nullable String imageResolutions, long missedMessageCount, long expirationStartTimestamp, boolean limitedVisibility, @Nullable Long linkPreviewFyleId, @Nullable String jsonMentions, @Nullable String jsonPoll) {
         this.senderSequenceNumber = senderSequenceNumber;
         this.contentBody = contentBody;
         this.jsonReply = jsonReply;
@@ -342,7 +342,7 @@ public class Message {
         this.senderIdentifier = senderIdentifier;
         this.senderThreadIdentifier = senderThreadIdentifier;
         this.totalAttachmentCount = totalAttachmentCount;
-        this.imageCount = imageCount;
+        this.imageAndVideoCount = imageAndVideoCount;
         this.videoCount = videoCount;
         this.audioCount = audioCount;
         this.firstAttachmentName = firstAttachmentName;
@@ -385,7 +385,7 @@ public class Message {
         this.senderIdentifier = senderIdentifier;
         this.senderThreadIdentifier = senderThreadIdentifier;
         this.totalAttachmentCount = totalAttachmentCount;
-        this.imageCount = imageAndVideoCount;
+        this.imageAndVideoCount = imageAndVideoCount;
         this.videoCount = videoCount;
         this.audioCount = audioCount;
         this.firstAttachmentName = firstAttachmentName;
@@ -1668,7 +1668,8 @@ public class Message {
 
     public String getAttachmentsStringContent(Context context) {
         StringBuilder sb = new StringBuilder();
-        int fileCount = totalAttachmentCount - imageCount - videoCount - audioCount;
+        int fileCount = totalAttachmentCount - imageAndVideoCount - audioCount;
+        int imageOnlyCount = imageAndVideoCount - videoCount;
         if (fileCount > 0) {
             sb.append("📎 ");
             if (firstAttachmentName != null) {
@@ -1688,12 +1689,12 @@ public class Message {
             sb.append("🎤 ");
             sb.append(context.getResources().getQuantityString(R.plurals.text_audios, audioCount, audioCount));
         }
-        if (imageCount > 0) {
+        if (imageOnlyCount > 0) {
             if (sb.length() > 0) {
                 sb.append(context.getString(R.string.attachments_joiner));
             }
             sb.append("📷 ");
-            sb.append(context.getResources().getQuantityString(R.plurals.text_images, imageCount, imageCount));
+            sb.append(context.getResources().getQuantityString(R.plurals.text_images, imageOnlyCount, imageOnlyCount));
         }
         if (videoCount > 0) {
             if (sb.length() > 0) {
@@ -2059,14 +2060,14 @@ public class Message {
         }
         String imageResolutions = sb.toString();
         if (this.totalAttachmentCount != totalCount
-                || this.imageCount != imageCount
+                || this.imageAndVideoCount != imageCount
                 || this.videoCount != videoCount
                 || this.audioCount != audioCount
                 || !Objects.equals(this.firstAttachmentName, firstAttachmentName)
                 || !Objects.equals(this.imageResolutions, imageResolutions)
         ) {
             this.totalAttachmentCount = totalCount;
-            this.imageCount = imageCount;
+            this.imageAndVideoCount = imageCount;
             this.videoCount = videoCount;
             this.audioCount = audioCount;
             this.firstAttachmentName = firstAttachmentName;
@@ -2127,7 +2128,7 @@ public class Message {
             }
         }
         totalAttachmentCount = 0;
-        imageCount = 0;
+        imageAndVideoCount = 0;
         videoCount = 0;
         audioCount = 0;
         firstAttachmentName = null;

@@ -2119,4 +2119,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Moottorin tietokantakyselyjen ajoitukset</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Odotetaan vastakaverin laitteen vastausta</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Vastapuolen laite on saavuttamaton</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Luo kaikki suojatut kanavat uudelleen</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Kaikkien suojattujen kanavien uudelleenluonti pakottaa Olvidin luomaan uusia suojattuja yhteydenottokanavia kaikkien yhteystietojesi laitteille. Tämä ei yleensä ole hyödyllistä, mutta voi ratkaista harvinaisia tilanteita, joissa jotkin näistä kanavista ovat «synkronoimattomia».\n\n**Varoitus:** Jos sinulla on paljon yhteystietoja, tämä toiminto voi kestää muutaman minuutin ja voit menettää joitain saapuvia viestejä sen aikana.</string>
 </resources>

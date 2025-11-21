@@ -2119,4 +2119,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Thời gian truy vấn cơ sở dữ liệu của engine</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Đang chờ thiết bị của người dùng kia phản hồi</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Thiết bị của người liên hệ không khả dụng</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Tạo lại tất cả các kênh bảo mật</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Tạo lại tất cả các kênh bảo mật sẽ buộc Olvid tạo các kênh liên lạc bảo mật mới với tất cả các thiết bị của danh bạ của bạn. Điều này thường không hữu ích, nhưng có thể giải quyết các tình huống hiếm gặp khi một số kênh này bị \"mất đồng bộ\".\n\n**Cảnh báo:** nếu bạn có nhiều liên hệ, thao tác này có thể mất vài phút và bạn có thể bỏ lỡ một số tin nhắn đến trong khi nó đang chạy.</string>
 </resources>

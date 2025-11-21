@@ -26,8 +26,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -675,7 +673,7 @@ fun DiscussionListScreen(
                                                         pendingContact = discussion.isPreDiscussion || (discussion.isLocked && invitation != null),
                                                         attachmentCount = if (message?.isLocationMessage == true) 0 else message?.totalAttachmentCount
                                                             ?: 0,
-                                                        imageAndVideoCount = if (message?.isLocationMessage == true) 0 else message?.imageCount
+                                                        imageAndVideoCount = if (message?.isLocationMessage == true) 0 else message?.imageAndVideoCount
                                                             ?: 0,
                                                         videoCount = message?.videoCount ?: 0,
                                                         audioCount = message?.audioCount ?: 0,

@@ -204,7 +204,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                                 db.messageDao().delete(message);
                                 UnreadCountsSingleton.INSTANCE.messageDeleted(message);
                             } else {
-                                db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageCount, message.videoCount, message.audioCount, message.firstAttachmentName, 0, message.imageResolutions);
+                                db.messageDao().updateAttachmentCount(message.id, message.totalAttachmentCount, message.imageAndVideoCount, message.videoCount, message.audioCount, message.firstAttachmentName, 0, message.imageResolutions);
                             }
                         }
                     } else {

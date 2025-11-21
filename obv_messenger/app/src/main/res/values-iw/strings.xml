@@ -2119,4 +2119,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">זמני שאילתות מסד הנתונים של המנוע</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">ממתין לתגובה מהמכשיר של הצד השני</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">מכשיר העמית אינו נגיש</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">צור מחדש את כל הערוצים המאובטחים</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">יצירה מחדש של כל הערוצים המאובטחים תאלץ את Olvid ליצור ערוצי תקשורת מאובטחים חדשים עם כל המכשירים של אנשי הקשר שלך. זה בדרך כלל לא מועיל, אך יכול לפתור מצבים נדירים שבהם חלק מהערוצים הללו \"לא מסונכרנים\".\n\n**אזהרה:** אם יש לך אנשי קשר רבים, פעולה זו עלולה להימשך מספר דקות ואתה עלול לאבד חלק מההודעות הנכנסות בזמן שהיא פועלת.</string>
 </resources>

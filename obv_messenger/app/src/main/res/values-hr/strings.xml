@@ -2119,4 +2119,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Vremena upita baze podataka motora</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Čekam na odgovor uređaja sugovornika</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Uređaj sugovornika je nedostižan</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Ponovno kreirajte sve sigurne kanale</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Ponovna uspostava svih sigurnih kanala prisilit će Olvid da uspostavi nove sigurne komunikacijske kanale sa svim uređajima vaših kontakata. Ovo obično nije korisno, ali može riješiti rijetke situacije u kojima su neki od ovih kanala \"izvan sinkronizacije\".\n\n**Upozorenje:** ako imate mnogo kontakata, ova operacija može potrajati nekoliko minuta i možete izgubiti neke dolazne poruke dok se izvršava.</string>
 </resources>

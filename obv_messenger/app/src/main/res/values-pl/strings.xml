@@ -2148,4 +2148,6 @@ Jeśli jest to klucz kopii zapasowej starszej generacji, możesz spróbować prz
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Czasy wykonywania zapytań do bazy danych silnika</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Oczekiwanie na odpowiedź urządzenia rozmówcy</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Urządzenie kontaktu jest niedostępne.</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Ponownie utwórz wszystkie bezpieczne kanały.</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Odtworzenie wszystkich bezpiecznych kanałów wymusi ponowne utworzenie przez Olvid bezpiecznych kanałów komunikacyjnych ze wszystkimi urządzeniami Twoich kontaktów. Zazwyczaj nie jest to przydatne, ale może rozwiązać rzadkie sytuacje, w których niektóre z tych kanałów są „niesynchronizowane”.\n\n**Ostrzeżenie:** jeśli masz wielu kontaktów, operacja ta może potrwać kilka minut i możesz utracić niektóre wiadomości przychodzące podczas jej wykonywania.</string>
 </resources>

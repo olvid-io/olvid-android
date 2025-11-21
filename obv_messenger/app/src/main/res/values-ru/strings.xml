@@ -2118,4 +2118,6 @@
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Время выполнения запросов к базе данных движка</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Ожидание ответа от устройства собеседника</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Устройство собеседника недоступно</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Восстановить все защищенные каналы</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Воссоздание всех защищенных каналов заставит Olvid создать новые защищенные каналы связи со всеми устройствами ваших контактов. Обычно это не полезно, но может решить редкие ситуации, когда некоторые из этих каналов «не синхронизированы».\n\n**Внимание:** если у вас много контактов, эта операция может занять несколько минут, и вы можете потерять некоторые входящие сообщения во время ее выполнения.</string>
 </resources>

@@ -26,8 +26,8 @@ android {
         applicationId "io.olvid.messenger"
         minSdkVersion 23
         targetSdk 36
-        versionCode 279
-        versionName "4.1.1"
+        versionCode 281
+        versionName "4.1.2"
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
         resourceConfigurations += ['en', 'fr', 'af', 'ar', 'ca', 'cs', 'da', 'de', 'el', 'es', 'fa', 'fi', 'hi', 'hr', 'hu', 'it', 'iw', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-rBR', 'ro', 'ru', 'sk', 'sl', 'sv', 'tr', 'uk', 'vi', 'zh', 'zh-rTW']
@@ -86,6 +86,10 @@ android {
             buildConfigField "String", "SERVER_NAME", "\"https://server.olvid.io\""
             buildConfigField "String", "KEYCLOAK_REDIRECT_URL", "\"https://openid-redirect.olvid.io/\""
             buildConfigField "int", "LOG_LEVEL", "io.olvid.engine.Logger.INFO"
+            buildConfigField "String[]", "TURN_SERVERS", "new String[]{\"turn:turn-scaled.olvid.io:5349?transport=udp\", \"turn:turn-scaled.olvid.io:443?transport=tcp\", \"turns:turn-scaled.olvid.io:443?transport=tcp\"}"
+            buildConfigField "String[]", "TURN_SERVERS_EU", "new String[]{\"turn:eu.turn-scaled.olvid.io:5349?transport=udp\", \"turn:eu.turn-scaled.olvid.io:443?transport=tcp\", \"turns:eu.turn-scaled.olvid.io:443?transport=tcp\"}"
+            buildConfigField "String[]", "TURN_SERVERS_US", "new String[]{\"turn:us.turn-scaled.olvid.io:5349?transport=udp\", \"turn:us.turn-scaled.olvid.io:443?transport=tcp\", \"turns:us.turn-scaled.olvid.io:443?transport=tcp\"}"
+            buildConfigField "String[]", "TURN_SERVERS_AP", "new String[]{\"turn:ap.turn-scaled.olvid.io:5349?transport=udp\", \"turn:ap.turn-scaled.olvid.io:443?transport=tcp\", \"turns:ap.turn-scaled.olvid.io:443?transport=tcp\"}"
             manifestPlaceholders = [
                     KEYCLOAK_REDIRECT_HOST: "openid-redirect.olvid.io",
                     MAPS_API_KEY: "<please fill in your own API key>"

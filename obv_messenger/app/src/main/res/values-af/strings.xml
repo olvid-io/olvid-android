@@ -2125,4 +2125,6 @@ Olvid sal nie toegang hê tot enige van u lêers op Google Drive nie.</string>
 	<string name="dialog_title_engine_db_statistics" state="needs_review" hash="-450320257">Enjin databasisnavrae tydsduur</string>
 	<string name="webrtc_status_initializing_call" state="needs_review" hash="-1158181443">Wag vir die ander se toestel se reaksie</string>
 	<string name="webrtc_status_start_call_timeout" state="needs_review" hash="833440939">Gelykgestelde toestel onbereikbaar</string>
+	<string name="recreate_all_secure_channels" state="needs_review" hash="-377972918">Herstel alle veilige kanale</string>
+	<string name="recreate_all_secure_channels_explanation" state="needs_review" hash="2103664451">Die herstel van alle veilige kanale sal Olvid dwing om nuwe veilige kommunikasiekanale met al die toestelle van jou kontakte te skep. Dit is gewoonlik nie nuttig nie, maar kan seldsame situasies oplos waar sommige van hierdie kanale \"nie gesinkroniseer is nie\".\n\n**Waarskuwing:** as jy baie kontakte het, kan hierdie operasie \'n paar minute neem en kan jy sommige inkomende boodskappe verloor terwyl dit loop.</string>
 </resources>

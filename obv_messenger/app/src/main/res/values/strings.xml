@@ -2152,4 +2152,6 @@
     <string name="dialog_title_engine_db_statistics">Engine database query timings</string>
     <string name="webrtc_status_initializing_call">Waiting for peer\'s device to respond</string>
     <string name="webrtc_status_start_call_timeout">Peer device unreachable</string>
+    <string name="recreate_all_secure_channels">Recreate all secure channels</string>
+    <string name="recreate_all_secure_channels_explanation">Recreating all secure channels will force Olvid to create new secure communication channels with all the devices of your contacts. This is generally not useful, but can solve rare situations where some of these channels are \"out of sync\".\n\n**Warning:** if you have many contacts, this operation can take a few minutes and you could lose some incoming messages while it is running.</string>
 </resources>
