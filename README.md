@@ -8,6 +8,15 @@ Because of this, from a security standpoint, Olvid is **not** "yet another secur
 
 Note that this doesn't mean that Olvid uses no servers (it does). It means that you do not have to trust them: your privacy is ensured by cryptographic protocols running on the client-side (i.e., on your device), and these protocols assume that the servers were compromised from day one. Even then, your privacy is ensured 😊.
 
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
+alt="Download from Google Play"
+height="80">](https://play.google.com/store/apps/details?id=io.olvid.messenger)
+
+Signing certificate fingerprint to [verify](https://developer.android.com/studio/command-line/apksigner#usage-verify) the APK:
+```
+SHA-256: cc83a47d8ed411468580889fb3e058b0b31e82ef812d473531b5f9cd4a88fd33
+SHA-1: 41a074e99269b61e4b6513f6240321f130aa51ca
+```
 
 ## Help and documentation
 
