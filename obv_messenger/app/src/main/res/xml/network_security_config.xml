@@ -4,6 +4,10 @@
         <trust-anchors>
             <certificates src="user"/>
             <certificates src="system"/>
+            <certificates src="@raw/lets_encrypt_ca_x1"/>
+            <certificates src="@raw/lets_encrypt_ca_x2"/>
+            <certificates src="@raw/lets_encrypt_ca_ye"/>
+            <certificates src="@raw/lets_encrypt_ca_yr"/>
         </trust-anchors>
     </base-config>
 </network-security-config>

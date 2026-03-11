@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">설치된 브라우저를 쿼리할 수 없습니다</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">인증에 사용할 브라우저를 선택하세요.</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">기본 브라우저</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">글로벌 지역 기반 TURN 서버</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">파리 TURN 서버</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">뉴욕 TURN 서버</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">싱가포르 TURN 서버</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d개의 연락처</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">그룹 %2$s에는 %1$d개의 연락처가 있습니다.</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">업데이트 필요</string>
@@ -1935,7 +1931,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">백업 키가 분실되거나 손상된 경우 이 키와 연결된 계정의 모든 백업을 **삭제**하기 위해 재설정할 수 있습니다. 이 키는 더 이상 계정을 복원하는 데 사용할 수 없습니다.\n\n누군가가 이 키를 사용하여 악의적으로 계정에 액세스했을 수 있다고 생각되면 프로필 세부 정보의 **장치 목록**을 확인하여 예기치 않은 장치가 있는지 확인해야 합니다.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">내 Olvid 백업 관리하기</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">지금 백업 시작</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/프로필-백업/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">닫기</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">온라인 백업</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">초기화</string>
@@ -2152,6 +2148,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">협상 중 (3단계 중 1단계)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">메시지 전송 중 (3단계 중 2단계)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">첨부 파일 전송 중 (3단계 중 3단계)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">협상 중</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">메시지 전송 중</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">첨부 파일 전송 중</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">전송 완료</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">전송이 중단되었습니다.</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">채팅 기록 전송 (베타)</string>
@@ -2176,5 +2175,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">처리량</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">남은</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">첨부 파일</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">이 기능은 아직 베타 테스트 단계에 있으며 현재 구현 방식이 Olvid의 최종 기록 전송 구현과 호환되지 않을 수 있습니다.\n\n이 기능을 사용하기 전에 장치에 최신 버전의 Olvid가 설치되어 있는지 확인하십시오.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">이 기능은 아직 베타 테스트 단계에 있으며 현재 구현 방식이 Olvid의 최종 기록 전송 구현과 호환되지 않을 수 있습니다.\n\n이 기능을 사용하기 전에 장치에 최신 버전의 Olvid가 설치되어 있는지 확인하십시오.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">진행 중인 전송을 중단하시겠습니까?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">대화 기록 전송이 현재 진행 중입니다. 중단하시겠습니까?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">전송 취소</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">이 대화에 참여할 준비 중입니다.</string>
 </resources>

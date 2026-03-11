@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Yüklenmiş tarayıcıları sorgulanamadı</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Kimlik doğrulaması için hangi tarayıcıyı kullanacağınızı seçin</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Varsayılan Tarayıcı</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Bölgesel tabanlı global TURN sunucuları</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Paris TURN sunucuları</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">New York TURN sunucuları</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">Singapur TURN sunucuları</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d kişiler</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d kişi %2$s grubunda</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Güncelleme gerekiyor</string>
@@ -1932,7 +1928,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Yedek anahtarınız kaybolduysa veya tehlikeye girdiyse, bu anahtara bağlı olan **hesabınızın tüm yedeklerini silmek** için sıfırlayabilirsiniz. Bu anahtar artık hesabınızı geri yüklemek için kullanılamayacaktır.\n\nBirinin bu anahtarı kötü niyetli bir şekilde hesabınıza erişmek için kullanmış olabileceğini düşünüyorsanız, profilinizdeki ayrıntılarda **cihaz listenizi** kontrol ederek beklenmedik bir cihaz olup olmadığını kontrol etmelisiniz.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Olvid yedeklemelerimi yönet</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Şimdi yedeklemeyi başlat</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/profillerinizi-yedekleyin/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Kapat</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Çevrimiçi yedeklemeleriniz</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Sıfırla</string>
@@ -2149,6 +2145,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Müzakere ediliyor (3 adımdan 1\'incisi)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Mesajların aktarılması (3 adımdan 2\'si)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Eklerin aktarılması (3. adım / 3 adım)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Müzakere</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Mesajların aktarılması</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Ekler aktarılıyor</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Transfer tamamlandı</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Aktarım kesintiye uğradı</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Sohbet geçmişi aktarımı (beta)</string>
@@ -2173,5 +2172,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Verim Hızı</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Kalan</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Ekler</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Bu özellik hala beta test aşamasındadır ve mevcut uygulama, Olvid\'in geçmiş aktarımının son sürümüyle uyumlu olmayabilir.\n\nBu özelliği kullanmadan önce cihazlarınızda Olvid\'in en son sürümünün yüklü olduğundan emin olun.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Bu özellik hala beta test aşamasındadır ve mevcut uygulama, Olvid\'in geçmiş aktarımının son sürümüyle uyumlu olmayabilir.\n\nBu özelliği kullanmadan önce cihazlarınızda Olvid\'in en son sürümünün yüklü olduğundan emin olun.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Devam eden aktarımı iptal et?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Bir mesaj geçmişi aktarımı şu anda devam ediyor. Devamını durdurmak ister misiniz?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Aktarımı iptal et</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Bu sohbete katılmayı bekliyorum</string>
 </resources>

@@ -141,7 +141,7 @@ fun ComposeMessageArea(
     val hasCamera by lazy { context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) }
     val replyMessage by composeMessageViewModel.getDraftMessageReply().observeAsState()
     val linkPreview by linkPreviewViewModel.openGraph.observeAsState()
-    val isEditMode = composeMessageViewModel.getMessageBeingEdited().observeAsState().value != null
+    val isEditMode by composeMessageViewModel.isEditMode().observeAsState()
     val ephemeralSettingsEnabled by composeMessageViewModel.ephemeralSettingsChanged.observeAsState()
 
     var keyboardHeight by remember(orientation) {
@@ -170,7 +170,7 @@ fun ComposeMessageArea(
     }
 
     LaunchedEffect(isEditMode) {
-        if (isEditMode) {
+        if (isEditMode == true) {
             inputEditText?.focusAndShowKeyboard()
         }
     }
@@ -235,7 +235,6 @@ fun ComposeMessageArea(
                 inputEditText?.let {
                     Utils.applyBodyWithSpans(
                         it,
-                        message.senderIdentifier,
                         message,
                         null,
                         false,
@@ -306,7 +305,7 @@ fun ComposeMessageArea(
 
 
         // Edit Message
-        AnimatedVisibility(visible = isEditMode) {
+        AnimatedVisibility(visible = isEditMode == true) {
             EditMessage(
                 onCancel = {
                     composeMessageViewModel.clearMessageBeingEdited()
@@ -328,7 +327,7 @@ fun ComposeMessageArea(
             verticalAlignment = Alignment.Bottom
         ) {
             AnimatedVisibility(
-                visible = isEditMode.not()
+                visible = isEditMode != true
             ) {
                 AnimatedContent(
                     targetState = isRecording,
@@ -438,7 +437,7 @@ fun ComposeMessageArea(
                         onSendMessage = {
                             controller.onSendMessage(
                                 composeMessageViewModel.sending,
-                                isEditMode,
+                                isEditMode == true,
                                 isRecording,
                                 inputEditText
                             )
@@ -504,7 +503,7 @@ fun ComposeMessageArea(
                 }
 
                 AnimatedVisibility(
-                    visible = !isEditMode && !composeMessageViewModel.hasText && !composeMessageViewModel.hasAttachments() && isRecording != true
+                    visible = isEditMode != true && !composeMessageViewModel.hasText && !composeMessageViewModel.hasAttachments() && isRecording != true
                 ) {
                     IconButton(
                         modifier = Modifier.size( 32.dp, 40.dp).requiredSize(40.dp),
@@ -526,17 +525,17 @@ fun ComposeMessageArea(
                 Spacer(Modifier.width(4.dp))
             }
             AnimatedVisibility(
-                visible = composeMessageViewModel.hasAttachments() || composeMessageViewModel.hasText || isEditMode || isRecording == true
+                visible = composeMessageViewModel.hasAttachments() || composeMessageViewModel.hasText || isEditMode == true|| isRecording == true
             ) {
                 SendButton(
                     modifier = Modifier.padding(start = 4.dp),
-                    enabled = (!isEditMode && !composeMessageViewModel.sending)
-                            || (isEditMode && composeMessageViewModel.editIsSendable),
+                    enabled = (isEditMode != true && !composeMessageViewModel.sending)
+                            || (isEditMode == true && composeMessageViewModel.editIsSendable),
                     isAudioMode = false
                 ) {
                     controller.onSendMessage(
                         composeMessageViewModel.sending,
-                        isEditMode,
+                        isEditMode == true,
                         isRecording,
                         inputEditText
                     )

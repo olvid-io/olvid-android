@@ -996,6 +996,8 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                     switch (standaloneServerQueryOperation.getReasonForCancel()) {
                         case StandaloneServerQueryOperation.RFC_NETWORK_ERROR:
                             return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.NETWORK_ERROR, null, null);
+                        case StandaloneServerQueryOperation.RFC_PERMISSION_DENIED:
+                            return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.PERMANENT_ERROR, null, null);
                         case StandaloneServerQueryOperation.RFC_SERVER_PARSING_ERROR:
                         case StandaloneServerQueryOperation.RFC_INVALID_SERVER_SESSION:
                             break;

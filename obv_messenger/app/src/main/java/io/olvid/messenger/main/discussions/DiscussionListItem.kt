@@ -297,7 +297,7 @@ fun DiscussionListItem(
                             )
                         }
 
-                        AnimatedVisibility(visible = attachmentCount > 0) {
+                        if(attachmentCount > 0) {
                             Row(
                                 modifier = Modifier.padding(top = 1.dp),
                                 verticalAlignment = Alignment.CenterVertically,

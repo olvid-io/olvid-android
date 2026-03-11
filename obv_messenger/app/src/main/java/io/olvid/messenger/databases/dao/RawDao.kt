@@ -16,17 +16,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with Olvid.  If not, see <https://www.gnu.org/licenses/>.
  */
+package io.olvid.messenger.databases.dao
 
-package io.olvid.messenger.databases.dao;
-
-import androidx.annotation.NonNull;
-import androidx.room.Dao;
-import androidx.room.RawQuery;
-import androidx.sqlite.db.SupportSQLiteQuery;
+import androidx.room.Dao
+import androidx.room.RawQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 
 @Dao
-public interface RawDao {
-    @SuppressWarnings("UnusedReturnValue")
+interface RawDao {
     @RawQuery
-    int executeRawQuery(@NonNull SupportSQLiteQuery supportSQLiteQuery);
+    fun executeRawQuery(supportSQLiteQuery: SupportSQLiteQuery): Int
 }

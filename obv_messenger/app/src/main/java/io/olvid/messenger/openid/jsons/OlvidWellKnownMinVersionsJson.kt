@@ -19,7 +19,10 @@
 
 package io.olvid.messenger.openid.jsons
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 class OlvidWellKnownMinVersionsJson {
     var android: Int? = null
     var ios: Int? = null

@@ -278,7 +278,6 @@ class WebrtcCallService : Service() {
     enum class TurnServerOrigin {
         FROM_CALLER,
         WELL_KNOWN,
-        REGIONAL_USER_SETTING,
         FALLBACK,
     }
 
@@ -370,17 +369,7 @@ class WebrtcCallService : Service() {
     private var turnPassword: String? = null
     private var turnServers: MutableMap<TurnServerOrigin, List<String>> = mutableMapOf(
         TurnServerOrigin.FALLBACK to BuildConfig.TURN_SERVERS.toList()
-    ).apply {
-        // if the user has set a region TURN server, add it to the map of available turn servers
-        when (SettingsActivity.scaledTurn) {
-            "par" -> BuildConfig.TURN_SERVERS_EU.toList()
-            "nyc" -> BuildConfig.TURN_SERVERS_US.toList()
-            "sng" -> BuildConfig.TURN_SERVERS_AP.toList()
-            else -> null
-        }?.let {
-            this[TurnServerOrigin.REGIONAL_USER_SETTING] = it
-        }
-    }
+    )
 
     var incomingParticipantCount = 0
         private set
@@ -1796,14 +1785,6 @@ class WebrtcCallService : Service() {
                 call.callerTurnServers?.let {
                     this@WebrtcCallService.turnServers[TurnServerOrigin.FROM_CALLER] = it
                 }
-                (if (SettingsActivity.useAltTurnServers)
-                    // get the alt servers, but fallback to non-alt ones if they are not defined on server side
-                    AppSingleton.getEngine().getWellKnownAltTurnServers(bytesOwnedIdentity) ?: AppSingleton.getEngine().getWellKnownTurnServers(bytesOwnedIdentity)
-                else
-                    AppSingleton.getEngine().getWellKnownTurnServers(bytesOwnedIdentity)
-                )?.let {
-                        this@WebrtcCallService.turnServers[TurnServerOrigin.WELL_KNOWN] = it
-                    }
 
                 callerCallParticipant?.let {
                     it.peerConnectionHolder.setGatheringPolicy(call.gatheringPolicy)
@@ -2355,28 +2336,10 @@ class WebrtcCallService : Service() {
         get() = role == CALLER
 
     fun pickTurnServers(): List<String> {
-        val ownServer = AppSingleton.getEngine().getServerOfIdentity(bytesOwnedIdentity)
         if (isCaller) {
-            if (ownServer == BuildConfig.SERVER_NAME) {
-                Logger.d("Picking regional or well known TURN server")
-                return turnServers[TurnServerOrigin.REGIONAL_USER_SETTING] ?: turnServers[TurnServerOrigin.WELL_KNOWN] ?: turnServers[TurnServerOrigin.FALLBACK]!!
-            } else {
-                Logger.d("Picking well known TURN server")
-                return turnServers[TurnServerOrigin.WELL_KNOWN] ?: turnServers[TurnServerOrigin.FALLBACK]!!
-            }
+            return turnServers[TurnServerOrigin.WELL_KNOWN] ?: turnServers[TurnServerOrigin.FALLBACK]!!
         } else {
-            if (getCallerBytesIdentity()?.let { AppSingleton.getEngine().getServerOfIdentity(it) } == ownServer) {
-                if (ownServer == BuildConfig.SERVER_NAME) {
-                    Logger.d("Picking regional or well known TURN server")
-                    return turnServers[TurnServerOrigin.REGIONAL_USER_SETTING] ?: turnServers[TurnServerOrigin.WELL_KNOWN] ?: turnServers[TurnServerOrigin.FALLBACK]!!
-                } else {
-                    Logger.d("Picking well known TURN server")
-                    return turnServers[TurnServerOrigin.WELL_KNOWN] ?: turnServers[TurnServerOrigin.FALLBACK]!!
-                }
-            } else {
-                Logger.d("Picking caller TURN server")
-                return turnServers[TurnServerOrigin.FROM_CALLER] ?: turnServers[TurnServerOrigin.FALLBACK]!!
-            }
+            return turnServers[TurnServerOrigin.FROM_CALLER] ?: turnServers[TurnServerOrigin.FALLBACK]!!
         }
     }
 

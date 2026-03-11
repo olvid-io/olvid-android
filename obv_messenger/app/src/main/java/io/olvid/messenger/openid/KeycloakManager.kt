@@ -48,22 +48,18 @@ import androidx.core.content.edit
 import io.olvid.engine.engine.types.ObvKeycloakIdBasedAuthResult
 import io.olvid.engine.engine.types.identities.ObvKeycloakAuthType
 import io.olvid.messenger.openid.jsons.OlvidWellKnownJson
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 object KeycloakManager {
-    private val ownedIdentityStates: HashMap<BytesKey, KeycloakManagerState?>
-    private val currentlySyncingOwnedIdentities: HashSet<BytesKey?>
-    val authenticationRequiredOwnedIdentities: HashSet<BytesKey?>
-    private val executor: NoExceptionSingleThreadExecutor
-    private val retryTimer: Timer
+    private val ownedIdentityStates: HashMap<BytesKey, KeycloakManagerState?> = HashMap()
+    private val currentlySyncingOwnedIdentities: HashSet<BytesKey?> = HashSet()
+    val authenticationRequiredOwnedIdentities: HashSet<BytesKey?> = HashSet()
+    private val executor: NoExceptionSingleThreadExecutor = NoExceptionSingleThreadExecutor("KeycloakManager-Executor")
+    private val retryTimer: Timer = Timer("KeycloakManager-Retry timer")
 
-
-    init {
-        ownedIdentityStates = HashMap<BytesKey, KeycloakManagerState?>()
-        currentlySyncingOwnedIdentities = HashSet<BytesKey?>()
-        authenticationRequiredOwnedIdentities = HashSet<BytesKey?>()
-        executor = NoExceptionSingleThreadExecutor("KeycloakManager-Executor")
-        retryTimer = Timer("KeycloakManager-Retry timer")
-    }
+    private val _authenticationSuccessfulNotifier = MutableSharedFlow<Long>(1)
+    val authenticationSuccessfulNotifier = _authenticationSuccessfulNotifier.asSharedFlow()
 
     // region public methods
     @JvmStatic
@@ -152,6 +148,9 @@ object KeycloakManager {
             } catch (_: Exception) {
                 // failed to save to engine
             }
+
+            // notify whoever is listening that authentication was successful
+            _authenticationSuccessfulNotifier.tryEmit(System.currentTimeMillis())
 
             // after any authentication, re-sync details
             synchronizeIdentityWithKeycloak(identityBytesKey, 0)

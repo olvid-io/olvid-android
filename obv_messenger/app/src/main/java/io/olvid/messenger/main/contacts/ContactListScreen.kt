@@ -60,7 +60,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Badge
 import androidx.compose.material.BadgedBox
-import androidx.compose.material3.Checkbox
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -70,6 +69,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.ripple
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -97,6 +97,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.ifNull
@@ -115,6 +116,7 @@ import io.olvid.messenger.main.contacts.ContactListViewModel.ContactOrKeycloakDe
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.CONTACT
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK
 import io.olvid.messenger.main.contacts.ContactListViewModel.ContactType.KEYCLOAK_MORE_RESULTS
+import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -187,13 +189,23 @@ fun ContactListScreen(
         }
     val pageTypes = remember(pages) { pages.keys.toList() }
 
+    val pagerState = rememberPagerState { if (contactListViewModel.isFiltering() && showOthers.not()) 1 else pages.size }
+
+    if (contactListViewModel.keycloakManaged.value) {
+        val lastAuthenticatedIdentity by KeycloakManager.authenticationSuccessfulNotifier.collectAsStateWithLifecycle(0)
+
+        LaunchedEffect(lastAuthenticatedIdentity) {
+            if (pageTypes[pagerState.currentPage] == ContactListPage.DIRECTORY) {
+                contactListViewModel.refreshKeycloakSearch()
+            }
+        }
+    }
+
     Box(
         modifier = modifier
             .then(refreshState?.let { Modifier.pullRefresh(it) } ?: Modifier)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            val pagerState =
-                rememberPagerState { if (contactListViewModel.isFiltering() && showOthers.not()) 1 else pages.size }
             LaunchedEffect(pagerState.currentPage) {
                 snapshotFlow { pagerState.currentPage }.collect { pageIndex ->
                     val page = pageTypes[pageIndex]

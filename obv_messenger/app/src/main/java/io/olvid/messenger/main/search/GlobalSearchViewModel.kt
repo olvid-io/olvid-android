@@ -36,6 +36,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingSource.LoadResult.Page
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
+import io.olvid.engine.Logger
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.StringUtils2
@@ -54,6 +55,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import java.util.concurrent.CancellationException
 
 class GlobalSearchViewModel : ViewModel() {
     companion object {
@@ -98,7 +100,14 @@ class GlobalSearchViewModel : ViewModel() {
                         searchDiscussions(bytesOwnedIdentity)
                     }
                 )
-                runCatching { deferredSearches.awaitAll() }
+                try {
+                    deferredSearches.awaitAll()
+                }  catch (_: CancellationException) {
+                    // if the job was canceled, make sure not to set filterJob to null
+                    return@supervisorScope
+                } catch (e: Exception) {
+                    Logger.x(e)
+                }
                 searchJob = null
             }
         }

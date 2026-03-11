@@ -283,19 +283,6 @@
         <item>%l %f (%p @ %c)</item>
     </string-array>
 
-    <string-array name="regional_turn_servers">
-        <item>@string/pref_text_regional_turn_server_global</item>
-        <item>@string/pref_text_regional_turn_server_paris</item>
-        <item>@string/pref_text_regional_turn_server_new_york</item>
-        <item>@string/pref_text_regional_turn_server_singapore</item>
-    </string-array>
-    <string-array name="regional_turn_servers_values">
-        <item>global</item>
-        <item>par</item>
-        <item>nyc</item>
-        <item>sng</item>
-    </string-array>
-
     <string-array name="font_scale_choice">
         <item>@string/pref_text_font_scale_0_75</item>
         <item>@string/pref_text_font_scale_0_9</item>

@@ -462,7 +462,7 @@ fun Attachments(
                                                         val showTextBlocksInGallery = textBlocks.isNotEmpty()
                                                                 && (discussionSearchViewModel?.matchedMessageAndFyleIds?.any {
                                                             it.first == message.id
-                                                                    && it.second == attachment.fyle.id
+                                                                    && it.second.first == attachment.fyle.id
                                                         } == true)
 
                                                         openViewerCallback?.invoke()
@@ -528,7 +528,7 @@ fun Attachments(
                         }
                     }
                     LaunchedEffect(discussionSearchViewModel?.matchedMessageAndFyleIds) {
-                        if (discussionSearchViewModel?.matchedMessageAndFyleIds?.contains(attachment.fyleMessageJoinWithStatus.messageId to attachment.fyle.id) == true) {
+                        if (discussionSearchViewModel?.matchedMessageAndFyleIds?.any {it.first == attachment.fyleMessageJoinWithStatus.messageId && it.second.first == attachment.fyle.id } == true) {
                             launch(Dispatchers.IO) {
                                 textBlocks =
                                     AppDatabase.getInstance().fyleMessageTextBlockDao().getAll(

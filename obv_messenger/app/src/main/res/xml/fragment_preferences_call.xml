@@ -42,16 +42,4 @@
         android:icon="@drawable/ic_pref_use_alt_turn_servers"
         android:order="45"
         />
-    <DropDownPreference
-        android:key="pref_key_scaled_turn_region"
-        android:title="@string/pref_scaled_turn_title"
-        app:useSimpleSummaryProvider="true"
-        android:defaultValue="null"
-        app:singleLineTitle="false"
-        android:entries="@array/regional_turn_servers"
-        android:entryValues="@array/regional_turn_servers_values"
-        app:isPreferenceVisible="false"
-        tools:isPreferenceVisible="true"
-        android:icon="@drawable/ic_pref_language"
-        android:order="50" />
 </PreferenceScreen>

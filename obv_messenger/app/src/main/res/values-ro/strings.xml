@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Nu s-au putut găsi browserele instalate</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Alege browserul pe care dorești să îl folosești pentru autentificare</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Browser implicit</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Servere TURN globale bazate pe regiuni</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Servere TURN Paris</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">Servere TURN din New York</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">Servere TURN din Singapore</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d contacte</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d contacte în grupul %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Actualizare necesară</string>
@@ -1935,7 +1931,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Dacă cheia de rezervă a fost pierdută sau compromisă, o puteți reseta pentru a **șterge orice copie de rezervă a contului asociată acestei chei**. Această cheie nu va mai putea fi utilizată pentru a restaura contul.\n\nDacă credeți că cineva ar fi putut utiliza deja această cheie pentru a accesa în mod rău intenționat contul dvs., ar trebui să **verificați lista de dispozitive** din detaliile profilului dvs. pentru orice dispozitiv neașteptat.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Gestionarea backup-urilor Olvid</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Inițiază o copie de rezervă acum</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-profilele-tale/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Închide</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Copii de rezervă online</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Resetați</string>
@@ -2152,6 +2148,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Negociere (pasul 1 din 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Transferarea mesajelor (pasul 2 din 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Transferarea atașamentelor (pasul 3 din 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Negociere</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Transferarea mesajelor</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Se transferă atașamentele</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Transfer efectuat</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Transfer întrerupt</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Transferă istoricul conversațiilor (versiune beta)</string>
@@ -2176,5 +2175,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Debit</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Rămas</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Atașamente</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Această funcție este încă în faza de testare beta, iar implementarea actuală s-ar putea să nu fie compatibilă cu implementarea finală a transferului de istoric Olvid.\n\nÎnainte de a utiliza această funcție, asigurați-vă că dispozitivele dvs. rulează cea mai recentă versiune a Olvid.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Această funcție este încă în faza de testare beta, iar implementarea actuală s-ar putea să nu fie compatibilă cu implementarea finală a transferului de istoric Olvid.\n\nÎnainte de a utiliza această funcție, asigurați-vă că dispozitivele dvs. rulează cea mai recentă versiune a Olvid.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Anulați transferul în curs?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">O transferare a istoricului este în curs. Doriți să o întrerupeți?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Anulează transferul</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Aștept să mă alătur acestei discuții</string>
 </resources>

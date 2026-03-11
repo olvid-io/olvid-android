@@ -148,10 +148,10 @@
 	<string name="invitation_status_exchange_sas_with" state="needs_review" hash="-1787508633">Anna koodisi käyttäjälle %1$s</string>
 	<string name="invitation_status_group_invite" state="needs_review" hash="1220924544">Ryhmäkutsut</string>
 	<string name="invitation_status_invite_accepted" state="needs_review" hash="-1862275659">Ole hyvä ja odota</string>
-	<string name="invitation_status_invite_sent" state="needs_review" hash="318192131">Odotetaan %1$s:ää</string>
+	<string name="invitation_status_invite_sent" state="needs_review" hash="318192131">Odotetaan %1$s</string>
 	<string name="invitation_status_mediator_invite" state="needs_review" hash="-1216588869">Yhteystiedon esittely</string>
 	<string name="invitation_status_mediator_invite_accepted" state="needs_review" hash="-1362366154">Esittely hyväksytty</string>
-	<string name="invitation_status_mediator_invite_information_sent" state="needs_review" hash="1829213391">Esittelit %1$s:n</string>
+	<string name="invitation_status_mediator_invite_information_sent" state="needs_review" hash="1829213391">Esittelit %1$s</string>
 	<string name="invitation_status_mediator_invite_information_accepted" state="needs_review" hash="-744115153">Olet hyväksynyt %1$s:n esittelyn</string>
 	<string name="invitation_status_mediator_invite_information_ignored" state="needs_review" hash="533777275">Olet jättänyt huomiotta %1$s:n esittelyn</string>
 	<string name="label_copy" state="needs_review" hash="-811327733">Kopioi</string>
@@ -594,7 +594,7 @@
 	<string name="label_subscription_offer_save_percent" state="needs_review" hash="479307719">Tallenna %1$d%%</string>
 	<string name="label_subscription_offer_monthly" state="needs_review" hash="-1602490190">Kuukausittain</string>
 	<string name="label_subscription_offer_yearly" state="needs_review" hash="1246240165">Vuosittain</string>
-	<string name="label_subscription_status" state="needs_review" hash="1154002053">Tilaustila</string>
+	<string name="label_subscription_status" state="needs_review" hash="1154002053">Tilaukset</string>
 	<string name="text_feature_initiate_secure_calls" state="needs_review" hash="1414263062">Aloita suojatut puhelut</string>
 	<string name="text_premium_features" state="needs_review" hash="603728806">Premium-ominaisuudet</string>
 	<string name="text_subscription_active" state="needs_review" hash="960106589">Tilaus on aktiivinen</string>
@@ -687,7 +687,7 @@
 	<string name="text_awaiting_subscription_payment" state="needs_review" hash="1135205985">Tilauksen maksu hylätty</string>
 	<string name="text_subscription_in_grace_period_until" state="needs_review" hash="-1685522686">Armonaika päättyy: %1$s</string>
 	<string name="text_subscription_on_hold_since" state="needs_review" hash="-515586151">Tilaus on ollut keskeytettynä: %1$s</string>
-	<string name="menu_action_refresh_subscription_status" state="needs_review" hash="-486840226">Päivitä tilausstatus</string>
+	<string name="menu_action_refresh_subscription_status" state="needs_review" hash="-486840226">Päivitä tilauksen tila</string>
 	<string name="label_fix_payment_method" state="needs_review" hash="-41275395">Päivitä maksutapa</string>
 	<string name="label_fix_payment_method_explanation" state="needs_review" hash="-2118046403">Jotta voit säilyttää tilauksesi Olvidissa, päivitä maksutapasi.</string>
 	<string name="pref_title_subscription" state="needs_review" hash="-1948915367">Hallinnoi Olvid-tilaustasi</string>
@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Asennettuja selaimia ei voitu hakea</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Valitse selain, jota haluat käyttää tunnistautumiseen</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Oletusselain</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Globaalit aluepohjaiset TURN-palvelimet</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Paris TURN-palvelimet</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">New Yorkin TURN-palvelimet</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">Singaporen TURN-palvelimet</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d kontaktia</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d kontaktia ryhmässä %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Päivitys vaaditaan</string>
@@ -1090,7 +1086,7 @@
 	<string name="text_notification_location_permission_denied_title" state="needs_review" hash="-790054697">Sijaintilupa evätty</string>
 	<string name="text_notification_location_permission_denied_message" state="needs_review" hash="134258093">Olvid tarvitsee pääsyn sijaintiisi jatkaakseen jakamista.</string>
 	<string name="notification_action_authenticate" state="needs_review" hash="272245375">Vahvista</string>
-	<string name="button_label_manage" state="needs_review" hash="1671874936">Hallinnoida</string>
+	<string name="button_label_manage" state="needs_review" hash="1671874936">Hallinnoi</string>
 	<string name="button_label_add_new_profile" state="needs_review" hash="-2002397142">Lisää profiili</string>
 	<string name="dialog_title_open_hidden_profile" state="needs_review" hash="36372079">Avaa piilotettu profiili</string>
 	<string name="hint_profile_nickname" state="needs_review" hash="524858188">Profiilin lempinimi</string>
@@ -1935,7 +1931,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Jos varmuuskopioavaimesi on kadonnut tai vaarantunut, voit nollata sen **poistaaksesi kaikki tähän avaimeen liittyvät tilisi varmuuskopiot**. Tätä avainta ei voida enää käyttää tilisi palauttamiseen.\n\nJos uskot, että joku on jo voinut käyttää tätä avainta päästäkseen luvattomasti tilillesi, tarkista **laiteluettelo** profiilisi tiedoista odottamattomien laitteiden varalta.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Hallinnoi Olvid-varmuuskopioitani</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Aloita varmuuskopiointi nyt</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/varmuuskopioi-profiilisi/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Sulje</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Online-varmuuskopiosi</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Palauta</string>
@@ -2152,6 +2148,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Neuvottelussa (vaihe 1/3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Viestien siirtäminen (vaihe 2/3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Liitteiden siirtäminen (vaihe 3/3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Neuvottelemassa</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Viestien siirtäminen</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Liitteiden siirtäminen</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Siirto valmis</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Siirto keskeytettiin</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Chat-historian siirto (beta)</string>
@@ -2176,5 +2175,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Läpimenomäärä</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Jäljellä</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Liitteet</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Tämä ominaisuus on vielä beta-testausvaiheessa, eikä nykyinen toteutus välttämättä ole yhteensopiva Olvidin historian siirron lopullisen toteutuksen kanssa.\n\nEnnen kuin käytät tätä ominaisuutta, varmista, että laitteissasi on asennettuna uusin Olvid-versio.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Tämä ominaisuus on vielä beta-testausvaiheessa, eikä nykyinen toteutus välttämättä ole yhteensopiva Olvidin historian siirron lopullisen toteutuksen kanssa.\n\nEnnen kuin käytät tätä ominaisuutta, varmista, että laitteissasi on asennettuna uusin Olvid-versio.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Keskeytetäänkö käynnissä oleva tiedonsiirto?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Historiansiirto on parhaillaan käynnissä. Haluatko keskeyttää sen?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Keskeytä tiedonsiirto</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Odotetaan, että pääset osallistumaan tähän keskusteluun</string>
 </resources>

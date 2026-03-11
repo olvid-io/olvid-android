@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Không thể truy vấn trình duyệt đã cài đặt</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Chọn trình duyệt để sử dụng cho xác thực</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Trình duyệt mặc định</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Máy chủ TURN dựa trên khu vực toàn cầu</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Máy chủ TURN Paris</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">Máy chủ TURN New York</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">Máy chủ TURN Singapore</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d danh bạ</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d liên hệ trong nhóm %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Cần cập nhật</string>
@@ -1935,7 +1931,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Nếu khóa sao lưu của bạn bị mất hoặc bị xâm phạm, bạn có thể đặt lại nó để **xóa mọi bản sao lưu của tài khoản liên kết với khóa này**. Khóa này sẽ không còn khả dụng để khôi phục tài khoản của bạn.\n\nNếu bạn nghi ngờ ai đó đã sử dụng khóa này để truy cập trái phép vào tài khoản của mình, bạn nên **kiểm tra danh sách thiết bị** trong chi tiết hồ sơ của mình để tìm bất kỳ thiết bị không mong muốn nào.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Quản lý bản sao lưu Olvid của tôi</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Bắt đầu sao lưu ngay bây giờ</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/sao-luu-ho-so/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Đóng</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Bản sao lưu trực tuyến của bạn</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Đặt lại</string>
@@ -2152,6 +2148,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Đang thương lượng (bước 1 trong 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Đang chuyển các tin nhắn (bước 2 trong 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Đang chuyển các tệp đính kèm (bước 3 trong 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Đàm phán</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Đang chuyển tin nhắn</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Đang chuyển các tệp đính kèm</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Quá trình truyền đã hoàn tất</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Quá trình truyền bị gián đoạn</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Chuyển lịch sử trò chuyện (phiên bản thử nghiệm)</string>
@@ -2176,5 +2175,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Thông lượng</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Số còn lại</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Tệp đính kèm</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Tính năng này vẫn đang trong giai đoạn thử nghiệm beta và phiên bản hiện tại có thể không tương thích với phiên bản cuối cùng của tính năng chuyển dữ liệu lịch sử của Olvid.\n\nTrước khi sử dụng tính năng này, hãy đảm bảo rằng các thiết bị của bạn đang chạy phiên bản Olvid mới nhất.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Tính năng này vẫn đang trong giai đoạn thử nghiệm beta và phiên bản hiện tại có thể không tương thích với phiên bản cuối cùng của tính năng chuyển dữ liệu lịch sử của Olvid.\n\nTrước khi sử dụng tính năng này, hãy đảm bảo rằng các thiết bị của bạn đang chạy phiên bản Olvid mới nhất.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Hủy bỏ quá trình truyền dữ liệu đang diễn ra?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Hiện tại đang diễn ra quá trình chuyển dữ liệu lịch sử. Bạn có muốn hủy bỏ không?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Hủy bỏ quá trình truyền</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Đang chờ để tham gia cuộc trò chuyện này</string>
 </resources>

@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.history_transfer
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.text.format.Formatter
@@ -75,6 +76,7 @@ import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.history_transfer.types.TransferFailReason
 import io.olvid.messenger.history_transfer.types.TransferProgress
+import io.olvid.messenger.history_transfer.types.TransferProgress.Connecting.getStepName
 
 
 class HistoryTransferActivity: LockableActivity() {
@@ -86,7 +88,13 @@ class HistoryTransferActivity: LockableActivity() {
         )
         super.onCreate(savedInstanceState)
 
-
+        if (TransferService.transferInProgress.value) {
+            runCatching {
+                startService(Intent(this, TransferNotificationService::class.java).apply {
+                    action = TransferNotificationService.ACTION_START
+                })
+            }
+        }
 
         setContent {
             val transferProgress = remember { TransferService.getTransferProgress() }
@@ -143,16 +151,7 @@ fun TransferProgressDialog(
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = when (transferProgress) {
-                        TransferProgress.ContactingOtherDevice -> stringResource(R.string.history_transfer_step_contacting_other_device)
-                        TransferProgress.Connecting -> stringResource(R.string.history_transfer_step_connecting)
-                        TransferProgress.Negotiating -> stringResource(R.string.history_transfer_step_negotiating)
-                        is TransferProgress.TransferringMessages -> stringResource(R.string.history_transfer_step_transferring_messages)
-                        is TransferProgress.TransferringFiles -> stringResource(R.string.history_transfer_step_transferring_files)
-                        TransferProgress.Finished -> stringResource(R.string.history_transfer_step_finished)
-                        is TransferProgress.Failed -> stringResource(R.string.history_transfer_step_failed) // TODO: change message depending on fail reason
-                        null -> stringResource(R.string.history_transfer_step_none)
-                    },
+                    text = transferProgress.getStepName(false),
                     textAlign = TextAlign.Center,
                     style = OlvidTypography.body1,
                     color = colorResource(R.color.almostBlack),

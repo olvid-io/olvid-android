@@ -65,7 +65,7 @@ class LinkPreviewRepository {
                         }
                         val trustManager = trustManagers[0] as X509TrustManager
                         this.sslSocketFactory(sslSocketFactory, trustManager)
-                    } catch (e: java.lang.Exception) {
+                    } catch (_: Exception) {
                         Log.e("LinkPreviewRepository", "Error initializing okHttpClient trustManager")
                     }
                 }

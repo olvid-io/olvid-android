@@ -675,7 +675,6 @@ fun SpannableStringBuilder.removePreviousLinebreak(start: Int) {
 fun AnnotatedString.formatMarkdown(
     complete: Boolean = false,
     context: Context? = null,
-    bytesOwnedIdentity: ByteArray? = null,
     message: Message? = null,
     backgroundColor: Color = Color.White.copy(alpha = .25f)
 ): AnnotatedString {
@@ -686,8 +685,8 @@ fun AnnotatedString.formatMarkdown(
         val paragraphStyles = emptyList<AnnotatedString.Range<ParagraphStyle>>().toMutableList()
         val mentionStringAnnotations = mutableListOf<MentionStringAnnotation>()
         val spannableString = SpannableString(this).apply {
-            if (context != null && message != null && bytesOwnedIdentity != null) {
-                Utils.applyMentionSpans(context, bytesOwnedIdentity, message, this)
+            if (context != null && message != null) {
+                Utils.applyMentionSpans(context, message, this)
             }
         }.formatMarkdown(Spannable.SPAN_INCLUSIVE_EXCLUSIVE).apply {
             // first do all operations that may shift offsets (insert of delete)

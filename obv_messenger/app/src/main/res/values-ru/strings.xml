@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Не удалось найти установленные браузеры</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Выберите браузер для аутентификации</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Браузер по умолчанию</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Глобальные TURN-серверы, основанные на регионах</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">TURN-серверы в Париже</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">TURN-серверы в Нью-Йорке</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">TURN-серверы Сингапура</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d контактов</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d контактов в группе %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Требуется обновление</string>
@@ -1934,7 +1930,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Если ваш ключ резервного копирования был утерян или скомпрометирован, вы можете сбросить его, чтобы **удалить все резервные копии вашей учётной записи, связанные с этим ключом**. Этот ключ больше нельзя будет использовать для восстановления вашей учётной записи.\n\nЕсли вы считаете, что кто-то мог уже использовать этот ключ для несанкционированного доступа к вашей учётной записи, вам следует **проверить список устройств** в деталях вашего профиля на наличие неожиданных устройств.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Управление резервными копиями Olvid</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Начать резервное копирование сейчас</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-ваших-профилей/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Закрыть</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Ваши онлайн-резервные копии</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Сбросить</string>
@@ -2151,6 +2147,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Согласование (шаг 1 из 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Передача сообщений (шаг 2 из 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Передача вложений (шаг 3 из 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Ведутся переговоры</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Передача сообщений</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Передача вложений</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Передача завершена</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Передача прервана</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Перенос истории чатов (бета-версия)</string>
@@ -2175,5 +2174,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Пропускная способность</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Остаток</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Вложения</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Эта функция все еще находится на стадии бета-тестирования, и текущая реализация может быть несовместима с окончательной реализацией функции переноса истории Olvid.\n\nПрежде чем использовать эту функцию, убедитесь, что на ваших устройствах установлена последняя версия Olvid.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Эта функция все еще находится на стадии бета-тестирования, и текущая реализация может быть несовместима с окончательной реализацией функции переноса истории Olvid.\n\nПрежде чем использовать эту функцию, убедитесь, что на ваших устройствах установлена последняя версия Olvid.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Отменить текущую передачу?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">В данный момент выполняется перенос истории. Хотите отменить его?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Отменить передачу</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Ожидаю подключения к этому обсуждению</string>
 </resources>

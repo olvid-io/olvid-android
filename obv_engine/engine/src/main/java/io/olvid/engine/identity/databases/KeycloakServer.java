@@ -551,7 +551,7 @@ public class KeycloakServer implements ObvDatabase {
     public static void setSupportsIdBasedAuth(IdentityManagerSession identityManagerSession, String serverUrl, Identity ownedIdentity, boolean supportsIdBasedAuth) throws SQLException {
         try (PreparedStatement statement = identityManagerSession.session.prepareStatement("KeycloakServer.setSupportsIdBasedAuth",
                 "UPDATE " + TABLE_NAME +
-                        " SET " + SUPPORTS_ID_BASED_AUTH + " = ?, " +
+                        " SET " + SUPPORTS_ID_BASED_AUTH + " = ? " +
                         " WHERE " + SERVER_URL + " = ? " +
                         " AND " + OWNED_IDENTITY + " = ?;")) {
             statement.setBoolean(1, supportsIdBasedAuth);

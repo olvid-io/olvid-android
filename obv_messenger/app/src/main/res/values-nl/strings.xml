@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Kon geen geïnstalleerde browsers vinden</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Kies welke browser je wilt gebruiken voor authenticatie</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Standaardbrowser</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Wereldwijde regio-gebaseerde TURN-servers</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Paris TURN-servers</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">TURN-servers van New York</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">TURN-servers van Singapore</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d contacten</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d contacten in groep %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Update vereist</string>
@@ -1934,7 +1930,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Als uw back-upsleutel verloren is gegaan of gecompromitteerd, kunt u deze resetten om **alle back-ups van uw account die aan deze sleutel zijn gekoppeld te verwijderen**. Deze sleutel kan dan niet meer worden gebruikt om uw account te herstellen.\n\nAls u denkt dat iemand deze sleutel al heeft gebruikt om op illegale wijze toegang tot uw account te krijgen, moet u **de lijst met apparaten** in uw profielgegevens controleren op onverwachte apparaten.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Mijn Olvid-back-ups beheren</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Start nu een back-up</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/maak-een-back-up-van-je-profielen/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Sluiten</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Je online back-ups</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Terugstellen</string>
@@ -2151,6 +2147,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Bezig met onderhandelen (stap 1 van 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Berichten worden overgedragen (stap 2 van 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Bestanden verzenden (stap 3 van 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Bezig met onderhandelen</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Berichten worden overgedragen</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Bijlagen worden verzonden</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Overdracht voltooid</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Overdracht onderbroken.</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Chatgeschiedenis overzetten (bèta)</string>
@@ -2175,5 +2174,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Doorvoer</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Resterend</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Bijlagen</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Deze functie bevindt zich nog in de bètatestfase en de huidige implementatie is mogelijk niet compatibel met de uiteindelijke implementatie van de geschiedenistransfer van Olvid.\n\nVoordat u deze functie gebruikt, moet u ervoor zorgen dat uw apparaten de nieuwste versie van Olvid hebben geïnstalleerd.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Deze functie bevindt zich nog in de bètatestfase en de huidige implementatie is mogelijk niet compatibel met de uiteindelijke implementatie van de geschiedenistransfer van Olvid.\n\nVoordat u deze functie gebruikt, moet u ervoor zorgen dat uw apparaten de nieuwste versie van Olvid hebben geïnstalleerd.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Huidige overdracht annuleren?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Er is momenteel een overdracht van de gesprekshistorie gaande. Wilt u deze annuleren?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Overdracht annuleren</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Wacht tot ik kan deelnemen aan dit gesprek.</string>
 </resources>

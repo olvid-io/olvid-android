@@ -18,6 +18,9 @@
  */
 package io.olvid.messenger.openid.jsons
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 class KeycloakServerRevocationsAndStuff(
     val revocationAllowed: Boolean,
     val transferRestricted: Boolean,

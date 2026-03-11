@@ -19,10 +19,17 @@
 
 package io.olvid.messenger.history_transfer
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.net.wifi.WifiManager
+import android.net.wifi.WifiManager.WifiLock
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import com.fasterxml.jackson.core.JsonProcessingException
 import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.EtaEstimator
@@ -415,7 +422,49 @@ class TransferService(
 
     companion object {
         const val HISTORY_TRANSFER_MESSAGE_MAX_AGE: Long = 30_000
+        private var wifiLock: WifiLock? = null
+        private var powerLock: PowerManager.WakeLock? = null
+
+
         var instance: TransferService? = null
+            @SuppressLint("WifiManagerLeak", "WakelockTimeout")
+            set(value) {
+                field = value
+                transferInProgress.value = value != null
+                if (value != null) {
+                    // for WebRTC transfers, request a wifi wake lock
+                    if (value.transferTransportType is TransferTransportType.WebRtcWithOwnedDevice) {
+                        runCatching {
+                            @Suppress("DEPRECATION")
+                            (App.getContext().getSystemService(Context.WIFI_SERVICE) as WifiManager?)?.createWifiLock(
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                                    WifiManager.WIFI_MODE_FULL_LOW_LATENCY
+                                else
+                                    WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+                                "io.olvid:wifi_lock_for_transfer"
+                            )?.apply {
+                                wifiLock = this
+                                acquire()
+                            }
+                        }
+                    }
+
+                    // in all cases, request a power wake lock
+                    runCatching {
+                        (App.getContext().getSystemService(Context.POWER_SERVICE) as PowerManager?)?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "io.olvid:power_lock_for_transfer")?.apply {
+                            powerLock = this
+                            acquire()
+                        }
+                    }
+                } else {
+                    wifiLock?.release()
+                    wifiLock = null
+                    powerLock?.release()
+                    powerLock = null
+                }
+            }
+
+        val transferInProgress = mutableStateOf(false)
 
         fun initiateHistoryTransferToOtherDevice(transferTransportType: TransferTransportType, transferScope: TransferScope) : Boolean {
             instance?.let {
@@ -456,7 +505,7 @@ class TransferService(
                     Logger.w("Unable to run two history transfers in parallel")
                 }
             } ?: run {
-                // only create an instance when receiving a SDP message, ICE candidates should only be delivered to existing instances
+                // only create an instance when receiving an SDP message, ICE candidates should only be delivered to existing instances
                 if (jsonWebrtcHistoryTransferMessage.sdp != null) {
                     instance = TransferService(
                         role = TransferRole.DESTINATION,

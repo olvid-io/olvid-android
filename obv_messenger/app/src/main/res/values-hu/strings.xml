@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Nem találhatóak a telepített böngészők</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Válaszd ki a böngészőt, amelyet az azonosításhoz használni szeretnél</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Alapértelmezett böngésző</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Globális régióalapú TURN-szerverek</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Párizsi TURN szerverek</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">New York-i TURN szerverek</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">Szingapúri TURN szerverek</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d kapcsolat</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d kontakt a(z) %2$s csoportban</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Frissítés szükséges</string>
@@ -1934,7 +1930,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Ha elvesztette vagy kompromittálta a biztonsági kulcsát, visszaállíthatja azt, hogy **törölje a kulcshoz társított fiókjának összes biztonsági másolatát**. Ez a kulcs többé nem használható a fiók helyreállítására.\n\nHa úgy gondolja, hogy valaki már használhatta ezt a kulcsot a fiókjához való illetéktelen hozzáféréshez, ellenőrizze a profiljának részleteiben található **eszközlistát** az esetleges váratlan eszközök tekintetében.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Olvid biztonsági másolatok kezelése</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Indíts el egy biztonsági másolatot most</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/profiljainak-mentese/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Bezárás</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Online biztonsági mentései</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Visszaállítás</string>
@@ -2151,6 +2147,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Tárgyalás (1. lépés, összesen 3-ból)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Üzenetek átvitele (2. lépés, összesen 3-ból)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Mellékletek átvitele (3. lépés, összesen 3-ból)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Tárgyalás</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Üzenetek átvitele</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Mellékletek átvitele</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Az átvitel befejeződött</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Az átvitel megszakadt</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Chat-előzmények átvitele (béta)</string>
@@ -2175,5 +2174,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Átvitel</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Megmaradt</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Mellékletek</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Ez a funkció még a béta tesztelési fázisban van, és a jelenlegi implementáció nem feltétlenül kompatibilis az Olvid történetátvitelének végleges implementációjával.\n\nMielőtt használná ezt a funkciót, győződjön meg arról, hogy az eszközein a legújabb Olvid verzió van telepítve.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Ez a funkció még a béta tesztelési fázisban van, és a jelenlegi implementáció nem feltétlenül kompatibilis az Olvid történetátvitelének végleges implementációjával.\n\nMielőtt használná ezt a funkciót, győződjön meg arról, hogy az eszközein a legújabb Olvid verzió van telepítve.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Megszakassam a folyamatban lévő átvitelt?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Jelenleg egy előzményátvitel zajlik. Szeretnéd leállítani?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Állítsa le az átvitelt</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Várakozás, amíg csatlakozhatok ehhez a beszélgetéshez</string>
 </resources>

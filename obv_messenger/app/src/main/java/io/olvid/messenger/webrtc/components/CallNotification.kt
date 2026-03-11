@@ -20,6 +20,7 @@
 package io.olvid.messenger.webrtc.components
 
 import android.content.res.Configuration
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,6 +38,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -59,7 +62,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.InitialView
@@ -71,91 +73,100 @@ fun CallNotification(
     callData: CallData
 ) {
     val context = LocalContext.current
-    Row(
+    Card(
         modifier = modifier
             .padding(horizontal = 8.dp)
             .widthIn(max = 360.dp)
-            .clickable {
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
+                onClick = {
+                    callData.fullScreenIntent?.let {
+                        context.startActivity(it)
+                    }
+                }
+            ),
+        colors = CardDefaults.cardColors(
+            containerColor = colorResource(R.color.newDialogBackground),
+            contentColor = colorResource(R.color.almostBlack),
+        ),
+        border = BorderStroke(1.dp, colorResource(R.color.newDialogBorder)),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(8.dp),
+            verticalAlignment = CenterVertically
+        ) {
+            InitialView(
+                modifier = Modifier.size(48.dp),
+                initialViewSetup = callData.initialViewSetup,
+                onCall = true
+            ) {
                 callData.fullScreenIntent?.let {
                     context.startActivity(it)
                 }
             }
-            .shadow(elevation = 12.dp)
-            .background(
-                color = colorResource(id = R.color.dialogBackground),
-                shape = RoundedCornerShape(12.dp)
-            )
-            .padding(8.dp)
-            .clip(RoundedCornerShape(16.dp)),
-        verticalAlignment = CenterVertically
-    ) {
-        InitialView(
-            modifier = Modifier.size(48.dp),
-            initialViewSetup = callData.initialViewSetup,
-            onCall = true
-        ) {
-            callData.fullScreenIntent?.let {
-                context.startActivity(it)
-            }
-        }
-        Spacer(Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f, true), verticalArrangement = Arrangement.Center) {
-            Text(
-                text = callData.title,
-                color = colorResource(id = R.color.primary700),
-                style = OlvidTypography.h3,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            callData.subtitle?.let {
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f, true), verticalArrangement = Arrangement.Center) {
                 Text(
-                    text = it,
-                    color = colorResource(id = R.color.greyTint),
-                    style = OlvidTypography.subtitle1,
+                    text = callData.title,
+                    color = colorResource(id = R.color.primary700),
+                    style = OlvidTypography.h3,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-            }
-        }
-        Spacer(Modifier.width(8.dp))
-        callData.rejectCall?.let {
-            IconButton(
-                onClick = it,
-                colors = IconButtonDefaults.iconButtonColors(colorResource(R.color.red))
-            ) {
-                if (callData.isDoubleCall) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_close),
-                        contentDescription = stringResource(R.string.notification_action_reject),
-                        tint = Color.White
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_end_call),
-                        contentDescription = stringResource(R.string.notification_action_reject),
-                        tint = Color.White
+
+                callData.subtitle?.let {
+                    Text(
+                        text = it,
+                        color = colorResource(id = R.color.greyTint),
+                        style = OlvidTypography.subtitle1,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
-        }
-        callData.acceptCall?.let { onClick ->
-            Spacer(Modifier.width(12.dp))
-            if (callData.isDoubleCall) {
-                EndAndAcceptCall(
-                    backgroundColor = colorResource(R.color.almostWhite),
-                    onClick = onClick
-                )
-            } else {
+            Spacer(Modifier.width(8.dp))
+            callData.rejectCall?.let {
                 IconButton(
-                    onClick = onClick,
-                    colors = IconButtonDefaults.iconButtonColors(colorResource(R.color.green))
+                    onClick = it,
+                    colors = IconButtonDefaults.iconButtonColors(colorResource(R.color.red))
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_answer_call),
-                        contentDescription = stringResource(R.string.notification_action_accept),
-                        tint = Color.White
+                    if (callData.isDoubleCall) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = stringResource(R.string.notification_action_reject),
+                            tint = Color.White
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_end_call),
+                            contentDescription = stringResource(R.string.notification_action_reject),
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+            callData.acceptCall?.let { onClick ->
+                Spacer(Modifier.width(12.dp))
+                if (callData.isDoubleCall) {
+                    EndAndAcceptCall(
+                        backgroundColor = colorResource(R.color.newDialogBackground),
+                        onClick = onClick
                     )
+                } else {
+                    IconButton(
+                        onClick = onClick,
+                        colors = IconButtonDefaults.iconButtonColors(colorResource(R.color.green))
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_answer_call),
+                            contentDescription = stringResource(R.string.notification_action_accept),
+                            tint = Color.White
+                        )
+                    }
                 }
             }
         }
@@ -167,51 +178,45 @@ fun CallNotification(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun CallNotificationPreview() {
-    AppCompatTheme {
-        CallNotification(
-            callData = CallData(
-                initialViewSetup = { it.setUnknown() },
-                title = "John Doe",
-                subtitle = "Incoming call",
-                rejectCall = {},
-                acceptCall = {})
-        )
-    }
+    CallNotification(
+        callData = CallData(
+            initialViewSetup = { it.setUnknown() },
+            title = "John Doe",
+            subtitle = "Incoming call",
+            rejectCall = {},
+            acceptCall = {})
+    )
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun DoubleCallNotificationPreview() {
-    AppCompatTheme {
-        CallNotification(
-            callData = CallData(
-                initialViewSetup = { it.setUnknown() },
-                title = "John Doe",
-                subtitle = "Incoming call",
-                rejectCall = {},
-                acceptCall = {},
-                isDoubleCall = true
-            )
+    CallNotification(
+        callData = CallData(
+            initialViewSetup = { it.setUnknown() },
+            title = "John Doe",
+            subtitle = "Incoming call",
+            rejectCall = {},
+            acceptCall = {},
+            isDoubleCall = true
         )
-    }
+    )
 }
 
 
 @Preview
 @Composable
 fun OngoingCallPreview() {
-    AppCompatTheme {
-        CallNotification(
-            callData = CallData(
-                initialViewSetup = { it.setUnknown() },
-                title = "John Doe",
-                subtitle = "Ongoing call",
-                rejectCall = {},
-                isDoubleCall = false
-            )
+    CallNotification(
+        callData = CallData(
+            initialViewSetup = { it.setUnknown() },
+            title = "John Doe",
+            subtitle = "Ongoing call",
+            rejectCall = {},
+            isDoubleCall = false
         )
-    }
+    )
 }
 
 @Composable
@@ -227,7 +232,8 @@ fun EndAndAcceptCall(backgroundColor: Color, onClick: () -> Unit = {}) {
                 onClick()
             }
             .size(48.dp)
-            .background(backgroundColor), contentAlignment = Center
+            .background(backgroundColor),
+        contentAlignment = Center
     ) {
         Icon(
             modifier = Modifier
@@ -258,7 +264,5 @@ fun EndAndAcceptCall(backgroundColor: Color, onClick: () -> Unit = {}) {
 @Preview
 @Composable
 fun EndAndAcceptCallPreview() {
-    AppCompatTheme {
-        EndAndAcceptCall(Color.White)
-    }
+    EndAndAcceptCall(colorResource(R.color.newDialogBackground))
 }

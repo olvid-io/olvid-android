@@ -1025,10 +1025,6 @@
     <string name="toast_message_error_querying_for_available_browsers">Impossible de lister les navigateurs installés</string>
     <string name="dialog_title_choose_browser_for_authentication">Choisissez le navigateur à utiliser pour l\'authentification</string>
     <string name="text_default_browser">Navigateur par défaut</string>
-    <string name="pref_text_regional_turn_server_global">Serveurs TURN régionaux globaux</string>
-    <string name="pref_text_regional_turn_server_paris">Serveurs TURN de Paris</string>
-    <string name="pref_text_regional_turn_server_new_york">Serveurs TURN de New-York</string>
-    <string name="pref_text_regional_turn_server_singapore">Serveurs TURN de Singapour</string>
     <string name="text_count_contacts">%1$d contacts</string>
     <string name="text_count_contacts_from_group">%1$d contacts du groupe %2$s</string>
     <string name="dialog_title_outdated_version">Mise à jour requise</string>
@@ -2147,6 +2143,9 @@
     <string name="history_transfer_step_negotiating">Négociation (étape 1 sur 3)</string>
     <string name="history_transfer_step_transferring_messages">Transfert des messages (étape 2 sur 3)</string>
     <string name="history_transfer_step_transferring_files">Transfert des pièces jointes (étape 3 sur 3)</string>
+    <string name="history_transfer_step_negotiating_short">Négociation</string>
+    <string name="history_transfer_step_transferring_messages_short">Transfert des messages</string>
+    <string name="history_transfer_step_transferring_files_short">Transfert des pièces jointes</string>
     <string name="history_transfer_step_finished">Transfert terminé</string>
     <string name="history_transfer_step_failed">Transfert interrompu</string>
     <string name="pref_category_history_transfer_title">Transfert d\'historique (bêta)</string>
@@ -2171,5 +2170,9 @@
     <string name="transfer_label_throughput">Débit</string>
     <string name="transfer_label_remaining">Restant</string>
     <string name="transfer_label_attachments">Pièces jointes</string>
-    <string name="transfer_disclaimer_beta">Cette fonctionnalité est encore en phase de bêta test et l\'implémentation actuelle pourrait ne pas être compatible avec l\'implémentation finale du transfert d\'historique Olvid.\n\nAvant d\'utiliser cette fonctionnalité, assurez vous que vos appareils ont bien la dernière version d\'Olvid installée.</string>
+    <string name="transfer_disclaimer_beta">Cette fonctionnalité est encore en phase de bêta test et l\'implémentation actuelle pourrait ne pas être compatible avec l\'implémentation finale du transfert d\'historique Olvid.\n\nAvant d\'utiliser cette fonctionnalité, assurez-vous que vos appareils ont bien la dernière version d\'Olvid installée.</string>
+    <string name="history_transfer_abort_dialog_title">Interrompre le transfert en cours ?</string>
+    <string name="history_transfer_abort_dialog_message">Un transfert d\'historique est en cours. Souhaitez-vous l\'interrompre ?</string>
+    <string name="button_label_abort_transfer">Interrompre le transfert</string>
+    <string name="message_discussion_waiting_to_join">En attente de rejoindre la discussion</string>
 </resources>

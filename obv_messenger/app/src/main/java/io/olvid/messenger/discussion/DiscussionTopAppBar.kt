@@ -52,6 +52,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -88,6 +89,7 @@ import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.propagateMuteSettings
+import io.olvid.messenger.designsystem.components.OlvidCircularProgress
 import io.olvid.messenger.designsystem.components.SearchBar
 import io.olvid.messenger.designsystem.components.SelectionTopAppBar
 import io.olvid.messenger.designsystem.theme.OlvidTypography
@@ -99,6 +101,7 @@ import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.webrtc.WebrtcCallService
+import kotlinx.coroutines.delay
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -200,21 +203,28 @@ fun DiscussionTopAppBar(
         ),
         content = {
             if (discussionSearchViewModel.searchExpanded) {
+                LaunchedEffect(discussionSearchViewModel.searchText) {
+                    delay(300)
+                    discussion?.id?.let { discussionId ->
+                        discussionSearchViewModel.filter(
+                            discussionId = discussionId,
+                            filterString = discussionSearchViewModel.searchText,
+                            firstVisibleMessageMessageId = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()?.key as? Long
+                        )
+                    }
+                }
                 SearchBar(
                     modifier = Modifier.height(if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) 40.dp else 48.dp).fillMaxWidth(),
                     searchText = discussionSearchViewModel.searchText,
                     onSearchTextChanged = { newText ->
                         discussionSearchViewModel.searchText = newText
-                        discussion?.id?.let { discussionId ->
-                            discussionSearchViewModel.filter(
-                                discussionId = discussionId,
-                                filterString = newText,
-                                firstVisibleMessageId = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()?.key as? Long
-                                    ?: Long.MAX_VALUE
-                            )
-                        }
                     },
                     placeholderText = stringResource(R.string.hint_search_message),
+                    leadingIcon = discussionSearchViewModel.filterJob?.let {
+                        {
+                            OlvidCircularProgress(size = 24.dp)
+                        }
+                    },
                     requestFocus = discussionSearchViewModel.focusSearchOnOpen,
                     onClearClick = {
                         discussionSearchViewModel.reset()
@@ -353,111 +363,113 @@ fun DiscussionTopAppBar(
                     }
                 })
             } else {
-                discussion?.takeIf { it.isNormalOrReadOnly && discussionSearchViewModel.searchExpanded.not() }
+                discussion?.takeIf { discussionSearchViewModel.searchExpanded.not() }
                     ?.apply {
                         add(R.drawable.ic_search to {
                             discussionSearchViewModel.searchExpanded = true
                             keyboardController?.show()
                         })
-                        add(R.drawable.ic_phone to {
+                        if (isNormalOrReadOnly) {
+                            add(R.drawable.ic_phone to {
 
-                            when (discussionType) {
-                                Discussion.TYPE_CONTACT -> {
-                                    val contacts =
-                                        discussionViewModel.discussionContacts.value
-                                    if (!contacts.isNullOrEmpty() && contacts[0].hasChannelOrPreKey()) {
-                                        App.startWebrtcCall(
-                                            context,
-                                            bytesOwnedIdentity,
-                                            bytesDiscussionIdentifier
-                                        )
-                                    }
-                                }
-
-                                Discussion.TYPE_GROUP, Discussion.TYPE_GROUP_V2 -> {
-                                    val contacts =
-                                        discussionViewModel.discussionContacts.value
-                                    if (contacts != null) {
-                                        val bytesContactIdentities: ArrayList<BytesKey>?
-                                        if (contacts.size > WebrtcCallService.MAX_GROUP_SIZE_TO_SELECT_ALL_BY_DEFAULT) {
-                                            bytesContactIdentities = null
-                                        } else {
-                                            bytesContactIdentities =
-                                                ArrayList(contacts.size)
-                                            for (contact in contacts) {
-                                                bytesContactIdentities.add(
-                                                    BytesKey(contact.bytesContactIdentity)
-                                                )
-                                            }
-                                        }
-                                        val multiCallStartDialogFragment =
-                                            MultiCallStartDialogFragment.newInstance(
+                                when (discussionType) {
+                                    Discussion.TYPE_CONTACT -> {
+                                        val contacts =
+                                            discussionViewModel.discussionContacts.value
+                                        if (!contacts.isNullOrEmpty() && contacts[0].hasChannelOrPreKey()) {
+                                            App.startWebrtcCall(
+                                                context,
                                                 bytesOwnedIdentity,
-                                                bytesDiscussionIdentifier,
-                                                bytesContactIdentities
+                                                bytesDiscussionIdentifier
                                             )
-                                        multiCallStartDialogFragment.show(
-                                            supportFragmentManager,
-                                            "dialog"
-                                        )
+                                        }
+                                    }
+
+                                    Discussion.TYPE_GROUP, Discussion.TYPE_GROUP_V2 -> {
+                                        val contacts =
+                                            discussionViewModel.discussionContacts.value
+                                        if (contacts != null) {
+                                            val bytesContactIdentities: ArrayList<BytesKey>?
+                                            if (contacts.size > WebrtcCallService.MAX_GROUP_SIZE_TO_SELECT_ALL_BY_DEFAULT) {
+                                                bytesContactIdentities = null
+                                            } else {
+                                                bytesContactIdentities =
+                                                    ArrayList(contacts.size)
+                                                for (contact in contacts) {
+                                                    bytesContactIdentities.add(
+                                                        BytesKey(contact.bytesContactIdentity)
+                                                    )
+                                                }
+                                            }
+                                            val multiCallStartDialogFragment =
+                                                MultiCallStartDialogFragment.newInstance(
+                                                    bytesOwnedIdentity,
+                                                    bytesDiscussionIdentifier,
+                                                    bytesContactIdentities
+                                                )
+                                            multiCallStartDialogFragment.show(
+                                                supportFragmentManager,
+                                                "dialog"
+                                            )
+                                        }
                                     }
                                 }
-                            }
-                        })
-                        if (discussionCustomization?.shouldMuteNotifications() == true) {
-                            add(R.drawable.ic_notification_muted to {
-                                discussionCustomization?.discussionId?.let { discussionId ->
-                                    val builder = SecureAlertDialogBuilder(
-                                        context,
-                                        R.style.CustomAlertDialog
-                                    )
-                                        .setTitle(R.string.dialog_title_unmute_notifications)
-                                        .setPositiveButton(R.string.button_label_unmute_notifications) { _: DialogInterface?, _: Int ->
-                                            App.runThread {
-                                                val reDiscussionCustomization =
-                                                    AppDatabase.getInstance()
-                                                        .discussionCustomizationDao()[discussionId]
-                                                reDiscussionCustomization?.let {
-                                                    reDiscussionCustomization.prefMuteNotifications =
-                                                        false
-                                                    AppDatabase.getInstance()
-                                                        .discussionCustomizationDao()
-                                                        .update(
-                                                            reDiscussionCustomization
-                                                        )
-                                                    discussionViewModel.discussion.value?.let {
-                                                        it.propagateMuteSettings(
-                                                            reDiscussionCustomization
-                                                        )
-                                                        AppSingleton.getEngine()
-                                                            .profileBackupNeeded(
-                                                                it.bytesOwnedIdentity
+                            })
+                            if (discussionCustomization?.shouldMuteNotifications() == true) {
+                                add(R.drawable.ic_notification_muted to {
+                                    discussionCustomization?.discussionId?.let { discussionId ->
+                                        val builder = SecureAlertDialogBuilder(
+                                            context,
+                                            R.style.CustomAlertDialog
+                                        )
+                                            .setTitle(R.string.dialog_title_unmute_notifications)
+                                            .setPositiveButton(R.string.button_label_unmute_notifications) { _: DialogInterface?, _: Int ->
+                                                App.runThread {
+                                                    val reDiscussionCustomization =
+                                                        AppDatabase.getInstance()
+                                                            .discussionCustomizationDao()[discussionId]
+                                                    reDiscussionCustomization?.let {
+                                                        reDiscussionCustomization.prefMuteNotifications =
+                                                            false
+                                                        AppDatabase.getInstance()
+                                                            .discussionCustomizationDao()
+                                                            .update(
+                                                                reDiscussionCustomization
                                                             )
+                                                        discussionViewModel.discussion.value?.let {
+                                                            it.propagateMuteSettings(
+                                                                reDiscussionCustomization
+                                                            )
+                                                            AppSingleton.getEngine()
+                                                                .profileBackupNeeded(
+                                                                    it.bytesOwnedIdentity
+                                                                )
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
-                                        .setNegativeButton(
-                                            R.string.button_label_cancel,
-                                            null
-                                        )
+                                            .setNegativeButton(
+                                                R.string.button_label_cancel,
+                                                null
+                                            )
 
-                                    discussionCustomization?.prefMuteNotificationsTimestamp?.let {
-                                        builder.setMessage(
-                                            context.getString(
-                                                R.string.dialog_message_unmute_notifications_muted_until,
-                                                StringUtils.getLongNiceDateString(
-                                                    context,
-                                                    it
+                                        discussionCustomization?.prefMuteNotificationsTimestamp?.let {
+                                            builder.setMessage(
+                                                context.getString(
+                                                    R.string.dialog_message_unmute_notifications_muted_until,
+                                                    StringUtils.getLongNiceDateString(
+                                                        context,
+                                                        it
+                                                    )
                                                 )
                                             )
-                                        )
-                                    } ?: {
-                                        builder.setMessage(R.string.dialog_message_unmute_notifications)
+                                        } ?: {
+                                            builder.setMessage(R.string.dialog_message_unmute_notifications)
+                                        }
+                                        builder.create().show()
                                     }
-                                    builder.create().show()
-                                }
-                            })
+                                })
+                            }
                         }
                     }
             }
@@ -485,16 +497,16 @@ fun DiscussionTopAppBar(
                             Discussion.TYPE_GROUP, Discussion.TYPE_GROUP_V2 ->
                                 add(R.string.menu_action_group_details to { toolbarClickedCallback?.run() })
                         }
-                        add(R.string.label_gallery to {
-                            discussionViewModel.markAsReadOnPause = false
-                            discussion.apply {
-                                App.openDiscussionMediaGalleryActivity(
-                                    context,
-                                    id
-                                )
-                            }
-                        })
                     }
+                    add(R.string.label_gallery to {
+                        discussionViewModel.markAsReadOnPause = false
+                        discussion.apply {
+                            App.openDiscussionMediaGalleryActivity(
+                                context,
+                                id
+                            )
+                        }
+                    })
                     if (!discussion.active) {
                         add(R.string.menu_action_unblock_discussion to {
                             discussion.takeIf { it.isNormalOrReadOnly }
@@ -598,7 +610,6 @@ fun DiscussionTopAppBar(
                                 )
                             }
                         })
-
                     }
                     add(R.string.menu_action_delete_discussion to {
                         App.runThread {

@@ -263,7 +263,7 @@ class HistoryTransferPreferenceFragment : Fragment() {
                                                                 ),
                                                                 style = OlvidTypography.body1,
                                                                 color = colorResource(R.color.almostBlack),
-                                                                maxLines = 1,
+                                                                maxLines = 2,
                                                             )
                                                             device.lastRegistrationTimestamp?.let {
                                                                 Spacer(Modifier.height(4.dp))
@@ -277,7 +277,7 @@ class HistoryTransferPreferenceFragment : Fragment() {
                                                                     ),
                                                                     style = OlvidTypography.body2,
                                                                     color = colorResource(R.color.greyTint),
-                                                                    maxLines = 1,
+                                                                    maxLines = 2,
                                                                 )
                                                             }
                                                         }

@@ -452,7 +452,8 @@ class DiscussionActivity : LockableActivity() {
                             .clickable(
                                 interactionSource = null,
                                 indication = null,
-                            ) { discussionViewModel.fullScreenPhotoUrl = null },
+                            ) { discussionViewModel.fullScreenPhotoUrl = null }
+                            .safeDrawingPadding(),
                         contentAlignment = Alignment.Center
                     ) {
                         AsyncImage(
@@ -699,7 +700,6 @@ class DiscussionActivity : LockableActivity() {
             discussionSearchViewModel.filter(
                 discussionId = intent.getLongExtra(DISCUSSION_ID_INTENT_EXTRA, -1), // SEARCH_QUERY_INTENT_EXTRA is only set from global search results, so we use the DISCUSSION_ID_INTENT_EXTRA to get discussion id. The discussion id is not set in the view model yet anyway...
                 filterString = searchQuery,
-                firstVisibleMessageId = Long.MAX_VALUE,
                 messageIdToSetAsCurrent = messageId
             )
         }
@@ -986,16 +986,14 @@ class DiscussionActivity : LockableActivity() {
         lockedAsReadOnly: Boolean
     ) {
         if (locked) {
-            lockedState = if (!lockedAsPreDiscussion) {
-                if (lockedAsInactive) {
-                    LockedState(R.drawable.ic_block, R.string.message_discussion_blocked)
-                } else if (lockedAsReadOnly) {
-                    LockedState(R.drawable.ic_show_password, R.string.message_discussion_readonly)
-                } else {
-                    LockedState(R.drawable.ic_lock, R.string.message_discussion_locked)
-                }
+            lockedState = if (lockedAsPreDiscussion) {
+                LockedState(R.drawable.ic_timer, R.string.message_discussion_waiting_to_join)
+            } else if (lockedAsInactive) {
+                LockedState(R.drawable.ic_block, R.string.message_discussion_blocked)
+            } else if (lockedAsReadOnly) {
+                LockedState(R.drawable.ic_show_password, R.string.message_discussion_readonly)
             } else {
-                null
+                LockedState(R.drawable.ic_lock, R.string.message_discussion_locked)
             }
         } else if (this.discussionViewModel.locked != false) {
             lockedState = null

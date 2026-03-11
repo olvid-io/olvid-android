@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">امکان جستجوی مرورگرهای نصب شده وجود ندارد</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">مرورگری را برای احراز هویت انتخاب کنید</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">مرورگر پیش‌فرض</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">سرورهای TURN مبتنی بر منطقه جهانی</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">سرورهای TURN پاریس</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">سرورهای TURN نیویورک</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">سرورهای TURN سنگاپور</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d مخاطبین</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d مخاطب در گروه %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">به‌روزرسانی لازم است</string>
@@ -1935,7 +1931,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">اگر کلید پشتیبان‌گیری شما گم شده یا به خطر افتاده باشد، می‌توانید آن را بازنشانی کنید تا **هرگونه پشتیبان‌گیری از حساب شما که به این کلید مرتبط است حذف شود**. این کلید دیگر برای بازیابی حساب شما قابل استفاده نخواهد بود.\n\nاگر معتقدید کسی ممکن است از این کلید برای دسترسی مخربانه به حساب شما استفاده کرده باشد، باید **لیست دستگاه‌های خود** را در جزئیات پروفایل خود برای هر دستگاه غیرمنتظره بررسی کنید.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">مدیریت پشتیبان‌گیری‌های Olvid من</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">اکنون پشتیبان‌گیری را آغاز کنید</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/پشتیبان‌گیری-از-پروفایل‌ها/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">بستن</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">پشتیبان‌گیری آنلاین شما</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">بازنشانی</string>
@@ -2153,6 +2149,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">در حال مذاکره (مرحله 1 از 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">انتقال پیام‌ها (مرحله ۲ از ۳)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">انتقال فایل‌های پیوست (مرحله 3 از 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">در حال مذاکره</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">انتقال پیام‌ها</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">انتقال فایل‌های پیوست‌شده</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">انتقال با موفقیت انجام شد</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">انتقال متوقف شد</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">انتقال تاریخچه چت (نسخه آزمایشی)</string>
@@ -2177,5 +2176,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">حجم داده‌ی ارسالی</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">باقی‌مانده</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">پیوست‌ها</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">این ویژگی هنوز در مرحله آزمایش بتا قرار دارد و پیاده‌سازی فعلی ممکن است با پیاده‌سازی نهایی انتقال تاریخچه Olvid سازگار نباشد.\n\nقبل از استفاده از این ویژگی، لطفاً اطمینان حاصل کنید که دستگاه‌های شما آخرین نسخه Olvid را اجرا می‌کنند.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">این ویژگی هنوز در مرحله آزمایش بتا قرار دارد و پیاده‌سازی فعلی ممکن است با پیاده‌سازی نهایی انتقال تاریخچه Olvid سازگار نباشد.\n\nقبل از استفاده از این ویژگی، لطفاً اطمینان حاصل کنید که دستگاه‌های شما آخرین نسخه Olvid را اجرا می‌کنند.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">آیا انتقال در حال انجام را متوقف کنیم؟</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">انتقال تاریخچه در حال انجام است. آیا می‌خواهید آن را متوقف کنید؟</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">انتقال را متوقف کنید</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">در انتظار پیوستن به این گفتگو</string>
 </resources>

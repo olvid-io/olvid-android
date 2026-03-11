@@ -90,6 +90,7 @@ fun SearchBar(
     onClearClick: () -> Unit = {},
     focusState: MutableState<Boolean>? = null,
     requestFocus: Boolean = false,
+    leadingIcon: @Composable (() -> Unit)? = null,
     selectAllBeacon: Any? = null, // any time selectAllBeacon object changes, the text of the search bar is fully selected
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = colorResource(R.color.olvid_gradient_dark),
@@ -111,6 +112,7 @@ fun SearchBar(
                 focusState = focusState,
                 onClearClick = onClearClick,
                 selectAllBeacon = selectAllBeacon,
+                leadingIcon = leadingIcon,
                 requestFocus = requestFocus,
                 colors = colors,
             )
@@ -127,6 +129,7 @@ private fun SearchBarInput(
     onClearClick: () -> Unit = {},
     focusState: MutableState<Boolean>? = null,
     selectAllBeacon: Any? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
     requestFocus: Boolean = false,
     colors: TextFieldColors
 ) {
@@ -210,7 +213,7 @@ private fun SearchBarInput(
                         style = OlvidTypography.body1.copy(color = colorResource(R.color.darkGrey))
                     )
                 },
-                leadingIcon = {
+                leadingIcon = leadingIcon ?: {
                     Icon(
                         painter = painterResource(R.drawable.ic_search_blue),
                         contentDescription = stringResource(R.string.menu_action_search),

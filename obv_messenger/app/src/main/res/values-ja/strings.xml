@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">インストールされているブラウザを照会できません</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">認証に使用するブラウザを選択してください</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">デフォルトブラウザ</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">グローバルな地域ベースのTURNサーバー</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">パリ TURN サーバー</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">ニューヨーク TURN サーバー</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">シンガポール TURN サーバー</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d人の連絡先</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">グループ %2$s には %1$d 件の連絡先があります</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">アップデートが必要です</string>
@@ -1932,7 +1928,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">バックアップキーが紛失または侵害された場合は、このキーに関連付けられたアカウントのすべてのバックアップを**削除**するためにリセットできます。このキーは、アカウントを復元するために使用できなくなります。\n\n誰かがこのキーを悪用してアカウントに不正にアクセスした可能性があると思われる場合は、プロフィールの詳細にある**デバイスリスト**を確認して、予期しないデバイスがないか確認してください。</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Olvidのバックアップを管理する</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">今すぐバックアップを開始</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/プロファイルのバックアップ/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">閉じる</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">オンラインバックアップ</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">リセット</string>
@@ -2149,6 +2145,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">交渉中（3段階のうち1段階目）</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">メッセージの転送（3段階のうちの2段階目）</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">添付ファイルの転送（3/3）</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">交渉中</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">メッセージの転送</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">添付ファイルの転送</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">転送が完了しました</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">転送が中断されました</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">チャット履歴の転送（ベータ版）</string>
@@ -2173,5 +2172,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">スループット</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">残り</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">添付ファイル</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">この機能はまだベータテスト段階にあり、現在の実装はOlvidの履歴転送の最終実装と互換性がない場合があります。\n\nこの機能を使用する前に、お使いのデバイスにOlvidの最新バージョンがインストールされていることを確認してください。</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">この機能はまだベータテスト段階にあり、現在の実装はOlvidの履歴転送の最終実装と互換性がない場合があります。\n\nこの機能を使用する前に、お使いのデバイスにOlvidの最新バージョンがインストールされていることを確認してください。</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">転送中の処理を中止しますか？</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">履歴の転送が現在進行中です。中止しますか？</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">転送を中止する</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">このディスカッションに参加するのを待っています</string>
 </resources>

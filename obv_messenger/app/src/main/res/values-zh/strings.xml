@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">无法查询已安装的浏览器</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">选择用于身份验证的浏览器</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">默认浏览器</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">全球基于区域的TURN服务器</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">巴黎TURN服务器</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">纽约TURN服务器</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">新加坡 TURN 服务器</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d 位联系人</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">群组 %2$s 中有 %1$d 位联系人</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">需要更新</string>
@@ -1935,7 +1931,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">如果您的备份密钥丢失或泄露，您可以重置它以**删除与此密钥关联的任何账户备份**。此密钥将不再可用以恢复您的账户。\n\n如果您认为有人可能已经使用此密钥恶意访问您的账户，您应该**检查您的设备列表**，查看您的个人资料详情中是否有任何意外设备。</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">管理我的 Olvid 备份</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">立即备份</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/备份您的资料/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">关闭</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">您的在线备份</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">重置</string>
@@ -2152,6 +2148,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">正在协商（第 1 步，共 3 步）</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">正在传输消息（第 2 步，共 3 步）</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">正在传输附件（第 3 步，共 3 步）</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">协商</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">正在传输消息</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">正在传输附件</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">传输完成</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">传输中断</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">聊天记录迁移（测试版）</string>
@@ -2176,5 +2175,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">吞吐量</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">剩余</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">附件</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">此功能仍在测试阶段，并且当前实现可能与 Olvid 历史记录传输的最终实现不兼容。\n\n在使用此功能之前，请确保您的设备已安装最新版本的 Olvid。</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">此功能仍在测试阶段，并且当前实现可能与 Olvid 历史记录传输的最终实现不兼容。\n\n在使用此功能之前，请确保您的设备已安装最新版本的 Olvid。</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">取消当前传输？</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">历史记录传输正在进行中。您要取消吗？</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">取消传输</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">等待加入此讨论</string>
 </resources>

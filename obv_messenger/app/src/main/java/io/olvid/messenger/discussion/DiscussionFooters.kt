@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -86,9 +87,9 @@ fun DiscussionLocked(modifier: Modifier = Modifier, state: DiscussionActivity.Lo
         horizontalArrangement = Arrangement.Center
     ) {
         Icon(
+            modifier = Modifier.padding(12.dp).size(24.dp),
             painter = painterResource(id = state.icon),
             contentDescription = null,
-            modifier = Modifier.padding(12.dp),
             tint = colorResource(id = R.color.grey)
         )
         Text(

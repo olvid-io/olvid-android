@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Δεν ήταν δυνατή η εύρεση των εγκατεστημένων περιηγητών</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Επιλέξτε το πρόγραμμα περιήγησης που θα χρησιμοποιήσετε για τον έλεγχο ταυτότητας</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Προεπιλεγμένος περιηγητής</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Παγκόσμιοι διακομιστές TURN βάσει περιοχών</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Εξυπηρετές TURN Παρισιού</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">Εξυπηρετές TURN στη Νέα Υόρκη</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">Εξυπηρετητές TURN της Σιγκαπούρης</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d επαφές</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d επαφές στην ομάδα %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Απαιτείται ενημέρωση</string>
@@ -1934,7 +1930,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Εάν το κλειδί ασφαλείας σας χαθεί ή τεθεί σε κίνδυνο, μπορείτε να το επαναφέρετε για να **διαγράψετε οποιαδήποτε αντίγραφα ασφαλείας του λογαριασμού σας που σχετίζονται με αυτό το κλειδί**. Αυτό το κλειδί δεν θα μπορεί πλέον να χρησιμοποιηθεί για την επαναφορά του λογαριασμού σας.\n\nΕάν πιστεύετε ότι κάποιος μπορεί να έχει ήδη χρησιμοποιήσει αυτό το κλειδί για να αποκτήσει κακόβουλη πρόσβαση στον λογαριασμό σας, θα πρέπει να **ελέγξετε τη λίστα συσκευών** στις λεπτομέρειες του προφίλ σας για τυχόν απροσδόκητες συσκευές.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Διαχείριση των αντιγράφων ασφαλείας Olvid</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Έναρξη δημιουργίας αντιγράφων ασφαλείας τώρα</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-των-προφίλ-σας/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Κλείσιμο</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Τα διαδικτυακά αντίγραφα ασφαλείας σας</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Επαναφορά</string>
@@ -2151,6 +2147,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Διαπραγμάτευση (βήμα 1 από 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Μεταφορά μηνυμάτων (βήμα 2 από 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Μεταφορά συνημμένων (βήμα 3 από 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Διαπραγμάτευση</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Μεταφορά μηνυμάτων</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Μεταφορά συνημμένων αρχείων</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Η μεταφορά ολοκληρώθηκε</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Η μεταφορά διακόπηκε</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Μεταφορά ιστορικού συνομιλιών (beta)</string>
@@ -2175,5 +2174,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Ρυθμός μετάδοσης</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Υπόλοιπο</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Συνημμένα</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Αυτή η λειτουργία βρίσκεται ακόμη σε φάση δοκιμών beta και η τρέχουσα υλοποίηση ενδέχεται να μην είναι συμβατή με την τελική υλοποίηση της μεταφοράς ιστορικού του Olvid.\n\nΠριν χρησιμοποιήσετε αυτήν τη λειτουργία, βεβαιωθείτε ότι οι συσκευές σας εκτελούν την πιο πρόσφατη έκδοση του Olvid.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Αυτή η λειτουργία βρίσκεται ακόμη σε φάση δοκιμών beta και η τρέχουσα υλοποίηση ενδέχεται να μην είναι συμβατή με την τελική υλοποίηση της μεταφοράς ιστορικού του Olvid.\n\nΠριν χρησιμοποιήσετε αυτήν τη λειτουργία, βεβαιωθείτε ότι οι συσκευές σας εκτελούν την πιο πρόσφατη έκδοση του Olvid.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Διακοπή της τρέχουσας μεταφοράς;</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Ενεργή είναι αυτήν τη στιγμή η μεταφορά του ιστορικού. Θέλετε να τη διακόψετε;</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Διακοπή μεταφοράς</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Περιμένω να συμμετάσχω σε αυτήν τη συζήτηση</string>
 </resources>

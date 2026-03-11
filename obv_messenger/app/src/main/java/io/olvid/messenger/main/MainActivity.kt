@@ -113,6 +113,11 @@ import io.olvid.messenger.discussion.location.FullscreenMapDialogFragment
 import io.olvid.messenger.fragments.dialog.CallContactDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment.OnOwnedIdentitySelectedListener
+import io.olvid.messenger.history_transfer.HistoryTransferActivity
+import io.olvid.messenger.history_transfer.TransferNotificationService
+import io.olvid.messenger.history_transfer.TransferService
+import io.olvid.messenger.history_transfer.components.TransferNotification
+import io.olvid.messenger.history_transfer.types.TransferProgress
 import io.olvid.messenger.main.calls.CallLogFragment
 import io.olvid.messenger.main.contacts.ContactListFragment
 import io.olvid.messenger.main.discussions.DiscussionListFragment
@@ -285,8 +290,49 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                         )
                     }
                 }
+
+
+                // ongoing history transfer notification
+                var cachedOngoingTransferVisibility: Boolean by remember { mutableStateOf(false) }
+                var cachedState: TransferProgress? by remember { mutableStateOf(null) }
+                TransferService.getTransferProgress()?.value?.let {
+                    cachedState = it
+                }
+                LaunchedEffect(TransferService.transferInProgress.value) {
+                    if (TransferService.transferInProgress.value) {
+                        cachedOngoingTransferVisibility = true
+                    } else {
+                        delay(500)
+                        cachedOngoingTransferVisibility = false
+                    }
+                }
+                AnimatedVisibility(
+                    visible = cachedOngoingTransferVisibility && cachedState != null
+                ) {
+                    cachedState?.let {
+                        TransferNotification(
+                            modifier = Modifier
+                                .padding(
+                                    top = 8.dp,
+                                    bottom = dimensionResource(R.dimen.tab_bar_size) + 12.dp
+                                ),
+                            transferProgress = it,
+                            onClick = {
+                                startActivity(Intent(this@MainActivity, HistoryTransferActivity::class.java).apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                })
+                            },
+                            onAbort = {
+                                startService(Intent(this@MainActivity, TransferNotificationService::class.java).apply {
+                                    action = TransferNotificationService.ACTION_ABORT
+                                })
+                            }
+                        )
+                    }
+                }
             }
         }
+
         val gestureDetector = GestureDetector(this, object : SimpleOnGestureListener() {
             var scrolled = false
             override fun onDown(e: MotionEvent): Boolean {
@@ -583,7 +629,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                     val configurationMatcher = ObvLinkActivity.CONFIGURATION_PATTERN.matcher(uri)
                     if (configurationMatcher.find()) {
                         try {
-                            // detect if it is a licence or a keycloak
+                            // detect if it is a license or a keycloak
                             val configurationPojo = AppSingleton.getJsonObjectMapper().readValue(
                                 ObvBase64.decode(configurationMatcher.group(2)),
                                 ConfigurationPojo::class.java
@@ -593,7 +639,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                                     // offer to chose a profile or create a new one for profile binding
                                     R.string.dialog_title_chose_profile_keycloak_configuration
                                 } else {
-                                    // offer to chose a profile or create a new one for licence activation or configuration
+                                    // offer to chose a profile or create a new one for license activation or configuration
                                     R.string.dialog_title_chose_profile_configuration
                                 }
                             val ownedIdentitySelectionDialogFragment =

@@ -39,6 +39,8 @@ public class StandaloneServerQueryOperation extends Operation {
     public static final int RFC_UNKNOWN_BACKUP_THREAD_ID = 8;
     public static final int RFC_UNKNOWN_BACKUP_VERSION = 9;
 
+    public static final int RFC_PERMISSION_DENIED = 10;
+
     public static final int RFC_SERVER_PARSING_ERROR = 100;
 
     private final ServerQuery serverQuery;
@@ -174,6 +176,10 @@ public class StandaloneServerQueryOperation extends Operation {
                 }
                 case ServerMethod.PARSING_ERROR: {
                     cancel(RFC_SERVER_PARSING_ERROR);
+                    return;
+                }
+                case ServerMethod.PERMISSION_DENIED: {
+                    cancel(RFC_PERMISSION_DENIED);
                     return;
                 }
                 default: {

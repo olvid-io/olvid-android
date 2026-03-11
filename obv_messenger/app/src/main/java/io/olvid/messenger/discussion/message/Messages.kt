@@ -872,7 +872,6 @@ private fun Replied(
                             complete = true,
                             context = context,
                             message = repliedToMessage,
-                            bytesOwnedIdentity = discussionViewModel?.discussion?.value?.bytesOwnedIdentity,
                             backgroundColor = Color(
                                 ContextCompat.getColor(
                                     context,
@@ -1225,7 +1224,6 @@ fun MessageBody(
                         context,
                         message,
                         linkUrl,
-                        discussionViewModel?.discussion?.value?.bytesOwnedIdentity,
                         discussionSearchViewModel
                     )
                 }
@@ -1470,7 +1468,6 @@ fun getAnnotatedStringContent(
     context: Context,
     message: Message,
     linkPreviewUrl: String? = null,
-    bytesOwnedIdentity: ByteArray? = null,
     discussionSearchViewModel: DiscussionSearchViewModel?,
 ): AnnotatedString {
     return buildAnnotatedString {
@@ -1491,7 +1488,6 @@ fun getAnnotatedStringContent(
                 complete = true,
                 context = context,
                 message = message,
-                bytesOwnedIdentity = bytesOwnedIdentity,
                 backgroundColor = Color(ContextCompat.getColor(context, R.color.greySubtleOverlay))
             )
         append(annotatedStringContent)

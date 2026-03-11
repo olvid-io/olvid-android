@@ -18,7 +18,10 @@
  */
 package io.olvid.messenger.openid.jsons
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 class OlvidWellKnownJson {
     var supportIdentityAuthentication: Boolean? = null
     var apiVersion: Int? = null

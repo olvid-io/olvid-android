@@ -2,7 +2,7 @@
 
 [Reproducible builds](https://reproducible-builds.org/docs/definition/) allow anyone to check that the software they are downloading from a store (or more generally the internet) matches the source code published on an open-source repository. If you are able to recreate a bit-by-bit copy of the software that is distributed, you are sure that this software does exactly what can be seen and the source code, and nothing more.
 
-However, reproducible build are not easy to achieve as the whole compilation process has to be **perfectly deterministic**. This is particularly hard for native code where compilers tend to optimize based on specific architecture features depending on the hardware it is running on. For Java bytecode, and in particular Android applications, this is a bit easier. This is why [F-Droid pushes for reproducible builds](https://f-droid.org/docs/Reproducible_Builds/#potential-sources-of-unreproducible-builds) whenever this is possible.
+However, reproducible build are not easy to achieve as the whole compilation process has to be **perfectly deterministic**. This is particularly hard for native code where compilers tend to optimize based on specific architecture features depending on the hardware it is running on. For Java bytecode, and in particular Android applications, this is a bit easier. This is why [F-Droid pushes for reproducible builds](https://f-droid.org/docs/Reproducible_Builds/) whenever this is possible.
 
 This folder contains the tools to replicate a docker environment similar to the CI environment in which apps distributed on [F-Droid](https://f-droid.org/) are compiled.
 

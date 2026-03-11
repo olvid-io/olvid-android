@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Kunde inte hitta installerade webbläsare</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Välj vilken webbläsare du vill använda för autentisering</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Standardwebbläsare</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Globala regionsbaserade TURN-servrar</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Paris TURN-servrar</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">TURN-servrar i New York</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">Singapore TURN-servrar</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d kontakter</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d kontakter i gruppen %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Uppdatering krävs</string>
@@ -1935,7 +1931,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Om din säkerhetskopieringsnyckel har förlorats eller komprometterats kan du återställa den för att **radera alla säkerhetskopior av ditt konto som är kopplade till den här nyckeln**. Den här nyckeln kommer inte längre att kunna användas för att återställa ditt konto.\n\nOm du misstänker att någon redan kan ha använt den här nyckeln för att få obehörig åtkomst till ditt konto bör du **kontrollera din enhetslista** i dina profiluppgifter för att se om det finns några oväntade enheter.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Hantera mina Olvid-säkerhetskopior</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Starta en säkerhetskopia nu</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/säkerhetskopiera-dina-profiler/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Stäng</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Dina online-säkerhetskopior</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Återställ</string>
@@ -2152,6 +2148,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Förhandling pågår (steg 1 av 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Överföring av meddelanden (steg 2 av 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Överför bilagor (steg 3 av 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Förhandling</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Överföring av meddelanden</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Överför bilagor</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Överföringen är klar</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Överföringen avbröts</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Överföring av chatthistorik (beta)</string>
@@ -2176,5 +2175,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Genomströmning</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Återstående</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Bifogade filer</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Den här funktionen är fortfarande i betatestningsfasen och den nuvarande implementeringen kanske inte är kompatibel med den slutliga implementeringen av Olvids historiköverföring.\n\nInnan du använder den här funktionen, se till att dina enheter kör den senaste versionen av Olvid.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Den här funktionen är fortfarande i betatest och den nuvarande implementeringen kanske inte är kompatibel med den slutliga implementeringen av Olvids historiköverföring.\n\nInnan du använder den här funktionen, se till att dina enheter kör den senaste versionen av Olvid.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Avbryt pågående överföring?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">En historiköverföring pågår. Vill du avbryta den?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Avbryt överföringen</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Väntar på att ansluta till den här diskussionen</string>
 </resources>

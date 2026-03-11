@@ -31,15 +31,6 @@ import io.olvid.messenger.settings.SettingsActivity.Companion.betaFeaturesEnable
 class CallPreferenceFragment  : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.fragment_preferences_call, rootKey)
-
-        val screen = preferenceScreen
-
-        val scaledTurnPreference: DropDownPreference? = screen.findPreference(SettingsActivity.PREF_KEY_SCALED_TURN_REGION)
-        if (scaledTurnPreference != null) {
-            if (betaFeaturesEnabled) {
-                scaledTurnPreference.isVisible = true
-            }
-        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

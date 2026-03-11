@@ -30,6 +30,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
@@ -59,6 +60,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -85,7 +87,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -103,6 +104,8 @@ import io.olvid.messenger.customClasses.DeviceBackupProfile
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.ProfileBackupSnapshot
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.designsystem.components.CustomDialogContent
+import io.olvid.messenger.designsystem.components.DialogSecure
 import io.olvid.messenger.designsystem.constantSp
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.settings.BackupV2ViewModel
@@ -130,121 +133,131 @@ fun ManageBackupsDialog(
     onDeleteSnapshot: (ProfileBackupSnapshot) -> Unit,
     onDismiss: () -> Unit
 ) {
-    Dialog(
+    DialogSecure(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Column(
+        CustomDialogContent(
             modifier = Modifier
                 .padding(16.dp)
                 .widthIn(max = 400.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(colorResource(R.color.dialogBackground))
-                .padding(8.dp),
         ) {
-            val backStackSize = navController.currentBackStack.collectAsState().value.size
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
+                modifier = Modifier.padding(8.dp),
             ) {
+                val backStackSize = navController.currentBackStack.collectAsState().value.size
 
-                IconButton(
-                    modifier = Modifier.size(32.dp),
-                    enabled = backStackSize > 2,
-                    onClick = {
-                        navController.popBackStack()
-                    }) {
-                    AnimatedVisibility(
-                        visible = backStackSize > 2,
-                        enter = fadeIn(),
-                        exit = fadeOut(),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+
+                    IconButton(
+                        modifier = Modifier.size(32.dp),
+                        enabled = backStackSize > 2,
+                        onClick = {
+                            navController.popBackStack()
+                        }) {
+                        AnimatedVisibility(
+                            visible = backStackSize > 2,
+                            enter = fadeIn(),
+                            exit = fadeOut(),
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_arrow_back_white),
+                                tint = colorResource(id = R.color.almostBlack),
+                                contentDescription = stringResource(R.string.content_description_back_button)
+                            )
+                        }
+                    }
+
+                    Text(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .weight(1f, true),
+                        text = stringResource(R.string.dialog_title_your_online_backups),
+                        style = OlvidTypography.h2,
+                        color = colorResource(R.color.almostBlack),
+                        textAlign = TextAlign.Center,
+                    )
+
+                    IconButton(
+                        modifier = Modifier.size(32.dp),
+                        onClick = onDismiss,
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_arrow_back_white),
+                            painter = painterResource(id = R.drawable.ic_close),
                             tint = colorResource(id = R.color.almostBlack),
-                            contentDescription = stringResource(R.string.content_description_back_button)
+                            contentDescription = stringResource(R.string.content_description_close_button)
                         )
                     }
                 }
 
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .weight(1f, true),
-                    text = stringResource(R.string.dialog_title_your_online_backups),
-                    style = OlvidTypography.h2,
-                    color = colorResource(R.color.almostBlack),
-                    textAlign = TextAlign.Center,
-                )
 
-                IconButton(
-                    modifier = Modifier.size(32.dp),
-                    onClick = onDismiss,
+                NavHost(
+                    navController = navController,
+                    startDestination = "profiles",
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_close),
-                        tint = colorResource(id = R.color.almostBlack),
-                        contentDescription = stringResource(R.string.content_description_close_button)
+                    deviceProfiles(
+                        showingBackupsForOtherKey = showingBackupsForOtherKey.value,
+                        fetchingDeviceBackup = fetchingDeviceBackup,
+                        fetchError = fetchError,
+                        deviceBackupProfiles = deviceBackupProfiles,
+                        onFetchRetry = onFetchForDevice,
+                        onSelectOtherKey = {
+                            onCancelCurrentFetch.invoke()
+                            deviceBackupSeed.value = null
+                            showingBackupsForOtherKey.value = true
+                            navController.navigate(
+                                route = "key",
+                                navOptions = NavOptions.Builder()
+                                    .setPopUpTo(
+                                        route = "profiles",
+                                        inclusive = true,
+                                        saveState = false
+                                    )
+                                    .build()
+                            )
+                        },
+                        onProfileSelected = { selectedProfile ->
+                            selectedDeviceBackupProfile.value = selectedProfile
+                            onFetchForProfile.invoke()
+                            navController.navigate("snapshots")
+                        },
+                        onDismiss = onDismiss
+                    )
+                    manuallyEnterKey(
+                        backupSeed = deviceBackupSeed,
+                        backupSeedError = backupSeedError,
+                        onLoadFromCredentialsManager = onLoadFromCredentialsManager,
+                        onValidateSeed = {
+                            if (onValidateSeed.invoke()) {
+                                onCancelCurrentFetch.invoke()
+                                onFetchForDevice.invoke()
+                                navController.navigate("profiles")
+                            }
+                        },
+                    )
+                    profileBackups(
+                        fetchingProfileBackups = fetchingProfileBackups,
+                        fetchError = fetchError,
+                        profileExistsOnDevice = selectedDeviceBackupProfile.value?.profileAlreadyPresent == true,
+                        profileDisplayName = selectedDeviceBackupProfile.value?.let {
+                            it.nickName ?: it.identityDetails.formatFirstAndLastName(
+                                JsonIdentityDetails.FORMAT_STRING_FIRST_LAST,
+                                false
+                            )
+                        } ?: "",
+                        profileBackupSnapshots = profileBackupSnapshots,
+                        onRestoreSnapshot = onRestoreSnapshot,
+                        onDeleteSnapshot = onDeleteSnapshot,
+                        onFetchRetry = onFetchForProfile,
+                        onDismiss = onDismiss
                     )
                 }
-            }
-
-
-            NavHost(
-                navController = navController,
-                startDestination = "profiles",
-            ) {
-                deviceProfiles(
-                    showingBackupsForOtherKey = showingBackupsForOtherKey.value,
-                    fetchingDeviceBackup = fetchingDeviceBackup,
-                    fetchError = fetchError,
-                    deviceBackupProfiles = deviceBackupProfiles,
-                    onFetchRetry = onFetchForDevice,
-                    onSelectOtherKey = {
-                        onCancelCurrentFetch.invoke()
-                        deviceBackupSeed.value = null
-                        showingBackupsForOtherKey.value = true
-                        navController.navigate(
-                            route = "key",
-                            navOptions = NavOptions.Builder()
-                                .setPopUpTo(route = "profiles", inclusive = true, saveState = false)
-                                .build()
-                        )
-                    },
-                    onProfileSelected = { selectedProfile ->
-                        selectedDeviceBackupProfile.value = selectedProfile
-                        onFetchForProfile.invoke()
-                        navController.navigate("snapshots")
-                    },
-                    onDismiss = onDismiss
-                )
-                manuallyEnterKey(
-                    backupSeed = deviceBackupSeed,
-                    backupSeedError = backupSeedError,
-                    onLoadFromCredentialsManager = onLoadFromCredentialsManager,
-                    onValidateSeed = {
-                        if (onValidateSeed.invoke()) {
-                            onCancelCurrentFetch.invoke()
-                            onFetchForDevice.invoke()
-                            navController.navigate("profiles")
-                        }
-                    },
-                )
-                profileBackups(
-                    fetchingProfileBackups = fetchingProfileBackups,
-                    fetchError = fetchError,
-                    profileExistsOnDevice = selectedDeviceBackupProfile.value?.profileAlreadyPresent == true,
-                    profileDisplayName = selectedDeviceBackupProfile.value?.let { it.nickName ?: it.identityDetails.formatFirstAndLastName(JsonIdentityDetails.FORMAT_STRING_FIRST_LAST, false) } ?: "",
-                    profileBackupSnapshots = profileBackupSnapshots,
-                    onRestoreSnapshot = onRestoreSnapshot,
-                    onDeleteSnapshot = onDeleteSnapshot,
-                    onFetchRetry = onFetchForProfile,
-                    onDismiss = onDismiss
-                )
             }
         }
     }
@@ -290,9 +303,9 @@ fun NavGraphBuilder.manuallyEnterKey(
                         contentColor = colorResource(R.color.olvid_gradient_light),
                     ),
                     onClick = {
-                        it.invoke({ seed ->
+                        it.invoke { seed ->
                             backupSeed.value = seed
-                        })
+                        }
                     },
                 ) {
                     Text(
@@ -374,7 +387,10 @@ fun NavGraphBuilder.deviceProfiles(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(colorResource(R.color.lightGrey))
-                                .clickable {
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = ripple(),
+                                ) {
                                     onProfileSelected.invoke(deviceBackupProfile)
                                 }
                                 .padding(
@@ -587,11 +603,12 @@ fun NavGraphBuilder.profileBackups(
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(colorResource(R.color.lightGrey))
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    .padding(start = 16.dp, bottom = 12.dp, end = 4.dp),
                                 verticalAlignment = Alignment.Top,
                             ) {
                                 Image(
                                     modifier = Modifier
+                                        .padding(top = 12.dp)
                                         .size(40.dp)
                                         .clip(RoundedCornerShape(12.dp))
                                         .background(colorResource(R.color.almostWhite))
@@ -603,7 +620,7 @@ fun NavGraphBuilder.profileBackups(
                                 Column(
                                     modifier = Modifier
                                         .weight(1f, true)
-                                        .padding(horizontal = 16.dp),
+                                        .padding(start = 16.dp, top = 12.dp, end = 4.dp),
                                     horizontalAlignment = Alignment.Start,
                                     verticalArrangement = Arrangement.SpaceAround,
                                 ) {
@@ -651,7 +668,7 @@ fun NavGraphBuilder.profileBackups(
                                     )
                                 }
                                 IconButton(
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(48.dp),
                                     onClick = {
                                         showContextMenu = true
                                     }

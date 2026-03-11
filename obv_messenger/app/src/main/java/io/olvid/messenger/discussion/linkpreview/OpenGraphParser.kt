@@ -31,21 +31,21 @@ class OpenGraphParser {
         val openGraphResult = OpenGraph(url = url)
 
         try {
-            val response = client.newCall(Request.Builder().url(url).build()).execute()
-
             var html = ""
-            if (response.isSuccessful) {
-                response.body?.let { body ->
-                    if (body.contentType()?.subtype != "html") return null
-                    html = String(
-                        body.byteStream().readBytes(),
-                        body.contentType()?.charset(StandardCharsets.UTF_8)
-                            ?: StandardCharsets.UTF_8
-                    )
+            client.newCall(Request.Builder().url(url).build()).execute().use { response ->
+                if (response.isSuccessful) {
+                    response.body?.let { body ->
+                        if (body.contentType()?.subtype != "html") return null
+                        html = String(
+                            body.byteStream().readBytes(),
+                            body.contentType()?.charset(StandardCharsets.UTF_8)
+                                ?: StandardCharsets.UTF_8
+                        )
+                    }
+                } else {
+                    // typically, for 404 errors
+                    return null
                 }
-            } else {
-                // typically, for 404 errors
-                return null
             }
 
             val doc = Jsoup.parse(html, url)

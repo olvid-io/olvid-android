@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Não foi possível encontrar os navegadores instalados</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Escolha qual navegador usar para a autenticação</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Navegador padrão</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Servidores TURN regionais globais</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Servidores TURN de Paris</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">Servidores TURN de Nova York</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">Servidores TURN de Singapura</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d contatos</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d contatos no grupo %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Atualização necessária</string>
@@ -1935,7 +1931,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Se sua chave de backup foi perdida ou comprometida, você pode redefini-la para **excluir qualquer backup da sua conta associado a esta chave**. Esta chave não poderá mais ser usada para restaurar sua conta.\n\nSe você acredita que alguém já pode ter usado esta chave para acessar sua conta de forma maliciosa, você deve **verificar sua lista de dispositivos** nos detalhes do seu perfil para verificar se há algum dispositivo inesperado.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Gerenciar meus backups Olvid</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Iniciar backup agora</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/faça-backup-dos-seus-perfis/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Fechar</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Seus backups online</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Redefinir</string>
@@ -2152,6 +2148,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Negociação (passo 1 de 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Transferindo mensagens (passo 2 de 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Transferindo anexos (passo 3 de 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Negociação</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Transferindo mensagens</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Transferindo anexos</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Transferência concluída</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Transferência interrompida</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Transferência do histórico de conversas (versão beta)</string>
@@ -2176,5 +2175,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Taxa de transferência</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Restante</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Anexos</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Este recurso ainda está em fase de testes beta e a implementação atual pode não ser compatível com a implementação final da transferência de histórico do Olvid.\n\nAntes de usar este recurso, certifique-se de que seus dispositivos estão executando a versão mais recente do Olvid.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Este recurso ainda está em fase de testes beta e a implementação atual pode não ser compatível com a implementação final da transferência de histórico do Olvid.\n\nAntes de usar este recurso, certifique-se de que seus dispositivos estão executando a versão mais recente do Olvid.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Cancelar a transferência em andamento?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Uma transferência de histórico está em andamento. Deseja interrompê-la?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Cancelar transferência</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Aguardando para participar desta conversa</string>
 </resources>

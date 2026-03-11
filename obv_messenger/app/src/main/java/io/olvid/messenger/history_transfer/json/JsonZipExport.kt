@@ -38,7 +38,7 @@ class JsonZipExport {
 
     companion object {
         const val DISCUSSION_AND_MESSAGES_JSON_FILE_NAME = "discussions_and_messages.json"
-        const val ATTACHMENTS_DIRECTORY_NAME = "attachments/"
+        const val ATTACHMENTS_DIRECTORY_NAME = "files/"
     }
 }
 

@@ -415,7 +415,6 @@ public class Discussion {
             return null;
         }
         try {
-            Long timestamp = db.discussionDao().getMaxLastMessageTimestamp(bytesOwnedIdentity);
             Discussion discussion = new Discussion(
                     title,
                     bytesOwnedIdentity,
@@ -423,7 +422,7 @@ public class Discussion {
                     bytesDiscussionIdentifier,
                     UUID.randomUUID(),
                     0,
-                    (timestamp == null) ? 10 : timestamp + 10,
+                    10,
                     null,
                     false,
                     false,

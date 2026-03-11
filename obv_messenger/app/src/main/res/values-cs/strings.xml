@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Nepodařilo se najít nainstalované prohlížeče</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Vyberte prohlížeč, který chcete použít pro ověření</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Výchozí prohlížeč</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Globální TURN servery založené na regionech</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Paris TURN servery</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">TURN servery v New Yorku</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">TURN servery v Singapuru</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d kontaktů</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d kontaktů ve skupině %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Vyžadována aktualizace</string>
@@ -1933,7 +1929,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Pokud byla vaše záložní klíč ztratena nebo ohrožena, můžete ji resetovat a **smazat veškeré zálohy účtu, které jsou s tímto klíčem spojené**. Tento klíč již nebude možné použít k obnovení účtu.\n\nPokud máte podezření, že někdo mohl tento klíč již použít k neoprávněnému přístupu k vašemu účtu, měli byste **zkontrolovat seznam zařízení** v detailech vašeho profilu a ověřit, zda se tam nenachází nějaké neočekávané zařízení.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Správa záloh Olvid</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Zahájit zálohování nyní</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/zalohovani-vasich-profilu/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Zavřít</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Vaše online zálohy</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Resetovat</string>
@@ -2150,6 +2146,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Probíhá vyjednávání (krok 1 ze 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Přenos zpráv (krok 2 ze 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Přenos příloh (krok 3 ze 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Probíhá vyjednávání</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Přenos zpráv</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Přenos příloh</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Přenos dokončen</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Přenos přerušen</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Přenos historie chatu (beta verze)</string>
@@ -2174,5 +2173,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Propustnost</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Zbývající</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Přílohy</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Tato funkce je stále ve fázi beta testování a aktuální implementace nemusí být kompatibilní s finální implementací přenosu historie Olvid.\n\nNež začnete tuto funkci používat, ujistěte se, že vaše zařízení mají nainstalovanou nejnovější verzi Olvid.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Tato funkce je stále ve fázi beta testování a aktuální implementace nemusí být kompatibilní s finální implementací přenosu historie Olvid.\n\nNež začnete tuto funkci používat, ujistěte se, že vaše zařízení mají nainstalovanou nejnovější verzi Olvid.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Chcete přerušit probíhající přenos?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Přenos historie právě probíhá. Chcete ho zrušit?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Přerušit přenos</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Čekám, až se mohu připojit k této diskusi</string>
 </resources>

@@ -37,11 +37,16 @@ import io.olvid.messenger.customClasses.StringUtils2.Companion.computeHighlightR
 import io.olvid.messenger.customClasses.fullTextSearchEscape
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.GlobalSearchTokenizer
+import io.olvid.messenger.databases.dao.GlobalSearchDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.yield
+import java.util.concurrent.CancellationException
 
 class DiscussionSearchViewModel : ViewModel() {
     private var currentPosition: Int = 0
@@ -53,11 +58,11 @@ class DiscussionSearchViewModel : ViewModel() {
     var hasNext by mutableStateOf(false)
     var hasPrevious by mutableStateOf(false)
 
-    var matchedMessageAndFyleIds by mutableStateOf<List<Pair<Long, Long?>>>(emptyList()) // messageId, fyleId
+    var matchedMessageAndFyleIds by mutableStateOf<List<Pair<Long, Pair<Long?, Double>>>>(emptyList()) // messageId, fyleId
 
     var initialFoundItem by mutableStateOf<Long?>(null)
 
-    private var filterJob: Job? = null
+    var filterJob: Job? by mutableStateOf(null)
 
     fun reset() {
         currentPosition = 0
@@ -113,38 +118,76 @@ class DiscussionSearchViewModel : ViewModel() {
                 && (matchedMessageAndFyleIds.first().first != matchedMessageAndFyleIds[currentPosition].first)
     }
 
-    @Synchronized
+    var lastSearchTokenizedQuery: String? = null
+
     fun filter(
         discussionId: Long,
         filterString: String?,
-        firstVisibleMessageId: Long,
+        firstVisibleMessageMessageId: Long? = null,
         messageIdToSetAsCurrent: Long? = null
     ) {
+        // do not start a new search if the filterString did not change
+        val tokenizedQuery = filterString?.let {
+            GlobalSearchTokenizer.tokenize(filterString).filter { it.length > 1 }.fullTextSearchEscape()
+        }
+
+        if (tokenizedQuery == lastSearchTokenizedQuery) {
+            return
+        }
         filterJob?.cancel()
         filterJob = null
-        filterRegexes = filterString
-            ?.trim()
-            ?.split("\\s+".toRegex())
-            ?.filter { it.isNotEmpty() }
-            ?.map {
-                Regex(
-                    """(\b|(?<=_)(?!_))${Regex.escape(StringUtils.unAccent(it))}""",
-                    RegexOption.IGNORE_CASE
-                )
-            }
-        if (filterString.isNullOrBlank()) {
+        lastSearchTokenizedQuery = tokenizedQuery
+
+        if (tokenizedQuery.isNullOrBlank()) {
             matchedMessageAndFyleIds = emptyList()
             currentPosition = 0
             updateHasNextAndPrevious()
+            filterRegexes = null
         } else {
             filterJob = viewModelScope.launch(Dispatchers.IO) {
                 supervisorScope {
-                    runCatching {
-                        val tokenizedQuery =
-                            GlobalSearchTokenizer.tokenize(filterString).fullTextSearchEscape()
-                        val result = AppDatabase.getInstance().globalSearchDao()
-                            .discussionSearch(discussionId, tokenizedQuery).map { it.id to it.fyleId }
-                        if (matchedMessageAndFyleIds != result || messageIdToSetAsCurrent != null) {
+                    try {
+                        var resultMessages = emptyList<GlobalSearchDao.MessageIdAndTimestamp>()
+                        var resultAttachments = emptyList<GlobalSearchDao.MessageIdAndTimestamp>()
+                        var firstMessageSortIndex: Double? = null
+                        val deferredSearches = listOf(
+                            async(Dispatchers.IO) {
+                                val startTime = System.currentTimeMillis()
+                                resultMessages = AppDatabase.getInstance().globalSearchDao()
+                                    .discussionSearchMessages(discussionId, tokenizedQuery, 50)
+                                Logger.d("🤡 Message search took ${System.currentTimeMillis() - startTime}ms")
+                            },
+                            async(Dispatchers.IO) {
+                                val startTime = System.currentTimeMillis()
+                                resultAttachments = AppDatabase.getInstance().globalSearchDao()
+                                    .discussionSearchAttachments(discussionId, tokenizedQuery, 50)
+                                Logger.d("🤡 Attachment search took ${System.currentTimeMillis() - startTime}ms")
+                            },
+                            async(Dispatchers.IO) {
+                                firstVisibleMessageMessageId?.let {
+                                    firstMessageSortIndex = AppDatabase.getInstance().messageDao().get(it)?.sortIndex
+                                }
+                            }
+                        )
+                        deferredSearches.awaitAll()
+
+                        val result = (resultMessages + resultAttachments).sortedBy { -it.sortIndex }.map { it.id to Pair(it.fyleId, it.sortIndex) }
+                        filterRegexes = filterString
+                            .trim()
+                            .split("\\s+".toRegex())
+                            .filter { it.length > 1 }
+                            .map {
+                                Regex(
+                                    """(\b|(?<=_)(?!_))${Regex.escape(StringUtils.unAccent(it))}""",
+                                    RegexOption.IGNORE_CASE
+                                )
+                            }
+
+                        if (tokenizedQuery == lastSearchTokenizedQuery
+                            && (matchedMessageAndFyleIds != result || messageIdToSetAsCurrent != null)) {
+                            // get a last chance to process a cancellation before setting search results
+                            yield()
+
                             matchedMessageAndFyleIds = result
                             val found: Boolean
                             // if the discussion was opened with a target message, always select this one
@@ -168,7 +211,9 @@ class DiscussionSearchViewModel : ViewModel() {
                             // - if no match, pick the message 0 (the most recent)
                             if (!found) {
                                 val forwardMatch =
-                                    matchedMessageAndFyleIds.indexOfLast { messageAndFyleId -> messageAndFyleId.first >= firstVisibleMessageId } // TODO: comparing messageIds is a little risky, it would be better to compare their sortIndex...
+                                    matchedMessageAndFyleIds.indexOfLast { messageAndFyleId ->
+                                        messageAndFyleId.second.second >= (firstMessageSortIndex ?: Double.MAX_VALUE)
+                                    }
                                 currentPosition = if (forwardMatch != -1) forwardMatch else 0
                                 updateHasNextAndPrevious()
                             }
@@ -178,10 +223,15 @@ class DiscussionSearchViewModel : ViewModel() {
                                 initialFoundItem = matchedMessageAndFyleIds[currentPosition].first
                             }
                         }
-                    }.onFailure {
-                        Logger.x(it)
+                    } catch (_: CancellationException) {
+                        // if the job was canceled, make sure not to set filterJob to null
+                        return@supervisorScope
+                    } catch (e: Exception) {
+                        Logger.x(e)
                     }
-                    filterJob = null
+                    if (isActive) {
+                        filterJob = null
+                    }
                 }
             }
         }

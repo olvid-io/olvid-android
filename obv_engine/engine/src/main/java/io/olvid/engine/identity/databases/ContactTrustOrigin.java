@@ -397,21 +397,13 @@ public class ContactTrustOrigin implements ObvDatabase {
         private static final int TYPE_SERVER_GROUP_V2 = 4;
 
         public long timestamp;
-        private int trust_type;
+        public int trust_type;
         public byte[] mediator_or_group_owner_identity;
         public Integer mediator_or_group_owner_trust_level_major;
         public String identity_server;
         public byte[] raw_obv_group_v2_identifier;
 
         public Pojo_0() {
-        }
-
-        public int getTrust_type() {
-            return trust_type;
-        }
-
-        public void setTrust_type(int trust_type) {
-            this.trust_type = trust_type;
         }
 
         @JsonIgnore

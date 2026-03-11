@@ -191,7 +191,7 @@ class WebrtcPeerConnectionHolder(
             // check if a proxy is required for WebRCT
             try {
                 val proxies =
-                    ProxySelector.getDefault().select(URI.create("https://turn-scaled.olvid.io/"))
+                    ProxySelector.getDefault().select(URI.create("https://turn-scaled.olvid.io/")) // TODO: do not use this! use the actual turn server we are going to use
                 for (proxy in proxies) {
                     val type = proxy.type()
                     if (type == HTTP) {

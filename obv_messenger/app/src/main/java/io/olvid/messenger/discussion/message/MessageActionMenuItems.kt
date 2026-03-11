@@ -84,7 +84,7 @@ fun MessageActionItemsList(
                 if (!messageEditHandler.isEditMode()) {
                     discussionDelegate.replyToMessage(
                         message.id,
-                        ""
+                        message.contentBody.orEmpty().trim()
                     )
                     keyboardController?.show()
                 }

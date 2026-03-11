@@ -1,0 +1,264 @@
+[versions]
+# Plugins
+android-gradle-plugin = "9.1.0"
+kotlin = "2.3.10"
+ksp = "2.3.5"
+google-services = "4.4.4"
+protobuf-plugin = "0.9.6"
+protobuf-protoc = "4.34.0"
+protobuf-protocgenjavalite = "3.0.0"
+oss-licenses-plugin = "0.10.10"
+navigation-args = "2.9.7"
+
+# Libraries
+androidx-core = "1.17.0"
+androidx-appcompat = "1.7.1"
+androidx-activity = "1.12.4"
+androidx-fragment = "1.8.9"
+androidx-constraintlayout = "2.2.1"
+androidx-recyclerview = "1.4.0"
+androidx-preference = "1.2.1"
+androidx-swiperefreshlayout = "1.2.0"
+androidx-localbroadcastmanager = "1.1.0"
+androidx-documentfile = "1.1.0"
+androidx-exifinterface = "1.4.2"
+androidx-biometric = "1.1.0"
+androidx-security-crypto = "1.1.0"
+androidx-camera = "1.5.3"
+androidx-media3 = "1.9.2"
+androidx-media = "1.7.1"
+androidx-navigation = "2.9.7"
+androidx-lifecycle = "2.10.0"
+androidx-room = "2.8.4"
+androidx-paging = "3.4.1"
+androidx-work = "2.11.1"
+androidx-datastore = "1.2.0"
+androidx-emoji2 = "1.6.0"
+androidx-credentials = "1.5.0"
+androidx-sharetarget = "1.2.0"
+androidx-splashscreen = "1.2.0"
+androidx-compose-bom = "2026.02.01"
+
+google-material = "1.13.0"
+google-zxing = "3.3.3" # starting with zxing 3.4.0, API level 24 is required...
+google-protobuf-lite = "3.0.1"
+google-play-billing = "8.3.0"
+google-firebase-messaging = "25.0.1"
+google-play-services-maps = "20.0.0"
+google-play-services-location = "21.3.0"
+google-play-services-auth = "21.5.1"
+google-http-client = "2.1.0"
+google-api-client = "2.9.0"
+google-api-services-drive = "v3-rev20240903-2.0.0"
+google-play-review = "2.0.2"
+google-play-services-oss-licenses = "17.3.0" # version 17.4.0 requires API 24
+google-mlkit-barcode = "17.3.0"
+google-mlkit-text = "16.0.1"
+
+accompanist = "0.37.3"
+accompanist-themeadapter = "0.36.0"
+
+kotlinx-coroutines = "1.10.2"
+
+coil = "2.7.0"
+lottie = "6.7.1"
+reorderable = "3.0.0"
+sqlcipher = "4.13.0"
+jackson = "2.13.4" # starting with jackson 2.14, API level 26 is required...
+jsoup = "1.22.1"
+appauth = "0.11.1"
+jose4j = "0.9.6"
+maplibre = "12.3.1" # maplibre 13.0.0 switches to vulkan which is incompatible with old Android versions. And the opengl-only version of maplibre is not compatible with maplibre annoatations
+maplibre-annotation = "3.0.2"
+commonmark = "0.27.1"
+okhttp = "4.12.0"
+okhttp5 = "5.3.2"
+simple-xml = "2.7.1"
+slf4j = "2.0.17"
+iharder-base64 = "2.3.9"
+olvid-webrtc = "7559"
+olvid-sqlite-jdbc = "3.50.3.0" # only here to check if a new version is available
+
+desugar-libs = "2.1.5"
+junit = "4.13.2"
+
+[libraries]
+# AndroidX
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "androidx-activity" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "androidx-fragment" }
+androidx-fragment-compose = { group = "androidx.fragment", name = "fragment-compose", version.ref = "androidx-fragment" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidx-constraintlayout" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "androidx-recyclerview" }
+androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "androidx-preference" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "androidx-swiperefreshlayout" }
+androidx-localbroadcastmanager = { group = "androidx.localbroadcastmanager", name = "localbroadcastmanager", version.ref = "androidx-localbroadcastmanager" }
+androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "androidx-documentfile" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "androidx-exifinterface" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "androidx-biometric" }
+androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "androidx-security-crypto" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "androidx-camera" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "androidx-camera" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "androidx-camera" }
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "androidx-media3" }
+androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "androidx-media3" }
+androidx-media = { group = "androidx.media", name = "media", version.ref = "androidx-media" }
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "androidx-navigation" }
+androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "androidx-navigation" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation" }
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "androidx-room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
+androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "androidx-room" }
+androidx-paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "androidx-paging" }
+androidx-paging-runtime-ktx = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "androidx-paging" }
+androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "androidx-paging" }
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime", version.ref = "androidx-work" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "androidx-datastore" }
+androidx-emoji2 = { group = "androidx.emoji2", name = "emoji2", version.ref = "androidx-emoji2" }
+androidx-emoji2-bundled = { group = "androidx.emoji2", name = "emoji2-bundled", version.ref = "androidx-emoji2" }
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "androidx-credentials" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "androidx-credentials" }
+androidx-sharetarget = { group = "androidx.sharetarget", name = "sharetarget", version.ref = "androidx-sharetarget" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "androidx-splashscreen" }
+
+# Compose
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidx-compose-bom" }
+androidx-compose-material = { group = "androidx.compose.material", name = "material" }
+androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-animation = { group = "androidx.compose.animation", name = "animation" }
+androidx-compose-animation-graphics = { group = "androidx.compose.animation", name = "animation-graphics" }
+androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+
+# Google
+google-material = { group = "com.google.android.material", name = "material", version.ref = "google-material" }
+google-zxing = { group = "com.google.zxing", name = "core", version.ref = "google-zxing" }
+google-protobuf-lite = { group = "com.google.protobuf", name = "protobuf-lite", version.ref = "google-protobuf-lite" }
+google-play-billing = { group = "com.android.billingclient", name = "billing", version.ref = "google-play-billing" }
+google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "google-firebase-messaging" }
+google-play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "google-play-services-maps" }
+google-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "google-play-services-location" }
+google-play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "google-play-services-auth" }
+google-http-client-gson = { group = "com.google.http-client", name = "google-http-client-gson", version.ref = "google-http-client" }
+google-api-client-android = { group = "com.google.api-client", name = "google-api-client-android", version.ref = "google-api-client" }
+google-api-services-drive = { group = "com.google.apis", name = "google-api-services-drive", version.ref = "google-api-services-drive" }
+google-play-review-ktx = { group = "com.google.android.play", name = "review-ktx", version.ref = "google-play-review" }
+google-play-services-oss-licenses = { group = "com.google.android.gms", name = "play-services-oss-licenses", version.ref = "google-play-services-oss-licenses" }
+google-mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "google-mlkit-barcode" }
+google-mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "google-mlkit-text" }
+
+# Accompanist
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
+accompanist-themeadapter-appcompat = { group = "com.google.accompanist", name = "accompanist-themeadapter-appcompat", version.ref = "accompanist-themeadapter" }
+
+# Kotlinx
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
+
+# Coil
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+coil-video = { group = "io.coil-kt", name = "coil-video", version.ref = "coil" }
+coil-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
+coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
+
+# Others
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
+reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderable" }
+sqlcipher-android = { group = "net.zetetic", name = "sqlcipher-android", version.ref = "sqlcipher" }
+jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
+jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version.ref = "jose4j" }
+maplibre-android-sdk = { group = "org.maplibre.gl", name = "android-sdk", version.ref = "maplibre" }
+maplibre-android-plugin-annotation = { group = "org.maplibre.gl", name = "android-plugin-annotation-v9", version.ref = "maplibre-annotation" }
+commonmark = { group = "org.commonmark", name = "commonmark", version.ref = "commonmark" }
+commonmark-ext-gfm-strikethrough = { group = "org.commonmark", name = "commonmark-ext-gfm-strikethrough", version.ref = "commonmark" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp5 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp5" }
+simple-xml = { group = "org.simpleframework", name = "simple-xml", version.ref = "simple-xml" }
+slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
+iharder-base64 = { group = "net.iharder", name = "base64", version.ref = "iharder-base64" }
+olvid-webrtc-android = { group = "io.olvid.messenger", name = "olvid-webrtc-android", version.ref = "olvid-webrtc" }
+olvid-sqlite-jdbc-android = { group = "io.olvid.messenger", name = "olvid-sqlite-jdbc-android", version.ref = "olvid-sqlite-jdbc" }
+sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "olvid-sqlite-jdbc" }
+
+# Build
+desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar-libs" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+
+[bundles]
+compose = [
+    "androidx-compose-material",
+    "androidx-compose-material-icons-core",
+    "androidx-compose-material3",
+    "androidx-compose-animation",
+    "androidx-compose-animation-graphics",
+    "androidx-compose-runtime-livedata",
+    "androidx-compose-ui-tooling-preview",
+    "androidx-compose-ui",
+]
+lifecycle = [
+    "androidx-lifecycle-viewmodel-compose",
+    "androidx-lifecycle-process",
+    "androidx-lifecycle-runtime-compose",
+]
+coil = [
+    "coil-compose",
+    "coil-video",
+    "coil-svg",
+    "coil-gif",
+]
+camera = [
+    "androidx-camera-camera2",
+    "androidx-camera-lifecycle",
+    "androidx-camera-view",
+]
+navigation = [
+    "androidx-navigation-fragment-ktx",
+    "androidx-navigation-ui-ktx",
+    "androidx-navigation-compose",
+]
+paging = [
+    "androidx-paging-common",
+    "androidx-paging-runtime-ktx",
+    "androidx-paging-compose",
+    "androidx-room-paging",
+]
+room = [
+    "androidx-room-runtime",
+    "androidx-room-ktx",
+]
+media3 = [
+    "androidx-media3-exoplayer",
+    "androidx-media3-ui",
+]
+commonmark = [
+    "commonmark",
+    "commonmark-ext-gfm-strikethrough",
+]
+maplibre = [
+    "maplibre-android-sdk",
+    "maplibre-android-plugin-annotation",
+]
+emoji2 = [
+    "androidx-emoji2",
+    "androidx-emoji2-bundled",
+]
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
+android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
+oss-licenses = { id = "com.google.android.gms.oss-licenses-plugin", version.ref = "oss-licenses-plugin" }
+navigation-safeargs = { id = "androidx.navigation.safeargs", version.ref = "navigation-args" }

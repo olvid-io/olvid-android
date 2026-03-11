@@ -50,6 +50,7 @@ import io.olvid.messenger.settings.SettingsActivity
 @Composable
 fun DialogSecure(
     onDismissRequest: () -> Unit,
+    properties: DialogProperties = DialogProperties(),
     content: @Composable () -> Unit
 ) {
     val securePolicy = if (SettingsActivity.preventScreenCapture()) {
@@ -60,7 +61,14 @@ fun DialogSecure(
 
     Dialog(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(securePolicy = securePolicy),
+        properties = DialogProperties(
+            dismissOnBackPress = properties.dismissOnBackPress,
+            dismissOnClickOutside = properties.dismissOnClickOutside,
+            securePolicy = securePolicy,
+            usePlatformDefaultWidth = properties.usePlatformDefaultWidth,
+            decorFitsSystemWindows = properties.decorFitsSystemWindows,
+            windowTitle = properties.windowTitle,
+        ),
         content = content
     )
 }
@@ -106,6 +114,24 @@ fun BaseDialogContent(
                 actions()
             }
         }
+    }
+}
+
+@Composable
+fun CustomDialogContent(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = colorResource(R.color.newDialogBackground),
+            contentColor = colorResource(R.color.almostBlack),
+        ),
+        border = BorderStroke(1.dp, colorResource(R.color.newDialogBorder))
+    ) {
+        content()
     }
 }
 

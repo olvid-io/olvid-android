@@ -39,7 +39,7 @@ fun Discussion.computeMessageRanges(db: AppDatabase): Map<ObvBytesKey, Map<Strin
             currentSenderIdentifier = message.senderIdentifier
             currentSenderMap = mutableMapOf()
             rangesByThreadAndSender[ObvBytesKey(currentSenderIdentifier)] = currentSenderMap
-            currentSenderIdentifier = null
+            currentSenderThreadIdentifier = null
         }
         if (message.senderThreadIdentifier != currentSenderThreadIdentifier) {
             currentSenderThreadIdentifier = message.senderThreadIdentifier

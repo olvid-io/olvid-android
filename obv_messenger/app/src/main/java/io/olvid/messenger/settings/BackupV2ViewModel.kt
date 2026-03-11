@@ -241,11 +241,14 @@ class BackupV2ViewModel: ViewModel() {
 
     fun deleteProfileSnapshot(profileBackupSnapshot: ProfileBackupSnapshot) {
         selectedProfileBackup.value?.let { selectedProfileBackup ->
+            fetchingProfileBackups.value = true
             App.runThread {
-                if (AppSingleton.getEngine().deleteProfileBackupSnapshot(selectedProfileBackup.bytesProfileIdentity, selectedProfileBackup.profileBackupSeed, profileBackupSnapshot.threadId, profileBackupSnapshot.version)) {
+                val deleted = AppSingleton.getEngine().deleteProfileBackupSnapshot(selectedProfileBackup.bytesProfileIdentity, selectedProfileBackup.profileBackupSeed, profileBackupSnapshot.threadId, profileBackupSnapshot.version)
+                fetchingProfileBackups.value = false
+                if (deleted) {
                     profileBackups.value?.let { list ->
                         profileBackups.value = list.filter {
-                            !it.threadId.contentEquals(profileBackupSnapshot.threadId) && it.version == profileBackupSnapshot.version
+                            !it.threadId.contentEquals(profileBackupSnapshot.threadId) || it.version != profileBackupSnapshot.version
                         }
                     }
                 }

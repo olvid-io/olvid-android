@@ -26,6 +26,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.databases.AppDatabase
@@ -84,6 +85,7 @@ class ComposeMessageViewModel(
     }
     private val draftMessageReplyEditMode = MediatorLiveData<Message?>()
     private val messageBeingEdited = MutableLiveData<Message?>(null)
+    private val editMode = messageBeingEdited.map { it != null }
     val ephemeralSettingsChanged: LiveData<Boolean>
     var rawNewMessageText: CharSequence = ""
         private set
@@ -148,6 +150,10 @@ class ComposeMessageViewModel(
 
     fun getMessageBeingEdited(): LiveData<Message?> {
         return messageBeingEdited
+    }
+
+    fun isEditMode(): LiveData<Boolean> {
+        return editMode;
     }
 
     fun setMessageBeingEdited(message: Message) {

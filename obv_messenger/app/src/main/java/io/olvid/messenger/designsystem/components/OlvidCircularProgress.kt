@@ -33,12 +33,26 @@ import io.olvid.messenger.R
 @Composable
 fun OlvidCircularProgress(modifier: Modifier = Modifier,
                           color: Color = colorResource(id = R.color.olvid_gradient_light),
-                          size : Dp = 64.dp) {
-    CircularProgressIndicator(
-        modifier = modifier
-            .size(size),
-        color = color,
-        strokeWidth = 5.dp,
-        strokeCap = StrokeCap.Round,
-    )
+                          size : Dp = 64.dp,
+                          progress: Float? = null) {
+    if (progress != null) {
+        CircularProgressIndicator(
+            progress = {
+                progress
+            },
+            modifier = modifier
+                .size(size),
+            color = color,
+            strokeWidth = 5.dp,
+            strokeCap = StrokeCap.Round,
+        )
+    } else {
+        CircularProgressIndicator(
+            modifier = modifier
+                .size(size),
+            color = color,
+            strokeWidth = 5.dp,
+            strokeCap = StrokeCap.Round,
+        )
+    }
 }

@@ -1009,9 +1009,6 @@ public class AppSingleton {
                 App.openAppDialogIntroducingMultiProfile();
             }
             if (lastBuildExecuted != 0 && lastBuildExecuted < 157) {
-                if ("null".equals(SettingsActivity.getScaledTurn())) {
-                    SettingsActivity.resetScaledTurn();
-                }
                 try {
                     String googleDriveEmail = SettingsActivity.migrateAutomaticBackupAccount();
                     if (googleDriveEmail != null) {
@@ -1069,7 +1066,6 @@ public class AppSingleton {
                 }
                 Logger.i("🔫🔫 Build 277->278 attachment count migration performed in " + (System.currentTimeMillis()-migrationStartTime) + "ms");
             }
-
 
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());
             saveLastExecutedVersions(BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);

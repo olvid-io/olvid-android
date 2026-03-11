@@ -18,10 +18,12 @@
  */
 package io.olvid.messenger.openid.jsons
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails
 import org.jose4j.jwk.JsonWebKey
 
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class KeycloakUserDetailsAndStuff(
     val userDetails: JsonKeycloakUserDetails?,
     val signedUserDetails: String?,

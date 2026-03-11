@@ -21,6 +21,7 @@ package io.olvid.messenger.history_transfer
 
 import android.content.Context
 import android.net.Uri
+import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor
@@ -32,6 +33,7 @@ import io.olvid.messenger.history_transfer.json.DstExpectedSha256
 import io.olvid.messenger.history_transfer.json.DstRequestSha256
 import io.olvid.messenger.history_transfer.json.JsonDiscussionIdentifier
 import io.olvid.messenger.history_transfer.json.JsonZipExport
+import io.olvid.messenger.history_transfer.json.SrcDiscussionDone
 import io.olvid.messenger.history_transfer.json.SrcDiscussionList
 import io.olvid.messenger.history_transfer.json.SrcDiscussionRanges
 import io.olvid.messenger.history_transfer.json.SrcMessages
@@ -70,14 +72,22 @@ class ZipImportTransferTransportDelegate(
     init {
         executor.execute {
             try {
-                context.contentResolver.openInputStream(zipReadableFileUri).use { inputStream ->
-                    ZipInputStream(inputStream).use { zip ->
+                inputStream = context.contentResolver.openInputStream(zipReadableFileUri)
+                zipInputStream = ZipInputStream(inputStream)
+                var foundAnAttachmentBeforeTheMessages = false
+                try {
+                    zipInputStream?.let { zip ->
                         // first find the json and read it
                         var zipEntry: ZipEntry? = zip.nextEntry
                         while (zipEntry != null) {
                             if (zipEntry.name == JsonZipExport.DISCUSSION_AND_MESSAGES_JSON_FILE_NAME) {
-                                jsonZipExport = objectMapper.readValue(zip, JsonZipExport::class.java)
+                                jsonZipExport = objectMapper.reader()
+                                    .without(JsonParser.Feature.AUTO_CLOSE_SOURCE)
+                                    .readValue(zip, JsonZipExport::class.java)
                                 break
+                            } else if (zipEntry.name.startsWith(JsonZipExport.ATTACHMENTS_DIRECTORY_NAME)) {
+                                Logger.e("ZIP if badly ordered")
+                                foundAnAttachmentBeforeTheMessages = true
                             }
                             zipEntry = zip.nextEntry
                         }
@@ -85,24 +95,36 @@ class ZipImportTransferTransportDelegate(
                         jsonZipExport?.let { jsonZipExport ->
                             // check that the ownedIdentity actually exists on the device
                             jsonZipExport.bytesOwnedIdentity?.let { bytesOwnedIdentity ->
-                                AppDatabase.getInstance().ownedIdentityDao().get(bytesOwnedIdentity)?.let {
-                                    // pass this owned identity to the transfer service so the dstState can be properly initialized
-                                    transferListener.onOwnedIdentityFound(bytesOwnedIdentity)
-                                    // only create the source state if the identity exists
-                                    srcTransferState = SrcTransferProtocolState(
-                                        TransferScope.Profile,
-                                        bytesOwnedIdentity
-                                    )
-                                }
+                                AppDatabase.getInstance().ownedIdentityDao().get(bytesOwnedIdentity)
+                                    ?.let {
+                                        // pass this owned identity to the transfer service so the dstState can be properly initialized
+                                        transferListener.onOwnedIdentityFound(bytesOwnedIdentity)
+                                        // only create the source state if the identity exists
+                                        srcTransferState = SrcTransferProtocolState(
+                                            TransferScope.Profile,
+                                            bytesOwnedIdentity
+                                        )
+                                    }
                             }
                         }
                     }
+                } finally {
+                    if (foundAnAttachmentBeforeTheMessages) {
+                        Logger.e("ZIP closing input streams")
+                        zipInputStream?.close()
+                        inputStream?.close()
+                        zipInputStream = null
+                        inputStream = null
+                    }
                 }
+
                 if (srcTransferState == null) {
                     transferListener.onTransportLayerStateChange(TransferTransportLayerState.CLOSED)
                 } else {
-                    inputStream = context.contentResolver.openInputStream(zipReadableFileUri)
-                    zipInputStream = ZipInputStream(inputStream)
+                    if (inputStream == null) {
+                        inputStream = context.contentResolver.openInputStream(zipReadableFileUri)
+                        zipInputStream = ZipInputStream(inputStream)
+                    }
                     transferListener.onTransportLayerStateChange(TransferTransportLayerState.READY)
 
                     // compute the initial SrcTransferProtocolState from the jsonZipExport
@@ -134,11 +156,14 @@ class ZipImportTransferTransportDelegate(
 
                         // sort sequence numbers and compute ranges, as in RangeUtils Discussion.computeMessageRanges()
                         jsonZipMessages.messages?.mapNotNull { it.sequenceNumber }?.sorted()?.forEach { sequenceNumber ->
-                            if (sequenceNumber - 1 != currentStride?.get(1)) {
+                            if (currentStride != null && (sequenceNumber - 1 < currentStride[1])) {
+                                // this only happens if messages were not properly sorted, or if we have duplicate sequence numbers
+                                // ==> simply ignore this message by doing nothing
+                            } else if (sequenceNumber - 1 == currentStride?.get(1)) {
+                                currentStride[1]++
+                            } else {
                                 currentStride = mutableListOf(sequenceNumber, sequenceNumber)
                                 threadList.add(currentStride)
-                            } else {
-                                currentStride[1]++
                             }
                         }
 
@@ -290,7 +315,13 @@ class ZipImportTransferTransportDelegate(
         transferListener.onTransportLayerStateChange(TransferTransportLayerState.CLOSED)
     }
 
+    var processZipMessagesCalled: Boolean = false
+
     private fun processZipMessages() {
+        if (processZipMessagesCalled) {
+            return
+        }
+        processZipMessagesCalled = true
         jsonZipExport?.messages?.forEach { jsonZipMessages ->
             val discussionIdentifier = jsonZipMessages.discussion ?: return@forEach
             val senderIdentifier = jsonZipMessages.sender ?: return@forEach
@@ -321,6 +352,20 @@ class ZipImportTransferTransportDelegate(
             srcTransferState?.sentMessageCount += sequenceNumbers.size
         }
 
+        // for discussions where no messages were expected, send a SrcDiscussionDone message.
+        // Otherwise, if an import has no message to import, it remains stuck on "negotiating"
+        srcTransferState?.expectedDiscussionRanges?.filter { countMessagesInRanges(it.value) == 0 }?.forEach {
+            transferListener.onJsonMessage(
+                messageType = TransferMessageType.SRC_DISCUSSION_DONE,
+                serializedMessage = objectMapper.writeValueAsBytes(
+                    SrcDiscussionDone().apply {
+                        this.discussion = it.key
+                        this.missingMessageCount = 0
+                    }
+                )
+            )
+        }
+
         // if there are no attachments to send, notify the transfer is done
         if (srcTransferState?.updateProgress() == true) {
             transferListener.onJsonMessage(
@@ -332,8 +377,13 @@ class ZipImportTransferTransportDelegate(
         }
     }
 
+    var sendPendingAttachmentsCalled: Boolean = false
 
     private fun sendPendingAttachments() {
+        if (sendPendingAttachmentsCalled) {
+            return
+        }
+        sendPendingAttachmentsCalled = true
         zipInputStream?.let { zip ->
             var zipEntry: ZipEntry? = zip.nextEntry
             while (zipEntry != null) {
@@ -357,19 +407,19 @@ class ZipImportTransferTransportDelegate(
                                      c = zip.read(buffer)
                                  }
                                  transferListener.onAttachmentComplete(sha256, totalSize)
+                                 srcTransferState?.sentBytes += totalSize
                              }
                         }
                     } catch (e: Exception) {
                         Logger.x(e)
                     }
                 }
-
                 zipEntry = zip.nextEntry
             }
 
         }
 
-        // this test should always be true. Anyways, we have nothing more to send !
+        // this test should always be true. Anyway, we have nothing more to send!
         // ==> notify the transfer is done
         if (srcTransferState?.updateProgress() == true) {
             transferListener.onJsonMessage(

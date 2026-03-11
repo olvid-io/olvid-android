@@ -373,7 +373,7 @@ public abstract class DiscussionDao {
             " WHERE disc.id = :discussionId ")
     public abstract LiveData<DiscussionAndGroupMembersCount> getWithGroupMembersCount(long discussionId);
 
-//    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH) // the columns is_group and status are used for sorting only
+    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH) // the columns is_group and status are used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
             " COALESCE(grp." + Group.FULL_SEARCH_FIELD + ", grpp." + Group2.FULL_SEARCH_FIELD + ") AS patterMatchingField, " +
@@ -397,7 +397,7 @@ public abstract class DiscussionDao {
             " ORDER BY status, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllWithGroupMembersNames(@NonNull byte[] ownedIdentityBytes);
 
-//    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH) // the column status is used for sorting only
+    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH) // the column status is used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
             " COALESCE(grp." + Group.FULL_SEARCH_FIELD + ", grpp." + Group2.FULL_SEARCH_FIELD + ") AS patterMatchingField, " +
@@ -419,7 +419,7 @@ public abstract class DiscussionDao {
             " ORDER BY status DESC, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract List<DiscussionAndGroupMembersNames> getAllForGlobalSearch(@NonNull byte[] ownedIdentityBytes);
 
-//    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH) // the columns is_group and status are used for sorting only
+    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH) // the columns is_group and status are used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
             " COALESCE(grp." + Group.FULL_SEARCH_FIELD + ", grpp." + Group2.FULL_SEARCH_FIELD + ") AS patterMatchingField, " +
@@ -443,7 +443,7 @@ public abstract class DiscussionDao {
             " ORDER BY " + PINNED_ORDER + ", status, is_group, disc." + Discussion.TITLE + " COLLATE NOCASE ASC")
     public abstract LiveData<List<DiscussionAndGroupMembersNames>> getAllPinnedFirstWithGroupMembersNames(@NonNull byte[] ownedIdentityBytes);
 
-//    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH) // the column is_group is used for sorting only
+    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH) // the column is_group is used for sorting only
     @Query("SELECT " + PREFIX_DISCUSSION_COLUMNS + ", " +
             " COALESCE(grp." + Group.GROUP_MEMBERS_NAMES + ", grpp." + Group2.GROUP_MEMBERS_NAMES + ") AS groupMemberNames, " +
             " COALESCE(grp." + Group.FULL_SEARCH_FIELD + ", grpp." + Group2.FULL_SEARCH_FIELD + ") AS patterMatchingField, " +

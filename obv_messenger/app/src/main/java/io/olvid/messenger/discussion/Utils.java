@@ -49,6 +49,7 @@ import java.util.regex.Pattern;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
+import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.Markdown;
@@ -136,7 +137,7 @@ public class Utils {
             });
         });
     }
-    public static void applyBodyWithSpans(@NonNull TextView textView, @Nullable byte[] bytesOwnedIdentity, @NonNull Message message, @Nullable List<Pattern> searchPatterns, boolean linkifyLinks, boolean markdown, String finalUrlToTruncate) {
+    public static void applyBodyWithSpans(@NonNull TextView textView, @NonNull Message message, @Nullable List<Pattern> searchPatterns, boolean linkifyLinks, boolean markdown, String finalUrlToTruncate) {
         String body = message.getStringContent(textView.getContext());
         if (finalUrlToTruncate != null && endsWithIgnoreCase(body, finalUrlToTruncate) && SettingsActivity.truncateMessageBodyTrailingLinks()) {
             body = body.substring(0, body.length() - finalUrlToTruncate.length()).trim();
@@ -147,9 +148,7 @@ public class Utils {
             if (linkifyLinks) {
                 StringUtils2Kt.linkify(result);
             }
-            if (bytesOwnedIdentity != null) {
-                applyMentionSpans(textView.getContext(), bytesOwnedIdentity, message, result);
-            }
+            applyMentionSpans(textView.getContext(), message, result);
         } catch (Exception ex) {
             Logger.w("Error while applying spans to message content body");
         }
@@ -166,9 +165,10 @@ public class Utils {
         return source.regionMatches(true, source.length() - suffix.length(), suffix, 0, suffix.length());
     }
 
-    public static void applyMentionSpans(@NonNull Context context, @NonNull byte[] bytesOwnedIdentity, @NonNull Message message, SpannableString result) {
+    public static void applyMentionSpans(@NonNull Context context, @NonNull Message message, SpannableString result) {
+        byte[] bytesOwnedIdentity = AppSingleton.getBytesCurrentIdentity();
         List<JsonUserMention> mentions = message.getMentions();
-        if (mentions != null && !mentions.isEmpty()) {
+        if (bytesOwnedIdentity != null && mentions != null && !mentions.isEmpty()) {
             for (JsonUserMention mention : mentions) {
                 if (mention.getRangeStart() >= 0 && mention.getRangeEnd() <= result.length()) {
                     // this test also considers groupV2 pending members as contacts --> need to check this at click time

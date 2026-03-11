@@ -1026,10 +1026,6 @@ Kontak asseblief jou administrateur vir meer besonderhede.</string>
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Kon nie geïnstalleerde webblaaiers vind nie</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Kies watter blaaier om vir verifikasie te gebruik</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Standaardblaaier</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Globale streek-gebaseerde TURN-bedieners</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Paris TURN-bedieners</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">Nieu-York TURN-bedieners</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">Singapoer TURN-bedieners</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d kontakte</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d kontakte in groep %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Opdatering vereis</string>
@@ -1941,7 +1937,7 @@ Olvid sal nie toegang hê tot enige van u lêers op Google Drive nie.</string>
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Indien u rugsteun sleutel verlore of gekompromitteer is, kan u dit terugstel om **enige rugsteun van u rekening wat aan hierdie sleutel gekoppel is, te verwyder**. Hierdie sleutel sal nie meer bruikbaar wees om u rekening te herstel nie.\n\nAs u glo iemand het hierdie sleutel reeds misbruik om toegang tot u rekening te verkry, moet u **u toestellys** in u profiel se besonderhede nagaan vir enige onverwags toestelle.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Bestuur my Olvid-rugsteun</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Begin \'n rugsteun vandag</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/rugsteun-jou-profiele/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Sluit</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Jou aanlyn rugsteun</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Herstel</string>
@@ -2158,6 +2154,9 @@ Olvid sal nie toegang hê tot enige van u lêers op Google Drive nie.</string>
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Onderhandeling (stap 1 van 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Boodskappe oordra (stap 2 van 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Besig om bysluit aan te dra (stap 3 van 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Onderhandel</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Boodskappe oordra</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Besig om bysluitte oor te dra</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Oordrag voltooi</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Oordrag onderbreek</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Gesprekshistorie-oordrag (beta)</string>
@@ -2182,5 +2181,9 @@ Olvid sal nie toegang hê tot enige van u lêers op Google Drive nie.</string>
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Deurvoer</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Resterend</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Aanhangsels</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Hierdie funksie is nog in die beta-toetsfase en die huidige implementering is moontlik nie versoenbaar met die finale implementering van Olvid se geskiedenis-oordrag nie.\n\nMaak asseblief seker dat jou toestelle die nuutste weergawe van Olvid gebruik voordat jy hierdie funksie gebruik.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Hierdie funksie is nog in die beta-toetsfase en die huidige implementering is moontlik nie versoenbaar met die finale implementering van Olvid se geskiedenis-oordrag nie.\n\nMaak asseblief seker dat jou toestelle die nuutste weergawe van Olvid gebruik voordat jy hierdie funksie gebruik.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Huidige oordrag onderbreek?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">\'n Geskiedenis-oordrag is tans aan die gang. Wil jy dit onderbreek?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Onderbreek die oordrag</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Wag vir om aan hierdie gesprek deel te neem</string>
 </resources>

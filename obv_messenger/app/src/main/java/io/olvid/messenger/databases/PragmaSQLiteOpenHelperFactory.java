@@ -1,6 +1,6 @@
 /*
  *  Olvid for Android
- *  Copyright © 2019-2025 Olvid SAS
+ *  Copyright © 2019-2026 Olvid SAS
  *
  *  This file is part of Olvid for Android.
  *
@@ -39,7 +39,7 @@ public class PragmaSQLiteOpenHelperFactory implements SupportSQLiteOpenHelper.Fa
     public SupportSQLiteOpenHelper create(SupportSQLiteOpenHelper.Configuration configuration) {
         PragmaCallbackWrapper callback = new PragmaCallbackWrapper(configuration.callback);
         SupportSQLiteOpenHelper.Configuration wrappedConfiguration = SupportSQLiteOpenHelper.Configuration.builder(configuration.context).name(configuration.name).callback(callback).build();
-        return frameworkSQLiteOpenHelperFactory.create(wrappedConfiguration);
+        return new SupportSQLiteOpenHelperWrapper(frameworkSQLiteOpenHelperFactory.create(wrappedConfiguration));
     }
 
     private static class PragmaCallbackWrapper extends SupportSQLiteOpenHelper.Callback {

@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">स्थापित ब्राउज़रों को क्वेरी करने में असमर्थ</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">प्रमाणीकरण के लिए उपयोग करने के लिए ब्राउज़र चुनें</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">डिफ़ॉल्ट ब्राउज़र</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">क्षेत्र-आधारित वैश्विक TURN सर्वर</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">पेरिस TURN सर्वर</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">न्यूयॉर्क TURN सर्वर</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">सिंगापुर TURN सर्वर</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d संपर्क</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d संपर्क समूह %2$s में</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">अपडेट आवश्यक है</string>
@@ -1934,7 +1930,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">यदि आपकी बैकअप कुंजी खो गई है या समझौता कर ली गई है, तो आप इसे **अपने खाते के किसी भी बैकअप को हटाने** के लिए रीसेट कर सकते हैं जो इस कुंजी से जुड़ा है। यह कुंजी अब आपके खाते को पुनर्स्थापित करने के लिए उपयोग करने योग्य नहीं होगी।\n\nयदि आपको लगता है कि किसी ने पहले से ही इस कुंजी का उपयोग दुर्भावनापूर्ण तरीके से आपके खाते तक पहुंचने के लिए किया होगा, तो आपको अपने प्रोफ़ाइल विवरण में **अपने डिवाइस सूची की जांच** करनी चाहिए ताकि कोई अप्रत्याशित डिवाइस न हो।</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">मेरे Olvid बैकअप प्रबंधित करें</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">अभी बैकअप शुरू करें</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/अपने-प्रोफ़ाइल-का-बैकअप-ले/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">बंद करें</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">आपके ऑनलाइन बैकअप</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">रीसेट करें</string>
@@ -2151,6 +2147,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">समझौता किया जा रहा है (चरण 1/3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">संदेशों का स्थानांतरण (चरण 2/3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">अटैचमेंट स्थानांतरित करना (चरण 3 में से 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">समझौता करना</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">संदेशों का स्थानांतरण</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">अटैचमेंट स्थानांतरित करना</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">स्थानांतरण पूरा हुआ</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">स्थानांतरण बाधित</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">चैट इतिहास स्थानांतरण (बीटा)</string>
@@ -2175,5 +2174,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">थ्रूपुट</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">शेष</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">अटैचमेंट</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">यह सुविधा अभी भी बीटा परीक्षण चरण में है और वर्तमान कार्यान्वयन Olvid के इतिहास स्थानांतरण के अंतिम कार्यान्वयन के साथ संगत नहीं हो सकता है।\n\nइस सुविधा का उपयोग करने से पहले, कृपया सुनिश्चित करें कि आपके उपकरणों पर Olvid का नवीनतम संस्करण स्थापित है।</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">यह सुविधा अभी भी बीटा परीक्षण चरण में है और वर्तमान कार्यान्वयन Olvid के इतिहास स्थानांतरण के अंतिम कार्यान्वयन के साथ संगत नहीं हो सकता है।\n\nइस सुविधा का उपयोग करने से पहले, कृपया सुनिश्चित करें कि आपके उपकरणों पर Olvid का नवीनतम संस्करण स्थापित है।</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">क्या चल रहे स्थानांतरण को रद्द करें?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">वर्तमान में इतिहास स्थानांतरण चल रहा है। क्या आप इसे रद्द करना चाहते हैं?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">स्थानांतरण रद्द करें</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">इस चर्चा में शामिल होने की प्रतीक्षा कर रहा हूँ</string>
 </resources>

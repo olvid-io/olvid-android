@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">تعذر الاستعلام عن المتصفحات المثبتة</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">اختر المتصفح الذي ستستخدمه للمصادقة</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">المتصفح الافتراضي</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">خوادم TURN عالمية قائمة على المناطق</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">خوادم TURN في باريس</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">خوادم TURN في نيويورك</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">خوادم TURN في سنغافورة</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d جهات اتصال</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d جهة اتصال في المجموعة %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">تحديث مطلوب</string>
@@ -1934,7 +1930,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">إذا فُقدت مفتاح النسخ الاحتياطي الخاص بك أو تعرض للاختراق، يمكنك إعادة تعيينه **لحذف أي نسخة احتياطية لحسابك مرتبطة بهذا المفتاح**. لن يكون هذا المفتاح قابلاً للاستخدام لاستعادة حسابك بعد ذلك.\n\nإذا كنت تعتقد أن شخصًا ما قد استخدم هذا المفتاح بالفعل للوصول إلى حسابك بشكل ضار، فيجب عليك **التحقق من قائمة الأجهزة** في تفاصيل ملفك الشخصي بحثًا عن أي جهاز غير متوقع.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">إدارة نسخ Olvid الاحتياطية الخاصة بي</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">ابدأ النسخ الاحتياطي الآن</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/احتفظ-بملفاتك-الخاصة/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">إغلاق</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">نسخك الاحتياطية عبر الإنترنت</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">إعادة تعيين</string>
@@ -2151,6 +2147,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">التفاوض (الخطوة 1 من 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">نقل الرسائل (الخطوة 2 من 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">نقل المرفقات (الخطوة 3 من 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">التفاوض</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">نقل الرسائل</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">نقل المرفقات</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">اكتمل النقل</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">تم مقاطعة النقل</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">نقل سجل الدردشة (إصدار تجريبي)</string>
@@ -2175,5 +2174,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">معدل النقل</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">المتبقي</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">مرفقات</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">لا تزال هذه الميزة في مرحلة الاختبار التجريبي، وقد لا يكون التنفيذ الحالي متوافقًا مع التنفيذ النهائي لنقل سجل Olvid.\n\nقبل استخدام هذه الميزة، يرجى التأكد من أن أجهزتك تعمل بأحدث إصدار من Olvid.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">لا تزال هذه الميزة في مرحلة الاختبار التجريبي، وقد لا يكون التنفيذ الحالي متوافقًا مع التنفيذ النهائي لنقل سجل Olvid.\n\nقبل استخدام هذه الميزة، يرجى التأكد من أن أجهزتك تعمل بأحدث إصدار من Olvid.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">هل تريد إيقاف عملية النقل الحالية؟</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">يتم نقل سجل الدردشة حاليًا. هل تريد إيقافه؟</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">إلغاء النقل</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">في انتظار الانضمام إلى هذا النقاش</string>
 </resources>

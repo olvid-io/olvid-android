@@ -19,6 +19,10 @@
 
 package io.olvid.messenger.history_transfer.types
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import io.olvid.messenger.R
+
 
 sealed interface TransferProgress {
     data object ContactingOtherDevice: TransferProgress
@@ -28,4 +32,18 @@ sealed interface TransferProgress {
     data class TransferringFiles(val progress: Long, val total: Long) : TransferProgress
     data object Finished: TransferProgress
     data class Failed(val reason: TransferFailReason): TransferProgress
+
+    @Composable
+    fun TransferProgress?.getStepName(shortName: Boolean): String {
+        return when (this) {
+            ContactingOtherDevice -> stringResource(R.string.history_transfer_step_contacting_other_device)
+            Connecting -> stringResource(R.string.history_transfer_step_connecting)
+            Negotiating -> if (shortName) stringResource(R.string.history_transfer_step_negotiating_short) else stringResource(R.string.history_transfer_step_negotiating)
+            is TransferringMessages -> if (shortName) stringResource(R.string.history_transfer_step_transferring_messages_short) else stringResource(R.string.history_transfer_step_transferring_messages)
+            is TransferringFiles -> if (shortName) stringResource(R.string.history_transfer_step_transferring_files_short) else stringResource(R.string.history_transfer_step_transferring_files)
+            Finished -> stringResource(R.string.history_transfer_step_finished)
+            is Failed -> stringResource(R.string.history_transfer_step_failed) // TODO: change message depending on fail reason
+            null -> stringResource(R.string.history_transfer_step_none)
+        }
+    }
 }

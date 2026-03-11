@@ -323,7 +323,7 @@ class BackupV2PreferenceFragment : Fragment() {
                                         strokeWidth = 2.dp,
                                         color = colorResource(id = R.color.olvid_gradient_light)
                                     )
-                                } else {
+                                } else if (viewModel.backupNowState.value != BackupNowState.NONE) {
                                     Image(
                                         modifier = Modifier.size(24.dp),
                                         painter = if (viewModel.backupNowState.value == BackupNowState.SUCCESS) painterResource(R.drawable.ic_ok_outline) else painterResource(R.drawable.ic_error_outline),

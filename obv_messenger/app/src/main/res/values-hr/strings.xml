@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Nije moguće pronaći instalirane preglednike</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Odaberite preglednik koji ćete koristiti za autentifikaciju</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Zadana preglednica</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Globalni TURN poslužitelji bazirani na regijama</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Paris TURN poslužitelji</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">TURN poslužitelji New Yorka</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">TURN poslužitelji Singapura</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d kontakti</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d kontakata u grupi %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Zahtijeva se ažuriranje</string>
@@ -1935,7 +1931,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Ako je vaš ključ za sigurnosnu kopiju izgubljen ili kompromitiran, možete ga resetirati kako biste **izbrisali sve sigurnosne kopije vašeg računa povezane s ovim ključem**. Ovaj ključ više neće biti upotrebljiv za vraćanje vašeg računa.\n\nAko sumnjate da je netko već mogao koristiti ovaj ključ za zlonamjerni pristup vašem računu, trebali biste **provjeriti popis svojih uređaja** u detaljima profila kako biste pronašli bilo koji neočekivani uređaj.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Upravljanje mojim Olvid sigurnosnim kopijama</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Pokreni sigurnosnu kopiju sada</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/sigurnosno-kopiranje-profila/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Zatvori</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Vaše online sigurnosne kopije</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Poništi</string>
@@ -2152,6 +2148,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">U tijeku (korak 1 od 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Prenos poruka (korak 2 od 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Prenos priloga (korak 3 od 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Pregovaranje</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Prenos poruka</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Prenos priloga</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Prijenos završen</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Prijenos prekinut</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Prijenos povijesti chata (beta verzija)</string>
@@ -2176,5 +2175,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Propusnost</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Preostalo</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Prilozi</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Ova značajka je još uvijek u fazi beta testiranja i trenutna implementacija možda neće biti kompatibilna s konačnom implementacijom prijenosa povijesti Olvid-a.\n\nPrije korištenja ove značajke, provjerite jesu li na vašim uređajima instalirana najnovija izdanja Olvida.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Ova značajka je još uvijek u fazi beta testiranja i trenutna implementacija možda neće biti kompatibilna s konačnom implementacijom prijenosa povijesti Olvid-a.\n\nPrije korištenja ove značajke, provjerite jesu li na vašim uređajima instalirana najnovija izdanja Olvida.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Prekinuti trenutni prijenos?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Prijenos povijesti je trenutno u tijeku. Želite li ga prekinuti?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Otkaži prijenos</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Čekam da se pridružim ovoj raspravi</string>
 </resources>

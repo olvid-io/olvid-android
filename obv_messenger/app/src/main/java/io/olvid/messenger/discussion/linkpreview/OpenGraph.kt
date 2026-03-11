@@ -28,6 +28,7 @@ import io.olvid.engine.encoder.Encoded
 import io.olvid.messenger.customClasses.StringUtils2
 import java.io.ByteArrayOutputStream
 import java.util.Locale
+import androidx.core.net.toUri
 
 data class OpenGraph(
     var title: String? = null,
@@ -51,7 +52,7 @@ data class OpenGraph(
                     dictionary[DictionaryKey("image")]?.decodeBytes()?.let {
                         bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
                     }
-                } catch (e: DecodingException) {
+                } catch (_: DecodingException) {
                     title = null
                     description = null
                     bitmap = null
@@ -66,6 +67,8 @@ data class OpenGraph(
             ".threads.net",
             ".bsky.app",
             ".mastodon.social",
+            ".substack.com",
+            ".threads.com",
         )
     }
 
@@ -80,13 +83,13 @@ data class OpenGraph(
 
 
     fun shouldShowCompleteDescription() : Boolean {
-        return url?.let {
+        return url?.let { url ->
             try {
-                Uri.parse(it).host?.let { host ->
+                url.toUri().host?.let { host ->
                     val dottedHost = ".$host".lowercase(locale = Locale.ENGLISH)
                     DOMAINS_WITH_LONG_DESCRIPTION.any { dottedHost.endsWith(it) }
                 }
-            } catch (e : Exception) {
+            } catch (_ : Exception) {
                 null
             }
         } ?: false
@@ -98,7 +101,7 @@ data class OpenGraph(
 
     fun getSafeUri(): Uri? {
         return StringUtils2.getLink(url)?.second?.let {
-            Uri.parse(it).takeIf { uri -> uri.scheme != null }
+            it.toUri().takeIf { uri -> uri.scheme != null }
         }
     }
 

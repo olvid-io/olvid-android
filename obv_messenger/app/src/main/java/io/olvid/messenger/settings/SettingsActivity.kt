@@ -537,9 +537,6 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_ENABLE_BETA_FEATURES: String = "pref_key_enable_beta_features"
         const val PREF_KEY_ENABLE_BETA_FEATURES_DEFAULT: Boolean = false
 
-        const val PREF_KEY_SCALED_TURN_REGION: String = "pref_key_scaled_turn_region"
-        const val PREF_KEY_SCALED_TURN_REGION_DEFAULT: String = "global"
-
         const val PREF_KEY_USE_ALT_TURN_SERVERS: String = "pref_key_use_alt_turn_servers"
         const val PREF_KEY_USE_ALT_TURN_SERVERS_DEFAULT: Boolean = false
 
@@ -1660,21 +1657,6 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
 
         @JvmStatic
-        val scaledTurn: String?
-            get() {
-                val value: String =
-                    PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .getString(
-                            PREF_KEY_SCALED_TURN_REGION,
-                            PREF_KEY_SCALED_TURN_REGION_DEFAULT
-                        )!!
-                if (PREF_KEY_SCALED_TURN_REGION_DEFAULT == value) {
-                    return null
-                }
-                return value
-            }
-
-        @JvmStatic
         val useAltTurnServers: Boolean
             get() {
                 return PreferenceManager.getDefaultSharedPreferences(App.getContext())
@@ -1683,14 +1665,6 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                         PREF_KEY_USE_ALT_TURN_SERVERS_DEFAULT
                     )
             }
-
-        @JvmStatic
-        fun resetScaledTurn() {
-            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
-                remove(PREF_KEY_SCALED_TURN_REGION)
-            }
-        }
-
 
         @JvmStatic
         var autoJoinGroups: AutoJoinGroupsCategory

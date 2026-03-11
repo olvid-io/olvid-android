@@ -1024,10 +1024,6 @@
 	<string name="toast_message_error_querying_for_available_browsers" state="needs_review" hash="-1647725573">Kunne ikke finde installerede browsere</string>
 	<string name="dialog_title_choose_browser_for_authentication" state="needs_review" hash="1953462781">Vælg hvilken browser du vil bruge til godkendelse</string>
 	<string name="text_default_browser" state="needs_review" hash="-704738713">Standardbrowser</string>
-	<string name="pref_text_regional_turn_server_global" state="needs_review" hash="-2137414824">Globale regionsbaserede TURN-servere</string>
-	<string name="pref_text_regional_turn_server_paris" state="needs_review" hash="-1805142760">Paris TURN-servere</string>
-	<string name="pref_text_regional_turn_server_new_york" state="needs_review" hash="-933590208">New York TURN-servere</string>
-	<string name="pref_text_regional_turn_server_singapore" state="needs_review" hash="1897065698">Singapore TURN-servere</string>
 	<string name="text_count_contacts" state="needs_review" hash="1022571360">%1$d kontakter</string>
 	<string name="text_count_contacts_from_group" state="needs_review" hash="1527328959">%1$d kontakter i gruppen %2$s</string>
 	<string name="dialog_title_outdated_version" state="needs_review" hash="-885405214">Opdatering påkrævet</string>
@@ -1934,7 +1930,7 @@
 	<string name="dialog_message_reset_backup_key" state="needs_review" hash="-880239601">Hvis din sikkerhedsnøgle er gået tabt eller kompromitteret, kan du nulstille den for at **slette alle sikkerhedskopier af din konto, der er knyttet til denne nøgle**. Denne nøgle kan ikke længere bruges til at gendanne din konto.\n\nHvis du mener, at nogen allerede kan have brugt denne nøgle til at få uautoriseret adgang til din konto, bør du **tjekke din enhedsliste** i dine profildetaljer for uventede enheder.</string>
 	<string name="pref_manage_backups_title" state="needs_review" hash="268639056">Administrer mine Olvid-sikkerhedskopier</string>
 	<string name="pref_initiate_backup_now_title" state="needs_review" hash="1295112545">Start en sikkerhedskopi nu</string>
-	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-dine-profiler/</string>
+	<string name="backup_faq_link" state="needs_review" hash="-92834363">https://olvid.io/faq/backup-your-profiles/</string>
 	<string name="content_description_close_button" state="needs_review" hash="1454843231">Luk</string>
 	<string name="dialog_title_your_online_backups" state="needs_review" hash="-309422767">Dine online sikkerhedskopier</string>
 	<string name="button_label_reset" state="needs_review" hash="-1702159211">Nulstil</string>
@@ -2151,6 +2147,9 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Forhandling (trin 1 af 3)</string>
 	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Overførsel af beskeder (trin 2 af 3)</string>
 	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Overførsel af vedhæftede filer (trin 3 af 3)</string>
+	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Forhandling</string>
+	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Overførsel af beskeder</string>
+	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Overførsel af vedhæftede filer</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Overførsel fuldført</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Overførsel afbrudt</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Overførsel af chatlog (beta)</string>
@@ -2175,5 +2174,9 @@
 	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Gennemstrømning</string>
 	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Resterende</string>
 	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Vedhæftede filer</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-344386922">Denne funktion er stadig i beta-testfasen, og den nuværende implementering er muligvis ikke kompatibel med den endelige implementering af Olvids historikoverførsel.\n\nFør du bruger denne funktion, skal du sørge for, at dine enheder kører den nyeste version af Olvid.</string>
+	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Denne funktion er stadig i beta-testfasen, og den nuværende implementering er muligvis ikke kompatibel med den endelige implementering af Olvids historikoverførsel.\n\nInden du bruger denne funktion, skal du sørge for, at dine enheder kører den nyeste version af Olvid.</string>
+	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Afbryd igangværende overførsel?</string>
+	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">En overførsel af chatloggen er i gang. Vil du afbryde den?</string>
+	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Afbryd overførsel</string>
+	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Venter på at deltage i denne samtale</string>
 </resources>
