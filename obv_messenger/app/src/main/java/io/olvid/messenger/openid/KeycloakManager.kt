@@ -455,7 +455,7 @@ object KeycloakManager {
             KeycloakTasks.discoverKeycloakServerOlvidWellKnown(kms.serverUrl)?.let { olvidWellKnownJson ->
                 // check the minimum android version imposed by keycloak to show a tip
                 val minimumBuildVersion = olvidWellKnownJson.minBuildVersions?.android
-                if (minimumBuildVersion != null && minimumBuildVersion > BuildConfig.VERSION_CODE) {
+                if (minimumBuildVersion != null && minimumBuildVersion > (BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER)) {
                     PreferenceManager.getDefaultSharedPreferences(App.getContext()).takeIf {
                         // only update the min version if Keycloak imposes a greater version number than the server
                         it.getInt(
@@ -540,7 +540,7 @@ object KeycloakManager {
                                 if (keycloakServerRevocationsAndStuff.minimumBuildVersions != null) {
                                     val minimumBuildVersion =
                                         keycloakServerRevocationsAndStuff.minimumBuildVersions["android"]
-                                    if (minimumBuildVersion != null && minimumBuildVersion > BuildConfig.VERSION_CODE) {
+                                    if (minimumBuildVersion != null && minimumBuildVersion > (BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER)) {
                                         PreferenceManager.getDefaultSharedPreferences(App.getContext()).takeIf {
                                             // only update the min version if Keycloak imposes a greater version number than the server
                                             it.getInt(SettingsActivity.PREF_KEY_MIN_APP_VERSION, -1) < minimumBuildVersion

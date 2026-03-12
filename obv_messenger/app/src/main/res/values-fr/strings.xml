@@ -202,7 +202,7 @@
     <string name="menu_action_unbookmark">Non favori</string>
     <string name="menu_action_archive">Archiver</string>
     <string name="menu_action_unarchive">Désarchiver</string>
-    <string name="menu_check_update">Vérifier les mises à jour sur Google Play</string>
+    <string name="menu_check_update">Vérifier les mises à jour</string>
     <string name="message_discussion_locked">Cette discussion est verrouillée</string>
     <string name="message_discussion_readonly">Cette discussion est en lecture seule</string>
     <string name="message_discussion_no_channel">Vos messages seront automatiquement envoyés dès qu\'un canal sécurisé sera établi pour cette discussion. D\'ici là, ils resteront en attente.</string>
@@ -855,7 +855,7 @@
     <string name="troubleshooting_update_valid_title">Olvid est à jour</string>
     <string name="explanation_latest_olvid_version">Vous disposez de la version la plus récente d\'olvid</string>
     <string name="dialog_title_update_available">Mise à jour disponible</string>
-    <string name="dialog_message_update_available">Une nouvelle version d\'Olvid est disponible sur Google Play.\n\nVeuillez mettre à jour pour profiter des dernières fonctionnalités.</string>
+    <string name="dialog_message_update_available">Une nouvelle version d\'Olvid est disponible.\n\nVeuillez mettre à jour pour profiter des dernières fonctionnalités.</string>
     <string name="dialog_title_call_initiation_not_supported">Émission d\'appels impossible</string>
     <string name="dialog_message_call_initiation_not_supported">Il semble que votre serveur Olvid ne permette pas l\'émission d\'appels sécurisés.\n\nVeuillez contacter votre administrateur pour plus de détails.</string>
     <string name="label_identity_creation_options">Options de création d\'ID</string>

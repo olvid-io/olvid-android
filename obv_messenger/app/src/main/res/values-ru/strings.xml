@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Удалить из закладок</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Архивировать</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Восстановить из архива</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Проверьте наличие обновлений в Google Play</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Проверить наличие обновлений</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Этот чат заблокирован</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Этот чат доступен только для чтения</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Ваши сообщения будут автоматически отправлены, как только будет установлен защищенный канал для этой беседы. До этого момента они останутся на удержании.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid обновлен</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">У вас установлена последняя версия Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Доступно обновление</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Более новая версия Olvid доступна в Google Play.\n\nПожалуйста, обновите, чтобы воспользоваться новейшими функциями.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Доступна новая версия Olvid.\n\nПожалуйста, обновите приложение, чтобы воспользоваться новейшими функциями.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Не удалось начать вызов</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Похоже, что ваш сервер Olvid не поддерживает безопасный запуск вызовов.\n\nПожалуйста, свяжитесь со своим администратором для получения дополнительной информации.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Параметры создания ID</string>

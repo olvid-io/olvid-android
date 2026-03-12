@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">حذف از نشانک‌ها</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">بایگانی</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">بازگردانی از آرشیو</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">برای به‌روزرسانی در گوگل پلی را بررسی کنید</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">بررسی به‌روزرسانی</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">این گفتگو قفل شده است</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">این گفتگو فقط‌خواندنی است</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">پیام‌های شما به محض برقراری یک کانال امن برای این گفتگو به‌طور خودکار ارسال می‌شوند. تا آن زمان، آن‌ها در حالت تعلیق باقی می‌مانند.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">اولوید به‌روز است</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">شما آخرین نسخه Olvid را نصب کرده‌اید</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">به‌روزرسانی موجود است</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">نسخه جدید Olvid در Google Play موجود است.\n\nلطفاً برای بهره‌مندی از جدیدترین ویژگی‌ها، آن را به‌روزرسانی کنید.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">نسخه جدیدتری از Olvid در دسترس است.\n\nلطفاً برای بهره‌مندی از جدیدترین ویژگی‌ها، آن را به‌روزرسانی کنید.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">برقراری تماس پشتیبانی نمی‌شود</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">به نظر می‌رسد سرور Olvid شما از برقراری تماس امن پشتیبانی نمی‌کند.\n\nلطفاً برای اطلاعات بیشتر با مدیر سیستم خود تماس بگیرید.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">گزینه‌های ایجاد شناسه</string>

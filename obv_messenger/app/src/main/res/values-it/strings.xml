@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Rimuovi segnalibro</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Archivia</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Ripristina</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Verifica aggiornamenti su Google Play</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Verifica aggiornamenti</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Questa conversazione è bloccata</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Questa conversazione è di sola lettura</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">I tuoi messaggi verranno inviati automaticamente non appena verrà stabilito un canale sicuro per questa conversazione. Fino ad allora, rimarranno in sospeso.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid è aggiornato</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Hai l\'ultima versione di Olvid installata</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Aggiornamento disponibile</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">È disponibile una nuova versione di Olvid su Google Play.\n\nSi prega di aggiornare per usufruire delle ultime funzionalità.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">È disponibile una versione più recente di Olvid.\n\nSi prega di aggiornare per usufruire delle ultime funzionalità.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Impossibile avviare la chiamata</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Sembra che il tuo server Olvid non supporti l\'avvio di chiamate sicure.\n\nContatta il tuo amministratore per maggiori dettagli.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Opzioni di creazione ID</string>

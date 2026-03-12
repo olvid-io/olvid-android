@@ -203,7 +203,7 @@
     <string name="menu_action_unbookmark">Unbookmark</string>
     <string name="menu_action_archive">Archive</string>
     <string name="menu_action_unarchive">Unarchive</string>
-    <string name="menu_check_update">Check Google Play for update</string>
+    <string name="menu_check_update">Check for update</string>
     <string name="message_discussion_locked">This discussion is locked</string>
     <string name="message_discussion_readonly">This discussion is read-only</string>
     <string name="message_discussion_no_channel">Your messages will be automatically sent once a secure channel is established for this discussion. Until then, they will remain on hold.</string>
@@ -865,7 +865,7 @@
     <string name="troubleshooting_update_valid_title">Olvid is up to date</string>
     <string name="explanation_latest_olvid_version">You have the latest version of Olvid installed</string>
     <string name="dialog_title_update_available">Update available</string>
-    <string name="dialog_message_update_available">A newer version of Olvid is available from Google Play.\n\nPlease update to take advantage of the newest features.</string>
+    <string name="dialog_message_update_available">A newer version of Olvid is available.\n\nPlease update to take advantage of the newest features.</string>
     <string name="dialog_title_call_initiation_not_supported">Call initiation not supported</string>
     <string name="dialog_message_call_initiation_not_supported">It seems your Olvid server does not support secure call initiation.\n\nPlease contact your administrator for more details.</string>
     <string name="label_identity_creation_options">ID creation options</string>

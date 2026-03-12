@@ -20,10 +20,8 @@ package io.olvid.messenger.onboarding
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.method.PasswordTransformationMethod
@@ -40,7 +38,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.core.net.toUri
 import androidx.core.util.Pair
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -59,6 +56,7 @@ import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.TextChangeListener
+import io.olvid.messenger.customClasses.openStoreUrlOrFallback
 import io.olvid.messenger.onboarding.OnboardingViewModel.VALIDATED_STATUS
 import io.olvid.messenger.onboarding.OnboardingViewModel.VALIDATED_STATUS.CHECKING
 import io.olvid.messenger.onboarding.OnboardingViewModel.VALIDATED_STATUS.INVALID
@@ -438,7 +436,7 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
 
                                 val minimumBuildVersion =
                                     if (result.second.minimumBuildVersions != null) result.second.minimumBuildVersions!!["android"] else null
-                                if (minimumBuildVersion != null && minimumBuildVersion > BuildConfig.VERSION_CODE) {
+                                if (minimumBuildVersion != null && minimumBuildVersion > (BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER)) {
                                     failed(VERSION_OUTDATED)
                                     return
                                 }
@@ -478,26 +476,7 @@ class KeycloakSelectionFragment : Fragment(), OnClickListener,
                                         .setTitle(R.string.dialog_title_outdated_version)
                                         .setMessage(R.string.explanation_keycloak_olvid_version_outdated)
                                         .setPositiveButton(R.string.button_label_update) { _: DialogInterface?, _: Int ->
-                                            val appPackageName = activity.packageName
-                                            try {
-                                                startActivity(
-                                                    Intent(
-                                                        Intent.ACTION_VIEW,
-                                                        "market://details?id=$appPackageName".toUri()
-                                                    )
-                                                )
-                                            } catch (_: ActivityNotFoundException) {
-                                                try {
-                                                    startActivity(
-                                                        Intent(
-                                                            Intent.ACTION_VIEW,
-                                                            "https://play.google.com/store/apps/details?id=$appPackageName".toUri()
-                                                        )
-                                                    )
-                                                } catch (ee: Exception) {
-                                                    ee.printStackTrace()
-                                                }
-                                            }
+                                            activity.openStoreUrlOrFallback()
                                         }
                                         .setNegativeButton(
                                             R.string.button_label_cancel,

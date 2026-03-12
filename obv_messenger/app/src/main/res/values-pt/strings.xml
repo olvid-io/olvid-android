@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Remover favorito</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Arquivar</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Desarquivar</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Verifique se há atualizações no Google Play</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Verificar atualizações</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Esta conversa está bloqueada</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Esta conversa é apenas para leitura</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">As suas mensagens serão enviadas automaticamente assim que um canal seguro for estabelecido para esta conversa. Até lá, permanecerão em espera.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid está atualizado</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Tem a versão mais recente do Olvid instalada</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Atualização disponível</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Uma versão mais recente de Olvid está disponível na Google Play.\n\nPor favor, atualize para aproveitar os recursos mais recentes.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Uma versão mais recente do Olvid está disponível.\n\nAtualize para aproveitar os recursos mais recentes.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Chamada não pode ser iniciada</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Parece que o seu servidor Olvid não suporta o início de chamadas seguras.\n\nContacte o seu administrador para obter mais informações.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Opções de criação de ID</string>

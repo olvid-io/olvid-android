@@ -189,7 +189,7 @@ internal fun KeycloakContent(
                         discovering = false
 
                         val minimumBuildVersion = olvidWellKnown?.minBuildVersions?.android
-                        if (minimumBuildVersion != null && minimumBuildVersion > BuildConfig.VERSION_CODE) {
+                        if (minimumBuildVersion != null && minimumBuildVersion > (BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER)) {
                             errorMessage =
                                 context.getString(R.string.explanation_keycloak_olvid_version_outdated)
                         } else {
@@ -323,7 +323,7 @@ internal fun KeycloakContent(
                                             context.getString(R.string.explanation_keycloak_update_bad_server)
                                         retrievingDetails = false
                                         return
-                                    } else if (minimumBuildVersion != null && minimumBuildVersion > BuildConfig.VERSION_CODE) {
+                                    } else if (minimumBuildVersion != null && minimumBuildVersion > (BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER)) {
                                         errorMessage =
                                             context.getString(R.string.explanation_keycloak_olvid_version_outdated)
                                         retrievingDetails = false

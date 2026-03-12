@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Usuń z zakładek</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Archiwizuj</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Odrzuć archiwizację</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Sprawdź dostępność aktualizacji w Google Play</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Sprawdź dostępność aktualizacji</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Ta dyskusja jest zablokowana</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Ta dyskusja jest tylko do odczytu</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Twoje wiadomości zostaną automatycznie wysłane, gdy tylko zostanie ustanowiony bezpieczny kanał dla tej rozmowy. Do tego czasu pozostaną wstrzymane.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid jest aktualny.</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Masz zainstalowaną najnowszą wersję Olvid.</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Dostępna aktualizacja</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Nowsza wersja Olvid jest dostępna w Google Play.\n\nZaktualizuj, aby skorzystać z najnowszych funkcji.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Dostępna jest nowsza wersja Olvid.\n\nZaktualizuj, aby skorzystać z najnowszych funkcji.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Nie można zainicjować połączenia</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Wygląda na to, że twój serwer Olvid nie obsługuje bezpiecznego inicjowania połączeń.\n\nSkontaktuj się z administratorem, aby uzyskać więcej informacji.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Opcje tworzenia ID</string>

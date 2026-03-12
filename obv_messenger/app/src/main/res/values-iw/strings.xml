@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">הסר סימון שמירה</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">ארכיון</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">שחזור מארכיון</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">בדוק אם יש עדכונים ב-Google Play</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">בדוק אם יש עדכונים</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">השיחה הזו נעולה</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">שיחה זו לקריאה בלבד</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">ההודעות שלך יישלחו אוטומטית ברגע שיוקם ערוץ מאובטח לדיון זה. עד אז, הן יישארו בהמתנה.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid מעודכן</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">מותקנת אצלך הגרסה האחרונה של Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">עדכון זמין</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">גרסה חדשה יותר של Olvid זמינה ב-Google Play.\n\nאנא עדכנו כדי ליהנות מהתכונות החדשות ביותר.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">גרסה חדשה יותר של Olvid זמינה.\n\nאנא עדכנו כדי לנצל את התכונות החדשות ביותר.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">לא ניתן להתחיל שיחה</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">נראה שהשרת Olvid שלך אינו תומך בהתחלת שיחות מאובטחות.\n\nאנא צור קשר עם המנהל שלך לקבלת פרטים נוספים.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">אפשרויות יצירת מזהה</string>

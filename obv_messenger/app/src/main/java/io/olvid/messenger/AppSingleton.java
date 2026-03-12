@@ -133,7 +133,7 @@ public class AppSingleton {
         this.jsonObjectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         this.sharedPreferences = App.getContext().getSharedPreferences(App.getContext().getString(R.string.preference_filename_app), Context.MODE_PRIVATE);
 
-        int lastBuildExecuted = sharedPreferences.getInt(LAST_BUILD_EXECUTED_PREFERENCE_KEY, BuildConfig.VERSION_CODE);
+        int lastBuildExecuted = sharedPreferences.getInt(LAST_BUILD_EXECUTED_PREFERENCE_KEY, BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER);
         int lastAndroidSdkVersionExecuted = sharedPreferences.getInt(LAST_ANDROID_SDK_VERSION_EXECUTED_PREFERENCE_KEY, 0);
         int lastFtsGlobalSearchVersion = sharedPreferences.getInt(LAST_FTS_GLOBAL_SEARCH_VERSION_PREFERENCE_KEY, 0);
 
@@ -393,7 +393,7 @@ public class AppSingleton {
         // Always re-create all channels in case a user has reset all app preferences as this deletes all notification channels
         AndroidNotificationManager.createChannels(lastBuildExecuted);
 
-        if (lastBuildExecuted != BuildConfig.VERSION_CODE || lastAndroidSdkVersionExecuted != Build.VERSION.SDK_INT) {
+        if (lastBuildExecuted != BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER || lastAndroidSdkVersionExecuted != Build.VERSION.SDK_INT) {
             App.runThread(() -> runBuildUpgrade(lastBuildExecuted, lastAndroidSdkVersionExecuted));
         }
 
@@ -1068,7 +1068,7 @@ public class AppSingleton {
             }
 
             PeriodicTasksScheduler.resetAllPeriodicTasksFollowingAnUpdate(App.getContext());
-            saveLastExecutedVersions(BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT);
+            saveLastExecutedVersions(BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER, Build.VERSION.SDK_INT);
         } catch (Exception e) {
             // upgrade failed, will be tried again at next startup...
             Logger.w("Build Upgrade failed");

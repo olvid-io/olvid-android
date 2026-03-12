@@ -85,6 +85,7 @@ import io.olvid.messenger.billing.SubscriptionOfferDialog
 import io.olvid.messenger.customClasses.AccessibilityManager
 import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.customClasses.openStoreUrlOrFallback
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.components.StarRatingBar
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
@@ -149,7 +150,6 @@ fun TipItem(
                     if (showSeed) {
                         Dialog(
                             onDismissRequest = {
-                                @Suppress("AssignedValueIsNeverRead")
                                 showSeed = false
                             },
                             properties = DialogProperties(
@@ -189,7 +189,6 @@ fun TipItem(
                                     },
                                     onClose = {
                                         refreshTipState()
-                                        @Suppress("AssignedValueIsNeverRead")
                                         showSeed = false
                                     },
                                 )
@@ -459,21 +458,7 @@ fun TipItem(
                 message = R.string.dialog_message_outdated_version,
                 action = R.string.menu_check_update,
                 onAction = {
-                    try {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                "market://details?id=${context.packageName}".toUri()
-                            )
-                        )
-                    } catch (_: Exception) {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
-                            )
-                        )
-                    }
+                    context.openStoreUrlOrFallback()
                 }
             )
         }
@@ -485,21 +470,7 @@ fun TipItem(
                 message = R.string.dialog_message_update_available,
                 action = R.string.menu_check_update,
                 onAction = {
-                    try {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                "market://details?id=${context.packageName}".toUri()
-                            )
-                        )
-                    } catch (_: Exception) {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
-                            )
-                        )
-                    }
+                    context.openStoreUrlOrFallback()
                 },
                 onDismiss = {
                     SettingsActivity.isUpdateAvailableTipDismissed = true

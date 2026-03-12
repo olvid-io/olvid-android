@@ -19,7 +19,6 @@
 package io.olvid.messenger.settings
 
 import android.app.Dialog
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -80,6 +79,7 @@ import io.olvid.messenger.customClasses.LocationShareQuality.QUALITY_BALANCED
 import io.olvid.messenger.customClasses.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.openStoreUrlOrFallback
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.firebase.ObvFirebaseMessagingService
 import io.olvid.messenger.google_services.GoogleServicesUtils
@@ -135,7 +135,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
     }
 
     enum class LocationIntegrationEnum {
-        NONE,  // used if user did not yet chose an integration
+        NONE,  // used if user did not yet choose an integration
         OSM,
         MAPS,
         BASIC,
@@ -276,7 +276,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     getString(
                         R.string.dialog_message_about_olvid,
                         BuildConfig.VERSION_NAME,
-                        BuildConfig.VERSION_CODE,
+                        (BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER),
                         Constants.SERVER_API_VERSION,
                         Constants.CURRENT_ENGINE_DB_SCHEMA_VERSION,
                         AppDatabase.DB_SCHEMA_VERSION,
@@ -292,7 +292,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                     getString(
                         R.string.dialog_message_about_olvid_extra_features,
                         BuildConfig.VERSION_NAME,
-                        BuildConfig.VERSION_CODE,
+                        (BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER),
                         Constants.SERVER_API_VERSION,
                         Constants.CURRENT_ENGINE_DB_SCHEMA_VERSION,
                         AppDatabase.DB_SCHEMA_VERSION,
@@ -361,26 +361,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
             return true
         } else if (itemId == R.id.action_check_update) {
-            val appPackageName: String = packageName
-            try {
-                startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        "market://details?id=$appPackageName".toUri()
-                    )
-                )
-            } catch (_: ActivityNotFoundException) {
-                try {
-                    startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            "https://play.google.com/store/apps/details?id=$appPackageName".toUri()
-                        )
-                    )
-                } catch (ee: Exception) {
-                    ee.printStackTrace()
-                }
-            }
+            openStoreUrlOrFallback()
             return true
         } else if (itemId == R.id.action_help_faq) {
             try {
@@ -470,11 +451,11 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         val prefFragmentName: String = pref.fragment ?: return false
         navigateToSettingsFragment(prefFragmentName)
 
-        if (prefFragmentName == BackupV2PreferenceFragment::class.java.name) {
-            title = getString(R.string.pref_category_backup_title)
+        title = if (prefFragmentName == BackupV2PreferenceFragment::class.java.name) {
+            getString(R.string.pref_category_backup_title)
         } else {
             // set the activity title
-            title = pref.title
+            pref.title
         }
         return true
     }
@@ -523,14 +504,14 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         fun isUpdateAvailable(): Boolean {
             val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())
             val latestVersion = prefs.getInt(PREF_KEY_LATEST_APP_VERSION, 0)
-            return latestVersion > BuildConfig.VERSION_CODE
+            return latestVersion > (BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER)
         }
 
         @JvmStatic
         fun isVersionOutdated(): Boolean {
             val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())
             val minimumVersion = prefs.getInt(PREF_KEY_MIN_APP_VERSION, 0)
-            return minimumVersion > BuildConfig.VERSION_CODE
+            return minimumVersion > (BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER)
         }
 
         // BETA
@@ -775,7 +756,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_PING_CONNECTIVITY_INDICATOR_DEFAULT: String = "null"
 
         const val PREF_KEY_SHARE_APP_VERSION: String = "pref_key_share_app_version"
-        const val PREF_KEY_SHARE_APP_VERSION_DEFAULT: Boolean = true
+        const val PREF_KEY_SHARE_APP_VERSION_DEFAULT: Boolean = BuildConfig.USE_GOOGLE_LIBS
 
         const val PREF_KEY_NOTIFY_CERTIFICATE_CHANGE: String = "pref_key_notify_certificate_change"
         const val PREF_KEY_NOTIFY_CERTIFICATE_CHANGE_DEFAULT: Boolean = false

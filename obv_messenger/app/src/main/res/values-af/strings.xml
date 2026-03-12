@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Verwyder boekmerk</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Argief</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">De-argiveer</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Kontroleer Google Play vir opdaterings</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Kontroleer vir opdaterings</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Hierdie gesprek is gesluit</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Hierdie gesprek is lees-alleen</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Jou boodskappe sal outomaties gestuur word sodra \'n veilige kanaal vir hierdie gesprek gevestig is. Tot daardie tyd sal hulle in wagtoestand bly.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid is opdatering</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Jy het die nuutste weergawe van Olvid geïnstalleer.</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Opdatering beskikbaar</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">\'n Nuwer weergawe van Olvid is beskikbaar op Google Play.\n\nWees asseblief so vriendelik om op te dateer om van die nuutste kenmerke te kan gebruik maak.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">\'n Nuwer weergawe van Olvid is beskikbaar.\n\nWees asseblief so vriendelik om op te dateer om voordeel te trek uit die nuutste kenmerke.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">oproep kan nie begin nie</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Dit lyk asof jou Olvid-bediener nie veilige oproepinisiering ondersteun nie.\n\nKontak asseblief jou administrateur vir meer besonderhede.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">ID-skeppingsopsies</string>

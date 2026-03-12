@@ -121,7 +121,7 @@ fun AppVersionHeader(betaEnabled: Boolean) {
                     appendLine(stringResource(
                         R.string.troubleshooting_header_app_version,
                         BuildConfig.VERSION_NAME + if (betaEnabled) " beta" else "",
-                        BuildConfig.VERSION_CODE))
+                        BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER))
                     installTimestamp()?.let { timestamp ->
                         appendLine(
                             stringResource(

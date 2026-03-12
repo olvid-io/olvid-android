@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Fjern bokmerke</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Arkiver</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Gjenopprett fra arkiv</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Sjekk Google Play for oppdateringer</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Sjekk etter oppdateringer</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Denne samtalen er låst</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Denne samtalen er kun skrivebeskyttet</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Meldingene dine vil bli sendt automatisk så snart en sikker kanal er etablert for denne samtalen. Frem til da vil de bli liggende på vent.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid er oppdatert.</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Du har den nyeste versjonen av Olvid installert.</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Oppdatering tilgjengelig</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">En nyere versjon av Olvid er tilgjengelig på Google Play.\n\nVennligst oppdater for å dra nytte av de nyeste funksjonene.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">En nyere versjon av Olvid er tilgjengelig.\n\nVennligst oppdater for å benytte deg av de nyeste funksjonene.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Kunne ikke starte samtalen</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Det ser ut som om Olvid-serveren din ikke støtter sikker oppstart av samtaler.\n\nKontakt administratoren din for mer informasjon.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">ID-opprettingsalternativer</string>

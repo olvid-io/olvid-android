@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">즐겨찾기 해제</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">보관</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">보관 해제</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Google Play에서 업데이트를 확인하세요.</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">업데이트 확인</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">이 대화는 잠겼습니다</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">이 대화는 읽기 전용입니다.</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">이 토론을 위해 보안 채널이 설정되면 메시지가 자동으로 전송됩니다. 그 때까지는 보류 상태로 유지됩니다.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid가 최신 버전입니다.</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">올비드의 최신 버전이 설치되어 있습니다.</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">업데이트가 있습니다</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Olvid의 새 버전이 Google Play에서 제공됩니다.\n\n최신 기능을 사용하려면 업데이트하세요.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Olvid의 최신 버전이 출시되었습니다.\n\n최신 기능을 사용하려면 업데이트하십시오.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">통화 시작이 지원되지 않습니다</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Olvid 서버가 보안 통화 연결을 지원하지 않는 것 같습니다.\n\n자세한 내용은 관리자에게 문의하십시오.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">ID 생성 옵션</string>

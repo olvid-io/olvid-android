@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">取消收藏</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">封存</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">還原</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">請至Google Play檢查更新</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">檢查更新</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">這段對話已被鎖定</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">這段對話為唯讀模式</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">您的訊息在建立安全的討論通道後將自動發送。在此之前，它們將保持擱置狀態。</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid 已更新至最新版本</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">您已安裝最新版本的 Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">有新的更新可用</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Olvid 在 Google Play 上有新版本可用。\n\n請更新以享受最新功能。</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Olvid的最新版本已發布。\n\n請更新以使用最新功能。</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">無法發起通話</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">您的 Olvid 伺服器似乎不支持安全通話的啟動。\n請聯繫您的管理員以獲取更多詳細信息。</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">ID建立選項</string>

@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Ukloni oznaku</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Arhiva</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Poništi arhiviranje</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Provjerite Google Play za ažuriranje</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Provjeri ima li novih ažuriranja</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Ova rasprava je zaključana</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Ova rasprava je samo za čitanje</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Vaše poruke će se automatski poslati čim se uspostavi sigurni kanal za ovu raspravu. Do tada će ostati na čekanju.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid je ažuriran</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Imate najnoviju verziju Olvida instaliranu</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Dostupna je ažuriranje</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Nova verzija Olvida je dostupna na Google Playu.\n\nMolimo vas da ažurirate kako biste iskoristili najnovije značajke.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Dostupna je novija verzija aplikacije Olvid.\n\nMolimo vas da je ažurirate kako biste mogli koristiti najnovije značajke.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Poziv nije podržan</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Čini se da vaš Olvid poslužitelj ne podržava pokretanje sigurnih poziva.\n\nMolimo, kontaktirajte svog administratora za više informacija.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Opcije za stvaranje ID-a</string>

@@ -1,3 +1,5 @@
+import com.android.build.VariantOutput
+import com.android.build.gradle.api.ApkVariantOutput
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -17,6 +19,10 @@ ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
     arg("room.incremental", "true")
     arg("room.generateKotlin", "false")
+}
+
+ext {
+    set("fdroidAbiCodes", mapOf("arm64-v8a" to 1, "armeabi-v7a" to 2, "x86_64" to 3, "x86" to  4))
 }
 
 android {
@@ -97,6 +103,7 @@ android {
 
         create("full") {
             dimension = "google-services"
+            buildConfigField("int", "VERSION_CODE_MULTIPLIER", "1")
             buildConfigField("boolean", "USE_BILLING_LIB", "true")
             buildConfigField("boolean", "USE_FIREBASE_LIB", "true")
             buildConfigField("boolean", "USE_GOOGLE_LIBS", "true")
@@ -106,18 +113,52 @@ android {
             dimension = "google-services"
             applicationIdSuffix = ".nogoogle"
             versionNameSuffix = "-nogoogle"
+            buildConfigField("int", "VERSION_CODE_MULTIPLIER", "1")
+            buildConfigField("boolean", "USE_BILLING_LIB", "false")
+            buildConfigField("boolean", "USE_FIREBASE_LIB", "false")
+            buildConfigField("boolean", "USE_GOOGLE_LIBS", "false")
+        }
+
+        create("zfdroid") {
+            dimension = "google-services"
+            applicationIdSuffix = ".nogoogle"
+            versionNameSuffix = "-fdroid"
+            buildConfigField("int", "VERSION_CODE_MULTIPLIER", "100")
             buildConfigField("boolean", "USE_BILLING_LIB", "false")
             buildConfigField("boolean", "USE_FIREBASE_LIB", "false")
             buildConfigField("boolean", "USE_GOOGLE_LIBS", "false")
         }
     }
 
+    // also include nogoogle source folders in the FDroid build
+    sourceSets {
+        named("zfdroid") {
+            java.srcDirs("src/nogoogle/java")
+            kotlin.srcDirs("src/nogoogle/java")
+            res.srcDirs("src/nogoogle/res")
+        }
+    }
+
     splits {
         abi {
-            isEnable = gradle.startParameter.taskNames.any { it.contains("nogoogle", ignoreCase = true) }
+            isEnable = gradle.startParameter.taskNames.any { it.contains("zfdroid", ignoreCase = true) }
+            isUniversalApk = isEnable.not()
             reset()
             include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-            isUniversalApk = isEnable.not()
+        }
+    }
+
+    applicationVariants.configureEach {
+        if (flavorName.contains("zfdroid", ignoreCase = true)) {
+            outputs.forEach { output ->
+                val abi = output.filters.find { it.filterType == VariantOutput.FilterType.ABI.name }?.identifier
+                abi?.let {
+                    @Suppress("UNCHECKED_CAST")
+                    val archVersionCodeOffset = (project.ext.get("fdroidAbiCodes") as? Map<String, Int>)?.get(abi) ?: 0
+                    (output as ApkVariantOutput).versionCodeOverride =
+                        (100 * project.android.defaultConfig.versionCode!!) + archVersionCodeOffset
+                }
+            }
         }
     }
 }
@@ -281,8 +322,7 @@ protobuf {
 // disable google services plugin task for "nogoogle" flavor
 tasks.configureEach {
     if (name.startsWith("process") && name.endsWith("GoogleServices")) {
-        val flavorName = name.substring(7, name.length - 14)
-        if (flavorName.contains("Nogoogle", ignoreCase = true)) {
+        if (name.contains("nogoogle", ignoreCase = true) || name.contains("zfdroid", ignoreCase = true)) {
             enabled = false
         }
     }

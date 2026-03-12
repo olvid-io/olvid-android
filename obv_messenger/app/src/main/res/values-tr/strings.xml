@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Yer imini Kaldır</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Arşiv</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Arşivden Kaldır</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Google Play\'de güncelleme olup olmadığını kontrol edin</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Güncellemeleri kontrol et</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Bu sohbet kilitlendi</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Bu sohbet salt okunur</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Mesajlarınız, bu konuşma için güvenli bir kanal kurulur kurulmaz otomatik olarak gönderilecektir. O zamana kadar beklemeye alınacaktır.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid güncel</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Olvid\'in en son sürümünü yüklediniz</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Güncelleme mevcut</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Olvid\'in yeni bir sürümü Google Play\'de mevcut.\n\nEn son özelliklerden yararlanmak için lütfen güncelleyin.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Olvid\'in daha yeni bir sürümü mevcut.\n\nEn son özelliklerden yararlanmak için lütfen güncelleyin.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Çağrı başlatma desteklenmiyor</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Olvid sunucunuzun güvenli çağrı başlatmayı desteklemediği görülüyor.\n\nLütfen daha fazla bilgi için yöneticinizle iletişime geçin.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Kimlik Oluşturma Seçenekleri</string>

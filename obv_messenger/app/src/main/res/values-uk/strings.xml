@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Видалити з закладок</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Архів</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Відновити з архіву</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Перевірте наявність оновлень у Google Play</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Перевірити наявність оновлень</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Ця розмова заблокована</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Ця розмова лише для читання</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Ваші повідомлення будуть автоматично надіслані, щойно буде встановлено безпечний канал для цієї дискусії. До того часу вони залишатимуться на утриманні.</string>
@@ -855,7 +855,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid оновлено до останньої версії</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">У вас встановлено останню версію Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Доступно оновлення</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Доступна нова версія Olvid у Google Play.\n\nБудь ласка, оновіть, щоб скористатися найновішими функціями.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Доступна новіша версія Olvid.\n\nБудь ласка, оновіть, щоб скористатися найновішими функціями.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Не підтримується ініціювання дзвінка</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Схоже, що ваш сервер Olvid не підтримує ініціювання захищених дзвінків.\n\nЗверніться до вашого адміністратора для отримання додаткової інформації.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Параметри створення ID</string>

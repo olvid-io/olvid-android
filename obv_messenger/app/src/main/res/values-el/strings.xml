@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Κατάργηση σελιδοδείκτη</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Αρχειοθέτηση</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Αρχειοθέτηση</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Ελέγξτε το Google Play για ενημερώσεις</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Έλεγχος για ενημερώσεις</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Αυτή η συζήτηση είναι κλειδωμένη</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Αυτή η συζήτηση είναι μόνο για ανάγνωση</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Τα μηνύματά σας θα αποσταλούν αυτόματα μόλις δημιουργηθεί ένα ασφαλές κανάλι για αυτήν τη συζήτηση. Μέχρι τότε, θα παραμείνουν σε αναμονή.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Το Olvid είναι ενημερωμένο</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Έχετε εγκατεστημένη την τελευταία έκδοση του Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Διαθέσιμη ενημέρωση</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Μια νεότερη έκδοση του Olvid είναι διαθέσιμη στο Google Play.\n\nΠαρακαλώ ενημερώστε για να επωφεληθείτε από τις τελευταίες λειτουργίες.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Μια νεότερη έκδοση του Olvid είναι διαθέσιμη.\n\nΠαρακαλούμε ενημερώστε για να επωφεληθείτε από τις πιο πρόσφατες λειτουργίες.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Δεν είναι δυνατή η έναρξη της κλήσης</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Φαίνεται ότι ο διακομιστής Olvid σας δεν υποστηρίζει την ασφαλή έναρξη κλήσεων.\n\nΕπικοινωνήστε με τον διαχειριστή σας για περισσότερες λεπτομέρειες.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Επιλογές δημιουργίας ID</string>

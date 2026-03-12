@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">बुकमार्क हटाएं</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">पुरालेख</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">अभिलेखीय करें</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Google Play पर अपडेट जांचें</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">अपडेट की जाँच करें</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">यह चर्चा लॉक है</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">यह चर्चा केवल पढ़ने के लिए है</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">आपके संदेश स्वचालित रूप से भेजे जाएंगे जैसे ही इस चर्चा के लिए एक सुरक्षित चैनल स्थापित हो जाएगा। तब तक, वे होल्ड पर रहेंगे।</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">ओलविड अपडेटेड है</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">आपके पास Olvid का नवीनतम संस्करण स्थापित है</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">अपडेट उपलब्ध है</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Olvid का एक नया संस्करण Google Play पर उपलब्ध है।\n\nनवीनतम सुविधाओं का लाभ उठाने के लिए कृपया अपडेट करें।</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Olvid का एक नया संस्करण उपलब्ध है।\n\nनवीनतम सुविधाओं का लाभ उठाने के लिए कृपया अपडेट करें।</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">कॉल शुरू करना समर्थित नहीं है</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">ऐसा लगता है कि आपका Olvid सर्वर सुरक्षित कॉल शुरू करने का समर्थन नहीं करता है।\n\nअधिक जानकारी के लिए कृपया अपने व्यवस्थापक से संपर्क करें।</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">आईडी बनाने के विकल्प</string>

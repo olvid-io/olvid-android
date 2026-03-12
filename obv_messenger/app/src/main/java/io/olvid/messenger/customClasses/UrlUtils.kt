@@ -19,8 +19,11 @@
 
 package io.olvid.messenger.customClasses
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.core.net.toUri
+import io.olvid.messenger.BuildConfig
 import kotlin.collections.contains
 import kotlin.collections.filter
 import kotlin.collections.forEach
@@ -79,3 +82,26 @@ object UrlUtils {
 
 fun Uri.clean() = UrlUtils.cleanUrl(toString())
 fun String.cleanUrl() = UrlUtils.cleanUrl(this)
+
+fun Context.openStoreUrlOrFallback() {
+    runCatching {
+        startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                "market://details?id=$packageName".toUri()
+            )
+        )
+    }.onFailure {
+        runCatching {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    if (BuildConfig.USE_GOOGLE_LIBS)
+                        "https://play.google.com/store/apps/details?id=$packageName".toUri()
+                    else
+                        "https://olvid.io/download/".toUri()
+                )
+            )
+        }
+    }
+}

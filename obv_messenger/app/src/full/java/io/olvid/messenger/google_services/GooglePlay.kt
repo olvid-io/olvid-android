@@ -20,9 +20,8 @@
 package io.olvid.messenger.google_services
 
 import android.app.Activity
-import android.content.Intent
-import androidx.core.net.toUri
 import com.google.android.play.core.review.ReviewManagerFactory
+import io.olvid.messenger.customClasses.openStoreUrlOrFallback
 
 class GooglePlay {
     companion object {
@@ -36,36 +35,16 @@ class GooglePlay {
                         val flow = manager.launchReviewFlow(activity, reviewInfo)
                         flow.addOnCompleteListener { reviewFlowTask ->
                             if (reviewFlowTask.isSuccessful.not()) {
-                                launchPlayStoreFallback(activity)
+                                activity.openStoreUrlOrFallback()
                             }
                         }
                     } else {
-                        launchPlayStoreFallback(activity)
+                        activity.openStoreUrlOrFallback()
                     }
                 } else {
-                    launchPlayStoreFallback(activity)
+                    activity.openStoreUrlOrFallback()
                 }
             }
         }
     }
 }
-
-private fun launchPlayStoreFallback(activity: Activity) {
-    val packageName = activity.packageName
-    runCatching {
-        activity.startActivity(
-            Intent(
-                Intent.ACTION_VIEW,
-                "market://details?id=$packageName".toUri()
-            )
-        )
-    }.onFailure {
-        activity.startActivity(
-            Intent(
-                Intent.ACTION_VIEW,
-                "https://play.google.com/store/apps/details?id=$packageName".toUri()
-            )
-        )
-    }
-}
-

@@ -440,7 +440,7 @@ public class SettingsPojo_0 {
         // update share app version
         if (share_app_version != null) {
             if (SettingsActivity.shareAppVersion()) {
-                AppSingleton.getEngine().connectWebsocket(false, "android", Integer.toString(android.os.Build.VERSION.SDK_INT), BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME);
+                AppSingleton.getEngine().connectWebsocket(false, "android", Integer.toString(android.os.Build.VERSION.SDK_INT), BuildConfig.VERSION_CODE / BuildConfig.VERSION_CODE_MULTIPLIER, BuildConfig.VERSION_NAME);
             } else {
                 AppSingleton.getEngine().connectWebsocket(false, null, null, 0, null);
             }

@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Eliminar marcador</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Arxivar</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Desarxivar</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Comprova si hi ha actualitzacions a Google Play</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Comproveu si hi ha actualitzacions</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Aquesta conversa està bloquejada</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Aquesta conversa és de només lectura</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Els teus missatges s\'enviaran automàticament un cop s\'estableixi un canal segur per a aquesta conversa. Fins llavors, romandran en espera.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid està actualitzat</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Tens la versió més recent d\'Olvid instal·lada.</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Actualització disponible</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Hi ha una versió més recent d\'Olvid disponible a Google Play.\n\nSi us plau, actualitza per gaudir de les últimes funcions.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Hi ha disponible una versió més recent d\'Olvid.\n\nActualitzeu-ho per aprofitar les últimes funcions.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">No s\'ha pogut iniciar la trucada</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Sembla que el vostre servidor Olvid no admet l\'inici de trucades segures.\n\nSi us plau, poseu-vos en contacte amb el vostre administrador per obtenir més informació.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Opcions de creació d\'ID</string>

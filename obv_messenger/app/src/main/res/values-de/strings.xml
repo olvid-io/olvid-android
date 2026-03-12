@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Lesezeichen entfernen</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Archivieren</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Archivierung aufheben</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Überprüfe Google Play auf Updates</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Nach Updates suchen</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Diese Diskussion ist gesperrt</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Diese Konversation ist schreibgeschützt</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Ihre Nachrichten werden automatisch versendet, sobald ein sicherer Kanal für diese Unterhaltung eingerichtet wurde. Bis dahin bleiben sie in Wartestellung.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid ist auf dem neuesten Stand</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Sie haben die neueste Version von Olvid installiert</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Update verfügbar</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">Eine neuere Version von Olvid ist im Google Play verfügbar.\n\nBitte aktualisieren Sie, um die neuesten Funktionen nutzen zu können.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">Eine neuere Version von Olvid ist verfügbar.\n\nBitte aktualisieren Sie, um die neuesten Funktionen nutzen zu können.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Anruf konnte nicht gestartet werden</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Es scheint, dass Ihr Olvid-Server die sichere Anrufinitiierung nicht unterstützt.\n\nWenden Sie sich bitte an Ihren Administrator, um weitere Informationen zu erhalten.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">ID-Erstellungsoptionen</string>

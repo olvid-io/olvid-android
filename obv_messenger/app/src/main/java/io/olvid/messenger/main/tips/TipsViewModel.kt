@@ -183,6 +183,7 @@ class TipsViewModel : ViewModel() {
             && System.currentTimeMillis() - firstInstallTimestamp > RATING_AND_OLVID_PLUS_INSTALL_MIN_AGE
             && contactCount > 10
             && AppDatabase.getInstance().messageDao().countOutbound() > 50
+            && BuildConfig.USE_GOOGLE_LIBS
         ) {
             tipToShow = Tip.PLAY_STORE_REVIEW
             return

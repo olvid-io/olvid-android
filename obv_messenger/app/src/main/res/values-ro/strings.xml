@@ -201,7 +201,7 @@
 	<string name="menu_action_unbookmark" state="needs_review" hash="-1117840659">Elimină marcaj</string>
 	<string name="menu_action_archive" state="needs_review" hash="-1970974030">Arhivează</string>
 	<string name="menu_action_unarchive" state="needs_review" hash="551888469">Dezarchivați</string>
-	<string name="menu_check_update" state="needs_review" hash="266262263">Verifică Google Play pentru actualizări</string>
+	<string name="menu_check_update" state="needs_review" hash="1635875089">Verifică dacă există actualizări</string>
 	<string name="message_discussion_locked" state="needs_review" hash="1316975941">Această discuție este blocată</string>
 	<string name="message_discussion_readonly" state="needs_review" hash="-858225323">Această discuție este doar pentru citire</string>
 	<string name="message_discussion_no_channel" state="needs_review" hash="-1921985024">Mesajele tale vor fi trimise automatizat imediat ce se va stabili un canal sigur pentru această discuție. Până atunci, vor rămâne în așteptare.</string>
@@ -854,7 +854,7 @@
 	<string name="troubleshooting_update_valid_title" state="needs_review" hash="741828768">Olvid este la zi</string>
 	<string name="explanation_latest_olvid_version" state="needs_review" hash="-1038138294">Aveți instalată cea mai recentă versiune Olvid</string>
 	<string name="dialog_title_update_available" state="needs_review" hash="-1893271535">Actualizare disponibilă</string>
-	<string name="dialog_message_update_available" state="needs_review" hash="259838609">O versiune mai nouă a Olvid este disponibilă pe Google Play.Vă rugăm să actualizați pentru a beneficia de cele mai recente funcționalități.</string>
+	<string name="dialog_message_update_available" state="needs_review" hash="416187645">O versiune mai nouă a Olvid este disponibilă.\n\nVă rugăm să actualizați pentru a beneficia de cele mai recente funcționalități.</string>
 	<string name="dialog_title_call_initiation_not_supported" state="needs_review" hash="-2088021831">Apelul nu a putut fi inițiat</string>
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Se pare că serverul dvs. Olvid nu acceptă inițierea apelurilor securizate.\n\nVă rugăm să contactați administratorul pentru mai multe detalii.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Opțiuni de creare ID</string>

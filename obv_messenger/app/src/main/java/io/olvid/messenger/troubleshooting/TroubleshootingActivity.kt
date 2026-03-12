@@ -92,6 +92,7 @@ import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AccessibilityManager
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.customClasses.openStoreUrlOrFallback
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.AppDatabaseOpenCallback
 import io.olvid.messenger.designsystem.components.OlvidTextButton
@@ -845,21 +846,7 @@ class TroubleshootingActivity : AppCompatActivity() {
                                         contentColor = colorResource(R.color.almostBlack)
                                     ),
                                     onClick = {
-                                        try {
-                                            context.startActivity(
-                                                Intent(
-                                                    Intent.ACTION_VIEW,
-                                                    "market://details?id=${context.packageName}".toUri()
-                                                )
-                                            )
-                                        } catch (_: Exception) {
-                                            context.startActivity(
-                                                Intent(
-                                                    Intent.ACTION_VIEW,
-                                                    "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
-                                                )
-                                            )
-                                        }
+                                        context.openStoreUrlOrFallback()
                                     }
                                 ) {
                                     Text(text = stringResource(R.string.menu_check_update))
