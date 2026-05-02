@@ -35,7 +35,7 @@ import io.olvid.engine.engine.types.SimpleEngineNotificationListener
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.main.MainActivity.Companion.LINK_URI_INTENT_EXTRA

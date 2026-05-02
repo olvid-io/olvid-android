@@ -41,23 +41,9 @@ sealed interface TransferTransportType {
         }
     }
 
-    data class ZipFileExport(val bytesOwnedIdentity: ByteArray, val zipWritableFileUri: Uri) : TransferTransportType {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other !is ZipFileExport) return false
+    @Suppress("ArrayInDataClass")
+    data class ZipFileExport(val bytesOwnedIdentity: ByteArray, val zipWritableFileUri: Uri, val password: String?) : TransferTransportType
 
-            if (!bytesOwnedIdentity.contentEquals(other.bytesOwnedIdentity)) return false
-            if (zipWritableFileUri != other.zipWritableFileUri) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result = bytesOwnedIdentity.contentHashCode()
-            result = 31 * result + zipWritableFileUri.hashCode()
-            return result
-        }
-    }
-
-    data class ZipFileImport(val zipReadableFileUri: Uri) : TransferTransportType
+    @Suppress("ArrayInDataClass")
+    data class ZipFileImport(val bytesOwnedIdentity: ByteArray, val zipReadableFileUri: Uri, val password: String?) : TransferTransportType
 }

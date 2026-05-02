@@ -25,9 +25,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.switchMap
 import io.olvid.messenger.databases.AppDatabase.Companion.getInstance
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
+import io.olvid.messenger.databases.entity.Fyle
+import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.MessageExpiration
 import io.olvid.messenger.databases.entity.TextBlock
+import io.olvid.messenger.discussion.linkpreview.OpenGraph
 import io.olvid.messenger.gallery.GalleryViewModel.GalleryType.DISCUSSION
 import io.olvid.messenger.gallery.GalleryViewModel.GalleryType.DRAFT
 import io.olvid.messenger.gallery.GalleryViewModel.GalleryType.MESSAGE
@@ -89,6 +92,7 @@ class GalleryViewModel : ViewModel() {
         DRAFT,
         MESSAGE,
         OWNED_IDENTITY,
+        LINK_PREVIEW,
     }
 
     var galleryType: GalleryType? = null
@@ -118,6 +122,14 @@ class GalleryViewModel : ViewModel() {
         ownedIdentitySortOrderAscending.postValue(ascending)
         this.bytesOwnedIdentity.postValue(bytesOwnedIdentity)
         galleryType = OWNED_IDENTITY
+    }
+
+    var linkPreviewOpenGraph: OpenGraph? = null
+
+    fun setLinkPreview(openGraph: OpenGraph) {
+        linkPreviewOpenGraph = openGraph
+        galleryType = GalleryType.LINK_PREVIEW
+        (imageAndVideoFyleAndStatusList as TripleLiveData).showLinkPreview()
     }
 
     fun getCurrentPagerPosition(): Int? {
@@ -154,6 +166,7 @@ class GalleryViewModel : ViewModel() {
         private var bytesOwnedIdentity: ByteArray? = null
         private var sortOrder: String? = null
         private var ascending: Boolean? = null
+        private var showLinkPreview: Boolean? = null
 
         private var source: LiveData<List<FyleAndStatus>>? = null
 
@@ -163,6 +176,31 @@ class GalleryViewModel : ViewModel() {
             addSource(ownedIdentitySortOrder) { this.onSortOrderChanged(it) }
             addSource(ascending) { this.onAscendingChanged(it) }
             addSource(bytesOwnedIdentity) { this.onOwnedIdentityChanged(it) }
+        }
+
+        fun showLinkPreview() {
+            showLinkPreview = true
+            updateLinkPreview()
+        }
+
+        private fun updateLinkPreview() {
+            if (showLinkPreview == true) {
+                if (source != null) {
+                    removeSource(source!!)
+                }
+                source = null
+
+                // Fake FyleAndStatus to make the adapter display one item.
+                val fakeFyleAndStatus = FyleAndStatus().apply {
+                    fyle = Fyle().apply { id = -1 }
+                    fyleMessageJoinWithStatus = FyleMessageJoinWithStatus(
+                        -1, -1, byteArrayOf(), "", "", OpenGraph.MIME_TYPE,
+                        FyleMessageJoinWithStatus.STATUS_COMPLETE, 0, null, null, null
+                    )
+                }
+
+                value = listOf(fakeFyleAndStatus)
+            }
         }
 
         private fun onDiscussionChanged(discussionId: Long?) {

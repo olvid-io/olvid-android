@@ -78,6 +78,7 @@ import io.olvid.messenger.databases.entity.jsons.JsonUpdateMessage;
 import io.olvid.messenger.databases.entity.jsons.JsonUserMention;
 import io.olvid.messenger.databases.tasks.ComputeAttachmentPreviewsAndPostMessageTask;
 import io.olvid.messenger.databases.tasks.ExpiringOutboundMessageSent;
+import io.olvid.messenger.discussion.compose.VoiceMessageRecorder;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.services.UnifiedForegroundService;
 
@@ -1203,6 +1204,19 @@ public class Message {
                 }
             });
 
+            // for voice message attachments, clear any existing mini preview as it should be properly recomputed
+            for (FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus : attachmentFylesAndStatuses) {
+                if (fyleAndStatus.fyleMessageJoinWithStatus.fileName.contains(VoiceMessageRecorder.AUDIO_FILE_NAME_SUFFIX) &&
+                        fyleAndStatus.fyleMessageJoinWithStatus.mimeType != null && fyleAndStatus.fyleMessageJoinWithStatus.mimeType.startsWith("audio/")) {
+                    fyleAndStatus.fyleMessageJoinWithStatus.miniPreview = null;
+                    db.fyleMessageJoinWithStatusDao().updateMiniPreview(
+                            fyleAndStatus.fyleMessageJoinWithStatus.messageId,
+                            fyleAndStatus.fyleMessageJoinWithStatus.fyleId,
+                            null
+                    );
+                }
+            }
+
             /////////////////
             // if I have other devices, also add a recipient info for myself
             if (db.ownedDeviceDao().doesOwnedIdentityHaveAnotherDeviceWithChannel(discussion.bytesOwnedIdentity)) {
@@ -1557,7 +1571,7 @@ public class Message {
     }
 
     @NonNull
-    public String getStringContent(Context context, Boolean withAttachmentsDescription) {
+    public String getStringContent(Context context, boolean withAttachmentsDescription) {
         if (messageType == TYPE_INBOUND_EPHEMERAL_MESSAGE) {
             return context.getString(R.string.text_message_content_hidden);
         } else if (wipeStatus == WIPE_STATUS_WIPED) {

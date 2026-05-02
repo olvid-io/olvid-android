@@ -64,11 +64,11 @@ public class ObvKeycloakState {
             if (authType instanceof ObvKeycloakAuthType.IdBased idBased) {
                 dict.put(new DictionaryKey("ida"), Encoded.of(true));
             } else if (authType instanceof ObvKeycloakAuthType.OpenIdConnect oidc) {
-                if (oidc.clientId() != null) {
-                    dict.put(new DictionaryKey("ci"), Encoded.of(oidc.clientId()));
+                if (oidc.clientId != null) {
+                    dict.put(new DictionaryKey("ci"), Encoded.of(oidc.clientId));
                 }
-                if (oidc.clientSecret() != null) {
-                    dict.put(new DictionaryKey("cs"), Encoded.of(oidc.clientSecret()));
+                if (oidc.clientSecret != null) {
+                    dict.put(new DictionaryKey("cs"), Encoded.of(oidc.clientSecret));
                 }
             }
         }

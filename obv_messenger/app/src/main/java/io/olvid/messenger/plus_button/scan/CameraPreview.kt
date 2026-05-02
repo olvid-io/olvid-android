@@ -162,7 +162,7 @@ fun CameraPreview(
                     preview,
                     imageAnalyzer
                 )
-                // add a touch listener to trigger auto-focus/auto-metering
+                // add a touch listener to trigger autofocus/auto-metering
                 previewView.setOnTouchListener { v: View?, event: MotionEvent? ->
                     if (event?.action == MotionEvent.ACTION_DOWN && v != null) {
                         val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(v.width.toFloat(), v.height.toFloat())

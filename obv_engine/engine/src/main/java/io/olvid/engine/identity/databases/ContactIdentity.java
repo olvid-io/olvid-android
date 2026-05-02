@@ -360,7 +360,7 @@ public class ContactIdentity implements ObvDatabase {
             statement.setBytes(2, contactIdentity.getBytes());
             statement.setBytes(3, ownedIdentity.getBytes());
             statement.executeUpdate();
-            // do not notify when changing from unknown to false (normally this setter is not called in that case, but let's make sure!
+            // do not notify when changing from unknown to false (normally this setter is not called in that case, but let's make sure!)
             if (isOneToOne() != oneToOne) {
                 commitHookBits |= HOOK_BIT_ONE_TO_ONE_CHANGED;
                 identityManagerSession.session.addSessionCommitListener(this);
@@ -479,7 +479,7 @@ public class ContactIdentity implements ObvDatabase {
             }
         }
 
-        // for each of them, set them as not certified any more
+        // for each of them, set them as not certified anymore
         for (ContactIdentity contactIdentity: certifiedContacts) {
             // no need to provide lastKnownSerializedCertifiedDetails as unmarkAllCertifiedByOwnKeycloakContacts is only called when:
             // - our ownedIdentity is no longer certified

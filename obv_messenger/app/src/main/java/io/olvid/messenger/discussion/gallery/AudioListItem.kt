@@ -39,12 +39,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Slider
-import androidx.compose.material.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -71,7 +69,6 @@ import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding.AudioInfo
-import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding.timeFromMs
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.Fyle
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
@@ -79,10 +76,11 @@ import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.constantSp
 import io.olvid.messenger.designsystem.theme.OlvidTypography
+import io.olvid.messenger.discussion.compose.StaticSoundWave
+import io.olvid.messenger.discussion.compose.WaveformExtractor
 import io.olvid.messenger.discussion.gallery.DiscussionMediaGalleryActivity.AudioServiceBindable
 import io.olvid.messenger.discussion.search.DiscussionSearchViewModel
-import io.olvid.messenger.services.MediaPlayerService.AudioOutput
-import io.olvid.messenger.services.MediaPlayerService.AudioOutput.PHONE
+import io.olvid.messenger.services.AudioOutput
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -104,7 +102,7 @@ fun AudioListItem(
         mutableLongStateOf(0)
     }
     var duration by remember {
-        mutableLongStateOf(0)
+        mutableStateOf<Long?>(null)
     }
     var isPlaying by remember {
         mutableStateOf(false)
@@ -137,7 +135,7 @@ fun AudioListItem(
     val audioServiceBindableViewHolder = remember {
         object : AudioServiceBindable() {
             override fun updatePlayTimeMs(
-                audioInfo: AudioInfo?,
+                audioInfo: AudioInfo,
                 playTimeMs: Long,
                 playing: Boolean
             ) {
@@ -146,43 +144,34 @@ fun AudioListItem(
             }
 
             override fun bindAudioInfo(
-                audioInfo: AudioInfo?,
-                audioOutput: AudioOutput?,
+                audioInfo: AudioInfo,
+                audioOutput: AudioOutput,
                 playbackSpeed: Float
             ) {
-                if (audioInfo == null || audioInfo.failed) {
-                    duration = 0
-                    playtime = 0
-                } else {
-                    duration = audioInfo.durationMs ?: 0
-                    playtime = audioInfo.seekTimeMs
-                }
+                duration = audioInfo.durationMs
+                playtime = audioInfo.seekTimeMs
                 isPlaying = false
                 audioOutputResource = audioOutput.getResource()
                 playbackSpeedState = playbackSpeed
             }
 
             override fun setFailed(failed: Boolean) {
-                duration = 0
+                duration = null
                 playtime = 0
                 isPlaying = false
             }
 
             override fun setAudioOutput(
-                audioOutput: AudioOutput?,
+                audioOutput: AudioOutput,
                 somethingPlaying: Boolean
             ) {
                 audioOutputResource = audioOutput.getResource()
                 activity?.let {
-                    if ((somethingPlaying && (audioOutput == PHONE)) != (activity.volumeControlStream == AudioManager.STREAM_VOICE_CALL)) {
+                    if ((somethingPlaying && (audioOutput == AudioOutput.PHONE)) != (activity.volumeControlStream == AudioManager.STREAM_VOICE_CALL)) {
                         activity.volumeControlStream =
-                            if ((somethingPlaying && (audioOutput == PHONE))) AudioManager.STREAM_VOICE_CALL else AudioManager.USE_DEFAULT_STREAM_TYPE
+                            if ((somethingPlaying && (audioOutput == AudioOutput.PHONE))) AudioManager.STREAM_VOICE_CALL else AudioManager.USE_DEFAULT_STREAM_TYPE
                     }
                 }
-            }
-
-            override fun setPlaybackSpeed(playbackSpeed: Float) {
-                playbackSpeedState = playbackSpeed
             }
 
             override fun getFyleAndStatus(): FyleAndStatus? {
@@ -193,6 +182,8 @@ fun AudioListItem(
 
     var playbackSpeedMenuOpened by remember { mutableStateOf(false) }
 
+    var waveform by remember { mutableStateOf<List<Float>>(emptyList()) }
+
     LaunchedEffect(fyleAndStatus.fyle.id, playable) {
         if (playable) {
             audioServiceBindableViewHolder.setFyleAndStatus(fyleAndStatus)
@@ -200,6 +191,7 @@ fun AudioListItem(
                 fyleAndStatus,
                 audioServiceBindableViewHolder
             )
+            waveform = WaveformExtractor.getCachedAmplitudesOrExtracted(fyleAndStatus)
         }
     }
 
@@ -233,7 +225,14 @@ fun AudioListItem(
             Image(
                 modifier = Modifier
                     .size(64.dp),
-                painter = painterResource(id = if (playable) if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play else R.drawable.mime_type_icon_audio),
+                painter = painterResource(id =
+                    if (playable)
+                        if (isPlaying)
+                            R.drawable.ic_pause
+                        else
+                            R.drawable.ic_play
+                    else
+                        R.drawable.mime_type_icon_audio),
                 contentDescription = fyleAndStatus.fyleMessageJoinWithStatus.fileName
             )
             if (!fyleAndStatus.fyleMessageJoinWithStatus.wasOpened && playable) {
@@ -283,25 +282,28 @@ fun AudioListItem(
                                 OlvidDropdownMenuItem(
                                     text = stringResource(id = R.string.menu_action_play_at_1x),
                                     onClick = {
-                                        audioAttachmentServiceBinding?.setPlaybackSpeed(
-                                            1f
-                                        )
+                                        audioAttachmentServiceBinding?.let {
+                                            it.setPlaybackSpeed(1f)
+                                            playbackSpeedState = 1f
+                                        }
                                         playbackSpeedMenuOpened = false
                                     })
                                 OlvidDropdownMenuItem(
                                     text = stringResource(id = R.string.menu_action_play_at_1_5x),
                                     onClick = {
-                                        audioAttachmentServiceBinding?.setPlaybackSpeed(
-                                            1.5f
-                                        )
+                                        audioAttachmentServiceBinding?.let {
+                                            it.setPlaybackSpeed(1.5f)
+                                            playbackSpeedState = 1.5f
+                                        }
                                         playbackSpeedMenuOpened = false
                                     })
                                 OlvidDropdownMenuItem(
                                     text = stringResource(id = R.string.menu_action_play_at_2x),
                                     onClick = {
-                                        audioAttachmentServiceBinding?.setPlaybackSpeed(
-                                            2f
-                                        )
+                                        audioAttachmentServiceBinding?.let {
+                                            it.setPlaybackSpeed(2f)
+                                            playbackSpeedState = 2f
+                                        }
                                         playbackSpeedMenuOpened = false
                                     })
                             }
@@ -350,43 +352,26 @@ fun AudioListItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (playable) {
-                    Text(
-                        text = timeFromMs(playtime),
-                        style = OlvidTypography.subtitle1.copy(fontSize = constantSp(value = 10)),
-                        color = if (isPlaying)
-                            colorResource(id = R.color.olvid_gradient_light)
-                        else
-                            colorResource(id = R.color.greyTint)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Slider(
+                    StaticSoundWave(
                         modifier = Modifier
                             .fillMaxHeight()
                             .weight(1f),
-                        value = playtime / (duration.takeIf { it > 0 }
-                            ?: 1).toFloat(),
-                        onValueChange = { progress ->
-                            onEnableMessageSwipe?.invoke(false)
-                            audioAttachmentServiceBinding?.seekAudioAttachment(
-                                fyleAndStatus,
-                                (progress * 1000).roundToInt()
-                            )
+                        amplitudes = waveform,
+                        progress = duration?.let { dur ->
+                            if (dur > 0) playtime.toFloat() / dur else 0f
+                        } ?: 0f,
+                        durationMs = duration,
+                        playtimeMs = playtime,
+                        onSeek = { seekProgress ->
+                            duration?.takeIf { it > 0 }?.let {
+                                audioAttachmentServiceBinding?.seekAudioAttachment(
+                                    fyleAndStatus,
+                                    (seekProgress * 1000).roundToInt()
+                                )
+                            }
                         },
-                        onValueChangeFinished = {
-                            onEnableMessageSwipe?.invoke(true)
-                        },
-                        colors = SliderDefaults.colors(
-                            thumbColor = colorResource(id = R.color.olvid_gradient_light),
-                            activeTrackColor = colorResource(id = R.color.olvid_gradient_light)
-                        )
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = timeFromMs(duration),
-                        style = OlvidTypography.subtitle1.copy(fontSize = constantSp(value = 10)),
-                        color = colorResource(
-                            id = R.color.greyTint
-                        )
+                        onSeekStarted = { onEnableMessageSwipe?.invoke(false) },
+                        onSeekEnded = { onEnableMessageSwipe?.invoke(true) }
                     )
                 } else {
                     Text(

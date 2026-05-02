@@ -128,6 +128,13 @@ fun ConfigurationSettingsPojo.prettyPrint(c: Context): AnnotatedString {
         sb.appendFluid(highlight(c, R.string.text_setting_lock_wipe_on_fail)).appendFluid(bool(c, lw != 0))
             .appendFluid("\n")
     }
+    if (lr != null) {
+        sb.appendFluid(highlight(c, R.string.text_setting_lock_required)).appendFluid(bool(c, lr != 0))
+            .appendFluid("\n")
+    }
+    if (lt != null) {
+        sb.appendFluid(highlight(c, R.string.text_setting_lock_allow_bypass)).appendFluid(lt).appendFluid("\n")
+    }
 
     if (ad != null) {
         sb.appendFluid(highlight(c, R.string.text_setting_auto_download_size))

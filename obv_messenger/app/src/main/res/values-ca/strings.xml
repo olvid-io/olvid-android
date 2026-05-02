@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Detalls del contacte</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Detalls de l\'usuari</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Detalls del grup</string>
@@ -258,7 +258,6 @@
 	<string name="text_you" state="needs_review" hash="672009142">Tu</string>
 	<string name="title_invite_chooser" state="needs_review" hash="1726572772">Tria com enviar la teva invitació</string>
 	<string name="title_sharing_chooser" state="needs_review" hash="291715689">Tria un mètode per compartir</string>
-	<string name="toast_message_android_bug_attach_duplicate_uri" state="needs_review" hash="-776215584">Alguns fitxers no s\'han pogut adjuntar al missatge a causa d\'un error a la teva versió d\'Android (diversos fitxers van retornar el mateix URI). Si us plau, prova a adjuntar els fitxers que falten de nou.</string>
 	<string name="toast_message_attachment_being_copied" state="needs_review" hash="-978855599">Un fitxer adjunt encara s\'està processant. El teu missatge s\'enviarà quan finalitzi el processament.</string>
 	<string name="toast_message_attachment_saved" state="needs_review" hash="-2073631581">Fitxer desat</string>
 	<string name="toast_message_camera_permission_denied" state="needs_review" hash="1896719877">S\'ha denegat el permís per utilitzar la càmera</string>
@@ -344,6 +343,9 @@
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">Un cop activada, Olvid obtindrà una vista prèvia dels enllaços que envies i l\'afegirà al missatge.</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">Obtenir previsualitzacions dels enllaços rebuts</string>
 	<string name="pref_link_preview_summary_inbound" state="needs_review" hash="-320325429">Un cop activada, Olvid recuperarà automàticament previsualitzacions dels enllaços que reps (si no s\'adjunta una previsualització al missatge).</string>
+	<string name="link_preview_menu_copy_link" state="needs_review" hash="1269903076">Copia l\'enllaç</string>
+	<string name="link_preview_menu_open_in_browser" state="needs_review" hash="-1711141559">Obre al navegador</string>
+	<string name="link_preview_menu_open_image" state="needs_review" hash="-2013483894">Mostra la imatge</string>
 	<string name="pref_discussion_read_receipt_title" state="needs_review" hash="-652307837">Confirmacions de lectura</string>
 	<string name="pref_text_app_default" state="needs_review" hash="1920567018">Utilitza la configuració per defecte</string>
 	<string name="pref_text_app_default_true" state="needs_review" hash="-948780646">Utilitza la teva configuració per defecte (activat)</string>
@@ -352,6 +354,10 @@
 	<string name="pref_text_discussion_read_receipt_on" state="needs_review" hash="983295321">Activat, es notifica als teus contactes</string>
 	<string name="pref_use_lock_screen_title" state="needs_review" hash="540058239">Utilitzar la pantalla de bloqueig de l\'aplicació</string>
 	<string name="pref_use_lock_screen_summary" state="needs_review" hash="-399095273">Activa això per protegir Olvid amb una pantalla de bloqueig a l\'inici.</string>
+	<string name="pref_lock_screen_required_by_mdm" state="needs_review" hash="-500219406">Requerit per la vostra organització</string>
+	<string name="lock_screen_setup_title" state="needs_review" hash="932203184">Cal protegit amb contrasenya obligatòria</string>
+	<string name="lock_screen_setup_explanation" state="needs_review" hash="169071212">La vostra organització us exigeix que protegiu aquesta aplicació amb un codi PIN o una contrasenya a la pantalla de bloqueig.</string>
+	<string name="lock_screen_setup_button" state="needs_review" hash="672169315">Configura el PIN</string>
 	<string name="pref_category_notifications_title" state="needs_review" hash="1237583104">Notificacions</string>
 	<string name="pref_category_privacy_title" state="needs_review" hash="-1750659871">Privacitat</string>
 	<string name="pref_category_other_title" state="needs_review" hash="-1683901612">Altres ajustos</string>
@@ -370,7 +376,7 @@
 	<string name="button_label_use_pin" state="needs_review" hash="918492771">Utilitza un PIN en lloc d\'una contrasenya</string>
 	<string name="hint_enter_pin" state="needs_review" hash="999437557">Introdueix el PIN</string>
 	<string name="hint_confirm_pin" state="needs_review" hash="1780268503">Confirmar PIN</string>
-	<string name="text_pin_creation_explanation" state="needs_review" hash="-1935715126">Hauràs d\'introduir aquest PIN per desbloquejar Olvid.\nNo es pot recuperar i podries perdre l\'accés a les teves dades d\'Olvid si l\'oblides.</string>
+	<string name="text_pin_creation_explanation" state="needs_review" hash="1232246926">Hauràs d\'introduir aquest PIN per desbloquejar Olvid.\nNo es pot recuperar i, si l\'oblides, **podries perdre l\'accés a les teves dades d\'Olvid**.</string>
 	<string name="error_text_pin_too_short" state="needs_review" hash="-1085309478">PIN massa curt (mínim 4 dígits)</string>
 	<string name="error_text_pin_mismatch" state="needs_review" hash="-4525766">PIN no coincideix</string>
 	<string name="hint_enter_password" state="needs_review" hash="478503341">Introduïu la contrasenya</string>
@@ -394,6 +400,7 @@
 	<string name="pref_text_lock_grace_time_infinity" state="needs_review" hash="146086108">Bloquejar Olvid manualment</string>
 	<string name="pref_unlock_biometry_summary_none_enrolled" state="needs_review" hash="-118589413">L\'autenticació biomètrica encara no està configurada al teu dispositiu.</string>
 	<string name="dialog_title_unlock_olvid" state="needs_review" hash="-2054572246">Desbloqueja Olvid amb biomètria</string>
+	<string name="dialog_title_unlock_neutral" state="needs_review" hash="761644522">Desbloqueja amb biomètria</string>
 	<string name="notification_channel_unified_service_name" state="needs_review" hash="1404446256">Servei en primer pla</string>
 	<string name="notification_channel_unified_service_description" state="needs_review" hash="-1204081836">Notificació permanent que mostra l\'estat d\'Olvid</string>
 	<string name="notification_title_olvid_is_unlocked" state="needs_review" hash="1688502744">Olvid està desbloquejat</string>
@@ -437,6 +444,7 @@
 	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">El teu perfil ha estat desactivat en aquest dispositiu.\n\nSembla que no tens cap dispositiu actiu en aquest moment, per la qual cosa pots reactivar el teu perfil quan vulguis.\n\nSi vols continuar, prem \"reactivar el meu perfil en aquest dispositiu\" a continuació.\n\nPrem \"cancel·lar\" per descartar aquest diàleg i mantenir aquest dispositiu inactiu: no podràs enviar ni rebre missatges en aquest dispositiu, però encara podràs consultar les teves antigues converses.</string>
 	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">El teu perfil ha estat desactivat en aquest dispositiu.\n\nSembla que no tens llicència per utilitzar Olvid en múltiples dispositius simultàniament. Reactivar aquest dispositiu requereix desactivar un altre dels teus dispositius.\n\nSi vols continuar, selecciona el dispositiu que vols desactivar de la llista següent i després prem \"reactiva el meu perfil en aquest dispositiu\".\n\nPrem \"cancel·lar\" per descartar aquest diàleg i mantenir aquest dispositiu inactiu: no podràs enviar ni rebre missatges en aquest dispositiu, però encara podràs consultar les teves converses antigues.</string>
 	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">El teu perfil ha estat desactivat en aquest dispositiu.\n\nSembla que tots els teus altres dispositius estan configurats per desactivar-se en un futur pròxim, així que pots reactivar el teu perfil en aquest dispositiu quan vulguis. A continuació, trobaràs la llista dels teus dispositius actius actuals.\n\nSi vols continuar, prem \"reactiva el meu perfil en aquest dispositiu\" a continuació.\n\nPrem \"cancel·lar\" per descartar aquest diàleg i mantenir aquest dispositiu inactiu: no podràs enviar ni rebre missatges en aquest dispositiu, però encara podràs consultar les teves antigues converses.</string>
+	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">El teu perfil està desactivat en aquest dispositiu.\n\nNo podràs enviar ni rebre missatges aquí, tret que el reactivis.</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">Reactivar el meu perfil en aquest dispositiu</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">S\'ha produït un error. Si us plau, torneu-ho a provar.</string>
 	<string name="dialog_title_identity_activated" state="needs_review" hash="-1465666248">ID Olvid reactivada</string>
@@ -810,10 +818,7 @@
 	<string name="toast_message_voice_message_recording_failed" state="needs_review" hash="-632817078">Error en enregistrar el missatge de veu</string>
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Reproductor multimèdia</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Controls de reproducció al reproduir contingut multimèdia a Olvid</string>
-	<string name="notification_title_now_playing" state="needs_review" hash="-1042122929">Reproduint…</string>
-	<string name="notification_action_pause" state="needs_review" hash="1931883968">Pausa</string>
-	<string name="notification_action_play" state="needs_review" hash="1143766922">Reproduir</string>
-	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="-1049639416">No es possible reproduir %1$s</string>
+	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">No es possible reproduir el fitxer d\'àudio</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Eliminar</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Eliminar a tot arreu</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">No s\'ha pogut eliminar a tot arreu. Si us plau, torneu-ho a provar.</string>
@@ -843,7 +848,6 @@
 	<string name="dialog_message_unmute_notifications" state="needs_review" hash="816867976">Les notificacions de nous missatges estan silenciades actualment.\n\nVols reactivar-les?</string>
 	<string name="dialog_message_unmute_notifications_muted_until" state="needs_review" hash="-325454266">Les notificacions de nous missatges estan silenciades fins a: %1$s.\n\nVols reactivar-les?</string>
 	<string name="notification_action_mute" state="needs_review" hash="-1553988068">Silenciar</string>
-	<string name="pref_scaled_turn_title" state="needs_review" hash="-1234636269">Tria quins servidors TURN regionals utilitzar</string>
 	<string name="explanation_identity_creation_options" state="needs_review" hash="-795537312">Aquesta pantalla et permet triar opcions addicionals per a la creació del teu ID Olvid. Pots introduir les opcions manualment o escanejar un codi QR de configuració.</string>
 	<string name="button_label_check_options" state="needs_review" hash="-759177128">Revisar opcions</string>
 	<string name="hint_olvid_server" state="needs_review" hash="1097391633">Servidor Olvid</string>
@@ -859,6 +863,8 @@
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Sembla que el vostre servidor Olvid no admet l\'inici de trucades segures.\n\nSi us plau, poseu-vos en contacte amb el vostre administrador per obtenir més informació.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Opcions de creació d\'ID</string>
 	<string name="text_option_server" state="needs_review" hash="-1130676431">Servidor: %1$s</string>
+	<string name="dialog_title_non_default_server" state="needs_review" hash="2119192219">Utilització d\'un servidor personalitzat</string>
+	<string name="dialog_message_non_default_server" state="needs_review" hash="459308900">Estàs a punt de crear un perfil al servidor següent:\n\n%1$s\n\nAquest no és el servidor Olvid per defecte. Només continua si confies en aquest servidor.</string>
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Llicència: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Proveïdor d\'identitat</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Servidor de proveïdor d\'identitat</string>
@@ -1202,8 +1208,6 @@
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Connectivitat: CONNECTAT</string>
 	<string name="label_ping_delay" state="needs_review" hash="25344924">Ping: %1$dms</string>
 	<string name="label_over_max_ping_delay" state="needs_review" hash="-684190262">Ping: &gt;%1$ds</string>
-	<string name="menu_action_copy_message_text" state="needs_review" hash="1799737962">Copia el text del missatge</string>
-	<string name="menu_action_copy_text_and_attachments" state="needs_review" hash="428315032">Copia el missatge i els adjunts</string>
 	<string name="label_message_copied_from_olvid" state="needs_review" hash="1145396410">Missatge copiat d\'Olvid</string>
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">Missatge complet copiat al porta-retalls</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">Accés directe per enviar un missatge predefinit a un contacte o grup amb un sol clic</string>
@@ -1403,7 +1407,6 @@
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Còpia de</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Ubicació enviada</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Ubicació rebuda</string>
-	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">Serveis de localització no disponibles</string>
 	<string name="label_send_your_location" state="needs_review" hash="618026241">Enviar la teva ubicació</string>
 	<string name="notification_title_sharing_location" state="needs_review" hash="-1626101904">Compartint la ubicació a Olvid</string>
 	<string name="notification_action_stop_sharing" state="needs_review" hash="585626699">Deixar de compartir</string>
@@ -1531,6 +1534,8 @@
 	<string name="text_setting_lock_biometry" state="needs_review" hash="-1698353580">‣ Desbloqueja amb la biomètria:</string>
 	<string name="text_setting_lock_notification" state="needs_review" hash="2022286622">‣ Notificació permanent de bloqueig de pantalla:</string>
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">‣ Esborrar missatges sensibles després de 3 PINs incorrectes:\u0020</string>
+	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">‣ Requereix bloqueig de pantalla:</string>
+	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">‣ Restableix el codi PIN de bloqueig de la pantalla:</string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">‣ Descàrrega automàtica dels adjunts de les converses arxivades:</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">‣ Restaura les converses arxivades quan reps una notificació de missatge nou:</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">‣ Vista prèvia d\'enllaç rebuda:\u0020</string>
@@ -1593,8 +1598,8 @@
 	<string name="label_open_original_link_with_trackers" state="needs_review" hash="-1586932660">Utilitza l\'enllaç original que conté paràmetres de seguiment</string>
 	<string name="dialog_title_confirm_open_olvid_link" state="needs_review" hash="425949498">Obrir aquest enllaç a Olvid?</string>
 	<string name="toast_message_unable_to_open_url" state="needs_review" hash="-1486954792">No s\'ha pogut obrir l\'URL</string>
-	<string name="text_explanation_location_map_provider" state="needs_review" hash="-173394547">Triar un proveïdor de mapes permet seleccionar amb precisió la ubicació que vols compartir en un mapa. No obstant això, això podria revelar la teva ubicació (o la dels teus contactes) a aquest proveïdor de serveis.</string>
-	<string name="text_explanation_location_map_provider_settings" state="needs_review" hash="68421420">Aquesta opció es pot canviar des de la configuració de l\'aplicació.</string>
+	<string name="dialog_title_choose_map_provider" state="needs_review" hash="1225681568">Trieu un proveïdor de mapes</string>
+	<string name="dialog_message_choose_map_provider" state="needs_review" hash="-2129640593">Seleccioneu un proveïdor de mapes a continuació per mostrar un mapa quan visualitzeu o compartiu una ubicació.\n\nTingueu en compte que això pot **divulgar la vostra ubicació (o la ubicació dels vostres contactes) a aquest proveïdor de serveis.**</string>
 	<string name="button_label_choose_provider" state="needs_review" hash="-797956886">Tria un proveïdor</string>
 	<string name="button_label_live_share" state="needs_review" hash="327122881">Compartir en directe</string>
 	<string name="label_fetching_address" state="needs_review" hash="-839353954">Obtenint adreça…</string>
@@ -1803,7 +1808,9 @@
 	<string name="dialog_title_custom_address_server_url" state="needs_review" hash="-2071925830">Servidor d\'adreces personalitzat</string>
 	<string name="hint_custom_address_server_url" state="needs_review" hash="1348105685">URL del servidor de cerca d\'adreces</string>
 	<string name="dialog_message_custom_address_server_url" state="needs_review" hash="401731382">Olvid només admet servidors **Pelias** per a la cerca d\'adreces. Si us plau, introduïu l\'URL del servidor que voleu consultar a continuació, hauria de ser quelcom com *https://pelias.olvid.io*, i les consultes s\'enviaran al punt d\'entrada */v1/reverse*.\n\nTingueu en compte que aquest servidor pot aprendre informació sobre la vostra ubicació. Assegureu-vos d\'**utilitzar un servidor en el qual confieu**.</string>
-	<string name="toast_message_playback_speed_not_supported_on_device" state="needs_review" hash="502764942">No s\'ha pogut canviar la velocitat de reproducció</string>
+	<string name="pref_location_gps_debug_title" state="needs_review" hash="1786532100">Activa les funcions de depuració per a compartir la ubicació</string>
+	<string name="pref_location_gps_always_on_title" state="needs_review" hash="1250376384">Manteniu el GPS sempre en funcionament</string>
+	<string name="pref_location_export_gps_logs_title" state="needs_review" hash="-459831250">Exporta els registres d\'activitat del GPS</string>
 	<string name="text_speed_1x" state="needs_review" hash="789822816">1×</string>
 	<string name="text_speed_1_5x" state="needs_review" hash="-120181054">1,5×</string>
 	<string name="text_speed_2x" state="needs_review" hash="1171767872">2×</string>
@@ -2144,15 +2151,11 @@
 	<string name="history_transfer_step_none" state="needs_review" hash="1228580785">No hi ha cap transfer en curs</string>
 	<string name="history_transfer_step_contacting_other_device" state="needs_review" hash="1719019815">Esperant l\'altre dispositiu</string>
 	<string name="history_transfer_step_connecting" state="needs_review" hash="1836039168">Connectant-se a l\'altre dispositiu</string>
-	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Negociant (pas 1 de 3)</string>
-	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Transferint missatges (pas 2 de 3)</string>
-	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">S\'estan transferint els arxius adjunts (pas 3 de 3)</string>
-	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Negociant</string>
-	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Transferint missatges</string>
-	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">S\'estan transferint els arxius adjunts</string>
+	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Negociant</string>
+	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Transferint</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Transferència completada</string>
-	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Transferència interrompuda</string>
-	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Transferència de l\'historial de xat (versió beta)</string>
+	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">La transferència ha fallat</string>
+	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Transferència de l\'historial de xat</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">No s\'ha pogut iniciar la transferència. Potser ja hi ha una altra transferència en curs?</string>
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Utilitza el \"enllaç màgic\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Enllaç màgic no vàlid</string>
@@ -2165,18 +2168,111 @@
 	<string name="onboarding_transfer_keycloak_error_message_authentication_impossible" state="needs_review" hash="-1891385979">Sembla que no hi hagi cap mètode d\'autenticació compatible disponible.</string>
 	<string name="pref_use_alt_turn_servers_title" state="needs_review" hash="-1956132776">Utilitza servidors TURN alternatius</string>
 	<string name="pref_use_alt_turn_servers_summary" state="needs_review" hash="357427162">Activeu aquesta opció per utilitzar servidors TURN amb adreces IP rotatives. Si no esteu segur, deixeu aquesta opció desactivada 😁</string>
-	<string name="button_label_transfer_through_webrtc" state="needs_review" hash="-1809138918">Transferència a través de la xarxa local</string>
-	<string name="button_label_export_zip" state="needs_review" hash="1575043364">Exporta un fitxer ZIP</string>
-	<string name="button_label_import_zip" state="needs_review" hash="1299665090">Importa un fitxer ZIP</string>
-	<string name="dialog_title_transfer_choose_target_device" state="needs_review" hash="218115750">Trieu el dispositiu de destinació per a aquesta transferència.</string>
-	<string name="transfer_label_no_other_active_device" state="needs_review" hash="-2135899221">No hi ha cap altre dispositiu actiu</string>
-	<string name="transfer_label_messages" state="needs_review" hash="-1639407912">Missatges</string>
-	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Rendiment</string>
-	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Restant</string>
-	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Adjunts</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Aquesta funció encara està en fase de proves beta i és possible que la implementació actual no sigui compatible amb la implementació final de la transferència d\'historial d\'Olvid.\n\nAbans d\'utilitzar aquesta funció, assegureu-vos que els vostres dispositius tinguin instal·lada la darrera versió d\'Olvid.</string>
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Vols cancel·lar la transferència en curs?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Actualment s\'està transferint l\'historial. Vols cancel·lar-ho?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Interrompre la transferència</string>
 	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Esperant per unir-me a aquesta conversa</string>
+	<string name="label_your_other_device" state="needs_review" hash="-339632056">El teu altre dispositiu</string>
+	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">vol transferir l\'historial de xat a aquest dispositiu</string>
+	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">\"%1$s\" vol transferir el teu historial de xat a aquest dispositiu</string>
+	<string name="button_label_start_transfer" state="needs_review" hash="208526116">Comença la transferència</string>
+	<string name="pref_disable_secondary_notifications_title" state="needs_review" hash="29372078">Desactiva les notificacions \"secundàries\"</string>
+	<string name="pref_disable_secondary_notifications_summary" state="needs_review" hash="-402927980">Aquest paràmetre desactiva les notificacions per a les reaccions als teus missatges o les noves respostes als teus enquestes.</string>
+	<string name="template_copy_multiple_messages" state="needs_review" hash="-1584473750">[%1$s] [%2$s]:\n[%3$s]</string>
+	<string name="label_export_your_chat_history" state="needs_review" hash="30036193">Exporta l\'historial del xat</string>
+	<string name="label_import_your_chat_history" state="needs_review" hash="-1058286401">Importa el teu historial de xat</string>
+	<string name="explanation_export_your_chat_history" state="needs_review" hash="2042738985">Utilitza aquesta opció si vols transferir el teu historial de xat **des d\'aquest** dispositiu.</string>
+	<string name="explanation_import_your_chat_history" state="needs_review" hash="366204152">Utilitza aquesta opció si vols transferir el teu historial de xat a aquest dispositiu.</string>
+	<string name="explanation_history_transfer" state="needs_review" hash="983501865">Aquesta funció et permet **transferir** el teu historial de xat de manera **segura** entre dos dels teus dispositius.\n\nAbans de començar, el teu perfil ha d\'estar **present en tots dos dispositius**.</string>
+	<string name="button_label_import" state="needs_review" hash="-984720905">Importar</string>
+	<string name="history_transfer_pick_profile_title" state="needs_review" hash="-1782334343">Quin perfil vols utilitzar per continuar?</string>
+	<string name="history_transfer_pick_profile_text_import" state="needs_review" hash="-1162713377">Si us plau, trieu el perfil al qual voleu **importar l\'historial del xat**.</string>
+	<string name="history_transfer_pick_profile_text_export" state="needs_review" hash="951522414">Si us plau, trieu el perfil des d\'on voleu **exportar l\'historial de xat**.</string>
+	<string name="history_transfer_pick_method_title" state="needs_review" hash="661094742">Què vols fer?</string>
+	<string name="history_transfer_pick_method_text_import" state="needs_review" hash="1116376527">Si us plau, trieu com voleu importar l\'historial de xat del vostre perfil **%1$s**.</string>
+	<string name="history_transfer_pick_method_text_export" state="needs_review" hash="1750125743">Si us plau, trieu com voleu exportar l\'historial de xat del vostre perfil **%1$s**.</string>
+	<string name="history_transfer_via_wifi_title" state="needs_review" hash="-2016953028">Transferència a través de Wi-Fi</string>
+	<string name="history_transfer_via_wifi_message" state="needs_review" hash="-758708700">Simplement connecta els dos dispositius a la mateixa xarxa Wi-Fi.</string>
+	<string name="history_transfer_via_zip_title_import" state="needs_review" hash="1608302669">Importa un fitxer .zip</string>
+	<string name="history_transfer_via_zip_title_export" state="needs_review" hash="-1924849877">Exporta un fitxer .zip</string>
+	<string name="history_transfer_via_zip_message_import" state="needs_review" hash="1766231761">Selecciona el fitxer .zip que has copiat del teu dispositiu antic.</string>
+	<string name="history_transfer_via_zip_message_export" state="needs_review" hash="-1123951975">Descarrega un fitxer .zip i copia\'l al teu nou dispositiu.</string>
+	<string name="history_transfer_import_zip_description" state="needs_review" hash="855194374">Per importar l\'historial del xat, seleccioneu el fitxer .zip que heu **exportat des del vostre altre dispositiu**.\n\nAssegureu-vos que el perfil **%1$s** que heu seleccionat coincideixi amb el perfil que s\'ha utilitzat per generar aquest fitxer .zip.</string>
+	<string name="button_label_choose_zip_file" state="needs_review" hash="-493688169">Trieu un fitxer .zip</string>
+	<string name="dialog_title_error_reading_zip" state="needs_review" hash="1059408985">Error en llegir el fitxer .zip</string>
+	<string name="dialog_message_error_reading_zip" state="needs_review" hash="1864744526">S\'ha produït un error en llegir el fitxer .zip que heu proporcionat.\n\nAssegureu-vos que heu seleccionat un fitxer d\'exportació de l\'historial de xat d\'Olvid.</string>
+	<string name="dialog_title_error_zip_password" state="needs_review" hash="1651240086">Contrasenya incorrecta</string>
+	<string name="dialog_message_error_zip_password" state="needs_review" hash="216311562">La contrasenya que heu proporcionat no ha permès desxifrar el fitxer .zip seleccionat.\n\nSi us plau, torneu-ho a provar.</string>
+	<string name="dialog_title_zip_password_required" state="needs_review" hash="-944166479">Es requereix una contrasenya</string>
+	<string name="dialog_message_zip_password_required" state="needs_review" hash="548842041">El fitxer .zip seleccionat està protegit amb contrasenya. Si us plau, introduïu la contrasenya que heu triat quan vau exportar l\'historial de xat al vostre altre dispositiu.</string>
+	<string name="history_transfer_export_scope_title_export" state="needs_review" hash="933575859">Què vols exportar?</string>
+	<string name="history_transfer_export_scope_title_transfer" state="needs_review" hash="-1971421411">Què vols transferir?</string>
+	<string name="history_transfer_scope_messages_export_title" state="needs_review" hash="-1810394953">Exporta només els missatges</string>
+	<string name="history_transfer_scope_messages_transfer_title" state="needs_review" hash="1119624141">Transfereix només els missatges</string>
+	<string name="history_transfer_scope_messages_export_message" state="needs_review" hash="-2120867312">Exportació més petita. Només s\'inclouen els missatges de text.</string>
+	<string name="history_transfer_scope_messages_transfer_message" state="needs_review" hash="2071005834">Transferència més ràpida. Només es inclouen els missatges de text.</string>
+	<string name="history_transfer_scope_everything_export_title" state="needs_review" hash="463008259">Exporta els missatges i els arxius adjunts</string>
+	<string name="history_transfer_scope_everything_transfer_title" state="needs_review" hash="-175297433">Transferir missatges i arxius adjunts</string>
+	<string name="history_transfer_scope_everything_export_message" state="needs_review" hash="-266277978">Exportació completa. Inclou tots els missatges i els arxius adjunts.</string>
+	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Transferència completa. Inclou tots els missatges i els arxius adjunts.</string>
+	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Exporta el teu historial de xat com a fitxer .zip. Més endavant, pots importar-lo a un altre dispositiu del teu perfil **%1$s**.\n\nTambé pots descomprimir aquest fitxer per visualitzar el teu historial de xat en una pàgina web.</string>
+	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Crea un fitxer .zip</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d discussions i %2$d missatges</string>
+	<string name="label_computing" state="needs_review" hash="1393495921">S\'està calculant…</string>
+	<string name="label_total_size" state="needs_review" hash="-788411929">Mida total: %1$s</string>
+	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Protegeix les teves exportacions</string>
+	<string name="dialog_message_protect_export" state="needs_review" hash="-900141026">Per la vostra seguretat, us recomanem que protegiu les vostres dades exportades amb una contrasenya.</string>
+	<string name="button_label_generate_password" state="needs_review" hash="-1174237913">Genera una contrasenya</string>
+	<string name="button_label_choose_password" state="needs_review" hash="-1893200284">Trieu una contrasenya</string>
+	<string name="button_label_continue_without_password" state="needs_review" hash="-106870576">Continua sense contrasenya</string>
+	<string name="dialog_title_choose_password" state="needs_review" hash="1927816439">Trieu una contrasenya</string>
+	<string name="dialog_title_generated_password" state="needs_review" hash="-690449371">Contrasenya generada</string>
+	<string name="dialog_message_generated_password" state="needs_review" hash="1100314355">La contrasenya que es mostra a continuació s\'ha generat de manera aleatòria.\n\nAssegureu-vos d\'**escriure-la abans de continuar**.</string>
+	<string name="button_label_copy_to_clipboard" state="needs_review" hash="-1309214553">Copia al portapapers</string>
+	<string name="history_transfer_pick_target_device_title" state="needs_review" hash="1659408512">Selecciona un dispositiu</string>
+	<string name="history_transfer_pick_target_device_text" state="needs_review" hash="-1456199559">Si us plau, seleccioneu el dispositiu al qual voleu transferir l\'historial de xat del dispositiu actual.\n\nNo trobeu el dispositiu que busqueu? Assegureu-vos que el vostre perfil **%1$s** estigui **actiu en aquest altre dispositiu**.</string>
+	<string name="history_transfer_no_other_device_explanation" state="needs_review" hash="-1034788616">Sembla que el vostre perfil **%1$s** no tingui cap altre dispositiu actiu.\n\nSi us plau, **afegeix el vostre nou dispositiu a aquest perfil** abans de continuar amb la transferència de l\'historial de xat.\n\nTambé podeu **exportar un fitxer .zip** per importar-lo més endavant al vostre nou dispositiu.</string>
+	<string name="history_transfer_webrtc_instructions_title" state="needs_review" hash="-1353013738">Segueix aquestes instruccions al teu altre dispositiu.</string>
+	<string name="history_transfer_instructions_turn_on_other_import" state="needs_review" hash="-930696177">Engegueu el dispositiu que conté l\'historial de xat.</string>
+	<string name="history_transfer_instructions_same_wifi_import" state="needs_review" hash="465388607">Assegureu-vos que els dos dispositius estiguin connectats a la mateixa xarxa Wi-Fi.</string>
+	<string name="history_transfer_instructions_start_export" state="needs_review" hash="-1288439668">A l\'altre dispositiu, obriu la configuració d\'Olvid i comenceu l\'exportació de l\'historial de xat.</string>
+	<string name="history_transfer_instructions_turn_on_other_export" state="needs_review" hash="1280642155">Engega el teu **%1$s**.</string>
+	<string name="history_transfer_instructions_same_wifi_export" state="needs_review" hash="284833986">Assegureu-vos que aquest dispositiu i el vostre **%1$s** estiguin connectats a la mateixa xarxa Wi-Fi.</string>
+	<string name="history_transfer_step_awaiting_confirmation" state="needs_review" hash="665601714">Esperant que acceptis la transferència</string>
+	<string name="dialog_title_abort_history_transfer" state="needs_review" hash="1914158733">Interrompre la transferència en curs?</string>
+	<string name="dialog_title_abort_history_transfer_export" state="needs_review" hash="-856542741">Aturar l\'exportació en curs?</string>
+	<string name="dialog_title_abort_history_transfer_import" state="needs_review" hash="976007540">Aturar la importació en curs?</string>
+	<string name="dialog_message_abort_history_transfer_webrtc" state="needs_review" hash="1807742093">Estàs segur que vols interrompre la transferència de l\'historial de xat en curs?\n\nSempre pots reiniciar la transferència més endavant si vols. **Tot el que ja s\'ha transferit es conservarà** i no caldrà que es torni a transferir.</string>
+	<string name="dialog_message_abort_history_transfer_zip_export" state="needs_review" hash="716134255">Estàs segur que vols cancel·lar l\'exportació del fitxer .zip en curs?\n\nAixò deixarà un **fitxer .zip incomplet al teu dispositiu** i hauràs de **suprimir-lo manualment**.</string>
+	<string name="dialog_message_abort_history_transfer_zip_import" state="needs_review" hash="1264487097">Estàs segur que vols cancel·lar la importació del fitxer .zip que està en curs?\n\nSempre pots reiniciar la importació més endavant si vols. **Tot el que ja s\'ha importat es conservarà** i no caldrà tornar-ho a importar.</string>
+	<string name="button_label_interrupt_and_continue_later" state="needs_review" hash="-976034947">Interromp i continua més tard</string>
+	<string name="button_label_abort_export" state="needs_review" hash="428199797">Cancel·lar l\'exportació</string>
+	<string name="button_label_abort_import" state="needs_review" hash="2031103191">Cancel·lar la importació</string>
+	<string name="history_transfer_fail_reason_aborted" state="needs_review" hash="277351522">La transferència s\'ha interromput.</string>
+	<string name="history_transfer_fail_reason_unknown" state="needs_review" hash="-1170630200">S’ha produït un error desconegut (probablement una desconnexió de la xarxa).</string>
+	<string name="history_transfer_fail_reason_identity_mismatch" state="needs_review" hash="936267267">Aquest fitxer .zip s\'ha exportat des d\'un perfil diferent.</string>
+	<string name="history_transfer_fail_reason_wrong_passwrod" state="needs_review" hash="1847441965">Contrasenya incorrecta</string>
+	<string name="history_transfer_fail_reason_invalid_zip" state="needs_review" hash="-691417686">No s\'ha pogut llegir el fitxer .zip (és realment un fitxer d\'exportació de l\'historial de xat d\'Olvid?)</string>
+	<string name="transfer_label_sending_messages" state="needs_review" hash="2018039973">S\'estan enviant missatges</string>
+	<string name="transfer_label_exporting_messages" state="needs_review" hash="1572454408">Exportació de missatges</string>
+	<string name="transfer_label_importing_messages" state="needs_review" hash="1913024934">Important missatges</string>
+	<string name="transfer_label_receiving_messages" state="needs_review" hash="2015919003">Rebre missatges</string>
+	<string name="transfer_label_sending_attachments" state="needs_review" hash="2102571371">S\'estan enviant els arxius adjunts</string>
+	<string name="transfer_label_exporting_attachments" state="needs_review" hash="-1029839434">Exportació d\'adjunts</string>
+	<string name="transfer_label_importing_attachments" state="needs_review" hash="1078186262">Importació d\'adjunts</string>
+	<string name="transfer_label_receiving_attachments" state="needs_review" hash="439049517">Rebre d\'adjunts</string>
+	<string name="label_remaining_and_throughput" state="needs_review" hash="1772610397">Aproximadament %1$s restants (%2$s)</string>
+	<string name="history_transfer_step_connecting_export" state="needs_review" hash="-28311439">Creant el fitxer .zip</string>
+	<string name="history_transfer_step_connecting_import" state="needs_review" hash="1323447620">S\'està obrint el fitxer .zip</string>
+	<string name="history_transfer_step_failed_export" state="needs_review" hash="185890904">Exportació fallida</string>
+	<string name="history_transfer_step_finished_export" state="needs_review" hash="1156914922">Exportació completada</string>
+	<string name="history_transfer_step_failed_import" state="needs_review" hash="-909085512">S\'ha produït un error en la importació</string>
+	<string name="history_transfer_step_finished_import" state="needs_review" hash="-653312310">Importació completada</string>
+	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">S\'està exportant</string>
+	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">S\'està important</string>
+	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analitzant el contingut</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">S\'estan analitzant les converses exportades</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">S\'ha produït un error en carregar el fitxer d\'estil OpenStreetMap.</string>
+	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Les subscripcions a l\'aplicació no estan disponibles</string>
+	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">La versió d\'Olvid que has instal·lat no inclou la biblioteca de facturació de Google i no admet compres dins de l\'aplicació.\n\nPer a més informació, si us plau, poseu-vos en contacte amb nosaltres a **feedback@olvid.io**.</string>
 </resources>

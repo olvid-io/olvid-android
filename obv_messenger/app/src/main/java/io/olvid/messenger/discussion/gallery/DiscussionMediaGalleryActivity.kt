@@ -113,7 +113,7 @@ import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding.AudioServiceBindableViewHolder
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatusTimestamped
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
@@ -124,10 +124,7 @@ import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.linkpreview.OpenGraph
 import io.olvid.messenger.gallery.GalleryActivity
 import io.olvid.messenger.main.contacts.CustomTab
-import io.olvid.messenger.services.MediaPlayerService.AudioOutput
-import io.olvid.messenger.services.MediaPlayerService.AudioOutput.BLUETOOTH
-import io.olvid.messenger.services.MediaPlayerService.AudioOutput.HEADSET
-import io.olvid.messenger.services.MediaPlayerService.AudioOutput.LOUDSPEAKER
+import io.olvid.messenger.services.AudioOutput
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -836,9 +833,9 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
 
 fun AudioOutput?.getResource(): Int {
     return when (this) {
-        HEADSET -> R.drawable.ic_headset_grey
-        LOUDSPEAKER -> R.drawable.ic_speaker_blue
-        BLUETOOTH -> R.drawable.ic_speaker_bluetooth_grey
+        AudioOutput.HEADSET -> R.drawable.ic_headset_grey
+        AudioOutput.LOUDSPEAKER -> R.drawable.ic_speaker_blue
+        AudioOutput.BLUETOOTH -> R.drawable.ic_speaker_bluetooth_grey
         else -> R.drawable.ic_speaker_light_grey
     }
 }

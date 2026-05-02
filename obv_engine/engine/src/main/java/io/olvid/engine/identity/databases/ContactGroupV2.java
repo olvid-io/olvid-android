@@ -91,7 +91,7 @@ public class ContactGroupV2 implements ObvDatabase {
     private Seed blobVersionSeed; // used to decrypt the blob on the server, null for a keycloak group
     static final String BLOB_VERSION_SEED = "blob_version_seed";
 
-    private ServerAuthenticationPrivateKey groupAdminServerAuthenticationPrivateKey; // non null for admins --> required to upload the blob
+    private ServerAuthenticationPrivateKey groupAdminServerAuthenticationPrivateKey; // non-null for admins --> required to upload the blob
     static final String GROUP_ADMIN_SERVER_AUTHENTICATION_PRIVATE_KEY = "group_admin_server_authentication_private_key";
     private byte[] ownGroupInvitationNonce;
     static final String OWN_GROUP_INVITATION_NONCE = "own_group_invitation_nonce";

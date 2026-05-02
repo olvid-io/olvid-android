@@ -26,6 +26,14 @@
                     android:title="@string/pref_message_led_color_title"
                     android:icon="@drawable/ic_pref_color"
                     android:order="13" />
+                <SwitchPreference
+                    android:key="pref_key_disable_secondary_notifications"
+                    android:title="@string/pref_disable_secondary_notifications_title"
+                    android:summary="@string/pref_disable_secondary_notifications_summary"
+                    android:icon="@drawable/ic_pref_mute_notification"
+                    android:defaultValue="false"
+                    android:order="14"
+                        />
         </PreferenceCategory>
 
         <PreferenceCategory

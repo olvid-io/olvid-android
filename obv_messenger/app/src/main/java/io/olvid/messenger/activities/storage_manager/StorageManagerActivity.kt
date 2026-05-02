@@ -71,7 +71,7 @@ import io.olvid.messenger.activities.storage_manager.StorageUsageLiveData.Storag
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.customClasses.EmptyRecyclerView
 import io.olvid.messenger.customClasses.InitialView
-import io.olvid.messenger.customClasses.LockScreenOrNotActivity
+import io.olvid.messenger.lock_screen.LockScreenOrNotActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase

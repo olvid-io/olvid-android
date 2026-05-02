@@ -190,7 +190,7 @@ internal class ConnectivityIndicator(private val activity: Activity) : EngineNot
         activityInForeground = true
         startListening()
 
-        pingConnectivitySetting = SettingsActivity.Companion.pingConnectivityIndicator
+        pingConnectivitySetting = SettingsActivity.pingConnectivityIndicator
         if (pingConnectivitySetting == SettingsActivity.PingConnectivityIndicator.NONE) {
             startTimerIfNeeded()
         } else {

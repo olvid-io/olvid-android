@@ -25,19 +25,17 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Consumer;
 import androidx.core.util.Pair;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
@@ -92,6 +90,7 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
 
     // store last centered marker to reset it's zIndex property
     private Marker currentlyCenteredMarker = null;
+    private int topPaddingPx = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,13 +103,13 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
         mapFragment = SupportMapFragment.newInstance();
         mapFragment.getMapAsync(this);
 
-        // if google services are not available show a pop up and dismiss dialog fragment
+        // if google services are not available show a pop-up and dismiss dialog fragment
         if (!GoogleServicesUtils.googleServicesAvailable(activity)) {
             new SecureAlertDialogBuilder(this.activity, R.style.CustomAlertDialog)
                     .setTitle(R.string.dialog_title_google_maps_services_unavailable)
                     .setMessage(R.string.dialog_message_google_maps_services_unavailable)
                     .setPositiveButton(R.string.button_label_choose_provider,
-                            (dialog, which) -> new LocationIntegrationSelectorDialog(activity, false, (SettingsActivity.LocationIntegrationEnum integration, String customOsmServerUrl) -> SettingsActivity.setLocationIntegration(integration.getString(), customOsmServerUrl)).show())
+                            (dialog, which) -> new LocationIntegrationSelectorDialog(activity, (SettingsActivity.LocationIntegrationEnum integration, String customOsmServerUrl) -> SettingsActivity.setLocationIntegration(integration.getString(), customOsmServerUrl)).show())
                     .show();
             if (getParentFragment() != null && getParentFragment() instanceof DialogFragment) {
                 ((DialogFragment) getParentFragment()).dismiss();
@@ -132,6 +131,19 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
     }
 
     @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, windowInsets) -> {
+            topPaddingPx = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
+            repositionCompass();
+
+            return windowInsets;
+        });
+    }
+
+
+    @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         this.googleMap = googleMap;
 
@@ -145,7 +157,7 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
                 setCurrentlyCenteredMarker(null);
             }
         });
-        // when move finish get center marker down and and update cameraCenterLiveData
+        // when move finish get center marker down and update cameraCenterLiveData
         googleMap.setOnCameraMoveCanceledListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(googleMap.getCameraPosition().target)));
         googleMap.setOnCameraIdleListener(() -> currentCameraCenterLiveData.postValue(new LatLngWrapper(googleMap.getCameraPosition().target)));
 
@@ -184,18 +196,18 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
             if (mapView != null) {
                 View compass = mapView.findViewWithTag("GoogleMapCompass");
                 if (compass != null) {
-                    int sixteenDp = (int) (16 * activity.getResources().getDisplayMetrics().density);
+                    int eightDp = (int) (8 * activity.getResources().getDisplayMetrics().density);
                     compass.post(() -> {
                         try {
                             // create layoutParams, giving it our wanted width and height(important, by default the width is "match parent")
-                            RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(sixteenDp * 2, sixteenDp * 2);
+                            RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(eightDp * 4, eightDp * 4);
                             // position on top right
                             rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
                             rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
                             rlp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
                             rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
                             //give compass margin
-                            rlp.setMargins(0, sixteenDp * 4, sixteenDp, 0);
+                            rlp.setMargins(0, topPaddingPx + eightDp * 7, eightDp, 0);
                             compass.setLayoutParams(rlp);
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -218,10 +230,10 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
         }
 
         // check permission and location is enabled (do not ask, father is supposed to do)
-        if (!AbstractLocationDialogFragment.isLocationPermissionGranted(activity)) {
+        if (!LocationUtils.isLocationPermissionGranted(activity)) {
             return false;
         }
-        if (!AbstractLocationDialogFragment.isLocationEnabled()) {
+        if (!LocationUtils.isLocationEnabled()) {
             return false;
         }
 
@@ -240,7 +252,7 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
         currentlyCenteredOnGpsPosition.postValue(true);
         setCurrentlyCenteredMarker(null);
 
-        // we concurrently request lastLocation and current location and we only keep the first one
+        // we concurrently request lastLocation and current location, and we only keep the first one
         FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this.activity);
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         CancellationToken cancellationToken = cancellationTokenSource.getToken();
@@ -301,67 +313,33 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
     }
 
     @Override
-    void onLayersButtonClicked(View view) {
-        if (googleMap != null) {
-            PopupMenu popup = new PopupMenu(activity, view, Gravity.TOP | Gravity.END);
-            Menu menu = popup.getMenu();
-            MenuItem normal = menu.add(0, GoogleMap.MAP_TYPE_NORMAL, 0, R.string.menu_action_google_maps_normal);
-            MenuItem satellite = menu.add(0, GoogleMap.MAP_TYPE_SATELLITE, 1, R.string.menu_action_google_maps_satellite);
-            MenuItem hybrid = menu.add(0, GoogleMap.MAP_TYPE_HYBRID, 2, R.string.menu_action_google_maps_hybrid);
-            MenuItem terrain = menu.add(0, GoogleMap.MAP_TYPE_TERRAIN, 3, R.string.menu_action_google_maps_terrain);
-            menu.setGroupCheckable(0, true, true);
-            switch (googleMap.getMapType()) {
-                case GoogleMap.MAP_TYPE_NORMAL:
-                    normal.setChecked(true);
-                    break;
-                case GoogleMap.MAP_TYPE_SATELLITE:
-                    satellite.setChecked(true);
-                    break;
-                case GoogleMap.MAP_TYPE_HYBRID:
-                    hybrid.setChecked(true);
-                    break;
-                case GoogleMap.MAP_TYPE_TERRAIN:
-                    terrain.setChecked(true);
-                    break;
-            }
-            popup.setOnMenuItemClickListener(item -> {
-                if (item.getItemId() != googleMap.getMapType()) {
-                    googleMap.setMapType(item.getItemId());
-                    SettingsActivity.setLocationLastGoogleMapType(item.getItemId());
-                }
-                return true;
-            });
-            popup.show();
-        }
+    java.util.Map<String, String> getMapLayers() {
+        java.util.Map<String, String> layers = new java.util.LinkedHashMap<>();
+        layers.put(String.valueOf(GoogleMap.MAP_TYPE_NORMAL), activity.getString(R.string.menu_action_google_maps_normal));
+        layers.put(String.valueOf(GoogleMap.MAP_TYPE_SATELLITE), activity.getString(R.string.menu_action_google_maps_satellite));
+        layers.put(String.valueOf(GoogleMap.MAP_TYPE_HYBRID), activity.getString(R.string.menu_action_google_maps_hybrid));
+        layers.put(String.valueOf(GoogleMap.MAP_TYPE_TERRAIN), activity.getString(R.string.menu_action_google_maps_terrain));
+        return layers;
     }
 
+    @Override
+    String getCurrentMapLayerId() {
+        if (googleMap == null) {
+            return String.valueOf(GoogleMap.MAP_TYPE_NORMAL);
+        }
+        return String.valueOf(googleMap.getMapType());
+    }
 
-    //    @Override
-//    public void setGestureEnabled(boolean enabled) {
-//        if (googleMap == null) {
-//            Logger.i("GoogleMapMapView: setGestureEnabled: googleMap is not ready to use");
-//            return;
-//        }
-//        googleMap.getUiSettings().setAllGesturesEnabled(enabled);
-//    }
-//
-//    @Override
-//    public void setOnMapClickListener(Runnable clickListener) {
-//        if (googleMap == null) {
-//            Logger.i("GoogleMapMapView: setOnMapClickListener: googleMap is not ready to use");
-//            return;
-//        }
-//        googleMap.setOnMapClickListener((latLng) -> clickListener.run());
-//    }
-//
-//    @Override
-//    public void setOnMapLongClickListener(Runnable clickListener) {
-//        if (googleMap == null) {
-//            Logger.i("GoogleMapMapView: setOnMapLongClickListener: googleMap is not ready to use");
-//            return;
-//        }
-//        googleMap.setOnMapLongClickListener((latLng) -> clickListener.run());
-//    }
+    @Override
+    void setMapLayer(String id) {
+        if (googleMap != null) {
+            int mapType = Integer.parseInt(id);
+            if (googleMap.getMapType() != mapType) {
+                googleMap.setMapType(mapType);
+                SettingsActivity.setLocationLastGoogleMapType(mapType);
+            }
+        }
+    }
 
     @Override
     public void setOnMapReadyCallback(@Nullable Runnable callback) {
@@ -370,7 +348,12 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
 
     @Override
     void setRedrawMarkersCallback(@Nullable Runnable callback) {
-        // not required for Google maps
+        // not required for Google Maps
+    }
+
+    @Override
+    void setFailedStyleUrlCallback(@Nullable Consumer<String> consumer) {
+        // not required for Google Maps
     }
 
     @Override
@@ -465,7 +448,7 @@ public class MapViewGoogleMapsFragment extends MapViewAbstractFragment implement
         }
 
         if (includeMyLocation && googleMap.isMyLocationEnabled()) {
-            // we use this deprecated method as we do not want to initialise the FusedLocationProviderClient just for this
+            // we use this deprecated method as we do not want to initialize the FusedLocationProviderClient just for this
             // noinspection deprecation
             Location myLocation = googleMap.getMyLocation();
             //noinspection ConstantConditions // in practice, it's not always non-null...

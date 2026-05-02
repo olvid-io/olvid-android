@@ -40,7 +40,7 @@ import io.olvid.messenger.customClasses.KeycloakInfo
 import io.olvid.messenger.customClasses.ProfileBackupSnapshot
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.backups.AppDeviceSnapshot
-import io.olvid.messenger.settings.composables.ProfilePictureLabelAndKey
+import io.olvid.messenger.settings.backupV2.composables.ProfilePictureLabelAndKey
 import net.openid.appauth.AuthState
 import java.util.HashMap
 import java.util.concurrent.atomic.AtomicInteger

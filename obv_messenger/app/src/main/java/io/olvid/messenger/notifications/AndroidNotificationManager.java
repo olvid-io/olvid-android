@@ -584,7 +584,7 @@ public class AndroidNotificationManager {
             sendMessageIntent.setAction(NotificationActionService.ACTION_MISSED_CALL_MESSAGE);
             sendMessageIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussion.id);
             PendingIntent sendMessagePendingIntent = PendingIntent.getService(App.getContext(), getMissedCallNotificationId(discussion.id), sendMessageIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
-            NotificationCompat.Action sendMessageAction = new NotificationCompat.Action.Builder(R.drawable.ic_send, App.getContext().getString(R.string.notification_action_send_message), sendMessagePendingIntent)
+            NotificationCompat.Action sendMessageAction = new NotificationCompat.Action.Builder(R.drawable.ic_send_up, App.getContext().getString(R.string.notification_action_send_message), sendMessagePendingIntent)
                     .addRemoteInput(remoteInput)
                     .setAllowGeneratedReplies(SettingsActivity.isNotificationSuggestionAllowed())
                     .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
@@ -1050,7 +1050,7 @@ public class AndroidNotificationManager {
             replyIntent.setAction(NotificationActionService.ACTION_DISCUSSION_REPLY);
             replyIntent.putExtra(NotificationActionService.EXTRA_DISCUSSION_ID, discussion.id);
             PendingIntent replyPendingIntent = PendingIntent.getService(App.getContext(), getMessageNotificationId(discussion.id), replyIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
-            NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(R.drawable.ic_send, App.getContext().getString(R.string.notification_action_reply), replyPendingIntent)
+            NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(R.drawable.ic_send_up, App.getContext().getString(R.string.notification_action_reply), replyPendingIntent)
                     .addRemoteInput(remoteInput)
                     .setAllowGeneratedReplies(SettingsActivity.isNotificationSuggestionAllowed())
                     .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
@@ -1090,6 +1090,10 @@ public class AndroidNotificationManager {
     @SuppressLint("MissingPermission")
     public static void displayPollVoteNotification(OwnedIdentity ownedIdentity, Discussion discussion, Message message, UUID voteId) {
         executor.execute(() -> {
+            if (SettingsActivity.getDisableSecondaryNotifications()) {
+                return;
+            }
+
             DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
             if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications()) {
                 return;
@@ -1238,6 +1242,10 @@ public class AndroidNotificationManager {
     @SuppressLint("MissingPermission")
     public static void displayReactionNotification(@Nullable OwnedIdentity ownedIdentity, @NonNull Discussion discussion, @NonNull Message message, @Nullable String emoji, @NonNull Contact contact) {
         executor.execute(() -> {
+            if (SettingsActivity.getDisableSecondaryNotifications()) {
+                return;
+            }
+
             DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussion.id);
             if (discussionCustomization != null && discussionCustomization.shouldMuteNotifications()) {
                 return;
@@ -1377,7 +1385,9 @@ public class AndroidNotificationManager {
             initialView.drawOnCanvas(new Canvas(largeIcon));
             builder.setLargeIcon(largeIcon);
 
-            String messageContent = message.getStringContent(App.getContext());
+            String messageContent = message.getStringContent(App.getContext(), true);
+            messageContent = Markdown.formatSingleLineMarkdown(messageContent).toString();
+
             if (message.jsonExpiration != null) {
                 try {
                     JsonExpiration jsonExpiration = AppSingleton.getJsonObjectMapper().readValue(message.jsonExpiration, JsonExpiration.class);

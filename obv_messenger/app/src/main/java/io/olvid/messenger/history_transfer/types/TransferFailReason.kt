@@ -19,9 +19,28 @@
 
 package io.olvid.messenger.history_transfer.types
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import io.olvid.messenger.R
+
 
 enum class TransferFailReason {
-    ABORTED, // this is only visible on the size which aborted, other side will have UNKNOWN_REASON
-    UNKNOWN_OWNED_IDENTITY, // only used when restoring a zip
+    ABORTED, // this is only visible for user initiated aborts, for disconnect UNKNOWN_REASON is shown
     UNKNOWN_REASON, // most often this is a connection loss, but could be an internal exception
+
+    // only used when restoring a zip
+    OWNED_IDENTITY_MISMATCH,
+    BAD_ZIP_PASSWORD,
+    BAD_ZIP_FORMAT,
+}
+
+@Composable
+fun TransferFailReason.getDescription(): String {
+    return when (this) {
+        TransferFailReason.ABORTED -> stringResource(R.string.history_transfer_fail_reason_aborted)
+        TransferFailReason.UNKNOWN_REASON -> stringResource(R.string.history_transfer_fail_reason_unknown)
+        TransferFailReason.OWNED_IDENTITY_MISMATCH -> stringResource(R.string.history_transfer_fail_reason_identity_mismatch)
+        TransferFailReason.BAD_ZIP_PASSWORD -> stringResource(R.string.history_transfer_fail_reason_wrong_passwrod)
+        TransferFailReason.BAD_ZIP_FORMAT -> stringResource(R.string.history_transfer_fail_reason_invalid_zip)
+    }
 }

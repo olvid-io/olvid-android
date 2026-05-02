@@ -624,7 +624,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 if (((groupWasJustCreatedByMe && createdOnOtherDevice) || !updatedByMe)
                         && !bytesIdentitiesOfNewMembersWithChangeSettingsPermission.isEmpty()) {
                     // the list of users with the permission to change group shared settings has changed
-                    //    --> send a query shared settings message to them to have the most up to date shared settings
+                    //    --> send a query shared settings message to them to have the most up-to-date shared settings
                     Integer jsonSharedSettingsVersion;
                     JsonExpiration jsonExpiration;
                     DiscussionCustomization discussionCustomization = db.discussionCustomizationDao().get(discussion.id);

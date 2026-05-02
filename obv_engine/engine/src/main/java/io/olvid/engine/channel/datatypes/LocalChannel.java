@@ -89,7 +89,7 @@ public class LocalChannel extends Channel {
         switch (message.getSendChannelInfo().getChannelType()) {
             case SendChannelInfo.LOCAL_TYPE:
                 // Check that the toIdentity is an OwnedIdentity
-                if (channelManagerSession.identityDelegate.isOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getToIdentity())
+                if (channelManagerSession.identityDelegate.isOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getToIdentity(), false)
                         || Objects.equals(message.getSendChannelInfo().getToIdentity().getServer(), Constants.EPHEMERAL_IDENTITY_SERVER)) {
                     return new LocalChannel[]{
                             new LocalChannel(message.getSendChannelInfo().getToIdentity())

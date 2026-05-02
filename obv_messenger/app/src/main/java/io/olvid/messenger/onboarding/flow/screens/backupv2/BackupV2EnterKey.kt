@@ -52,7 +52,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.customClasses.formatMarkdownToAnnotatedString
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.flow.BackupKeyCheckState
 import io.olvid.messenger.onboarding.flow.OnboardingAction
@@ -60,7 +60,7 @@ import io.olvid.messenger.onboarding.flow.OnboardingActionType
 import io.olvid.messenger.onboarding.flow.OnboardingRoutes
 import io.olvid.messenger.onboarding.flow.OnboardingScreen
 import io.olvid.messenger.onboarding.flow.OnboardingStep
-import io.olvid.messenger.settings.composables.BackupKeyTextField
+import io.olvid.messenger.settings.backupV2.composables.BackupKeyTextField
 
 
 fun NavGraphBuilder.backupV2EnterKey(
@@ -168,14 +168,14 @@ fun NavGraphBuilder.backupV2EnterKey(
                     if (newProfile) {
                         Text(
                             modifier = Modifier.widthIn(max = 400.dp),
-                            text = AnnotatedString(stringResource(R.string.explanation_no_backup_found_try_legacy_add_profile)).formatMarkdown(),
+                            text = stringResource(R.string.explanation_no_backup_found_try_legacy_add_profile).formatMarkdownToAnnotatedString(),
                             color = colorResource(R.color.red),
                             style = OlvidTypography.body2,
                         )
                     } else {
                         Text(
                             modifier = Modifier.widthIn(max = 400.dp),
-                            text = AnnotatedString(stringResource(R.string.explanation_no_backup_found_try_legacy)).formatMarkdown(),
+                            text = stringResource(R.string.explanation_no_backup_found_try_legacy).formatMarkdownToAnnotatedString(),
                             color = colorResource(R.color.red),
                             style = OlvidTypography.body2,
                         )

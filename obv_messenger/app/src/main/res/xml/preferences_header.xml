@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <Preference
         android:title="@string/pref_category_notifications_title"
         android:key="pref_header_key_notifications"
@@ -55,9 +54,8 @@
     <Preference
         android:title="@string/pref_category_history_transfer_title"
         android:key="pref_header_key_history_transfer"
-        android:fragment="io.olvid.messenger.settings.HistoryTransferPreferenceFragment"
+        android:fragment="io.olvid.messenger.settings.history_transfer.HistoryTransferPreferenceFragment"
         android:icon="@drawable/ic_pref_transfer"
-        app:isPreferenceVisible="false"
         android:widgetLayout="@layout/preference_widget_header_chevron" />
     <Preference
         android:title="@string/pref_category_other_title"

@@ -513,7 +513,7 @@
             android:name=".discussion.settings.DiscussionSettingsActivity"
             android:label="@string/activity_title_discussion_settings" />
         <activity
-            android:name=".activities.LockScreenActivity"
+            android:name=".lock_screen.LockScreenActivity"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateAlwaysVisible" />
@@ -552,6 +552,16 @@
             android:name=".webrtc.WebrtcIncomingCallActivity"
             android:theme="@style/AppTheme.NoActionBar.Black"
             android:label="@string/activity_title_webrtc_incoming_call"
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            tools:targetApi="o_mr1" />
+        <activity
+            android:name=".history_transfer.WebrtcIncomingTransferActivity"
+            android:theme="@style/AppTheme.NoActionBar.DimmedWithStatusTransparent"
+            android:label="@string/history_transfer_title"
             android:excludeFromRecents="true"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
@@ -601,6 +611,10 @@
             android:launchMode="singleInstance"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".discussion.location.LocationActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/AppTheme.NoActionBar.DimmedWithStatusTransparent" />
 
         <service android:name=".notifications.NotificationActionService"
             android:exported="false"/>
@@ -617,10 +631,14 @@
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="This service is started for both outgoing and incoming VoIP calls. For outgoing calls, the microphone permission is already granted and service can be started as microphone, for incoming calls we start a foreground service while the phone is ringing, following the reception of a push notification. As soon as the recipient picks up the call and grants audio permission, the foreground service is restarted as a microphone service."/>
         </service>
-        <service android:name=".services.MediaPlayerService"
+        <service android:name=".services.MediaPlaybackService"
             android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService"/>
+            </intent-filter>
+        </service>
         <service android:name="io.olvid.messenger.history_transfer.TransferNotificationService"
             android:enabled="true"
             android:exported="false"

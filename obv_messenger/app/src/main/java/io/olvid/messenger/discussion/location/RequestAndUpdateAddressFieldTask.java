@@ -94,10 +94,10 @@ public class RequestAndUpdateAddressFieldTask implements Runnable {
                     PeliasReverseResponse serverResponse = AppSingleton.getJsonObjectMapper().readValue(byteArrayOutputStream.toByteArray(), PeliasReverseResponse.class);
 
                     if (serverResponse == null) {
-                        throw new IOException("Invalid server response: " + serverResponse);
+                        throw new IOException("Invalid server response: null");
                     }
 
-                    if (serverResponse.getFeatures().size() != 0) {
+                    if (!serverResponse.getFeatures().isEmpty()) {
                         PeliasReverseResponse.FeaturesItem mostRelevantFeature = null;
                         // select value: we some layers are more relevant
                         for (PeliasReverseResponse.FeaturesItem feature : serverResponse.getFeatures()) {
@@ -140,6 +140,6 @@ public class RequestAndUpdateAddressFieldTask implements Runnable {
     }
 
     interface  AddressCallback {
-        public void onAddressFound(RequestAndUpdateAddressFieldTask requestAndUpdateAddressFieldTask, @Nullable String address);
+        void onAddressFound(RequestAndUpdateAddressFieldTask requestAndUpdateAddressFieldTask, @Nullable String address);
     }
 }

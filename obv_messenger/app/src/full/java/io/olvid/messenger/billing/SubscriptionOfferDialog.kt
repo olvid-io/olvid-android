@@ -59,7 +59,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -76,6 +75,8 @@ import io.olvid.messenger.designsystem.components.OlvidActionButton
 import io.olvid.messenger.designsystem.components.OlvidCircularProgress
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
 import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
+import io.olvid.messenger.designsystem.components.OlvidOutlinedActionButton
+import io.olvid.messenger.designsystem.components.OlvidOutlinedSecondaryButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.olvid_plus.OlvidPlusDetails
 import io.olvid.messenger.settings.SettingsActivity
@@ -211,11 +212,8 @@ fun SubscriptionOfferDialog(
                         }
                         Spacer(Modifier.height(8.dp))
 
-                        OlvidActionButton(
+                        OlvidOutlinedActionButton(
                             modifier = Modifier.fillMaxWidth(),
-                            containerColor = Color.Transparent,
-                            contentColor = colorResource(R.color.olvid_gradient_light),
-                            outlinedColor = colorResource(R.color.olvid_gradient_light),
                             text = stringResource(R.string.button_label_retry),
                             onClick = { viewModel.fetchOffers(addDelay = true) }
                         )
@@ -273,11 +271,8 @@ fun SubscriptionOfferDialog(
                                     .ofLocalizedTime(FormatStyle.SHORT)
                                     .withLocale(locale)
                             }
-                            OlvidActionButton(
+                            OlvidOutlinedSecondaryButton(
                                 modifier = Modifier.fillMaxWidth(),
-                                containerColor = Color.Transparent,
-                                contentColor = colorResource(R.color.almostBlack),
-                                outlinedColor = colorResource(R.color.darkGrey),
                                 text = stringResource(R.string.button_label_remind_me_later),
                                 onClick = {
                                     remindMeLaterMenu = true

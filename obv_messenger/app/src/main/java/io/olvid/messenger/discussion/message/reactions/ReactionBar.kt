@@ -53,8 +53,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
 import io.olvid.messenger.designsystem.components.AnimatedEmoji
@@ -146,17 +148,25 @@ fun ReactionBar(
                 }
             }
         }
+        val rtlLayout = LocalLayoutDirection.current == LayoutDirection.Rtl
         IconButton(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .size(48.dp)
                 .background(
                     brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            colorResource(R.color.dialogBackground),
-                            colorResource(R.color.dialogBackground)
-                        )
+                        colors = if (rtlLayout)
+                            listOf(
+                                colorResource(R.color.dialogBackground),
+                                colorResource(R.color.dialogBackground),
+                                Color.Transparent
+                            )
+                        else
+                            listOf(
+                                Color.Transparent,
+                                colorResource(R.color.dialogBackground),
+                                colorResource(R.color.dialogBackground)
+                            )
                     )
                 )
                 .padding(2.dp)

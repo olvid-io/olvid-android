@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">連絡先の詳細</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">ユーザー詳細</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">グループ詳細</string>
@@ -258,7 +258,6 @@
 	<string name="text_you" state="needs_review" hash="672009142">あなた</string>
 	<string name="title_invite_chooser" state="needs_review" hash="1726572772">招待状の送信方法を選択してください</string>
 	<string name="title_sharing_chooser" state="needs_review" hash="291715689">共有方法を選択してください</string>
-	<string name="toast_message_android_bug_attach_duplicate_uri" state="needs_review" hash="-776215584">Androidのバージョンにバグがあるため、一部のファイルをメッセージに添付できませんでした（複数のファイルが同じURIを返しました）。不足しているファイルを再度添付してみてください。</string>
 	<string name="toast_message_attachment_being_copied" state="needs_review" hash="-978855599">添付ファイルはまだ処理中です。処理が完了するとメッセージが送信されます。</string>
 	<string name="toast_message_attachment_saved" state="needs_review" hash="-2073631581">添付ファイルが保存されました</string>
 	<string name="toast_message_camera_permission_denied" state="needs_review" hash="1896719877">カメラの使用許可が拒否されました</string>
@@ -344,6 +343,9 @@
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">有効にすると、Olvidは送信したリンクのプレビューを取得してメッセージに添付します。</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">受信したリンクのプレビューを取得</string>
 	<string name="pref_link_preview_summary_inbound" state="needs_review" hash="-320325429">有効にすると、Olvidは受信したリンクのプレビューを自動的に取得します（プレビューがメッセージに添付されていない場合）。</string>
+	<string name="link_preview_menu_copy_link" state="needs_review" hash="1269903076">リンクをコピー</string>
+	<string name="link_preview_menu_open_in_browser" state="needs_review" hash="-1711141559">ブラウザで開く</string>
+	<string name="link_preview_menu_open_image" state="needs_review" hash="-2013483894">画像を閲覧</string>
 	<string name="pref_discussion_read_receipt_title" state="needs_review" hash="-652307837">既読通知を送信</string>
 	<string name="pref_text_app_default" state="needs_review" hash="1920567018">デフォルト設定を使用する</string>
 	<string name="pref_text_app_default_true" state="needs_review" hash="-948780646">デフォルト設定を使用する (オン)</string>
@@ -352,6 +354,10 @@
 	<string name="pref_text_discussion_read_receipt_on" state="needs_review" hash="983295321">オンにすると、連絡先に通知されます。</string>
 	<string name="pref_use_lock_screen_title" state="needs_review" hash="540058239">アプリケーションロック画面を使用する</string>
 	<string name="pref_use_lock_screen_summary" state="needs_review" hash="-399095273">起動時にOlvidをロック画面で保護するために、これをオンにします。</string>
+	<string name="pref_lock_screen_required_by_mdm" state="needs_review" hash="-500219406">組織によって必要とされます</string>
+	<string name="lock_screen_setup_title" state="needs_review" hash="932203184">ロック画面が必要です</string>
+	<string name="lock_screen_setup_explanation" state="needs_review" hash="169071212">お客様の組織では、このアプリをロック画面のPINまたはパスワードで保護する必要があります。</string>
+	<string name="lock_screen_setup_button" state="needs_review" hash="672169315">PINを設定する</string>
 	<string name="pref_category_notifications_title" state="needs_review" hash="1237583104">通知</string>
 	<string name="pref_category_privacy_title" state="needs_review" hash="-1750659871">プライバシー</string>
 	<string name="pref_category_other_title" state="needs_review" hash="-1683901612">その他の設定</string>
@@ -370,7 +376,7 @@
 	<string name="button_label_use_pin" state="needs_review" hash="918492771">パスワードの代わりにPINを使用する</string>
 	<string name="hint_enter_pin" state="needs_review" hash="999437557">PINを入力</string>
 	<string name="hint_confirm_pin" state="needs_review" hash="1780268503">PINを確認</string>
-	<string name="text_pin_creation_explanation" state="needs_review" hash="-1935715126">Olvidのロックを解除するには、このPINを入力する必要があります。\n復元することはできません。忘れてしまうと、Olvidデータへのアクセスを失う可能性があります。</string>
+	<string name="text_pin_creation_explanation" state="needs_review" hash="1232246926">Olvidのロックを解除するには、このPINを入力する必要があります。\nPINは復元できず、**PINを忘れると、Olvidのデータにアクセスできなくなる可能性があります**。</string>
 	<string name="error_text_pin_too_short" state="needs_review" hash="-1085309478">PINが短すぎます（4桁以上）</string>
 	<string name="error_text_pin_mismatch" state="needs_review" hash="-4525766">PINが一致しません</string>
 	<string name="hint_enter_password" state="needs_review" hash="478503341">パスワードを入力</string>
@@ -394,6 +400,7 @@
 	<string name="pref_text_lock_grace_time_infinity" state="needs_review" hash="146086108">Olvidを手動でロックのみ</string>
 	<string name="pref_unlock_biometry_summary_none_enrolled" state="needs_review" hash="-118589413">お使いのデバイスでは、生体認証がまだ設定されていません。</string>
 	<string name="dialog_title_unlock_olvid" state="needs_review" hash="-2054572246">生体認証でOlvidのロックを解除</string>
+	<string name="dialog_title_unlock_neutral" state="needs_review" hash="761644522">生体認証でロック解除</string>
 	<string name="notification_channel_unified_service_name" state="needs_review" hash="1404446256">フォアグラウンドサービス</string>
 	<string name="notification_channel_unified_service_description" state="needs_review" hash="-1204081836">Olvidのステータスを表示する固定通知</string>
 	<string name="notification_title_olvid_is_unlocked" state="needs_review" hash="1688502744">Olvidがアンロックされました</string>
@@ -437,6 +444,7 @@
 	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">このデバイスであなたのプロフィールは無効になりました。\n\n現在、有効なデバイスがないようです。いつでもプロフィールを再アクティブにできます。\n\n続行するには、以下にある「このデバイスでプロフィールを再アクティブにする」を押してください。\n\n「キャンセル」を押すと、このダイアログを閉じ、このデバイスを非アクティブのままにできます。このデバイスでメッセージを送受信することはできませんが、以前のディスカッションは引き続き閲覧できます。</string>
 	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">このデバイスであなたのプロフィールは無効になりました.\n\n複数のデバイスでOlvidを使用するライセンスがないようです。このデバイスを再アクティブ化するには、別のデバイスを無効にする必要があります.\n\n続行する場合は、以下のリストから無効にするデバイスを選択し、「このデバイスでプロフィールを再アクティブ化」を押してください.\n\n「キャンセル」を押すと、このダイアログを閉じ、このデバイスを非アクティブのままにできます。このデバイスでメッセージを送受信することはできませんが、以前のディスカッションは引き続き閲覧できます。</string>
 	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">このデバイスであなたのプロフィールは無効になりました。\n\n他のすべてのデバイスが近い将来に無効になるように設定されているようです。そのため、いつでもこのデバイスでプロフィールを再アクティブ化できます。参考までに、現在アクティブなデバイスのリストを以下に示します。\n\n続行する場合は、以下にある「このデバイスでプロフィールを再アクティブ化する」を押してください。\n\n「キャンセル」を押すと、このダイアログを閉じ、このデバイスを非アクティブのままにできます。このデバイスでメッセージを送受信することはできませんが、以前のディスカッションは引き続き閲覧できます。</string>
+	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">このデバイスであなたのプロフィールは非アクティブになっています。\n\n再アクティブ化しない限り、ここではメッセージを送受信できません。</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">このデバイスで自分のプロフィールを再アクティブにする</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">エラーが発生しました。もう一度お試しください。</string>
 	<string name="dialog_title_identity_activated" state="needs_review" hash="-1465666248">Olvid IDが再アクティブ化されました</string>
@@ -810,10 +818,7 @@
 	<string name="toast_message_voice_message_recording_failed" state="needs_review" hash="-632817078">ボイスメッセージの録音に失敗しました</string>
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">メディアプレーヤー</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Olvidでメディアを再生する際の再生/一時停止コントロール</string>
-	<string name="notification_title_now_playing" state="needs_review" hash="-1042122929">再生中…</string>
-	<string name="notification_action_pause" state="needs_review" hash="1931883968">一時停止</string>
-	<string name="notification_action_play" state="needs_review" hash="1143766922">再生</string>
-	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="-1049639416">%1$sを再生できません</string>
+	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">オーディオファイルを再生できません</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">削除</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">すべて削除</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">すべての場所から削除できませんでした。もう一度お試しください。</string>
@@ -843,7 +848,6 @@
 	<string name="dialog_message_unmute_notifications" state="needs_review" hash="816867976">新しいメッセージの通知は現在ミュートされています。\n\n通知を解除しますか？</string>
 	<string name="dialog_message_unmute_notifications_muted_until" state="needs_review" hash="-325454266">新しいメッセージの通知は%1$sまでミュートされています.\n\n通知を解除しますか？</string>
 	<string name="notification_action_mute" state="needs_review" hash="-1553988068">ミュート</string>
-	<string name="pref_scaled_turn_title" state="needs_review" hash="-1234636269">使用する地域のTURNサーバーを選択してください</string>
 	<string name="explanation_identity_creation_options" state="needs_review" hash="-795537312">この画面では、Olvid IDの作成に関する追加オプションを選択できます。オプションを手動で入力するか、設定用のQRコードをスキャンしてください。</string>
 	<string name="button_label_check_options" state="needs_review" hash="-759177128">オプションを確認</string>
 	<string name="hint_olvid_server" state="needs_review" hash="1097391633">Olvidサーバー</string>
@@ -859,6 +863,8 @@
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Olvidサーバーがセキュアな通話の開始をサポートしていないようです。\n\n詳細については、管理者にお問い合わせください。</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">ID作成オプション</string>
 	<string name="text_option_server" state="needs_review" hash="-1130676431">サーバー：%1$s</string>
+	<string name="dialog_title_non_default_server" state="needs_review" hash="2119192219">カスタムサーバーの使用</string>
+	<string name="dialog_message_non_default_server" state="needs_review" hash="459308900">次のサーバーでプロフィールを作成しようとしています:\n\n%1$s\n\nこれはデフォルトのOlvidサーバーではありません。このサーバーを信頼できる場合にのみ続行してください。</string>
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">ライセンス: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">IDプロバイダー</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">IDプロバイダーサーバー</string>
@@ -1201,8 +1207,6 @@
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">接続状況: 接続済み</string>
 	<string name="label_ping_delay" state="needs_review" hash="25344924">Ping: %1$dms</string>
 	<string name="label_over_max_ping_delay" state="needs_review" hash="-684190262">ピング: &gt;%1$ds</string>
-	<string name="menu_action_copy_message_text" state="needs_review" hash="1799737962">メッセージのテキストをコピー</string>
-	<string name="menu_action_copy_text_and_attachments" state="needs_review" hash="428315032">メッセージと添付ファイルをコピー</string>
 	<string name="label_message_copied_from_olvid" state="needs_review" hash="1145396410">Olvidからメッセージをコピーしました</string>
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">メッセージ全体がクリップボードにコピーされました</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">ワンクリックで連絡先またはグループに定義済みのメッセージを送信するためのアクションショートカット</string>
@@ -1402,7 +1406,6 @@
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">のコピー</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">位置情報を送信しました</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">位置情報を受信しました</string>
-	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">位置情報サービスが利用できません</string>
 	<string name="label_send_your_location" state="needs_review" hash="618026241">位置情報を送信</string>
 	<string name="notification_title_sharing_location" state="needs_review" hash="-1626101904">Olvidで位置情報の共有</string>
 	<string name="notification_action_stop_sharing" state="needs_review" hash="585626699">共有を停止</string>
@@ -1529,6 +1532,8 @@
 	<string name="text_setting_lock_biometry" state="needs_review" hash="-1698353580">‣ 生体認証でロック解除：</string>
 	<string name="text_setting_lock_notification" state="needs_review" hash="2022286622">‣ 永続的なロック画面通知：</string>
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">‣ 3回PINコードを間違えたら、機密メッセージを消去します：</string>
+	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">‣ ロック画面を必須にする:</string>
+	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">‣ ロック画面のトークンをリセットする:</string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">‣ アーカイブされたチャットの添付ファイルを自動ダウンロード：</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">‣ 通知時の議論のアーカイブ解除：</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">‣ リンクのプレビューを受信しました：</string>
@@ -1591,8 +1596,8 @@
 	<string name="label_open_original_link_with_trackers" state="needs_review" hash="-1586932660">追跡パラメータを含む元のリンクを使用する</string>
 	<string name="dialog_title_confirm_open_olvid_link" state="needs_review" hash="425949498">このリンクをOlvidで開きますか？</string>
 	<string name="toast_message_unable_to_open_url" state="needs_review" hash="-1486954792">URLを開けませんでした</string>
-	<string name="text_explanation_location_map_provider" state="needs_review" hash="-173394547">地図プロバイダーを選択すると、地図上で共有したい場所を正確に選択できます。ただし、これにより、あなたの位置情報（または連絡先の位置情報）がこのサービスプロバイダーに開示される可能性があります。</string>
-	<string name="text_explanation_location_map_provider_settings" state="needs_review" hash="68421420">この選択はアプリケーションの設定から変更できます。</string>
+	<string name="dialog_title_choose_map_provider" state="needs_review" hash="1225681568">地図プロバイダーを選択</string>
+	<string name="dialog_message_choose_map_provider" state="needs_review" hash="-2129640593">地図を表示する際に、以下の地図プロバイダーを選択して、場所の表示や共有を行ってください。\n\nこの操作により、**お客様の場所（または連絡先の場所）がこのサービスプロバイダーに開示される可能性がある**ことにご注意ください。</string>
 	<string name="button_label_choose_provider" state="needs_review" hash="-797956886">プロバイダーを選択</string>
 	<string name="button_label_live_share" state="needs_review" hash="327122881">ライブ共有</string>
 	<string name="label_fetching_address" state="needs_review" hash="-839353954">アドレス取得中…</string>
@@ -1801,7 +1806,9 @@
 	<string name="dialog_title_custom_address_server_url" state="needs_review" hash="-2071925830">カスタムアドレスサーバー</string>
 	<string name="hint_custom_address_server_url" state="needs_review" hash="1348105685">アドレス参照サーバーURL</string>
 	<string name="dialog_message_custom_address_server_url" state="needs_review" hash="401731382">Olvidは、アドレス検索のために**Pelias**サーバーのみをサポートしています。以下に、クエリしたいサーバーのURLを入力してください。URLは*https://pelias.olvid.io*のような形式である必要があります。クエリは*/v1/reverse*のエンドポイントに送信されます.\n\nこのサーバーはあなたの位置に関する情報を学習する可能性があります。**信頼できるサーバーを使用する**ようにしてください。</string>
-	<string name="toast_message_playback_speed_not_supported_on_device" state="needs_review" hash="502764942">再生速度を変更できません</string>
+	<string name="pref_location_gps_debug_title" state="needs_review" hash="1786532100">位置情報の共有に関するデバッグ機能を有効にする</string>
+	<string name="pref_location_gps_always_on_title" state="needs_review" hash="1250376384">GPSを常にオンにしておく</string>
+	<string name="pref_location_export_gps_logs_title" state="needs_review" hash="-459831250">GPSアクティビティログをエクスポート</string>
 	<string name="text_speed_1x" state="needs_review" hash="789822816">1×</string>
 	<string name="text_speed_1_5x" state="needs_review" hash="-120181054">1.5×</string>
 	<string name="text_speed_2x" state="needs_review" hash="1171767872">2×</string>
@@ -2142,15 +2149,11 @@
 	<string name="history_transfer_step_none" state="needs_review" hash="1228580785">現在転送中のデータはありません</string>
 	<string name="history_transfer_step_contacting_other_device" state="needs_review" hash="1719019815">他のデバイスを待機中</string>
 	<string name="history_transfer_step_connecting" state="needs_review" hash="1836039168">別のデバイスに接続中</string>
-	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">交渉中（3段階のうち1段階目）</string>
-	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">メッセージの転送（3段階のうちの2段階目）</string>
-	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">添付ファイルの転送（3/3）</string>
-	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">交渉中</string>
-	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">メッセージの転送</string>
-	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">添付ファイルの転送</string>
+	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">交渉中</string>
+	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">転送中</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">転送が完了しました</string>
-	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">転送が中断されました</string>
-	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">チャット履歴の転送（ベータ版）</string>
+	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">転送に失敗しました</string>
+	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">チャット履歴の転送</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">転送を開始できません。別の転送がすでに実行されている可能性があります。</string>
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">「マジックリンク」を使用する</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">無効なマジックリンク</string>
@@ -2163,18 +2166,111 @@
 	<string name="onboarding_transfer_keycloak_error_message_authentication_impossible" state="needs_review" hash="-1891385979">利用可能な認証方法が見つかりません。</string>
 	<string name="pref_use_alt_turn_servers_title" state="needs_review" hash="-1956132776">別のTURNサーバーを使用する</string>
 	<string name="pref_use_alt_turn_servers_summary" state="needs_review" hash="357427162">このオプションを有効にすると、IPアドレスが変更されるTURNサーバーを使用できます。不明な場合は、このオプションをオフのままにしてください。😁</string>
-	<string name="button_label_transfer_through_webrtc" state="needs_review" hash="-1809138918">ローカルネットワーク経由での転送</string>
-	<string name="button_label_export_zip" state="needs_review" hash="1575043364">ZIPファイルとしてエクスポート</string>
-	<string name="button_label_import_zip" state="needs_review" hash="1299665090">ZIPファイルをインポート</string>
-	<string name="dialog_title_transfer_choose_target_device" state="needs_review" hash="218115750">この転送の対象デバイスを選択してください</string>
-	<string name="transfer_label_no_other_active_device" state="needs_review" hash="-2135899221">他のアクティブなデバイスはありません</string>
-	<string name="transfer_label_messages" state="needs_review" hash="-1639407912">メッセージ</string>
-	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">スループット</string>
-	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">残り</string>
-	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">添付ファイル</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">この機能はまだベータテスト段階にあり、現在の実装はOlvidの履歴転送の最終実装と互換性がない場合があります。\n\nこの機能を使用する前に、お使いのデバイスにOlvidの最新バージョンがインストールされていることを確認してください。</string>
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">転送中の処理を中止しますか？</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">履歴の転送が現在進行中です。中止しますか？</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">転送を中止する</string>
 	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">このディスカッションに参加するのを待っています</string>
+	<string name="label_your_other_device" state="needs_review" hash="-339632056">別のデバイス</string>
+	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">このデバイスにチャット履歴を転送したい</string>
+	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">\"%1$s\"は、このデバイスにチャット履歴を転送したいと考えています</string>
+	<string name="button_label_start_transfer" state="needs_review" hash="208526116">転送を開始</string>
+	<string name="pref_disable_secondary_notifications_title" state="needs_review" hash="29372078">「セカンダリ」通知を無効にする</string>
+	<string name="pref_disable_secondary_notifications_summary" state="needs_review" hash="-402927980">この設定を有効にすると、メッセージに対するリアクションやアンケートへの新しい回答に関する通知が無効になります。</string>
+	<string name="template_copy_multiple_messages" state="needs_review" hash="-1584473750">[%1$s] [%2$s]:\n[%3$s]</string>
+	<string name="label_export_your_chat_history" state="needs_review" hash="30036193">チャット履歴をエクスポートする</string>
+	<string name="label_import_your_chat_history" state="needs_review" hash="-1058286401">チャット履歴をインポートする</string>
+	<string name="explanation_export_your_chat_history" state="needs_review" hash="2042738985">このオプションは、このデバイス**から**チャット履歴を転送する場合に使用してください。</string>
+	<string name="explanation_import_your_chat_history" state="needs_review" hash="366204152">このオプションは、チャット履歴を**このデバイスに**転送する場合に使用してください。</string>
+	<string name="explanation_history_transfer" state="needs_review" hash="983501865">この機能を使用すると、チャット履歴を2つのデバイス間で**安全に転送**できます。\n\n開始する前に、プロファイルが**両方のデバイスに存在**していることを確認してください。</string>
+	<string name="button_label_import" state="needs_review" hash="-984720905">インポート</string>
+	<string name="history_transfer_pick_profile_title" state="needs_review" hash="-1782334343">どのプロフィールで続行しますか？</string>
+	<string name="history_transfer_pick_profile_text_import" state="needs_review" hash="-1162713377">チャット履歴を**インポート**したいプロファイルを選択してください。</string>
+	<string name="history_transfer_pick_profile_text_export" state="needs_review" hash="951522414">**チャット履歴をエクスポート**したいプロファイルを選択してください。</string>
+	<string name="history_transfer_pick_method_title" state="needs_review" hash="661094742">何をしたいですか？</string>
+	<string name="history_transfer_pick_method_text_import" state="needs_review" hash="1116376527">プロフィール**%1$s**のチャット履歴をインポートする方法をお選びください。</string>
+	<string name="history_transfer_pick_method_text_export" state="needs_review" hash="1750125743">プロフィール**%1$s**のチャット履歴をどのようにエクスポートするかお選びください。</string>
+	<string name="history_transfer_via_wifi_title" state="needs_review" hash="-2016953028">Wi-Fi経由での転送</string>
+	<string name="history_transfer_via_wifi_message" state="needs_review" hash="-758708700">両方のデバイスを同じWi-Fiネットワークに接続するだけです。</string>
+	<string name="history_transfer_via_zip_title_import" state="needs_review" hash="1608302669">.zipファイルをインポート</string>
+	<string name="history_transfer_via_zip_title_export" state="needs_review" hash="-1924849877">‎.zipファイルをエクスポート</string>
+	<string name="history_transfer_via_zip_message_import" state="needs_review" hash="1766231761">古いデバイスからコピーした.zipファイルを選択してください。</string>
+	<string name="history_transfer_via_zip_message_export" state="needs_review" hash="-1123951975">.zipファイルをダウンロードして、新しいデバイスにコピーしてください。</string>
+	<string name="history_transfer_import_zip_description" state="needs_review" hash="855194374">チャット履歴をインポートするには、別のデバイスから**エクスポートした**.zipファイルを選択してください。\n\n選択したプロファイル**%1$s**が、この.zipファイルを生成するために使用されたプロファイルと一致していることを確認してください。</string>
+	<string name="button_label_choose_zip_file" state="needs_review" hash="-493688169">.zipファイルを選択</string>
+	<string name="dialog_title_error_reading_zip" state="needs_review" hash="1059408985">‎.zipファイルの読み込みに失敗しました</string>
+	<string name="dialog_message_error_reading_zip" state="needs_review" hash="1864744526">指定された.zipファイルの読み込み中にエラーが発生しました。\n\nOlvidのチャット履歴エクスポートファイルを選択していることを確認してください。</string>
+	<string name="dialog_title_error_zip_password" state="needs_review" hash="1651240086">パスワードが違います</string>
+	<string name="dialog_message_error_zip_password" state="needs_review" hash="216311562">入力されたパスワードでは、選択した.zipファイルを解読できませんでした。\n\n再度お試しください。</string>
+	<string name="dialog_title_zip_password_required" state="needs_review" hash="-944166479">パスワードが必要です</string>
+	<string name="dialog_message_zip_password_required" state="needs_review" hash="548842041">選択した.zipファイルはパスワードで保護されています。別のデバイスでチャット履歴をエクスポートしたときに選択したパスワードを入力してください。</string>
+	<string name="history_transfer_export_scope_title_export" state="needs_review" hash="933575859">何をエクスポートしますか？</string>
+	<string name="history_transfer_export_scope_title_transfer" state="needs_review" hash="-1971421411">何を転送しますか？</string>
+	<string name="history_transfer_scope_messages_export_title" state="needs_review" hash="-1810394953">メッセージのみエクスポート</string>
+	<string name="history_transfer_scope_messages_transfer_title" state="needs_review" hash="1119624141">メッセージのみ転送</string>
+	<string name="history_transfer_scope_messages_export_message" state="needs_review" hash="-2120867312">より小さいエクスポート。テキストメッセージのみが含まれます。</string>
+	<string name="history_transfer_scope_messages_transfer_message" state="needs_review" hash="2071005834">より高速な転送。テキストメッセージのみが含まれます。</string>
+	<string name="history_transfer_scope_everything_export_title" state="needs_review" hash="463008259">メッセージと添付ファイルをエクスポート</string>
+	<string name="history_transfer_scope_everything_transfer_title" state="needs_review" hash="-175297433">メッセージと添付ファイルを転送</string>
+	<string name="history_transfer_scope_everything_export_message" state="needs_review" hash="-266277978">完全エクスポート。すべてのメッセージと添付ファイルが含まれます。</string>
+	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">転送が完了しました。すべてのメッセージと添付ファイルが含まれます。</string>
+	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">チャット履歴を.zipファイルとしてエクスポートします。後で、別のデバイスのプロファイルにインポートできます**%1$s**。\n\nこのファイルを解凍して、**チャット履歴をWebページで表示**することもできます。</string>
+	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">.zipファイルを作成</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d のディスカッションと %2$d のメッセージ</string>
+	<string name="label_computing" state="needs_review" hash="1393495921">計算中…</string>
+	<string name="label_total_size" state="needs_review" hash="-788411929">合計サイズ：%1$s</string>
+	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">輸出を保護する</string>
+	<string name="dialog_message_protect_export" state="needs_review" hash="-900141026">セキュリティのため、エクスポートファイルをパスワードで保護することをお勧めします。</string>
+	<string name="button_label_generate_password" state="needs_review" hash="-1174237913">パスワードを生成する</string>
+	<string name="button_label_choose_password" state="needs_review" hash="-1893200284">パスワードを選択</string>
+	<string name="button_label_continue_without_password" state="needs_review" hash="-106870576">パスワードなしで続行</string>
+	<string name="dialog_title_choose_password" state="needs_review" hash="1927816439">パスワードを選択</string>
+	<string name="dialog_title_generated_password" state="needs_review" hash="-690449371">生成されたパスワード</string>
+	<string name="dialog_message_generated_password" state="needs_review" hash="1100314355">以下のパスワードはランダムに生成されました。\n\n**必ず書き留めてから進んでください**。</string>
+	<string name="button_label_copy_to_clipboard" state="needs_review" hash="-1309214553">クリップボードにコピー</string>
+	<string name="history_transfer_pick_target_device_title" state="needs_review" hash="1659408512">デバイスを選択</string>
+	<string name="history_transfer_pick_target_device_text" state="needs_review" hash="-1456199559">チャット履歴を転送したいデバイスを選択してください。\n\n探しているデバイスが見つかりませんか？プロファイル**%1$s**が別のデバイスでアクティブになっていることを確認してください。</string>
+	<string name="history_transfer_no_other_device_explanation" state="needs_review" hash="-1034788616">お使いのプロファイル**%1$s**には、他のアクティブなデバイスがないようです。\n\nチャット履歴の転送を進める前に、**このプロファイルに新しいデバイスを追加**してください。\n\nまた、**.zipファイルをエクスポート**して、後で新しいデバイスにインポートすることもできます。</string>
+	<string name="history_transfer_webrtc_instructions_title" state="needs_review" hash="-1353013738">別のデバイスでこれらの手順に従ってください</string>
+	<string name="history_transfer_instructions_turn_on_other_import" state="needs_review" hash="-930696177">チャット履歴が保存されているデバイスの電源を入れます。</string>
+	<string name="history_transfer_instructions_same_wifi_import" state="needs_review" hash="465388607">両方のデバイスが同じWi-Fiネットワークに接続されていることを確認してください。</string>
+	<string name="history_transfer_instructions_start_export" state="needs_review" hash="-1288439668">別のデバイスで、Olvidの設定を開き、チャット履歴のエクスポートを開始してください。</string>
+	<string name="history_transfer_instructions_turn_on_other_export" state="needs_review" hash="1280642155">**%1$s**をオンにしてください。</string>
+	<string name="history_transfer_instructions_same_wifi_export" state="needs_review" hash="284833986">このデバイスと**%1$s**が同じWi-Fiネットワークに接続されていることを確認してください。</string>
+	<string name="history_transfer_step_awaiting_confirmation" state="needs_review" hash="665601714">転送の承認をお待ちしています</string>
+	<string name="dialog_title_abort_history_transfer" state="needs_review" hash="1914158733">転送中の処理を中断しますか？</string>
+	<string name="dialog_title_abort_history_transfer_export" state="needs_review" hash="-856542741">現在のエクスポートを中止しますか？</string>
+	<string name="dialog_title_abort_history_transfer_import" state="needs_review" hash="976007540">現在のインポートを中止しますか？</string>
+	<string name="dialog_message_abort_history_transfer_webrtc" state="needs_review" hash="1807742093">現在進行中のチャット履歴の転送を中断してもよろしいですか？\n\n後でいつでも転送を再開できます。**すでに転送されたデータはすべて保存され**、再度転送する必要はありません。</string>
+	<string name="dialog_message_abort_history_transfer_zip_export" state="needs_review" hash="716134255">実行中の.zipファイルの書き出しを中止してもよろしいですか？\n\nそうすると、**デバイスに不完全な.zipファイル**が残り、**手動で削除**する必要があります。</string>
+	<string name="dialog_message_abort_history_transfer_zip_import" state="needs_review" hash="1264487097">現在実行中の.zipファイルのインポートを中止してもよろしいですか？\n\n後でいつでもインポートを再開できます。**すでにインポートされたものはすべて保持されます**ので、再度インポートする必要はありません。</string>
+	<string name="button_label_interrupt_and_continue_later" state="needs_review" hash="-976034947">一時停止して後で再開する</string>
+	<string name="button_label_abort_export" state="needs_review" hash="428199797">エクスポートを中止する</string>
+	<string name="button_label_abort_import" state="needs_review" hash="2031103191">インポートを中止する</string>
+	<string name="history_transfer_fail_reason_aborted" state="needs_review" hash="277351522">転送が中断されました</string>
+	<string name="history_transfer_fail_reason_unknown" state="needs_review" hash="-1170630200">不明のエラーが発生しました（おそらくネットワーク接続の問題です）</string>
+	<string name="history_transfer_fail_reason_identity_mismatch" state="needs_review" hash="936267267">この.zipファイルは、別のプロファイルからエクスポートされました</string>
+	<string name="history_transfer_fail_reason_wrong_passwrod" state="needs_review" hash="1847441965">パスワードが違います</string>
+	<string name="history_transfer_fail_reason_invalid_zip" state="needs_review" hash="-691417686">.zipファイルを読み込めません（これは本当にOlvidのチャット履歴のエクスポートファイルですか？）</string>
+	<string name="transfer_label_sending_messages" state="needs_review" hash="2018039973">メッセージの送信</string>
+	<string name="transfer_label_exporting_messages" state="needs_review" hash="1572454408">メッセージのエクスポート</string>
+	<string name="transfer_label_importing_messages" state="needs_review" hash="1913024934">メッセージのインポート</string>
+	<string name="transfer_label_receiving_messages" state="needs_review" hash="2015919003">メッセージ受信</string>
+	<string name="transfer_label_sending_attachments" state="needs_review" hash="2102571371">添付ファイルの送信</string>
+	<string name="transfer_label_exporting_attachments" state="needs_review" hash="-1029839434">添付ファイルの書き出し</string>
+	<string name="transfer_label_importing_attachments" state="needs_review" hash="1078186262">添付ファイルのインポート</string>
+	<string name="transfer_label_receiving_attachments" state="needs_review" hash="439049517">添付ファイルの受信</string>
+	<string name="label_remaining_and_throughput" state="needs_review" hash="1772610397">約%1$s個残っています(%2$s)</string>
+	<string name="history_transfer_step_connecting_export" state="needs_review" hash="-28311439">.zipファイルの作成</string>
+	<string name="history_transfer_step_connecting_import" state="needs_review" hash="1323447620">‎.zipファイルの展開</string>
+	<string name="history_transfer_step_failed_export" state="needs_review" hash="185890904">エクスポートに失敗しました</string>
+	<string name="history_transfer_step_finished_export" state="needs_review" hash="1156914922">エクスポートが完了しました</string>
+	<string name="history_transfer_step_failed_import" state="needs_review" hash="-909085512">インポートに失敗しました</string>
+	<string name="history_transfer_step_finished_import" state="needs_review" hash="-653312310">インポートが完了しました</string>
+	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">エクスポート中</string>
+	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">インポート中</string>
+	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">コンテンツの分析</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">エクスポートされた会話を分析中</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">OpenStreetMapのスタイルファイルを読み込む際にエラーが発生しました</string>
+	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">アプリ内サブスクリプションは利用できません</string>
+	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">インストールしたOlvidのバージョンには、Googleの課金ライブラリが含まれておらず、アプリ内購入をサポートしていません。\n\n詳細については、**feedback@olvid.io**までお問い合わせください。</string>
 </resources>

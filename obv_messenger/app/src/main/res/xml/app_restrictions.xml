@@ -48,4 +48,15 @@
         android:description="@string/restriction_user_agent_override_for_link_previews_description"
         android:restrictionType="bool"
         android:defaultValue="false" />
+    <restriction
+        android:key="require_lock_screen"
+        android:title="@string/restriction_require_lock_screen_title"
+        android:description="@string/restriction_require_lock_screen_description"
+        android:restrictionType="bool"
+        android:defaultValue="false" />
+    <restriction
+        android:key="allow_disable_lock_screen"
+        android:title="@string/restriction_allow_disable_lock_screen_title"
+        android:description="@string/restriction_allow_disable_lock_screen_description"
+        android:restrictionType="string" />
 </restrictions>

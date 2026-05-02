@@ -35,7 +35,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 
 class PollResultActivity : LockableActivity() {
 

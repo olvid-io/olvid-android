@@ -119,7 +119,7 @@ public class DiscussionCustomizationPreferenceFragment extends PreferenceFragmen
                 backgroundImagePreference.setSummary(R.string.pref_discussion_background_image_click_to_choose_summary);
             } else {
                 Bitmap bitmap = BitmapFactory.decodeFile(App.absolutePathFromRelative(discussionCustomization.backgroundImageUrl));
-                if (bitmap.getByteCount() < SelectDetailsPhotoViewModel.MAX_BITMAP_SIZE) {
+                if (bitmap != null && bitmap.getByteCount() < SelectDetailsPhotoViewModel.MAX_BITMAP_SIZE) {
                     backgroundImagePreference.setImage(App.absolutePathFromRelative(discussionCustomization.backgroundImageUrl));
                 }
                 backgroundImagePreference.setSummary(R.string.pref_discussion_background_image_click_to_remove_summary);

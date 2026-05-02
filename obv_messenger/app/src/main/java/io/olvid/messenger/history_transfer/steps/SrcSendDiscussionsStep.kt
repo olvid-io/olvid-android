@@ -61,17 +61,23 @@ class SrcSendDiscussionsStep(
                         }
                     }
                 }
-                fyles = srcTransferProtocolState.transferScope.discussionIds.chunked(100).flatMap { batch ->
-                    db.fyleDao().getAllTransferableForDiscussionIds(batch)
-                }
+                fyles = if (srcTransferProtocolState.transferScope.messagesOnly)
+                    emptyList()
+                else
+                    srcTransferProtocolState.transferScope.discussionIds.chunked(100).flatMap { batch ->
+                        db.fyleDao().getAllTransferableForDiscussionIds(batch)
+                    }
             }
 
-            TransferScope.Profile -> {
+            is TransferScope.Profile -> {
                 db.discussionDao().getAllNotPreDiscussion(srcTransferProtocolState.bytesOwnedIdentity).forEach { discussion ->
                     discussions.add(discussion)
                     discussionIdentifiers.add(JsonDiscussionIdentifier(discussion))
                 }
-                fyles = db.fyleDao().getAllTransferableForOwnedIdentity(srcTransferProtocolState.bytesOwnedIdentity)
+                fyles = if (srcTransferProtocolState.transferScope.messagesOnly)
+                    emptyList()
+                else
+                    db.fyleDao().getAllTransferableForOwnedIdentity(srcTransferProtocolState.bytesOwnedIdentity)
             }
         }
 

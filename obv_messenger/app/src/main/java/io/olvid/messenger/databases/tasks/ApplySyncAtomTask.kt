@@ -270,7 +270,7 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                                                 this.prefMuteNotificationsExceptMentioned =
                                                     obvSyncAtom.muteNotification.exceptMentioned
                                             } else {
-                                                // when un-muting do not overwrite previous value of prefMuteNotificationsExceptMentioned
+                                                // when unmuting do not overwrite previous value of prefMuteNotificationsExceptMentioned
                                                 this.prefMuteNotifications = false
                                             }
                                         })
@@ -284,7 +284,7 @@ class ApplySyncAtomTask(private val dialogUuid: UUID, private val bytesOwnedIden
                                                 this.prefMuteNotificationsExceptMentioned =
                                                     obvSyncAtom.muteNotification.exceptMentioned
                                             } else {
-                                                // when un-muting do not overwrite previous value of prefMuteNotificationsExceptMentioned
+                                                // when unmuting do not overwrite previous value of prefMuteNotificationsExceptMentioned
                                                 this.prefMuteNotifications = false
                                             }
                                         })

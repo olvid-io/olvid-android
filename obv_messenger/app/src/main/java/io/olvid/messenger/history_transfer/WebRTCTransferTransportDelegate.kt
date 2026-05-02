@@ -34,13 +34,13 @@ import io.olvid.messenger.databases.entity.jsons.JsonWebrtcHistoryTransferMessag
 import io.olvid.messenger.databases.entity.jsons.JsonWebrtcHistoryTransferMessage.JsonWebrtcHistoryTransferIceCandidate
 import io.olvid.messenger.databases.entity.jsons.JsonWebrtcHistoryTransferMessage.JsonWebrtcHistoryTransferSdp
 import io.olvid.messenger.history_transfer.types.AttachmentProgressListener
+import io.olvid.messenger.history_transfer.types.TransferAbort
 import io.olvid.messenger.history_transfer.types.TransferListener
 import io.olvid.messenger.history_transfer.types.TransferMessageType
 import io.olvid.messenger.history_transfer.types.TransferRole
 import io.olvid.messenger.history_transfer.types.TransferTransportDelegate
 import io.olvid.messenger.history_transfer.types.TransferTransportLayerState
 import io.olvid.messenger.settings.SettingsActivity
-import io.olvid.messenger.webrtc.WebrtcPeerConnectionHolder
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
@@ -66,20 +66,21 @@ class WebRTCTransferTransportDelegate(
     role: TransferRole,
     transferListener: TransferListener,
     objectMapper: ObjectMapper,
+    val transferId: String,
     val bytesOwnedIdentity: ByteArray,
     val bytesOtherDeviceUid: ByteArray,
     val context: Context,
 ) : TransferTransportDelegate(role = role, transferListener = transferListener, objectMapper = objectMapper) {
     private val webRtcExecutor = NoExceptionSingleThreadExecutor("webrtc-history-transfer-executor")
     private val timer = Timer("webrtc-history-transfer-timer")
-    private var dataChannelState: TransferTransportLayerState = TransferTransportLayerState.INITIALIZING
+    private var dataChannelState: TransferTransportLayerState = TransferTransportLayerState.NOT_STARTED
         set(value) {
             field = value
             transferListener.onTransportLayerStateChange(value)
         }
     var sendAttachmentExecutor: ExecutorService = Executors.newFixedThreadPool(2)
 
-    private var aborted = false
+    private var aborted = TransferAbort.NONE
 
     var peerConnectionFactory: PeerConnectionFactory?
     val peerConnectionObserver: PeerConnection.Observer
@@ -91,10 +92,10 @@ class WebRTCTransferTransportDelegate(
     var peerConnection: PeerConnection? = null
     var dataChannel: DataChannel? = null
     val dataChannelObserver: DataChannel.Observer = object : DataChannel.Observer {
-        // map from a message Id to a pair of:
+        // map from a message id to a pair of:
         // - number of chunks received and
         // - "sparse" ByteArray reconstructed from already received chunks
-        val partiallyReceivedJsonMessages = mutableMapOf<Int, Pair<Int, ByteArray>>()
+        val partiallyReceivedMessages = mutableMapOf<Int, Pair<Int, ByteArray>>()
         val partiallyReceivedSha256 = mutableMapOf<BytesKey, PartialSha256>()
 
 
@@ -110,137 +111,121 @@ class WebRTCTransferTransportDelegate(
         }
 
         override fun onMessage(buffer: DataChannel.Buffer) {
-            if (aborted) {
+            if (aborted != TransferAbort.NONE) {
                 return
             }
-            TransferMessageType.of(buffer.data.get())?.let { messageType ->
-                val byteBuffer = ByteArray(4)
-                when (messageType) {
-                    TransferMessageType.ACK -> {
-                        buffer.data.get(byteBuffer)
-                        val id = byteBuffer.toInt32()
-                        buffer.data.get(byteBuffer)
-                        val chunk = byteBuffer.toInt32()
-                        Logger.d("\uD83E\uDDF6 --> ack $id-$chunk")
-                        webRtcExecutor.execute {
-                            if (!unackedSentMessages.remove((id.toLong() shl 32) + chunk)) {
-                                Logger.w("Received a ack for a data channel message ID ($id-$chunk) we never sent???")
-                            }
-                        }
-                    }
+            runCatching {
+                TransferMessageType.of(buffer.data.get())?.let { messageType ->
+                    val byteBuffer = ByteArray(4)
+                    when (messageType) {
+                        TransferMessageType.ACK -> {
+                            // skip 16 useless bytes at the beginning (the ACKs have the same structure as other messages)
+                            buffer.data.get(byteBuffer)
+                            buffer.data.get(byteBuffer)
+                            buffer.data.get(byteBuffer)
+                            buffer.data.get(byteBuffer)
 
-                    TransferMessageType.SRC_SHA256 -> {
-                        buffer.data.get(byteBuffer)
-                        val id = byteBuffer.toInt32()
-                        buffer.data.get(byteBuffer)
-                        val chunk = byteBuffer.toInt32()
-                        buffer.data.get(byteBuffer)
-                        val totalChunks = byteBuffer.toInt32()
-                        buffer.data.get(byteBuffer)
-                        val blockSize = byteBuffer.toInt32()
-                        val sha256 = ByteArray(32)
-                        buffer.data.get(sha256)
-
-                        Logger.d("\uD83E\uDDF6 --> attachment $id ($chunk/$totalChunks)")
-                        sendAck(id, chunk)
-
-                        val payload = ByteArray(if (chunk == totalChunks - 1) buffer.data.remaining() else blockSize)
-                        buffer.data.get(payload)
-                        webRtcExecutor.execute {
-                            try {
-                                if (totalChunks == 1) {
-                                    val pair = transferListener.onNewAttachment(sha256 = sha256) ?: return@execute
-                                    val outputStream = pair.first
-                                    outputStream.write(payload)
-                                    pair.second?.bytesTransferred(payload.size.toLong())
-                                    transferListener.onAttachmentComplete(sha256 = sha256, fileSize = payload.size.toLong())
-                                } else {
-                                    val sha256Key = BytesKey(sha256)
-                                    val partial = partiallyReceivedSha256[sha256Key] ?: run {
-                                        val pair = transferListener.onNewAttachment(sha256 = sha256) ?: return@execute
-                                        return@run PartialSha256(
-                                            outputStream = pair.first,
-                                            attachmentProgressListener = pair.second
-                                        )
-                                    }
-
-                                    var sizeOfLastChunk = 0
-
-                                    if (partial.nextChunkNumber != chunk) {
-                                        // not the correct chunk order --> store the chunk for later
-                                        partial.pendingChunks[chunk] = payload
-                                    } else {
-                                        // we are in the correct order --> append to the output
-                                        partial.outputStream.write(payload)
-                                        sizeOfLastChunk = payload.size
-                                        partial.attachmentProgressListener?.bytesTransferred(payload.size.toLong())
-                                        partial.nextChunkNumber++
-
-                                        // check if we have any pending chunk ready to be appended
-                                        while (partial.pendingChunks.contains(partial.nextChunkNumber)) {
-                                            val chunk = partial.pendingChunks[partial.nextChunkNumber]!!
-                                            partial.outputStream.write(chunk)
-                                            sizeOfLastChunk = chunk.size
-                                            partial.pendingChunks.remove(partial.nextChunkNumber)
-                                            partial.attachmentProgressListener?.bytesTransferred(chunk.size.toLong())
-                                            partial.nextChunkNumber++
-                                        }
-                                    }
-
-                                    if (partial.nextChunkNumber == totalChunks) {
-                                        // we received and appended the whole file
-                                        partiallyReceivedSha256.remove(sha256Key)
-                                        transferListener.onAttachmentComplete(sha256 = sha256, fileSize = (totalChunks - 1).toLong() * blockSize + sizeOfLastChunk)
-                                    } else {
-                                        partiallyReceivedSha256[sha256Key] = partial
-                                    }
+                            buffer.data.get(byteBuffer)
+                            val id = byteBuffer.toInt32()
+                            buffer.data.get(byteBuffer)
+                            val chunk = byteBuffer.toInt32()
+                            webRtcExecutor.execute {
+                                if (!unackedSentMessages.remove((id.toLong() shl 32) + chunk)) {
+                                    Logger.w("Received a ack for a data channel message ID ($id-$chunk) we never sent???")
                                 }
-                            } catch (e: Exception) {
-                                Logger.x(e)
                             }
                         }
-                    }
 
-                    else -> {
-                        buffer.data.get(byteBuffer)
-                        val id = byteBuffer.toInt32()
-                        buffer.data.get(byteBuffer)
-                        val chunk = byteBuffer.toInt32()
-                        buffer.data.get(byteBuffer)
-                        val totalChunks = byteBuffer.toInt32()
-                        buffer.data.get(byteBuffer)
-                        val blockSize = byteBuffer.toInt32()
+                        else -> {
+                            buffer.data.get(byteBuffer)
+                            val id = byteBuffer.toInt32()
+                            buffer.data.get(byteBuffer)
+                            val chunk = byteBuffer.toInt32()
+                            buffer.data.get(byteBuffer)
+                            val totalChunks = byteBuffer.toInt32()
+                            buffer.data.get(byteBuffer)
+                            val blockSize = byteBuffer.toInt32()
 
-                        Logger.d("\uD83E\uDDF6 --> json $id ($chunk/$totalChunks)")
-                        sendAck(id, chunk)
+                            sendAck(id, chunk)
 
-                        val payload = ByteArray(if (chunk == totalChunks - 1) buffer.data.remaining() else blockSize)
-                        buffer.data.get(payload)
-                        webRtcExecutor.execute {
-                            if (totalChunks == 1) {
-                                transferListener.onJsonMessage(messageType = messageType, serializedMessage = payload)
-                            } else {
-                                val partial = partiallyReceivedJsonMessages[id] ?: Pair(0, ByteArray(blockSize * totalChunks))
-
-                                payload.copyInto(partial.second, chunk * blockSize)
-                                val updated = Pair(
-                                    partial.first + 1,
-                                    if (chunk == totalChunks - 1) {
-                                        partial.second.sliceArray(0..<(chunk * blockSize) + payload.size)
-                                    } else {
-                                        partial.second
-                                    }
-                                )
-                                if (updated.first == totalChunks) {
-                                    partiallyReceivedJsonMessages.remove(id)
-                                    transferListener.onJsonMessage(messageType = messageType, serializedMessage = updated.second)
+                            val payload = ByteArray(if (chunk == totalChunks - 1) buffer.data.remaining() else blockSize)
+                            buffer.data.get(payload)
+                            webRtcExecutor.execute {
+                                if (totalChunks == 1) {
+                                    onMessageUnchunked(messageType = messageType, payload = payload)
                                 } else {
-                                    partiallyReceivedJsonMessages[id] = updated
+                                    val partial = partiallyReceivedMessages[id] ?: Pair(0, ByteArray(blockSize * totalChunks))
+
+                                    payload.copyInto(partial.second, chunk * blockSize)
+                                    val updated = Pair(
+                                        partial.first + 1,
+                                        if (chunk == totalChunks - 1) {
+                                            partial.second.sliceArray(0..<(chunk * blockSize) + payload.size)
+                                        } else {
+                                            partial.second
+                                        }
+                                    )
+                                    if (updated.first == totalChunks) {
+                                        partiallyReceivedMessages.remove(id)
+                                        onMessageUnchunked(messageType = messageType, payload = updated.second)
+                                    } else {
+                                        partiallyReceivedMessages[id] = updated
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            }.onFailure(action = Logger::x)
+        }
+
+        // should always be called from webRtcExecutor thread
+        private fun onMessageUnchunked(messageType: TransferMessageType, payload: ByteArray) {
+            if (messageType == TransferMessageType.SRC_SHA256) {
+                try {
+                    val sha256 = payload.sliceArray(0..<32)
+                    val sha256Key = BytesKey(sha256)
+                    val offset = payload.sliceArray(32..<40).toInt64()
+
+                    val partial = partiallyReceivedSha256[sha256Key] ?: run {
+                        val triple = transferListener.onNewAttachment(sha256 = sha256) ?: return
+                        return@run PartialSha256(
+                            outputStream = triple.first,
+                            totalSize = triple.second,
+                            attachmentProgressListener = triple.third
+                        )
+                    }
+
+                    if (offset != partial.currentOffset) {
+                        partial.pendingChunks[offset] = payload.sliceArray(40..<payload.size)
+                    } else {
+                        // we are in the correct order --> append to the output
+                        partial.outputStream.write(payload, 40, payload.size - 40)
+                        partial.attachmentProgressListener?.bytesTransferred(payload.size.toLong() - 40)
+                        partial.currentOffset += payload.size - 40
+
+                        // check if we have any pending chunk ready to be appended
+                        while (partial.pendingChunks.contains(partial.currentOffset)) {
+                            val chunk = partial.pendingChunks[partial.currentOffset]!!
+                            partial.outputStream.write(chunk)
+                            partial.pendingChunks.remove(partial.currentOffset)
+                            partial.attachmentProgressListener?.bytesTransferred(chunk.size.toLong())
+                            partial.currentOffset += chunk.size
+                        }
+                    }
+
+                    if (partial.currentOffset == partial.totalSize) {
+                        // we received and appended the whole file
+                        partiallyReceivedSha256.remove(sha256Key)
+                        transferListener.onAttachmentComplete(sha256 = sha256)
+                    } else {
+                        partiallyReceivedSha256[sha256Key] = partial
+                    }
+                } catch (e: Exception) {
+                    Logger.x(e)
+                }
+            } else {
+                transferListener.onJsonMessage(messageType, payload)
             }
         }
     }
@@ -256,20 +241,25 @@ class WebRTCTransferTransportDelegate(
 //        org.webrtc.Logging.enableLogToDebugOutput(org.webrtc.Logging.Severity.LS_INFO);
 
         val builder = PeerConnectionFactory.builder()
-            .setOptions(PeerConnectionFactory
-                .Options().apply {
-                    this.networkIgnoreMask = PeerConnectionFactory.Options.ADAPTER_TYPE_LOOPBACK
-                })
+            .setOptions(
+                PeerConnectionFactory
+                    .Options().apply {
+                        this.networkIgnoreMask = PeerConnectionFactory.Options.ADAPTER_TYPE_LOOPBACK
+                    })
         peerConnectionFactory = builder.createPeerConnectionFactory()
         peerConnectionObserver = PeerConnectionObserver()
         sessionDescriptionObserver = SessionDescriptionObserver()
 
         webRtcExecutor.execute {
             var bytesOwnedIdentityWithCallPermission = bytesOwnedIdentity
-            val currentOwnedIdentity = AppDatabase.getInstance().ownedIdentityDao()[bytesOwnedIdentity]
-            val currentIdentityServer = AppSingleton.getEngine().getServerOfIdentity(bytesOwnedIdentity)
+            val currentOwnedIdentity =
+                AppDatabase.getInstance().ownedIdentityDao()[bytesOwnedIdentity]
+            val currentIdentityServer =
+                AppSingleton.getEngine().getServerOfIdentity(bytesOwnedIdentity)
             if (currentOwnedIdentity == null
-                || !currentOwnedIdentity.getApiKeyPermissions().contains(EngineAPI.ApiKeyPermission.CALL)) {
+                || !currentOwnedIdentity.getApiKeyPermissions()
+                    .contains(EngineAPI.ApiKeyPermission.CALL)
+            ) {
                 // if my current identity can't call, check other identities
                 for (ownedIdentity in AppDatabase.getInstance().ownedIdentityDao().allNotHidden) {
                     if (ownedIdentity.bytesOwnedIdentity.contentEquals(bytesOwnedIdentity)) {
@@ -277,8 +267,10 @@ class WebRTCTransferTransportDelegate(
                         continue
                     }
                     if (ownedIdentity.active
-                        && ownedIdentity.getApiKeyPermissions().contains(EngineAPI.ApiKeyPermission.CALL)
-                        && AppSingleton.getEngine().getServerOfIdentity(ownedIdentity.bytesOwnedIdentity) == currentIdentityServer
+                        && ownedIdentity.getApiKeyPermissions()
+                            .contains(EngineAPI.ApiKeyPermission.CALL)
+                        && AppSingleton.getEngine()
+                            .getServerOfIdentity(ownedIdentity.bytesOwnedIdentity) == currentIdentityServer
                     ) {
                         bytesOwnedIdentityWithCallPermission = ownedIdentity.bytesOwnedIdentity
                         break
@@ -306,36 +298,50 @@ class WebRTCTransferTransportDelegate(
             peerConnection =
                 peerConnectionFactory?.createPeerConnection(configuration, peerConnectionObserver)
 
-
-            // we are the source, create the data channel
-            if (role == TransferRole.SOURCE) {
-                webRtcExecutor.execute {
-                    val init = DataChannel.Init()
-                    init.ordered = true
-                    init.negotiated = false
-                    init.id = 1
-                    dataChannel = peerConnection?.createDataChannel("data-channel-1", init)
-                    dataChannel?.registerObserver(dataChannelObserver)
-                    peerConnection?.createOffer(sessionDescriptionObserver, MediaConstraints())
-                }
-            }
+            // we wait for an accept message from the TARGET before sending anything
         }
     }
 
 
-    override fun abort() {
-        aborted = true
+    fun transferAcceptedByTheTargetDevice() {
+        // we are the source, create the data channel
+        if (role == TransferRole.SOURCE) {
+            webRtcExecutor.execute {
+                val init = DataChannel.Init()
+                init.ordered = true
+                init.negotiated = false
+                init.id = 1
+                dataChannel = peerConnection?.createDataChannel("data-channel-1", init)
+                dataChannel?.registerObserver(dataChannelObserver)
+                peerConnection?.createOffer(sessionDescriptionObserver, MediaConstraints())
+
+                dataChannelState = TransferTransportLayerState.INITIALIZING
+            }
+        }
+    }
+
+    fun acceptTheTransferAsTargetDevice() {
+        // we are the target, switch to the INITIALIZING state
+        if (role == TransferRole.DESTINATION) {
+            webRtcExecutor.execute {
+                dataChannelState = TransferTransportLayerState.INITIALIZING
+            }
+        }
+    }
+
+    override fun abort(userInitiated: Boolean) {
+        aborted = if (userInitiated) TransferAbort.USER_ABORT else TransferAbort.DISCONNECT
         sendAttachmentExecutor.shutdownNow()
         cleanup()
     }
 
     override fun isAborted(): Boolean {
-        return aborted
+        return aborted != TransferAbort.NONE
     }
 
     override fun cleanup() {
         webRtcExecutor.execute {
-            Logger.e("Unacked message count: ${unackedSentMessages.size}")
+            Logger.d("Unacked message count: ${unackedSentMessages.size}")
 
             dataChannel?.let {
                 dataChannel = null
@@ -353,13 +359,13 @@ class WebRTCTransferTransportDelegate(
     }
 
     fun handleJsonHistoryTransferMessage(jsonWebrtcHistoryTransferMessage: JsonWebrtcHistoryTransferMessage) {
-        if (aborted) {
+        if (aborted != TransferAbort.NONE) {
             return
         }
         webRtcExecutor.execute {
             jsonWebrtcHistoryTransferMessage.iceCandidates?.forEach {
                 Logger.d("\uD83E\uDDF6 ice candidate received: ${it.sdp}")
-                val iceCandidate = IceCandidate("", it.sdpMLineIndex, it.sdp)
+                val iceCandidate = IceCandidate(it.mid ?: "", it.sdpMLineIndex ?: 0, it.sdp ?: "")
                 if (peerConnection?.signalingState() == PeerConnection.SignalingState.STABLE) {
                     peerConnection?.addIceCandidate(iceCandidate)
                 } else {
@@ -399,7 +405,7 @@ class WebRTCTransferTransportDelegate(
 
     // should only be called on the executor
     private fun sendIceCandidate(iceCandidate: IceCandidate) {
-        if (aborted) {
+        if (aborted != TransferAbort.NONE) {
             return
         }
         if (batchingIceCandidates.isEmpty()) {
@@ -415,12 +421,14 @@ class WebRTCTransferTransportDelegate(
 
     // should only be called on the executor
     private fun sendIceCandidatesBatch() {
-        if (aborted) {
+        if (aborted != TransferAbort.NONE) {
             return
         }
         JsonWebrtcHistoryTransferMessage().apply {
+            this.transferId = this@WebRTCTransferTransportDelegate.transferId
             this.iceCandidates = batchingIceCandidates.map { iceCandidate ->
                 JsonWebrtcHistoryTransferIceCandidate().apply {
+                    this.mid = iceCandidate.sdpMid
                     this.sdp = iceCandidate.sdp
                     this.sdpMLineIndex = iceCandidate.sdpMLineIndex
                 }
@@ -431,20 +439,22 @@ class WebRTCTransferTransportDelegate(
     }
 
     private fun sendSdp(type: String, sdp: String) {
-        if (aborted) {
+        if (aborted != TransferAbort.NONE) {
             return
         }
         JsonWebrtcHistoryTransferMessage().apply {
-            this.sdp = JsonWebrtcHistoryTransferSdp()
-            this.sdp.type = type
-            this.sdp.sdp = sdp
+            this.transferId = this@WebRTCTransferTransportDelegate.transferId
+            this.sdp = JsonWebrtcHistoryTransferSdp().apply {
+                this.type = type
+                this.sdp = sdp
+            }
             sendSignalingMessage(this)
         }
     }
 
     private fun sendSignalingMessage(jsonWebrtcHistoryTransferMessage: JsonWebrtcHistoryTransferMessage) {
         val jsonPayload = JsonPayload()
-        jsonPayload.jsonHistoryTransferMessage = jsonWebrtcHistoryTransferMessage
+        jsonPayload.jsonWebrtcHistoryTransferMessage = jsonWebrtcHistoryTransferMessage
 
         val messagePayload = objectMapper.writeValueAsBytes(jsonPayload)
 
@@ -460,7 +470,13 @@ class WebRTCTransferTransportDelegate(
 
     private fun sendAck(id: Int, chunk: Int) {
         Logger.d("\uD83E\uDDF6 sendAck for seq: $id-$chunk")
-        val chunkBytes = ByteArray(1) { TransferMessageType.ACK.value } + id.to4ByteArray() + chunk.to4ByteArray()
+        val chunkBytes = ByteArray(1) { TransferMessageType.ACK.value } +
+                id.to4ByteArray() +
+                0.to4ByteArray() +
+                1.to4ByteArray() +
+                8.to4ByteArray() +
+                id.to4ByteArray() +
+                chunk.to4ByteArray()
 
         sendOnDataChannel(chunkBytes)
     }
@@ -469,22 +485,25 @@ class WebRTCTransferTransportDelegate(
         messageType: TransferMessageType,
         serializedMessage: ByteArray
     ) {
-        val id = nextDataChannelMessageId.getAndAdd(1)
-        Logger.d("\uD83E\uDDF6 sendJsonMessage $messageType (seq: $id)")
-        val blockSize = MAX_DATA_CHANNEL_MESSAGE_SIZE - DATA_CHANNEL_MESSAGE_HEADER_SIZE
-        val totalChunks = (serializedMessage.size - 1) / blockSize + 1
+        Logger.d("\uD83E\uDDF6 sendJsonMessage $messageType")
+        sendBytes(messageType, serializedMessage)
+    }
 
+    private fun sendBytes(messageType: TransferMessageType, messagePayload: ByteArray) {
+        val id = nextDataChannelMessageId.getAndAdd(1)
+        val blockSize = MAX_DATA_CHANNEL_MESSAGE_SIZE - DATA_CHANNEL_MESSAGE_HEADER_SIZE
+        val totalChunks = (messagePayload.size - 1) / blockSize + 1
 
         var offset = 0
         var chunk = 0
-        while (offset < serializedMessage.size && !aborted) {
+        while (offset < messagePayload.size && aborted == TransferAbort.NONE) {
             unackedSentMessages.add((id.toLong() shl 32) + chunk)
             val chunkBytes = ByteArray(1) { messageType.value } +
                     id.to4ByteArray() +
                     chunk.to4ByteArray() +
                     totalChunks.to4ByteArray() +
                     blockSize.to4ByteArray() +
-                    serializedMessage.sliceArray(offset..<(offset + blockSize).coerceAtMost(serializedMessage.size))
+                    messagePayload.sliceArray(offset..<(offset + blockSize).coerceAtMost(messagePayload.size))
 
             sendOnDataChannel(chunkBytes)
 
@@ -499,52 +518,39 @@ class WebRTCTransferTransportDelegate(
         inputStream: InputStream,
         attachmentProgressListener: AttachmentProgressListener?
     ) {
-        if (aborted) {
+        if (aborted != TransferAbort.NONE) {
             return
         }
-        val id = nextDataChannelMessageId.getAndAdd(1)
-        Logger.d("\uD83E\uDDF6 sendAttachment (seq: $id)")
-        val blockSize = MAX_DATA_CHANNEL_MESSAGE_SIZE - DATA_CHANNEL_MESSAGE_HEADER_SIZE - sha256.size
-        val totalChunks = ((size - 1) / blockSize + 1).toInt()
-        val buffer = ByteArray(blockSize)
+        Logger.d("\uD83E\uDDF6 sendAttachment ${Logger.toHexString(sha256.copyOfRange(0, 4))}")
+        val buffer = ByteArray(ATTACHMENT_BLOCK_SIZE)
 
-        var offset = 0
-        var chunk = 0
+        var offset = 0L
         var finished = false
-        while (!finished && !aborted) {
+        while (!finished && aborted == TransferAbort.NONE) {
             var bufferFullness = 0
             var c: Int
             do {
-                c = inputStream.read(buffer, bufferFullness, blockSize - bufferFullness)
+                c = inputStream.read(buffer, bufferFullness, ATTACHMENT_BLOCK_SIZE - bufferFullness)
                 if (c == -1) {
                     finished = true
                     break
                 }
                 bufferFullness += c
-            } while (!aborted && bufferFullness != blockSize)
+            } while (aborted == TransferAbort.NONE && bufferFullness != ATTACHMENT_BLOCK_SIZE)
 
-            if (bufferFullness == 0) {
+            if (bufferFullness == 0 || aborted != TransferAbort.NONE) {
                 break
             }
 
-            if (aborted) {
-                break
-            }
-
-            unackedSentMessages.add((id.toLong() shl 32) + chunk)
-            val chunkBytes = ByteArray(1) { TransferMessageType.SRC_SHA256.value } +
-                    id.to4ByteArray() +
-                    chunk.to4ByteArray() +
-                    totalChunks.to4ByteArray() +
-                    blockSize.to4ByteArray() +
-                    sha256 +
+            @Suppress("EmptyRange")
+            val chunkBytes = sha256 +
+                    offset.to8ByteArray() +
                     buffer.sliceArray(0..<bufferFullness)
 
-            sendOnDataChannel(chunkBytes)
+            sendBytes(TransferMessageType.SRC_SHA256, chunkBytes)
 
             attachmentProgressListener?.bytesTransferred(bufferFullness.toLong())
-            offset += blockSize
-            chunk++
+            offset += bufferFullness
         }
     }
 
@@ -558,12 +564,12 @@ class WebRTCTransferTransportDelegate(
 
     private fun sendOnDataChannel(payload: ByteArray) {
         // we wait before sending more data if our buffer is already encumbered
-        while (!aborted && (dataChannel?.bufferedAmount() ?: 0) > 50 * MAX_DATA_CHANNEL_MESSAGE_SIZE) {
+        while (aborted == TransferAbort.NONE && (dataChannel?.bufferedAmount() ?: 0) > 50 * MAX_DATA_CHANNEL_MESSAGE_SIZE) {
             try {
                 Thread.sleep(30)
             } catch (_: InterruptedException) {}
         }
-        if (aborted) {
+        if (aborted != TransferAbort.NONE) {
             return
         }
 
@@ -576,7 +582,7 @@ class WebRTCTransferTransportDelegate(
     }
 
 
-    inner class PeerConnectionObserver() : PeerConnection.Observer {
+    inner class PeerConnectionObserver : PeerConnection.Observer {
         override fun onSignalingChange(newState: PeerConnection.SignalingState?) {
             Logger.d("\uD83E\uDDF6 signaling changed: ${newState?.name}")
             if (newState == PeerConnection.SignalingState.STABLE) {
@@ -611,7 +617,7 @@ class WebRTCTransferTransportDelegate(
                 PeerConnection.IceConnectionState.DISCONNECTED,
                 PeerConnection.IceConnectionState.CLOSED -> {
                     // we set aborted to true to unblock the webRtcExecutor
-                    aborted = true
+                    aborted = TransferAbort.DISCONNECT
                     webRtcExecutor.execute {
                         dataChannelState = TransferTransportLayerState.CLOSED
                     }
@@ -657,7 +663,7 @@ class WebRTCTransferTransportDelegate(
     }
 
 
-    inner class SessionDescriptionObserver() : SdpObserver {
+    inner class SessionDescriptionObserver : SdpObserver {
         override fun onCreateSuccess(sdp: SessionDescription?) {
             sdp?.let {
                 Logger.d("\uD83E\uDDF6 sdp created: ${sdp.type} - ${sdp.description}")
@@ -684,10 +690,12 @@ class WebRTCTransferTransportDelegate(
     }
 
     companion object {
+        const val ATTACHMENT_BLOCK_SIZE = 300_000
         const val MAX_DATA_CHANNEL_MESSAGE_SIZE = 64*1024// 65536
         const val DATA_CHANNEL_MESSAGE_HEADER_SIZE = 17
 
         private fun getTurnCredentialsFromEngine(bytesOwnedIdentity: ByteArray): Triple<String, String, List<String>>? {
+            @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
             val lock = Object()
             var out: Triple<String, String, List<String>>? = null
 
@@ -756,6 +764,13 @@ private fun Int.to4ByteArray(): ByteArray {
     }
 }
 
+private fun Long.to8ByteArray(): ByteArray {
+    return ByteArray(8) { i ->
+        (this shr (56 - 8 * i)).toByte()
+    }
+}
+
+
 private fun ByteArray.toInt32(): Int {
     return((this[0].toInt() and 0xff) shl 24) +
             ((this[1].toInt() and 0xff) shl 16) +
@@ -763,4 +778,22 @@ private fun ByteArray.toInt32(): Int {
             (this[3].toInt() and 0xff)
 }
 
-private class PartialSha256(val outputStream: OutputStream, val attachmentProgressListener: AttachmentProgressListener?, var nextChunkNumber: Int = 0, val pendingChunks: MutableMap<Int, ByteArray> = mutableMapOf())
+private fun ByteArray.toInt64(): Long {
+    return ((this[0].toLong() and 0xff) shl 56) +
+            ((this[1].toLong() and 0xff) shl 48) +
+            ((this[2].toLong() and 0xff) shl 40) +
+            ((this[3].toLong() and 0xff) shl 32) +
+            ((this[4].toLong() and 0xff) shl 24) +
+            ((this[5].toLong() and 0xff) shl 16) +
+            ((this[6].toLong() and 0xff) shl 8) +
+            (this[7].toLong() and 0xff)
+}
+
+
+private class PartialSha256(
+    val outputStream: OutputStream,
+    val totalSize: Long,
+    val attachmentProgressListener: AttachmentProgressListener?,
+    var currentOffset: Long = 0,
+    val pendingChunks: MutableMap<Long, ByteArray> = mutableMapOf()
+)

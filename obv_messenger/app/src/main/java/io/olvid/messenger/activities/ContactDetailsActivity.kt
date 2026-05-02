@@ -95,7 +95,7 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.InitialView
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.onBackPressed

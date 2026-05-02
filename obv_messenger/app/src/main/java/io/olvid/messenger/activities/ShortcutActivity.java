@@ -68,7 +68,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
-import io.olvid.messenger.customClasses.LockScreenOrNotActivity;
+import io.olvid.messenger.lock_screen.LockScreenOrNotActivity;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
 import io.olvid.messenger.databases.entity.Discussion;

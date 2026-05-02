@@ -83,6 +83,7 @@ public class SettingsPojo_0 {
     public Integer lock_delay_s;
     public Boolean lock_notification;
     public Boolean lock_wipe_on_fail;
+//    public Boolean lock_required;
 
     public Long auto_download_size;
     public Boolean auto_download_archived;
@@ -153,7 +154,7 @@ public class SettingsPojo_0 {
         settingsPojo.allow_notification_suggestions = SettingsActivity.isNotificationSuggestionAllowed();
         settingsPojo.expose_recent_discussions = SettingsActivity.exposeRecentDiscussions();
         settingsPojo.incognito_keyboard = SettingsActivity.useKeyboardIncognitoMode();
-        settingsPojo.prevent_screen_capture = SettingsActivity.preventScreenCapture();
+        settingsPojo.prevent_screen_capture = SettingsActivity.preventScreenCapture(null);
         settingsPojo.hidden_profile_policy = SettingsActivity.getHiddenProfileClosePolicy();
         if (settingsPojo.hidden_profile_policy == SettingsActivity.HIDDEN_PROFILE_CLOSE_POLICY_BACKGROUND) {
             settingsPojo.hidden_profile_background_grace = SettingsActivity.getHiddenProfileClosePolicyBackgroundGraceDelay();
@@ -313,6 +314,7 @@ public class SettingsPojo_0 {
         if (lock_delay_s != null) {SettingsActivity.setLockGraceTime(lock_delay_s); }
         if (lock_notification != null) {SettingsActivity.setKeepLockServiceOpen(lock_notification); }
         if (lock_wipe_on_fail != null) {SettingsActivity.setWipeMessagesOnUnlockFails(lock_wipe_on_fail); }
+//        if (lock_required != null) { SettingsActivity.setLockScreenRequired(lock_required); }
 
         if (auto_download_size != null) { SettingsActivity.setAutoDownloadSize(auto_download_size); }
         if (auto_download_archived != null) { SettingsActivity.setAutoDownloadArchivedDiscussion(auto_download_archived); }

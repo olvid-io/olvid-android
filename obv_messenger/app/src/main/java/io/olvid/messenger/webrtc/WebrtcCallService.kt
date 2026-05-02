@@ -1537,14 +1537,16 @@ class WebrtcCallService : Service() {
         }
     }
 
-    private fun hangUpCallInternal(notifyPeers: Boolean) {
+    private fun hangUpCallInternal(notifyPeers: Boolean, muteMicrophone: Boolean = true) {
         if (role != NONE) {
             if (_state == CALL_IN_PROGRESS) {
                 for (callParticipant in callParticipants.values) {
                     callParticipant.peerConnectionHolder.setAudioEnabled(false)
                 }
-                microphoneMuted = true
-                microphoneMutedLiveData.postValue(true)
+                if (muteMicrophone) {
+                    microphoneMuted = true
+                    microphoneMutedLiveData.postValue(true)
+                }
             }
             if (notifyPeers) {
                 // notify peer that you hung up (it's not just a connection loss)
@@ -1596,6 +1598,10 @@ class WebrtcCallService : Service() {
                 screenCapturerAndroid?.dispose()
                 screenCapturerAndroid = null
             }
+            for (callParticipant in callParticipants.values) {
+                callParticipant.peerConnectionHolder.cleanUp()
+            }
+            releaseAudioManagerFocus()
             stopThisServiceOrRefreshNotificationAndRingers()
         }
     }
@@ -1764,7 +1770,8 @@ class WebrtcCallService : Service() {
             }?.let { call ->
                 // stop current call if any
                 if (role != NONE) {
-                    hangUpCallInternal(notifyPeers = true)
+                    // do not mute microphone here as we are picking up another call instantly after
+                    hangUpCallInternal(notifyPeers = true, muteMicrophone = false)
                 }
                 // apply call object to start
                 callParticipants.clear()
@@ -3070,6 +3077,17 @@ class WebrtcCallService : Service() {
         audioManager!!.mode = AudioManager.MODE_IN_COMMUNICATION
     }
 
+    private fun releaseAudioManagerFocus() {
+        if (audioManager != null && audioFocusRequest != null) {
+            AudioManagerCompat.abandonAudioFocusRequest(audioManager!!, audioFocusRequest!!)
+            audioFocusRequest = null
+            @Suppress("DEPRECATION")
+            audioManager!!.isSpeakerphoneOn = false
+            audioManager!!.mode = savedAudioManagerMode
+            Logger.d("☎ Audio focus released")
+        }
+    }
+
     @SuppressLint("ForegroundServiceType")
     private fun showOngoingForeground() {
         if (callParticipants.isEmpty()) {
@@ -3382,7 +3400,7 @@ class WebrtcCallService : Service() {
                 .setPublicVersion(publicBuilder.build())
                 .setSmallIcon(drawable.ic_phone_animated)
                 .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_CALL)
                 .setContentIntent(fullScreenPendingIntent)
                 .setDeleteIntent(rejectCallPendingIntent)
@@ -3524,12 +3542,7 @@ class WebrtcCallService : Service() {
             )
             webrtcMessageReceivedBroadcastReceiver = null
         }
-        if (audioManager != null && audioFocusRequest != null) {
-            AudioManagerCompat.abandonAudioFocusRequest(audioManager!!, audioFocusRequest!!)
-            @Suppress("DEPRECATION")
-            audioManager!!.isSpeakerphoneOn = false
-            audioManager!!.mode = savedAudioManagerMode
-        }
+        releaseAudioManagerFocus()
         if (engineTurnCredentialsReceiver != null) {
             AppSingleton.getEngine().removeNotificationListener(
                 EngineNotifications.TURN_CREDENTIALS_RECEIVED,
@@ -4156,13 +4169,13 @@ class WebrtcCallService : Service() {
         callIdentifier: UUID?
     ): Boolean {
         return try {
-            val jsonWebrtcCallMessage = JsonWebrtcCallMessage()
-            jsonWebrtcCallMessage.messageType = protocolMessage.messageType
-            jsonWebrtcCallMessage.callIdentifier = callIdentifier
-            jsonWebrtcCallMessage.serializedMessagePayload =
-                objectMapper.writeValueAsString(protocolMessage)
-            val jsonPayload = JsonPayload()
-            jsonPayload.jsonWebrtcMessage = jsonWebrtcCallMessage
+            val jsonPayload = JsonPayload().apply {
+                jsonWebrtcCallMessage = JsonWebrtcCallMessage().apply {
+                    this.messageType = protocolMessage.messageType
+                    this.callIdentifier = callIdentifier
+                    this.serializedMessagePayload = objectMapper.writeValueAsString(protocolMessage)
+                }
+            }
 
             // only mark START_CALL_MESSAGE_TYPE messages as voip
             val tagAsVoipMessage = protocolMessage.messageType == START_CALL_MESSAGE_TYPE

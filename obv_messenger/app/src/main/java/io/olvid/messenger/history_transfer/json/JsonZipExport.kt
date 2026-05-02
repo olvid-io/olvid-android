@@ -31,7 +31,10 @@ class JsonZipExport {
     @JsonSerialize(keyUsing = ObvBytesKey.KeySerializer::class)
     @JsonDeserialize(keyUsing = ObvBytesKey.KeyDeserializer::class)
     var sha256s: Map<ObvBytesKey, Long>? = null
+    // this saves the title for discussions, which is only useful when restoring for locked discussions that do not exist yet on the target device
     var discussions: MutableList<JsonZipDiscussion>? = null
+    // this field is not actually used when importing a zip history transfer, it is only used for the discussion/profile HTML export
+    var contacts: MutableList<JsonZipContact>? = null
 
     var messages: MutableList<JsonZipMessages>? = null
 

@@ -19,7 +19,6 @@
 
 package io.olvid.messenger.onboarding.flow
 
-import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

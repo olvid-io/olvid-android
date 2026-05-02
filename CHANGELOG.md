@@ -1,3 +1,41 @@
+# Build 302 (4.3)
+2026-05-02
+
+- Fix an issue with desugaring of Java records not working properly in latest Android Studio.
+
+# ~~Build 301 (4.3)~~
+2026-04-22
+
+- Fix a few issues with the new voice recorder.
+- Minor adjustments to location sharing map display.
+- Add advanced debug options for location sharing.  
+
+# ~~Build 300 (4.3)~~
+2026-04-19
+
+- Rollback to sqlcipher 4.13.0 has we are seeing db performance issues.
+
+# ~~Build 299 (4.3)~~
+2026-04-19
+
+- Chat history transfer is now available (no longer in beta).
+- Chat history .zip file export contains an HTML page to visualize exports outside Olvid.
+- Voice message recording can now be paused/resumed.
+- Rework of audio playback within Olvid:
+  - finishing playing a voice message continues with the next one,
+  - use of Android media sessions for previous/next support.
+- New option to copy the text of multiple messages at once.
+- Improved map display when sharing your location.
+- Support for "multi-style" maps when using a custom OpenStreetMap server.
+- Enabled R8 to minimize app install size.
+- [MDM] Added the possibility to force users to set up a lock screen for Olvid.
+- [MDM] Added the possibility to bypass a user's lock screen if they forgot their PIN.
+
+# ~~Build 298 (4.2.6)~~
+2026-03-17
+
+- Internal release to test for potential R8-related bugs.
+
 # ~~Build 297 (4.2.5)~~
 2026-03-16
 

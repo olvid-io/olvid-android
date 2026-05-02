@@ -22,14 +22,18 @@ package io.olvid.messenger.discussion.compose
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.net.Uri
+import android.os.Build
 import android.text.SpannableString
 import android.text.Spanned
 import android.view.KeyEvent
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -40,6 +44,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -67,10 +72,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -78,8 +86,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionOnScreen
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -91,6 +102,14 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.map
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.Timeline
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
@@ -117,6 +136,7 @@ import io.olvid.messenger.viewModels.FilteredContactListViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ComposeMessageArea(
@@ -137,6 +157,7 @@ fun ComposeMessageArea(
     val orientation = LocalConfiguration.current.orientation
 
     var inputEditText: DiscussionInputEditText? by remember { mutableStateOf(null) }
+    var buttonBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
 
     val hasCamera by lazy { context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) }
     val replyMessage by composeMessageViewModel.getDraftMessageReply().observeAsState()
@@ -156,18 +177,65 @@ fun ComposeMessageArea(
         mentionViewModel = mentionViewModel
     )
 
+    BackHandler(
+        enabled = controller.voiceMessageRecorder.isRecording
+    ) {
+        if (controller.voiceMessageRecorder.isRecording) {
+            controller.voiceMessageRecorder.stopRecord(false)
+        }
+    }
+
     LaunchedEffect(Unit) {
         activity?.window?.setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
         )
     }
 
-    val isRecording by composeMessageViewModel.getRecordingLiveData().observeAsState()
-    LaunchedEffect(isRecording) {
-        if (isRecording != true && controller.voiceMessageRecorder.isRecording()) {
-            controller.onVoiceRecordingStop(discard = true)
+    val exoPlayer: Player = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
+                    .build(),
+                true
+            )
         }
     }
+    var playbackProgress by remember { mutableFloatStateOf(0f) }
+    var audioDuration by remember { mutableLongStateOf(0L) }
+    var isPlayingAudio by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                isPlayingAudio = isPlaying
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    audioDuration = if (exoPlayer.duration != C.TIME_UNSET) exoPlayer.duration else 0L
+                }
+                if (playbackState == Player.STATE_ENDED) {
+                    isPlayingAudio = false
+                }
+            }
+
+            override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+                audioDuration = if (exoPlayer.duration != C.TIME_UNSET) exoPlayer.duration else 0L
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+
+            if (controller.voiceMessageRecorder.isRecording) {
+                controller.voiceMessageRecorder.stopRecord(false)
+            }
+        }
+    }
+
 
     LaunchedEffect(isEditMode) {
         if (isEditMode == true) {
@@ -178,7 +246,32 @@ fun ComposeMessageArea(
     // Draft loading logic
     val draftMessage by composeMessageViewModel.getDraftMessage().observeAsState()
     val messageBeingEdited by composeMessageViewModel.getMessageBeingEdited().observeAsState()
-    val draftAttachments: List<Attachment> by composeMessageViewModel.getDraftMessageFyles().map { it?.map { fyleAndStatus -> Attachment(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus) } ?: emptyList() }.observeAsState(emptyList())
+    val draftAttachments: List<Attachment> by composeMessageViewModel.getDraftMessageFyles().map {
+        it?.map {
+            fyleAndStatus -> Attachment(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus)
+        } ?: emptyList()
+    }.observeAsState(emptyList())
+    val draftVoiceRecording by composeMessageViewModel.getDraftVoiceRecording().observeAsState()
+
+    // Load paused voice recording from draft if exists
+    LaunchedEffect(draftVoiceRecording) {
+        controller.voiceMessageRecorder.loadFromDraft(draftVoiceRecording)
+    }
+
+    // anytime the voice recorder updates its file (on load, after a merge, etc.), reset the player
+    LaunchedEffect(controller.voiceMessageRecorder.draftAudioFile) {
+        controller.voiceMessageRecorder.draftAudioFile?.takeIf {
+            it.exists()
+        }?.let { file ->
+            val mediaItem = MediaItem.fromUri(Uri.fromFile(file))
+            exoPlayer.playWhenReady = false
+            exoPlayer.stop() // Clear previous state
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.prepare()
+            exoPlayer.seekTo(0)
+            playbackProgress = 0f
+        }
+    }
 
     val lastProcessedDraftMessage = remember { mutableStateOf<Message?>(null) }
 
@@ -330,7 +423,7 @@ fun ComposeMessageArea(
                 visible = isEditMode != true
             ) {
                 AnimatedContent(
-                    targetState = isRecording,
+                    targetState = controller.voiceMessageRecorder.isOpened,
                     transitionSpec = {
                         (scaleIn(tween(200)) + fadeIn(tween(200))).togetherWith(
                             scaleOut(tween(200)) + fadeOut(tween(200))
@@ -338,56 +431,86 @@ fun ComposeMessageArea(
                     },
                     contentAlignment = Alignment.Center,
                     label = "LeftButton"
-                ) { recording ->
-                    if (recording == true) {
+                ) { showRecordingUi ->
+                    if (showRecordingUi) {
                         IconButton(
                             modifier = Modifier
                                 .size(48.dp)
                                 .padding(4.dp),
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = colorResource(id = R.color.red).copy(alpha = .5f),
-                                contentColor = colorResource(R.color.red)
+                                contentColor = colorResource(R.color.red),
+                                disabledContainerColor = colorResource(id = R.color.red).copy(alpha = .5f),
+                                disabledContentColor = colorResource(R.color.greyTint)
                             ),
                             shape = CircleShape,
+                            enabled = !controller.voiceMessageRecorder.isSaving,
                             onClick = {
-                                controller.onVoiceRecordingStop(discard = false)
+                                if (controller.voiceMessageRecorder.isPaused) {
+                                    if (isPlayingAudio) {
+                                        exoPlayer.stop()
+                                    }
+                                    controller.voiceMessageRecorder.resumeRecord()
+                                } else {
+                                    controller.voiceMessageRecorder.stopRecord(false)
+                                }
                             }
                         ) {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(R.drawable.ic_stop),
-                                contentDescription = stringResource(R.string.button_label_cancel)
-                            )
+                            if (controller.voiceMessageRecorder.isPaused) {
+                                Icon(
+                                    modifier = Modifier.height(24.dp),
+                                    painter = painterResource(R.drawable.ic_microphone_on),
+                                    contentDescription = stringResource(R.string.content_description_attach_voice_message_button)
+                                )
+                            } else {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = painterResource(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) R.drawable.ic_pause else R.drawable.ic_stop),
+                                    contentDescription = stringResource(R.string.button_label_cancel)
+                                )
+                            }
                         }
                     } else {
-                        IconButton(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .padding(4.dp),
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = colorResource(id = R.color.lightGrey),
-                                contentColor = colorResource(R.color.almostBlack)
-                            ),
-                            shape = CircleShape,
-                            onClick = {
-                                composeMessageViewModel.menuExpanded =
-                                    !composeMessageViewModel.menuExpanded
+                        Box(modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
+                            val offset = layoutCoordinates.positionOnScreen()
+
+                            buttonBoundsInWindow = Rect(
+                                left = offset.x,
+                                top = offset.y,
+                                right = offset.x + layoutCoordinates.size.width,
+                                bottom = offset.y + layoutCoordinates.size.height
+                            )
+                        }) {
+                            IconButton(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .padding(4.dp),
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = colorResource(id = R.color.lightGrey),
+                                    contentColor = colorResource(R.color.almostBlack)
+                                ),
+                                shape = CircleShape,
+                                onClick = {
+                                    composeMessageViewModel.menuExpanded =
+                                        !composeMessageViewModel.menuExpanded
+                                }
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(16.dp),
+                                    painter = painterResource(R.drawable.ic_add_white),
+                                    contentDescription = stringResource(R.string.button_label_add)
+                                )
                             }
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(16.dp),
-                                painter = painterResource(R.drawable.ic_add_white),
-                                contentDescription = stringResource(R.string.button_label_add)
+                            AttachMenu(
+                                expanded = composeMessageViewModel.menuExpanded,
+                                hasCamera = hasCamera,
+                                showContactIntroduction = discussionViewModel.discussion.value?.discussionType == Discussion.TYPE_CONTACT,
+                                inputEditText = inputEditText,
+                                onDismiss = { composeMessageViewModel.menuExpanded = false },
+                                controller = controller,
+                                buttonBounds = buttonBoundsInWindow
                             )
                         }
-                        AttachMenu(
-                            expanded = composeMessageViewModel.menuExpanded,
-                            hasCamera = hasCamera,
-                            showContactIntroduction = discussionViewModel.discussion.value?.discussionType == Discussion.TYPE_CONTACT,
-                            inputEditText = inputEditText,
-                            onDismiss = { composeMessageViewModel.menuExpanded = false },
-                            controller = controller
-                        )
                     }
                 }
             }
@@ -407,8 +530,7 @@ fun ComposeMessageArea(
                             } else {
                                 Modifier
                             }
-                        )
-                        .padding(start = 8.dp),
+                        ),
                 verticalAlignment = Alignment.Bottom,
             ) {
                 Box(
@@ -417,12 +539,13 @@ fun ComposeMessageArea(
                     DiscussionInputEditText(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(start = 8.dp)
                             .heightIn(min = 40.dp)
                             .then(
                                 // we keep DiscussionInputEditText in the composition tree
                                 // otherwise its draft states are lost
                                 // may be good to move out draft management
-                                if (controller.voiceMessageRecorder.opened) {
+                                if (controller.voiceMessageRecorder.isOpened) {
                                     Modifier.height(0.dp).alpha(0f)
                                 } else {
                                     Modifier
@@ -435,10 +558,10 @@ fun ComposeMessageArea(
                         discussionViewModel = discussionViewModel,
                         ephemeralMessage = ephemeralSettingsEnabled == true,
                         onSendMessage = {
+                            exoPlayer.stop()
                             controller.onSendMessage(
                                 composeMessageViewModel.sending,
                                 isEditMode == true,
-                                isRecording,
                                 inputEditText
                             )
                         },
@@ -446,16 +569,130 @@ fun ComposeMessageArea(
                             inputEditText = it
                         }
                     )
-                    if (controller.voiceMessageRecorder.opened) {
-                        SoundWave(
+
+                    // paused record playing progress
+                    LaunchedEffect(isPlayingAudio) {
+                        if (isPlayingAudio) {
+                            while (isPlayingAudio) {
+                                val duration = exoPlayer.duration
+                                if (duration > 0) {
+                                    playbackProgress = (exoPlayer.currentPosition.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
+                                }
+                                delay(33)
+                            }
+                        }
+                    }
+
+                    if (controller.voiceMessageRecorder.isOpened) {
+                        // we add this Box here to prevent clicks to the DiscussionInputEditText beneeth when in voice recorder
+                        Box(
                             modifier = Modifier
+                                .clickable(
+                                    interactionSource = null,
+                                    indication = null,
+                                    onClick = {}
+                                )
                                 .fillMaxWidth()
                                 .height(40.dp)
                                 .align(Alignment.Center),
-                            sample = controller.voiceMessageRecorder.soundWave,
-                            showStopButton = false
-                        ) {
-                            controller.onVoiceRecordingStop(discard = false)
+                        )
+
+                        Crossfade(
+                            targetState = controller.voiceMessageRecorder.isPaused
+                        ) { onPause ->
+                            if (onPause) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(40.dp)
+                                        .align(Alignment.Center),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    IconButton(
+                                        modifier = Modifier.size(40.dp),
+                                        onClick = {
+                                            if (isPlayingAudio) {
+                                                exoPlayer.pause()
+                                            } else {
+                                                if (exoPlayer.playbackState == Player.STATE_ENDED) {
+                                                    exoPlayer.seekTo(0)
+                                                }
+                                                exoPlayer.play()
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .background(
+                                                    color = colorResource(R.color.darkGrey),
+                                                    shape = CircleShape,
+                                                )
+                                                .padding(4.dp),
+                                            painter = painterResource(if (isPlayingAudio) R.drawable.ic_pause else R.drawable.ic_play),
+                                            contentDescription = null,
+                                            tint = colorResource(R.color.lightGrey)
+                                        )
+                                    }
+
+                                    val reversedAmplitudes = remember(controller.voiceMessageRecorder.soundWave.samples) {
+                                        // reverse the waveform, and resample it to 50 samples with max to preserve volume spikes
+                                        WaveformExtractor.resample(
+                                            source = controller.voiceMessageRecorder.soundWave.samples.reversed(),
+                                            targetCount = 50
+                                        )
+                                    }
+
+                                    StaticSoundWave(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(36.dp),
+                                        amplitudes = reversedAmplitudes,
+                                        progress = playbackProgress,
+                                        playtimeMs = (playbackProgress * audioDuration).toLong(),
+                                        durationMs = audioDuration,
+                                        onSeek = { seekProgress ->
+                                            if (exoPlayer.duration != C.TIME_UNSET) {
+                                                exoPlayer.seekTo((seekProgress * exoPlayer.duration).toLong())
+                                                playbackProgress = seekProgress
+                                            }
+                                        }
+                                    )
+
+                                    IconButton(
+                                        modifier = Modifier.size(40.dp),
+                                        enabled = !controller.voiceMessageRecorder.isSaving,
+                                        onClick = {
+                                            controller.onVoiceRecordingStop(discard = true)
+                                        }
+                                    ) {
+                                        Icon(
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .background(
+                                                    color = colorResource(R.color.darkGrey),
+                                                    shape = CircleShape,
+                                                )
+                                                .padding(4.dp),
+                                            painter = painterResource(R.drawable.ic_close),
+                                            contentDescription = stringResource(R.string.button_label_cancel),
+                                            tint = colorResource(R.color.lightGrey)
+                                        )
+                                    }
+                                }
+                            } else {
+                                SoundWave(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(40.dp)
+                                        .align(Alignment.Center)
+                                        .padding(horizontal = 4.dp),
+                                    sample = controller.voiceMessageRecorder.soundWave,
+                                    showStopButton = false
+                                ) {
+                                    controller.onVoiceRecordingStop(discard = false)
+                                }
+                            }
                         }
                     }
                 }
@@ -482,7 +719,7 @@ fun ComposeMessageArea(
                 }
 
                 AnimatedVisibility(
-                    visible = isRecording != true,
+                    visible = !controller.voiceMessageRecorder.isOpened,
                 ) {
                     IconButton(
                         modifier = Modifier.size( 32.dp, 40.dp).requiredSize(40.dp),
@@ -503,7 +740,7 @@ fun ComposeMessageArea(
                 }
 
                 AnimatedVisibility(
-                    visible = isEditMode != true && !composeMessageViewModel.hasText && !composeMessageViewModel.hasAttachments() && isRecording != true
+                    visible = isEditMode != true && !composeMessageViewModel.hasText && !composeMessageViewModel.hasAttachments() && !controller.voiceMessageRecorder.isOpened
                 ) {
                     IconButton(
                         modifier = Modifier.size( 32.dp, 40.dp).requiredSize(40.dp),
@@ -522,21 +759,25 @@ fun ComposeMessageArea(
                         )
                     }
                 }
-                Spacer(Modifier.width(4.dp))
+                AnimatedVisibility(
+                    visible = ephemeralSettingsEnabled == true || !controller.voiceMessageRecorder.isOpened
+                ) {
+                    Spacer(Modifier.width(4.dp))
+                }
             }
             AnimatedVisibility(
-                visible = composeMessageViewModel.hasAttachments() || composeMessageViewModel.hasText || isEditMode == true|| isRecording == true
+                visible = composeMessageViewModel.hasAttachments() || composeMessageViewModel.hasText || isEditMode == true || controller.voiceMessageRecorder.isOpened
             ) {
                 SendButton(
                     modifier = Modifier.padding(start = 4.dp),
-                    enabled = (isEditMode != true && !composeMessageViewModel.sending)
-                            || (isEditMode == true && composeMessageViewModel.editIsSendable),
+                    enabled = ((isEditMode != true && !composeMessageViewModel.sending)
+                            || (isEditMode == true && composeMessageViewModel.editIsSendable)) && !controller.voiceMessageRecorder.isSaving,
                     isAudioMode = false
                 ) {
+                    exoPlayer.stop()
                     controller.onSendMessage(
                         composeMessageViewModel.sending,
                         isEditMode == true,
-                        isRecording,
                         inputEditText
                     )
                 }

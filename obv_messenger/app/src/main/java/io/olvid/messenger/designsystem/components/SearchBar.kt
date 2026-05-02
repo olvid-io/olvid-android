@@ -155,7 +155,6 @@ private fun SearchBarInput(
             textFieldValue.selection != textFieldValueState.selection ||
             textFieldValue.composition != textFieldValueState.composition
         ) {
-            @Suppress("AssignedValueIsNeverRead")
             textFieldValueState = textFieldValue
         }
     }
@@ -184,7 +183,6 @@ private fun SearchBarInput(
             textFieldValueState = newValue
 
             val stringChanged = lastTextValue != newValue.text
-            @Suppress("AssignedValueIsNeverRead")
             lastTextValue = newValue.text
 
             if (stringChanged) {

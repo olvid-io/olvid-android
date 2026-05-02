@@ -28,6 +28,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -49,14 +50,14 @@ import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.DiscussionInputEditText
 import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
+import io.olvid.messenger.customClasses.StringUtils2.Companion.normalize
 import io.olvid.messenger.databases.tasks.AddFyleToDraftFromUriTask
 import io.olvid.messenger.databases.tasks.PostMessageInDiscussionTask
 import io.olvid.messenger.databases.tasks.UpdateMessageBodyTask
 import io.olvid.messenger.discussion.DiscussionViewModel
 import io.olvid.messenger.discussion.Utils
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
-import io.olvid.messenger.discussion.location.SendLocationBasicDialogFragment
-import io.olvid.messenger.discussion.location.SendLocationMapDialogFragment
+import io.olvid.messenger.discussion.location.LocationActivity
 import io.olvid.messenger.discussion.mention.MentionViewModel
 import io.olvid.messenger.discussion.poll.PollCreationActivity
 import io.olvid.messenger.fragments.dialog.ContactIntroductionDialogFragment
@@ -166,7 +167,8 @@ class ComposeMessageController(
     }
 
     fun onAttachTimer() {
-        composeMessageViewModel.openEphemeralSettings = !composeMessageViewModel.openEphemeralSettings
+        composeMessageViewModel.openEphemeralSettings =
+            !composeMessageViewModel.openEphemeralSettings
         if (composeMessageViewModel.openEphemeralSettings) {
             ephemeralViewModel.setDiscussionId(
                 discussionViewModel.discussionId,
@@ -236,30 +238,24 @@ class ComposeMessageController(
                     OSM,
                     MAPS,
                     CUSTOM_OSM -> {
-                        val dialogFragment =
-                            SendLocationMapDialogFragment.newInstance(
-                                discussionId,
-                                SettingsActivity.locationIntegration
-                            )
-                        dialogFragment.show(
-                            activity.supportFragmentManager,
-                            "send-location-fragment-osm"
+                        LocationActivity.startSendLocation(
+                            context,
+                            discussionId,
+                            SettingsActivity.locationIntegration
                         )
                     }
 
                     BASIC -> {
-                        val dialogFragment =
-                            SendLocationBasicDialogFragment.newInstance(discussionId)
-                        dialogFragment.show(
-                            activity.supportFragmentManager,
-                            "send-location-fragment-basic"
+                        LocationActivity.startSendLocationBasic(
+                            activity,
+                            discussionId,
+                            BASIC
                         )
                     }
 
                     SettingsActivity.LocationIntegrationEnum.NONE -> {
                         LocationIntegrationSelectorDialog(
                             context,
-                            false,
                             object :
                                 LocationIntegrationSelectorDialog.OnIntegrationSelectedListener {
                                 override fun onIntegrationSelected(
@@ -326,7 +322,6 @@ class ComposeMessageController(
     fun onSendMessage(
         sending: Boolean,
         isEditMode: Boolean,
-        isRecording: Boolean?,
         inputEditText: DiscussionInputEditText?
     ) {
         if (sending) return
@@ -355,9 +350,12 @@ class ComposeMessageController(
             discussionViewModel.discussionId?.let { discussionId ->
                 if (composeMessageViewModel.trimmedNewMessageText != null
                     || composeMessageViewModel.hasAttachments()
-                    || isRecording == true
+                    || voiceMessageRecorder.isOpened
                 ) {
                     composeMessageViewModel.sending = true
+//                    if (voiceMessageRecorder.isRecording || voiceMessageRecorder.isPaused) {
+//                        voiceMessageRecorder.stoppedForSend = true
+//                    }
                     discussionViewModel.markMessagesRead()
                     val trimAndMentions =
                         Utils.removeProtectionFEFFsAndTrim(
@@ -368,7 +366,7 @@ class ComposeMessageController(
                     linkPreviewViewModel.waitForPreview {
                         App.runThread {
                             runCatching {
-                                if (isRecording == true) {
+                                if (voiceMessageRecorder.isRecording || voiceMessageRecorder.isPaused) {
                                     voiceMessageRecorder.stopRecord(
                                         discard = false,
                                         async = false
@@ -422,17 +420,26 @@ fun rememberComposeMessageController(
             if (result.resultCode == Activity.RESULT_OK) {
                 result.data?.let { data ->
                     if (data.clipData != null) {
-                        val count = data.clipData!!.itemCount
-                        for (i in 0 until count) {
-                            val uri = data.clipData!!.getItemAt(i).uri
-                            App.runThread(
-                                AddFyleToDraftFromUriTask(
+                        val clipData = data.clipData!!
+                        val uris = (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
+                        val discussionId = discussionViewModel.discussionId!!
+                        App.runThread {
+                            // Sort URIs alphabetically by display name before inserting to preserve order
+                            val sortedUris = uris.sortedBy { uri ->
+                                context.contentResolver.query(
                                     uri,
-                                    null,
-                                    null,
-                                    discussionViewModel.discussionId!!
-                                )
-                            )
+                                    arrayOf(OpenableColumns.DISPLAY_NAME),
+                                    null, null, null
+                                )?.use { cursor ->
+                                    if (cursor.moveToFirst())
+                                        cursor.getString(0)?.normalize()
+                                    else
+                                        null
+                                } ?: uri.lastPathSegment?.normalize() ?: ""
+                            }
+                            for (uri in sortedUris) {
+                                AddFyleToDraftFromUriTask(uri, null, null, discussionId).run()
+                            }
                         }
                     } else if (data.data != null) {
                         App.runThread(

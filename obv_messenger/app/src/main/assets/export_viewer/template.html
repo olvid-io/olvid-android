@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olvid Discussions</title>
+    <link rel="stylesheet" href="viewer.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header"><h1>Olvid Export</h1></div>
+        <div class="discussion-list" id="list"></div>
+    </div>
+    <div class="main-chat" id="main">
+        <div class="empty-chat"><h3>Select a discussion to start</h3></div>
+    </div>
+
+    <script id="data" type="application/json">DATA_JSON</script>
+
+    <script>
+        const appData = JSON.parse(document.getElementById('data').textContent);
+        const myId = appData.bytesOwnedIdentity;
+        const discussions = appData.discussions || [];
+        const allMessages = appData.messages || [];
+
+        function formatDate(ts) {
+            return new Date(ts).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+        function formatTime(ts) {
+            return new Date(ts).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function loadChat(id, title) {
+            document.querySelectorAll('.discussion-item').forEach(el => el.classList.toggle('active', el.dataset.id === id));
+            const data = allMessages.find(m => m.discussion.id === id);
+            if (!data) return;
+
+            const sorted = data.messages.sort((a,b) => a.timestamp - b.timestamp);
+            const main = document.getElementById('main');
+            main.innerHTML = `
+                <div class="chat-header">
+                    <h2>${title}</h2>
+                    <div class="meta">${sorted.length} messages exported</div>
+                </div>
+                <div class="messages-container" id="msgs"></div>
+            `;
+
+            const container = document.getElementById('msgs');
+            let lastDate = '';
+
+            sorted.forEach(msg => {
+                const dateStr = formatDate(msg.timestamp);
+                if (dateStr !== lastDate) {
+                    const sep = document.createElement('div');
+                    sep.className = 'date-separator';
+                    sep.innerHTML = `<span>${dateStr}</span>`;
+                    container.appendChild(sep);
+                    lastDate = dateStr;
+                }
+
+                const isMe = msg.sender === myId || !msg.sender;
+                const row = document.createElement('div');
+                row.className = `message-row ${isMe ? 'out' : 'in'}`;
+                
+                let content = `<div class="message-info">${isMe ? 'You' : title} • ${formatTime(msg.timestamp)}</div>`;
+                if (msg.body) content += `<div class="bubble">${msg.body}</div>`;
+                
+                if (msg.attachments && msg.attachments.length > 0) {
+                    content += '<div class="attachments">';
+                    msg.attachments.forEach(att => {
+                        content += '<div class="attachment-item">';
+                        const fileOnDisk = att.diskFilename || att.filename;
+                        if (att.mimeType.startsWith('image/')) {
+                            content += `<img src="attachments/${fileOnDisk}" class="attachment-image">`;
+                        } else if (att.mimeType.startsWith('audio/')) {
+                            content += `<audio controls class="attachment-audio"><source src="attachments/${fileOnDisk}" type="${att.mimeType}"></audio>`;
+                        } else {
+                            content += `<a href="attachments/${fileOnDisk}" class="attachment-file" target="_blank">📄 ${att.filename}</a>`;
+                        }
+                        content += '</div>';
+                    });
+                    content += '</div>';
+                }
+
+                if (msg.location) {
+                    content += `<a href="https://maps.google.com/?q=${msg.location.lat},${msg.location.long}" class="location-link" target="_blank">📍 View Location</a>`;
+                }
+
+                row.innerHTML = content;
+                container.appendChild(row);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        const list = document.getElementById('list');
+        discussions.forEach(d => {
+            const item = document.createElement('div');
+            item.className = 'discussion-item';
+            item.dataset.id = d.discussion.id;
+            item.innerHTML = `<div class="title">${d.title}</div><div class="preview">${d.discussion.id.substring(0,20)}...</div>`;
+            item.onclick = () => loadChat(d.discussion.id, d.title);
+            list.appendChild(item);
+        });
+
+        if (discussions.length > 0) loadChat(discussions[0].discussion.id, discussions[0].title);
+    </script>
+</body>
+</html>

@@ -114,7 +114,7 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
             PushNotificationConfiguration[] pushNotificationConfigurations = PushNotificationConfiguration.getAll(fetchManagerSession);
             for (PushNotificationConfiguration pushNotificationConfiguration : pushNotificationConfigurations) {
                 // check that the corresponding owned Identity still exists --> delete otherwise
-                if (!fetchManagerSession.identityDelegate.isOwnedIdentity(fetchManagerSession.session, pushNotificationConfiguration.getOwnedIdentity())) {
+                if (!fetchManagerSession.identityDelegate.isOwnedIdentity(fetchManagerSession.session, pushNotificationConfiguration.getOwnedIdentity(), true)) {
                     PushNotificationConfiguration.deleteForOwnedIdentity(fetchManagerSession, pushNotificationConfiguration.getOwnedIdentity());
                     fetchManagerSession.session.commit();
                     continue;

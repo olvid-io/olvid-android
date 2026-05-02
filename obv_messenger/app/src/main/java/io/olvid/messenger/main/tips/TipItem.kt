@@ -52,6 +52,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,7 +69,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -84,7 +84,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.billing.SubscriptionOfferDialog
 import io.olvid.messenger.customClasses.AccessibilityManager
 import io.olvid.messenger.customClasses.BytesKey
-import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.customClasses.formatMarkdownToAnnotatedString
 import io.olvid.messenger.customClasses.openStoreUrlOrFallback
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.components.StarRatingBar
@@ -94,7 +94,7 @@ import io.olvid.messenger.google_services.GooglePlay
 import io.olvid.messenger.main.tips.TipsViewModel.Tip
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.settings.SettingsActivity
-import io.olvid.messenger.settings.ShowCurrentSeed
+import io.olvid.messenger.settings.backupV2.ShowCurrentSeed
 import io.olvid.messenger.troubleshooting.TroubleshootingActivity
 
 
@@ -320,7 +320,7 @@ fun TipItem(
                             ) {
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
-                                    text = AnnotatedString(stringResource(R.string.tip_playstore_review_message)).formatMarkdown(),
+                                    text = stringResource(R.string.tip_playstore_review_message).formatMarkdownToAnnotatedString(),
                                     style = OlvidTypography.body2,
                                     color = colorResource(R.color.greyTint),
                                 )
@@ -344,7 +344,7 @@ fun TipItem(
                             ) {
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
-                                    text = AnnotatedString(stringResource(R.string.tip_playstore_email_message)).formatMarkdown(),
+                                    text = stringResource(R.string.tip_playstore_email_message).formatMarkdownToAnnotatedString(),
                                     style = OlvidTypography.body2,
                                     color = colorResource(R.color.greyTint),
                                 )
@@ -561,6 +561,22 @@ fun TipItem(
                 }
             )
         }
+
+        Tip.IDENTITY_DEACTIVATED -> {
+            val ownedIdentity by AppSingleton.getCurrentIdentityLiveData().observeAsState()
+            TipBubble(
+                icon = R.drawable.ic_block,
+                tint = R.color.red,
+                title = R.string.dialog_title_identity_deactivated,
+                message = R.string.tip_identity_deactivated_message,
+                action = R.string.button_label_reactivate_identity,
+                onAction = {
+                    ownedIdentity?.let {
+                        App.openAppDialogIdentityDeactivated(ownedIdentity)
+                    }
+                }
+            )
+        }
     }
     if (showOlvidPlus) {
         SubscriptionOfferDialog(
@@ -671,7 +687,7 @@ private fun TipBubble(
                     ?.let {
                         Text(
                             modifier = Modifier.padding(bottom = 8.dp, end = 8.dp),
-                            text = AnnotatedString(it).formatMarkdown(),
+                            text = it.formatMarkdownToAnnotatedString(),
                             style = OlvidTypography.body2,
                             color = colorResource(R.color.greyTint),
                         )

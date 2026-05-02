@@ -28,7 +28,7 @@ interface DiscussionDelegate {
 
     fun scrollToMessage(messageId: Long)
 
-    fun replyToMessage(messageId: Long, rawNewMessageText: String)
+    fun replyToMessage(messageId: Long, currentComposeMessageTextToSaveToDraft: String)
 
     fun initiateMessageForward(activity: FragmentActivity, messageId: Long, openDialogCallback: Runnable?)
 

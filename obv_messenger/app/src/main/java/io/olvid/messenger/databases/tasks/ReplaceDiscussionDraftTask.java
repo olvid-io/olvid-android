@@ -26,7 +26,6 @@ import androidx.annotation.NonNull;
 import java.util.List;
 
 import io.olvid.engine.Logger;
-import io.olvid.messenger.App;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Message;
@@ -65,7 +64,7 @@ public class ReplaceDiscussionDraftTask implements Runnable {
         });
         if (draftFiles != null) {
             for (Uri draftFile : draftFiles) {
-                App.runThread(new AddFyleToDraftFromUriTask(draftFile, discussionId));
+                new AddFyleToDraftFromUriTask(draftFile, discussionId).run();
             }
         }
     }

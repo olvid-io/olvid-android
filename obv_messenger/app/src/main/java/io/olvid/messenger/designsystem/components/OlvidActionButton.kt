@@ -46,8 +46,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.R
+import io.olvid.messenger.designsystem.minus
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 
 @Composable
@@ -55,10 +57,13 @@ fun OlvidActionButton(
     modifier: Modifier = Modifier,
     containerColor: Color = colorResource(R.color.olvid_gradient_light),
     contentColor: Color = colorResource(R.color.alwaysWhite),
-    @DrawableRes icon: Int? = null,
-    text: String?,
     outlinedColor: Color? = null,
+    @DrawableRes icon: Int? = null,
+    @DrawableRes trailingIcon: Int? = null,
+    text: String?,
+    large: Boolean = false,
     allowTwoLines: Boolean = false,
+    elevation: Dp? = null,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
@@ -80,7 +85,19 @@ fun OlvidActionButton(
             disabledContainerColor = containerColor.copy(alpha = .5f*containerColor.alpha),
             disabledContentColor = contentColor.copy(alpha = .5f*contentColor.alpha),
         ),
-        shape = RoundedCornerShape(8.dp)
+        elevation = elevation?.let { ButtonDefaults.buttonElevation(
+            defaultElevation = it,
+            pressedElevation = it,
+            focusedElevation = it,
+            hoveredElevation = it,
+            disabledElevation = it,
+        ) },
+        shape = RoundedCornerShape(8.dp),
+        contentPadding = ButtonDefaults.ContentPadding -
+                PaddingValues(
+                    start = if (icon != null) 4.dp else 0.dp,
+                    end = if (trailingIcon != null) 4.dp else 0.dp,
+                )
     ) {
         icon?.let {
             Icon(
@@ -98,13 +115,81 @@ fun OlvidActionButton(
                 text = text,
                 maxLines = if (allowTwoLines) 2 else 1,
                 overflow = TextOverflow.Ellipsis,
-                style = OlvidTypography.body2.copy(
-                    fontWeight = FontWeight.Medium
-                )
+                style = (
+                        if (large)
+                            OlvidTypography.body1
+                        else
+                            OlvidTypography.body2
+                        ).copy(
+                        fontWeight = FontWeight.Medium
+                    )
+            )
+        }
+        trailingIcon?.let {
+            if (text != null) {
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            Icon(
+                modifier = Modifier.size(24.dp),
+                painter = painterResource(trailingIcon),
+                contentDescription = null
             )
         }
     }
 }
+
+@Composable
+fun OlvidOutlinedActionButton(
+    modifier: Modifier = Modifier,
+    outlinedColor: Color? = colorResource(R.color.blueOrGrey),
+    contentColor: Color = colorResource(R.color.blueOrWhite),
+    @DrawableRes icon: Int? = null,
+    text: String?,
+    large: Boolean = false,
+    allowTwoLines: Boolean = false,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    OlvidActionButton(
+        modifier = modifier,
+        outlinedColor = outlinedColor,
+        containerColor = Color.Transparent,
+        contentColor = contentColor,
+        icon = icon,
+        text = text,
+        large = large,
+        allowTwoLines = allowTwoLines,
+        enabled = enabled,
+        onClick = onClick,
+    )
+}
+
+@Composable
+fun OlvidOutlinedSecondaryButton(
+    modifier: Modifier = Modifier,
+    outlinedColor: Color? = colorResource(R.color.greyTint),
+    contentColor: Color = colorResource(R.color.almostBlack),
+    @DrawableRes icon: Int? = null,
+    text: String?,
+    large: Boolean = false,
+    allowTwoLines: Boolean = false,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    OlvidActionButton(
+        modifier = modifier,
+        outlinedColor = outlinedColor,
+        containerColor = Color.Transparent,
+        contentColor = contentColor,
+        icon = icon,
+        text = text,
+        large = large,
+        allowTwoLines = allowTwoLines,
+        enabled = enabled,
+        onClick = onClick,
+    )
+}
+
 
 @Composable
 fun OlvidTextButton(

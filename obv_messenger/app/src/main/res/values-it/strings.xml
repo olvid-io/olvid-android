@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Dettagli contatto</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Dettagli utente</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Dettagli del gruppo</string>
@@ -258,7 +258,6 @@
 	<string name="text_you" state="needs_review" hash="672009142">Tu</string>
 	<string name="title_invite_chooser" state="needs_review" hash="1726572772">Scegli come inviare il tuo invito</string>
 	<string name="title_sharing_chooser" state="needs_review" hash="291715689">Scegli un metodo di condivisione</string>
-	<string name="toast_message_android_bug_attach_duplicate_uri" state="needs_review" hash="-776215584">Alcuni file non è stato possibile allegarli al messaggio a causa di un bug nella tua versione di Android (più file hanno restituito lo stesso URI). Riprova ad allegare i file mancanti.</string>
 	<string name="toast_message_attachment_being_copied" state="needs_review" hash="-978855599">Un allegato è ancora in fase di elaborazione. Il tuo messaggio verrà inviato al termine dell\'elaborazione.</string>
 	<string name="toast_message_attachment_saved" state="needs_review" hash="-2073631581">Allegato salvato</string>
 	<string name="toast_message_camera_permission_denied" state="needs_review" hash="1896719877">Autorizzazione all\'uso della fotocamera negata</string>
@@ -344,6 +343,9 @@
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">Una volta attivata, Olvid recupererà un\'anteprima dei link che invii e la alleggerà al messaggio.</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">Scarica anteprime dei link ricevuti</string>
 	<string name="pref_link_preview_summary_inbound" state="needs_review" hash="-320325429">Una volta attivata, Olvid recupererà automaticamente le anteprime dei link che ricevi (se un\'anteprima non è allegata al messaggio).</string>
+	<string name="link_preview_menu_copy_link" state="needs_review" hash="1269903076">Copia il link</string>
+	<string name="link_preview_menu_open_in_browser" state="needs_review" hash="-1711141559">Apri nel browser</string>
+	<string name="link_preview_menu_open_image" state="needs_review" hash="-2013483894">Visualizza immagine</string>
 	<string name="pref_discussion_read_receipt_title" state="needs_review" hash="-652307837">Ricevute di lettura</string>
 	<string name="pref_text_app_default" state="needs_review" hash="1920567018">Usa l\'impostazione predefinita</string>
 	<string name="pref_text_app_default_true" state="needs_review" hash="-948780646">Usa l\'impostazione predefinita (attiva)</string>
@@ -352,6 +354,10 @@
 	<string name="pref_text_discussion_read_receipt_on" state="needs_review" hash="983295321">Attivato, i tuoi contatti vengono informati</string>
 	<string name="pref_use_lock_screen_title" state="needs_review" hash="540058239">Usa la schermata di blocco dell\'applicazione</string>
 	<string name="pref_use_lock_screen_summary" state="needs_review" hash="-399095273">Attiva questa opzione per proteggere Olvid con uno schermo di blocco all\'avvio.</string>
+	<string name="pref_lock_screen_required_by_mdm" state="needs_review" hash="-500219406">Richiesto dalla tua organizzazione</string>
+	<string name="lock_screen_setup_title" state="needs_review" hash="932203184">È richiesto lo schermo di blocco</string>
+	<string name="lock_screen_setup_explanation" state="needs_review" hash="169071212">La tua organizzazione richiede che tu protegga questa app con un codice PIN o una password per lo schermo di blocco.</string>
+	<string name="lock_screen_setup_button" state="needs_review" hash="672169315">Imposta il PIN</string>
 	<string name="pref_category_notifications_title" state="needs_review" hash="1237583104">Notifiche</string>
 	<string name="pref_category_privacy_title" state="needs_review" hash="-1750659871">Privacy</string>
 	<string name="pref_category_other_title" state="needs_review" hash="-1683901612">Altre impostazioni</string>
@@ -370,7 +376,7 @@
 	<string name="button_label_use_pin" state="needs_review" hash="918492771">Usa un PIN invece di una password</string>
 	<string name="hint_enter_pin" state="needs_review" hash="999437557">Inserisci il PIN</string>
 	<string name="hint_confirm_pin" state="needs_review" hash="1780268503">Conferma PIN</string>
-	<string name="text_pin_creation_explanation" state="needs_review" hash="-1935715126">Dovrai inserire questo PIN per sbloccare Olvid.\nNon può essere recuperato e potresti perdere l\'accesso ai tuoi dati Olvid se lo dimentichi.</string>
+	<string name="text_pin_creation_explanation" state="needs_review" hash="1232246926">Dovrai inserire questo PIN per sbloccare Olvid.\nNon può essere recuperato e, se lo dimentichi, **potresti perdere l\'accesso ai tuoi dati Olvid**.</string>
 	<string name="error_text_pin_too_short" state="needs_review" hash="-1085309478">PIN troppo corto (almeno 4 cifre)</string>
 	<string name="error_text_pin_mismatch" state="needs_review" hash="-4525766">PIN non corrispondente</string>
 	<string name="hint_enter_password" state="needs_review" hash="478503341">Inserisci la password</string>
@@ -394,6 +400,7 @@
 	<string name="pref_text_lock_grace_time_infinity" state="needs_review" hash="146086108">Blocca Olvid manualmente</string>
 	<string name="pref_unlock_biometry_summary_none_enrolled" state="needs_review" hash="-118589413">L\'autenticazione biometrica non è ancora configurata sul tuo dispositivo.</string>
 	<string name="dialog_title_unlock_olvid" state="needs_review" hash="-2054572246">Sblocca Olvid con la biometria</string>
+	<string name="dialog_title_unlock_neutral" state="needs_review" hash="761644522">Sblocca con dati biometrici</string>
 	<string name="notification_channel_unified_service_name" state="needs_review" hash="1404446256">Servizio in primo piano</string>
 	<string name="notification_channel_unified_service_description" state="needs_review" hash="-1204081836">Notifica persistente che mostra lo stato di Olvid</string>
 	<string name="notification_title_olvid_is_unlocked" state="needs_review" hash="1688502744">Olvid è sbloccato</string>
@@ -437,6 +444,7 @@
 	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">Il tuo profilo è stato disattivato su questo dispositivo.\n\nSembra che tu non abbia alcun dispositivo attivo al momento, quindi puoi riattivare il tuo profilo quando vuoi.\n\nSe desideri procedere, premi \"riattiva il mio profilo su questo dispositivo\" qui sotto.\n\nPremi \"annulla\" per chiudere questa finestra di dialogo e mantenere questo dispositivo inattivo: non potrai inviare o ricevere messaggi su questo dispositivo, ma potrai comunque consultare le tue vecchie conversazioni.</string>
 	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">Il tuo profilo è stato disattivato su questo dispositivo.\n\nSembra che tu non abbia una licenza per utilizzare Olvid su più dispositivi contemporaneamente. La riattivazione di questo dispositivo richiede la disattivazione di un altro dei tuoi dispositivi.\n\nSe desideri procedere, seleziona il dispositivo che desideri disattivare dall\'elenco sottostante, quindi premi \"riattiva il mio profilo su questo dispositivo\".\n\nPremi \"annulla\" per chiudere questa finestra di dialogo e mantenere questo dispositivo inattivo: non potrai inviare o ricevere messaggi su questo dispositivo, ma potrai comunque consultare le tue vecchie conversazioni.</string>
 	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">Il tuo profilo è stato disattivato su questo dispositivo.\n\nSembra che tutti i tuoi altri dispositivi siano impostati per essere disattivati a breve, quindi puoi riattivare il tuo profilo su questo dispositivo in qualsiasi momento. Di seguito trovi l\'elenco dei tuoi dispositivi attualmente attivi.\n\nSe desideri procedere, premi \"riattiva il mio profilo su questo dispositivo\" qui sotto.\n\nPremi \"annulla\" per chiudere questa finestra di dialogo e mantenere questo dispositivo inattivo: non potrai inviare o ricevere messaggi su questo dispositivo, ma potrai comunque visualizzare le tue vecchie conversazioni.</string>
+	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">Il tuo profilo è disattivato su questo dispositivo.\n\nNon potrai inviare o ricevere messaggi qui a meno che tu non lo riattivi.</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">Riavvia il mio profilo su questo dispositivo</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">Si è verificato un errore. Riprova, per favore.</string>
 	<string name="dialog_title_identity_activated" state="needs_review" hash="-1465666248">ID Olvid riattivata</string>
@@ -810,10 +818,7 @@
 	<string name="toast_message_voice_message_recording_failed" state="needs_review" hash="-632817078">Impossibile registrare il messaggio vocale</string>
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Lettore multimediale</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Controlli di riproduzione durante la riproduzione di contenuti multimediali in Olvid</string>
-	<string name="notification_title_now_playing" state="needs_review" hash="-1042122929">In riproduzione…</string>
-	<string name="notification_action_pause" state="needs_review" hash="1931883968">Pausa</string>
-	<string name="notification_action_play" state="needs_review" hash="1143766922">Riproduci</string>
-	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="-1049639416">Impossibile riprodurre %1$s</string>
+	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Impossibile riprodurre il file audio</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Elimina</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Elimina ovunque</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Impossibile eliminare su tutti i dispositivi. Riprova.</string>
@@ -843,7 +848,6 @@
 	<string name="dialog_message_unmute_notifications" state="needs_review" hash="816867976">Le notifiche di nuovi messaggi sono attualmente silenziate.\n\nVuoi riattivarle?</string>
 	<string name="dialog_message_unmute_notifications_muted_until" state="needs_review" hash="-325454266">Le notifiche di nuovi messaggi sono silenziate fino a: %1$s.\n\nVuoi riattivarle?</string>
 	<string name="notification_action_mute" state="needs_review" hash="-1553988068">Silenzia</string>
-	<string name="pref_scaled_turn_title" state="needs_review" hash="-1234636269">Scegli quali server TURN regionali utilizzare</string>
 	<string name="explanation_identity_creation_options" state="needs_review" hash="-795537312">Questa schermata ti permette di scegliere opzioni aggiuntive per la creazione del tuo ID Olvid. Puoi inserire le opzioni manualmente o scansionare un codice QR di configurazione.</string>
 	<string name="button_label_check_options" state="needs_review" hash="-759177128">Controlla le opzioni</string>
 	<string name="hint_olvid_server" state="needs_review" hash="1097391633">Server Olvid</string>
@@ -859,6 +863,8 @@
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Sembra che il tuo server Olvid non supporti l\'avvio di chiamate sicure.\n\nContatta il tuo amministratore per maggiori dettagli.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Opzioni di creazione ID</string>
 	<string name="text_option_server" state="needs_review" hash="-1130676431">Server: %1$s</string>
+	<string name="dialog_title_non_default_server" state="needs_review" hash="2119192219">Utilizzo di un server personalizzato</string>
+	<string name="dialog_message_non_default_server" state="needs_review" hash="459308900">Stai per creare un profilo sul seguente server:\n\n%1$s\n\nQuesto non è il server Olvid predefinito. Procedi solo se ti fidi di questo server.</string>
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Licenza: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Fornitore di identità</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Server del fornitore di identità</string>
@@ -1202,8 +1208,6 @@
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Connettività: CONNESSO</string>
 	<string name="label_ping_delay" state="needs_review" hash="25344924">Ping: %1$dms</string>
 	<string name="label_over_max_ping_delay" state="needs_review" hash="-684190262">Ping: &gt;%1$ds</string>
-	<string name="menu_action_copy_message_text" state="needs_review" hash="1799737962">Copia il testo del messaggio</string>
-	<string name="menu_action_copy_text_and_attachments" state="needs_review" hash="428315032">Copia messaggio e allegati</string>
 	<string name="label_message_copied_from_olvid" state="needs_review" hash="1145396410">Messaggio copiato da Olvid</string>
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">Messaggio completo copiato negli appunti</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">Scorciatoia per inviare un messaggio predefinito a un contatto o gruppo con un solo clic</string>
@@ -1403,7 +1407,6 @@
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Copia di</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Posizione inviata</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Posizione ricevuta</string>
-	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">Servizi di localizzazione non disponibili</string>
 	<string name="label_send_your_location" state="needs_review" hash="618026241">Invia la tua posizione</string>
 	<string name="notification_title_sharing_location" state="needs_review" hash="-1626101904">Condivisione della posizione in Olvid</string>
 	<string name="notification_action_stop_sharing" state="needs_review" hash="585626699">Interrompi la condivisione</string>
@@ -1532,6 +1535,8 @@
 	<string name="text_setting_lock_biometry" state="needs_review" hash="-1698353580">‣ Sblocca con biometria:</string>
 	<string name="text_setting_lock_notification" state="needs_review" hash="2022286622">‣ Notifica permanente di blocco schermo:\u0020</string>
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">‣ Cancella i messaggi sensibili dopo 3 PIN errati:\u0020</string>
+	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">‣ Richiede il blocco schermo:</string>
+	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">‣ Reimposta il token di blocco schermo:</string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">‣ Scarica automaticamente gli allegati delle chat archiviate:\u0020</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">‣ Recupera la discussione dall\'archivio in caso di notifica:\u0020</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">‣ Anteprima del link ricevuta:\u0020</string>
@@ -1594,8 +1599,8 @@
 	<string name="label_open_original_link_with_trackers" state="needs_review" hash="-1586932660">Utilizza il link originale contenente i parametri di tracciamento</string>
 	<string name="dialog_title_confirm_open_olvid_link" state="needs_review" hash="425949498">Apri questo link in Olvid?</string>
 	<string name="toast_message_unable_to_open_url" state="needs_review" hash="-1486954792">Impossibile aprire l\'URL</string>
-	<string name="text_explanation_location_map_provider" state="needs_review" hash="-173394547">Scegliere un fornitore di mappe consente di selezionare con precisione la posizione che desideri condividere su una mappa. Tuttavia, ciò potrebbe rivelare la tua posizione (o quella dei tuoi contatti) a questo fornitore di servizi.</string>
-	<string name="text_explanation_location_map_provider_settings" state="needs_review" hash="68421420">Questa scelta può essere modificata dalle impostazioni dell\'applicazione.</string>
+	<string name="dialog_title_choose_map_provider" state="needs_review" hash="1225681568">Scegli un fornitore di mappe</string>
+	<string name="dialog_message_choose_map_provider" state="needs_review" hash="-2129640593">Seleziona un fornitore di mappe qui sotto per visualizzare una mappa quando visualizzi o condividi una posizione.\n\nTieni presente che questo potrebbe **rivelare la tua posizione (o quella dei tuoi contatti) a questo fornitore di servizi**.</string>
 	<string name="button_label_choose_provider" state="needs_review" hash="-797956886">Scegli un fornitore</string>
 	<string name="button_label_live_share" state="needs_review" hash="327122881">Condivisione in diretta</string>
 	<string name="label_fetching_address" state="needs_review" hash="-839353954">Recupero indirizzo…</string>
@@ -1804,7 +1809,9 @@
 	<string name="dialog_title_custom_address_server_url" state="needs_review" hash="-2071925830">Server di indirizzi personalizzato</string>
 	<string name="hint_custom_address_server_url" state="needs_review" hash="1348105685">URL del server di ricerca indirizzi</string>
 	<string name="dialog_message_custom_address_server_url" state="needs_review" hash="401731382">Olvid supporta solo server **Pelias** per la ricerca di indirizzi. Inserisci l\'URL del server che desideri interrogare qui sotto, dovrebbe essere qualcosa come *https://pelias.olvid.io*, e le query verranno inviate al punto di accesso */v1/reverse*.\n\nNota che questo server potrebbe apprendere informazioni sulla tua posizione. Assicurati di **utilizzare un server di cui ti fidi**.</string>
-	<string name="toast_message_playback_speed_not_supported_on_device" state="needs_review" hash="502764942">Impossibile modificare la velocità di riproduzione</string>
+	<string name="pref_location_gps_debug_title" state="needs_review" hash="1786532100">Abilita le funzionalità di debug per la condivisione della posizione</string>
+	<string name="pref_location_gps_always_on_title" state="needs_review" hash="1250376384">Mantieni sempre attivo il GPS</string>
+	<string name="pref_location_export_gps_logs_title" state="needs_review" hash="-459831250">Esporta i registri delle attività GPS</string>
 	<string name="text_speed_1x" state="needs_review" hash="789822816">1×</string>
 	<string name="text_speed_1_5x" state="needs_review" hash="-120181054">1,5×</string>
 	<string name="text_speed_2x" state="needs_review" hash="1171767872">2×</string>
@@ -2145,15 +2152,11 @@
 	<string name="history_transfer_step_none" state="needs_review" hash="1228580785">Nessun trasferimento in corso</string>
 	<string name="history_transfer_step_contacting_other_device" state="needs_review" hash="1719019815">In attesa dell\'altro dispositivo</string>
 	<string name="history_transfer_step_connecting" state="needs_review" hash="1836039168">Connessione all\'altro dispositivo</string>
-	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">In corso di negoziazione (fase 1 di 3)</string>
-	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Trasferimento dei messaggi (passaggio 2 di 3)</string>
-	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Trasferimento degli allegati (passaggio 3 di 3)</string>
-	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Negoziazione</string>
-	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Trasferimento dei messaggi</string>
-	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Trasferimento degli allegati</string>
+	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Negoziazione</string>
+	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">In corso di trasferimento</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Trasferimento completato</string>
-	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Trasferimento interrotto</string>
-	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Trasferimento della cronologia chat (versione beta)</string>
+	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Trasferimento non riuscito</string>
+	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Trasferimento cronologia chat</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Impossibile avviare il trasferimento. Forse è già in corso un altro trasferimento?</string>
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Utilizza il \"link magico\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Link magico non valido</string>
@@ -2166,18 +2169,111 @@
 	<string name="onboarding_transfer_keycloak_error_message_authentication_impossible" state="needs_review" hash="-1891385979">Sembra che nessuna delle metodologie di autenticazione supportate sia disponibile.</string>
 	<string name="pref_use_alt_turn_servers_title" state="needs_review" hash="-1956132776">Utilizza server TURN alternativi</string>
 	<string name="pref_use_alt_turn_servers_summary" state="needs_review" hash="357427162">Attiva questa opzione per utilizzare i server TURN con indirizzi IP variabili. Se non sei sicuro, lascia questa opzione disattivata 😁</string>
-	<string name="button_label_transfer_through_webrtc" state="needs_review" hash="-1809138918">Trasferimento tramite rete locale</string>
-	<string name="button_label_export_zip" state="needs_review" hash="1575043364">Esporta come ZIP</string>
-	<string name="button_label_import_zip" state="needs_review" hash="1299665090">Importa file ZIP</string>
-	<string name="dialog_title_transfer_choose_target_device" state="needs_review" hash="218115750">Scegli il dispositivo di destinazione per questo trasferimento</string>
-	<string name="transfer_label_no_other_active_device" state="needs_review" hash="-2135899221">Nessun altro dispositivo attivo</string>
-	<string name="transfer_label_messages" state="needs_review" hash="-1639407912">Messaggi</string>
-	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Velocità di trasmissione</string>
-	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Restante</string>
-	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Allegati</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Questa funzionalità è ancora in fase di test beta e l\'implementazione attuale potrebbe non essere compatibile con l\'implementazione finale del trasferimento della cronologia di Olvid.\n\nPrima di utilizzare questa funzionalità, assicurati che i tuoi dispositivi abbiano installata l\'ultima versione di Olvid.</string>
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Interrompere il trasferimento in corso?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Il trasferimento della cronologia è attualmente in corso. Vuoi interromperlo?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Annulla il trasferimento</string>
 	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">In attesa di partecipare a questa discussione</string>
+	<string name="label_your_other_device" state="needs_review" hash="-339632056">Il tuo altro dispositivo</string>
+	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">vuole trasferire la cronologia delle tue chat su questo dispositivo</string>
+	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">\"%1$s\" desidera trasferire la cronologia delle tue chat su questo dispositivo</string>
+	<string name="button_label_start_transfer" state="needs_review" hash="208526116">Avvia il trasferimento</string>
+	<string name="pref_disable_secondary_notifications_title" state="needs_review" hash="29372078">Disattiva le notifiche \"secondarie\"</string>
+	<string name="pref_disable_secondary_notifications_summary" state="needs_review" hash="-402927980">Questa impostazione disabilita le notifiche per le reazioni ai tuoi messaggi o le nuove risposte ai tuoi sondaggi.</string>
+	<string name="template_copy_multiple_messages" state="needs_review" hash="-1584473750">[%1$s] [%2$s]:\n[%3$s]</string>
+	<string name="label_export_your_chat_history" state="needs_review" hash="30036193">Esporta la cronologia delle tue chat</string>
+	<string name="label_import_your_chat_history" state="needs_review" hash="-1058286401">Importa la cronologia delle tue chat</string>
+	<string name="explanation_export_your_chat_history" state="needs_review" hash="2042738985">Utilizza questa opzione se desideri trasferire la cronologia delle tue chat **da** questo dispositivo.</string>
+	<string name="explanation_import_your_chat_history" state="needs_review" hash="366204152">Utilizza questa opzione se desideri trasferire la cronologia delle tue chat **su** questo dispositivo.</string>
+	<string name="explanation_history_transfer" state="needs_review" hash="983501865">Questa funzione ti consente di **trasferire in modo sicuro** la cronologia delle tue chat tra due dei tuoi dispositivi.\n\nPrima di iniziare, il tuo profilo deve essere **presente su entrambi i dispositivi**.</string>
+	<string name="button_label_import" state="needs_review" hash="-984720905">Importa</string>
+	<string name="history_transfer_pick_profile_title" state="needs_review" hash="-1782334343">Con quale profilo desideri procedere?</string>
+	<string name="history_transfer_pick_profile_text_import" state="needs_review" hash="-1162713377">Seleziona il profilo in cui desideri **importare la cronologia delle tue chat**.</string>
+	<string name="history_transfer_pick_profile_text_export" state="needs_review" hash="951522414">Seleziona il profilo da cui desideri **esportare la cronologia delle chat**.</string>
+	<string name="history_transfer_pick_method_title" state="needs_review" hash="661094742">Cosa vuoi fare?</string>
+	<string name="history_transfer_pick_method_text_import" state="needs_review" hash="1116376527">Si prega di scegliere come si desidera importare la cronologia delle chat del proprio profilo **%1$s**.</string>
+	<string name="history_transfer_pick_method_text_export" state="needs_review" hash="1750125743">Si prega di scegliere come si desidera esportare la cronologia delle chat del proprio profilo **%1$s**.</string>
+	<string name="history_transfer_via_wifi_title" state="needs_review" hash="-2016953028">Trasferimento tramite Wi-Fi</string>
+	<string name="history_transfer_via_wifi_message" state="needs_review" hash="-758708700">Basta connettere entrambi i dispositivi alla stessa rete Wi-Fi.</string>
+	<string name="history_transfer_via_zip_title_import" state="needs_review" hash="1608302669">Importa un file .zip</string>
+	<string name="history_transfer_via_zip_title_export" state="needs_review" hash="-1924849877">Esporta un file .zip</string>
+	<string name="history_transfer_via_zip_message_import" state="needs_review" hash="1766231761">Seleziona il file .zip che hai copiato dal tuo vecchio dispositivo.</string>
+	<string name="history_transfer_via_zip_message_export" state="needs_review" hash="-1123951975">Scarica un file .zip e copialo sul tuo nuovo dispositivo.</string>
+	<string name="history_transfer_import_zip_description" state="needs_review" hash="855194374">Per importare la cronologia delle tue chat, seleziona il file .zip che hai **esportato dal tuo altro dispositivo**.\n\nAssicurati che il profilo **%1$s** che hai selezionato corrisponda al profilo utilizzato per generare questo file .zip.</string>
+	<string name="button_label_choose_zip_file" state="needs_review" hash="-493688169">Scegli un file .zip</string>
+	<string name="dialog_title_error_reading_zip" state="needs_review" hash="1059408985">Errore durante la lettura del file .zip</string>
+	<string name="dialog_message_error_reading_zip" state="needs_review" hash="1864744526">Si è verificato un errore durante la lettura del file .zip fornito.\n\nAssicurati di aver selezionato un file di esportazione della cronologia chat di Olvid.</string>
+	<string name="dialog_title_error_zip_password" state="needs_review" hash="1651240086">Password errata</string>
+	<string name="dialog_message_error_zip_password" state="needs_review" hash="216311562">La password fornita non ha permesso di decrittografare il file .zip selezionato.\n\nSi prega di riprovare.</string>
+	<string name="dialog_title_zip_password_required" state="needs_review" hash="-944166479">Password richiesta</string>
+	<string name="dialog_message_zip_password_required" state="needs_review" hash="548842041">Il file .zip selezionato è protetto da password. Si prega di inserire la password scelta al momento dell\'esportazione della cronologia delle chat sull\'altro dispositivo.</string>
+	<string name="history_transfer_export_scope_title_export" state="needs_review" hash="933575859">Cosa vuoi esportare?</string>
+	<string name="history_transfer_export_scope_title_transfer" state="needs_review" hash="-1971421411">Cosa vuoi trasferire?</string>
+	<string name="history_transfer_scope_messages_export_title" state="needs_review" hash="-1810394953">Esporta solo i messaggi</string>
+	<string name="history_transfer_scope_messages_transfer_title" state="needs_review" hash="1119624141">Trasferisci solo i messaggi</string>
+	<string name="history_transfer_scope_messages_export_message" state="needs_review" hash="-2120867312">Esportazione più piccola. Sono incluse solo le comunicazioni testuali.</string>
+	<string name="history_transfer_scope_messages_transfer_message" state="needs_review" hash="2071005834">Trasferimento più rapido. Sono inclusi solo i messaggi di testo.</string>
+	<string name="history_transfer_scope_everything_export_title" state="needs_review" hash="463008259">Esporta messaggi e allegati</string>
+	<string name="history_transfer_scope_everything_transfer_title" state="needs_review" hash="-175297433">Trasferisci messaggi e allegati</string>
+	<string name="history_transfer_scope_everything_export_message" state="needs_review" hash="-266277978">Esportazione completa. Include tutti i messaggi e gli allegati.</string>
+	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Trasferimento completato. Include tutti i messaggi e gli allegati.</string>
+	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Esporta la cronologia delle tue chat in un file .zip. In seguito, potrai importarla su un altro dispositivo del tuo profilo **%1$s**.\n\nPuoi anche decomprimere questo file per **visualizzare la cronologia delle tue chat in una pagina web**.</string>
+	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Crea un file .zip</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d discussioni e %2$d messaggi</string>
+	<string name="label_computing" state="needs_review" hash="1393495921">In corso di calcolo…</string>
+	<string name="label_total_size" state="needs_review" hash="-788411929">Dimensione totale: %1$s</string>
+	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Proteggi le tue esportazioni</string>
+	<string name="dialog_message_protect_export" state="needs_review" hash="-900141026">Per la tua sicurezza, ti consigliamo di proteggere il tuo file di esportazione con una password.</string>
+	<string name="button_label_generate_password" state="needs_review" hash="-1174237913">Genera una password</string>
+	<string name="button_label_choose_password" state="needs_review" hash="-1893200284">Scegli una password</string>
+	<string name="button_label_continue_without_password" state="needs_review" hash="-106870576">Continua senza password</string>
+	<string name="dialog_title_choose_password" state="needs_review" hash="1927816439">Scegli una password</string>
+	<string name="dialog_title_generated_password" state="needs_review" hash="-690449371">Password generata</string>
+	<string name="dialog_message_generated_password" state="needs_review" hash="1100314355">La password qui sotto è stata generata in modo casuale.\n\nAssicurati di **scriverla prima di procedere**.</string>
+	<string name="button_label_copy_to_clipboard" state="needs_review" hash="-1309214553">Copia negli appunti</string>
+	<string name="history_transfer_pick_target_device_title" state="needs_review" hash="1659408512">Seleziona un dispositivo</string>
+	<string name="history_transfer_pick_target_device_text" state="needs_review" hash="-1456199559">Seleziona il dispositivo su cui desideri trasferire la cronologia delle chat dell\'attuale dispositivo.\n\nNon riesci a trovare il dispositivo che stai cercando? Assicurati che il tuo profilo **%1$s** sia attivo su questo altro dispositivo.</string>
+	<string name="history_transfer_no_other_device_explanation" state="needs_review" hash="-1034788616">Sembra che il tuo profilo **%1$s** non abbia altri dispositivi attivi.\n\nSi prega di **aggiungere il nuovo dispositivo a questo profilo** prima di procedere con il trasferimento della cronologia delle chat.\n\nPuoi anche **esportare un file .zip** per importarlo in seguito sul tuo nuovo dispositivo.</string>
+	<string name="history_transfer_webrtc_instructions_title" state="needs_review" hash="-1353013738">Segui queste istruzioni sull\'altro dispositivo</string>
+	<string name="history_transfer_instructions_turn_on_other_import" state="needs_review" hash="-930696177">Accendi il dispositivo che contiene la cronologia delle tue chat.</string>
+	<string name="history_transfer_instructions_same_wifi_import" state="needs_review" hash="465388607">Assicurati che entrambi i tuoi dispositivi siano connessi alla stessa rete Wi-Fi.</string>
+	<string name="history_transfer_instructions_start_export" state="needs_review" hash="-1288439668">Sul tuo altro dispositivo, apri le impostazioni di Olvid e avvia l\'esportazione della cronologia delle chat.</string>
+	<string name="history_transfer_instructions_turn_on_other_export" state="needs_review" hash="1280642155">Accendi il tuo **%1$s**.</string>
+	<string name="history_transfer_instructions_same_wifi_export" state="needs_review" hash="284833986">Assicurati che questo dispositivo e il tuo **%1$s** siano connessi alla stessa rete Wi-Fi.</string>
+	<string name="history_transfer_step_awaiting_confirmation" state="needs_review" hash="665601714">In attesa che tu accetti il trasferimento</string>
+	<string name="dialog_title_abort_history_transfer" state="needs_review" hash="1914158733">Interrompere il trasferimento in corso?</string>
+	<string name="dialog_title_abort_history_transfer_export" state="needs_review" hash="-856542741">Interrompere l\'esportazione in corso?</string>
+	<string name="dialog_title_abort_history_transfer_import" state="needs_review" hash="976007540">Interrompere l\'importazione in corso?</string>
+	<string name="dialog_message_abort_history_transfer_webrtc" state="needs_review" hash="1807742093">Sei sicuro di voler interrompere il trasferimento della cronologia delle chat in corso?\n\nPotrai sempre riavviare il trasferimento in seguito, se lo desideri. **Tutto ciò che è già stato trasferito verrà conservato** e non dovrà essere trasferito nuovamente.</string>
+	<string name="dialog_message_abort_history_transfer_zip_export" state="needs_review" hash="716134255">Sei sicuro di voler interrompere l\'esportazione del file .zip in corso?\n\nIn questo modo, sul tuo dispositivo rimarrà un **file .zip incompleto** che dovrai **eliminare manualmente**.</string>
+	<string name="dialog_message_abort_history_transfer_zip_import" state="needs_review" hash="1264487097">Sei sicuro di voler interrompere l\'importazione del file .zip in corso?\n\nPotrai sempre riavviare l\'importazione in seguito, se lo desideri. **Tutto ciò che è già stato importato verrà conservato** e non dovrà essere importato nuovamente.</string>
+	<string name="button_label_interrupt_and_continue_later" state="needs_review" hash="-976034947">Interrompi e riprendi più tardi</string>
+	<string name="button_label_abort_export" state="needs_review" hash="428199797">Annulla esportazione</string>
+	<string name="button_label_abort_import" state="needs_review" hash="2031103191">Annulla importazione</string>
+	<string name="history_transfer_fail_reason_aborted" state="needs_review" hash="277351522">Il trasferimento è stato interrotto</string>
+	<string name="history_transfer_fail_reason_unknown" state="needs_review" hash="-1170630200">Si è verificato un errore sconosciuto (probabilmente una disconnessione dalla rete)</string>
+	<string name="history_transfer_fail_reason_identity_mismatch" state="needs_review" hash="936267267">Questo file .zip è stato esportato da un profilo diverso</string>
+	<string name="history_transfer_fail_reason_wrong_passwrod" state="needs_review" hash="1847441965">Password errata</string>
+	<string name="history_transfer_fail_reason_invalid_zip" state="needs_review" hash="-691417686">Impossibile leggere il file .zip (è effettivamente un file di esportazione della cronologia chat di Olvid?)</string>
+	<string name="transfer_label_sending_messages" state="needs_review" hash="2018039973">Invio messaggi</string>
+	<string name="transfer_label_exporting_messages" state="needs_review" hash="1572454408">Esportazione messaggi</string>
+	<string name="transfer_label_importing_messages" state="needs_review" hash="1913024934">Importazione messaggi</string>
+	<string name="transfer_label_receiving_messages" state="needs_review" hash="2015919003">Ricezione messaggi</string>
+	<string name="transfer_label_sending_attachments" state="needs_review" hash="2102571371">Invio allegati</string>
+	<string name="transfer_label_exporting_attachments" state="needs_review" hash="-1029839434">Esportazione degli allegati</string>
+	<string name="transfer_label_importing_attachments" state="needs_review" hash="1078186262">Importazione allegati</string>
+	<string name="transfer_label_receiving_attachments" state="needs_review" hash="439049517">Ricezione allegati</string>
+	<string name="label_remaining_and_throughput" state="needs_review" hash="1772610397">Circa %1$s rimanenti (%2$s)</string>
+	<string name="history_transfer_step_connecting_export" state="needs_review" hash="-28311439">Creazione del file .zip</string>
+	<string name="history_transfer_step_connecting_import" state="needs_review" hash="1323447620">Apertura del file .zip</string>
+	<string name="history_transfer_step_failed_export" state="needs_review" hash="185890904">Esportazione fallita</string>
+	<string name="history_transfer_step_finished_export" state="needs_review" hash="1156914922">Esportazione completata</string>
+	<string name="history_transfer_step_failed_import" state="needs_review" hash="-909085512">Importazione fallita</string>
+	<string name="history_transfer_step_finished_import" state="needs_review" hash="-653312310">Importazione completata</string>
+	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">Esportazione in corso</string>
+	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Importazione in corso</string>
+	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analisi del contenuto</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Analisi delle conversazioni esportate</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Si è verificato un errore durante il caricamento del file di stile OpenStreetMap</string>
+	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Gli abbonamenti in-app non sono disponibili</string>
+	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">La versione di Olvid che hai installato non include la libreria di fatturazione di Google e non supporta gli acquisti in-app.\n\nPer maggiori informazioni, contattaci all\'indirizzo **feedback@olvid.io**.</string>
 </resources>

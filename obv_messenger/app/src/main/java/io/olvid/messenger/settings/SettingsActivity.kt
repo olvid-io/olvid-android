@@ -76,15 +76,18 @@ import io.olvid.messenger.R
 import io.olvid.messenger.billing.SubscriptionRepository
 import io.olvid.messenger.customClasses.LocationShareQuality
 import io.olvid.messenger.customClasses.LocationShareQuality.QUALITY_BALANCED
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.openStoreUrlOrFallback
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.firebase.ObvFirebaseMessagingService
 import io.olvid.messenger.google_services.GoogleServicesUtils
+import io.olvid.messenger.lock_screen.LockScreenActivity
 import io.olvid.messenger.main.Utils
 import io.olvid.messenger.services.BackupCloudProviderService.CloudProviderConfiguration
+import io.olvid.messenger.services.MDMConfigurationSingleton
+import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity.AutoJoinGroupsCategory.CONTACTS
 import io.olvid.messenger.settings.SettingsActivity.AutoJoinGroupsCategory.EVERYONE
 import io.olvid.messenger.settings.SettingsActivity.AutoJoinGroupsCategory.NOBODY
@@ -96,6 +99,8 @@ import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.CUST
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.MAPS
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum.OSM
 import io.olvid.messenger.settings.SettingsActivity.PingConnectivityIndicator.NONE
+import io.olvid.messenger.settings.backupV2.BackupV2PreferenceFragment
+import io.olvid.messenger.settings.backupV2.BackupV2ViewModel
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 import java.security.spec.InvalidKeySpecException
@@ -389,12 +394,6 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 SubscriptionRepository.loadSubscriptionSettingsHeader(activity, preferenceScreen)
             }
 
-            if (betaFeaturesEnabled) {
-                findPreference<Preference>(PREF_HEADER_KEY_TRANSFER)?.apply {
-                    isVisible = true
-                }
-            }
-
             App.runThread {
                 if (AppDatabase.getInstance().actionShortcutConfigurationDao().countAll() > 0) {
                     Handler(Looper.getMainLooper()).post {
@@ -463,12 +462,13 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
     companion object {
         const val SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA: String = "sub_setting"
         const val PREF_HEADER_KEY_BACKUP: String = "pref_header_key_backup"
-        const val PREF_HEADER_KEY_TRANSFER: String = "pref_header_key_history_transfer"
+
+        //    const val PREF_HEADER_KEY_HISTORY_TRANSFER: String = "pref_header_key_history_transfer"
         const val PREF_HEADER_KEY_NOTIFICATIONS: String = "pref_header_key_notifications"
 
         //    const val PREF_HEADER_KEY_PRIVACY: String = "pref_header_key_privacy";
         const val PREF_HEADER_KEY_LOCK_SCREEN: String = "pref_header_key_lock_screen"
-        //    const val PREF_HEADER_KEY_LOCATION: String = "pref_header_key_location"
+        const val PREF_HEADER_KEY_LOCATION: String = "pref_header_key_location"
 
         const val ACTIVITY_RECREATE_REQUIRED_ACTION: String = "activity_recreate_required_action"
 
@@ -480,6 +480,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             "pref_key_first_call_audio_permission_requested"
         const val PREF_KEY_COMPOSE_MESSAGE_ICON_PREFERRED_ORDER: String =
             "pref_key_compose_message_icon_preferred_order"
+
         @Deprecated("Use emojis table from AppDatabase")
         const val PREF_KEY_PREFERRED_REACTIONS: String = "pref_key_preferred_reactions"
         val PREF_KEY_PREFERRED_REACTIONS_DEFAULT: Array<String> =
@@ -544,6 +545,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         const val PREF_KEY_MESSAGE_LED_COLOR: String = "pref_key_message_led_color"
         const val PREF_KEY_MESSAGE_LED_COLOR_DEFAULT: String = "#2f65f5"
+
+        const val PREF_KEY_DISABLE_SECONDARY_NOTIFICATIONS: String = "pref_key_disable_secondary_notifications"
+        const val PREF_KEY_DISABLE_SECONDARY_NOTIFICATIONS_DEFAULT: Boolean = false
 
         const val PREF_KEY_CALL_VIBRATION_PATTERN: String = "pref_key_call_vibration_pattern"
         const val PREF_KEY_CALL_VIBRATION_PATTERN_DEFAULT: String = "20"
@@ -642,6 +646,7 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_DISABLE_PUSH_NOTIFICATIONS_DEFAULT: Boolean = false
 
         const val PREF_KEY_PERMANENT_WEBSOCKET: String = "pref_key_permanent_websocket"
+
         @Suppress("KotlinConstantConditions")
         const val PREF_KEY_PERMANENT_WEBSOCKET_DEFAULT: Boolean = !BuildConfig.USE_FIREBASE_LIB
 
@@ -687,6 +692,8 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_EMERGENCY_PLAIN_PIN: String = "pref_key_emergency_plain_pin"
 
         const val PREF_KEY_RESET_PIN: String = "pref_key_reset_pin"
+
+        const val PREF_KEY_LOCK_SCREEN_MDM_BYPASS_TOKEN: String = "pref_key_lock_screen_mdm_bypass_token"
 
 
         // BACKUPS
@@ -900,8 +907,8 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_VALUE_LOCATION_INTEGRATION_BASIC: String = "basic"
         const val PREF_VALUE_LOCATION_INTEGRATION_CUSTOM_OSM: String = "custom_osm"
 
-        const val PREF_KEY_LOCATION_CUSTOM_OSM_SERVER: String =
-            "pref_key_location_custom_osm_server"
+        const val PREF_KEY_LOCATION_CUSTOM_OSM_SERVER: String = "pref_key_location_custom_osm_server"
+        const val PREF_KEY_LOCATION_CUSTOM_OSM_SERVER_MULTI_STYLE_CACHE: String = "pref_key_location_custom_osm_server_multi_style_cache"
 
         const val PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION: String =
             "pref_key_location_share_duration"
@@ -931,6 +938,14 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         const val PREF_KEY_LOCATION_USE_CUSTOM_ADDRESS_SERVER_DEFAULT: Boolean = false
         const val PREF_KEY_LOCATION_CUSTOM_ADDRESS_SERVER: String =
             "pref_key_location_custom_address_server"
+
+        const val PREF_KEY_LOCATION_GPS_DEBUG: String = "pref_key_location_gps_debug"
+        const val PREF_KEY_LOCATION_GPS_DEBUG_DEFAULT: Boolean = false
+
+        const val PREF_KEY_LOCATION_GPS_ALWAYS_ON: String = "pref_key_location_gps_always_on"
+        const val PREF_KEY_LOCATION_GPS_ALWAYS_ON_DEFAULT: Boolean = false
+
+        const val PREF_KEY_LOCATION_EXPORT_GPS_LOGS: String = "pref_key_location_export_gps_logs"
 
         private fun useDarkMode(): Boolean {
             return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
@@ -1455,12 +1470,12 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(retain) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    putBoolean(
-                        PREF_KEY_RETAIN_WIPED_OUTBOUND_MESSAGES,
-                        retain
-                    )
-                        }
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_RETAIN_WIPED_OUTBOUND_MESSAGES,
+                            retain
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1495,16 +1510,16 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(count) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    if (count == 0L) {
-                        remove(PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT)
-                    } else {
-                        putString(
-                            PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT,
-                            count.toString()
-                        )
-                    }
+                    .edit {
+                        if (count == 0L) {
+                            remove(PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT)
+                        } else {
+                            putString(
+                                PREF_KEY_DEFAULT_DISCUSSION_RETENTION_COUNT,
+                                count.toString()
+                            )
                         }
+                    }
             }
 
         @JvmStatic
@@ -1528,12 +1543,12 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(duration) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    putString(
-                        PREF_KEY_DEFAULT_DISCUSSION_RETENTION_DURATION,
-                        duration.toString()
-                    )
-                        }
+                    .edit {
+                        putString(
+                            PREF_KEY_DEFAULT_DISCUSSION_RETENTION_DURATION,
+                            duration.toString()
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1547,9 +1562,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(readOnce) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    putBoolean(PREF_KEY_DEFAULT_READ_ONCE, readOnce)
-                        }
+                    .edit {
+                        putBoolean(PREF_KEY_DEFAULT_READ_ONCE, readOnce)
+                    }
             }
 
         @JvmStatic
@@ -1573,16 +1588,16 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(duration) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    if (duration == null) {
-                        remove(PREF_KEY_DEFAULT_VISIBILITY_DURATION)
-                    } else {
-                        putString(
-                            PREF_KEY_DEFAULT_VISIBILITY_DURATION,
-                            duration.toString()
-                        )
-                    }
+                    .edit {
+                        if (duration == null) {
+                            remove(PREF_KEY_DEFAULT_VISIBILITY_DURATION)
+                        } else {
+                            putString(
+                                PREF_KEY_DEFAULT_VISIBILITY_DURATION,
+                                duration.toString()
+                            )
                         }
+                    }
             }
 
         @JvmStatic
@@ -1606,16 +1621,16 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(duration) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    if (duration == null) {
-                        remove(PREF_KEY_DEFAULT_EXISTENCE_DURATION)
-                    } else {
-                        putString(
-                            PREF_KEY_DEFAULT_EXISTENCE_DURATION,
-                            duration.toString()
-                        )
-                    }
+                    .edit {
+                        if (duration == null) {
+                            remove(PREF_KEY_DEFAULT_EXISTENCE_DURATION)
+                        } else {
+                            putString(
+                                PREF_KEY_DEFAULT_EXISTENCE_DURATION,
+                                duration.toString()
+                            )
                         }
+                    }
             }
 
         @JvmStatic
@@ -1629,12 +1644,12 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(betaFeaturesEnabled) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    putBoolean(
-                        PREF_KEY_ENABLE_BETA_FEATURES,
-                        betaFeaturesEnabled
-                    )
-                        }
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_ENABLE_BETA_FEATURES,
+                            betaFeaturesEnabled
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1690,12 +1705,12 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(hide) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    putBoolean(
-                        PREF_KEY_HIDE_GROUP_MEMBER_CHANGES,
-                        hide
-                    )
-                        }
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_HIDE_GROUP_MEMBER_CHANGES,
+                            hide
+                        )
+                    }
             }
 
         @JvmStatic
@@ -1714,9 +1729,57 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
         @JvmStatic
         fun useApplicationLockScreen(): Boolean {
+            if (MDMConfigurationSingleton.isLockScreenRequired()) return true
             return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
                 PREF_KEY_USE_LOCK_SCREEN, PREF_KEY_USE_LOCK_SCREEN_DEFAULT
             )
+        }
+
+        // Called once at startup after MDM settings are applied.
+        // If the bypass token covers the current PIN, the PIN was created under a previous
+        // mandatory policy that has since been lifted — clear it so the user starts clean.
+        @JvmStatic
+        fun clearPINIfBypassAllowed() {
+            if (shouldLockScreenBeDisabled()) {
+                clearPIN()
+                LockScreenActivity.storeFailedPinCount(0)
+                PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                    putBoolean(PREF_KEY_USE_LOCK_SCREEN, false)
+                }
+                // Save the current MDM bypass token so this bypass is not re-triggered on next startup
+                setMDMBypassToken(MDMConfigurationSingleton.getAllowDisableLockScreenString())
+                val unlockIntent = Intent(App.getContext(), UnifiedForegroundService::class.java)
+                unlockIntent.action = UnifiedForegroundService.LockSubService.UNLOCK_APP_ACTION
+                unlockIntent.putExtra(UnifiedForegroundService.SUB_SERVICE_INTENT_EXTRA, UnifiedForegroundService.SUB_SERVICE_LOCK)
+                App.getContext().startService(unlockIntent)
+            }
+        }
+
+        @JvmStatic
+        fun shouldLockScreenBeDisabled(): Boolean {
+            if (!isPINConfigured()) return false
+            val mdmString = MDMConfigurationSingleton.getAllowDisableLockScreenString()
+            return mdmString != null && mdmString != getMDMBypassToken()
+        }
+
+        @JvmStatic
+        fun isPINConfigured(): Boolean {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(App.getContext())
+            return prefs.getString(PREF_KEY_PIN_HASH, null) != null || prefs.getString(PREF_KEY_PLAIN_PIN, null) != null
+        }
+
+        @JvmStatic
+        fun getMDMBypassToken(): String? {
+            return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                .getString(PREF_KEY_LOCK_SCREEN_MDM_BYPASS_TOKEN, null)
+        }
+
+        @JvmStatic
+        fun setMDMBypassToken(token: String?) {
+            PreferenceManager.getDefaultSharedPreferences(App.getContext()).edit {
+                if (token == null) remove(PREF_KEY_LOCK_SCREEN_MDM_BYPASS_TOKEN)
+                else putString(PREF_KEY_LOCK_SCREEN_MDM_BYPASS_TOKEN, token)
+            }
         }
 
         @JvmStatic
@@ -1807,8 +1870,8 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
         }
 
         @JvmStatic
-        fun preventScreenCapture(): Boolean {
-            return PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
+        fun preventScreenCapture(context: Context? = null): Boolean {
+            return PreferenceManager.getDefaultSharedPreferences((context ?: App.getContext())).getBoolean(
                 PREF_KEY_PREVENT_SCREEN_CAPTURE, PREF_KEY_PREVENT_SCREEN_CAPTURE_DEFAULT
             )
         }
@@ -2018,12 +2081,12 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(doNotNotify) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    putBoolean(
-                        PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS,
-                        doNotNotify
-                    )
-                        }
+                    .edit {
+                        putBoolean(
+                            PREF_KEY_NO_NOTIFY_CERTIFICATE_CHANGE_FOR_PREVIEWS,
+                            doNotNotify
+                        )
+                    }
             }
 
         @JvmStatic
@@ -2521,12 +2584,12 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                         pattern = "0"
                     }
                     PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                            .edit {
-                        putString(
-                            PREF_KEY_MESSAGE_VIBRATION_PATTERN,
-                            pattern
-                        )
-                            }
+                        .edit {
+                            putString(
+                                PREF_KEY_MESSAGE_VIBRATION_PATTERN,
+                                pattern
+                            )
+                        }
                 } catch (_: Exception) {
                 }
             }
@@ -2567,6 +2630,20 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                         } else {
                             putString(PREF_KEY_MESSAGE_LED_COLOR, color)
                         }
+                    }
+            }
+
+        @JvmStatic
+        var disableSecondaryNotifications: Boolean
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getBoolean(PREF_KEY_DISABLE_SECONDARY_NOTIFICATIONS, PREF_KEY_DISABLE_SECONDARY_NOTIFICATIONS_DEFAULT)
+            }
+            set(disable) {
+                PreferenceManager
+                    .getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(PREF_KEY_MUTE_NEW_TRANSLATIONS_TIP, disable)
                     }
             }
 
@@ -2688,9 +2765,9 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(remove) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    putBoolean(PREF_KEY_REMOVE_METADATA, remove)
-                }
+                    .edit {
+                        putBoolean(PREF_KEY_REMOVE_METADATA, remove)
+                    }
             }
 
         @JvmStatic
@@ -2709,16 +2786,16 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(language) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                            if (language == null || "" == language) {
-                                remove(PREF_KEY_LANGUAGE_WEBCLIENT)
-                            } else {
-                                putString(
-                                    PREF_KEY_LANGUAGE_WEBCLIENT,
-                                    language
-                                )
-                            }
+                    .edit {
+                        if (language == null || "" == language) {
+                            remove(PREF_KEY_LANGUAGE_WEBCLIENT)
+                        } else {
+                            putString(
+                                PREF_KEY_LANGUAGE_WEBCLIENT,
+                                language
+                            )
                         }
+                    }
             }
 
         @JvmStatic
@@ -2989,19 +3066,19 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(reactions) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    val sb: StringBuilder = StringBuilder()
-                    for (reaction: String? in reactions) {
-                        if (sb.isNotEmpty()) {
-                            sb.append(",")
+                    .edit {
+                        val sb: StringBuilder = StringBuilder()
+                        for (reaction: String? in reactions) {
+                            if (sb.isNotEmpty()) {
+                                sb.append(",")
+                            }
+                            sb.append(reaction)
                         }
-                        sb.append(reaction)
+                        putString(
+                            PREF_KEY_PREFERRED_REACTIONS,
+                            sb.toString()
+                        )
                     }
-                            putString(
-                                PREF_KEY_PREFERRED_REACTIONS,
-                                sb.toString()
-                            )
-                        }
             }
 
         @JvmStatic
@@ -3052,6 +3129,10 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
 
                         PREF_VALUE_LOCATION_INTEGRATION_CUSTOM_OSM -> {
                             if (customOsmServerUrl != null) {
+                                // if the customOsmServerUrl changed, clear any cached content
+                                if (locationCustomOsmServerUrl != customOsmServerUrl) {
+                                    remove(PREF_KEY_LOCATION_CUSTOM_OSM_SERVER_MULTI_STYLE_CACHE)
+                                }
                                 putString(PREF_KEY_LOCATION_INTEGRATION, integrationString)
                                 putString(
                                     PREF_KEY_LOCATION_CUSTOM_OSM_SERVER,
@@ -3092,12 +3173,12 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(mapType) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    putInt(
-                        PREF_KEY_LOCATION_LAST_GOOGLE_MAP_TYPE,
-                        mapType
-                    )
-                        }
+                    .edit {
+                        putInt(
+                            PREF_KEY_LOCATION_LAST_GOOGLE_MAP_TYPE,
+                            mapType
+                        )
+                    }
             }
 
         @JvmStatic
@@ -3105,6 +3186,22 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             get() {
                 return PreferenceManager.getDefaultSharedPreferences(App.getContext())
                     .getString(PREF_KEY_LOCATION_CUSTOM_OSM_SERVER, null)
+            }
+
+        @JvmStatic
+        var locationCustomOsmServerUrlMultiStyleCache: String?
+            get() {
+                return PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .getString(PREF_KEY_LOCATION_CUSTOM_OSM_SERVER_MULTI_STYLE_CACHE, null)
+            }
+            set(cachedValue) {
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putString(
+                            PREF_KEY_LOCATION_CUSTOM_OSM_SERVER_MULTI_STYLE_CACHE,
+                            cachedValue
+                        )
+                    }
             }
 
         @JvmStatic
@@ -3126,42 +3223,42 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
             }
             set(duration) {
                 PreferenceManager.getDefaultSharedPreferences(App.getContext())
-                        .edit {
-                    putString(
-                        PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION,
-                        duration.toString()
-                    )
-                        }
+                    .edit {
+                        putString(
+                            PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION,
+                            duration.toString()
+                        )
+                    }
             }
 
-        @JvmStatic
-        fun getLocationDefaultSharingDurationLongString(context: Context): CharSequence {
-            var duration: String? =
-                PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(
-                    PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION, null
-                )
-
-            // default value not set
-            if (duration == null) {
-                duration = PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION_DEFAULT.toString()
-            }
-
-            val valuesArray: Array<String> =
-                context.resources.getStringArray(R.array.share_location_duration_values)
-            val longStringArray: Array<CharSequence> =
-                context.resources.getTextArray(R.array.share_location_duration_long_strings)
-
-            val index: Int = listOf(*valuesArray).indexOf(duration)
-            if (index >= 0 && index < longStringArray.size) {
-                return longStringArray[index]
-            }
-
-            // fallback mechanism
-            if (longStringArray.isEmpty()) {
-                return ""
-            }
-            return longStringArray[0]
-        }
+//        @JvmStatic
+//        fun getLocationDefaultSharingDurationLongString(context: Context): CharSequence {
+//            var duration: String? =
+//                PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(
+//                    PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION, null
+//                )
+//
+//            // default value not set
+//            if (duration == null) {
+//                duration = PREF_KEY_LOCATION_DEFAULT_SHARE_DURATION_DEFAULT.toString()
+//            }
+//
+//            val valuesArray: Array<String> =
+//                context.resources.getStringArray(R.array.share_location_duration_values)
+//            val longStringArray: Array<CharSequence> =
+//                context.resources.getTextArray(R.array.share_location_duration_long_strings)
+//
+//            val index: Int = listOf(*valuesArray).indexOf(duration)
+//            if (index >= 0 && index < longStringArray.size) {
+//                return longStringArray[index]
+//            }
+//
+//            // fallback mechanism
+//            if (longStringArray.isEmpty()) {
+//                return ""
+//            }
+//            return longStringArray[0]
+//        }
 
         @JvmStatic
         var locationDefaultShareQuality: LocationShareQuality
@@ -3265,6 +3362,25 @@ class SettingsActivity : LockableActivity(), OnPreferenceStartFragmentCallback {
                 PREF_KEY_LOCATION_HIDE_ERROR_NOTIFICATIONS_DEFAULT
             )
         }
+
+        val useGpsDebug: Boolean
+            get() = betaFeaturesEnabled && PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
+                PREF_KEY_LOCATION_GPS_DEBUG,
+                PREF_KEY_LOCATION_GPS_DEBUG_DEFAULT
+            )
+
+        @JvmStatic
+        var gpsAlwaysOn: Boolean
+            get() = useGpsDebug && PreferenceManager.getDefaultSharedPreferences(App.getContext()).getBoolean(
+                PREF_KEY_LOCATION_GPS_ALWAYS_ON,
+                PREF_KEY_LOCATION_GPS_ALWAYS_ON_DEFAULT
+            )
+            set(newValue) {
+                PreferenceManager.getDefaultSharedPreferences(App.getContext())
+                    .edit {
+                        putBoolean(PREF_KEY_LOCATION_GPS_ALWAYS_ON, newValue)
+                    }
+            }
     }
 }
 

@@ -38,7 +38,6 @@ import io.olvid.messenger.history_transfer.types.SrcTransferProtocolState
 import io.olvid.messenger.history_transfer.types.TransferMessageType
 import io.olvid.messenger.history_transfer.types.TransferTransportDelegate
 import kotlinx.coroutines.Runnable
-import java.util.UUID
 import java.util.concurrent.Executor
 
 
@@ -83,13 +82,16 @@ class SrcSendMessagesStep(
                     ranges.flatMap { it[0]..it[1] }.chunked(batchSize ?: Int.MAX_VALUE).forEach { sequenceNumbers ->
                         val messages: List<JsonMessageInThread> = sequenceNumbers.mapNotNull { sequenceNumber ->
                             // if message is no longer found, skip it
-                            db.messageDao().getBySenderSequenceNumber(sequenceNumber, UUID.fromString(threadId), senderIdentifier, discussion.id)?.let { message ->
+                            db.messageDao().getBySenderSequenceNumber(sequenceNumber, threadId, senderIdentifier, discussion.id)?.let { message ->
                                 JsonMessageInThread().apply {
                                     this.sequenceNumber = sequenceNumber
                                     this.uidFromServer = message.inboundMessageEngineIdentifier
                                     this.timestamp = message.timestamp
                                     if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
                                         this.status = JsonMessageInThread.jsonMessageStatusFromOutboundMessageStatus(message.status)
+                                        if (this.status == null) {
+                                            Logger.e("OUTBOUND NULL! ${message.status}")
+                                        }
                                     }
                                     this.body = message.contentBody
                                     message.jsonReply?.let {
@@ -173,7 +175,7 @@ class SrcSendMessagesStep(
                                         SrcMessages().apply {
                                             this.discussion = discussionIdentifier
                                             this.sender = senderIdentifier
-                                            this.threadId = threadId
+                                            this.threadId = Logger.getUuidString(threadId)
                                             this.messages = messages
                                             this.missingMessageCount = (sequenceNumbers.size - messages.size).coerceAtLeast(0)
                                         }

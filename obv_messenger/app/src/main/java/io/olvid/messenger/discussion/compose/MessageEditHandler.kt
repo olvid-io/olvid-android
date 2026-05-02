@@ -31,6 +31,10 @@ class MessageEditHandler(
     private val composeMessageViewModel: ComposeMessageViewModel,
     private val mentionViewModel: MentionViewModel,
 ) {
+    fun getCurrentComposeMessageText(): String {
+        return composeMessageViewModel.rawNewMessageText.toString()
+    }
+
     fun enterEditModeIfAllowed(message: Message) {
         if (message.messageType != Message.TYPE_OUTBOUND_MESSAGE
             || message.wipeStatus == Message.WIPE_STATUS_WIPED

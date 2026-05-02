@@ -20,7 +20,6 @@
 package io.olvid.messenger.history_transfer.steps
 
 import io.olvid.engine.Logger
-import io.olvid.engine.engine.types.ObvBytesKey
 import io.olvid.messenger.history_transfer.json.DstExpectedSha256
 import io.olvid.messenger.history_transfer.types.SrcTransferProtocolState
 import kotlinx.coroutines.Runnable

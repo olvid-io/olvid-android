@@ -9,4 +9,5 @@
     <item name="attach_emoji" type="id"/>
     <item name="attach_location" type="id"/>
     <item name="attach_introduce" type="id"/>
+    <item name="fullscreen_map_fragment_container" type="id"/>
 </resources>

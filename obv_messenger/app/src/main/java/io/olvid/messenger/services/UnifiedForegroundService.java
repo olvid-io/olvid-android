@@ -73,8 +73,8 @@ import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.HandlerExecutor;
 import io.olvid.messenger.customClasses.LocationShareQuality;
-import io.olvid.messenger.customClasses.LockScreenOrNotActivity;
-import io.olvid.messenger.customClasses.LockableActivity;
+import io.olvid.messenger.lock_screen.LockScreenOrNotActivity;
+import io.olvid.messenger.lock_screen.LockableActivity;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.Discussion;
@@ -392,6 +392,10 @@ public class UnifiedForegroundService extends Service {
                 openIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, DiscussionActivity.class.getName());
                 openIntent.putExtra(DiscussionActivity.DISCUSSION_ID_INTENT_EXTRA, bytesOwnedIdentityAndDiscussionId.second);
                 openIntent.putExtra(MainActivity.BYTES_OWNED_IDENTITY_TO_SELECT_INTENT_EXTRA, bytesOwnedIdentityAndDiscussionId.first);
+            } else if (LocationSharingSubService.subscriber.holdersByDiscussionId.isEmpty() && SettingsActivity.getGpsAlwaysOn()) {
+                openIntent.setAction(MainActivity.FORWARD_ACTION);
+                openIntent.putExtra(MainActivity.FORWARD_TO_INTENT_EXTRA, SettingsActivity.class.getName());
+                openIntent.putExtra(SettingsActivity.SUB_SETTING_PREF_KEY_TO_OPEN_INTENT_EXTRA, SettingsActivity.PREF_HEADER_KEY_LOCATION);
             }
         }
         PendingIntent openPendingIntent = PendingIntent.getActivity(App.getContext(), 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
@@ -663,10 +667,6 @@ public class UnifiedForegroundService extends Service {
 
         public WebClientManager getManager() {
             return manager;
-        }
-
-        public boolean isAlreadyRunning() {
-            return isAlreadyRunning;
         }
 
         @Nullable
@@ -997,7 +997,7 @@ public class UnifiedForegroundService extends Service {
         private static final String DISCUSSION_ID_INTENT_EXTRA = "discussion_id"; // long
         private static final String SHARING_EXPIRATION_INTENT_EXTRA = "sharing_duration"; // long (optional)
         private static final String SHARING_QUALITY_INTENT_EXTRA = "sharing_quality"; // int
-        private static final String MESSAGE_ID_INTENT_EXTRA = "message_id"; // id of message to update with new location
+        private static final String MESSAGE_ID_INTENT_EXTRA = "olvid_message_id"; // id of message to update with new location
 
         public static final long PASSIVE_PROVIDER_UPDATE_INTERVAL_MILLIS = 3_000; // never update more than every 3 seconds, even with passive provider
         private static UnifiedForegroundService unifiedForegroundService = null;
@@ -1034,6 +1034,18 @@ public class UnifiedForegroundService extends Service {
                                 if (!isSharingLocation && subscriber.isCurrentlySharingLocation()) {
                                     isSharingLocation = true;
                                 }
+                            }
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                if (unifiedForegroundService != null) {
+                                    unifiedForegroundService.stopOrRestartForegroundService();
+                                }
+                            });
+                        });
+                    } else if (SettingsActivity.getGpsAlwaysOn()) {
+                        App.runThread(() -> {
+                            synchronized (subscriber) {
+                                subscriber.startSharingForGpsAlwaysOn();
+                                isSharingLocation = true;
                             }
                             new Handler(Looper.getMainLooper()).post(() -> {
                                 if (unifiedForegroundService != null) {
@@ -1079,6 +1091,9 @@ public class UnifiedForegroundService extends Service {
                             onStartCommand(START_SHARING_ACTION, restartSharingIntent);
                         }
                     }
+                    if (shareMessages.isEmpty() && SettingsActivity.getGpsAlwaysOn()) {
+                        startSharingForGpsAlwaysOn();
+                    }
                     break;
                 }
             }
@@ -1121,6 +1136,24 @@ public class UnifiedForegroundService extends Service {
                 }
             }
             return null;
+        }
+
+        public static void startSharingForGpsAlwaysOn() {
+            Intent startSharingPositionIntent = new Intent(App.getContext(), UnifiedForegroundService.class);
+            startSharingPositionIntent.putExtra(SUB_SERVICE_INTENT_EXTRA, SUB_SERVICE_LOCATION_SHARING);
+            startSharingPositionIntent.setAction(LocationSharingSubService.START_SHARING_ACTION);
+            App.getContext().startService(startSharingPositionIntent);
+        }
+
+        public static void stopSharingForGpsAlwaysOn() {
+            if (subscriber == null) {
+                return;
+            }
+            synchronized (subscriber.holdersByDiscussionId) {
+                if (subscriber.holdersByDiscussionId.isEmpty() && !SettingsActivity.getGpsAlwaysOn()) {
+                    stopSharing();
+                }
+            }
         }
 
         public static void startSharingInDiscussion(long discussionId, @Nullable Long shareExpirationInMs, LocationShareQuality quality, long messageId) {
@@ -1181,10 +1214,7 @@ public class UnifiedForegroundService extends Service {
                 subscriber.endSharing();
 
                 // update notification
-                isSharingLocation = false;
-                if (unifiedForegroundService != null) {
-                    unifiedForegroundService.stopOrRestartForegroundService();
-                }
+                refreshServiceStateAndNotification();
             }
         }
 
@@ -1198,6 +1228,10 @@ public class UnifiedForegroundService extends Service {
             private final LocationManager locationManager = (LocationManager) App.getContext().getSystemService(Context.LOCATION_SERVICE);
             private final Executor executor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ? App.getContext().getMainExecutor() : new HandlerExecutor(Looper.getMainLooper());
             private final Handler timerHandler = new Handler(Looper.getMainLooper());
+            private final LocationListenerCompat passiveLocationListenerForGps = (Location location) -> {
+                GpsDebugLogger.INSTANCE.logGpsEvent("Next location is from passive provider");
+                onLocationChanged(location);
+            };
             private final LocationListenerCompat fakeLocationListenerForGps = (Location location) -> {};
 
             // return null if holdersByDiscussionId is empty
@@ -1216,10 +1250,12 @@ public class UnifiedForegroundService extends Service {
                 synchronized (holdersByDiscussionId) {
                     try {
                         // if no more sharing discussion: remove location updates
-                        if (holdersByDiscussionId.isEmpty()) {
-                            Logger.d("No more discussion sharing location, removing updates");
+                        if (holdersByDiscussionId.isEmpty() && !SettingsActivity.getGpsAlwaysOn()) {
+                            GpsDebugLogger.INSTANCE.logGpsEvent("Unregistering all background location update listeners");
+
                             // remove location updates
                             LocationManagerCompat.removeUpdates(locationManager, this);
+                            LocationManagerCompat.removeUpdates(locationManager, passiveLocationListenerForGps);
                             LocationManagerCompat.removeUpdates(locationManager, fakeLocationListenerForGps);
 
                             // remove all notifications
@@ -1231,8 +1267,12 @@ public class UnifiedForegroundService extends Service {
 
                         LocationShareQuality mostPreciseShareQuality = getMostPreciseRequestedQuality();
                         if (mostPreciseShareQuality == null) {
-                            // this never happens, currentSharingInterval is null only if holdersByDiscussionId is empty
-                            return;
+                            if (SettingsActivity.getGpsAlwaysOn()) {
+                                mostPreciseShareQuality = LocationShareQuality.QUALITY_POWER_SAVE;
+                            } else {
+                                // this never happens, currentSharingInterval is null only if holdersByDiscussionId is empty
+                                return;
+                            }
                         }
 
                         if (!isLocationPermissionGranted()) {
@@ -1270,18 +1310,24 @@ public class UnifiedForegroundService extends Service {
                                 .setMaxUpdateDelayMillis(mostPreciseShareQuality.getDefaultUpdateFrequencyMs())
                                 .build();
 
+                        GpsDebugLogger.INSTANCE.logGpsEvent("Registering to background location updates (precision: " + mostPreciseShareQuality.toString() + ")");
 
                         // unregister any previously registered provider
                         LocationManagerCompat.removeUpdates(locationManager, this);
+                        LocationManagerCompat.removeUpdates(locationManager, passiveLocationListenerForGps);
                         LocationManagerCompat.removeUpdates(locationManager, fakeLocationListenerForGps);
 
 
                         List<String> providers = locationManager.getProviders(true);
+                        GpsDebugLogger.INSTANCE.logGpsEvent("Available providers: " + String.join(", ", providers));
+
                         if (providers.contains(LocationManager.PASSIVE_PROVIDER)) { // this should always be the case (if the documentation is correct)
+                            GpsDebugLogger.INSTANCE.logGpsEvent("Request updates from " + LocationManager.PASSIVE_PROVIDER);
                             LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.PASSIVE_PROVIDER, new LocationRequestCompat.Builder(PASSIVE_PROVIDER_UPDATE_INTERVAL_MILLIS).build(), executor, this);
                         }
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && providers.contains(LocationManager.FUSED_PROVIDER)) {
+                            GpsDebugLogger.INSTANCE.logGpsEvent("Request updates from " + LocationManager.FUSED_PROVIDER);
                             LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.FUSED_PROVIDER, locationRequest, executor, this);
                             if (providers.contains(LocationManager.GPS_PROVIDER)) {
                                 // also enable gps callback (on Android 12 emulator, fused does not always trigger updates on its own)
@@ -1289,9 +1335,11 @@ public class UnifiedForegroundService extends Service {
                             }
                         } else if (providers.contains(LocationManager.GPS_PROVIDER) || providers.contains(LocationManager.NETWORK_PROVIDER)) {
                             if (providers.contains(LocationManager.GPS_PROVIDER)) {
+                                GpsDebugLogger.INSTANCE.logGpsEvent("Request updates from " + LocationManager.GPS_PROVIDER);
                                 LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.GPS_PROVIDER, locationRequest, executor, this);
                             }
                             if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+                                GpsDebugLogger.INSTANCE.logGpsEvent("Request updates from " + LocationManager.NETWORK_PROVIDER);
                                 LocationManagerCompat.requestLocationUpdates(locationManager, LocationManager.NETWORK_PROVIDER, locationRequest, executor, this);
                             }
                         } else {
@@ -1306,8 +1354,10 @@ public class UnifiedForegroundService extends Service {
 
             @Override
             synchronized public void onLocationChanged(@NonNull Location location) {
+                GpsDebugLogger.INSTANCE.logReceivedLocation(location);
                 try {
                     synchronized (holdersByDiscussionId) {
+                        int actualUpdates = 0;
                         for (DiscussionSharingHolder holder : holdersByDiscussionId.values()) {
                             // check sharing expiration lazily
                             if (holder.shareExpiration != null && holder.shareExpiration < System.currentTimeMillis()) {
@@ -1317,12 +1367,16 @@ public class UnifiedForegroundService extends Service {
 
                             // We filter here to avoid too frequent updates if the position did not change much
                             if (filterLocationUpdate(holder.lastSharedLocation, holder.lastUpdateTimestamp, location, holder.quality, true)) {
+                                actualUpdates++;
                                 holder.updateLocation(location);
                             }
                         }
+                        if (!holdersByDiscussionId.isEmpty()) {
+                            GpsDebugLogger.INSTANCE.logGpsEvent("Posting this location in " + actualUpdates + "/" + holdersByDiscussionId.size() + " discussions");
+                        }
                     }
 
-                    // clear all notifications
+                    // clear all error notifications
                     AndroidNotificationManager.clearLocationNotification(null);
                 } catch (Exception e) {
                     Logger.e("SharingLocationService: onLocationChanged: unexpected exception !", e);
@@ -1345,7 +1399,11 @@ public class UnifiedForegroundService extends Service {
                 return holdersByDiscussionId.containsKey(discussionId);
             }
             public boolean isCurrentlySharingLocation() {
-                return !holdersByDiscussionId.isEmpty();
+                return !holdersByDiscussionId.isEmpty() || SettingsActivity.getGpsAlwaysOn();
+            }
+
+            synchronized void startSharingForGpsAlwaysOn() {
+                refreshLocationUpdatesSubscription();
             }
 
             synchronized void startSharingInDiscussion(byte[] bytesOwnedIdentity, long discussionId, @Nullable Long shareExpiration, LocationShareQuality quality, long messageId) {
@@ -1358,8 +1416,8 @@ public class UnifiedForegroundService extends Service {
 
                     holder = new DiscussionSharingHolder(bytesOwnedIdentity, discussionId, shareExpiration, quality, messageId);
                     holdersByDiscussionId.put(discussionId, holder);
-                    refreshLocationUpdatesSubscription();
                 }
+                refreshLocationUpdatesSubscription();
             }
 
             synchronized void endSharingInDiscussion(long discussionId, boolean synchronously) {

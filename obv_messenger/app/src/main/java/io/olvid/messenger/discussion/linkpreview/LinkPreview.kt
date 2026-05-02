@@ -55,6 +55,7 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,10 +65,10 @@ import androidx.lifecycle.map
 import coil.compose.rememberAsyncImagePainter
 import io.olvid.messenger.App
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao
 import io.olvid.messenger.databases.entity.Message
+import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.DiscussionViewModel
 import io.olvid.messenger.discussion.message.attachments.Attachment
@@ -161,6 +162,8 @@ private fun LinkPreviewContent(
 ) {
     val context = LocalContext.current
     val clipboardManager = LocalClipboard.current
+    var showMenu by remember { mutableStateOf(false) }
+
     Box(modifier = modifier
         .border(
             width = 1.dp,
@@ -179,40 +182,73 @@ private fun LinkPreviewContent(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = ripple(),
                     onLongClick = {
-                        openGraph.getSafeUri()?.toString()?.let {
-                            clipboardManager.nativeClipboard.setPrimaryClip(
-                                ClipData.newPlainText(
-                                    it,
-                                    it
-                                )
-                            )
-                            App.toast(
-                                R.string.toast_message_link_copied,
-                                Toast.LENGTH_SHORT
-                            )
-                        } ifNull {
-                            onLongClick()
-                        }
+                        onLongClick()
                     }) {
                     App.openLink(context, openGraph.getSafeUri())
                 })
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 4.dp)
-                .background(color = colorResource(id = R.color.almostWhite))
-        ) {
-            if (openGraph.hasLargeImageToDisplay()) {
-                Column(modifier = Modifier.padding(4.dp)) {
-                    LinkTitleAndDescription(openGraph = openGraph, highlighter)
-                    LinkImage(openGraph.bitmap, isLarge = true)
+        Box {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp)
+                    .background(color = colorResource(id = R.color.almostWhite))
+            ) {
+                if (openGraph.hasLargeImageToDisplay()) {
+                    Column(modifier = Modifier.padding(4.dp)) {
+                        LinkTitleAndDescription(openGraph = openGraph, highlighter)
+                        LinkImage(openGraph.bitmap, isLarge = true, onClick = {App.openLink(context, openGraph.getSafeUri())}, onLongClick = { showMenu = true })
+                    }
+                } else {
+                    Row(modifier = Modifier.padding(4.dp)) {
+                        LinkImage(openGraph.bitmap, onClick = {App.openLink(context, openGraph.getSafeUri())}, onLongClick = { showMenu = true })
+                        Spacer(modifier = Modifier.width(4.dp))
+                        LinkTitleAndDescription(openGraph = openGraph, highlighter)
+                    }
                 }
-            } else {
-                Row(modifier = Modifier.padding(4.dp)) {
-                    LinkImage(openGraph.bitmap)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    LinkTitleAndDescription(openGraph = openGraph, highlighter)
+            }
+
+            if (blockClicks.not()) {
+                if (showMenu) {
+                    io.olvid.messenger.designsystem.components.OlvidDropdownMenu(
+                        expanded = true,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        OlvidDropdownMenuItem(
+                            text = stringResource(R.string.link_preview_menu_copy_link),
+                            onClick = {
+                                showMenu = false
+                                openGraph.getSafeUri()?.toString()?.let {
+                                    clipboardManager.nativeClipboard.setPrimaryClip(
+                                        ClipData.newPlainText(
+                                            it,
+                                            it
+                                        )
+                                    )
+                                    App.toast(
+                                        R.string.toast_message_link_copied,
+                                        Toast.LENGTH_SHORT
+                                    )
+                                }
+                            },
+                        )
+                        OlvidDropdownMenuItem(
+                            text = stringResource(R.string.link_preview_menu_open_in_browser),
+                            onClick = {
+                                showMenu = false
+                                App.openLink(context, openGraph.getSafeUri())
+                            },
+                        )
+                        if (openGraph.image != null || openGraph.bitmap != null) {
+                            OlvidDropdownMenuItem(
+                                text = stringResource(R.string.link_preview_menu_open_image),
+                                onClick = {
+                                    showMenu = false
+                                    App.openLinkPreviewGallery(context, openGraph)
+                                },
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -220,9 +256,13 @@ private fun LinkPreviewContent(
 }
 
 @Composable
-private fun LinkImage(bitmap: Bitmap?, isLarge: Boolean = false) {
+private fun LinkImage(bitmap: Bitmap?, isLarge: Boolean = false, onClick : () -> Unit = {}, onLongClick : () -> Unit) {
     Image(
-        modifier = Modifier
+        modifier = Modifier.combinedClickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = ripple(),
+            onClick = onClick,
+            onLongClick = onLongClick)
             .then(if (isLarge) bitmap?.let {
                 Modifier.aspectRatio(
                     (it.width / it.height.toFloat()).coerceAtLeast(

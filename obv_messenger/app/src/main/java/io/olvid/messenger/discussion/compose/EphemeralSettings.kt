@@ -20,6 +20,7 @@
 package io.olvid.messenger.discussion.compose
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -162,6 +163,8 @@ fun EphemeralSettingsGroup(
             }
         }
     }
+
+    BackHandler(enabled = dismiss != null, onBack = { dismiss?.invoke() })
 
     Box(modifier = modifier.fillMaxSize()) {
 

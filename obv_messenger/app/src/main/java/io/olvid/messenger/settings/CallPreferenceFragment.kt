@@ -22,10 +22,8 @@ package io.olvid.messenger.settings
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
-import androidx.preference.DropDownPreference
 import androidx.preference.PreferenceFragmentCompat
 import io.olvid.messenger.R
-import io.olvid.messenger.settings.SettingsActivity.Companion.betaFeaturesEnabled
 
 
 class CallPreferenceFragment  : PreferenceFragmentCompat() {

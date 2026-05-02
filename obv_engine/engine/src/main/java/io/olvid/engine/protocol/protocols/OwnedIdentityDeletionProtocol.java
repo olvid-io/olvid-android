@@ -358,16 +358,17 @@ public class OwnedIdentityDeletionProtocol extends ConcreteProtocol {
             // also mark the owned identity for deletion so it is not recreated on app side
             protocolManagerSession.identityDelegate.markOwnedIdentityForDeletion(protocolManagerSession.session, getOwnedIdentity());
 
-
             if (ownedIdentityIsActive) {
                 ////////////
                 // delete current device from server
-                {
+                try {
                     UID currentDeviceUid = protocolManagerSession.identityDelegate.getCurrentDeviceUidOfOwnedIdentity(protocolManagerSession.session, getOwnedIdentity());
 
                     CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.DeviceManagementDeactivateDeviceQuery(getOwnedIdentity(), currentDeviceUid)));
                     ChannelMessageToSend messageToSend = new DeactivateCurrentDeviceServerQueryMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                     protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
+                } catch (Exception e) {
+                    Logger.x(e);
                 }
 
 

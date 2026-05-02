@@ -116,7 +116,7 @@ public class ChannelCoordinator {
                 try {
                     // the message is from a contact
                     if (!channelManagerSession.identityDelegate.isIdentityAContactOfOwnedIdentity(channelManagerSession.session, ownedIdentity, contactIdentity)) {
-                        // contact unknown, set the from identity of the inbox message to reprocess it once the contact is created
+                        // contact unknown, set the "from" identity of the inbox message to reprocess it once the contact is created
                         Logger.i("Received a PreKey encrypted message from an unknown contact, putting it on hold...");
                         channelManagerSession.networkFetchDelegate.setInboxMessageFromIdentityForMissingPreKeyContact(
                                 channelManagerSession.session,

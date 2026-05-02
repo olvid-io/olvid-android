@@ -50,6 +50,9 @@ import io.olvid.messenger.google_services.GoogleServicesUtils
 import io.olvid.messenger.services.BackupCloudProviderService.CloudProviderConfiguration
 import io.olvid.messenger.settings.SettingsActivity.Companion.automaticBackupConfiguration
 import io.olvid.messenger.settings.SettingsActivity.Companion.useAutomaticBackup
+import io.olvid.messenger.settings.backupV2.BackupV2KeyGenerationDialogFragment
+import io.olvid.messenger.settings.backupV2.BackupV2PreferenceFragment
+import io.olvid.messenger.settings.backupV2.EnableBackupsV2Card
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

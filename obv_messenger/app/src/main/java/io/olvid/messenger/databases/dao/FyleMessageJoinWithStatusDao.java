@@ -95,6 +95,12 @@ public interface FyleMessageJoinWithStatusDao {
     void updateMiniPreview(@NonNull byte[] bytesOwnedIdentity, @NonNull byte[] messageIdentifier, int number, @Nullable byte[] miniPreview);
 
     @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
+            " SET " + FyleMessageJoinWithStatus.MINI_PREVIEW + " = :miniPreview " +
+            " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
+            " AND " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId ")
+    void updateMiniPreview(long messageId, long fyleId, @Nullable byte[] miniPreview);
+
+    @Query("UPDATE " + FyleMessageJoinWithStatus.TABLE_NAME +
             " SET " + FyleMessageJoinWithStatus.FILE_PATH + " = :filePath " +
             " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
             " AND " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId ")
@@ -179,6 +185,14 @@ public interface FyleMessageJoinWithStatusDao {
             " WHERE " + FyleMessageJoinWithStatus.FYLE_ID + " = :fyleId " +
             " AND " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId")
     @Nullable FyleMessageJoinWithStatus get(long fyleId, long messageId);
+
+    @Query("SELECT FMjoin.* FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
+            " AND fyle." + Fyle.SHA256 + " = :sha256 " +
+            " LIMIT 1 ") // there should never be more than one match, but let's add this anyway
+    @Nullable FyleMessageJoinWithStatus getByMessageIdAndSha256(long messageId, byte[] sha256);
 
     @Query("SELECT * FROM " + FyleMessageJoinWithStatus.TABLE_NAME +
             " WHERE " + FyleMessageJoinWithStatus.MESSAGE_ID + " = :messageId " +
@@ -364,6 +378,21 @@ public interface FyleMessageJoinWithStatusDao {
     LiveData<Long> getMimeUsage(@NonNull byte[] bytesOwnedIdentity, @NonNull String mimeStart);
 
 
+    @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
+            " ON FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = mess.id " +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
+            " ON mess." + Message.DISCUSSION_ID + " = disc.id " +
+            " WHERE fyle." + Fyle.SHA256 + " IS NOT NULL " +
+            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL " +
+            " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND mess." + Message.MESSAGE_TYPE + " IN ( " + Message.TYPE_OUTBOUND_MESSAGE + "," + Message.TYPE_INBOUND_MESSAGE + ") " +
+            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT
+    )
+    LiveData<List<FyleAndStatus>> getAllTransferableForOwnedIdentity(@NonNull byte[] bytesOwnedIdentity);
+
     String FYLE_AND_ORIGIN_QUERY = "SELECT " + DiscussionDao.PREFIX_DISCUSSION_COLUMNS + ", " + MessageDao.PREFIX_MESSAGE_COLUMNS + ", fyle.*, FMjoin.* " +
             " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
             " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle " +
@@ -438,6 +467,21 @@ public interface FyleMessageJoinWithStatusDao {
     @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC ")
     LiveData<List<FyleAndOrigin>> getFyleAndOriginNameDesc(@NonNull byte[] bytesOwnedIdentity);
 
+    @Query("SELECT " + DiscussionDao.PREFIX_DISCUSSION_COLUMNS + ", " + MessageDao.PREFIX_MESSAGE_COLUMNS
+            + ", fyle.*, FMjoin.* " +
+            " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
+            " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
+            " ON disc.id = mess." + Message.DISCUSSION_ID +
+            " WHERE mess." + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'audio/%' " +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL " +
+            " ORDER BY mess." + Message.SORT_INDEX + " ASC")
+    List<FyleAndOrigin> getAudioFyleAndOriginForDiscussionDateAscSync(long discussionId);
 
     class FyleAndStatusTimestamped {
         @Embedded

@@ -542,13 +542,13 @@ private fun Editable.setMarkdownSpanFromNode(
                     setSpan(
                         MarkdownDelimiter(color = highlightColor),
                         start,
-                        start + 1 + substring(start + 1).indexOfFirst {
+                        (start + 1 + substring(start + 1).indexOfFirst {
                             listOf(
                                 ' ',
                                 '\t',
                                 '\u000C'
                             ).contains(it).not()
-                        },
+                        }).coerceAtMost(end - 1),
                         spanFlag
                     )
                 }
@@ -633,6 +633,10 @@ fun String.formatMarkdown(spanFlag: Int = Spannable.SPAN_EXCLUSIVE_EXCLUSIVE): S
     return SpannableStringBuilder(this).apply {
         formatMarkdown(0, spanFlag)
     }
+}
+
+fun String.formatMarkdownToAnnotatedString(): AnnotatedString {
+    return AnnotatedString(this).formatMarkdown()
 }
 
 fun SpannableString.formatMarkdown(spanFlag: Int): SpannableStringBuilder {
@@ -955,7 +959,7 @@ fun List<String>.formatSingleLineMarkdown(): AnnotatedString {
     this.filter { it.trim().isNotEmpty() }
         .take(5) // only keep the first 5 lines
         .map { line ->
-            return@map AnnotatedString(line.trim()).formatMarkdown()
+            return@map line.trim().formatMarkdownToAnnotatedString()
         }
         .let {
             return if (it.isEmpty())

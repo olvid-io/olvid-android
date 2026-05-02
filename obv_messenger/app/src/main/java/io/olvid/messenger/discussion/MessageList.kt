@@ -19,7 +19,6 @@
 
 package io.olvid.messenger.discussion
 
-import android.view.View
 import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -76,7 +75,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
@@ -96,6 +94,8 @@ import io.olvid.messenger.discussion.compose.ComposeMessageViewModel
 import io.olvid.messenger.discussion.compose.MessageEditHandler
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.message.DateHeader
+import io.olvid.messenger.discussion.message.LocationContextMenu
+import io.olvid.messenger.discussion.message.LocationContextMenuState
 import io.olvid.messenger.discussion.message.LocationSharing
 import io.olvid.messenger.discussion.message.MessageDisclaimer
 import io.olvid.messenger.discussion.message.MissedMessageCount
@@ -233,7 +233,6 @@ fun MessageList(
                 if (it > 0) {
                     discussionViewModel.scrollToMessageRequest =
                         DiscussionActivity.ScrollRequest(messageId = it, highlight = false)
-                    @Suppress("AssignedValueIsNeverRead")
                     scrollToFirstUnread = false
                 } else {
                     startCollectingMessagesToMarkAsRead = true
@@ -394,13 +393,11 @@ fun MessageList(
                             var offset by remember {
                                 mutableStateOf(Offset.Zero)
                             }
-                            // TODO convert location menu to compose
-                            // location menu android view
-                            var view: View? = null
-                            AndroidView(factory = { context ->
-                                View(context).apply { view = this }
-                            }) { v ->
-                                view = v
+                            if (message.id == discussionViewModel.locationContextMenuState?.message?.id) {
+                                LocationContextMenu(
+                                    discussionViewModel = discussionViewModel,
+                                    locationMessageHandler = locationMessageHandler
+                                )
                             }
                             // missed count
                             if (message.isInbound && message.missedMessageCount > 0) {
@@ -502,19 +499,17 @@ fun MessageList(
                                 onLocationClick = {
                                     locationMessageHandler.onLocationClick(it)
                                 },
-                                onLocationLongClick = {
-                                    view?.let { view ->
-                                        message.jsonLocation?.let {
-                                            AppSingleton.getJsonObjectMapper()
-                                                .readValue(it, JsonLocation::class.java)
-                                        }?.let { jsonLocation ->
-                                            locationMessageHandler.showLocationContextMenu(
-                                                message = message,
-                                                view = view,
-                                                truncatedLatitudeString = jsonLocation.truncatedLatitudeString,
-                                                truncatedLongitudeString = jsonLocation.truncatedLongitudeString
-                                            )
-                                        }
+                                 onLocationLongClick = {
+                                    message.jsonLocation?.let {
+                                        AppSingleton.getJsonObjectMapper()
+                                            .readValue(it, JsonLocation::class.java)
+                                    }?.let { jsonLocation ->
+                                        discussionViewModel.locationContextMenuState =
+                                            LocationContextMenuState(
+                                            message = message,
+                                            truncatedLatitude = jsonLocation.truncatedLatitudeString,
+                                            truncatedLongitude = jsonLocation.truncatedLongitudeString,
+                                        )
                                     }
                                 },
                                 onAttachmentLongClick = { fyleAndStatus ->

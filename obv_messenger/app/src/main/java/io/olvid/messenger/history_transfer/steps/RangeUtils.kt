@@ -19,18 +19,17 @@
 
 package io.olvid.messenger.history_transfer.steps
 
-import io.olvid.engine.Logger
 import io.olvid.engine.engine.types.ObvBytesKey
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
 import java.util.UUID
 
 
-fun Discussion.computeMessageRanges(db: AppDatabase): Map<ObvBytesKey, Map<String, List<List<Long>>>> {
-    val rangesByThreadAndSender = mutableMapOf<ObvBytesKey, Map<String, List<List<Long>>>>()
+fun Discussion.computeMessageRanges(db: AppDatabase): Map<ObvBytesKey, Map<UUID, List<List<Long>>>> {
+    val rangesByThreadAndSender = mutableMapOf<ObvBytesKey, Map<UUID, List<List<Long>>>>()
 
     var currentSenderIdentifier : ByteArray? = null
-    var currentSenderMap: MutableMap<String, List<List<Long>>>? = null
+    var currentSenderMap: MutableMap<UUID, List<List<Long>>>? = null
     var currentSenderThreadIdentifier : UUID? = null
     var currentThreadList: MutableList<List<Long>>? = null
     var currentSequenceNumberStride: MutableList<Long>? = null
@@ -44,7 +43,7 @@ fun Discussion.computeMessageRanges(db: AppDatabase): Map<ObvBytesKey, Map<Strin
         if (message.senderThreadIdentifier != currentSenderThreadIdentifier) {
             currentSenderThreadIdentifier = message.senderThreadIdentifier
             currentThreadList = mutableListOf()
-            currentSenderMap?.put(Logger.getUuidString(currentSenderThreadIdentifier), currentThreadList)
+            currentSenderMap?.put(currentSenderThreadIdentifier, currentThreadList)
             currentSequenceNumberStride = null
         }
         if (currentSequenceNumberStride != null && (message.senderSequenceNumber - 1 < currentSequenceNumberStride[1])) {
@@ -60,8 +59,8 @@ fun Discussion.computeMessageRanges(db: AppDatabase): Map<ObvBytesKey, Map<Strin
     return rangesByThreadAndSender
 }
 
-fun computeDiscussionRangesDiff(src: Map<ObvBytesKey, Map<String, List<List<Long>>>>, known: Map<ObvBytesKey, Map<String, List<List<Long>>>>): Map<ObvBytesKey, Map<String, List<List<Long>>>> {
-    val rangesByThreadAndSender = mutableMapOf<ObvBytesKey, Map<String, List<List<Long>>>>()
+fun computeDiscussionRangesDiff(src: Map<ObvBytesKey, Map<UUID, List<List<Long>>>>, known: Map<ObvBytesKey, Map<UUID, List<List<Long>>>>): Map<ObvBytesKey, Map<UUID, List<List<Long>>>> {
+    val rangesByThreadAndSender = mutableMapOf<ObvBytesKey, Map<UUID, List<List<Long>>>>()
 
     src.entries.forEach { (obvBytesKey, threadsMap) ->
         val knownThreadMap = known[obvBytesKey] ?: run {
@@ -69,7 +68,7 @@ fun computeDiscussionRangesDiff(src: Map<ObvBytesKey, Map<String, List<List<Long
             return@forEach
         }
 
-        val rangesByThread = mutableMapOf<String, List<List<Long>>>()
+        val rangesByThread = mutableMapOf<UUID, List<List<Long>>>()
         rangesByThreadAndSender[obvBytesKey] = rangesByThread
 
         threadsMap.entries.forEach { (threadId, ranges) ->
@@ -141,7 +140,7 @@ fun computeDiscussionRangesDiff(src: Map<ObvBytesKey, Map<String, List<List<Long
     return rangesByThreadAndSender
 }
 
-fun countMessagesInRanges(rangesByThreadAndSender:  Map<ObvBytesKey, Map<String, List<List<Long>>>>): Int {
+fun countMessagesInRanges(rangesByThreadAndSender:  Map<ObvBytesKey, Map<UUID, List<List<Long>>>>): Int {
     return rangesByThreadAndSender.values.sumOf { rangesByThread ->
         rangesByThread.values.sumOf { ranges ->
             ranges.sumOf { range -> (range[1] - range[0] + 1).toInt() }

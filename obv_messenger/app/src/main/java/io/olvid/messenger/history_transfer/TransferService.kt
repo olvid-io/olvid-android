@@ -28,6 +28,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -43,6 +44,8 @@ import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Fyle
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus
+import io.olvid.messenger.databases.entity.jsons.JsonPayload
+import io.olvid.messenger.databases.entity.jsons.JsonWebrtcHistoryTransferControl
 import io.olvid.messenger.databases.entity.jsons.JsonWebrtcHistoryTransferMessage
 import io.olvid.messenger.history_transfer.json.DstDiscussionExpectedRanges
 import io.olvid.messenger.history_transfer.json.DstDoNotRequestSha256
@@ -65,6 +68,7 @@ import io.olvid.messenger.history_transfer.steps.SrcSendMessagesStep
 import io.olvid.messenger.history_transfer.types.AttachmentProgressListener
 import io.olvid.messenger.history_transfer.types.DstTransferProtocolState
 import io.olvid.messenger.history_transfer.types.SrcTransferProtocolState
+import io.olvid.messenger.history_transfer.types.TransferAbort
 import io.olvid.messenger.history_transfer.types.TransferFailReason
 import io.olvid.messenger.history_transfer.types.TransferListener
 import io.olvid.messenger.history_transfer.types.TransferMessageType
@@ -78,36 +82,28 @@ import io.olvid.messenger.history_transfer.types.TransferTransportType
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+import java.util.UUID
 
 
 class TransferService(
     val role: TransferRole,
+    val transferId: String,
     val transferTransportType: TransferTransportType,
     val transferProtocolState: TransferProtocolState
 ): TransferListener {
-    val transferTransportDelegate: TransferTransportDelegate
-    var aborted = false
+    var aborted = TransferAbort.NONE
+    var currentFailReason: TransferFailReason? = null
     val executor = NoExceptionSingleThreadExecutor("History transfer executor")
     val fileOutputStreams: MutableMap<BytesKey, FileOutputStream> = mutableMapOf()
 
-    var transferTransportLayerState = TransferTransportLayerState.INITIALIZING
+    var transferTransportLayerState = TransferTransportLayerState.NOT_STARTED
 
-    init {
-        Handler(Looper.getMainLooper()).post {
-            try {
-                App.getContext().startService(Intent(App.getContext(), TransferNotificationService::class.java).apply {
-                    action = TransferNotificationService.ACTION_START
-                })
-            } catch (e: Exception) {
-                Logger.x(e)
-            }
-        }
-
-        transferTransportDelegate = when(transferTransportType)  {
+    val transferTransportDelegate: TransferTransportDelegate = when(transferTransportType)  {
             is TransferTransportType.WebRtcWithOwnedDevice -> WebRTCTransferTransportDelegate(
                 role = role,
                 transferListener = this,
                 objectMapper = AppSingleton.getJsonObjectMapper(),
+                transferId = transferId,
                 bytesOwnedIdentity = transferTransportType.bytesOwnedIdentity,
                 bytesOtherDeviceUid = transferTransportType.bytesOtherDeviceUid,
                 context = App.getContext(),
@@ -117,18 +113,19 @@ class TransferService(
                 transferListener = this,
                 bytesOwnedIdentity = transferTransportType.bytesOwnedIdentity,
                 zipWritableFileUri = transferTransportType.zipWritableFileUri,
+                password = transferTransportType.password,
                 context = App.getContext(),
             )
             is TransferTransportType.ZipFileImport -> ZipImportTransferTransportDelegate(
                 role = role,
                 transferListener = this,
                 objectMapper = AppSingleton.getJsonObjectMapper(),
+                bytesOwnedIdentity = transferTransportType.bytesOwnedIdentity,
                 zipReadableFileUri = transferTransportType.zipReadableFileUri,
+                password = transferTransportType.password,
                 context = App.getContext(),
             )
         }
-
-    }
 
     override fun onTransportLayerStateChange(state: TransferTransportLayerState) {
         if (transferTransportLayerState == state) {
@@ -138,8 +135,22 @@ class TransferService(
         transferTransportLayerState = state
 
         when(state) {
-            TransferTransportLayerState.INITIALIZING -> {
+            TransferTransportLayerState.NOT_STARTED -> {
                 // nothing to do here
+            }
+            TransferTransportLayerState.INITIALIZING -> {
+                executor.execute {
+                    transferProtocolState.transferProgress.value = TransferProgress.ContactingOtherDevice
+                }
+                Handler(Looper.getMainLooper()).post {
+                    try {
+                        App.getContext().startService(Intent(App.getContext(), TransferNotificationService::class.java).apply {
+                            action = TransferNotificationService.ACTION_START
+                        })
+                    } catch (e: Exception) {
+                        Logger.x(e)
+                    }
+                }
             }
 
             TransferTransportLayerState.CONNECTING -> {
@@ -163,14 +174,18 @@ class TransferService(
             }
 
             TransferTransportLayerState.CLOSED -> {
-                // if the connection is closed before it is finished --> set to failed state
-                if (transferProtocolState.transferProgress.value != TransferProgress.Finished) {
-                    transferProtocolState.transferProgress.value = if (aborted)
-                        TransferProgress.Failed(TransferFailReason.ABORTED)
-                    else if (transferProtocolState is DstTransferProtocolState && transferProtocolState.bytesOwnedIdentity == null)
-                        TransferProgress.Failed(TransferFailReason.UNKNOWN_OWNED_IDENTITY)
-                    else
-                        TransferProgress.Failed(TransferFailReason.UNKNOWN_REASON)
+                currentFailReason?.let {
+                    transferProtocolState.transferProgress.value = TransferProgress.Failed(it)
+                } ?: run {
+                    Logger.w("onTransportLayerStateChange CLOSED without a failReason")
+                    // if the connection is closed before it is finished and no failReason was set, try to infer the fail reason
+                    if (transferProtocolState.transferProgress.value != TransferProgress.Finished) {
+                        transferProtocolState.transferProgress.value =
+                            if (aborted == TransferAbort.USER_ABORT)
+                                TransferProgress.Failed(TransferFailReason.ABORTED)
+                            else
+                                TransferProgress.Failed(TransferFailReason.UNKNOWN_REASON)
+                    }
                 }
                 // connection was closed, clean up everything
                 cleanup()
@@ -178,11 +193,22 @@ class TransferService(
         }
     }
 
-    private fun abort() {
+    override fun setFailReason(failReason: TransferFailReason) {
+        // never overwrite a fail reason once it was set
+        if (this.currentFailReason == null) {
+            this.currentFailReason = failReason
+        }
+    }
+
+    private fun abort(transferId: String) {
         instance?.let {
-            if (transferTransportType == it.transferTransportType) {
-                aborted = true
-                transferTransportDelegate.abort()
+            // we make sure this instance is the one referenced in the TransferService
+            // and that it's id is the one we want to abort
+            if (it.transferTransportType == transferTransportType &&
+                it.transferId == transferId) {
+                sendWebRTCTransferControlMessage(JsonWebrtcHistoryTransferControl.REJECT_OR_ABORT_TRANSFER)
+                aborted = TransferAbort.USER_ABORT
+                transferTransportDelegate.abort(true)
             }
         }
     }
@@ -202,6 +228,9 @@ class TransferService(
                     tmpFile.delete()
                 } catch (_: Exception) { }
             }
+            if (aborted == TransferAbort.USER_ABORT) {
+                executor.shutdownNow()
+            }
         }
     }
 
@@ -209,7 +238,7 @@ class TransferService(
         messageType: TransferMessageType,
         serializedMessage: ByteArray
     ) {
-        if (aborted) {
+        if (aborted != TransferAbort.NONE) {
             return
         }
         executor.execute {
@@ -256,7 +285,6 @@ class TransferService(
                     TransferMessageType.SRC_MESSAGES -> {
                         val srcMessages = AppSingleton.getJsonObjectMapper().readValue(serializedMessage, SrcMessages::class.java)
                         (transferProtocolState as? DstTransferProtocolState)?.let { state ->
-                            // TODO run on executor directly
                             DstProcessSrcMessagesStep(state, srcMessages, transferTransportDelegate).run()
                         }
                     }
@@ -308,8 +336,8 @@ class TransferService(
         return Logger.toHexString(sha256) + "_hist_trans"
     }
 
-    override fun onNewAttachment(sha256: ByteArray): Pair<OutputStream, AttachmentProgressListener?>? {
-        if (aborted) {
+    override fun onNewAttachment(sha256: ByteArray): Triple<OutputStream, Long, AttachmentProgressListener?>? {
+        if (aborted != TransferAbort.NONE) {
             return null
         }
         val fos: OutputStream
@@ -325,11 +353,10 @@ class TransferService(
             fos = FileOutputStream(tmpFile, false) // open in truncate mode in case the file exists
             fileOutputStreams[sha256Key] = fos
         }
-        return Pair(fos, object : AttachmentProgressListener {
-            val size: Long = (transferProtocolState as? DstTransferProtocolState)?.let { dstTransferProtocolState ->
-                dstTransferProtocolState.expectedSha256s?.get(ObvBytesKey(sha256))
-            } ?: 0L
-
+        val size: Long = (transferProtocolState as? DstTransferProtocolState)?.let { dstTransferProtocolState ->
+            dstTransferProtocolState.expectedSha256s?.get(ObvBytesKey(sha256))
+        } ?: 0L
+        return Triple(fos, size, object : AttachmentProgressListener {
             var transferredCount = 0L
 
             override fun bytesTransferred(count: Long) {
@@ -345,7 +372,7 @@ class TransferService(
         })
     }
 
-    override fun onAttachmentComplete(sha256: ByteArray, fileSize: Long) {
+    override fun onAttachmentComplete(sha256: ByteArray) {
         val sha256Key = BytesKey(sha256)
         synchronized(fileOutputStreams) {
             val fos = fileOutputStreams[sha256Key]
@@ -356,16 +383,8 @@ class TransferService(
                 return
             }
         }
-        if (aborted) {
+        if (aborted != TransferAbort.NONE) {
             return
-        }
-        executor.execute {
-            // count missing bytes if fileSize does not match expected size
-            (transferProtocolState as? DstTransferProtocolState)?.let { dstTransferProtocolState ->
-                val expectedSize = dstTransferProtocolState.expectedSha256s?.get(ObvBytesKey(sha256)) ?: 0L
-                dstTransferProtocolState.receivedBytes += (expectedSize - fileSize).coerceAtLeast(0L)
-                dstTransferProtocolState.updateProgress()
-            }
         }
         App.runThread {
             val tmpDir = File(App.getContext().cacheDir, App.WEBCLIENT_ATTACHMENT_FOLDER)
@@ -430,10 +449,18 @@ class TransferService(
             @SuppressLint("WifiManagerLeak", "WakelockTimeout")
             set(value) {
                 field = value
-                transferInProgress.value = value != null
+                transferInProgress.value = value?.transferId
                 if (value != null) {
-                    // for WebRTC transfers, request a wifi wake lock
+                    // save the progress state to a cache so we can still access it after the transfer is done
+                    transferProgressCache[value.transferId] = Triple(
+                        value.role,
+                        value.transferTransportType,
+                        value.transferProtocolState.transferProgress
+                    )
+
+                    // for WebRTC transfers, request a Wi-Fi wake lock
                     if (value.transferTransportType is TransferTransportType.WebRtcWithOwnedDevice) {
+
                         runCatching {
                             @Suppress("DEPRECATION")
                             (App.getContext().getSystemService(Context.WIFI_SERVICE) as WifiManager?)?.createWifiLock(
@@ -464,84 +491,239 @@ class TransferService(
                 }
             }
 
-        val transferInProgress = mutableStateOf(false)
+        val transferInProgress = mutableStateOf<String?>(null)
+        val transferProgressCache = mutableMapOf<String, Triple<TransferRole, TransferTransportType, MutableState<TransferProgress>>>()
 
-        fun initiateHistoryTransferToOtherDevice(transferTransportType: TransferTransportType, transferScope: TransferScope) : Boolean {
+        // this method returns the transferId if a new transfer instance was indeed created
+        fun initiateHistoryTransferToOtherDevice(transferTransportType: TransferTransportType, transferScope: TransferScope) : String? {
+            // If an instance has only received a notification (and never actually started) and we receive a new one, delete the old instance
+            instance?.let {
+                if (it.transferTransportType != transferTransportType
+                    && it.transferTransportLayerState == TransferTransportLayerState.NOT_STARTED) {
+                    it.cleanup()
+                }
+            }
+
             instance?.let {
                 Logger.w("Unable to run two history transfers in parallel")
-                return false
+                return null
             }
             when(transferTransportType) {
                 is TransferTransportType.WebRtcWithOwnedDevice -> {
-                    instance = TransferService(TransferRole.SOURCE, transferTransportType, SrcTransferProtocolState(transferScope, transferTransportType.bytesOwnedIdentity))
-                    return true
+                    val transferId = Logger.getUuidString(UUID.randomUUID())
+                    instance = TransferService(
+                        role = TransferRole.SOURCE,
+                        transferId = transferId,
+                        transferTransportType = transferTransportType,
+                        transferProtocolState = SrcTransferProtocolState(
+                            transferScope,
+                            transferTransportType.bytesOwnedIdentity
+                        )
+                    )
+                    sendWebRTCTransferControlMessage(JsonWebrtcHistoryTransferControl.REQUEST_TRANSFER)
+                    return transferId
                 }
 
                 is TransferTransportType.ZipFileExport -> {
                     if (!StringUtils.validateUri(transferTransportType.zipWritableFileUri)) {
-                        return false
+                        return null
                     }
 
-                    instance = TransferService(TransferRole.SOURCE, transferTransportType, SrcTransferProtocolState(transferScope, transferTransportType.bytesOwnedIdentity))
-                    return true
+                    val transferId = Logger.getUuidString(UUID.randomUUID())
+                    instance = TransferService(
+                        role = TransferRole.SOURCE,
+                        transferId = transferId,
+                        transferTransportType = transferTransportType,
+                        transferProtocolState = SrcTransferProtocolState(
+                            transferScope,
+                            transferTransportType.bytesOwnedIdentity
+                        )
+                    )
+                    return transferId
                 }
                 is TransferTransportType.ZipFileImport -> {
                     if (!StringUtils.validateUri(transferTransportType.zipReadableFileUri)) {
-                        return false
+                        return null
                     }
 
-                    instance = TransferService(TransferRole.DESTINATION, transferTransportType, DstTransferProtocolState())
-                    return true
+                    val transferId = Logger.getUuidString(UUID.randomUUID())
+                    instance = TransferService(
+                        role = TransferRole.DESTINATION,
+                        transferId = transferId,
+                        transferTransportType = transferTransportType,
+                        transferProtocolState = DstTransferProtocolState()
+                    )
+                    return transferId
                 }
             }
         }
 
-        fun handleJsonHistoryTransferMessage(jsonWebrtcHistoryTransferMessage: JsonWebrtcHistoryTransferMessage, bytesOwnedIdentity: ByteArray, bytesOtherDeviceUid: ByteArray) {
-            val transferTransportType = TransferTransportType.WebRtcWithOwnedDevice(bytesOwnedIdentity = bytesOwnedIdentity, bytesOtherDeviceUid = bytesOtherDeviceUid)
-            instance?.also {
-                if (it.transferTransportType == transferTransportType) {
-                    (it.transferTransportDelegate as? WebRTCTransferTransportDelegate)?.handleJsonHistoryTransferMessage(jsonWebrtcHistoryTransferMessage)
-                } else {
-                    Logger.w("Unable to run two history transfers in parallel")
-                }
-            } ?: run {
-                // only create an instance when receiving an SDP message, ICE candidates should only be delivered to existing instances
-                if (jsonWebrtcHistoryTransferMessage.sdp != null) {
-                    instance = TransferService(
-                        role = TransferRole.DESTINATION,
-                        transferTransportType = transferTransportType,
-                        transferProtocolState = DstTransferProtocolState().apply { this.bytesOwnedIdentity = bytesOwnedIdentity }
-                    ).apply {
-                        (transferTransportDelegate as? WebRTCTransferTransportDelegate)?.handleJsonHistoryTransferMessage(jsonWebrtcHistoryTransferMessage)
+        fun handleJsonHistoryTransferControl(jsonWebrtcHistoryTransferControl: JsonWebrtcHistoryTransferControl, bytesOwnedIdentity: ByteArray, bytesOtherDeviceUid: ByteArray) {
+            jsonWebrtcHistoryTransferControl.transferId?.let { transferId ->
+                val transferTransportType = TransferTransportType.WebRtcWithOwnedDevice(
+                    bytesOwnedIdentity = bytesOwnedIdentity,
+                    bytesOtherDeviceUid = bytesOtherDeviceUid,
+                )
+
+                // If an instance has only received a notification (and never actually started) and we receive a new one, delete the old instance
+                instance?.let {
+                    if (it.transferTransportType != transferTransportType
+                        && it.transferTransportLayerState == TransferTransportLayerState.NOT_STARTED) {
+                        it.cleanup()
                     }
-                    // try to start the activity to track progress. It may fail if the app is in background
-                    Handler(Looper.getMainLooper()).post {
-                        try {
-                            App.getContext().startActivity(Intent(App.getContext(), HistoryTransferActivity::class.java).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            })
-                        } catch (e: Exception) {
-                            Logger.x(e)
+                }
+
+                when(jsonWebrtcHistoryTransferControl.type) {
+                    JsonWebrtcHistoryTransferControl.REQUEST_TRANSFER -> {
+                        instance?.also {
+                            Logger.w("Received a JsonWebrtcHistoryTransferControl of type REQUEST_TRANSFER while an instance is already running")
+                        } ?: run {
+                            val otherDeviceName = AppDatabase.getInstance().ownedDeviceDao()
+                                .get(bytesOwnedIdentity, bytesOtherDeviceUid)
+                                ?.getDisplayNameOrDeviceHexName(App.getContext())
+
+                            // create an instance and wait for user to accept or reject the transfer
+                            instance = TransferService(
+                                role = TransferRole.DESTINATION,
+                                transferId = transferId,
+                                transferTransportType = transferTransportType,
+                                transferProtocolState = DstTransferProtocolState().apply {
+                                    this.bytesOwnedIdentity = bytesOwnedIdentity
+                                    this.transferProgress.value = TransferProgress.DestinationWaitingForConfirmation(otherDeviceName)
+                                }
+                            )
+
+
+                            // try to start the activity to track progress. It may fail if the app is in background
+                            Handler(Looper.getMainLooper()).post {
+                                runCatching {
+                                    App.getContext().startService(
+                                        Intent(
+                                            App.getContext(),
+                                            TransferNotificationService::class.java
+                                        ).apply {
+                                            action = TransferNotificationService.ACTION_INCOMING
+                                            putExtra(TransferNotificationService.EXTRA_TRANSFER_ID, transferId)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    JsonWebrtcHistoryTransferControl.ACCEPT_TRANSFER -> {
+                        instance?.also {
+                            if (it.transferTransportType == transferTransportType &&
+                                it.transferId == transferId
+                            ) {
+                                // If I'm indeed the initiator, send the sdp to start the actual transfer!
+                                if (it.role == TransferRole.SOURCE) {
+                                    (it.transferTransportDelegate as? WebRTCTransferTransportDelegate)?.transferAcceptedByTheTargetDevice()
+                                } else {
+                                    Logger.w("Received a JsonWebrtcHistoryTransferControl of type ACCEPT_TRANSFER while an instance where I am the TARGET is running")
+                                }
+                            } else {
+                                Logger.w("Received a JsonWebrtcHistoryTransferControl of type ACCEPT_TRANSFER while another transfer is running")
+                            }
+                        } ?: run {
+                            Logger.w("Received a JsonWebrtcHistoryTransferControl of type ACCEPT_TRANSFER while no instance exists")
+                        }
+                    }
+
+                    JsonWebrtcHistoryTransferControl.REJECT_OR_ABORT_TRANSFER -> {
+                        instance?.let {
+                            if (it.transferTransportType == transferTransportType &&
+                                it.transferId == transferId
+                            ) {
+                                it.aborted = TransferAbort.USER_ABORT
+                                it.transferTransportDelegate.abort(true)
+                                return@let Unit
+                            } else {
+                                return@let null
+                            }
+                        } ?: run {
+                            // we received an abort while no instance is running or another instance is running
+                            // --> simply try to update the fail reason
+                            transferProgressCache[transferId]?.third?.value = TransferProgress.Failed(TransferFailReason.ABORTED)
                         }
                     }
                 }
             }
         }
 
-        fun abortOngoingTransfer() {
-            instance?.abort()
+
+        fun handleJsonHistoryTransferMessage(jsonWebrtcHistoryTransferMessage: JsonWebrtcHistoryTransferMessage, bytesOwnedIdentity: ByteArray, bytesOtherDeviceUid: ByteArray) {
+            jsonWebrtcHistoryTransferMessage.transferId?.let { transferId ->
+                val transferTransportType = TransferTransportType.WebRtcWithOwnedDevice(
+                    bytesOwnedIdentity = bytesOwnedIdentity,
+                    bytesOtherDeviceUid = bytesOtherDeviceUid,
+                )
+                instance?.also {
+                    if (it.transferTransportType == transferTransportType && it.transferId == transferId) {
+                        (it.transferTransportDelegate as? WebRTCTransferTransportDelegate)
+                            ?.handleJsonHistoryTransferMessage(jsonWebrtcHistoryTransferMessage)
+                    } else {
+                        Logger.w("Unable to run two history transfers in parallel")
+                    }
+                } ?: run {
+                    Logger.w("Received a JsonWebrtcHistoryTransferMessage but no transfer is in progress")
+                }
+            }
         }
 
-        fun getTransferProgress(): State<TransferProgress>? {
-            return instance?.transferProtocolState?.transferProgress
+        fun abortOngoingTransfer(transferId: String) {
+            instance?.abort(transferId)
         }
 
-        fun getTransferMessagesEta(): State<EtaEstimator.SpeedAndEta?>? {
-            return instance?.transferProtocolState?.messagesSpeedAndEta
+        fun acceptTransferRequest() {
+            sendWebRTCTransferControlMessage(JsonWebrtcHistoryTransferControl.ACCEPT_TRANSFER)
         }
 
-        fun getTransferFilesEta(): State<EtaEstimator.SpeedAndEta?>? {
-            return instance?.transferProtocolState?.filesSpeedAndEta
+        fun getTransferProgress(transferId: String): Triple<TransferRole, TransferTransportType, State<TransferProgress>>? {
+            return transferProgressCache[transferId]
+        }
+
+        fun getCurrentTransferIdAndProgressState(): Pair<String, State<TransferProgress>>? {
+            return instance?.let {
+                it.transferId to it.transferProtocolState.transferProgress
+            }
+        }
+
+        fun getTransferMessagesEta(transferId: String): State<EtaEstimator.SpeedAndEta?>? {
+            return instance?.takeIf { it.transferId == transferId }?.transferProtocolState?.messagesSpeedAndEta
+        }
+
+        fun getTransferFilesEta(transferId: String): State<EtaEstimator.SpeedAndEta?>? {
+            return instance?.takeIf { it.transferId == transferId }?.transferProtocolState?.filesSpeedAndEta
+        }
+
+        private fun sendWebRTCTransferControlMessage(controlMessageType: Int) {
+            instance?.let {
+                (it.transferTransportDelegate as? WebRTCTransferTransportDelegate)?.let { delegate ->
+                    // When accepting a transfer, we notify that the delegate as this is what
+                    // distinguishes between the "awaiting confirmation" and the "ongoing transfer" state
+                    if (controlMessageType == JsonWebrtcHistoryTransferControl.ACCEPT_TRANSFER) {
+                        delegate.acceptTheTransferAsTargetDevice()
+                    }
+
+                    val jsonPayload = JsonPayload().apply {
+                        jsonWebrtcHistoryTransferControl =
+                            JsonWebrtcHistoryTransferControl().apply {
+                                transferId = delegate.transferId
+                                type = controlMessageType
+                            }
+                    }
+
+                    AppSingleton.getEngine().postToSpecificDevices(
+                        AppSingleton.getJsonObjectMapper().writeValueAsBytes(jsonPayload),
+                        listOf(delegate.bytesOwnedIdentity),
+                        listOf(delegate.bytesOtherDeviceUid),
+                        delegate.bytesOwnedIdentity,
+                        controlMessageType == JsonWebrtcHistoryTransferControl.REQUEST_TRANSFER, // true only for the first request message
+                        false
+                    )
+                }
+            }
         }
     }
 }

@@ -31,6 +31,9 @@ import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.core.view.ContentInfoCompat;
 import androidx.core.view.OnReceiveContentListener;
@@ -96,16 +99,23 @@ public class DiscussionInputEditText extends AppCompatEditText {
                 }
                 String fallbackFileName = clipName;
 
+                List<Pair<Uri, String>> uriItems = new ArrayList<>();
                 for (int i = 0; i < clip.getItemCount(); i++) {
                     ClipData.Item item = clip.getItemAt(i);
                     if (item.getText() != null) {
                         insertTextAtSelection(item.getText());
                     } else if (StringUtils.validateUri(item.getUri())) {
-                        Uri uri = item.getUri();
                         String mimeType = clip.getDescription().getMimeTypeCount() > i ? clip.getDescription().getMimeType(i) : null;
-                        App.runThread(() -> {
+                        uriItems.add(new Pair<>(item.getUri(), mimeType));
+                    }
+                }
+                if (!uriItems.isEmpty()) {
+                    App.runThread(() -> {
+                        String[] projection = {OpenableColumns.DISPLAY_NAME};
+                        for (Pair<Uri, String> uriItem : uriItems) {
+                            Uri uri = uriItem.first;
+                            String mimeType = uriItem.second;
                             String fileName = fallbackFileName;
-                            String[] projection = {OpenableColumns.DISPLAY_NAME};
                             try (Cursor cursor = contentResolver.query(uri, projection, null, null, null)) {
                                 if ((cursor != null) && cursor.moveToFirst()) {
                                     int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
@@ -114,10 +124,9 @@ public class DiscussionInputEditText extends AppCompatEditText {
                                     }
                                 }
                             }
-
                             imeContentCommittedHandler.handler(uri, fileName, mimeType, null);
-                        });
-                    }
+                        }
+                    });
                 }
             }
             return remaining;

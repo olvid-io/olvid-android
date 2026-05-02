@@ -35,6 +35,7 @@ import io.olvid.messenger.databases.entity.DiscussionCustomization
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.databases.entity.jsons.JsonMessageReference
+import io.olvid.messenger.discussion.message.attachments.Attachment
 import java.io.File
 
 class ComposeMessageViewModel(
@@ -48,13 +49,23 @@ class ComposeMessageViewModel(
     var editIsSendable by mutableStateOf(false)
 
     private val db: AppDatabase = AppDatabase.getInstance()
-    private val recordingLiveData: MutableLiveData<Boolean> = MutableLiveData(false)
     private val draftMessageFyles: LiveData<List<FyleAndStatus>?> =
         discussionIdLiveData.switchMap { discussionId: Long? ->
             if (discussionId == null) {
                 return@switchMap null
             }
-            db.fyleDao().getDiscussionDraftFyles(discussionId)
+            db.fyleDao().getDiscussionDraftFylesWithoutVoiceRecordings(discussionId)
+        }
+    private val draftVoiceRecording: LiveData<Attachment?> =
+        discussionIdLiveData.switchMap { discussionId: Long? ->
+            if (discussionId == null) {
+                return@switchMap null
+            }
+            db.fyleDao().getDiscussionDraftVoiceRecording(discussionId)?.map { fyleAndStatus: FyleAndStatus? ->
+                fyleAndStatus?.let {
+                    Attachment(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus)
+                }
+            }
         }
     private val draftMessageFylesEditMode = MediatorLiveData<List<FyleAndStatus>?>()
     private val draftMessage: LiveData<Message> = discussionIdLiveData.switchMap { discussionId: Long? ->
@@ -121,13 +132,6 @@ class ComposeMessageViewModel(
         )
     }
 
-    fun setRecording(recording: Boolean) {
-        recordingLiveData.postValue(recording)
-    }
-
-    fun getRecordingLiveData(): LiveData<Boolean> {
-        return recordingLiveData
-    }
 
     fun setNewMessageText(newMessageText: CharSequence) {
         rawNewMessageText = newMessageText
@@ -138,6 +142,10 @@ class ComposeMessageViewModel(
 
     fun getDraftMessageFyles(): LiveData<List<FyleAndStatus>?> {
         return draftMessageFylesEditMode
+    }
+
+    fun getDraftVoiceRecording(): LiveData<Attachment?> {
+        return draftVoiceRecording
     }
 
     fun getDraftMessage(): LiveData<Message?> {

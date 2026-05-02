@@ -100,8 +100,8 @@ import io.olvid.messenger.onboarding.flow.screens.transfer.targetShowSas
 import io.olvid.messenger.onboarding.flow.screens.welcomeScreen
 import io.olvid.messenger.services.MDMConfigurationSingleton
 import io.olvid.messenger.settings.SettingsActivity
-import io.olvid.messenger.settings.checkIfAvailable
-import io.olvid.messenger.settings.loadCredentials
+import io.olvid.messenger.settings.backupV2.checkIfAvailable
+import io.olvid.messenger.settings.backupV2.loadCredentials
 import kotlinx.coroutines.runBlocking
 import java.util.UUID
 import java.util.concurrent.Executor

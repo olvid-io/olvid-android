@@ -27,7 +27,7 @@ import androidx.preference.Preference.SummaryProvider
 import androidx.preference.PreferenceFragmentCompat
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.NoClickSwitchPreference
-import io.olvid.messenger.fragments.dialog.LockScreenPINVerificationDialogFragment
+import io.olvid.messenger.lock_screen.LockScreenPINVerificationDialogFragment
 import io.olvid.messenger.settings.SettingsActivity.Companion.useApplicationLockScreen
 
 class WebClientPreferenceFragment : PreferenceFragmentCompat() {

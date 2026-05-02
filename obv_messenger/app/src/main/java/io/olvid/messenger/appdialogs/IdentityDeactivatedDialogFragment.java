@@ -99,7 +99,7 @@ public class IdentityDeactivatedDialogFragment extends DialogFragment implements
 
     public void setDeviceList(ObvDeviceList deviceList) {
         this.deviceList = deviceList;
-        if (deviceList != null && (deviceList.deviceUidsAndServerInfo == null || deviceList.deviceUidsAndServerInfo.size() == 0)) {
+        if (deviceList != null && (deviceList.deviceUidsAndServerInfo == null || deviceList.deviceUidsAndServerInfo.isEmpty())) {
             // no active device --> simple message
             dialogConfiguration = DialogConfiguration.NO_DEVICE;
         } else if (deviceList != null) {
@@ -141,7 +141,7 @@ public class IdentityDeactivatedDialogFragment extends DialogFragment implements
         Window window = dialog.getWindow();
         if (window != null) {
             window.requestFeature(Window.FEATURE_NO_TITLE);
-            if (SettingsActivity.preventScreenCapture()) {
+            if (SettingsActivity.preventScreenCapture(getActivity())) {
                 window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
             }
         }
@@ -431,7 +431,7 @@ public class IdentityDeactivatedDialogFragment extends DialogFragment implements
         }
     }
 
-    interface DeviceClickedListener {
+    public interface DeviceClickedListener {
         void onClick(DeviceViewHolder deviceViewHolder);
     }
 }

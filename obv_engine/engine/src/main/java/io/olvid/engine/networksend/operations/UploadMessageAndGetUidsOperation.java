@@ -107,7 +107,7 @@ public class UploadMessageAndGetUidsOperation extends Operation {
                 // we need to block sending message for any inactive ownedIdentity, but, if the ownedIdentity was deleted, we should send the message
                 // this is required for the OwnedIdentityDeletion protocol, to inform your contacts
                 boolean sendMessage = sendManagerSession.identityDelegate.isActiveOwnedIdentity(sendManagerSession.session, ownedIdentity)
-                        || !sendManagerSession.identityDelegate.isOwnedIdentity(sendManagerSession.session, ownedIdentity);
+                        || !sendManagerSession.identityDelegate.isOwnedIdentity(sendManagerSession.session, ownedIdentity, true);
                 byte returnStatus = serverMethod.execute(sendMessage);
 
                 sendManagerSession.session.startTransaction();

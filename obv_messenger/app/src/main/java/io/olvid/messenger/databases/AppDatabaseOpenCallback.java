@@ -226,7 +226,7 @@ public class AppDatabaseOpenCallback implements Runnable {
             Logger.w("Error refreshing Fyle statuses.");
         }
 
-        // Resend reactions and poll votes to group2members who deserve it
+        // Resend reactions and poll votes to group2 members who deserve it
         for (Group2Member group2Member : db.group2MemberDao().getAllWithPendingCreationTimestamp()) {
             new ResendReactionsAndPollVotesForGroupV2MemberTask(group2Member).run();
         }
@@ -889,7 +889,7 @@ public class AppDatabaseOpenCallback implements Runnable {
 
             ContactCacheSingleton.INSTANCE.reloadCachedDisplayNamesAndHues();
 
-            // save the last synchronisation completion time
+            // save the last synchronization completion time
             AppSingleton.saveLastEngineSynchronisationTime(System.currentTimeMillis());
         } catch (Exception e) {
             Logger.x(e);

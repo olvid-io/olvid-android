@@ -126,3 +126,17 @@
 
 # Jsoup optional dependency on re2j
 -dontwarn com.google.re2j.**
+
+
+#------------------------------------------------------------------------------
+# WebRTC
+#------------------------------------------------------------------------------
+
+# Keep the entire jni_zero library structure
+-keep class org.jni_zero.** { *; }
+-keep class org.webrtc.** { *; }
+
+# Prevent renaming of classes that have native methods
+-keepnames class * {
+    native <methods>;
+}

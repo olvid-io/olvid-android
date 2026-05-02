@@ -20,7 +20,7 @@
 package io.olvid.messenger.main
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.colorResource
@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.string
 import io.olvid.messenger.designsystem.components.DotAnimation
@@ -53,7 +52,5 @@ fun EstablishingChannel() {
 @Preview
 @Composable
 private fun EstablishingChannelPreview() {
-    AppCompatTheme {
-        EstablishingChannel()
-    }
+    EstablishingChannel()
 }

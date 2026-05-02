@@ -40,6 +40,7 @@ import kotlin.concurrent.timer
 
 class TransferNotificationService : Service() {
     lateinit var timer: Timer
+    var transferStarted = false
     var notificationBuilder: NotificationCompat.Builder? = null
 
     override fun onCreate() {
@@ -49,7 +50,10 @@ class TransferNotificationService : Service() {
             period = 500,
             initialDelay = 500,
         ) {
-            updateNotification()
+            // only update the notification if the transfer actually started or if no transfer is in progress (to delete the notification in this case)
+            if (transferStarted || TransferService.transferInProgress.value == null) {
+                updateNotification()
+            }
         }
     }
 
@@ -60,10 +64,83 @@ class TransferNotificationService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         when(intent?.action) {
-            ACTION_START -> showNotification()
-            ACTION_ABORT -> TransferService.abortOngoingTransfer()
+            ACTION_INCOMING -> {
+                intent.getStringExtra(EXTRA_TRANSFER_ID)?.let { transferId ->
+                    showIncomingNotification(
+                        transferId,
+                        (TransferService.getTransferProgress(transferId)?.third?.value as? TransferProgress.DestinationWaitingForConfirmation)?.sourceDeviceName
+                    )
+                }
+            }
+            ACTION_START -> {
+                transferStarted = true
+                showNotification()
+            }
+            ACTION_ABORT -> {
+                intent.getStringExtra(EXTRA_TRANSFER_ID)?.let { transferId ->
+                    TransferService.abortOngoingTransfer(transferId)
+                }
+            }
         }
         return START_NOT_STICKY
+    }
+
+    private fun showIncomingNotification(transferId: String, otherDeviceName: String?) {
+        val notification = NotificationCompat.Builder(
+            this,
+            AndroidNotificationManager.TRANSFER_SERVICE_NOTIFICATION_CHANNEL_ID
+        ).apply {
+            val fullScreenPendingIntent = PendingIntent.getActivity(
+                this@TransferNotificationService,
+                0,
+                Intent(
+                    this@TransferNotificationService,
+                    WebrtcIncomingTransferActivity::class.java
+                ).apply {
+                    putExtra(HistoryTransferActivity.TRANSFER_ID_INTENT_EXTRA, transferId)
+                },
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val abortPendingIntent = PendingIntent.getService(
+                this@TransferNotificationService,
+                0,
+                Intent(
+                    this@TransferNotificationService,
+                    TransferNotificationService::class.java
+                ).apply {
+                    putExtra(EXTRA_TRANSFER_ID, transferId)
+                    action = ACTION_ABORT
+                },
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+
+            setSmallIcon(R.drawable.ic_o)
+            setLargeIcon(
+                Icon.createWithResource(
+                    this@TransferNotificationService,
+                    R.drawable.ic_transfer
+                )
+            )
+            setOngoing(true)
+            setPriority(NotificationCompat.PRIORITY_HIGH)
+            setContentTitle(getString(R.string.history_transfer_title))
+            setContentText(getString(R.string.notification_content_wants_to_transfer_history, otherDeviceName ?: getString(R.string.label_your_other_device)))
+            setContentIntent(fullScreenPendingIntent)
+            setDeleteIntent(abortPendingIntent)
+            setFullScreenIntent(fullScreenPendingIntent, true)
+        }.build()
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(SERVICE_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            } else {
+                startForeground(SERVICE_ID, notification)
+            }
+        } catch (e: Exception) {
+            Logger.x(e)
+        }
     }
 
     private fun showNotification() {
@@ -94,7 +171,8 @@ class TransferNotificationService : Service() {
     }
 
     private fun getNotification() : Notification? {
-        val progress = TransferService.getTransferProgress()?.value ?: return null
+        val transferIdAndProgressState = TransferService.getCurrentTransferIdAndProgressState() ?: return null
+        val progress = transferIdAndProgressState.second.value
         if (notificationBuilder == null) {
             notificationBuilder = NotificationCompat.Builder(
                 this,
@@ -112,13 +190,14 @@ class TransferNotificationService : Service() {
                     this@TransferNotificationService,
                     0,
                     Intent(this@TransferNotificationService, HistoryTransferActivity::class.java).apply {
+                        putExtra(HistoryTransferActivity.TRANSFER_ID_INTENT_EXTRA, transferIdAndProgressState.first)
                         this.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     },
                     PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
                 setSmallIcon(R.drawable.ic_o)
-                setLargeIcon(Icon.createWithResource(this@TransferNotificationService, R.drawable.ic_transfer_white))
+                setLargeIcon(Icon.createWithResource(this@TransferNotificationService, R.drawable.ic_transfer))
                 setOngoing(true)
                 setSilent(true)
                 setPriority(NotificationCompat.PRIORITY_LOW)
@@ -135,6 +214,10 @@ class TransferNotificationService : Service() {
 
         return notificationBuilder?.apply {
             when (progress) {
+                is TransferProgress.DestinationWaitingForConfirmation -> {
+                    setStyle(null)
+                    setContentText(getString(R.string.history_transfer_step_awaiting_confirmation))
+                }
                 TransferProgress.ContactingOtherDevice -> {
                     setStyle(null)
                     setContentText(getString(R.string.history_transfer_step_contacting_other_device))
@@ -147,38 +230,24 @@ class TransferNotificationService : Service() {
                     setStyle(null)
                     setContentText(getString(R.string.history_transfer_step_negotiating))
                 }
-                is TransferProgress.TransferringMessages -> {
+                is TransferProgress.Transferring -> {
                     setStyle(
                         NotificationCompat.ProgressStyle()
-                            .setProgress(progress.progress)
+                            .setProgress(
+                                (if (progress.messagesTotal != 0) progress.messagesProgress*1000 / progress.messagesTotal else 1000) +
+                                        (if (progress.filesTotal != 0L) (progress.filesProgress * 1000 / progress.filesTotal).toInt() else 1000)
+                            )
                             .addProgressSegment(
-                                NotificationCompat.ProgressStyle.Segment(progress.total)
+                                NotificationCompat.ProgressStyle.Segment(2000)
                                     .setColor(ContextCompat.getColor(this@TransferNotificationService, R.color.olvid_gradient_light))
                             )
                     )
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        setContentText(getString(R.string.history_transfer_step_transferring_messages))
+                        setContentText(getString(R.string.history_transfer_step_transferring))
                     } else {
                         setSubText(getString(R.string.history_transfer_title))
                         setContentText(null)
-                        setContentTitle(getString(R.string.history_transfer_step_transferring_messages))
-                    }
-                }
-                is TransferProgress.TransferringFiles ->  {
-                    setStyle(
-                        NotificationCompat.ProgressStyle()
-                            .setProgress(((progress.progress * 1000) / progress.total).toInt())
-                            .addProgressSegment(
-                                NotificationCompat.ProgressStyle.Segment(1000)
-                                    .setColor(ContextCompat.getColor(this@TransferNotificationService, R.color.olvid_gradient_light))
-                            )
-                    )
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        setContentText(getString(R.string.history_transfer_step_transferring_files))
-                    } else {
-                        setSubText(getString(R.string.history_transfer_title))
-                        setContentText(null)
-                        setContentTitle(getString(R.string.history_transfer_step_transferring_files))
+                        setContentTitle(getString(R.string.history_transfer_step_transferring))
                     }
                 }
                 TransferProgress.Finished -> {
@@ -203,8 +272,12 @@ class TransferNotificationService : Service() {
     }
 
     companion object {
+        const val ACTION_INCOMING = "incoming"
         const val ACTION_START = "start"
         const val ACTION_ABORT = "abort"
+
+        const val EXTRA_TRANSFER_ID = "transfer_id"
+
         const val SERVICE_ID = 9002
     }
 }

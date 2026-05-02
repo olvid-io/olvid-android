@@ -28,27 +28,26 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Consumer;
 import androidx.core.util.Pair;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.MutableLiveData;
 
-import org.maplibre.geojson.MultiPolygon;
-import org.maplibre.geojson.Point;
-import org.maplibre.android.plugins.annotation.Symbol;
-import org.maplibre.android.plugins.annotation.SymbolManager;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.camera.CameraUpdate;
@@ -56,12 +55,14 @@ import org.maplibre.android.camera.CameraUpdateFactory;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.geometry.LatLngBounds;
 import org.maplibre.android.location.LocationComponentActivationOptions;
-import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.MapLibreMapOptions;
+import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.OnMapReadyCallback;
 import org.maplibre.android.maps.Style;
 import org.maplibre.android.maps.SupportMapFragment;
+import org.maplibre.android.plugins.annotation.Symbol;
+import org.maplibre.android.plugins.annotation.SymbolManager;
 import org.maplibre.android.plugins.annotation.SymbolOptions;
 import org.maplibre.android.style.layers.FillLayer;
 import org.maplibre.android.style.layers.Layer;
@@ -69,7 +70,10 @@ import org.maplibre.android.style.layers.LineLayer;
 import org.maplibre.android.style.layers.PropertyValue;
 import org.maplibre.android.style.sources.GeoJsonSource;
 import org.maplibre.android.style.sources.Source;
+import org.maplibre.geojson.MultiPolygon;
+import org.maplibre.geojson.Point;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -80,21 +84,23 @@ import java.util.Objects;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.types.JsonOsmStyle;
+import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.LocationShareQuality;
+import io.olvid.messenger.customClasses.NoExceptionConnectionBuilder;
 import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class MapViewMapLibreFragment extends MapViewAbstractFragment implements OnMapReadyCallback {
 
-    private static final String FALLBACK_OSM_STYLE_URL = "https://map.olvid.io/styles/osm.json";
     public static final String OSM_STYLE_LANGUAGE_PLACEHOLDER = "[LANG]";
     private static final double DEFAULT_ZOOM = 17;
     private static final int TRANSITION_DURATION_MS = 500;
 
     @Nullable private Runnable onMapReadyCallback = null;
     @Nullable private Runnable redrawMarkersCallback = null;
+    @Nullable private Consumer<String> failedStyleUrlCallback = null;
     @Nullable private Consumer<Boolean> layersButtonVisibilitySetter = null;
     private FragmentActivity activity;
 
@@ -109,21 +115,20 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     // current camera center live data (set to null if camera is moving)
     private final MutableLiveData<LatLngWrapper> currentCameraCenterLiveData = new MutableLiveData<>();
 
-    // determine if we need to use fallback style or not (when using localized styles)
-    private boolean triedStyleFallbackUrl = false;
     private boolean firstStyleLoaded = false;
 
-    // store previously centered marker to unset Zindex
+    // store previously centered marker to unset Z-index
     private Symbol currentlyCenteredSymbol = null;
 
     @NonNull
     private Map<String, JsonOsmStyle> osmServerStyles = Collections.emptyMap();
     private String currentStyleId = null;
 
+    private int topPaddingPx = 0;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         // get current activity
         this.activity = requireActivity();
 
@@ -151,36 +156,175 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         return rootView;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, windowInsets) -> {
+            topPaddingPx = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
+            repositionCompass();
+
+            return windowInsets;
+        });
+    }
 
     private void loadStyleUrls() {
         if (SettingsActivity.getLocationIntegration() == SettingsActivity.LocationIntegrationEnum.OSM) {
             List<JsonOsmStyle> osmStyles = AppSingleton.getEngine().getOsmStyles(AppSingleton.getBytesCurrentIdentity());
             if (osmStyles == null || osmStyles.isEmpty()) {
-                loadFallbackStyleUrl();
+                if (failedStyleUrlCallback != null) {
+                    failedStyleUrlCallback.accept("");
+                }
             } else {
                 currentStyleId = SettingsActivity.getLocationLastOsmStyleId();
-                osmServerStyles = new LinkedHashMap<>();
-                for (JsonOsmStyle osmStyle : osmStyles) {
-                    if (osmStyle.id != null && osmStyle.url != null && osmStyle.name != null) {
-                        osmServerStyles.put(osmStyle.id, osmStyle);
-                    }
-                }
+                osmServerStyles = stylesMapFromStylesList(osmStyles);
             }
         } else if (SettingsActivity.getLocationIntegration() == SettingsActivity.LocationIntegrationEnum.CUSTOM_OSM) {
-            currentStyleId = "custom";
-            osmServerStyles = Collections.singletonMap("custom", new JsonOsmStyle("custom", SettingsActivity.getLocationCustomOsmServerUrl()));
+            String cachedStyles = SettingsActivity.getLocationCustomOsmServerUrlMultiStyleCache();
+            if (cachedStyles == null) {
+                // the style was never fetched --> fetch it and don't set any currentStyleId for now
+                currentStyleId = null;
+                osmServerStyles = Collections.emptyMap();
+
+                refreshCustomUrlCache(true);
+            } else if (cachedStyles.isEmpty()) {
+                // the style was already cached and is a single style url --> we still do a refresh in case a parsing failed once
+                currentStyleId = "custom";
+                osmServerStyles = Collections.singletonMap("custom", new JsonOsmStyle("custom", SettingsActivity.getLocationCustomOsmServerUrl()));
+
+                refreshCustomUrlCache(false);
+            } else {
+                try {
+                    List<JsonOsmStyle> osmStyles = AppSingleton.getJsonObjectMapper().readValue(cachedStyles, new TypeReference<>() {});
+                    if (osmStyles.isEmpty()) {
+                        if (failedStyleUrlCallback != null) {
+                            String url = SettingsActivity.getLocationCustomOsmServerUrl();
+                            failedStyleUrlCallback.accept(url == null ? "" : url);
+                        }
+                    } else {
+                        currentStyleId = SettingsActivity.getLocationLastOsmStyleId();
+                        osmServerStyles = stylesMapFromStylesList(osmStyles);
+                    }
+                } catch (Exception e) {
+                    Logger.x(e);
+                    if (failedStyleUrlCallback != null) {
+                        String url = SettingsActivity.getLocationCustomOsmServerUrl();
+                        failedStyleUrlCallback.accept(url == null ? "" : url);
+                    }
+                }
+
+                // refresh the cache, in case available styles have changed
+                refreshCustomUrlCache(false);
+            }
         } else {
-            loadFallbackStyleUrl();
+            if (failedStyleUrlCallback != null) {
+                failedStyleUrlCallback.accept("");
+            }
+        }
+
+        if (layersButtonVisibilitySetter != null) {
+            layersButtonVisibilitySetter.accept(osmServerStyles.size() > 1);
         }
     }
 
-    private void loadFallbackStyleUrl() {
-        triedStyleFallbackUrl = true;
-        currentStyleId = "fallback";
-        osmServerStyles = Collections.singletonMap("fallback", new JsonOsmStyle("fallback", FALLBACK_OSM_STYLE_URL));
+    private void refreshCustomUrlCache(boolean noStyleLoadedYet) {
+        App.runThread(() -> {
+            String url = SettingsActivity.getLocationCustomOsmServerUrl();
+            if (url != null) {
+                Logger.d("Fetching custom OSM style JSON at: " + url);
+                NoExceptionConnectionBuilder.DownloadResult result = NoExceptionConnectionBuilder.Companion.downloadContent(Uri.parse(url), 1_000_000L);
+                if (result instanceof NoExceptionConnectionBuilder.DownloadResult.Success success) {
+                    try {
+                        List<JsonOsmStyle> osmStyles = null;
+                        try {
+                            osmStyles = AppSingleton.getJsonObjectMapper().readValue(success.getOutput(), new TypeReference<>() {
+                            });
+                        } catch (Exception ignored) {
+                        }
+
+                        // get the current cache
+                        String previousCache = SettingsActivity.getLocationCustomOsmServerUrlMultiStyleCache();
+                        if (osmStyles == null || osmStyles.isEmpty()) {
+                            Logger.d(" --> this is a single style URL");
+
+                            // cache an empty string, meaning this is a plain JSON style file
+                            SettingsActivity.setLocationCustomOsmServerUrlMultiStyleCache("");
+
+                            // reload the style if no style was loaded yet, or if we previously loaded this url as multi-style
+                            if (noStyleLoadedYet || (previousCache != null && !previousCache.isEmpty())) {
+                                currentStyleId = "custom";
+                                osmServerStyles = Collections.singletonMap("custom", new JsonOsmStyle("custom", url));
+                                new Handler(Looper.getMainLooper()).post(this::clearMarkersAndReloadStyle);
+                            }
+                        } else {
+                            Logger.d(" --> this is a mutli-style URL");
+
+                            String newCache = new String(success.getOutput(), StandardCharsets.UTF_8);
+                            if (noStyleLoadedYet || !Objects.equals(previousCache, newCache)) {
+                                Logger.d(" --> OSM styles changed, updating cache");
+
+                                // save the new value
+                                SettingsActivity.setLocationCustomOsmServerUrlMultiStyleCache(newCache);
+
+                                // the cache changed, or we haven't loaded a style yet (which probably means the cache has changed too!)
+                                Map<String, JsonOsmStyle> newOsmServerStyles = stylesMapFromStylesList(osmStyles);
+
+                                // now, determine if we need to reload the current style.
+                                // A reload is not needed if the currentStyleId still exists in the new map and points to the same url
+                                boolean styleReloadNeeded = noStyleLoadedYet || currentStyleId == null;
+
+                                // also check if the url changed and reload if this is the case
+                                if (!styleReloadNeeded) {
+                                    JsonOsmStyle previousStyle = osmServerStyles.get(currentStyleId);
+                                    JsonOsmStyle newStyle = newOsmServerStyles.get(currentStyleId);
+                                    if (previousStyle == null || newStyle == null || !Objects.equals(previousStyle.url, newStyle.url)) {
+                                        styleReloadNeeded = true;
+                                    }
+                                }
+                                // update the style map in any case
+                                osmServerStyles = newOsmServerStyles;
+
+                                if (styleReloadNeeded) {
+                                    new Handler(Looper.getMainLooper()).post(this::clearMarkersAndReloadStyle);
+                                }
+                            }
+                        }
+
+                        if (layersButtonVisibilitySetter != null) {
+                            layersButtonVisibilitySetter.accept(osmServerStyles.size() > 1);
+                        }
+                        return;
+                    } catch (Exception e) {
+                        Logger.x(e);
+                    }
+                }
+                // if we reach this point, the download failed
+                if (failedStyleUrlCallback != null) {
+                    failedStyleUrlCallback.accept(url);
+                }
+            } else {
+                // if we reach this point, the url is null
+                if (failedStyleUrlCallback != null) {
+                    failedStyleUrlCallback.accept("");
+                }
+            }
+        });
     }
 
-    @NonNull
+    private Map<String, JsonOsmStyle> stylesMapFromStylesList(List<JsonOsmStyle> osmStyles) {
+        Map<String, JsonOsmStyle> stylesMap = new LinkedHashMap<>();
+        for (JsonOsmStyle osmStyle : osmStyles) {
+            if (osmStyle.name == null) {
+                osmStyle.name = Collections.emptyMap();
+            }
+            if (osmStyle.id != null && osmStyle.url != null) {
+                stylesMap.put(osmStyle.id, osmStyle);
+            }
+        }
+        return stylesMap;
+    }
+
+    @Nullable
     private String getStyleUrl() {
         if (currentStyleId != null) {
             JsonOsmStyle osmStyle = osmServerStyles.get(currentStyleId);
@@ -188,11 +332,13 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
                 return replaceLanguageInStyleUrl(osmStyle);
             }
         }
+        // if no currentStyleId is set, or if the style is not found, load the first one in the map
         for (Map.Entry<String, JsonOsmStyle> osmStyleEntry : osmServerStyles.entrySet()) {
             currentStyleId = osmStyleEntry.getKey();
             return replaceLanguageInStyleUrl(osmStyleEntry.getValue());
         }
-        return "";
+        // if the map is empty, return null
+        return null;
     }
 
     @NonNull
@@ -212,16 +358,26 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         if (mapView instanceof MapView) {
             // if style loading fail
             ((MapView) mapView).addOnDidFailLoadingMapListener((errorMessage) -> {
-                Logger.w("OSM style not found, trying fallback style");
-                if (!triedStyleFallbackUrl) {
-                    triedStyleFallbackUrl = true;
-                    mapLibreMap.setStyle(new Style.Builder().fromUri(FALLBACK_OSM_STYLE_URL), this::onStyleLoaded);
+                Logger.w("OSM style not found");
+                if (failedStyleUrlCallback != null) {
+                    String url = getStyleUrl();
+                    failedStyleUrlCallback.accept(url == null ? "" : url);
                 }
             });
         }
 
         // set style, with a callback for the loading of the first style
-        mapLibreMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
+        String styleUri = getStyleUrl();
+        if (styleUri != null) {
+            mapLibreMap.setStyle(new Style.Builder().fromUri(styleUri), this::onStyleLoaded);
+        }
+    }
+
+    private void repositionCompass() {
+        if (mapLibreMap != null) {
+            int eightDp = (int) (8 * activity.getResources().getDisplayMetrics().density);
+            mapLibreMap.getUiSettings().setCompassMargins(0, topPaddingPx + ((osmServerStyles.size() > 1) ? eightDp * 7 : eightDp), eightDp, 0);
+        }
     }
 
     public void onStyleLoaded(Style style) {
@@ -230,8 +386,9 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             return;
         }
 
-        // reset this to allow reloading it when the user selects another not found style
-        triedStyleFallbackUrl = false;
+        if (failedStyleUrlCallback != null) {
+            failedStyleUrlCallback.accept(null);
+        }
 
         // setup ui
         mapLibreMap.getUiSettings().setCompassEnabled(true);
@@ -239,16 +396,12 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         if (compass != null) {
             mapLibreMap.getUiSettings().setCompassImage(compass);
         }
-        int sixteenDp = (int) (16 * activity.getResources().getDisplayMetrics().density);
-        mapLibreMap.getUiSettings().setCompassMargins(0, (osmServerStyles.size() > 1) ? sixteenDp * 4 : sixteenDp, sixteenDp, 0);
+        repositionCompass();
         mapLibreMap.getUiSettings().setCompassGravity(Gravity.TOP | Gravity.END);
         mapLibreMap.getUiSettings().setLogoEnabled(false);
 
-        if (layersButtonVisibilitySetter != null) {
-            layersButtonVisibilitySetter.accept(osmServerStyles.size() > 1);
-        }
-
         // show and change attributions
+        int sixteenDp = (int) (16 * activity.getResources().getDisplayMetrics().density);
         mapLibreMap.getUiSettings().setAttributionEnabled(true);
         mapLibreMap.getUiSettings().setAttributionGravity(Gravity.BOTTOM | Gravity.START);
         mapLibreMap.getUiSettings().setAttributionMargins(sixteenDp, sixteenDp, sixteenDp, sixteenDp);
@@ -305,11 +458,11 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         }
     }
 
-    // Enable location tracking if possible, it check:
-    // mapbox is ready (and style too)
-    // location permission and enabled (show pop up if not)
-    // location component activated and enabled (activate and enable if not)
-    // enable tracking
+    // Enable location tracking if possible, it checks:
+    // - maplibre is ready (and style too)
+    // - location permission and enabled (show pop up if not)
+    // - location component activated and enabled (activate and enable if not)
+    // - enable tracking
     @SuppressLint("MissingPermission")
     @Override
     public boolean setEnableCurrentLocation(boolean enabled) {
@@ -320,10 +473,10 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
         }
 
         // check permission and location is enabled (do not ask, father is supposed to do)
-        if (!AbstractLocationDialogFragment.isLocationPermissionGranted(activity)) {
+        if (!LocationUtils.isLocationPermissionGranted(activity)) {
             return false;
         }
-        if (!AbstractLocationDialogFragment.isLocationEnabled()) {
+        if (!LocationUtils.isLocationEnabled()) {
             return false;
         }
 
@@ -479,76 +632,50 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     }
 
     @Override
-    void onLayersButtonClicked(View view) {
+    java.util.Map<String, String> getMapLayers() {
         if (osmServerStyles.size() <= 1) {
-            return;
+            return Collections.emptyMap();
         }
-        ArrayList<String> menuStyleIds = new ArrayList<>(osmServerStyles.size());
-        PopupMenu popup = new PopupMenu(activity, view, Gravity.TOP | Gravity.END);
-        Menu menu = popup.getMenu();
-        int index = 0;
         String lang = getString(R.string.language_short_string);
+        Map<String, String> layers = new LinkedHashMap<>();
         for (JsonOsmStyle osmStyle : osmServerStyles.values()) {
-            menuStyleIds.add(osmStyle.id);
-            CharSequence text;
+            String text;
             if (osmStyle.name.containsKey(lang)) {
                 text = osmStyle.name.get(lang);
             } else {
                 text = osmStyle.name.get("en");
             }
-            MenuItem menuItem = menu.add(0, index, index, text);
-            if (Objects.equals(currentStyleId, osmStyle.id)) {
-                menuItem.setChecked(true);
+            if (text == null) {
+                text = osmStyle.id;
             }
-            index++;
+            layers.put(osmStyle.id, text);
         }
-        menu.setGroupCheckable(0, true, true);
-        popup.setOnMenuItemClickListener(item -> {
-            if (!Objects.equals(currentStyleId, menuStyleIds.get(item.getItemId()))) {
-                currentStyleId = menuStyleIds.get(item.getItemId());
-                SettingsActivity.setLocationLastOsmStyleId(currentStyleId);
-                if (mapLibreMap != null) {
-                    removeAllMarkers();
-                    mapLibreMap.setStyle(new Style.Builder().fromUri(getStyleUrl()), this::onStyleLoaded);
-                }
-            }
-            return true;
-        });
-        popup.show();
+        return layers;
     }
 
-    //    @Override
-//    public void setGestureEnabled(boolean enabled) {
-//        if (mapboxMap == null || MapLibreMap.getStyle() == null) {
-//            Logger.i("MapLibreMapView: setGestureEnabled: mapboxMap is not ready to use");
-//            return;
-//        }
-//        MapLibreMap.getUiSettings().setAllGesturesEnabled(enabled);
-//    }
-//
-//    @Override
-//    public void setOnMapClickListener(Runnable clickListener) {
-//        if (mapboxMap == null || MapLibreMap.getStyle() == null) {
-//            Logger.i("MapLibreMapView: setOnMapClickListener: mapboxMap is not ready to use");
-//            return;
-//        }
-//        MapLibreMap.addOnMapClickListener((latLng) -> {
-//            clickListener.run();
-//            return false;
-//        });
-//    }
-//
-//    @Override
-//    public void setOnMapLongClickListener(Runnable clickListener) {
-//        if (mapboxMap == null || MapLibreMap.getStyle() == null) {
-//            Logger.i("MapLibreMapView: setOnMapLongClickListener: mapboxMap is not ready to use");
-//            return;
-//        }
-//        MapLibreMap.addOnMapLongClickListener((latLng) -> {
-//            clickListener.run();
-//            return false;
-//        });
-//    }
+    @Override
+    String getCurrentMapLayerId() {
+        return currentStyleId;
+    }
+
+    @Override
+    void setMapLayer(String id) {
+        if (!Objects.equals(currentStyleId, id) && osmServerStyles.containsKey(id)) {
+            currentStyleId = id;
+            SettingsActivity.setLocationLastOsmStyleId(currentStyleId);
+            clearMarkersAndReloadStyle();
+        }
+    }
+
+    private void clearMarkersAndReloadStyle() {
+        if (mapLibreMap != null) {
+            String styleUri = getStyleUrl();
+            if (styleUri != null) {
+                removeAllMarkers();
+                mapLibreMap.setStyle(new Style.Builder().fromUri(styleUri), this::onStyleLoaded);
+            }
+        }
+    }
 
     @Override
     public void setOnMapReadyCallback(@Nullable Runnable onMapReadyCallback) {
@@ -561,9 +688,14 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
     }
 
     @Override
+    void setFailedStyleUrlCallback(@Nullable Consumer<String> consumer) {
+        this.failedStyleUrlCallback = consumer;
+    }
+
+    @Override
     public void addMarker(long id, Bitmap icon, @NonNull LatLngWrapper latLngWrapper, @Nullable Float precision) {
         if (mapLibreMap == null || mapLibreMap.getStyle() == null || symbolManager == null) {
-            Logger.i("MapLibreMapView: addMarker: maplibreMap is not ready to use");
+            Logger.i("MapLibreMapView: addMarker: mapLibreMap is not ready to use");
             return;
         }
 
@@ -692,6 +824,7 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
             int padding = Math.min(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels) * 2 / 7;
             if (animate) {
                 mapLibreMap.getUiSettings().setAllGesturesEnabled(false);
+                Logger.e(bounds.second.getLongitude() + " - " + bounds.first.getLongitude());
                 mapLibreMap.easeCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.from(bounds.second.getLatitude(), bounds.second.getLongitude(), bounds.first.getLatitude(), bounds.first.getLongitude()), padding), TRANSITION_DURATION_MS, cancelableCallback);
             } else {
                 mapLibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(LatLngBounds.from(bounds.second.getLatitude(), bounds.second.getLongitude(), bounds.first.getLatitude(), bounds.first.getLongitude()), padding));
@@ -828,12 +961,12 @@ public class MapViewMapLibreFragment extends MapViewAbstractFragment implements 
                 }
                 circlesSource = new GeoJsonSource("precision-circles", MultiPolygon.fromLngLats(circles));
                 circlesLayer = new FillLayer("circles-layer", "precision-circles").withProperties(
-                        new PropertyValue<String>("fill-color", "#0099ff"),
-                        new PropertyValue<Float>("fill-opacity", 0.094f)
+                        new PropertyValue<>("fill-color", "#0099ff"),
+                        new PropertyValue<>("fill-opacity", 0.094f)
                 );
                 circleOutlinesLayer = new LineLayer("circle-outlines-layer", "precision-circles").withProperties(
-                        new PropertyValue<String>("line-color", "#0099ff"),
-                        new PropertyValue<Float>("line-opacity", 0.266f)
+                        new PropertyValue<>("line-color", "#0099ff"),
+                        new PropertyValue<>("line-opacity", 0.266f)
                 );
                 style.addSource(circlesSource);
                 style.addLayerBelow(circlesLayer, symbolManager.getLayerId());

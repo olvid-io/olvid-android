@@ -34,6 +34,8 @@ import androidx.room.Query;
 import androidx.room.Update;
 import androidx.room.Upsert;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -103,7 +105,6 @@ public interface MessageDao {
             " AND m." + Message.DISCUSSION_ID + " = :discussionId" +
             " AND " + Message.FTS_TABLE_NAME + " MATCH :query ORDER BY m." + Message.TIMESTAMP + " DESC")
     List<Long> discussionSearch(long discussionId, @NonNull String query);
-
 
     class DiscussionAndMessage {
         @Embedded(prefix = "disc_")
@@ -497,10 +498,21 @@ public interface MessageDao {
             " WHERE " + Message.MESSAGE_TYPE + " IN (" + Message.TYPE_OUTBOUND_MESSAGE + "," + Message.TYPE_INBOUND_MESSAGE + " ) " +
             " AND " + Message.DISCUSSION_ID + " = :discussionId " +
             " AND " + Message.WIPE_STATUS + " = " + Message.WIPE_STATUS_NONE +
+            " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
             " AND " + Message.LIMITED_VISIBILITY + " = 0 " +
             " ORDER BY " + Message.SENDER_IDENTIFIER + ", " + Message.SENDER_THREAD_IDENTIFIER + ", " + Message.SENDER_SEQUENCE_NUMBER + " ASC "
     )
     @NonNull List<Message> getAllTransferableForDiscussion(long discussionId);
+
+
+    @Query("SELECT COUNT(*) FROM " + Message.TABLE_NAME + " AS mess " +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON mess." + Message.DISCUSSION_ID + " = disc.id " +
+            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND mess." + Message.MESSAGE_TYPE + " IN (" + Message.TYPE_OUTBOUND_MESSAGE + "," + Message.TYPE_INBOUND_MESSAGE + " ) " +
+            " AND mess." + Message.WIPE_STATUS + " = " + Message.WIPE_STATUS_NONE +
+            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " AND mess." + Message.LIMITED_VISIBILITY + " = 0 ")
+    LiveData<Integer> countAllTransferableForOwnedIdentity(byte @NotNull [] bytesOwnedIdentity);
 
     @Query("SELECT id FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +

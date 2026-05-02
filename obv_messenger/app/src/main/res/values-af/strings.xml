@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Kontakbesonderhede</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Gebruikerbesonderhede</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Groepbesonderhede</string>
@@ -258,7 +258,6 @@
 	<string name="text_you" state="needs_review" hash="672009142">Jy</string>
 	<string name="title_invite_chooser" state="needs_review" hash="1726572772">Kies hoe om jou uitnodiging te stuur</string>
 	<string name="title_sharing_chooser" state="needs_review" hash="291715689">Kies \'n deelmetode</string>
-	<string name="toast_message_android_bug_attach_duplicate_uri" state="needs_review" hash="-776215584">Sommige lêers kon nie aan die boodskap gekoppel word weens \'n fout in jou Android-weergawe (meerdere lêers het dieselfde URI teruggegee). Probeer asseblief weer om die ontbrekende lêers te koppel.</string>
 	<string name="toast_message_attachment_being_copied" state="needs_review" hash="-978855599">\'n Aanhangsel word nog verwerk. Jou boodskap sal gestuur word wanneer die verwerking voltooi is.</string>
 	<string name="toast_message_attachment_saved" state="needs_review" hash="-2073631581">Aanhangsel is gestoor</string>
 	<string name="toast_message_camera_permission_denied" state="needs_review" hash="1896719877">Toestemming om die kamera te gebruik is geweier</string>
@@ -344,6 +343,9 @@
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">Sodra dit geaktiveer is, sal Olvid \'n voorskou van die skakels wat jy stuur aflaai en dit aan die boodskap heg.</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">Voorskoue van ontvangde skakels laai</string>
 	<string name="pref_link_preview_summary_inbound" state="needs_review" hash="-320325429">Sodra dit geaktiveer is, sal Olvid outomaties voorlopige beelde van skakels wat jy ontvang aflaai (indien geen voorlopige beeld aan die boodskap geheg is nie).</string>
+	<string name="link_preview_menu_copy_link" state="needs_review" hash="1269903076">Kopie skakel</string>
+	<string name="link_preview_menu_open_in_browser" state="needs_review" hash="-1711141559">Open in blaaier</string>
+	<string name="link_preview_menu_open_image" state="needs_review" hash="-2013483894">Beskou beelds</string>
 	<string name="pref_discussion_read_receipt_title" state="needs_review" hash="-652307837">Leesbevestigings stuur</string>
 	<string name="pref_text_app_default" state="needs_review" hash="1920567018">Gebruik jou verstekinstelling</string>
 	<string name="pref_text_app_default_true" state="needs_review" hash="-948780646">Gebruik jou verstekinstelling (aangeskakel)</string>
@@ -352,6 +354,10 @@
 	<string name="pref_text_discussion_read_receipt_on" state="needs_review" hash="983295321">Aangeskakel, jou kontakte is ingelig</string>
 	<string name="pref_use_lock_screen_title" state="needs_review" hash="540058239">Gebruik die programsluitskerm</string>
 	<string name="pref_use_lock_screen_summary" state="needs_review" hash="-399095273">Skakel dit aan om Olvid te beskerm met \'n sluitskerm wanneer dit begin.</string>
+	<string name="pref_lock_screen_required_by_mdm" state="needs_review" hash="-500219406">Vereis deur jou organisasie</string>
+	<string name="lock_screen_setup_title" state="needs_review" hash="932203184">Skermsluiting vereis</string>
+	<string name="lock_screen_setup_explanation" state="needs_review" hash="169071212">Jou organisasie vereis dat jy hierdie toepassing met ’n PIN-kode of wagwoord op die sluitskerm beskerm.</string>
+	<string name="lock_screen_setup_button" state="needs_review" hash="672169315">Stel PIN in</string>
 	<string name="pref_category_notifications_title" state="needs_review" hash="1237583104">Kennisgewings</string>
 	<string name="pref_category_privacy_title" state="needs_review" hash="-1750659871">Privaatheid</string>
 	<string name="pref_category_other_title" state="needs_review" hash="-1683901612">Ander instellings</string>
@@ -370,7 +376,7 @@
 	<string name="button_label_use_pin" state="needs_review" hash="918492771">Gebruik \'n PIN in plaas van \'n wagwoord</string>
 	<string name="hint_enter_pin" state="needs_review" hash="999437557">Voer PIN in</string>
 	<string name="hint_confirm_pin" state="needs_review" hash="1780268503">Bevestig PIN</string>
-	<string name="text_pin_creation_explanation" state="needs_review" hash="-1935715126">Jy sal hierdie PIN moet invoer om Olvid te ontsluit.\nDit kan nie herstel word nie en jy kan toegang tot jou Olvid-data verloor as jy dit vergeet.</string>
+	<string name="text_pin_creation_explanation" state="needs_review" hash="1232246926">Jy sal hierdie PIN moet invoer om Olvid te ontsluit.\nDit kan nie herstel word nie, en **jy kan toegang tot jou Olvid-data verloor as jy dit vergeet**.</string>
 	<string name="error_text_pin_too_short" state="needs_review" hash="-1085309478">PIN is te kort (minimaal 4 syfers)</string>
 	<string name="error_text_pin_mismatch" state="needs_review" hash="-4525766">PIN stem nie ooreen nie</string>
 	<string name="hint_enter_password" state="needs_review" hash="478503341">Voer wagwoord in</string>
@@ -394,6 +400,7 @@
 	<string name="pref_text_lock_grace_time_infinity" state="needs_review" hash="146086108">Sluit Olvid handmatig</string>
 	<string name="pref_unlock_biometry_summary_none_enrolled" state="needs_review" hash="-118589413">Biometriese verifikasie is nog nie op jou toestel opgestel nie.</string>
 	<string name="dialog_title_unlock_olvid" state="needs_review" hash="-2054572246">Ontsluit Olvid met biometrie</string>
+	<string name="dialog_title_unlock_neutral" state="needs_review" hash="761644522">Ontsluit met biometrie</string>
 	<string name="notification_channel_unified_service_name" state="needs_review" hash="1404446256">Voorgronddiens</string>
 	<string name="notification_channel_unified_service_description" state="needs_review" hash="-1204081836">Vasvertoning wat Olvid se status wys</string>
 	<string name="notification_title_olvid_is_unlocked" state="needs_review" hash="1688502744">Olvid is ontsluit</string>
@@ -437,6 +444,7 @@
 	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">Jou profiel is op hierdie toestel gedeaktiveer.\n\nDit lyk asof jy op die oomblik geen aktiewe toestel het nie, en jy kan jou profiel weer aktiveer wanneer jy wil.\n\nAs jy wil voortgaan, druk op \"aktiveer my profiel op hierdie toestel\" hieronder.\n\nDruk op \"kanselleer\" om hierdie dialoog te sluit en hierdie toestel inaktief te laat: jy sal nie boodskappe op hierdie toestel kan stuur of ontvang nie, maar jy kan steeds jou ou gesprekke besigtig.</string>
 	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">U profil is op hierdie toestel gedeaktiveer.\n\nDit lyk asof u nie \'n lisensie het om Olvid op verskeie toestelle gelyktydig te gebruik nie. Om hierdie toestel weer te aktiveer, moet u \'n ander toestel gedeaktiveer.\n\nAs u wil voortgaan, kies die toestel wat u wil gedeaktiveer uit die lys hieronder, en druk dan op \"aktiveer my profiel op hierdie toestel\".\n\nDruk op \"kanselleer\" om hierdie dialoog te sluit en hierdie toestel inaktief te laat: u sal nie boodskappe op hierdie toestel kan stuur of ontvang nie, maar u kan steeds u ou gesprekke besigtig.</string>
 	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">Jou profiel is op hierdie toestel gedeaktiveer.\n\nDit lyk asof al jou ander toestelle binnekort gedeaktiveer gaan word, so jy kan jou profiel op hierdie toestel weer aktiveer wanneer jy wil. Vir jou inligting, hieronder is die lys van jou huidige aktiewe toestelle.\n\nAs jy wil voortgaan, druk op \"aktiveer my profiel op hierdie toestel\" hieronder.\n\nDruk op \"kanselleer\" om hierdie dialoog te sluit en hierdie toestel inaktief te hou: jy sal nie boodskappe op hierdie toestel kan stuur of ontvang nie, maar jy kan steeds jou ou gesprekke besigtig.</string>
+	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">Jou profiel is op hierdie toestel gedeaktiveer.\n\nJy sal nie boodskappe hier kan stuur of ontvang nie, tensy jy dit weer aktiveer.</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">Aktiveer my profiel op hierdie toestel</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">\'n Fout het voorgekom. Probeer asseblief weer.</string>
 	<string name="dialog_title_identity_activated" state="needs_review" hash="-1465666248">Olvid ID weer geaktiveer</string>
@@ -810,10 +818,7 @@
 	<string name="toast_message_voice_message_recording_failed" state="needs_review" hash="-632817078">Kon nie stemnotisie opneem nie</string>
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Media speler</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Speel/pouse kontroles wanneer media in Olvid afgespeel word</string>
-	<string name="notification_title_now_playing" state="needs_review" hash="-1042122929">Besig om te speel…</string>
-	<string name="notification_action_pause" state="needs_review" hash="1931883968">Pouseer</string>
-	<string name="notification_action_play" state="needs_review" hash="1143766922">Speel</string>
-	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="-1049639416">Kan %1$s nie speel nie</string>
+	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Kan nie die klanklêer speel nie</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Vee uit</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Oral waar</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Kon nie oral uitvee nie. Probeer asseblief weer.</string>
@@ -843,7 +848,6 @@
 	<string name="dialog_message_unmute_notifications" state="needs_review" hash="816867976">Nuwe boodskapkennisgewings is tans gedemp.\n\nWil jy dit aanskakel?</string>
 	<string name="dialog_message_unmute_notifications_muted_until" state="needs_review" hash="-325454266">Nuwe boodskapkennisgewings is gedemp tot: %1$s.\n\nWil jy dit deaktiveer?</string>
 	<string name="notification_action_mute" state="needs_review" hash="-1553988068">Demp</string>
-	<string name="pref_scaled_turn_title" state="needs_review" hash="-1234636269">Kies watter regionale TURN-bedieners om te gebruik</string>
 	<string name="explanation_identity_creation_options" state="needs_review" hash="-795537312">Hierdie skerm laat jou toe om bykomende opsies vir die skep van jou Olvid ID te kies. Jy kan die opsies handmatig invoer of \'n konfigurasie QR-kode skandeer.</string>
 	<string name="button_label_check_options" state="needs_review" hash="-759177128">Opsies nagaan</string>
 	<string name="hint_olvid_server" state="needs_review" hash="1097391633">Olvid-bediener</string>
@@ -859,6 +863,8 @@
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Dit lyk asof jou Olvid-bediener nie veilige oproepinisiering ondersteun nie.\n\nKontak asseblief jou administrateur vir meer besonderhede.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">ID-skeppingsopsies</string>
 	<string name="text_option_server" state="needs_review" hash="-1130676431">Bediening: %1$s</string>
+	<string name="dialog_title_non_default_server" state="needs_review" hash="2119192219">Gebruik van \'n nie-standaard bediener</string>
+	<string name="dialog_message_non_default_server" state="needs_review" hash="459308900">Jy gaan \'n profiel op die volgende bediener skep:\n\n%1$s\n\nDit is nie die verstek Olvid-bediener nie. Gaan voort slegs as jy hierdie bediener vertrou.</string>
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Lisensie: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Identiteitsverskaffer</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Identiteitsverskaffer-bediener</string>
@@ -1204,8 +1210,6 @@ Kontak asseblief jou administrateur vir meer besonderhede.</string>
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Verbinding: VERBONDE</string>
 	<string name="label_ping_delay" state="needs_review" hash="25344924">Ping: %1$dms</string>
 	<string name="label_over_max_ping_delay" state="needs_review" hash="-684190262">Ping: &gt;%1$ds</string>
-	<string name="menu_action_copy_message_text" state="needs_review" hash="1799737962">kopieer boodskap teks</string>
-	<string name="menu_action_copy_text_and_attachments" state="needs_review" hash="428315032">Kopieer boodskap en aangehegte lêers</string>
 	<string name="label_message_copied_from_olvid" state="needs_review" hash="1145396410">Boodskap gekopieër vanaf Olvid</string>
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">Volledige boodskap na knipbord gekopieer</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">Vinnige toegang om \'n voorafgeskepte boodskap in een klik aan \'n kontak of groep te stuur</string>
@@ -1409,7 +1413,6 @@ Olvid sal nie toegang hê tot enige van u lêers op Google Drive nie.</string>
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Kopie van </string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Ligging gestuur</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Ligging ontvang</string>
-	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">Liggingdienste is nie beskikbaar nie</string>
 	<string name="label_send_your_location" state="needs_review" hash="618026241">Stuur jou ligging</string>
 	<string name="notification_title_sharing_location" state="needs_review" hash="-1626101904">Deel jou ligging in Olvid</string>
 	<string name="notification_action_stop_sharing" state="needs_review" hash="585626699">Deel nie meer</string>
@@ -1538,6 +1541,8 @@ Olvid sal nie toegang hê tot enige van u lêers op Google Drive nie.</string>
 	<string name="text_setting_lock_biometry" state="needs_review" hash="-1698353580">‣ Ontsluit met biometrie:</string>
 	<string name="text_setting_lock_notification" state="needs_review" hash="2022286622">‣ Permanente sluitskermkennisgewing:</string>
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">‣ Vee sensitiewe boodskappe uit na 3 verkeerde PIN-kodes: </string>
+	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">‣ Vereis skermsluiting:</string>
+	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">‣ Stel die wagwoord van die sluitskerm weer in:</string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">‣ Outomatiese aflaai van aangehegte lêers van gearchiveerde gesprekke:</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">\u2023 Herstel van argiefgesprekke by kennisgewing van \'n nuwe boodskap:</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">‣ Skakelvoorskou ontvang: </string>
@@ -1600,8 +1605,8 @@ Olvid sal nie toegang hê tot enige van u lêers op Google Drive nie.</string>
 	<string name="label_open_original_link_with_trackers" state="needs_review" hash="-1586932660">Gebruik die oorspronklike skakel wat dop-parameters bevat</string>
 	<string name="dialog_title_confirm_open_olvid_link" state="needs_review" hash="425949498">Maak hierdie skakel in Olvid oop?</string>
 	<string name="toast_message_unable_to_open_url" state="needs_review" hash="-1486954792">Kon nie URL oopmaak nie</string>
-	<string name="text_explanation_location_map_provider" state="needs_review" hash="-173394547">Om \'n kaartverskaffer te kies, kan jy presies die ligging wat jy op \'n kaart wil deel, kies. Dit kan egter jou ligging (of die ligging van jou kontakte) aan hierdie diensverskaffer bekend maak.</string>
-	<string name="text_explanation_location_map_provider_settings" state="needs_review" hash="68421420">Hierdie keuse kan in die toepassing se instellings verander word.</string>
+	<string name="dialog_title_choose_map_provider" state="needs_review" hash="1225681568">Kies \'n kaartverskaffer</string>
+	<string name="dialog_message_choose_map_provider" state="needs_review" hash="-2129640593">Kies \'n kaartverskaffer hieronder om \'n kaart te vertoon wanneer jy \'n ligging beskou of deel.\n\nOnthou dat dit moontlik jou ligging (of die ligging van jou kontakte) aan hierdie diensverskaffer kan **openbaar**.</string>
 	<string name="button_label_choose_provider" state="needs_review" hash="-797956886">Kies \'n diensverskaffer</string>
 	<string name="button_label_live_share" state="needs_review" hash="327122881">Regstroom deel</string>
 	<string name="label_fetching_address" state="needs_review" hash="-839353954">Adres word opgehaal…</string>
@@ -1810,7 +1815,9 @@ Olvid sal nie toegang hê tot enige van u lêers op Google Drive nie.</string>
 	<string name="dialog_title_custom_address_server_url" state="needs_review" hash="-2071925830">Pasgemaakte adresbediener</string>
 	<string name="hint_custom_address_server_url" state="needs_review" hash="1348105685">URL van die adresopsoekbediener</string>
 	<string name="dialog_message_custom_address_server_url" state="needs_review" hash="401731382">Olvid ondersteun slegs **Pelias**-bedieners vir adresopsoek. Voer asseblief die URL van die bediener wat jy wil gebruik hieronder in, dit moet soos *https://pelias.olvid.io* lyk, en navrae sal na die */v1/reverse* insendingpunt gestuur word.\n\nLet wel dat hierdie bediener dalk inligting oor jou posisie kan leer. Maak seker dat jy \'n **bediener gebruik wat jy vertrou**.</string>
-	<string name="toast_message_playback_speed_not_supported_on_device" state="needs_review" hash="502764942">Kon nie speelspoed verander nie</string>
+	<string name="pref_location_gps_debug_title" state="needs_review" hash="1786532100">Aktiveer die foutopsporing-kenmerke vir die deel van ligging</string>
+	<string name="pref_location_gps_always_on_title" state="needs_review" hash="1250376384">Hou die GPS altyd aan</string>
+	<string name="pref_location_export_gps_logs_title" state="needs_review" hash="-459831250">Voer GPS-aktiwiteitlogboeke uit</string>
 	<string name="text_speed_1x" state="needs_review" hash="789822816">1×</string>
 	<string name="text_speed_1_5x" state="needs_review" hash="-120181054">1,5×</string>
 	<string name="text_speed_2x" state="needs_review" hash="1171767872">2×</string>
@@ -2151,15 +2158,11 @@ Olvid sal nie toegang hê tot enige van u lêers op Google Drive nie.</string>
 	<string name="history_transfer_step_none" state="needs_review" hash="1228580785">Geen oordrag is aan die gang</string>
 	<string name="history_transfer_step_contacting_other_device" state="needs_review" hash="1719019815">Wag vir die ander toestel</string>
 	<string name="history_transfer_step_connecting" state="needs_review" hash="1836039168">Koppel aan die ander toestel</string>
-	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Onderhandeling (stap 1 van 3)</string>
-	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Boodskappe oordra (stap 2 van 3)</string>
-	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Besig om bysluit aan te dra (stap 3 van 3)</string>
-	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Onderhandel</string>
-	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Boodskappe oordra</string>
-	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Besig om bysluitte oor te dra</string>
+	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Onderhandel</string>
+	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Oordra</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Oordrag voltooi</string>
-	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Oordrag onderbreek</string>
-	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Gesprekshistorie-oordrag (beta)</string>
+	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Oordrag het misluk</string>
+	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Geskiedenis van gesprekke oordra</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Kon nie \'n oordrag begin nie. Miskien is daar reeds \'n ander oordrag aan die gang?</string>
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Gebruik die \"magiese skakel\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Ongeldige magiese skakel</string>
@@ -2172,18 +2175,111 @@ Olvid sal nie toegang hê tot enige van u lêers op Google Drive nie.</string>
 	<string name="onboarding_transfer_keycloak_error_message_authentication_impossible" state="needs_review" hash="-1891385979">Geen van die ondersteunde verifikasiemetodes lyk beskikbaar nie.</string>
 	<string name="pref_use_alt_turn_servers_title" state="needs_review" hash="-1956132776">Gebruik alternatiewe TURN-bedieners</string>
 	<string name="pref_use_alt_turn_servers_summary" state="needs_review" hash="357427162">Aktiveer hierdie opsie om TURN-bedieners met roterende IP-adresse te gebruik. Indien u nie seker is nie, laat hierdie opsie asb. af 😁</string>
-	<string name="button_label_transfer_through_webrtc" state="needs_review" hash="-1809138918">Deur die plaaslike netwerk oordra</string>
-	<string name="button_label_export_zip" state="needs_review" hash="1575043364">Voer ZIP uit</string>
-	<string name="button_label_import_zip" state="needs_review" hash="1299665090">Voer ZIP in</string>
-	<string name="dialog_title_transfer_choose_target_device" state="needs_review" hash="218115750">Kies die teikenapparaat vir hierdie oordrag.</string>
-	<string name="transfer_label_no_other_active_device" state="needs_review" hash="-2135899221">Geen ander aktiewe toestel nie</string>
-	<string name="transfer_label_messages" state="needs_review" hash="-1639407912">Boodskappe</string>
-	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Deurvoer</string>
-	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Resterend</string>
-	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Aanhangsels</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Hierdie funksie is nog in die beta-toetsfase en die huidige implementering is moontlik nie versoenbaar met die finale implementering van Olvid se geskiedenis-oordrag nie.\n\nMaak asseblief seker dat jou toestelle die nuutste weergawe van Olvid gebruik voordat jy hierdie funksie gebruik.</string>
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Huidige oordrag onderbreek?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">\'n Geskiedenis-oordrag is tans aan die gang. Wil jy dit onderbreek?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Onderbreek die oordrag</string>
 	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Wag vir om aan hierdie gesprek deel te neem</string>
+	<string name="label_your_other_device" state="needs_review" hash="-339632056">Jou ander toestel</string>
+	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">wil jou geskiedenis na hierdie toestel oordra</string>
+	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">\"%1$s\" wil jou kletsgeskiedenis na hierdie toestel oordra</string>
+	<string name="button_label_start_transfer" state="needs_review" hash="208526116">Begin met die oordrag</string>
+	<string name="pref_disable_secondary_notifications_title" state="needs_review" hash="29372078">Deaktiveer \"sekondêre\" kennisgewings</string>
+	<string name="pref_disable_secondary_notifications_summary" state="needs_review" hash="-402927980">Hierdie instelling deaktiveer kennisgewings vir reaksies op jou boodskappe of nuwe antwoorde op jou peilings.</string>
+	<string name="template_copy_multiple_messages" state="needs_review" hash="-1584473750">[%1$s] [%2$s]:\n[%3$s]</string>
+	<string name="label_export_your_chat_history" state="needs_review" hash="30036193">Voer jou kletsgeskiedenis uit</string>
+	<string name="label_import_your_chat_history" state="needs_review" hash="-1058286401">Voer jou kletsgeskiedenis in</string>
+	<string name="explanation_export_your_chat_history" state="needs_review" hash="2042738985">Gebruik hierdie opsie as jy jou geskiedenis van hierdie toestel wil oordra.</string>
+	<string name="explanation_import_your_chat_history" state="needs_review" hash="366204152">Gebruik hierdie opsie as jy jou geskiedenis van gesprekke na hierdie toestel oordra.</string>
+	<string name="explanation_history_transfer" state="needs_review" hash="983501865">Hierdie funksie stel jou in staat om jou geskiedenis van gesprekke **veiliglik** tussen twee van jou toestelle te **oordra**.\n\nVoordat jy begin, moet jou profiel op albei hierdie toestelle **bestaan**.</string>
+	<string name="button_label_import" state="needs_review" hash="-984720905">Invoer</string>
+	<string name="history_transfer_pick_profile_title" state="needs_review" hash="-1782334343">Watter profiel wil jy gebruik om voort te gaan?</string>
+	<string name="history_transfer_pick_profile_text_import" state="needs_review" hash="-1162713377">Kies asseblief die profiel waarin jy jou **kletsgeskiedenis wil invoer**.</string>
+	<string name="history_transfer_pick_profile_text_export" state="needs_review" hash="951522414">Kies asseblief die profiel waarvan jy jou **kletsgeskiedenis wil uitvoer**.</string>
+	<string name="history_transfer_pick_method_title" state="needs_review" hash="661094742">Wat wil jy doen?</string>
+	<string name="history_transfer_pick_method_text_import" state="needs_review" hash="1116376527">Kies asseblief hoe jy die geskiedenis van jou profiel **%1$s** wil invoer.</string>
+	<string name="history_transfer_pick_method_text_export" state="needs_review" hash="1750125743">Kies asseblief hoe jy die kletsgeskiedenis van jou profiel **%1$s** wil uitvoer.</string>
+	<string name="history_transfer_via_wifi_title" state="needs_review" hash="-2016953028">Oordrag via Wi-Fi</string>
+	<string name="history_transfer_via_wifi_message" state="needs_review" hash="-758708700">Koppel eenvoudig albei jou toestelle aan dieselfde Wi-Fi-netwerk.</string>
+	<string name="history_transfer_via_zip_title_import" state="needs_review" hash="1608302669">Voer \'n .zip-lêer in</string>
+	<string name="history_transfer_via_zip_title_export" state="needs_review" hash="-1924849877">Voer \'n .zip-lêer uit</string>
+	<string name="history_transfer_via_zip_message_import" state="needs_review" hash="1766231761">Kies die .zip-lêer wat jy van jou ou toestel gekopieer het.</string>
+	<string name="history_transfer_via_zip_message_export" state="needs_review" hash="-1123951975">Laai \'n .zip-lêer af en kopieer dit na jou nuwe toestel.</string>
+	<string name="history_transfer_import_zip_description" state="needs_review" hash="855194374">Om jou kletsgeskiedenis in te voer, kies asseblief die .zip-lêer wat jy **van jou ander toestel uitgevoer het**.\n\nMaak seker dat die profiel **%1$s** wat jy gekies het, ooreenstem met die profiel wat gebruik is om hierdie .zip-lêer te genereer.</string>
+	<string name="button_label_choose_zip_file" state="needs_review" hash="-493688169">Kies \'n .zip-lêer</string>
+	<string name="dialog_title_error_reading_zip" state="needs_review" hash="1059408985">Fout om die .zip-lêer te lees</string>
+	<string name="dialog_message_error_reading_zip" state="needs_review" hash="1864744526">Da het \'n fout opgetree tydens die lees van die .zip-lêer.\n\nMaak asseblief seker dat jy \'n Olvid-kletsgeskiedenis-eksportlêer kies.</string>
+	<string name="dialog_title_error_zip_password" state="needs_review" hash="1651240086">Verkeerde wagwoord</string>
+	<string name="dialog_message_error_zip_password" state="needs_review" hash="216311562">Die wagwoord wat jy ingegee het, het nie toegelaat om die gekose .zip-lêer te ontsleutel nie.\n\nProbeer asseblief weer.</string>
+	<string name="dialog_title_zip_password_required" state="needs_review" hash="-944166479">Wagwoord vereis</string>
+	<string name="dialog_message_zip_password_required" state="needs_review" hash="548842041">Die gekose .zip-lêer is wagwoordbeskerm. Voer asseblief die wagwoord in wat jy gekies het toe jy jou kletsgeskiedenis op jou ander toestel uitgevoer het.</string>
+	<string name="history_transfer_export_scope_title_export" state="needs_review" hash="933575859">Wat wil jy uitvoer?</string>
+	<string name="history_transfer_export_scope_title_transfer" state="needs_review" hash="-1971421411">Wat wil jy oordra?</string>
+	<string name="history_transfer_scope_messages_export_title" state="needs_review" hash="-1810394953">Voer slegs boodskappe uit</string>
+	<string name="history_transfer_scope_messages_transfer_title" state="needs_review" hash="1119624141">Slegs boodskappe oordra</string>
+	<string name="history_transfer_scope_messages_export_message" state="needs_review" hash="-2120867312">Kleiner eksport. Slegs teksboodskappe word ingesluit.</string>
+	<string name="history_transfer_scope_messages_transfer_message" state="needs_review" hash="2071005834">Vinniger oordrag. Slegs teksboodskappe word ingesluit.</string>
+	<string name="history_transfer_scope_everything_export_title" state="needs_review" hash="463008259">Voer boodskappe en aangehegte lêers uit</string>
+	<string name="history_transfer_scope_everything_transfer_title" state="needs_review" hash="-175297433">Oordra boodskappe en byvoegsels</string>
+	<string name="history_transfer_scope_everything_export_message" state="needs_review" hash="-266277978">Volledige uitvoer. Sluit alle boodskappe en aangehegte lêers in.</string>
+	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Volledige oordrag. Sluit alle boodskappe en aangehegte lêers in.</string>
+	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Voer jou kletsgeskiedenis uit as ’n .zip-lêer. Jy kan dit later op ’n ander toestel van jou profiel inlaai **%1$s**.\n\nJy kan ook hierdie lêer uitpak om jou kletsgeskiedenis op ’n webblad te vertoon.</string>
+	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Skep \'n .zip-lêer</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d besprekings en %2$d boodskappe</string>
+	<string name="label_computing" state="needs_review" hash="1393495921">Besig om te bereken…</string>
+	<string name="label_total_size" state="needs_review" hash="-788411929">Totale grootte: %1$s</string>
+	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Beskerm jou uitvoer</string>
+	<string name="dialog_message_protect_export" state="needs_review" hash="-900141026">Vir jou veiligheid, beveel ons aan dat jy jou eksport met ’n wagwoord beskerm.</string>
+	<string name="button_label_generate_password" state="needs_review" hash="-1174237913">Genereer \'n wagwoord</string>
+	<string name="button_label_choose_password" state="needs_review" hash="-1893200284">Kies \'n wagwoord</string>
+	<string name="button_label_continue_without_password" state="needs_review" hash="-106870576">Gaan voort sonder \'n wagwoord</string>
+	<string name="dialog_title_choose_password" state="needs_review" hash="1927816439">Kies \'n wagwoord</string>
+	<string name="dialog_title_generated_password" state="needs_review" hash="-690449371">Wagwoord gegenereer</string>
+	<string name="dialog_message_generated_password" state="needs_review" hash="1100314355">Die wagwoord hieronder is lukraak gegenereer.\n\nMaak seker jy **skryf dit neer voordat jy voortgaan**.</string>
+	<string name="button_label_copy_to_clipboard" state="needs_review" hash="-1309214553">Kopieer na knipbord</string>
+	<string name="history_transfer_pick_target_device_title" state="needs_review" hash="1659408512">Kies \'n toestel</string>
+	<string name="history_transfer_pick_target_device_text" state="needs_review" hash="-1456199559">Kies asseblief die toestel waarna jy die huidige toestel se kletsgeskiedenis wil oordra.\n\nKan jy nie die toestel kry waarna jy soek nie? Maak seker dat jou profiel **%1$s** op hierdie ander toestel **geaktiveer** is.</string>
+	<string name="history_transfer_no_other_device_explanation" state="needs_review" hash="-1034788616">Dit lyk asof jou profiel **%1$s** nie enige ander aktiewe toestelle het nie.\n\nVoeg asseblief **jou nuwe toestel by hierdie profiel** voordat jy voortgaan met die oordrag van jou kletshistorie.\n\nJy kan ook **\'n .zip-lêer uitvoer** om dit later op jou nuwe toestel in te voer.</string>
+	<string name="history_transfer_webrtc_instructions_title" state="needs_review" hash="-1353013738">Volg hierdie instruksies op jou ander toestel.</string>
+	<string name="history_transfer_instructions_turn_on_other_import" state="needs_review" hash="-930696177">Skakel die toestel aan wat jou geskiedenis van gesprekke bevat.</string>
+	<string name="history_transfer_instructions_same_wifi_import" state="needs_review" hash="465388607">Maak seker dat albei jou toestelle aan dieselfde Wi-Fi-netwerk gekoppel is.</string>
+	<string name="history_transfer_instructions_start_export" state="needs_review" hash="-1288439668">Op jou ander toestel, maak Olvid se instellings oop en begin met die uitvoer van jou geskiedenis.</string>
+	<string name="history_transfer_instructions_turn_on_other_export" state="needs_review" hash="1280642155">Skakel jou **%1$s** aan.</string>
+	<string name="history_transfer_instructions_same_wifi_export" state="needs_review" hash="284833986">Maak seker dat hierdie toestel en jou **%1$s** aan dieselfde Wi-Fi-netwerk gekoppel is.</string>
+	<string name="history_transfer_step_awaiting_confirmation" state="needs_review" hash="665601714">Wag vir jou om die oordrag te aanvaar</string>
+	<string name="dialog_title_abort_history_transfer" state="needs_review" hash="1914158733">Onderbreek die huidige oordrag?</string>
+	<string name="dialog_title_abort_history_transfer_export" state="needs_review" hash="-856542741">Huidige uitvoerproses stopmaak?</string>
+	<string name="dialog_title_abort_history_transfer_import" state="needs_review" hash="976007540">Huidige invoerproses stopmaak?</string>
+	<string name="dialog_message_abort_history_transfer_webrtc" state="needs_review" hash="1807742093">Is jy seker dat jy die huidige oordrag van die kletsgeskiedenis wil onderbreek?\n\nJy kan altyd later weer die oordrag begin as jy wil. **Alles wat reeds oorgedra is, sal behou bly** en hoef nie weer oorgedra te word nie.</string>
+	<string name="dialog_message_abort_history_transfer_zip_export" state="needs_review" hash="716134255">Is jy seker dat jy die huidige .zip-lêer-eksport wil onderbreek?\n\nAs jy dit doen, sal dit \'n **gedeeltelike .zip-lêer op jou toestel** agterlaat, wat jy **handmatig sal moet uitvee**.</string>
+	<string name="dialog_message_abort_history_transfer_zip_import" state="needs_review" hash="1264487097">Is jy seker dat jy die huidige .zip-lêer-invoegproses wil onderbreek?\n\nJy kan die invoegproses later weer begin as jy wil. **Alles wat reeds ingevoeg is, sal behou bly** en hoef nie weer ingevoeg te word nie.</string>
+	<string name="button_label_interrupt_and_continue_later" state="needs_review" hash="-976034947">Onderbreek en gaan later voort</string>
+	<string name="button_label_abort_export" state="needs_review" hash="428199797">Stel uitvoer vas</string>
+	<string name="button_label_abort_import" state="needs_review" hash="2031103191">Importeer nie meer nie</string>
+	<string name="history_transfer_fail_reason_aborted" state="needs_review" hash="277351522">Die oordrag is onderbreek.</string>
+	<string name="history_transfer_fail_reason_unknown" state="needs_review" hash="-1170630200">’n Onbekende fout het voorgekom (waarskynlik ’n netwerkontkoppeling)</string>
+	<string name="history_transfer_fail_reason_identity_mismatch" state="needs_review" hash="936267267">Hierdie .zip-lêer is vanaf ’n ander profiel uitgevoer.</string>
+	<string name="history_transfer_fail_reason_wrong_passwrod" state="needs_review" hash="1847441965">Verkeerde wagwoord</string>
+	<string name="history_transfer_fail_reason_invalid_zip" state="needs_review" hash="-691417686">Kan nie die .zip-lêer lees nie (is dit werklik ’n Olvid-kletsgeskiedenis-eksport?)</string>
+	<string name="transfer_label_sending_messages" state="needs_review" hash="2018039973">Boodskappe stuur</string>
+	<string name="transfer_label_exporting_messages" state="needs_review" hash="1572454408">Boodskappe uitvoer</string>
+	<string name="transfer_label_importing_messages" state="needs_review" hash="1913024934">Besig om boodskappe in te voer</string>
+	<string name="transfer_label_receiving_messages" state="needs_review" hash="2015919003">Boodskappe ontvang</string>
+	<string name="transfer_label_sending_attachments" state="needs_review" hash="2102571371">Besig om bysluit te stuur</string>
+	<string name="transfer_label_exporting_attachments" state="needs_review" hash="-1029839434">Besighede aflaai</string>
+	<string name="transfer_label_importing_attachments" state="needs_review" hash="1078186262">Besig om bysluitings in te voer</string>
+	<string name="transfer_label_receiving_attachments" state="needs_review" hash="439049517">Besig van byskrifte</string>
+	<string name="label_remaining_and_throughput" state="needs_review" hash="1772610397">Ongeveer %1$s oor (%2$s)</string>
+	<string name="history_transfer_step_connecting_export" state="needs_review" hash="-28311439">Besig met die skep van die .zip-lêer</string>
+	<string name="history_transfer_step_connecting_import" state="needs_review" hash="1323447620">Maak .zip-lêer oop</string>
+	<string name="history_transfer_step_failed_export" state="needs_review" hash="185890904">Eksport het misluk</string>
+	<string name="history_transfer_step_finished_export" state="needs_review" hash="1156914922">Eksport voltooi</string>
+	<string name="history_transfer_step_failed_import" state="needs_review" hash="-909085512">Invoer het misluk</string>
+	<string name="history_transfer_step_finished_import" state="needs_review" hash="-653312310">Invoer voltooi</string>
+	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">Besig om uit te voer</string>
+	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Besig om in te voer</string>
+	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Ontleed inhoud</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Besig om die uitgevoerde gesprekke te ontleed</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">\'n Fout het voorgekom tydens die laai van die OpenStreetMap-styl lêer.</string>
+	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">In-app-intekeninge nie beskikbaar nie</string>
+	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Die weergawe van Olvid wat jy geïnstalleer het, bevat nie Google se faktuurbiblioteek nie en ondersteun nie aankope in die toepassing nie.\n\nVir meer inligting, kontak ons asseblief by **feedback@olvid.io**.</string>
 </resources>

@@ -22,13 +22,17 @@ package io.olvid.engine.engine.types.identities;
 
 public sealed interface ObvKeycloakAuthType {
     // authentication method based on Olvid identity
-    record IdBased() implements ObvKeycloakAuthType {
+    final class IdBased implements ObvKeycloakAuthType {
     }
 
     // authentication method based on OIDC
-    record OpenIdConnect(
-            String clientId, // non-null
-            String clientSecret // may be null for non-authenticated OIDC
-    ) implements ObvKeycloakAuthType {
+    final class OpenIdConnect implements ObvKeycloakAuthType {
+        public String clientId; // non-null
+        public String clientSecret; // may be null for non-authenticated OIDC
+
+        public OpenIdConnect(String clientId, String clientSecret) {
+            this.clientId = clientId;
+            this.clientSecret = clientSecret;
+        }
     }
 }

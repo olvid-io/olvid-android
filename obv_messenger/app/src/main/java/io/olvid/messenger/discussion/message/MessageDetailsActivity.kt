@@ -78,7 +78,7 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.customClasses.EmptyRecyclerView
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
@@ -879,7 +879,7 @@ class MessageDetailsActivity : LockableActivity() {
     }
 
     companion object {
-        const val MESSAGE_ID_INTENT_EXTRA: String = "message_id"
+        const val MESSAGE_ID_INTENT_EXTRA: String = "olvid_message_id"
         const val INBOUND_INTENT_EXTRA: String = "inbound"
         const val SENT_FROM_OTHER_DEVICE_INTENT_EXTRA: String = "sent_from_other_device"
     }

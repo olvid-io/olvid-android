@@ -95,7 +95,7 @@ public class ManageCloudBackupsDialogFragment extends DialogFragment implements 
         Window window = dialog.getWindow();
         if (window != null) {
             window.requestFeature(Window.FEATURE_NO_TITLE);
-            if (SettingsActivity.preventScreenCapture()) {
+            if (SettingsActivity.preventScreenCapture(activity)) {
                 window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
             }
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);

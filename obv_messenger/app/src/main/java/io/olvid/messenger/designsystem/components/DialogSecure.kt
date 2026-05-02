@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -53,7 +54,7 @@ fun DialogSecure(
     properties: DialogProperties = DialogProperties(),
     content: @Composable () -> Unit
 ) {
-    val securePolicy = if (SettingsActivity.preventScreenCapture()) {
+    val securePolicy = if (SettingsActivity.preventScreenCapture(LocalContext.current)) {
         SecureFlagPolicy.SecureOn
     } else {
         SecureFlagPolicy.Inherit
@@ -75,11 +76,13 @@ fun DialogSecure(
 
 @Composable
 fun BaseDialogContent(
+    modifier: Modifier = Modifier,
     title: String,
     content: @Composable ColumnScope.() -> Unit,
     actions: @Composable RowScope.() -> Unit
 ) {
     Card(
+        modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = colorResource(R.color.newDialogBackground),
@@ -100,17 +103,20 @@ fun BaseDialogContent(
 
             Column(
                 modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp)
                     .weight(1f, false)
                     .heightIn(max = 400.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(rememberScrollState())
+                    .padding(start = 16.dp, end = 16.dp),
                 horizontalAlignment = Alignment.Start,
             ) {
                 content()
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 actions()
             }
         }

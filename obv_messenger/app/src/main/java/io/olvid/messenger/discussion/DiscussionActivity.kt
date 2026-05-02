@@ -48,6 +48,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.calculateCentroidSize
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -94,7 +95,7 @@ import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.PreviewUtils
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.SecureUriHandler
@@ -413,6 +414,16 @@ class DiscussionActivity : LockableActivity() {
                             }
                         }
                     }
+                }
+                // intercept taps outside the popup (caused by focusable false and useSystemWidth constraints)
+                if (composeMessageViewModel.menuExpanded) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectTapGestures { composeMessageViewModel.menuExpanded = false }
+                            }
+                    )
                 }
                 // Ephemeral settings
                 if (composeMessageViewModel.openEphemeralSettings) {
@@ -1057,8 +1068,6 @@ class DiscussionActivity : LockableActivity() {
     }
 
     companion object {
-        internal const val FULL_SCREEN_MAP_FRAGMENT_TAG = "full_screen_map_fragment_tag"
-
         private const val ALREADY_PLAYED_INTENT_EXTRA = "already_played"
         const val DISCUSSION_ID_INTENT_EXTRA: String = "discussion_id"
         const val MESSAGE_ID_INTENT_EXTRA: String = "msg_id"

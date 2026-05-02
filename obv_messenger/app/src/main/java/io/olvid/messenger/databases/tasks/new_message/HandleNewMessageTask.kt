@@ -24,7 +24,6 @@ import io.olvid.engine.engine.Engine
 import io.olvid.engine.engine.types.ObvMessage
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
-import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.jsons.JsonPayload
 import io.olvid.messenger.history_transfer.TransferService
@@ -167,7 +166,7 @@ private fun processObvMessage(
         }
 
         // special handling of WebRTC messages
-        messagePayload.jsonWebrtcMessage?.let { jsonWebrtcMessage ->
+        messagePayload.jsonWebrtcCallMessage?.let { jsonWebrtcMessage ->
             App.handleWebrtcMessage(obvMessage.bytesToIdentity, obvMessage.bytesFromIdentity, obvMessage.bytesFromDeviceUid, jsonWebrtcMessage, obvMessage.downloadTimestamp + (System.currentTimeMillis() - obvMessage.localDownloadTimestamp).coerceAtLeast(0), obvMessage.serverTimestamp)
             return HandleMessageOutput.DELETE_MESSAGE_AND_ATTACHMENTS
         }
@@ -181,13 +180,27 @@ private fun processObvMessage(
             return HandleMessageOutput.DELETE_MESSAGE_AND_ATTACHMENTS
         }
 
-        messagePayload.jsonHistoryTransferMessage?.let { jsonHistoryTransferMessage ->
+        messagePayload.jsonWebrtcHistoryTransferMessage?.let { jsonHistoryTransferMessage ->
+            if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                App.runThread {
+                    TransferService.handleJsonHistoryTransferMessage(
+                        jsonHistoryTransferMessage,
+                        messageSender.bytesOwnedIdentity,
+                        obvMessage.bytesFromDeviceUid
+                    )
+                }
+            } else {
+                Logger.e("Received a JsonHistoryTransferMessage from a contact!!!")
+            }
+            return HandleMessageOutput.DELETE_MESSAGE_AND_ATTACHMENTS
+        }
+
+        messagePayload.jsonWebrtcHistoryTransferControl?.let { jsonHistoryTransferControl ->
             if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
                 if (obvMessage.downloadTimestamp + (System.currentTimeMillis() - obvMessage.localDownloadTimestamp).coerceAtLeast(0) - obvMessage.serverTimestamp < TransferService.HISTORY_TRANSFER_MESSAGE_MAX_AGE) {
-                    // TODO: show a notification to click to open a transfer activity where one can accept the incoming transfer
                     App.runThread {
-                        TransferService.handleJsonHistoryTransferMessage(
-                            jsonHistoryTransferMessage,
+                        TransferService.handleJsonHistoryTransferControl(
+                            jsonHistoryTransferControl,
                             messageSender.bytesOwnedIdentity,
                             obvMessage.bytesFromDeviceUid
                         )

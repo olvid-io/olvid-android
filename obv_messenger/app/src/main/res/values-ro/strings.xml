@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Detalii contact</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Detalii utilizator</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Detalii grup</string>
@@ -258,7 +258,6 @@
 	<string name="text_you" state="needs_review" hash="672009142">Tu</string>
 	<string name="title_invite_chooser" state="needs_review" hash="1726572772">Alegeți cum să trimiteți invitația</string>
 	<string name="title_sharing_chooser" state="needs_review" hash="291715689">Alege o metodă de partajare</string>
-	<string name="toast_message_android_bug_attach_duplicate_uri" state="needs_review" hash="-776215584">Unele fișiere nu au putut fi atașate mesajului din cauza unei erori în versiunea ta de Android (mai multe fișiere au returnat același URI). Încearcă să atașezi din nou fișierele lipsă.</string>
 	<string name="toast_message_attachment_being_copied" state="needs_review" hash="-978855599">Un fișier atașat este încă în procesare. Mesajul tău va fi trimis când procesarea se va încheia.</string>
 	<string name="toast_message_attachment_saved" state="needs_review" hash="-2073631581">Fișier atașat salvat</string>
 	<string name="toast_message_camera_permission_denied" state="needs_review" hash="1896719877">Permisiunea de a utiliza camera a fost refuzată</string>
@@ -344,6 +343,9 @@
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">Odată activată, Olvid va prelua o previzualizare a linkurilor pe care le trimiți și o va atașa la mesaj.</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">Obține previzualizări ale linkurilor primite</string>
 	<string name="pref_link_preview_summary_inbound" state="needs_review" hash="-320325429">Odată activată, Olvid va prelua automat previzualizări ale linkurilor pe care le primești (dacă o previzualizare nu este atașată mesajului).</string>
+	<string name="link_preview_menu_copy_link" state="needs_review" hash="1269903076">Copiază link-ul</string>
+	<string name="link_preview_menu_open_in_browser" state="needs_review" hash="-1711141559">Deschide în browser</string>
+	<string name="link_preview_menu_open_image" state="needs_review" hash="-2013483894">Vizualizați imaginea</string>
 	<string name="pref_discussion_read_receipt_title" state="needs_review" hash="-652307837">Confirmări de citire</string>
 	<string name="pref_text_app_default" state="needs_review" hash="1920567018">Utilizați setările implicite</string>
 	<string name="pref_text_app_default_true" state="needs_review" hash="-948780646">Utilizează setarea implicită (activat)</string>
@@ -352,6 +354,10 @@
 	<string name="pref_text_discussion_read_receipt_on" state="needs_review" hash="983295321">Activat, contactele tale sunt informate</string>
 	<string name="pref_use_lock_screen_title" state="needs_review" hash="540058239">Utilizați ecranul de blocare al aplicației</string>
 	<string name="pref_use_lock_screen_summary" state="needs_review" hash="-399095273">Activează această opțiune pentru a proteja Olvid cu un ecran de blocare la pornire.</string>
+	<string name="pref_lock_screen_required_by_mdm" state="needs_review" hash="-500219406">Solicitat de organizația dumneavoastră</string>
+	<string name="lock_screen_setup_title" state="needs_review" hash="932203184">Ecran de blocare necesar</string>
+	<string name="lock_screen_setup_explanation" state="needs_review" hash="169071212">Organizația dumneavoastră vă solicită să protejați această aplicație cu un cod PIN sau o parolă pentru ecranul de blocare.</string>
+	<string name="lock_screen_setup_button" state="needs_review" hash="672169315">Setează PIN-ul</string>
 	<string name="pref_category_notifications_title" state="needs_review" hash="1237583104">Notificări</string>
 	<string name="pref_category_privacy_title" state="needs_review" hash="-1750659871">Confidențialitate</string>
 	<string name="pref_category_other_title" state="needs_review" hash="-1683901612">Alte setări</string>
@@ -370,7 +376,7 @@
 	<string name="button_label_use_pin" state="needs_review" hash="918492771">Utilizați un PIN în loc de parolă</string>
 	<string name="hint_enter_pin" state="needs_review" hash="999437557">Introdu PIN</string>
 	<string name="hint_confirm_pin" state="needs_review" hash="1780268503">Confirmă PIN</string>
-	<string name="text_pin_creation_explanation" state="needs_review" hash="-1935715126">Va trebui să introduci acest PIN pentru a debloca Olvid.Nu poate fi recuperat și poți pierde accesul la datele tale Olvid dacă îl uiți.</string>
+	<string name="text_pin_creation_explanation" state="needs_review" hash="1232246926">Va trebui să introduceți acest PIN pentru a debloca Olvid.\nNu poate fi recuperat și, **dacă îl uitați, este posibil să pierdeți accesul la datele Olvid**.</string>
 	<string name="error_text_pin_too_short" state="needs_review" hash="-1085309478">PIN prea scurt (minim 4 cifre)</string>
 	<string name="error_text_pin_mismatch" state="needs_review" hash="-4525766">PIN incorect</string>
 	<string name="hint_enter_password" state="needs_review" hash="478503341">Introduceți parola</string>
@@ -394,6 +400,7 @@
 	<string name="pref_text_lock_grace_time_infinity" state="needs_review" hash="146086108">Blocați Olvid manual</string>
 	<string name="pref_unlock_biometry_summary_none_enrolled" state="needs_review" hash="-118589413">Autentificarea biometrică nu a fost încă configurată pe dispozitivul tău.</string>
 	<string name="dialog_title_unlock_olvid" state="needs_review" hash="-2054572246">Deblocați Olvid cu biometrie</string>
+	<string name="dialog_title_unlock_neutral" state="needs_review" hash="761644522">Deblochează cu biometrie</string>
 	<string name="notification_channel_unified_service_name" state="needs_review" hash="1404446256">Serviciu în prim-plan</string>
 	<string name="notification_channel_unified_service_description" state="needs_review" hash="-1204081836">Notificare persistentă care afișează starea Olvid</string>
 	<string name="notification_title_olvid_is_unlocked" state="needs_review" hash="1688502744">Olvid este deblocat</string>
@@ -437,6 +444,7 @@
 	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">Profilul tău a fost dezactivat pe acest dispozitiv.Se pare că nu ai niciun dispozitiv activ în acest moment, așa că poți reactiva profilul tău oricând dorești.Dacă dorești să continui, apasă pe \"reactivați profilul meu pe acest dispozitiv\" mai jos.Apasă pe \"anulează\" pentru a închide această fereastră de dialog și a menține acest dispozitiv inactiv: nu vei putea trimite sau primi mesaje pe acest dispozitiv, dar poți consulta în continuare discuțiile tale vechi.</string>
 	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">Profilul tău a fost dezactivat pe acest dispozitiv.Se pare că nu ai o licență pentru a utiliza Olvid pe mai multe dispozitive simultan. Reactivarea acestui dispozitiv necesită dezactivarea unui alt dispozitiv.Dacă dorești să continui, selectează dispozitivul pe care dorești să îl dezactivezi din lista de mai jos și apoi apasă pe \"reactivați profilul meu pe acest dispozitiv\".Apasă pe \"anulează\" pentru a închide această fereastră și a menține acest dispozitiv inactiv: nu vei putea trimite sau primi mesaje pe acest dispozitiv, dar poți consulta în continuare conversațiile vechi.</string>
 	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">Profilul tău a fost dezactivat pe acest dispozitiv.Se pare că toate celelalte dispozitive ale tale sunt configurate să fie dezactivate în curând, astfel încât poți reactiva profilul tău pe acest dispozitiv oricând. Mai jos găsești lista dispozitivelor tale active în prezent.Dacă dorești să continui, apasă pe „reactivați profilul meu pe acest dispozitiv” mai jos.Apasă pe „anulați” pentru a închide această fereastră și a menține acest dispozitiv inactiv: nu vei putea trimite sau primi mesaje pe acest dispozitiv, dar poți consulta în continuare conversațiile tale vechi.</string>
+	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">Profilul tău este dezactivat pe acest dispozitiv.\n\nNu vei putea trimite sau primi mesaje aici, decât dacă îl reactivezi.</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">Reactivează-mi profilul pe acest dispozitiv</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">A apărut o eroare. Vă rugăm să încercați din nou.</string>
 	<string name="dialog_title_identity_activated" state="needs_review" hash="-1465666248">ID Olvid reactivat</string>
@@ -810,10 +818,7 @@
 	<string name="toast_message_voice_message_recording_failed" state="needs_review" hash="-632817078">Eroare la înregistrarea mesajului vocal</string>
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Player multimedia</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Controale de redare/pauză când se redă conținut multimedia în Olvid</string>
-	<string name="notification_title_now_playing" state="needs_review" hash="-1042122929">În curs de redare…</string>
-	<string name="notification_action_pause" state="needs_review" hash="1931883968">Pauză</string>
-	<string name="notification_action_play" state="needs_review" hash="1143766922">Redă</string>
-	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="-1049639416">Nu se poate reda %1$s</string>
+	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Nu se poate reda fișierul audio</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Șterge</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Șterge peste tot</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Nu a fost posibilă ștergerea de pe toate dispozitivele. Vă rugăm să încercați din nou.</string>
@@ -843,7 +848,6 @@
 	<string name="dialog_message_unmute_notifications" state="needs_review" hash="816867976">Notificările pentru mesaje noi sunt momentan dezactivate.Doriți să le reactivați?</string>
 	<string name="dialog_message_unmute_notifications_muted_until" state="needs_review" hash="-325454266">Notificările pentru mesaje noi sunt silențioase până la: %1$s.Vrei să le reactivezi?</string>
 	<string name="notification_action_mute" state="needs_review" hash="-1553988068">Muta</string>
-	<string name="pref_scaled_turn_title" state="needs_review" hash="-1234636269">Alegeți ce servere TURN regionale să utilizați</string>
 	<string name="explanation_identity_creation_options" state="needs_review" hash="-795537312">Acest ecran vă permite să alegeți opțiuni suplimentare pentru crearea ID-ului Olvid. Puteți introduce opțiunile manual sau puteți scana un cod QR de configurare.</string>
 	<string name="button_label_check_options" state="needs_review" hash="-759177128">Verifică opțiunile</string>
 	<string name="hint_olvid_server" state="needs_review" hash="1097391633">Server Olvid</string>
@@ -859,6 +863,8 @@
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Se pare că serverul dvs. Olvid nu acceptă inițierea apelurilor securizate.\n\nVă rugăm să contactați administratorul pentru mai multe detalii.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Opțiuni de creare ID</string>
 	<string name="text_option_server" state="needs_review" hash="-1130676431">Server: %1$s</string>
+	<string name="dialog_title_non_default_server" state="needs_review" hash="2119192219">Utilizarea unui server personalizat</string>
+	<string name="dialog_message_non_default_server" state="needs_review" hash="459308900">Sunteți pe cale să creați un profil pe următorul server:\n\n%1$s\n\nAcesta nu este serverul Olvid implicit. Continuați numai dacă aveți încredere în acest server.</string>
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Licență: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Furnizor de identitate</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Server furnizor de identitate</string>
@@ -1202,8 +1208,6 @@
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Conectivitate: CONECTAT</string>
 	<string name="label_ping_delay" state="needs_review" hash="25344924">Ping: %1$d ms</string>
 	<string name="label_over_max_ping_delay" state="needs_review" hash="-684190262">Ping: &gt;%1$ds</string>
-	<string name="menu_action_copy_message_text" state="needs_review" hash="1799737962">Copiază textul mesajului</string>
-	<string name="menu_action_copy_text_and_attachments" state="needs_review" hash="428315032">Copiază mesajul și atașamentele</string>
 	<string name="label_message_copied_from_olvid" state="needs_review" hash="1145396410">Mesaj copiat de pe Olvid</string>
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">Mesajul complet a fost copiat în clipboard</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">Scurtătură pentru a trimite un mesaj predefinit unui contact sau grup într-un singur clic</string>
@@ -1403,7 +1407,6 @@
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Copie din</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Locație trimisă</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Locație primită</string>
-	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">Serviciile de localizare sunt indisponibile</string>
 	<string name="label_send_your_location" state="needs_review" hash="618026241">Trimite locația ta</string>
 	<string name="notification_title_sharing_location" state="needs_review" hash="-1626101904">Partajarea locației în Olvid</string>
 	<string name="notification_action_stop_sharing" state="needs_review" hash="585626699">Oprește partajarea</string>
@@ -1532,6 +1535,8 @@
 	<string name="text_setting_lock_biometry" state="needs_review" hash="-1698353580">‣ Deblochează cu biometrie:</string>
 	<string name="text_setting_lock_notification" state="needs_review" hash="2022286622">‣ Notificare permanentă pe ecranul de blocare:</string>
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">‣ Șterge mesajele sensibile după 3 PIN-uri greșite:\u0020</string>
+	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">‣ Necesită blocarea ecranului:</string>
+	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">‣ Resetare token de blocare a ecranului:</string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">‣ Descărcare automată a atașamentelor din conversațiile arhivate:</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">‣ Dearhivează conversațiile la primirea notificării pentru un mesaj nou:</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">‣ Previzualizare link primită:\u0020</string>
@@ -1594,8 +1599,8 @@
 	<string name="label_open_original_link_with_trackers" state="needs_review" hash="-1586932660">Utilizați linkul original care conține parametri de urmărire</string>
 	<string name="dialog_title_confirm_open_olvid_link" state="needs_review" hash="425949498">Deschide acest link în Olvid?</string>
 	<string name="toast_message_unable_to_open_url" state="needs_review" hash="-1486954792">Nu se poate deschide URL</string>
-	<string name="text_explanation_location_map_provider" state="needs_review" hash="-173394547">Alegerea unui furnizor de hărți vă permite să selectați cu precizie locația pe care doriți să o partajați pe o hartă. Cu toate acestea, acest lucru poate dezvălui locația dvs. (sau a contactelor dvs.) acestui furnizor de servicii.</string>
-	<string name="text_explanation_location_map_provider_settings" state="needs_review" hash="68421420">Această opțiune poate fi modificată din setările aplicației.</string>
+	<string name="dialog_title_choose_map_provider" state="needs_review" hash="1225681568">Alegeți un furnizor de hărți</string>
+	<string name="dialog_message_choose_map_provider" state="needs_review" hash="-2129640593">Selectați un furnizor de hărți de mai jos pentru a afișa o hartă atunci când vizualizați sau partajați o locație.\n\nVă rugăm să rețineți că acest lucru poate **dezvălui locația dvs. (sau locația contactelor dvs.) către acest furnizor de servicii**.</string>
 	<string name="button_label_choose_provider" state="needs_review" hash="-797956886">Alege un furnizor</string>
 	<string name="button_label_live_share" state="needs_review" hash="327122881">Partajare live</string>
 	<string name="label_fetching_address" state="needs_review" hash="-839353954">Se preia adresa…</string>
@@ -1804,7 +1809,9 @@
 	<string name="dialog_title_custom_address_server_url" state="needs_review" hash="-2071925830">Server de adrese personalizat</string>
 	<string name="hint_custom_address_server_url" state="needs_review" hash="1348105685">URL-ul serverului de căutare a adreselor</string>
 	<string name="dialog_message_custom_address_server_url" state="needs_review" hash="401731382">Olvid acceptă doar servere **Pelias** pentru căutarea adreselor. Vă rugăm să introduceți URL-ul serverului pe care doriți să îl interogați mai jos, acesta ar trebui să fie ceva de genul *https://pelias.olvid.io*, iar interogările vor fi trimise la punctul de intrare */v1/reverse*.\n\nRețineți că acest server poate învăța unele informații despre locația dvs. Asigurați-vă că **utilizați un server de încredere**.</string>
-	<string name="toast_message_playback_speed_not_supported_on_device" state="needs_review" hash="502764942">Nu se poate modifica viteza de redare</string>
+	<string name="pref_location_gps_debug_title" state="needs_review" hash="1786532100">Activați funcțiile de depanare pentru partajarea locației</string>
+	<string name="pref_location_gps_always_on_title" state="needs_review" hash="1250376384">Menține GPS-ul activat în permanență</string>
+	<string name="pref_location_export_gps_logs_title" state="needs_review" hash="-459831250">Exportă jurnalele de activitate GPS</string>
 	<string name="text_speed_1x" state="needs_review" hash="789822816">1×</string>
 	<string name="text_speed_1_5x" state="needs_review" hash="-120181054">1,5×</string>
 	<string name="text_speed_2x" state="needs_review" hash="1171767872">2×</string>
@@ -2145,15 +2152,11 @@
 	<string name="history_transfer_step_none" state="needs_review" hash="1228580785">Nicio transfer în curs</string>
 	<string name="history_transfer_step_contacting_other_device" state="needs_review" hash="1719019815">Așteptarea celuilalt dispozitiv</string>
 	<string name="history_transfer_step_connecting" state="needs_review" hash="1836039168">Se conectează la un alt dispozitiv</string>
-	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Negociere (pasul 1 din 3)</string>
-	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Transferarea mesajelor (pasul 2 din 3)</string>
-	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Transferarea atașamentelor (pasul 3 din 3)</string>
-	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Negociere</string>
-	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Transferarea mesajelor</string>
-	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Se transferă atașamentele</string>
+	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Negociere</string>
+	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Transfer</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Transfer efectuat</string>
-	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Transfer întrerupt</string>
-	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Transferă istoricul conversațiilor (versiune beta)</string>
+	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Transferul a eșuat</string>
+	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Transferă istoricul conversațiilor</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Nu se poate iniția transferul. Poate că un alt transfer este deja în curs.</string>
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Utilizați \"link-ul magic\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Link magic invalid</string>
@@ -2166,18 +2169,111 @@
 	<string name="onboarding_transfer_keycloak_error_message_authentication_impossible" state="needs_review" hash="-1891385979">Nu pare să fie disponibil niciun metodă de autentificare suportată.</string>
 	<string name="pref_use_alt_turn_servers_title" state="needs_review" hash="-1956132776">Utilizați servere TURN alternative</string>
 	<string name="pref_use_alt_turn_servers_summary" state="needs_review" hash="357427162">Activați această opțiune pentru a utiliza servere TURN cu adrese IP rotative. Dacă nu sunteți sigur, lăsați această opțiune dezactivată 😁</string>
-	<string name="button_label_transfer_through_webrtc" state="needs_review" hash="-1809138918">Transferă prin rețeaua locală</string>
-	<string name="button_label_export_zip" state="needs_review" hash="1575043364">Exportă ca ZIP</string>
-	<string name="button_label_import_zip" state="needs_review" hash="1299665090">Importă fișier ZIP</string>
-	<string name="dialog_title_transfer_choose_target_device" state="needs_review" hash="218115750">Alegeți dispozitivul țintă pentru această transferare</string>
-	<string name="transfer_label_no_other_active_device" state="needs_review" hash="-2135899221">Niciun alt dispozitiv activ</string>
-	<string name="transfer_label_messages" state="needs_review" hash="-1639407912">Mesaje</string>
-	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Debit</string>
-	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Rămas</string>
-	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Atașamente</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Această funcție este încă în faza de testare beta, iar implementarea actuală s-ar putea să nu fie compatibilă cu implementarea finală a transferului de istoric Olvid.\n\nÎnainte de a utiliza această funcție, asigurați-vă că dispozitivele dvs. rulează cea mai recentă versiune a Olvid.</string>
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Anulați transferul în curs?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">O transferare a istoricului este în curs. Doriți să o întrerupeți?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Anulează transferul</string>
 	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Aștept să mă alătur acestei discuții</string>
+	<string name="label_your_other_device" state="needs_review" hash="-339632056">Celălalt dispozitiv</string>
+	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">dorește să transfere istoricul conversațiilor pe acest dispozitiv</string>
+	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">\"%1$s\" dorește să transfere istoricul conversațiilor pe acest dispozitiv</string>
+	<string name="button_label_start_transfer" state="needs_review" hash="208526116">Începe transferul</string>
+	<string name="pref_disable_secondary_notifications_title" state="needs_review" hash="29372078">Dezactivați notificările \"secundare\"</string>
+	<string name="pref_disable_secondary_notifications_summary" state="needs_review" hash="-402927980">Această setare dezactivează notificările pentru reacțiile la mesajele tale sau pentru noile răspunsuri la sondajele tale.</string>
+	<string name="template_copy_multiple_messages" state="needs_review" hash="-1584473750">[%1$s] %2$s:\n%3$s</string>
+	<string name="label_export_your_chat_history" state="needs_review" hash="30036193">Exportă istoricul conversațiilor</string>
+	<string name="label_import_your_chat_history" state="needs_review" hash="-1058286401">Importă istoricul conversațiilor</string>
+	<string name="explanation_export_your_chat_history" state="needs_review" hash="2042738985">Utilizați această opțiune dacă transferați istoricul conversațiilor **de pe** acest dispozitiv.</string>
+	<string name="explanation_import_your_chat_history" state="needs_review" hash="366204152">Utilizați această opțiune dacă doriți să transferați istoricul conversațiilor **pe** acest dispozitiv.</string>
+	<string name="explanation_history_transfer" state="needs_review" hash="983501865">Această funcție vă permite să **transferați în siguranță** istoricul conversațiilor între două dintre dispozitivele dvs.\n\nÎnainte de a începe, profilul dvs. trebuie să **existe pe ambele dispozitive**.</string>
+	<string name="button_label_import" state="needs_review" hash="-984720905">Importă</string>
+	<string name="history_transfer_pick_profile_title" state="needs_review" hash="-1782334343">Cu ce profil doriți să continuați?</string>
+	<string name="history_transfer_pick_profile_text_import" state="needs_review" hash="-1162713377">Vă rugăm să alegeți profilul în care doriți să **importați istoricul conversațiilor**.</string>
+	<string name="history_transfer_pick_profile_text_export" state="needs_review" hash="951522414">Vă rugăm să alegeți profilul din care doriți să **exportați istoricul conversațiilor**.</string>
+	<string name="history_transfer_pick_method_title" state="needs_review" hash="661094742">Ce vrei să faci?</string>
+	<string name="history_transfer_pick_method_text_import" state="needs_review" hash="1116376527">Vă rugăm să alegeți modul în care doriți să importați istoricul conversațiilor profilului dvs. **%1$s**.</string>
+	<string name="history_transfer_pick_method_text_export" state="needs_review" hash="1750125743">Vă rugăm să alegeți modul în care doriți să exportați istoricul conversațiilor profilului dvs. **%1$s**.</string>
+	<string name="history_transfer_via_wifi_title" state="needs_review" hash="-2016953028">Transferă prin Wi-Fi</string>
+	<string name="history_transfer_via_wifi_message" state="needs_review" hash="-758708700">Pur și simplu, conectați ambele dispozitive la aceeași rețea Wi-Fi.</string>
+	<string name="history_transfer_via_zip_title_import" state="needs_review" hash="1608302669">Importați un fișier .zip</string>
+	<string name="history_transfer_via_zip_title_export" state="needs_review" hash="-1924849877">Exportă un fișier .zip</string>
+	<string name="history_transfer_via_zip_message_import" state="needs_review" hash="1766231761">Selectați fișierul .zip pe care l-ați copiat de pe dispozitivul vechi.</string>
+	<string name="history_transfer_via_zip_message_export" state="needs_review" hash="-1123951975">Descărcați un fișier .zip și copiați-l pe dispozitivul dvs. nou.</string>
+	<string name="history_transfer_import_zip_description" state="needs_review" hash="855194374">Pentru a importa istoricul conversațiilor, selectați fișierul .zip pe care l-ați **exportat de pe celălalt dispozitiv**.\n\nAsigurați-vă că profilul **%1$s** pe care l-ați selectat corespunde profilului utilizat pentru a genera acest fișier .zip.</string>
+	<string name="button_label_choose_zip_file" state="needs_review" hash="-493688169">Alegeți un fișier .zip</string>
+	<string name="dialog_title_error_reading_zip" state="needs_review" hash="1059408985">Eroare la citirea fișierului .zip</string>
+	<string name="dialog_message_error_reading_zip" state="needs_review" hash="1864744526">A apărut o eroare la citirea fișierului .zip furnizat.\n\nVă rugăm să vă asigurați că ați selectat un fișier de export al istoricului de chat Olvid.</string>
+	<string name="dialog_title_error_zip_password" state="needs_review" hash="1651240086">Parolă incorectă</string>
+	<string name="dialog_message_error_zip_password" state="needs_review" hash="216311562">Parola introdusă nu a permis decriptarea fișierului .zip selectat.\n\nVă rugăm să încercați din nou.</string>
+	<string name="dialog_title_zip_password_required" state="needs_review" hash="-944166479">Parolă necesară</string>
+	<string name="dialog_message_zip_password_required" state="needs_review" hash="548842041">Fișierul .zip selectat este protejat cu parolă. Vă rugăm să introduceți parola pe care ați ales-o când ați exportat istoricul conversațiilor pe celălalt dispozitiv.</string>
+	<string name="history_transfer_export_scope_title_export" state="needs_review" hash="933575859">Ce doriți să exportați?</string>
+	<string name="history_transfer_export_scope_title_transfer" state="needs_review" hash="-1971421411">Ce doriți să transferați?</string>
+	<string name="history_transfer_scope_messages_export_title" state="needs_review" hash="-1810394953">Exportă doar mesajele</string>
+	<string name="history_transfer_scope_messages_transfer_title" state="needs_review" hash="1119624141">Transferă doar mesajele</string>
+	<string name="history_transfer_scope_messages_export_message" state="needs_review" hash="-2120867312">Export mai mic. Sunt incluse doar mesajele text.</string>
+	<string name="history_transfer_scope_messages_transfer_message" state="needs_review" hash="2071005834">Transfer mai rapid. Sunt incluse doar mesajele text.</string>
+	<string name="history_transfer_scope_everything_export_title" state="needs_review" hash="463008259">Exportă mesajele și atașamentele</string>
+	<string name="history_transfer_scope_everything_transfer_title" state="needs_review" hash="-175297433">Transferă mesajele și atașamentele</string>
+	<string name="history_transfer_scope_everything_export_message" state="needs_review" hash="-266277978">Export complet. Include toate mesajele și atașamentele.</string>
+	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Transfer complet. Include toate mesajele și atașamentele.</string>
+	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Exportați istoricul conversațiilor ca fișier .zip. Mai târziu, îl puteți importa pe un alt dispozitiv al profilului dvs. **%1$s**.\n\nDe asemenea, puteți dezarhiva acest fișier pentru a **afișa istoricul conversațiilor într-o pagină web**.</string>
+	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Creează un fișier .zip</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d discuții și %2$d mesaje</string>
+	<string name="label_computing" state="needs_review" hash="1393495921">Se calculează…</string>
+	<string name="label_total_size" state="needs_review" hash="-788411929">Dimensiune totală: %1$s</string>
+	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Protejați-vă exporturile</string>
+	<string name="dialog_message_protect_export" state="needs_review" hash="-900141026">Pentru siguranța dumneavoastră, vă recomandăm să protejați exportul cu o parolă.</string>
+	<string name="button_label_generate_password" state="needs_review" hash="-1174237913">Generează o parolă</string>
+	<string name="button_label_choose_password" state="needs_review" hash="-1893200284">Alegeți o parolă</string>
+	<string name="button_label_continue_without_password" state="needs_review" hash="-106870576">Continuă fără parolă</string>
+	<string name="dialog_title_choose_password" state="needs_review" hash="1927816439">Alegeți o parolă</string>
+	<string name="dialog_title_generated_password" state="needs_review" hash="-690449371">Parolă generată</string>
+	<string name="dialog_message_generated_password" state="needs_review" hash="1100314355">Parola de mai jos a fost generată aleatoriu.\n\nAsigurați-vă că o **notați înainte de a continua**.</string>
+	<string name="button_label_copy_to_clipboard" state="needs_review" hash="-1309214553">Copiază în clipboard</string>
+	<string name="history_transfer_pick_target_device_title" state="needs_review" hash="1659408512">Selectați un dispozitiv</string>
+	<string name="history_transfer_pick_target_device_text" state="needs_review" hash="-1456199559">Vă rugăm să selectați dispozitivul către care doriți să transferați istoricul conversațiilor de pe dispozitivul actual.\n\nNu găsiți dispozitivul pe care îl căutați? Asigurați-vă că profilul dvs. **%1$s** este **activ pe acest alt dispozitiv**.</string>
+	<string name="history_transfer_no_other_device_explanation" state="needs_review" hash="-1034788616">Se pare că profilul dvs. **%1$s** nu are alte dispozitive active.\n\nVă rugăm să **adăugați noul dvs. dispozitiv la acest profil** înainte de a continua cu transferul istoricului conversațiilor.\n\nDe asemenea, puteți **exporta un fișier .zip** pentru a-l importa mai târziu pe noul dvs. dispozitiv.</string>
+	<string name="history_transfer_webrtc_instructions_title" state="needs_review" hash="-1353013738">Urmați acești pași pe celălalt dispozitiv</string>
+	<string name="history_transfer_instructions_turn_on_other_import" state="needs_review" hash="-930696177">Porniți dispozitivul care conține istoricul conversațiilor.</string>
+	<string name="history_transfer_instructions_same_wifi_import" state="needs_review" hash="465388607">Asigurați-vă că ambele dispozitive sunt conectate la aceeași rețea Wi-Fi.</string>
+	<string name="history_transfer_instructions_start_export" state="needs_review" hash="-1288439668">Pe celălalt dispozitiv, deschideți setările Olvid și începeți exportul istoricului conversațiilor.</string>
+	<string name="history_transfer_instructions_turn_on_other_export" state="needs_review" hash="1280642155">Activați **%1$s**.</string>
+	<string name="history_transfer_instructions_same_wifi_export" state="needs_review" hash="284833986">Asigurați-vă că acest dispozitiv și **%1$s** sunt conectate la aceeași rețea Wi-Fi.</string>
+	<string name="history_transfer_step_awaiting_confirmation" state="needs_review" hash="665601714">Așteptăm să acceptați transferul</string>
+	<string name="dialog_title_abort_history_transfer" state="needs_review" hash="1914158733">Întrerupe transferul în curs?</string>
+	<string name="dialog_title_abort_history_transfer_export" state="needs_review" hash="-856542741">Anulați exportul în curs?</string>
+	<string name="dialog_title_abort_history_transfer_import" state="needs_review" hash="976007540">Anulați importul în curs?</string>
+	<string name="dialog_message_abort_history_transfer_webrtc" state="needs_review" hash="1807742093">Ești sigur că vrei să întrerupi transferul istoricului de conversații în curs?\n\nPoți oricând să reîncepi transferul mai târziu, dacă dorești. **Tot ceea ce a fost deja transferat va fi păstrat** și nu va mai trebui transferat din nou.</string>
+	<string name="dialog_message_abort_history_transfer_zip_export" state="needs_review" hash="716134255">Ești sigur că vrei să anulezi exportul fișierului .zip în curs?\n\nÎn acest caz, va rămâne un **fișier .zip incomplet pe dispozitivul tău**, pe care va trebui să-l **ștergi manual**.</string>
+	<string name="dialog_message_abort_history_transfer_zip_import" state="needs_review" hash="1264487097">Ești sigur că vrei să anulezi importul fișierului .zip în curs?\n\nPoți oricând să reîncepi importul mai târziu, dacă dorești. **Tot ceea ce a fost deja importat va fi păstrat** și nu va mai trebui importat din nou.</string>
+	<string name="button_label_interrupt_and_continue_later" state="needs_review" hash="-976034947">Întrerupe și reia mai târziu</string>
+	<string name="button_label_abort_export" state="needs_review" hash="428199797">Anulați exportul</string>
+	<string name="button_label_abort_import" state="needs_review" hash="2031103191">Anulați importul</string>
+	<string name="history_transfer_fail_reason_aborted" state="needs_review" hash="277351522">Transferul a fost întrerupt</string>
+	<string name="history_transfer_fail_reason_unknown" state="needs_review" hash="-1170630200">A apărut o eroare necunoscută (probabil o deconectare de la rețea)</string>
+	<string name="history_transfer_fail_reason_identity_mismatch" state="needs_review" hash="936267267">Acest fișier .zip a fost exportat dintr-un profil diferit</string>
+	<string name="history_transfer_fail_reason_wrong_passwrod" state="needs_review" hash="1847441965">Parolă incorectă</string>
+	<string name="history_transfer_fail_reason_invalid_zip" state="needs_review" hash="-691417686">Nu se poate citi fișierul .zip (este cu adevărat un fișier de export al istoricului de chat Olvid?)</string>
+	<string name="transfer_label_sending_messages" state="needs_review" hash="2018039973">Trimiterea mesajelor</string>
+	<string name="transfer_label_exporting_messages" state="needs_review" hash="1572454408">Exportarea mesajelor</string>
+	<string name="transfer_label_importing_messages" state="needs_review" hash="1913024934">Importarea mesajelor</string>
+	<string name="transfer_label_receiving_messages" state="needs_review" hash="2015919003">Primirea mesajelor</string>
+	<string name="transfer_label_sending_attachments" state="needs_review" hash="2102571371">Se trimit atașamente</string>
+	<string name="transfer_label_exporting_attachments" state="needs_review" hash="-1029839434">Exportarea atașamentelor</string>
+	<string name="transfer_label_importing_attachments" state="needs_review" hash="1078186262">Importarea atașamentelor</string>
+	<string name="transfer_label_receiving_attachments" state="needs_review" hash="439049517">Primirea atașamentelor</string>
+	<string name="label_remaining_and_throughput" state="needs_review" hash="1772610397">Aproximativ %1$s rămase (%2$s)</string>
+	<string name="history_transfer_step_connecting_export" state="needs_review" hash="-28311439">Crearea fișierului .zip</string>
+	<string name="history_transfer_step_connecting_import" state="needs_review" hash="1323447620">Se deschide fișierul .zip</string>
+	<string name="history_transfer_step_failed_export" state="needs_review" hash="185890904">Exportarea a eșuat</string>
+	<string name="history_transfer_step_finished_export" state="needs_review" hash="1156914922">Exportul a fost finalizat</string>
+	<string name="history_transfer_step_failed_import" state="needs_review" hash="-909085512">Importarea a eșuat</string>
+	<string name="history_transfer_step_finished_import" state="needs_review" hash="-653312310">Import finalizat</string>
+	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">Exportare</string>
+	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Se importă</string>
+	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analizarea conținutului</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Analizarea discuțiilor exportate</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">A apărut o eroare la încărcarea fișierului de stil OpenStreetMap</string>
+	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Abonamentele în aplicație nu sunt disponibile</string>
+	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Versiunea Olvid pe care ați instalat-o nu include biblioteca Google Billing și nu acceptă achiziții în aplicație.\n\nPentru mai multe informații, vă rugăm să ne contactați la **feedback@olvid.io**.</string>
 </resources>

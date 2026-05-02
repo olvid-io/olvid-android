@@ -1,5 +1,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <io.olvid.messenger.customClasses.NoClickListPreference
         android:entries="@array/location_integration"
@@ -55,4 +56,35 @@
         android:title="@string/pref_location_hide_notifications_title"
         android:icon="@drawable/ic_pref_hide_notification_contents"
         android:order="50" />
+
+    <SwitchPreference
+        android:key="pref_key_location_gps_debug"
+        android:defaultValue="false"
+        app:isPreferenceVisible="false"
+        tools:isPreferenceVisible="true"
+        android:icon="@drawable/ic_pref_debug_log"
+        android:title="@string/pref_location_gps_debug_title"
+        android:order="60"
+        />
+
+    <SwitchPreference
+        android:key="pref_key_location_gps_always_on"
+        android:defaultValue="false"
+        app:isPreferenceVisible="false"
+        tools:isPreferenceVisible="true"
+        android:dependency="pref_key_location_gps_debug"
+        android:icon="@drawable/ic_pref_satelite"
+        android:title="@string/pref_location_gps_always_on_title"
+        android:order="61"
+        />
+
+    <Preference
+        android:key="pref_key_location_export_gps_logs"
+        app:isPreferenceVisible="false"
+        tools:isPreferenceVisible="true"
+        android:dependency="pref_key_location_gps_debug"
+        android:icon="@drawable/ic_pref_download"
+        android:title="@string/pref_location_export_gps_logs_title"
+        android:order="62"
+        />
 </PreferenceScreen>

@@ -69,7 +69,7 @@ class SubscriptionOfferViewModel : ViewModel() {
     var freeTrialFailed by mutableStateOf(false)
     var freeTrialButtonEnabled by mutableStateOf(true)
 
-    private var freeTrialJob: Job? = null
+    var freeTrialJob: Job? = null
 
     init {
         SubscriptionRepository.initialize(App.getContext())

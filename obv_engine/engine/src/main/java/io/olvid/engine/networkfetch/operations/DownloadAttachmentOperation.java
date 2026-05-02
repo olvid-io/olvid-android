@@ -52,7 +52,7 @@ public class DownloadAttachmentOperation extends PriorityOperation {
     public static final int RFC_ATTACHMENT_CANNOT_BE_FOUND = 3;
     public static final int RFC_DECRYPTION_ERROR = 5;
     public static final int RFC_ATTACHMENT_CANNOT_BE_FETCHED = 6;
-    public static final int RFC_NOT_YET_AVAILABLE_ON_SERVER = 7;
+    public static final int RFC_NOT_FOUND_ON_SERVER = 7;
     public static final int RFC_DOES_NOT_HAVE_THE_HIGHEST_PRIORITY = 8;
     public static final int RFC_MARKED_FOR_DELETION = 9;
     public static final int RFC_FETCH_NOT_REQUESTED = 10;
@@ -207,7 +207,7 @@ public class DownloadAttachmentOperation extends PriorityOperation {
                             cancel(RFC_INVALID_SIGNED_URL);
                             return;
                         case ServerMethodForS3.NOT_FOUND:
-                            cancel(RFC_NOT_YET_AVAILABLE_ON_SERVER);
+                            cancel(RFC_NOT_FOUND_ON_SERVER);
                             return;
                         case ServerMethodForS3.IDENTITY_IS_NOT_ACTIVE:
                             cancel(RFC_IDENTITY_IS_INACTIVE);

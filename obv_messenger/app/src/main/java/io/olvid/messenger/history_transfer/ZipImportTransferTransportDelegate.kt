@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor
 import io.olvid.engine.engine.types.ObvBytesKey
-import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.history_transfer.json.DstDiscussionExpectedRanges
 import io.olvid.messenger.history_transfer.json.DstDoNotRequestSha256
 import io.olvid.messenger.history_transfer.json.DstExpectedSha256
@@ -41,27 +40,33 @@ import io.olvid.messenger.history_transfer.json.SrcTransferDone
 import io.olvid.messenger.history_transfer.steps.countMessagesInRanges
 import io.olvid.messenger.history_transfer.types.AttachmentProgressListener
 import io.olvid.messenger.history_transfer.types.SrcTransferProtocolState
+import io.olvid.messenger.history_transfer.types.TransferAbort
+import io.olvid.messenger.history_transfer.types.TransferFailReason
 import io.olvid.messenger.history_transfer.types.TransferListener
 import io.olvid.messenger.history_transfer.types.TransferMessageType
 import io.olvid.messenger.history_transfer.types.TransferRole
 import io.olvid.messenger.history_transfer.types.TransferScope
 import io.olvid.messenger.history_transfer.types.TransferTransportDelegate
 import io.olvid.messenger.history_transfer.types.TransferTransportLayerState
+import net.lingala.zip4j.exception.ZipException
+import net.lingala.zip4j.io.inputstream.ZipInputStream
+import net.lingala.zip4j.model.LocalFileHeader
 import java.io.InputStream
-import java.util.zip.ZipEntry
-import java.util.zip.ZipInputStream
+import java.util.UUID
 
 
 class ZipImportTransferTransportDelegate(
     role: TransferRole,
     transferListener: TransferListener,
     objectMapper: ObjectMapper,
+    val bytesOwnedIdentity: ByteArray,
     val zipReadableFileUri: Uri,
+    val password: String?,
     val context: Context,
 ) : TransferTransportDelegate(role = role, transferListener = transferListener, objectMapper = objectMapper) {
     private var inputStream: InputStream? = null
     private var zipInputStream: ZipInputStream? = null
-    private var aborted = false
+    private var aborted = TransferAbort.NONE
 
     private val executor = NoExceptionSingleThreadExecutor("ZipImportTransferTransportDelegate")
 
@@ -71,41 +76,53 @@ class ZipImportTransferTransportDelegate(
 
     init {
         executor.execute {
+            // set the state to initializing to show the ongoing import notification
+            transferListener.onTransportLayerStateChange(TransferTransportLayerState.INITIALIZING)
+
             try {
                 inputStream = context.contentResolver.openInputStream(zipReadableFileUri)
-                zipInputStream = ZipInputStream(inputStream)
+                zipInputStream = ZipInputStream(inputStream, password?.toCharArray())
                 var foundAnAttachmentBeforeTheMessages = false
                 try {
                     zipInputStream?.let { zip ->
-                        // first find the json and read it
-                        var zipEntry: ZipEntry? = zip.nextEntry
-                        while (zipEntry != null) {
-                            if (zipEntry.name == JsonZipExport.DISCUSSION_AND_MESSAGES_JSON_FILE_NAME) {
-                                jsonZipExport = objectMapper.reader()
-                                    .without(JsonParser.Feature.AUTO_CLOSE_SOURCE)
-                                    .readValue(zip, JsonZipExport::class.java)
-                                break
-                            } else if (zipEntry.name.startsWith(JsonZipExport.ATTACHMENTS_DIRECTORY_NAME)) {
-                                Logger.e("ZIP if badly ordered")
-                                foundAnAttachmentBeforeTheMessages = true
+                        try {
+                            // first find the JSON and read it
+                            var zipEntry: LocalFileHeader? = zip.nextEntry
+                            while (zipEntry != null) {
+                                if (zipEntry.fileName == JsonZipExport.DISCUSSION_AND_MESSAGES_JSON_FILE_NAME) {
+                                    jsonZipExport = objectMapper.reader()
+                                        .without(JsonParser.Feature.AUTO_CLOSE_SOURCE)
+                                        .readValue(zip, JsonZipExport::class.java)
+                                    break
+                                } else if (zipEntry.fileName.startsWith(JsonZipExport.ATTACHMENTS_DIRECTORY_NAME)) {
+                                    Logger.e("ZIP if badly ordered")
+                                    foundAnAttachmentBeforeTheMessages = true
+                                }
+                                zipEntry = zip.nextEntry
                             }
-                            zipEntry = zip.nextEntry
-                        }
 
-                        jsonZipExport?.let { jsonZipExport ->
-                            // check that the ownedIdentity actually exists on the device
-                            jsonZipExport.bytesOwnedIdentity?.let { bytesOwnedIdentity ->
-                                AppDatabase.getInstance().ownedIdentityDao().get(bytesOwnedIdentity)
-                                    ?.let {
-                                        // pass this owned identity to the transfer service so the dstState can be properly initialized
-                                        transferListener.onOwnedIdentityFound(bytesOwnedIdentity)
-                                        // only create the source state if the identity exists
-                                        srcTransferState = SrcTransferProtocolState(
-                                            TransferScope.Profile,
-                                            bytesOwnedIdentity
-                                        )
-                                    }
+                            jsonZipExport?.let { jsonZipExport ->
+                                // check that the ownedIdentity matches what was passed
+                                if (jsonZipExport.bytesOwnedIdentity.contentEquals(
+                                        bytesOwnedIdentity
+                                    )
+                                ) {
+                                    // pass this owned identity to the transfer service so the dstState can be properly initialized
+                                    transferListener.onOwnedIdentityFound(bytesOwnedIdentity)
+                                    // only create the source state if the identity exists
+                                    srcTransferState = SrcTransferProtocolState(
+                                        TransferScope.Profile(messagesOnly = false),
+                                        bytesOwnedIdentity
+                                    )
+                                } else {
+                                    transferListener.setFailReason(TransferFailReason.OWNED_IDENTITY_MISMATCH)
+                                }
+                            } ?: {
+                                transferListener.setFailReason(TransferFailReason.BAD_ZIP_FORMAT)
                             }
+                        } catch (e: ZipException) {
+                            Logger.x(e)
+                            transferListener.setFailReason(TransferFailReason.BAD_ZIP_PASSWORD)
                         }
                     }
                 } finally {
@@ -119,11 +136,12 @@ class ZipImportTransferTransportDelegate(
                 }
 
                 if (srcTransferState == null) {
+                    // if we did not initialize the state
                     transferListener.onTransportLayerStateChange(TransferTransportLayerState.CLOSED)
                 } else {
                     if (inputStream == null) {
                         inputStream = context.contentResolver.openInputStream(zipReadableFileUri)
-                        zipInputStream = ZipInputStream(inputStream)
+                        zipInputStream = ZipInputStream(inputStream, password?.toCharArray())
                     }
                     transferListener.onTransportLayerStateChange(TransferTransportLayerState.READY)
 
@@ -142,14 +160,14 @@ class ZipImportTransferTransportDelegate(
                         )
                     )
 
-                    val allDiscussionRanges = mutableMapOf<JsonDiscussionIdentifier, Map<ObvBytesKey, Map<String, List<List<Long>>>>>()
+                    val allDiscussionRanges = mutableMapOf<JsonDiscussionIdentifier, Map<ObvBytesKey, Map<UUID, List<List<Long>>>>>()
 
                     jsonZipExport?.messages?.forEach { jsonZipMessages ->
                         val discussionIdentifier = jsonZipMessages.discussion ?: return@forEach
                         val senderBytesKey = jsonZipMessages.sender?.let { ObvBytesKey(it) } ?: return@forEach
-                        val threadId = jsonZipMessages.threadId ?: return@forEach
+                        val threadId = UUID.fromString(jsonZipMessages.threadId) ?: return@forEach
 
-                        val discussionMap = allDiscussionRanges.get(discussionIdentifier)?.toMutableMap() ?: mutableMapOf()
+                        val discussionMap = allDiscussionRanges[discussionIdentifier]?.toMutableMap() ?: mutableMapOf()
                         val senderMap = discussionMap[senderBytesKey]?.toMutableMap() ?: mutableMapOf()
                         val threadList = mutableListOf<List<Long>>()
                         var currentStride: MutableList<Long>? = null
@@ -294,13 +312,13 @@ class ZipImportTransferTransportDelegate(
         return null
     }
 
-    override fun abort() {
-        aborted = true
+    override fun abort(userInitiated: Boolean) {
+        aborted = if (userInitiated) TransferAbort.USER_ABORT else TransferAbort.DISCONNECT
         cleanup()
     }
 
     override fun isAborted(): Boolean {
-        return aborted
+        return aborted != TransferAbort.NONE
     }
 
     override fun cleanup() {
@@ -330,7 +348,7 @@ class ZipImportTransferTransportDelegate(
             val sequenceNumbers = srcTransferState?.expectedDiscussionRanges
                 ?.get(discussionIdentifier)
                 ?.get(ObvBytesKey(senderIdentifier))
-                ?.get(threadId)
+                ?.get(UUID.fromString(threadId))
                 ?.flatMap { it[0]..it[1] }
                 ?.takeIf { it.isNotEmpty() }
                 ?.toSet()
@@ -385,38 +403,40 @@ class ZipImportTransferTransportDelegate(
         }
         sendPendingAttachmentsCalled = true
         zipInputStream?.let { zip ->
-            var zipEntry: ZipEntry? = zip.nextEntry
-            while (zipEntry != null) {
-                // skip entries that are not files
-                if (zipEntry.name.startsWith(JsonZipExport.ATTACHMENTS_DIRECTORY_NAME)) {
-                    try {
-                        val sha256 = Logger.fromHexString(zipEntry.name.substring(JsonZipExport.ATTACHMENTS_DIRECTORY_NAME.length))
-                        val sha256key = ObvBytesKey(sha256)
-                        if (pendingSha256.contains(sha256key)) {
-                             transferListener.onNewAttachment(sha256)?.let { pair ->
-                                 val outputStream = pair.first
-                                 val attachmentProgressListener = pair.second
+            runCatching {
+                var zipEntry: LocalFileHeader? = zip.nextEntry
+                while (zipEntry != null) {
+                    // skip entries that are not files
+                    if (zipEntry.fileName.startsWith(JsonZipExport.ATTACHMENTS_DIRECTORY_NAME)) {
+                        try {
+                            val sha256 =
+                                Logger.fromHexString(zipEntry.fileName.substring(JsonZipExport.ATTACHMENTS_DIRECTORY_NAME.length))
+                            val sha256key = ObvBytesKey(sha256)
+                            if (pendingSha256.contains(sha256key)) {
+                                transferListener.onNewAttachment(sha256)?.let { triple ->
+                                    val outputStream = triple.first
+                                    val attachmentProgressListener = triple.third
 
-                                 var totalSize = 0L
-                                 val buffer = ByteArray(65536)
-                                 var c = zip.read(buffer)
-                                 while (c >= 0) {
-                                     outputStream.write(buffer, 0, c)
-                                     totalSize += c
-                                     attachmentProgressListener?.bytesTransferred(c.toLong())
-                                     c = zip.read(buffer)
-                                 }
-                                 transferListener.onAttachmentComplete(sha256, totalSize)
-                                 srcTransferState?.sentBytes += totalSize
-                             }
+                                    var totalSize = 0L
+                                    val buffer = ByteArray(65536)
+                                    var c = zip.read(buffer)
+                                    while (c >= 0) {
+                                        outputStream.write(buffer, 0, c)
+                                        totalSize += c
+                                        attachmentProgressListener?.bytesTransferred(c.toLong())
+                                        c = zip.read(buffer)
+                                    }
+                                    transferListener.onAttachmentComplete(sha256)
+                                    srcTransferState?.sentBytes += totalSize
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Logger.x(e)
                         }
-                    } catch (e: Exception) {
-                        Logger.x(e)
                     }
+                    zipEntry = zip.nextEntry
                 }
-                zipEntry = zip.nextEntry
             }
-
         }
 
         // this test should always be true. Anyway, we have nothing more to send!

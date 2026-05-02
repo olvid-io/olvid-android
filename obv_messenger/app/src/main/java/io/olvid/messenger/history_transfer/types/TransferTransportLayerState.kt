@@ -20,6 +20,7 @@
 package io.olvid.messenger.history_transfer.types
 
 enum class TransferTransportLayerState {
+    NOT_STARTED, // we are still negotiating in the "control" step, no WebRTC connection has been attempted yet
     INITIALIZING, // transport layer is starting
     CONNECTING, // transport layer is starting
     READY, // transport layer is functional, messages can be sent

@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,6 +51,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,6 +86,7 @@ import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.constantSp
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.discussion.message.attachments.Attachment
+import io.olvid.messenger.services.AudioOutput
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -97,7 +100,16 @@ fun DraftAttachments(
     onAttachmentClick: (Attachment) -> Unit,
     onDeleteClick: (Attachment) -> Unit
 ) {
+    val listState = rememberLazyListState()
+    var previousSize by remember { mutableIntStateOf(0) }
+    LaunchedEffect(attachments.size) {
+        if (attachments.size > previousSize && attachments.isNotEmpty()) {
+            listState.animateScrollToItem(attachments.size - 1)
+        }
+        previousSize = attachments.size
+    }
     LazyRow(
+        state = listState,
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -341,7 +353,7 @@ fun DraftAudioIcon(
             object : AudioAttachmentServiceBinding.AudioServiceBindableViewHolder {
                 override fun updatePlayTimeMs(
                     audioInfo: AudioAttachmentServiceBinding.AudioInfo,
-                    timeMs: Long,
+                    playTimeMs: Long,
                     playing: Boolean
                 ) {
                     isPlaying = playing
@@ -349,7 +361,7 @@ fun DraftAudioIcon(
 
                 override fun bindAudioInfo(
                     audioInfo: AudioAttachmentServiceBinding.AudioInfo,
-                    audioOutput: io.olvid.messenger.services.MediaPlayerService.AudioOutput?,
+                    audioOutput: AudioOutput,
                     playbackSpeed: Float
                 ) {
                     failed = audioInfo.failed
@@ -360,12 +372,9 @@ fun DraftAudioIcon(
                 }
 
                 override fun setAudioOutput(
-                    audioOutput: io.olvid.messenger.services.MediaPlayerService.AudioOutput?,
+                    audioOutput: AudioOutput,
                     somethingPlaying: Boolean
                 ) {
-                }
-
-                override fun setPlaybackSpeed(playbackSpeed: Float) {
                 }
 
                 override fun getFyleAndStatus(): FyleMessageJoinWithStatusDao.FyleAndStatus {
@@ -411,29 +420,28 @@ fun DraftAttachmentSizeOrDuration(
             object : AudioAttachmentServiceBinding.AudioServiceBindableViewHolder {
                 override fun updatePlayTimeMs(
                     audioInfo: AudioAttachmentServiceBinding.AudioInfo,
-                    timeMs: Long,
+                    playTimeMs: Long,
                     playing: Boolean
                 ) {
-                    playTime = timeMs
+                    playTime = playTimeMs
                     duration = audioInfo.durationMs
                     isPlaying = playing
                 }
 
                 override fun bindAudioInfo(
                     audioInfo: AudioAttachmentServiceBinding.AudioInfo,
-                    audioOutput: io.olvid.messenger.services.MediaPlayerService.AudioOutput?,
+                    audioOutput: AudioOutput,
                     playbackSpeed: Float
                 ) {
                 }
 
                 override fun setFailed(f: Boolean) {}
                 override fun setAudioOutput(
-                    audioOutput: io.olvid.messenger.services.MediaPlayerService.AudioOutput?,
+                    audioOutput: AudioOutput,
                     somethingPlaying: Boolean
                 ) {
                 }
 
-                override fun setPlaybackSpeed(playbackSpeed: Float) {}
                 override fun getFyleAndStatus(): FyleMessageJoinWithStatusDao.FyleAndStatus =
                     attachment.fyleAndStatus
             }

@@ -19,6 +19,7 @@
 
 package io.olvid.messenger.discussion.compose
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.text.Editable
@@ -62,6 +63,7 @@ import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.mention.MentionViewModel
 import io.olvid.messenger.settings.SettingsActivity
 
+
 @Composable
 fun DiscussionInputEditText(
     modifier: Modifier = Modifier,
@@ -80,6 +82,7 @@ fun DiscussionInputEditText(
     AndroidView(
         modifier = modifier,
         factory = { ctx ->
+            @SuppressLint("InflateParams")
             val layout = LayoutInflater.from(ctx).inflate(R.layout.view_discussion_input_edit_text, null)
             layout.findViewById<DiscussionInputEditText>(R.id.discussion_input_edit_text).apply {
                 maxLines = 6
@@ -179,12 +182,14 @@ fun DiscussionInputEditText(
                             true
                         ).run()
                     }
-                    AddFyleToDraftFromUriTask(
-                        contentUri!!,
-                        fileName,
-                        mimeType,
-                        discussionViewModel.discussionId!!
-                    ).run()
+                    contentUri?.let {
+                        AddFyleToDraftFromUriTask(
+                            contentUri,
+                            fileName,
+                            mimeType,
+                            discussionViewModel.discussionId!!
+                        ).run()
+                    }
                     callMeWhenDone?.run()
                 }
                 setOnEditorActionListener(

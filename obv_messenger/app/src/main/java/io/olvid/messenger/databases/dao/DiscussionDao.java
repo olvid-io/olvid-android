@@ -554,6 +554,10 @@ public abstract class DiscussionDao {
             " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
     @Nullable public abstract Long getMaxLastMessageTimestamp(@NonNull byte[] bytesOwnedIdentity);
 
+    @Query("SELECT COUNT(*) FROM " + Discussion.TABLE_NAME +
+            " WHERE " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity ")
+    public abstract LiveData<Integer> countForOwnedIdentity(byte[] bytesOwnedIdentity);
+
 
     public static class DiscussionAndLastMessage {
         @Embedded(prefix = "disc_")

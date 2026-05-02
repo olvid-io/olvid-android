@@ -22,21 +22,17 @@ package io.olvid.messenger.history_transfer.types
 import io.olvid.engine.datatypes.EtaEstimator
 import io.olvid.engine.engine.types.ObvBytesKey
 import io.olvid.messenger.history_transfer.json.JsonDiscussionIdentifier
+import java.util.UUID
 
 
 class DstTransferProtocolState: TransferProtocolState() {
-    init {
-        // on dst side, start in connecting state
-        transferProgress.value = TransferProgress.Connecting
-    }
-
     var bytesOwnedIdentity: ByteArray? = null
 
     var srcDiscussionIdentifiers: Set<JsonDiscussionIdentifier>? = null
     var receivedSrcDiscussionTitles = mutableMapOf<JsonDiscussionIdentifier, String?>()
 
     var expectedSha256s: Map<ObvBytesKey, Long>? = null
-    var expectedDiscussionRanges = mutableMapOf<JsonDiscussionIdentifier, Map<ObvBytesKey, Map<String, List<List<Long>>>>>()
+    var expectedDiscussionRanges = mutableMapOf<JsonDiscussionIdentifier, Map<ObvBytesKey, Map<UUID, List<List<Long>>>>>()
     var totalMessageCount = 0
     var receivedMessageCount = 0
 
@@ -73,11 +69,9 @@ class DstTransferProtocolState: TransferProtocolState() {
             return false
         } else if (!readyToReceiveMessages()) {
             transferProgress.value = TransferProgress.Negotiating
-        } else if (receivedMessageCount < totalMessageCount) {
-            transferProgress.value = TransferProgress.TransferringMessages(receivedMessageCount, totalMessageCount)
-        } else if (receivedBytes < totalBytes) {
-            transferProgress.value = TransferProgress.TransferringFiles(receivedBytes, totalBytes)
-            return true
+        } else if (receivedMessageCount < totalMessageCount || receivedBytes < totalBytes) {
+            transferProgress.value = TransferProgress.Transferring(receivedMessageCount, totalMessageCount, receivedBytes, totalBytes)
+            return receivedMessageCount == totalMessageCount
         } else {
             transferProgress.value = TransferProgress.Finished
             return true

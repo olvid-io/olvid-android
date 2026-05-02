@@ -28,6 +28,7 @@ import io.olvid.messenger.history_transfer.json.SrcDiscussionRanges
 import io.olvid.messenger.history_transfer.types.DstTransferProtocolState
 import io.olvid.messenger.history_transfer.types.TransferMessageType
 import io.olvid.messenger.history_transfer.types.TransferTransportDelegate
+import java.util.UUID
 
 
 class DstSendDiscussionExpectedRangesStep(
@@ -58,7 +59,7 @@ class DstSendDiscussionExpectedRangesStep(
 
         val discussion: Discussion? = jsonDiscussionIdentifier.getDiscussion(db, bytesOwnedIdentity)
 
-        val expectedRanges: Map<ObvBytesKey, Map<String, List<List<Long>>>>
+        val expectedRanges: Map<ObvBytesKey, Map<UUID, List<List<Long>>>>
         if (discussion == null) {
             expectedRanges = ranges
         } else {

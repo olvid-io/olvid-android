@@ -50,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -62,6 +63,7 @@ import io.olvid.messenger.designsystem.components.DialogSecure
 import io.olvid.messenger.designsystem.components.OlvidCircularProgress
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
+import io.olvid.messenger.history_transfer.IncomingTransferConfirmationDialog
 import io.olvid.messenger.history_transfer.types.TransferProgress
 import io.olvid.messenger.history_transfer.types.TransferProgress.Connecting.getStepName
 
@@ -69,113 +71,137 @@ import io.olvid.messenger.history_transfer.types.TransferProgress.Connecting.get
 fun TransferNotification(
     modifier: Modifier = Modifier,
     transferProgress: TransferProgress,
-    onClick: () -> Unit,
+    onAcceptTransfer: () -> Unit,
+    openTransferActivity: () -> Unit,
     onAbort: () -> Unit,
 ) {
     var showAbortConfirmation by remember { mutableStateOf(false) }
 
-    Card(
-        modifier = modifier
-            .padding(horizontal = 8.dp)
-            .widthIn(max = 360.dp)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = ripple(),
-                onClick = onClick
+    if (transferProgress is TransferProgress.DestinationWaitingForConfirmation) {
+        Card(
+            modifier = modifier
+                .padding(horizontal = 8.dp)
+                .widthIn(max = 360.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.Transparent,
+                contentColor = colorResource(R.color.almostBlack),
             ),
-        colors = CardDefaults.cardColors(
-            containerColor = colorResource(R.color.newDialogBackground),
-            contentColor = colorResource(R.color.almostBlack),
-        ),
-        border = BorderStroke(1.dp, colorResource(R.color.newDialogBorder)),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(8.dp),
-            verticalAlignment = CenterVertically
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
         ) {
-            Box(
-                modifier = Modifier.size(48.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = transferProgress is TransferProgress.ContactingOtherDevice
-                            || transferProgress is TransferProgress.Connecting
-                            || transferProgress is TransferProgress.Negotiating
-                ) {
-                    OlvidCircularProgress(
-                        size = 48.dp,
-                    )
-                }
-
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = transferProgress is TransferProgress.TransferringMessages
-                ) {
-                    OlvidCircularProgress(
-                        progress = (transferProgress as? TransferProgress.TransferringMessages)?.let {
-                            it.progress.toFloat() / it.total
-                        } ?: 1f,
-                        size = 48.dp,
-                    )
-                }
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = transferProgress is TransferProgress.TransferringFiles
-                ) {
-                    OlvidCircularProgress(
-                        progress = (transferProgress as? TransferProgress.TransferringFiles)?.let {
-                            it.progress.toFloat() / it.total
-                        } ?: 1f,
-                        size = 48.dp,
-                    )
-                }
-                Icon(
-                    modifier = Modifier.size(32.dp),
-                    painter = painterResource(R.drawable.ic_transfer),
-                    tint = colorResource(R.color.olvid_gradient_light),
-                    contentDescription = null
-                )
-            }
-
-            Spacer(Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f, true), verticalArrangement = Arrangement.Center) {
-                Text(
-                    text = stringResource(R.string.history_transfer_title),
-                    color = colorResource(id = R.color.primary700),
-                    style = OlvidTypography.h3,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-
-                Text(
-                    text = transferProgress.getStepName(true),
-                    color = colorResource(id = R.color.greyTint),
-                    style = OlvidTypography.body2,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Spacer(Modifier.width(8.dp))
-
-            IconButton(
-                modifier = Modifier
-                    .size(48.dp)
-                    .padding(4.dp),
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = colorResource(id = R.color.red).copy(alpha = .5f),
-                    contentColor = colorResource(R.color.red)
+            IncomingTransferConfirmationDialog(
+                onDismiss = onAbort,
+                onConfirm = {
+                    onAcceptTransfer.invoke()
+                    openTransferActivity.invoke()
+                },
+                showCloseButton = false,
+                deviceName = transferProgress.sourceDeviceName
+            )
+        }
+    } else {
+        if (transferProgress is TransferProgress.ContactingOtherDevice
+            || transferProgress is TransferProgress.Connecting
+            || transferProgress is TransferProgress.Negotiating
+            || transferProgress is TransferProgress.Transferring) {
+            Card(
+                modifier = modifier
+                    .padding(horizontal = 8.dp)
+                    .widthIn(max = 360.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple(),
+                        onClick = openTransferActivity
+                    ),
+                colors = CardDefaults.cardColors(
+                    containerColor = colorResource(R.color.newDialogBackground),
+                    contentColor = colorResource(R.color.almostBlack),
                 ),
-                shape = CircleShape,
-                onClick = {
-                    showAbortConfirmation = true
-                }
+                border = BorderStroke(1.dp, colorResource(R.color.newDialogBorder)),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
             ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(R.drawable.ic_stop),
-                    contentDescription = stringResource(R.string.button_label_cancel)
-                )
+                Row(
+                    modifier = Modifier
+                        .padding(8.dp),
+                    verticalAlignment = CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier.size(48.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = transferProgress is TransferProgress.ContactingOtherDevice
+                                    || transferProgress is TransferProgress.Connecting
+                                    || transferProgress is TransferProgress.Negotiating
+                        ) {
+                            OlvidCircularProgress(
+                                size = 48.dp,
+                            )
+                        }
+
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = transferProgress is TransferProgress.Transferring
+                        ) {
+                            OlvidCircularProgress(
+                                progress = (transferProgress as? TransferProgress.Transferring)?.let {
+                                    (if (it.messagesTotal != 0) it.messagesProgress.toFloat() / it.messagesTotal / 2f else .5f) +
+                                            (if (it.filesTotal != 0L) it.filesProgress.toFloat() / it.filesTotal / 2f else .5f)
+                                } ?: 1f,
+                                size = 48.dp,
+                            )
+                        }
+                        Icon(
+                            modifier = Modifier.size(32.dp),
+                            painter = painterResource(R.drawable.ic_transfer),
+                            tint = colorResource(R.color.olvid_gradient_light),
+                            contentDescription = null
+                        )
+                    }
+
+                    Spacer(Modifier.width(16.dp))
+                    Column(
+                        modifier = Modifier.weight(1f, true),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.history_transfer_title),
+                            color = colorResource(id = R.color.primary700),
+                            style = OlvidTypography.h3,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            text = transferProgress.getStepName(),
+                            color = colorResource(id = R.color.greyTint),
+                            style = OlvidTypography.body2,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+
+                    IconButton(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .padding(4.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = colorResource(id = R.color.red).copy(alpha = .5f),
+                            contentColor = colorResource(R.color.red)
+                        ),
+                        shape = CircleShape,
+                        onClick = {
+                            showAbortConfirmation = true
+                        }
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(R.drawable.ic_stop),
+                            contentDescription = stringResource(R.string.button_label_cancel)
+                        )
+                    }
+                }
             }
         }
     }
@@ -231,27 +257,31 @@ fun TransferNotificationPreview() {
         verticalArrangement = spacedBy(16.dp)
     ) {
         TransferNotification(
+            transferProgress = TransferProgress.DestinationWaitingForConfirmation(null),
+            openTransferActivity = { },
+            onAbort = { },
+            onAcceptTransfer = {},
+        )
+
+        TransferNotification(
             transferProgress = TransferProgress.ContactingOtherDevice,
-            onClick = { },
-            onAbort = { }
+            openTransferActivity = { },
+            onAbort = { },
+            onAcceptTransfer = {},
         )
 
         TransferNotification(
             transferProgress = TransferProgress.Negotiating,
-            onClick = { },
-            onAbort = { }
+            openTransferActivity = { },
+            onAbort = { },
+            onAcceptTransfer = {},
         )
 
         TransferNotification(
-            transferProgress = TransferProgress.TransferringMessages(150, 3000),
-            onClick = { },
-            onAbort = { }
-        )
-
-        TransferNotification(
-            transferProgress = TransferProgress.TransferringFiles(5000L, 10000L),
-            onClick = { },
-            onAbort = { }
+            transferProgress = TransferProgress.Transferring(150, 3000, 5000L, 10000L),
+            openTransferActivity = { },
+            onAbort = { },
+            onAcceptTransfer = {},
         )
     }
 }

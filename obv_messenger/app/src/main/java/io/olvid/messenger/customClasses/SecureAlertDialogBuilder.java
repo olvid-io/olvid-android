@@ -38,7 +38,7 @@ public class SecureAlertDialogBuilder extends AlertDialog.Builder {
     @Override
     public AlertDialog create() {
         AlertDialog alertDialog = super.create();
-        if (SettingsActivity.preventScreenCapture()) {
+        if (SettingsActivity.preventScreenCapture(getContext())) {
             Window window = alertDialog.getWindow();
             if (window != null) {
                 window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);

@@ -25,24 +25,24 @@ import io.olvid.messenger.R
 
 
 sealed interface TransferProgress {
+    data class DestinationWaitingForConfirmation(val sourceDeviceName: String?): TransferProgress
     data object ContactingOtherDevice: TransferProgress
     data object Connecting: TransferProgress
     data object Negotiating : TransferProgress
-    data class TransferringMessages(val progress: Int, val total: Int) : TransferProgress
-    data class TransferringFiles(val progress: Long, val total: Long) : TransferProgress
+    data class Transferring(val messagesProgress: Int, val messagesTotal: Int, val filesProgress: Long, val filesTotal: Long): TransferProgress
     data object Finished: TransferProgress
     data class Failed(val reason: TransferFailReason): TransferProgress
 
     @Composable
-    fun TransferProgress?.getStepName(shortName: Boolean): String {
+    fun TransferProgress?.getStepName(): String {
         return when (this) {
+            is DestinationWaitingForConfirmation -> stringResource(R.string.history_transfer_step_awaiting_confirmation)
             ContactingOtherDevice -> stringResource(R.string.history_transfer_step_contacting_other_device)
             Connecting -> stringResource(R.string.history_transfer_step_connecting)
-            Negotiating -> if (shortName) stringResource(R.string.history_transfer_step_negotiating_short) else stringResource(R.string.history_transfer_step_negotiating)
-            is TransferringMessages -> if (shortName) stringResource(R.string.history_transfer_step_transferring_messages_short) else stringResource(R.string.history_transfer_step_transferring_messages)
-            is TransferringFiles -> if (shortName) stringResource(R.string.history_transfer_step_transferring_files_short) else stringResource(R.string.history_transfer_step_transferring_files)
+            Negotiating -> stringResource(R.string.history_transfer_step_negotiating)
+            is Transferring -> stringResource(R.string.history_transfer_step_transferring)
             Finished -> stringResource(R.string.history_transfer_step_finished)
-            is Failed -> stringResource(R.string.history_transfer_step_failed) // TODO: change message depending on fail reason
+            is Failed -> stringResource(R.string.history_transfer_step_failed)
             null -> stringResource(R.string.history_transfer_step_none)
         }
     }

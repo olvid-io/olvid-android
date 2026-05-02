@@ -79,7 +79,7 @@ import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.EmptyRecyclerView
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.onBackPressed

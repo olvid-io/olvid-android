@@ -78,7 +78,7 @@ import androidx.compose.ui.unit.sp
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.UnreadCountsSingleton
-import io.olvid.messenger.customClasses.LockableActivity.CLIPBOARD_SERVICE
+import android.content.Context.CLIPBOARD_SERVICE
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.ContactCacheSingleton
@@ -534,7 +534,6 @@ private fun LocationMessageContent(
     if (message.messageType == Message.TYPE_OUTBOUND_MESSAGE && message.locationType == Message.LOCATION_TYPE_SHARE && message.status != Message.STATUS_SENT_FROM_ANOTHER_DEVICE) {
         Text(
             modifier = Modifier
-                .padding(4.dp)
                 .fillMaxWidth()
                 .then(
                     if (blockClicks)
@@ -546,7 +545,8 @@ private fun LocationMessageContent(
                             },
                             indication = ripple()
                         ) { onStopSharingLocation() }
-                ),
+                )
+                .padding(4.dp),
             text = stringResource(id = R.string.title_stop_sharing_location),
             color = colorResource(
                 id = R.color.red
@@ -607,7 +607,7 @@ fun LocationMessageContentPreview() {
             lastUpdated = "Latest update: 01/04/2021 12:20",
             explanation = "Sharing location until 16:55",
             scale = 1f,
-            address = "2, rue de la Paix, 75000 Paris, France",
+            address = "2 rue de la Paix, 75000 Paris, France",
             onClick = {},
             onLongClick = {},
             onStopSharingLocation = {},

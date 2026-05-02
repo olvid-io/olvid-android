@@ -53,7 +53,7 @@ public class ComputeAttachmentPreviewsAndPostMessageTask implements Runnable {
 
     private final long messageId;
     @Nullable
-    private final MessageRecipientInfo messageRecipientInfo; // non null when this is a repost for a specific contact
+    private final MessageRecipientInfo messageRecipientInfo; // non-null when this is a repost for a specific contact
     private byte[] extendedPayload = null;
 
     public ComputeAttachmentPreviewsAndPostMessageTask(long messageId, @Nullable MessageRecipientInfo messageRecipientInfo) throws Exception {

@@ -89,7 +89,7 @@ import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
@@ -100,6 +100,7 @@ import io.olvid.messenger.databases.entity.TextBlock
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask
 import io.olvid.messenger.designsystem.theme.olvidSwitchDefaults
+import io.olvid.messenger.discussion.linkpreview.OpenGraph
 import io.olvid.messenger.gallery.GalleryActivity.MENU_TYPE.DELETE_ONLY
 import io.olvid.messenger.gallery.GalleryActivity.MENU_TYPE.INCOMPLETE_OR_DRAFT
 import io.olvid.messenger.gallery.GalleryActivity.MENU_TYPE.NONE
@@ -243,7 +244,10 @@ class GalleryActivity : LockableActivity() {
                                 show()
                             }
                         } else {
-                            App.toast(R.string.toast_message_text_copied_to_clipboard, Toast.LENGTH_SHORT)
+                            App.toast(
+                                R.string.toast_message_text_copied_to_clipboard,
+                                Toast.LENGTH_SHORT
+                            )
                             positionBlock?.text?.let {
                                 clipboard?.setPrimaryClip(
                                     ClipData.newPlainText(
@@ -382,7 +386,8 @@ class GalleryActivity : LockableActivity() {
             }
             AnimatedVisibility(
                 visible = fyleAndStatus?.fyleMessageJoinWithStatus?.textExtracted == true
-                        && fyleAndStatus?.fyleMessageJoinWithStatus?.textContent.isNullOrEmpty().not(),
+                        && fyleAndStatus?.fyleMessageJoinWithStatus?.textContent.isNullOrEmpty()
+                    .not(),
                 enter = slideInVertically { it },
                 exit = slideOutVertically { it },
             ) {
@@ -392,7 +397,8 @@ class GalleryActivity : LockableActivity() {
                         .background(color = colorResource(R.color.blackOverlay)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Switch(checked = showTextBlocks,
+                    Switch(
+                        checked = showTextBlocks,
                         onCheckedChange = { checked ->
                             showTextBlocks = checked
                         },
@@ -422,10 +428,19 @@ class GalleryActivity : LockableActivity() {
             val draft = intent.getBooleanExtra(DRAFT_INTENT_EXTRA, false)
             val messageId = intent.getLongExtra(INITIAL_MESSAGE_ID_INTENT_EXTRA, -1)
             val fyleId = intent.getLongExtra(INITIAL_FYLE_ID_INTENT_EXTRA, -1)
-            var showTextBlocks = intent.getBooleanExtra(SHOW_TEXT_BLOCKS_INTENT_EXTRA, false)
+            val showTextBlocks = intent.getBooleanExtra(SHOW_TEXT_BLOCKS_INTENT_EXTRA, false)
 
-
-            if (discussionId != -1L) {
+            if (intent.hasExtra(LOAD_FROM_OPEN_GRAPH_INTENT_EXTRA)
+                && intent.getBooleanExtra(LOAD_FROM_OPEN_GRAPH_INTENT_EXTRA, false)) {
+                openGraphToShow?.let { openGraph ->
+                    // clear the openGraph from the companion
+                    openGraphToShow = null
+                    if (openGraph.isEmpty().not()) {
+                        viewModel.setLinkPreview(openGraph)
+                        galleryAdapter.setLinkPreviewData(openGraph)
+                    }
+                }
+            } else if (discussionId != -1L) {
                 viewModel.setDiscussionId(discussionId, ascending)
             } else if (bytesOwnedIdentity != null) {
                 viewModel.setBytesOwnedIdentity(bytesOwnedIdentity, sortOrder, ascending)
@@ -546,6 +561,14 @@ class GalleryActivity : LockableActivity() {
 
     private fun updateMenuForMessage(message: Message?) {
         val newMenuType: MENU_TYPE
+        // Link previews have no real file backing, so no menu actions
+        if (viewModel.galleryType == GalleryViewModel.GalleryType.LINK_PREVIEW) {
+            if (currentMenuType != NONE) {
+                currentMenuType = NONE
+                invalidateOptionsMenu()
+            }
+            return
+        }
         val fyleAndStatus = viewModel.currentFyleAndStatus.value
         newMenuType =
             if (fyleAndStatus == null || message == null || fyleAndStatus.fyleMessageJoinWithStatus.messageId != message.id) {
@@ -553,7 +576,8 @@ class GalleryActivity : LockableActivity() {
             } else {
                 if (message.wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ
                     || fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_FAILED
-                    || fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_UNTRANSFERRED) {
+                    || fyleAndStatus.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_UNTRANSFERRED
+                ) {
                     DELETE_ONLY
                 } else if (message.status == Message.STATUS_DRAFT || !fyleAndStatus.fyle.isComplete) {
                     INCOMPLETE_OR_DRAFT
@@ -718,12 +742,35 @@ class GalleryActivity : LockableActivity() {
         galleryAdapter.cleanup()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun bindFileInfo(fyleAndStatus: FyleAndStatus?) {
         if (fyleAndStatus == null) {
             fileNameTextView.text = null
             fileSizeTextView.text = null
             mimeTypeTextView.text = null
             resolutionTextView.text = null
+            isShowingVideo = false
+        } else if (viewModel.galleryType == GalleryViewModel.GalleryType.LINK_PREVIEW) {
+            // Use OpenGraph data for link previews
+            viewModel.linkPreviewOpenGraph?.let { og ->
+                fileNameTextView.text = og.url ?: og.originalUrl ?: ""
+                val bitmap = og.bitmap
+                if (bitmap != null) {
+                    fileSizeTextView.text = null
+                    resolutionTextView.text = "${bitmap.width}x${bitmap.height}"
+                } else {
+                    fileSizeTextView.text = null
+                    resolutionTextView.text = null
+                }
+                mimeTypeTextView.text =
+                    if (bitmap?.hasAlpha() == true) "image/png" else "image/jpeg"
+            } ?: run {
+                fileNameTextView.text = null
+                fileSizeTextView.text = null
+                mimeTypeTextView.text = null
+                resolutionTextView.text = null
+            }
+            bottomBar.invalidate()
             isShowingVideo = false
         } else {
             fileNameTextView.text = fyleAndStatus.fyleMessageJoinWithStatus.fileName
@@ -1114,6 +1161,9 @@ class GalleryActivity : LockableActivity() {
         const val INITIAL_MESSAGE_ID_INTENT_EXTRA: String = "initial_message_id"
         const val INITIAL_FYLE_ID_INTENT_EXTRA: String = "initial_fyle_id"
         const val SHOW_TEXT_BLOCKS_INTENT_EXTRA: String = "show_text_blocks"
+
+        const val LOAD_FROM_OPEN_GRAPH_INTENT_EXTRA = "link_preview_url_intent_extra"
+        var openGraphToShow: OpenGraph? = null
 
         const val CONTROLS_SHOWN_INSTANCE_STATE_EXTRA: String = "controls_shown"
         const val TEXT_BLOCKS_SHOWN_INSTANCE_STATE_EXTRA: String = "text_blocks_shown"

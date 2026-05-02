@@ -64,7 +64,7 @@ public class IdentityManagerSyncSnapshot implements ObvSyncSnapshotNode {
             throw new Exception();
         }
         Identity ownedIdentity = Identity.of(owned_identity);
-        if (!identityManagerSession.identityDelegate.isOwnedIdentity(identityManagerSession.session, ownedIdentity)) {
+        if (!identityManagerSession.identityDelegate.isOwnedIdentity(identityManagerSession.session, ownedIdentity, true)) {
             Logger.e("Trying to restore a snapshot of an unknown owned identity");
             throw new Exception();
         }

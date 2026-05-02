@@ -38,8 +38,8 @@ android {
         applicationId = "io.olvid.messenger"
         minSdk = 23
         targetSdk = 36
-        versionCode = 297
-        versionName = "4.2.5"
+        versionCode = 302
+        versionName = "4.3"
         vectorDrawables.useSupportLibrary = true
         // MultiDex is enabled by default for minSdk >= 21
         androidResources {
@@ -178,7 +178,7 @@ androidComponents {
         }
     }
 
-    onVariants(selector().withBuildType("release")) { variant ->
+    onVariants { variant ->
         variant.packaging.resources.excludes.add("META-INF/*")
     }
 }
@@ -204,7 +204,6 @@ dependencies {
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-//    implementation(fileTree(mapOf("include" to listOf("*.jar", "*.aar"), "dir" to "libs")))
     implementation(project(":sardine-android"))
     implementation(project(":engine"))
     implementation(libs.olvid.webrtc.android)
@@ -261,6 +260,7 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.jsoup)
+    implementation(libs.zip4j)
 
     implementation(libs.bundles.paging)
 
@@ -280,15 +280,9 @@ dependencies {
     "fullImplementation"(libs.google.play.services.maps)
     "fullImplementation"(libs.google.play.services.location)
     "fullImplementation"(libs.google.play.services.auth)
-    "fullImplementation"(libs.google.http.client.gson) {
-        exclude(group = "org.apache.httpcomponents")
-    }
-    "fullImplementation"(libs.google.api.client.android) {
-        exclude(group = "org.apache.httpcomponents")
-    }
-    "fullImplementation"(libs.google.api.services.drive) {
-        exclude(group = "org.apache.httpcomponents")
-    }
+    "fullImplementation"(libs.google.http.client.gson)
+    "fullImplementation"(libs.google.api.client.android)
+    "fullImplementation"(libs.google.api.services.drive)
     "fullImplementation"(libs.google.play.review.ktx)
     "fullImplementation"(libs.google.play.services.oss.licenses)
     "fullImplementation"(libs.google.mlkit.barcode.scanning)

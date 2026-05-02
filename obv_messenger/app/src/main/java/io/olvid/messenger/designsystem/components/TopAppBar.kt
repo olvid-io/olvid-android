@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -125,6 +126,7 @@ fun <T> SelectionTopAppBar(
                         (if (selection.isEmpty()) actions else selectionActions).forEach {
                             IconButton(onClick = it.second, enabled = it.first !in disabledItems) {
                                 Icon(
+                                    modifier = Modifier.size(24.dp),
                                     painter = painterResource(it.first),
                                     contentDescription = null
                                 )

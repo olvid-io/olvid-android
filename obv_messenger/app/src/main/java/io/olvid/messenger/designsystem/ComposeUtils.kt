@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.findViewTreeLifecycleOwner
@@ -59,6 +60,17 @@ operator fun PaddingValues.plus(other: PaddingValues): PaddingValues {
         top = this.calculateTopPadding() + other.calculateTopPadding(),
         end = this.calculateEndPadding(layoutDirection) + other.calculateEndPadding(layoutDirection),
         bottom = this.calculateBottomPadding() + other.calculateBottomPadding()
+    )
+}
+
+@Composable
+operator fun PaddingValues.minus(other: PaddingValues): PaddingValues {
+    val layoutDirection = LocalLayoutDirection.current
+    return PaddingValues(
+        start = (this.calculateStartPadding(layoutDirection) - other.calculateStartPadding(layoutDirection)).coerceAtLeast(0.dp),
+        top = (this.calculateTopPadding() - other.calculateTopPadding()).coerceAtLeast(0.dp),
+        end = (this.calculateEndPadding(layoutDirection) - other.calculateEndPadding(layoutDirection)).coerceAtLeast(0.dp),
+        bottom = (this.calculateBottomPadding() - other.calculateBottomPadding()).coerceAtLeast(0.dp)
     )
 }
 

@@ -46,7 +46,7 @@ import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder.Type.DISCUSSION
 import io.olvid.messenger.customClasses.StringUtils
-import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.customClasses.formatMarkdownToAnnotatedString
 import io.olvid.messenger.customClasses.formatSingleLineMarkdown
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
@@ -426,7 +426,7 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
                         || message.isLocationMessage
                     ) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                            append(AnnotatedString(body).formatMarkdown())
+                            append(body.formatMarkdownToAnnotatedString())
                         }
                     } else {
                         append(body.formatSingleLineMarkdown())
@@ -750,7 +750,7 @@ fun Discussion.getAnnotatedBody(context: Context, message: Message?): AnnotatedS
 
                 Message.TYPE_INBOUND_EPHEMERAL_MESSAGE -> {
                     withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                        append(AnnotatedString(message.getStringContent(context)).formatMarkdown())
+                        append(message.getStringContent(context))
                     }
                 }
 

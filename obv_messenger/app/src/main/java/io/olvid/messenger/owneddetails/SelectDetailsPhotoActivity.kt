@@ -49,7 +49,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type
 import io.olvid.messenger.App
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.onBackPressed
 import java.io.File
 import java.io.FileOutputStream

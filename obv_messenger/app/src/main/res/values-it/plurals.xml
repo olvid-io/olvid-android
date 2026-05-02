@@ -1,4 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="label_files_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="6081130">%1$d file</item>
+		<item quantity="other" state="needs_review" hash="2115209750">%1$d file</item>
+	</plurals>
 	<plurals name="text_files" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1591553998">File</item>
 		<item quantity="other" state="needs_review" hash="2115209750">%1$d file</item>
@@ -265,5 +269,9 @@
 	<plurals name="subscription_offer_month_free" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="-1966265224">%1$d mese gratuito</item>
 		<item quantity="other" state="needs_review" hash="-599634154">%1$d mesi gratuiti</item>
+	</plurals>
+	<plurals name="toast_message_messages_copied_to_clipboard" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1393207312">%1$d messaggio copiato negli appunti</item>
+		<item quantity="other" state="needs_review" hash="-604999755">%1$d messaggio(i) copiato(i) negli appunti</item>
 	</plurals>
 </resources>

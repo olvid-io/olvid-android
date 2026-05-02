@@ -21,7 +21,6 @@ package io.olvid.messenger.discussion.location;
 
 import android.graphics.Bitmap;
 import android.location.Location;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,9 +37,11 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class MapViewAbstractFragment extends Fragment {
-    // any early interaction with the map must be in the callback runnable (else map is not ready and it won't work)
+    // any early interaction with the map must be in the callback runnable (else map is not ready, and it won't work)
     abstract void setOnMapReadyCallback(@Nullable Runnable callback);
     abstract void setRedrawMarkersCallback(@Nullable Runnable callback);
+    // if a style fails to load, the fragment may call this with the URL of the style file as an argument, or an empty String if no style is provided
+    abstract void setFailedStyleUrlCallback(@Nullable Consumer<String> consumer);
 
     // interact with user position
     @RequiresPermission(anyOf = {"android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"})
@@ -54,12 +55,10 @@ public abstract class MapViewAbstractFragment extends Fragment {
     abstract void launchMapSnapshot(@NonNull Consumer<Bitmap> onSnapshotReadyCallback);
 
     abstract void setLayersButtonVisibilitySetter(Consumer<Boolean> layersButtonVisibilitySetter);
-    abstract void onLayersButtonClicked(View view);
 
-    // customize map
-//    abstract void setGestureEnabled(boolean enabled);
-//    abstract void setOnMapClickListener(Runnable clickListener);
-//    abstract void setOnMapLongClickListener(Runnable clickListener);
+    abstract java.util.Map<String, String> getMapLayers();
+    abstract String getCurrentMapLayerId();
+    abstract void setMapLayer(String id);
 
     // markers api (use first call in onMapReadyCallback)
     abstract void addMarker(long id, Bitmap icon, @NonNull LatLngWrapper latLngWrapper, @Nullable Float precision);
@@ -110,7 +109,8 @@ public abstract class MapViewAbstractFragment extends Fragment {
                 east += 360;
             }
 
-            if ((largestGapValue == 0 || (360 - largestGapValue) < 0.005) && (latNorth - latSouth) < 0.05) {
+            // if points are very close to one another, use the default zoom, centered in the middle
+            if ((largestGapValue == 0 || (360 - largestGapValue) < 0.002) && (latNorth - latSouth) < 0.003) {
                 return new Pair<>(
                         new LatLngWrapper((latSouth + latNorth) / 2, (west + east) / 2),
                         null);

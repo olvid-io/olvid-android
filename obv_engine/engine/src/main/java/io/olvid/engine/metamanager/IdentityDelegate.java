@@ -72,7 +72,7 @@ import io.olvid.engine.identity.databases.sync.IdentityManagerSyncSnapshot;
 import io.olvid.engine.identity.datatypes.KeycloakGroupBlob;
 
 public interface IdentityDelegate {
-    boolean isOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
+    boolean isOwnedIdentity(Session session, Identity ownedIdentity, boolean excludeMarkedForDeletionIdentities) throws SQLException;
     boolean isActiveOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;
     Identity generateOwnedIdentity(Session session, String server, JsonIdentityDetails jsonIdentityDetails, ObvKeycloakState keycloakState, String deviceDisplayName, PRNGService prng) throws SQLException;
     void deleteOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException;

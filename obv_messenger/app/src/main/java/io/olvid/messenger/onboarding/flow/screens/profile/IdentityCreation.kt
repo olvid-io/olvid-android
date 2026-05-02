@@ -57,7 +57,7 @@ import androidx.navigation.compose.rememberNavController
 import io.olvid.messenger.R
 import io.olvid.messenger.R.color
 import io.olvid.messenger.R.string
-import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.customClasses.formatMarkdownToAnnotatedString
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.OnboardingActivity
 import io.olvid.messenger.onboarding.flow.OnboardingAction
@@ -128,7 +128,7 @@ fun NavGraphBuilder.identityCreation(onboardingFlowViewModel: OnboardingFlowView
             }
         ) {
             Text(
-                text = AnnotatedString(stringResource(R.string.onboarding_privacy_disclaimer)).formatMarkdown(),
+                text = stringResource(R.string.onboarding_privacy_disclaimer).formatMarkdownToAnnotatedString(),
                 style = OlvidTypography.h3.copy(fontWeight = FontWeight.Normal),
                 color = colorResource(R.color.almostBlack),
                 textAlign = TextAlign.Center,

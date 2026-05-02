@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Detaily kontaktu</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Detaily uživatele</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Podrobnosti skupiny</string>
@@ -258,7 +258,6 @@
 	<string name="text_you" state="needs_review" hash="672009142">Ty</string>
 	<string name="title_invite_chooser" state="needs_review" hash="1726572772">Zvolte, jak chcete odeslat pozvánku</string>
 	<string name="title_sharing_chooser" state="needs_review" hash="291715689">Zvolte způsob sdílení</string>
-	<string name="toast_message_android_bug_attach_duplicate_uri" state="needs_review" hash="-776215584">Některé soubory se nepodařilo připojit ke zprávě kvůli chybě ve vaší verzi Androidu (více souborů vrátilo stejné URI). Zkuste znovu připojit chybějící soubory.</string>
 	<string name="toast_message_attachment_being_copied" state="needs_review" hash="-978855599">Příloha se stále zpracovává. Vaše zpráva bude odeslána po dokončení zpracování.</string>
 	<string name="toast_message_attachment_saved" state="needs_review" hash="-2073631581">Příloha uložena</string>
 	<string name="toast_message_camera_permission_denied" state="needs_review" hash="1896719877">Přístup k fotoaparátu byl zamítnut</string>
@@ -344,6 +343,9 @@
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">Po aktivaci Olvid načte náhled odkazů, které odešlete, a připojí je ke zprávě.</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">Načíst náhledy přijatých odkazů</string>
 	<string name="pref_link_preview_summary_inbound" state="needs_review" hash="-320325429">Po aktivaci Olvid automaticky načte náhledy odkazů, které obdržíš (pokud není náhled připojen k zprávě).</string>
+	<string name="link_preview_menu_copy_link" state="needs_review" hash="1269903076">Kopírovat odkaz</string>
+	<string name="link_preview_menu_open_in_browser" state="needs_review" hash="-1711141559">Otevřít v prohlížeči</string>
+	<string name="link_preview_menu_open_image" state="needs_review" hash="-2013483894">Zobrazit obrázek</string>
 	<string name="pref_discussion_read_receipt_title" state="needs_review" hash="-652307837">Potvrzení o přečtení</string>
 	<string name="pref_text_app_default" state="needs_review" hash="1920567018">Použít výchozí nastavení</string>
 	<string name="pref_text_app_default_true" state="needs_review" hash="-948780646">Použijte výchozí nastavení (zapnuto)</string>
@@ -352,6 +354,10 @@
 	<string name="pref_text_discussion_read_receipt_on" state="needs_review" hash="983295321">Zapnuto, kontakty jsou informovány</string>
 	<string name="pref_use_lock_screen_title" state="needs_review" hash="540058239">Použít zamykací obrazovku aplikace</string>
 	<string name="pref_use_lock_screen_summary" state="needs_review" hash="-399095273">Zapněte toto pro ochranu Olvid pomocí zamykací obrazovky při spuštění.</string>
+	<string name="pref_lock_screen_required_by_mdm" state="needs_review" hash="-500219406">Vyžadováno vaší organizací</string>
+	<string name="lock_screen_setup_title" state="needs_review" hash="932203184">Vyžadováno uzamčení obrazovky</string>
+	<string name="lock_screen_setup_explanation" state="needs_review" hash="169071212">Vaše organizace vyžaduje, abyste tuto aplikaci chránili pomocí PIN kódu nebo hesla na uzamčené obrazovce.</string>
+	<string name="lock_screen_setup_button" state="needs_review" hash="672169315">Nastavit PIN</string>
 	<string name="pref_category_notifications_title" state="needs_review" hash="1237583104">Oznámení</string>
 	<string name="pref_category_privacy_title" state="needs_review" hash="-1750659871">Soukromí</string>
 	<string name="pref_category_other_title" state="needs_review" hash="-1683901612">Další nastavení</string>
@@ -370,7 +376,7 @@
 	<string name="button_label_use_pin" state="needs_review" hash="918492771">Použijte PIN místo hesla</string>
 	<string name="hint_enter_pin" state="needs_review" hash="999437557">Zadejte PIN</string>
 	<string name="hint_confirm_pin" state="needs_review" hash="1780268503">Potvrdit PIN</string>
-	<string name="text_pin_creation_explanation" state="needs_review" hash="-1935715126">Budeš muset zadat tento PIN pro odemknutí Olvid.\nNelze jej obnovit a můžeš ztratit přístup ke svým datům Olvid, pokud jej zapomeneš.</string>
+	<string name="text_pin_creation_explanation" state="needs_review" hash="1232246926">Budete muset zadat tento PIN pro odemknutí Olvid.\nNelze jej obnovit a pokud jej zapomenete, **můžete ztratit přístup ke svým datům Olvid**. </string>
 	<string name="error_text_pin_too_short" state="needs_review" hash="-1085309478">PIN je příliš krátký (minimálně 4 číslice)</string>
 	<string name="error_text_pin_mismatch" state="needs_review" hash="-4525766">Nesprávný PIN</string>
 	<string name="hint_enter_password" state="needs_review" hash="478503341">Zadejte heslo</string>
@@ -394,6 +400,7 @@
 	<string name="pref_text_lock_grace_time_infinity" state="needs_review" hash="146086108">Zámknout Olvid ručně</string>
 	<string name="pref_unlock_biometry_summary_none_enrolled" state="needs_review" hash="-118589413">Biometrická autentizace ještě není na vašem zařízení nakonfigurována.</string>
 	<string name="dialog_title_unlock_olvid" state="needs_review" hash="-2054572246">Odemkněte Olvid pomocí biometrie</string>
+	<string name="dialog_title_unlock_neutral" state="needs_review" hash="761644522">Odemkněte pomocí biometrie</string>
 	<string name="notification_channel_unified_service_name" state="needs_review" hash="1404446256">Popřední služba</string>
 	<string name="notification_channel_unified_service_description" state="needs_review" hash="-1204081836">Trvalá notifikace zobrazující stav Olvida</string>
 	<string name="notification_title_olvid_is_unlocked" state="needs_review" hash="1688502744">Olvid je odemčený</string>
@@ -437,6 +444,7 @@
 	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">Tvůj profil byl deaktivován na tomto zařízení.\n\nVypadá to, že momentálně nemáš žádné aktivní zařízení, takže si můžeš svůj profil kdykoli znovu aktivovat.\n\nPokud chceš pokračovat, stiskni „znovu aktivovat můj profil na tomto zařízení“ níže.\n\nStiskni „zrušit“, abys zavřel toto okno a ponechal toto zařízení neaktivní: nebudeš moci na tomto zařízení odesílat ani přijímat zprávy, ale stále si budeš moci prohlédnout své staré diskuze.</string>
 	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">Váš profil byl deaktivován na tomto zařízení.\n\nVypadá to, že nemáte licenci pro používání Olvid na více zařízeních současně. Pro opětovnou aktivaci tohoto zařízení je nutné deaktivovat jiné vaše zařízení.\n\nPokud chcete pokračovat, vyberte zařízení, které chcete deaktivovat, ze seznamu níže a poté stiskněte \"aktivovat můj profil na tomto zařízení\".\n\nStiskněte \"zrušit\" a zavřete toto okno a ponechte toto zařízení neaktivní: nebudete moci odesílat ani přijímat zprávy na tomto zařízení, ale stále si budete moci prohlédnout své staré diskuze.</string>
 	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">Váš profil byl na tomto zařízení deaktivován.\n\nVypadá to, že všechna vaše ostatní zařízení budou brzy deaktivována, takže si můžete kdykoli znovu aktivovat profil na tomto zařízení. Pro vaši informaci je níže uveden seznam vašich aktuálně aktivních zařízení.\n\nPokud chcete pokračovat, stiskněte níže \"znovu aktivovat můj profil na tomto zařízení\".\n\nStiskněte \"zrušit\" a zavřete toto okno a ponechte toto zařízení neaktivní: nebudete moci na tomto zařízení odesílat ani přijímat zprávy, ale budete si moci prohlížet své staré konverzace.</string>
+	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">Tvůj profil je na tomto zařízení deaktivován.\n\nNebudeš zde moci odesílat ani přijímat zprávy, dokud jej znovu neaktivuješ.</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">Znovu aktivovat můj profil na tomto zařízení</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">Nastala chyba. Zkuste to znovu.</string>
 	<string name="dialog_title_identity_activated" state="needs_review" hash="-1465666248">ID Olvid reaktivováno</string>
@@ -810,10 +818,7 @@
 	<string name="toast_message_voice_message_recording_failed" state="needs_review" hash="-632817078">Nepodařilo se nahrát hlasovou zprávu</string>
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Přehrávač médií</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Ovládání přehrávání/pauzy při přehrávání médií v Olvid</string>
-	<string name="notification_title_now_playing" state="needs_review" hash="-1042122929">Přehrávání…</string>
-	<string name="notification_action_pause" state="needs_review" hash="1931883968">Pozastavit</string>
-	<string name="notification_action_play" state="needs_review" hash="1143766922">Přehrát</string>
-	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="-1049639416">Nelze přehrát %1$s</string>
+	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Nelze přehrát zvukový soubor</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Smazat</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Smazat všude</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Nelze smazat na všech zařízeních. Zkuste to znovu.</string>
@@ -843,7 +848,6 @@
 	<string name="dialog_message_unmute_notifications" state="needs_review" hash="816867976">Upozornění na nové zprávy jsou aktuálně ztlumená.\n\nChcete je znovu zapnout?</string>
 	<string name="dialog_message_unmute_notifications_muted_until" state="needs_review" hash="-325454266">Upozornění na nové zprávy jsou ztlumené do: %1$s.\n\nChceš je znovu zapnout?</string>
 	<string name="notification_action_mute" state="needs_review" hash="-1553988068">Ztlumit</string>
-	<string name="pref_scaled_turn_title" state="needs_review" hash="-1234636269">Vyberte, které regionální TURN servery použít</string>
 	<string name="explanation_identity_creation_options" state="needs_review" hash="-795537312">Tato obrazovka vám umožňuje vybrat další možnosti pro vytvoření vašeho Olvid ID. Můžete zadat možnosti ručně nebo naskenovat konfigurační QR kód.</string>
 	<string name="button_label_check_options" state="needs_review" hash="-759177128">Zkontrolovat možnosti</string>
 	<string name="hint_olvid_server" state="needs_review" hash="1097391633">Server Olvid</string>
@@ -859,6 +863,8 @@
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Zdá se, že váš server Olvid nepodporuje zahajování zabezpečených hovorů.\n\nPro více informací kontaktujte svého administrátora.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Možnosti vytvoření ID</string>
 	<string name="text_option_server" state="needs_review" hash="-1130676431">Server: %1$s</string>
+	<string name="dialog_title_non_default_server" state="needs_review" hash="2119192219">Používání jiného než výchozího serveru</string>
+	<string name="dialog_message_non_default_server" state="needs_review" hash="459308900">Chystáte se vytvořit profil na následujícím serveru:\n\n%1$s\n\nToto není výchozí server Olvid. Pokračujte pouze v případě, že tomuto serveru důvěřujete.</string>
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Licence: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Poskytovatel identity</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Server poskytovatele identity</string>
@@ -1202,8 +1208,6 @@
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Připojení: PŘIPOJENO</string>
 	<string name="label_ping_delay" state="needs_review" hash="25344924">Ping: %1$d ms</string>
 	<string name="label_over_max_ping_delay" state="needs_review" hash="-684190262">Ping: &gt;%1$ds</string>
-	<string name="menu_action_copy_message_text" state="needs_review" hash="1799737962">Kopírovat text zprávy</string>
-	<string name="menu_action_copy_text_and_attachments" state="needs_review" hash="428315032">Kopírovat zprávu a přílohy</string>
 	<string name="label_message_copied_from_olvid" state="needs_review" hash="1145396410">Zpráva zkopírována z Olvid</string>
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">Celá zpráva byla zkopírována do schránky</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">Zkratka pro odeslání předdefinované zprávy kontaktu nebo skupině jedním kliknutím</string>
@@ -1403,7 +1407,6 @@
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Kopie</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Poloha odeslána</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Poloha přijata</string>
-	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">Služby pro určování polohy jsou nedostupné</string>
 	<string name="label_send_your_location" state="needs_review" hash="618026241">Sdílet polohu</string>
 	<string name="notification_title_sharing_location" state="needs_review" hash="-1626101904">Sdílení polohy v Olvid</string>
 	<string name="notification_action_stop_sharing" state="needs_review" hash="585626699">Zastavit sdílení</string>
@@ -1530,6 +1533,8 @@
 	<string name="text_setting_lock_biometry" state="needs_review" hash="-1698353580">‣ Odemknout pomocí biometrie:</string>
 	<string name="text_setting_lock_notification" state="needs_review" hash="2022286622">‣ Trvalá notifikace na uzamčené obrazovce:</string>
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">‣ Smazat citlivé zprávy po 3 nesprávných PIN kódech:\u0020</string>
+	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">‣ Vyžaduje uzamčení obrazovky:</string>
+	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">‣ Resetujte kód pro odemknutí obrazovky:</string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">‣ Automatické stahování příloh archivovaných konverzací:</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">‣ Obnovení archivovaných konverzací při notifikaci nové zprávy:</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">‣ Náhled odkazu přijat:\u0020</string>
@@ -1592,8 +1597,8 @@
 	<string name="label_open_original_link_with_trackers" state="needs_review" hash="-1586932660">Použijte původní odkaz obsahující sledovací parametry</string>
 	<string name="dialog_title_confirm_open_olvid_link" state="needs_review" hash="425949498">Otevřít tento odkaz v Olvid?</string>
 	<string name="toast_message_unable_to_open_url" state="needs_review" hash="-1486954792">Nelze otevřít URL</string>
-	<string name="text_explanation_location_map_provider" state="needs_review" hash="-173394547">Výběr poskytovatele map umožňuje přesně vybrat polohu, kterou chcete sdílet na mapě. To však může prozradit vaše polohu (nebo polohu vašich kontaktů) tomuto poskytovateli služeb.</string>
-	<string name="text_explanation_location_map_provider_settings" state="needs_review" hash="68421420">Tuto volbu lze změnit v nastavení aplikace.</string>
+	<string name="dialog_title_choose_map_provider" state="needs_review" hash="1225681568">Vyberte poskytovatele map</string>
+	<string name="dialog_message_choose_map_provider" state="needs_review" hash="-2129640593">Vyberte si níže poskytovatele map, který se bude používat pro zobrazení mapy při prohlížení nebo sdílení polohy.\n\nMějte na paměti, že tímto se může **zveřejnit vaše poloha (nebo poloha vašich kontaktů) tomuto poskytovateli služeb.**</string>
 	<string name="button_label_choose_provider" state="needs_review" hash="-797956886">Vyberte poskytovatele</string>
 	<string name="button_label_live_share" state="needs_review" hash="327122881">Živé sdílení</string>
 	<string name="label_fetching_address" state="needs_review" hash="-839353954">Získávání adresy…</string>
@@ -1802,7 +1807,9 @@
 	<string name="dialog_title_custom_address_server_url" state="needs_review" hash="-2071925830">Vlastní adresní server</string>
 	<string name="hint_custom_address_server_url" state="needs_review" hash="1348105685">URL serveru pro vyhledávání adres</string>
 	<string name="dialog_message_custom_address_server_url" state="needs_review" hash="401731382">Olvid podporuje pouze servery **Pelias** pro vyhledávání adres. Zadejte prosím URL serveru, který chcete použít, níže, měl by vypadat například *https://pelias.olvid.io*, a dotazy budou odeslány na vstupní bod */v1/reverse*.\n\nUpozorňujeme, že tento server se může dozvědět některé informace o vaší poloze. Ujistěte se, že **používáte server, kterému důvěřujete**.</string>
-	<string name="toast_message_playback_speed_not_supported_on_device" state="needs_review" hash="502764942">Nelze změnit rychlost přehrávání</string>
+	<string name="pref_location_gps_debug_title" state="needs_review" hash="1786532100">Povolte funkce pro ladění sdílení polohy</string>
+	<string name="pref_location_gps_always_on_title" state="needs_review" hash="1250376384">Nechte GPS neustále zapnuté</string>
+	<string name="pref_location_export_gps_logs_title" state="needs_review" hash="-459831250">Exportovat protokoly GPS aktivit</string>
 	<string name="text_speed_1x" state="needs_review" hash="789822816">1×</string>
 	<string name="text_speed_1_5x" state="needs_review" hash="-120181054">1,5×</string>
 	<string name="text_speed_2x" state="needs_review" hash="1171767872">2×</string>
@@ -2143,15 +2150,11 @@
 	<string name="history_transfer_step_none" state="needs_review" hash="1228580785">Žádný probíhající přenos</string>
 	<string name="history_transfer_step_contacting_other_device" state="needs_review" hash="1719019815">Čekám na jiné zařízení</string>
 	<string name="history_transfer_step_connecting" state="needs_review" hash="1836039168">Připojuji se k jinému zařízení</string>
-	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Probíhá vyjednávání (krok 1 ze 3)</string>
-	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Přenos zpráv (krok 2 ze 3)</string>
-	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Přenos příloh (krok 3 ze 3)</string>
-	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Probíhá vyjednávání</string>
-	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Přenos zpráv</string>
-	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Přenos příloh</string>
+	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Probíhá vyjednávání</string>
+	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Přenos</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Přenos dokončen</string>
-	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Přenos přerušen</string>
-	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Přenos historie chatu (beta verze)</string>
+	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Přenos selhal</string>
+	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Přenos historie chatu</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Nelze zahájit přenos. Možná už probíhá jiný přenos?</string>
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Použijte \"magický odkaz\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Neplatný magický odkaz</string>
@@ -2164,18 +2167,111 @@
 	<string name="onboarding_transfer_keycloak_error_message_authentication_impossible" state="needs_review" hash="-1891385979">Zdá se, že žádná z podporovaných metod ověřování není k dispozici.</string>
 	<string name="pref_use_alt_turn_servers_title" state="needs_review" hash="-1956132776">Použijte alternativní servery TURN</string>
 	<string name="pref_use_alt_turn_servers_summary" state="needs_review" hash="357427162">Aktivujte tuto možnost pro použití TURN serverů s rotujícími IP adresami. Pokud si nejste jisti, nechte tuto možnost vypnutou 😁</string>
-	<string name="button_label_transfer_through_webrtc" state="needs_review" hash="-1809138918">Přenos přes lokální síť</string>
-	<string name="button_label_export_zip" state="needs_review" hash="1575043364">Exportovat ZIP</string>
-	<string name="button_label_import_zip" state="needs_review" hash="1299665090">Importovat ZIP</string>
-	<string name="dialog_title_transfer_choose_target_device" state="needs_review" hash="218115750">Vyberte cílové zařízení pro tento přenos.</string>
-	<string name="transfer_label_no_other_active_device" state="needs_review" hash="-2135899221">Žádné jiné aktivní zařízení</string>
-	<string name="transfer_label_messages" state="needs_review" hash="-1639407912">Zprávy</string>
-	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Propustnost</string>
-	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Zbývající</string>
-	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Přílohy</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Tato funkce je stále ve fázi beta testování a aktuální implementace nemusí být kompatibilní s finální implementací přenosu historie Olvid.\n\nNež začnete tuto funkci používat, ujistěte se, že vaše zařízení mají nainstalovanou nejnovější verzi Olvid.</string>
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Chcete přerušit probíhající přenos?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Přenos historie právě probíhá. Chcete ho zrušit?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Přerušit přenos</string>
 	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Čekám, až se mohu připojit k této diskusi</string>
+	<string name="label_your_other_device" state="needs_review" hash="-339632056">Vaše druhé zařízení</string>
+	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">chce přenést historii chatu na toto zařízení</string>
+	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">\"%1$s\" chce přenést historii tvých konverzací na toto zařízení</string>
+	<string name="button_label_start_transfer" state="needs_review" hash="208526116">Spusťte přenos</string>
+	<string name="pref_disable_secondary_notifications_title" state="needs_review" hash="29372078">Vypnout \"sekundární\" oznámení</string>
+	<string name="pref_disable_secondary_notifications_summary" state="needs_review" hash="-402927980">Toto nastavení vypne upozornění na reakce na vaše zprávy nebo nové odpovědi na vaše ankety.</string>
+	<string name="template_copy_multiple_messages" state="needs_review" hash="-1584473750">[%1$s] [%2$s]:\n[%3$s]</string>
+	<string name="label_export_your_chat_history" state="needs_review" hash="30036193">Exportujte historii chatu</string>
+	<string name="label_import_your_chat_history" state="needs_review" hash="-1058286401">Importujte historii chatu</string>
+	<string name="explanation_export_your_chat_history" state="needs_review" hash="2042738985">Použijte tuto možnost, pokud chcete přenést historii chatu **z** tohoto zařízení.</string>
+	<string name="explanation_import_your_chat_history" state="needs_review" hash="366204152">Použijte tuto možnost, pokud chcete přenést historii chatu do tohoto zařízení.</string>
+	<string name="explanation_history_transfer" state="needs_review" hash="983501865">Tato funkce vám umožní **bezpečně přenést** historii vašich konverzací mezi dvěma vašimi zařízeními.\n\nNež začnete, musí být váš profil **přítomen na obou těchto zařízeních**.</string>
+	<string name="button_label_import" state="needs_review" hash="-984720905">Importovat</string>
+	<string name="history_transfer_pick_profile_title" state="needs_review" hash="-1782334343">Který profil si přejete použít pro pokračování?</string>
+	<string name="history_transfer_pick_profile_text_import" state="needs_review" hash="-1162713377">Vyberte prosím profil, do kterého chcete **importovat historii chatu**.</string>
+	<string name="history_transfer_pick_profile_text_export" state="needs_review" hash="951522414">Vyberte prosím profil, ze kterého chcete **exportovat historii chatu**.</string>
+	<string name="history_transfer_pick_method_title" state="needs_review" hash="661094742">Co chceš dělat?</string>
+	<string name="history_transfer_pick_method_text_import" state="needs_review" hash="1116376527">Vyberte, jak chcete importovat historii chatu vašeho profilu **%1$s**. </string>
+	<string name="history_transfer_pick_method_text_export" state="needs_review" hash="1750125743">Vyberte, jak chcete exportovat historii chatu vašeho profilu **%1$s**. </string>
+	<string name="history_transfer_via_wifi_title" state="needs_review" hash="-2016953028">Přenos přes Wi-Fi</string>
+	<string name="history_transfer_via_wifi_message" state="needs_review" hash="-758708700">Jednoduše připojte obě zařízení ke stejné Wi-Fi síti.</string>
+	<string name="history_transfer_via_zip_title_import" state="needs_review" hash="1608302669">Importujte soubor .zip</string>
+	<string name="history_transfer_via_zip_title_export" state="needs_review" hash="-1924849877">Exportovat soubor .zip</string>
+	<string name="history_transfer_via_zip_message_import" state="needs_review" hash="1766231761">Vyberte soubor .zip, který jste zkopírovali ze svého starého zařízení.</string>
+	<string name="history_transfer_via_zip_message_export" state="needs_review" hash="-1123951975">Stáhněte soubor .zip a zkopírujte ho do nového zařízení.</string>
+	<string name="history_transfer_import_zip_description" state="needs_review" hash="855194374">Chcete-li importovat historii chatu, vyberte soubor .zip, který jste **exportovali z jiného zařízení**.\n\nUjistěte se, že profil **%1$s**, který jste vybrali, odpovídá profilu, který byl použit k vytvoření tohoto souboru .zip.</string>
+	<string name="button_label_choose_zip_file" state="needs_review" hash="-493688169">Vyberte soubor .zip</string>
+	<string name="dialog_title_error_reading_zip" state="needs_review" hash="1059408985">Chyba při čtení souboru .zip</string>
+	<string name="dialog_message_error_reading_zip" state="needs_review" hash="1864744526">Při čtení poskytnutého souboru .zip došlo k chybě.\n\nUjistěte se, že jste vybrali soubor s exportem historie chatu Olvid.</string>
+	<string name="dialog_title_error_zip_password" state="needs_review" hash="1651240086">Nesprávné heslo</string>
+	<string name="dialog_message_error_zip_password" state="needs_review" hash="216311562">Zadané heslo neumožnilo dešifrovat vybraný soubor .zip.\n\nZkuste to znovu.</string>
+	<string name="dialog_title_zip_password_required" state="needs_review" hash="-944166479">Vyžaduje se heslo</string>
+	<string name="dialog_message_zip_password_required" state="needs_review" hash="548842041">Vybraný soubor .zip je chráněn heslem. Zadejte prosím heslo, které jste si zvolili při exportu historie chatu do jiného zařízení.</string>
+	<string name="history_transfer_export_scope_title_export" state="needs_review" hash="933575859">Co chcete exportovat?</string>
+	<string name="history_transfer_export_scope_title_transfer" state="needs_review" hash="-1971421411">Co chceš přenést?</string>
+	<string name="history_transfer_scope_messages_export_title" state="needs_review" hash="-1810394953">Exportovat pouze zprávy</string>
+	<string name="history_transfer_scope_messages_transfer_title" state="needs_review" hash="1119624141">Přenos pouze zpráv</string>
+	<string name="history_transfer_scope_messages_export_message" state="needs_review" hash="-2120867312">Menší export. Zahrnuty jsou pouze textové zprávy.</string>
+	<string name="history_transfer_scope_messages_transfer_message" state="needs_review" hash="2071005834">Rychlejší přenos. Zahrnuty jsou pouze textové zprávy.</string>
+	<string name="history_transfer_scope_everything_export_title" state="needs_review" hash="463008259">Exportovat zprávy a přílohy</string>
+	<string name="history_transfer_scope_everything_transfer_title" state="needs_review" hash="-175297433">Přenos zpráv a příloh</string>
+	<string name="history_transfer_scope_everything_export_message" state="needs_review" hash="-266277978">Úplný export. Zahrnuje všechny zprávy a přílohy.</string>
+	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Přenos dokončen. Zahrnuje všechny zprávy a přílohy.</string>
+	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Exportujte svou historii chatu jako soubor .zip. Později ji můžete importovat do jiného zařízení ve svém profilu **%1$s**.\n\nMůžete také rozbalit tento soubor a zobrazit tak svou historii chatu na webové stránce.</string>
+	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Vytvořit soubor .zip</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d diskuse a %2$d zprávy</string>
+	<string name="label_computing" state="needs_review" hash="1393495921">Probíhá výpočet…</string>
+	<string name="label_total_size" state="needs_review" hash="-788411929">Celková velikost: %1$s</string>
+	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Chraňte svůj export</string>
+	<string name="dialog_message_protect_export" state="needs_review" hash="-900141026">Pro vaše zabezpečení doporučujeme chránit vaše exportované údaje heslem.</string>
+	<string name="button_label_generate_password" state="needs_review" hash="-1174237913">Vygenerovat heslo</string>
+	<string name="button_label_choose_password" state="needs_review" hash="-1893200284">Vyberte si heslo</string>
+	<string name="button_label_continue_without_password" state="needs_review" hash="-106870576">Pokračovat bez hesla</string>
+	<string name="dialog_title_choose_password" state="needs_review" hash="1927816439">Vyberte si heslo</string>
+	<string name="dialog_title_generated_password" state="needs_review" hash="-690449371">Vygenerované heslo</string>
+	<string name="dialog_message_generated_password" state="needs_review" hash="1100314355">Heslo níže bylo vygenerováno náhodně.\n\nUjistěte se, že si ho **zapišete, než budete pokračovat**.</string>
+	<string name="button_label_copy_to_clipboard" state="needs_review" hash="-1309214553">Kopírovat do schránky</string>
+	<string name="history_transfer_pick_target_device_title" state="needs_review" hash="1659408512">Vyberte zařízení</string>
+	<string name="history_transfer_pick_target_device_text" state="needs_review" hash="-1456199559">Vyberte prosím zařízení, na které chcete přenést historii chatu z aktuálního zařízení.\n\nNemůžete najít zařízení, které hledáte? Ujistěte se, že je váš profil **%1$s** **aktivní na tomto jiném zařízení**.</string>
+	<string name="history_transfer_no_other_device_explanation" state="needs_review" hash="-1034788616">Zdá se, že váš profil **%1$s** nemá žádná další aktivní zařízení.\n\nPřed pokračováním v přenosu historie chatu **přidejte prosím nové zařízení do tohoto profilu**.\n\nMůžete také **exportovat soubor .zip**, který později importujete do nového zařízení.</string>
+	<string name="history_transfer_webrtc_instructions_title" state="needs_review" hash="-1353013738">Postupujte podle těchto pokynů na vašem druhém zařízení.</string>
+	<string name="history_transfer_instructions_turn_on_other_import" state="needs_review" hash="-930696177">Zapněte zařízení, na kterém je uložen váš chatovací protokol.</string>
+	<string name="history_transfer_instructions_same_wifi_import" state="needs_review" hash="465388607">Ujistěte se, že jsou obě zařízení připojena ke stejné Wi-Fi síti.</string>
+	<string name="history_transfer_instructions_start_export" state="needs_review" hash="-1288439668">Na vašem druhém zařízení otevřete nastavení Olvid a spusťte export historie chatu.</string>
+	<string name="history_transfer_instructions_turn_on_other_export" state="needs_review" hash="1280642155">Zapněte **%1$s**. </string>
+	<string name="history_transfer_instructions_same_wifi_export" state="needs_review" hash="284833986">Ujistěte se, že toto zařízení a vaše **%1$s** jsou připojeny ke stejné síti Wi-Fi.</string>
+	<string name="history_transfer_step_awaiting_confirmation" state="needs_review" hash="665601714">Čekám, až potvrdíš převod</string>
+	<string name="dialog_title_abort_history_transfer" state="needs_review" hash="1914158733">Přerušit probíhající přenos?</string>
+	<string name="dialog_title_abort_history_transfer_export" state="needs_review" hash="-856542741">Přerušit probíhající export?</string>
+	<string name="dialog_title_abort_history_transfer_import" state="needs_review" hash="976007540">Přerušit probíhající import?</string>
+	<string name="dialog_message_abort_history_transfer_webrtc" state="needs_review" hash="1807742093">Jste si jisti, že chcete přerušit probíhající přenos historie chatu?\n\nPokud budete chtít, můžete přenos později znovu spustit. **Vše, co již bylo přeneseno, bude zachováno** a nebude nutné jej znovu přenášet.</string>
+	<string name="dialog_message_abort_history_transfer_zip_export" state="needs_review" hash="716134255">Jste si jisti, že chcete zrušit probíhající export souboru .zip?\n\nTímto se na vašem zařízení uloží **částečný soubor .zip**, který budete muset **ručně smazat**. </string>
+	<string name="dialog_message_abort_history_transfer_zip_import" state="needs_review" hash="1264487097">Jste si jisti, že chcete přerušit probíhající import souboru .zip?\n\nPokud budete chtít, můžete import později znovu spustit. **Vše, co bylo již importováno, zůstane zachováno** a nebude nutné jej znovu importovat.</string>
+	<string name="button_label_interrupt_and_continue_later" state="needs_review" hash="-976034947">Přerušit a pokračovat později</string>
+	<string name="button_label_abort_export" state="needs_review" hash="428199797">Zrušit export</string>
+	<string name="button_label_abort_import" state="needs_review" hash="2031103191">Přerušit import</string>
+	<string name="history_transfer_fail_reason_aborted" state="needs_review" hash="277351522">Přenos byl přerušen.</string>
+	<string name="history_transfer_fail_reason_unknown" state="needs_review" hash="-1170630200">Nastala neznámá chyba (pravděpodobně došlo k odpojení od sítě).</string>
+	<string name="history_transfer_fail_reason_identity_mismatch" state="needs_review" hash="936267267">Tento soubor .zip byl exportován z jiného profilu.</string>
+	<string name="history_transfer_fail_reason_wrong_passwrod" state="needs_review" hash="1847441965">Nesprávné heslo</string>
+	<string name="history_transfer_fail_reason_invalid_zip" state="needs_review" hash="-691417686">Nepodařilo se načíst soubor .zip (je to skutečně export historie chatu Olvid?)</string>
+	<string name="transfer_label_sending_messages" state="needs_review" hash="2018039973">Odesílání zpráv</string>
+	<string name="transfer_label_exporting_messages" state="needs_review" hash="1572454408">Export zpráv</string>
+	<string name="transfer_label_importing_messages" state="needs_review" hash="1913024934">Importování zpráv</string>
+	<string name="transfer_label_receiving_messages" state="needs_review" hash="2015919003">Přijímání zpráv</string>
+	<string name="transfer_label_sending_attachments" state="needs_review" hash="2102571371">Odesílání příloh</string>
+	<string name="transfer_label_exporting_attachments" state="needs_review" hash="-1029839434">Exportování příloh</string>
+	<string name="transfer_label_importing_attachments" state="needs_review" hash="1078186262">Importování příloh</string>
+	<string name="transfer_label_receiving_attachments" state="needs_review" hash="439049517">Přijímání příloh</string>
+	<string name="label_remaining_and_throughput" state="needs_review" hash="1772610397">Přibližně %1$s zbývá (%2$s)</string>
+	<string name="history_transfer_step_connecting_export" state="needs_review" hash="-28311439">Vytvářím soubor .zip</string>
+	<string name="history_transfer_step_connecting_import" state="needs_review" hash="1323447620">Otevírám soubor .zip</string>
+	<string name="history_transfer_step_failed_export" state="needs_review" hash="185890904">Export se nezdařil</string>
+	<string name="history_transfer_step_finished_export" state="needs_review" hash="1156914922">Export byl dokončen</string>
+	<string name="history_transfer_step_failed_import" state="needs_review" hash="-909085512">Import selhal</string>
+	<string name="history_transfer_step_finished_import" state="needs_review" hash="-653312310">Import dokončen</string>
+	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">Probíhá export</string>
+	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Probíhá import</string>
+	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analyzuji obsah</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Analyzuji se exportované konverzace</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Při načítání souboru se stylem OpenStreetMap došlo k chybě.</string>
+	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Předplatné v aplikaci nejsou dostupné</string>
+	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Verze Olvid, kterou jste nainstalovali, neobsahuje knihovnu Google Billing a nepodporuje nákupy v aplikaci.\n\nPro více informací nás kontaktujte na adrese **feedback@olvid.io**.</string>
 </resources>

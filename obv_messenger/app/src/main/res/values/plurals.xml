@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <plurals name="label_files_count">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
     <plurals name="text_files">
         <item quantity="one">File</item>
         <item quantity="other">%1$d files</item>
@@ -266,5 +270,9 @@
     <plurals name="subscription_offer_month_free">
         <item quantity="one">%1$d month free</item>
         <item quantity="other">%1$d months free</item>
+    </plurals>
+    <plurals name="toast_message_messages_copied_to_clipboard">
+        <item quantity="one">%1$d message copied to clipboard</item>
+        <item quantity="other">%1$d messages copied to clipboard</item>
     </plurals>
 </resources>

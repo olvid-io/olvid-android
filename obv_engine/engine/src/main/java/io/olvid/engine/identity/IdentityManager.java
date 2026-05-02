@@ -546,9 +546,9 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
     // region OwnedIdentity
 
     @Override
-    public boolean isOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException {
+    public boolean isOwnedIdentity(Session session, Identity ownedIdentity, boolean excludeMarkedForDeletionIdentities) throws SQLException {
         OwnedIdentity ownedIdentityObject = OwnedIdentity.get(wrapSession(session), ownedIdentity);
-        return ownedIdentityObject != null;
+        return ownedIdentityObject != null && (!excludeMarkedForDeletionIdentities || !ownedIdentityObject.isMarkedForDeletion());
     }
 
     @Override
@@ -579,8 +579,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             boolean supportsIdBasedAuth = false;
             for (ObvKeycloakAuthType authType : keycloakState.supportedAuthenticationMethods) {
                 if (authType instanceof ObvKeycloakAuthType.OpenIdConnect oidc) {
-                    clientId = oidc.clientId();
-                    clientSecret = oidc.clientSecret();
+                    clientId = oidc.clientId;
+                    clientSecret = oidc.clientSecret;
                 } else if (authType instanceof ObvKeycloakAuthType.IdBased) {
                     supportsIdBasedAuth = true;
                 }
@@ -1113,8 +1113,8 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         boolean supportsIdBasedAuth = false;
         for (ObvKeycloakAuthType authType : keycloakState.supportedAuthenticationMethods) {
             if (authType instanceof ObvKeycloakAuthType.OpenIdConnect oidc) {
-                clientId = oidc.clientId();
-                clientSecret = oidc.clientSecret();
+                clientId = oidc.clientId;
+                clientSecret = oidc.clientSecret;
             } else if (authType instanceof ObvKeycloakAuthType.IdBased) {
                 supportsIdBasedAuth = true;
             }
@@ -1555,6 +1555,10 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
 
     @Override
     public List<ObvOwnedDevice> getDevicesOfOwnedIdentity(Session session, Identity ownedIdentity) throws SQLException {
+        if (!isOwnedIdentity(session, ownedIdentity, true)) {
+            // always return an empty list for owned identity that are marked for deletion
+            return Collections.emptyList();
+        }
         List<OwnedDevice> ownedDevices = OwnedDevice.getAllDevicesOfIdentity(wrapSession(session), ownedIdentity);
         List<ObvOwnedDevice> obvOwnedDevices = new ArrayList<>();
         for (OwnedDevice ownedDevice : ownedDevices) {
@@ -2446,7 +2450,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         session.addSessionCommitListener(getSessionCommitListenerForProfileBackup(ownedIdentity));
     }
 
-    // only for groups you do not own, when you get kicked or you leave
+    // only for groups you do not own, when you get kicked, or you leave
     @Override
     public void leaveGroup(Session session, byte[] groupOwnerAndUid, Identity ownedIdentity) throws Exception {
         ContactGroup contactGroup = ContactGroup.get(wrapSession(session), groupOwnerAndUid, ownedIdentity);
@@ -2750,7 +2754,7 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     if (contactIdentityObject == null) {
                         if (ownedIdentity.equals(groupInformation.groupOwnerIdentity)) {
                             // We are forced to create a contact without a contact origin
-                            // --> this is not good, but we don't have a choice. A group was created/updated on another device but we do not know this contact yet...
+                            // --> this is not good, but we don't have a choice. A group was created/updated on another device, but we do not know this contact yet...
                             addContactIdentity(session, groupMember.identity, groupMember.serializedDetails, ownedIdentity, null, false);
                         } else {
                             addContactIdentity(session, groupMember.identity, groupMember.serializedDetails, ownedIdentity, TrustOrigin.createGroupTrustOrigin(System.currentTimeMillis(), groupInformation.groupOwnerIdentity), false);

@@ -58,7 +58,7 @@ public class NotificationActionService extends IntentService {
 
     public static final String EXTRA_INVITATION_DIALOG_UUID = "dialog_uuid";
     public static final String EXTRA_DISCUSSION_ID = "discussion_id";
-    public static final String EXTRA_MESSAGE_ID = "message_id";
+    public static final String EXTRA_MESSAGE_ID = "olvid_message_id";
     public static final String EXTRA_BYTES_OWNED_IDENTITY = "bytes_owned_identity";
     public static final String EXTRA_DEVICE_UID = "device_uid";
 

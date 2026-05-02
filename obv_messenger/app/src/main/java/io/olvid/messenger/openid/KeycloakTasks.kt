@@ -40,6 +40,7 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.ConfigurationPojo
 import io.olvid.messenger.customClasses.NoExceptionConnectionBuilder
+import io.olvid.messenger.customClasses.NoExceptionConnectionBuilder.Companion.downloadContent
 import io.olvid.messenger.openid.KeycloakManager.KeycloakCallback
 import io.olvid.messenger.openid.KeycloakManager.KeycloakCallbackWrapper
 import io.olvid.messenger.openid.jsons.JsonGroupsRequest
@@ -71,12 +72,11 @@ import org.jose4j.jwt.consumer.JwtConsumerBuilder
 import org.jose4j.keys.resolvers.JwksVerificationKeyResolver
 import org.jose4j.lang.JoseException
 import java.io.BufferedInputStream
-import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.nio.charset.StandardCharsets
 import javax.net.ssl.HttpsURLConnection
 
 
@@ -136,7 +136,7 @@ object KeycloakTasks {
                         var jwks: JsonWebKeySet?
                         try {
                             val jwksString =
-                                getJkws(serviceConfiguration.discoveryDoc!!.jwksUri)
+                                getJwks(serviceConfiguration.discoveryDoc!!.jwksUri)
                             jwks = JsonWebKeySet(jwksString)
                         } catch (_: JoseException) {
                             jwks = null
@@ -166,24 +166,9 @@ object KeycloakTasks {
             keycloakServerUrl += "/"
         }
 
-        var connection: HttpURLConnection? = null
-        try {
-            connection = NoExceptionConnectionBuilder().openConnection("$keycloakServerUrl.well-known/olvid".toUri())
-            val response = connection.getResponseCode()
-            if (response == HttpURLConnection.HTTP_OK) {
-                BufferedReader(InputStreamReader(connection.getInputStream())).use { reader ->
-                    val sb = StringBuilder()
-                    var line: String?
-                    while ((reader.readLine().also { line = it }) != null) {
-                        sb.append(line)
-                    }
-                    return AppSingleton.getJsonObjectMapper().readValue(sb.toString(), OlvidWellKnownJson::class.java)
-                }
-            }
-        } catch (e: Exception) {
-            Logger.x(e)
-        } finally {
-            connection?.disconnect()
+        val result = "$keycloakServerUrl.well-known/olvid".toUri().downloadContent()
+        if (result is NoExceptionConnectionBuilder.DownloadResult.Success) {
+            return AppSingleton.getJsonObjectMapper().readValue(result.output, OlvidWellKnownJson::class.java)
         }
         return null
     }
@@ -553,7 +538,7 @@ object KeycloakTasks {
                 App.runThread {
                     try {
                         val query = JsonSearchRequest()
-                        if (searchQuery == null || searchQuery.isBlank()) {
+                        if (searchQuery.isNullOrBlank()) {
                             query.filter = null
                         } else {
                             query.filter =
@@ -889,30 +874,14 @@ object KeycloakTasks {
     }
 
 
-    private fun getJkws(jwksUri: Uri?): String? {
-        if (jwksUri != null) {
-            Logger.d("Fetching JKWS at: $jwksUri")
-            var connection: HttpURLConnection? = null
-            try {
-                connection = NoExceptionConnectionBuilder().openConnection(jwksUri)
-                val response = connection.getResponseCode()
-                if (response == HttpURLConnection.HTTP_OK) {
-                    BufferedReader(InputStreamReader(connection.getInputStream())).use { reader ->
-                        val sb = StringBuilder()
-                        var line: String?
-                        while ((reader.readLine().also { line = it }) != null) {
-                            sb.append(line)
-                        }
-                        return sb.toString()
-                    }
-                }
-            } catch (e: Exception) {
-                Logger.x(e)
-            } finally {
-                connection?.disconnect()
-            }
+    private fun getJwks(jwksUri: Uri?): String? {
+        Logger.d("Fetching JWKS at: $jwksUri")
+        return jwksUri?.downloadContent()?.let { result ->
+            if (result is NoExceptionConnectionBuilder.DownloadResult.Success)
+                String(result.output, StandardCharsets.UTF_8)
+            else
+                null
         }
-        return null
     }
 
 
@@ -1017,7 +986,7 @@ fun AuthState.performActionWithFreshTokens(bytesOwnedIdentity: ByteArray?, autho
             when (ex?.code) {
                 // if no exception, or network error, pass the result to the original action
                 null, 3 -> action.execute(accessToken, idToken, ex)
-                // if another error occurred and we would prompt the user for re-authentication, first try to re-authenticate with ID
+                // if another error occurred, and we would prompt the user for re-authentication, first try to re-authenticate with ID
                 else -> {
                     val idBasedAuthResult = AppSingleton.getEngine().performKeycloakIdBasedAuth(bytesOwnedIdentity)
                     if (idBasedAuthResult.status == ObvKeycloakIdBasedAuthResult.Status.SUCCESS) {

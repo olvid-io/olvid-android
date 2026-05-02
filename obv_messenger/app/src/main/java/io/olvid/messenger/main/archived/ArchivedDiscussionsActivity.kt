@@ -72,7 +72,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import io.olvid.messenger.App
 import io.olvid.messenger.R
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.designsystem.components.SelectionTopAppBar
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding

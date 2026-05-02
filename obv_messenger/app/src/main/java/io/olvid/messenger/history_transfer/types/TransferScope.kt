@@ -20,6 +20,6 @@
 package io.olvid.messenger.history_transfer.types
 
 sealed interface TransferScope {
-    data object Profile: TransferScope
-    data class Discussions(val discussionIds: List<Long>): TransferScope
+    data class Profile(val messagesOnly: Boolean): TransferScope
+    data class Discussions(val discussionIds: List<Long>, val messagesOnly: Boolean): TransferScope
 }

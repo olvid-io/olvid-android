@@ -132,6 +132,11 @@ public class AddFyleToDraftFromUriTask implements Runnable {
     }
 
     private Message draftMessage = null;
+    private byte[] miniPreview = null;
+
+    public void setMiniPreview(byte[] miniPreview) {
+        this.miniPreview = miniPreview;
+    }
 
     @Override
     public void run() {
@@ -242,6 +247,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                         fileName,
                         mimeType,
                         uriFileSize);
+                copyingFyleMessageJoinWithStatus.miniPreview = miniPreview;
                 db.fyleMessageJoinWithStatusDao().insert(copyingFyleMessageJoinWithStatus);
 
                 draftMessage.recomputeAttachmentCount(db);
@@ -341,6 +347,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                                     finalMimeType,
                                     fileSize
                             );
+                            fyleMessageJoinWithStatus.miniPreview = miniPreview;
                             db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                             draftMessage.recomputeAttachmentCount(db);
                             db.messageDao().updateAttachmentCount(draftMessage.id, draftMessage.totalAttachmentCount, draftMessage.imageAndVideoCount, draftMessage.videoCount, draftMessage.audioCount, draftMessage.firstAttachmentName, 0, draftMessage.imageResolutions);
@@ -439,6 +446,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                                 fileName,
                                 mimeType,
                                 fileSize);
+                        fyleMessageJoinWithStatus.miniPreview = miniPreview;
                         db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus);
                     }
                     draftMessage.recomputeAttachmentCount(db);

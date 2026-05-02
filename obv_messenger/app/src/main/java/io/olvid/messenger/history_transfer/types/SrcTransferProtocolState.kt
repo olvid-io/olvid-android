@@ -22,6 +22,7 @@ package io.olvid.messenger.history_transfer.types
 import io.olvid.engine.datatypes.EtaEstimator
 import io.olvid.engine.engine.types.ObvBytesKey
 import io.olvid.messenger.history_transfer.json.JsonDiscussionIdentifier
+import java.util.UUID
 
 
 class SrcTransferProtocolState(
@@ -31,7 +32,7 @@ class SrcTransferProtocolState(
     var discussionIdentifiers: Set<JsonDiscussionIdentifier>? = null
 
     var expectedSha256s: Map<ObvBytesKey, Long>? = null
-    var expectedDiscussionRanges = mutableMapOf<JsonDiscussionIdentifier, Map<ObvBytesKey, Map<String, List<List<Long>>>>>()
+    var expectedDiscussionRanges = mutableMapOf<JsonDiscussionIdentifier, Map<ObvBytesKey, Map<UUID, List<List<Long>>>>>()
     var totalMessageCount = 0
     var sentMessageCount = 0
 
@@ -67,10 +68,8 @@ class SrcTransferProtocolState(
             return false
         } else if (!readyToSendMessages()) {
             transferProgress.value = TransferProgress.Negotiating
-        } else if (sentMessageCount < totalMessageCount) {
-            transferProgress.value = TransferProgress.TransferringMessages(sentMessageCount, totalMessageCount)
-        } else if (sentBytes < totalBytes) {
-            transferProgress.value = TransferProgress.TransferringFiles(sentBytes, totalBytes)
+        } else if (sentMessageCount < totalMessageCount || sentBytes < totalBytes) {
+            transferProgress.value = TransferProgress.Transferring(sentMessageCount, totalMessageCount, sentBytes, totalBytes)
         } else {
             transferProgress.value = TransferProgress.Finished
             return true

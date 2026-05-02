@@ -34,6 +34,7 @@ import io.olvid.engine.crypto.PRNGService;
 import io.olvid.engine.crypto.Suite;
 import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.Identity;
+import io.olvid.engine.datatypes.NoAcceptableChannelException;
 import io.olvid.engine.datatypes.NotificationListener;
 import io.olvid.engine.datatypes.Session;
 import io.olvid.engine.datatypes.UID;
@@ -470,7 +471,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void process(Session session, ProtocolReceivedMessage message) throws Exception {
-        if (!identityDelegate.isOwnedIdentity(session, message.getOwnedIdentity())
+        if (!identityDelegate.isOwnedIdentity(session, message.getOwnedIdentity(), false)
                 && !Objects.equals(message.getOwnedIdentity().getServer(), Constants.EPHEMERAL_IDENTITY_SERVER)) {
             throw new Exception();
         }
@@ -482,7 +483,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void process(Session session, ProtocolReceivedDialogResponse message) throws Exception {
-        if (!identityDelegate.isOwnedIdentity(session, message.getToIdentity())
+        if (!identityDelegate.isOwnedIdentity(session, message.getToIdentity(), false)
                 && !Objects.equals(message.getToIdentity().getServer(), Constants.EPHEMERAL_IDENTITY_SERVER)) {
             throw new Exception();
         }
@@ -494,7 +495,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
 
     @Override
     public void process(Session session, ProtocolReceivedServerResponse message) throws Exception {
-        if (!identityDelegate.isOwnedIdentity(session, message.getToIdentity())
+        if (!identityDelegate.isOwnedIdentity(session, message.getToIdentity(), false)
                 && !Objects.equals(message.getToIdentity().getServer(), Constants.EPHEMERAL_IDENTITY_SERVER)) {
             throw new Exception();
         }
@@ -1395,15 +1396,18 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         if (session == null || ownedIdentity == null) {
             throw new Exception();
         }
+        try {
+            UID protocolInstanceUid = new UID(prng);
 
-        UID protocolInstanceUid = new UID(prng);
+            CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
+                    ConcreteProtocol.OWNED_IDENTITY_DELETION_PROTOCOL_ID,
+                    protocolInstanceUid);
 
-        CoreProtocolMessage coreProtocolMessage = new CoreProtocolMessage(SendChannelInfo.createLocalChannelInfo(ownedIdentity),
-                ConcreteProtocol.OWNED_IDENTITY_DELETION_PROTOCOL_ID,
-                protocolInstanceUid);
-
-        ChannelMessageToSend message = new OwnedIdentityDeletionProtocol.InitialMessage(coreProtocolMessage, deleteEverywhere).generateChannelProtocolMessageToSend();
-        channelDelegate.post(session, message, prng);
+            ChannelMessageToSend message = new OwnedIdentityDeletionProtocol.InitialMessage(coreProtocolMessage, deleteEverywhere).generateChannelProtocolMessageToSend();
+            channelDelegate.post(session, message, prng);
+        } catch (NoAcceptableChannelException e) {
+            Logger.w("Tried to delete an identity that is already deleted, ignoring message!");
+        }
     }
 
 

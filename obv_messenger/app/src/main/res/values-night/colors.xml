@@ -16,6 +16,7 @@
     <color name="orange">#da8200</color>
     <color name="golden">#dab700</color>
     <color name="blueOrWhite">#ffffff</color>
+    <color name="blueOrGrey">#828282</color>
     <color name="blueOrWhiteOverlay">#66ffffff</color>
     <color name="blueOverlay">#662a5ada</color>
 

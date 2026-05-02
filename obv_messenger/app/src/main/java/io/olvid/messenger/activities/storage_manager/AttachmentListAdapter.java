@@ -81,14 +81,19 @@ import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentFromAllMessagesTask;
 import io.olvid.messenger.databases.tasks.DeleteAttachmentTask;
 import io.olvid.messenger.discussion.DiscussionActivity;
-import io.olvid.messenger.services.MediaPlayerService;
+import io.olvid.messenger.services.AudioOutput;
 import io.olvid.messenger.settings.SettingsActivity;
 
-class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.AttachmentViewHolder> implements Observer<List<FyleMessageJoinWithStatusDao.FyleAndOrigin>> {
-    @NonNull private final FragmentActivity activity;
-    @NonNull private final AudioAttachmentServiceBinding audioAttachmentServiceBinding;
-    @NonNull private final StorageManagerViewModel viewModel;
-    @NonNull private final LayoutInflater layoutInflater;
+class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.AttachmentViewHolder>
+        implements Observer<List<FyleMessageJoinWithStatusDao.FyleAndOrigin>> {
+    @NonNull
+    private final FragmentActivity activity;
+    @NonNull
+    private final AudioAttachmentServiceBinding audioAttachmentServiceBinding;
+    @NonNull
+    private final StorageManagerViewModel viewModel;
+    @NonNull
+    private final LayoutInflater layoutInflater;
     private final int previewPixelSize;
     private final int selectedColor;
     private final int selectableBackgroundResourceId;
@@ -100,9 +105,9 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
     private static final int TYPE_AUDIO = 2;
     private static final int TYPE_FILE = 3;
 
-
     @SuppressLint("NotifyDataSetChanged")
-    AttachmentListAdapter(@NonNull FragmentActivity activity, @NonNull AudioAttachmentServiceBinding audioAttachmentServiceBinding) {
+    AttachmentListAdapter(@NonNull FragmentActivity activity,
+            @NonNull AudioAttachmentServiceBinding audioAttachmentServiceBinding) {
         this.activity = activity;
         this.audioAttachmentServiceBinding = audioAttachmentServiceBinding;
         this.viewModel = new ViewModelProvider(activity).get(StorageManagerViewModel.class);
@@ -139,7 +144,8 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
     public long getItemId(int position) {
         if (fyleAndOrigins != null) {
             FyleMessageJoinWithStatusDao.FyleAndOrigin fyleAndOrigin = fyleAndOrigins.get(position);
-            return fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId + (fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId << 32);
+            return fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId
+                    + (fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId << 32);
         }
         return 0;
     }
@@ -165,7 +171,8 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
     @NonNull
     @Override
     public AttachmentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new AttachmentViewHolder(layoutInflater.inflate(R.layout.item_view_storage_manager_file, parent, false), viewType);
+        return new AttachmentViewHolder(layoutInflater.inflate(R.layout.item_view_storage_manager_file, parent, false),
+                viewType);
     }
 
     @Override
@@ -174,10 +181,12 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
             return;
         }
         final FyleMessageJoinWithStatusDao.FyleAndOrigin fyleAndOrigin = fyleAndOrigins.get(position);
-        @NonNull final String mimeType = fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType();
+        @NonNull
+        final String mimeType = fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType();
         holder.fyleAndOrigin = fyleAndOrigin;
 
-        if (PreviewUtils.canGetPreview(fyleAndOrigin.fyleAndStatus.fyle, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus)) {
+        if (PreviewUtils.canGetPreview(fyleAndOrigin.fyleAndStatus.fyle,
+                fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus)) {
             if (mimeType.startsWith("image/") || mimeType.startsWith("video/")) {
                 holder.attachmentImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             } else {
@@ -208,7 +217,9 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
             holder.failedImageView.setVisibility(View.GONE);
             holder.progressBar.setVisibility(View.VISIBLE);
             if (holder.progressLiveData == null) {
-                holder.progressLiveData = FyleProgressSingleton.INSTANCE.getProgress(fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId);
+                holder.progressLiveData = FyleProgressSingleton.INSTANCE.getProgress(
+                        fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId,
+                        fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId);
                 holder.progressLiveData.observe(activity, holder.progressListener);
             }
         }
@@ -216,32 +227,49 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         if (Arrays.equals(fyleAndOrigin.message.senderIdentifier, AppSingleton.getBytesCurrentIdentity())) {
             final SpannableString spannableString;
             if (fyleAndOrigin.message.status == Message.STATUS_DRAFT) {
-                spannableString = new SpannableString(activity.getString(R.string.text_draft_for_xx, fyleAndOrigin.discussion.title));
+                spannableString = new SpannableString(
+                        activity.getString(R.string.text_draft_for_xx, fyleAndOrigin.discussion.title));
             } else {
-                spannableString = new SpannableString(activity.getString(R.string.text_sent_to_xx, fyleAndOrigin.discussion.title));
+                spannableString = new SpannableString(
+                        activity.getString(R.string.text_sent_to_xx, fyleAndOrigin.discussion.title));
             }
-            spannableString.setSpan(new StyleSpan(Typeface.BOLD), spannableString.length() - fyleAndOrigin.discussion.title.length(), spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannableString.setSpan(new StyleSpan(Typeface.BOLD),
+                    spannableString.length() - fyleAndOrigin.discussion.title.length(), spannableString.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             holder.senderTextView.setText(spannableString);
         } else {
-            String displayName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(fyleAndOrigin.message.senderIdentifier);
+            String displayName = ContactCacheSingleton.INSTANCE
+                    .getContactCustomDisplayName(fyleAndOrigin.message.senderIdentifier);
             if (displayName != null) {
-                SpannableString spannableString = new SpannableString(activity.getString(R.string.text_sent_by_xx, displayName));
-                spannableString.setSpan(new StyleSpan(Typeface.BOLD), spannableString.length() - displayName.length(), spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                spannableString.setSpan(new ForegroundColorSpan(InitialView.getTextColor(activity, fyleAndOrigin.message.senderIdentifier, ContactCacheSingleton.INSTANCE.getContactCustomHue(fyleAndOrigin.message.senderIdentifier))), spannableString.length() - displayName.length(), spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                SpannableString spannableString = new SpannableString(
+                        activity.getString(R.string.text_sent_by_xx, displayName));
+                spannableString.setSpan(new StyleSpan(Typeface.BOLD), spannableString.length() - displayName.length(),
+                        spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannableString.setSpan(
+                        new ForegroundColorSpan(
+                                InitialView.getTextColor(activity, fyleAndOrigin.message.senderIdentifier,
+                                        ContactCacheSingleton.INSTANCE
+                                                .getContactCustomHue(fyleAndOrigin.message.senderIdentifier))),
+                        spannableString.length() - displayName.length(), spannableString.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 holder.senderTextView.setText(spannableString);
             } else {
                 SpannableString spannableString = new SpannableString(activity.getString(R.string.text_unknown_sender));
-                spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                spannableString.setSpan(new StyleSpan(Typeface.ITALIC), 0, spannableString.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 holder.senderTextView.setText(spannableString);
             }
         }
 
-        holder.timestampTextView.setText(DateUtils.formatDateTime(activity, fyleAndOrigin.message.timestamp, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH));
+        holder.timestampTextView.setText(DateUtils.formatDateTime(activity, fyleAndOrigin.message.timestamp,
+                DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH));
         holder.filenameTextView.setText(fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fileName);
         {
-            String sizeAndMime = Formatter.formatShortFileSize(activity, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.size);
+            String sizeAndMime = Formatter.formatShortFileSize(activity,
+                    fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.size);
             int sizeLength = sizeAndMime.length();
-            sizeAndMime += activity.getString(R.string.text_date_time_separator) + fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType();
+            sizeAndMime += activity.getString(R.string.text_date_time_separator)
+                    + fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType();
             SpannableString spannableString = new SpannableString(sizeAndMime);
             spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, sizeLength, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             holder.sizeAndMimeTextView.setText(spannableString);
@@ -286,13 +314,15 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
     }
 
     StorageManagerViewModel.SortOrder latestSortOrder = null;
+
     @Override
     public void onChanged(List<FyleMessageJoinWithStatusDao.FyleAndOrigin> fyleAndOrigins) {
         final DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
 
             @Override
             public int getOldListSize() {
-                return AttachmentListAdapter.this.fyleAndOrigins == null ? 0 : AttachmentListAdapter.this.fyleAndOrigins.size();
+                return AttachmentListAdapter.this.fyleAndOrigins == null ? 0
+                        : AttachmentListAdapter.this.fyleAndOrigins.size();
             }
 
             @Override
@@ -302,7 +332,8 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
 
             @Override
             public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                FyleMessageJoinWithStatusDao.FyleAndOrigin oldItem = AttachmentListAdapter.this.fyleAndOrigins.get(oldItemPosition);
+                FyleMessageJoinWithStatusDao.FyleAndOrigin oldItem = AttachmentListAdapter.this.fyleAndOrigins
+                        .get(oldItemPosition);
                 FyleMessageJoinWithStatusDao.FyleAndOrigin newItem = fyleAndOrigins.get(newItemPosition);
                 return oldItem.message.id == newItem.message.id
                         && oldItem.fyleAndStatus.fyle.id == newItem.fyleAndStatus.fyle.id;
@@ -310,8 +341,10 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
 
             @Override
             public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                FyleMessageJoinWithStatus oldStatus = AttachmentListAdapter.this.fyleAndOrigins.get(oldItemPosition).fyleAndStatus.fyleMessageJoinWithStatus;
-                FyleMessageJoinWithStatus newStatus = fyleAndOrigins.get(newItemPosition).fyleAndStatus.fyleMessageJoinWithStatus;
+                FyleMessageJoinWithStatus oldStatus = AttachmentListAdapter.this.fyleAndOrigins
+                        .get(oldItemPosition).fyleAndStatus.fyleMessageJoinWithStatus;
+                FyleMessageJoinWithStatus newStatus = fyleAndOrigins
+                        .get(newItemPosition).fyleAndStatus.fyleMessageJoinWithStatus;
 
                 return oldStatus.status == newStatus.status
                         && Objects.equals(oldStatus.filePath, newStatus.filePath)
@@ -330,10 +363,8 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         latestSortOrder = viewModel.currentSortOrder;
     }
 
-
-
-
-    public class AttachmentViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, AudioAttachmentServiceBinding.AudioServiceBindableViewHolder {
+    public class AttachmentViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
+            View.OnLongClickListener, AudioAttachmentServiceBinding.AudioServiceBindableViewHolder {
         final int viewType;
         final ImageView attachmentImageView;
         final ImageView attachmentOverlay;
@@ -352,7 +383,6 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         FyleMessageJoinWithStatusDao.FyleAndOrigin fyleAndOrigin;
         boolean musicFailed;
 
-
         public AttachmentViewHolder(@NonNull View itemView, int viewType) {
             super(itemView);
             this.viewType = viewType;
@@ -366,7 +396,7 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                     progressBar.setProgress((int) (((ProgressStatus.InProgress) progressStatus).getProgress() * 100));
                 } else if (progressStatus == ProgressStatus.Unknown.INSTANCE) {
                     progressBar.setProgress(0);
-                }else if (progressStatus == ProgressStatus.Finished.INSTANCE) {
+                } else if (progressStatus == ProgressStatus.Finished.INSTANCE) {
                     progressBar.setProgress(100);
                 }
             };
@@ -393,7 +423,6 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
             }
         }
 
-
         @Override
         public void onClick(View view) {
             if (viewModel.isSelecting()) {
@@ -401,20 +430,31 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
             } else if (view.getId() == R.id.button_delete) {
                 App.runThread(() -> {
                     final FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = fyleAndOrigin.fyleAndStatus;
-                    Long count = AppDatabase.getInstance().fyleMessageJoinWithStatusDao().countMessageForFyle(fyleAndStatus.fyle.id);
+                    Long count = AppDatabase.getInstance().fyleMessageJoinWithStatusDao()
+                            .countMessageForFyle(fyleAndStatus.fyle.id);
                     if (count != null && count > 1) {
-                        final AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                        final AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity,
+                                R.style.CustomAlertDialog)
                                 .setTitle(R.string.dialog_title_delete_attachment)
-                                .setMessage(activity.getString(R.string.dialog_message_delete_attachment_for_many_messages, count.intValue(), fyleAndStatus.fyleMessageJoinWithStatus.fileName))
-                                .setNeutralButton(activity.getString(R.string.button_label_delete_all, count.intValue()), (dialog, which) -> App.runThread(new DeleteAttachmentFromAllMessagesTask(fyleAndStatus.fyle.id)))
-                                .setPositiveButton(R.string.button_label_delete_one, (dialog, which) -> App.runThread(new DeleteAttachmentTask(fyleAndStatus)))
+                                .setMessage(
+                                        activity.getString(R.string.dialog_message_delete_attachment_for_many_messages,
+                                                count.intValue(), fyleAndStatus.fyleMessageJoinWithStatus.fileName))
+                                .setNeutralButton(
+                                        activity.getString(R.string.button_label_delete_all, count.intValue()),
+                                        (dialog, which) -> App.runThread(
+                                                new DeleteAttachmentFromAllMessagesTask(fyleAndStatus.fyle.id)))
+                                .setPositiveButton(R.string.button_label_delete_one,
+                                        (dialog, which) -> App.runThread(new DeleteAttachmentTask(fyleAndStatus)))
                                 .setNegativeButton(R.string.button_label_cancel, null);
                         activity.runOnUiThread(() -> builder.create().show());
                     } else {
-                        final AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                        final AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity,
+                                R.style.CustomAlertDialog)
                                 .setTitle(R.string.dialog_title_delete_attachment)
-                                .setMessage(activity.getString(R.string.dialog_message_delete_attachment_gallery, fyleAndStatus.fyleMessageJoinWithStatus.fileName))
-                                .setPositiveButton(R.string.button_label_ok, (dialog, which) -> App.runThread(new DeleteAttachmentTask(fyleAndStatus)))
+                                .setMessage(activity.getString(R.string.dialog_message_delete_attachment_gallery,
+                                        fyleAndStatus.fyleMessageJoinWithStatus.fileName))
+                                .setPositiveButton(R.string.button_label_ok,
+                                        (dialog, which) -> App.runThread(new DeleteAttachmentTask(fyleAndStatus)))
                                 .setNegativeButton(R.string.button_label_cancel, null);
                         activity.runOnUiThread(() -> builder.create().show());
                     }
@@ -428,11 +468,18 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                 }
             } else if (fyleAndOrigin != null) {
                 if (viewType == TYPE_AUDIO && !musicFailed) {
-                    audioAttachmentServiceBinding.playPause(fyleAndOrigin.fyleAndStatus, null);
+                    audioAttachmentServiceBinding.playPause(fyleAndOrigin.fyleAndStatus,
+                            fyleAndOrigin.message.discussionId);
                 } else {
-                    if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(PreviewUtils.getNonNullMimeType(fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.mimeType, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fileName))
+                    if (PreviewUtils
+                            .mimeTypeIsSupportedImageOrVideo(PreviewUtils.getNonNullMimeType(
+                                    fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.mimeType,
+                                    fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fileName))
                             && SettingsActivity.useInternalImageViewer()
-                            && (!fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().startsWith("video/") || !"".equals(fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.imageResolution))) {
+                            && (!fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType()
+                                    .startsWith("video/")
+                                    || !"".equals(
+                                            fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.imageResolution))) {
                         if (AppSingleton.getBytesCurrentIdentity() != null) {
                             String sortOrder;
                             switch (viewModel.currentSortOrder.sortKey) {
@@ -447,7 +494,10 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                                     sortOrder = null;
                                     break;
                             }
-                            App.openOwnedIdentityGalleryActivity(activity, AppSingleton.getBytesCurrentIdentity(), sortOrder, viewModel.currentSortOrder.ascending, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId, fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
+                            App.openOwnedIdentityGalleryActivity(activity, AppSingleton.getBytesCurrentIdentity(),
+                                    sortOrder, viewModel.currentSortOrder.ascending,
+                                    fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.messageId,
+                                    fyleAndOrigin.fyleAndStatus.fyleMessageJoinWithStatus.fyleId);
                         }
                     } else {
                         App.openFyleViewer(activity, fyleAndOrigin.fyleAndStatus, null);
@@ -465,9 +515,9 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
             return true;
         }
 
-
         @Override
-        public void updatePlayTimeMs(AudioAttachmentServiceBinding.AudioInfo audioInfo, long playTimeMs, boolean playing) {
+        public void updatePlayTimeMs(AudioAttachmentServiceBinding.AudioInfo audioInfo, long playTimeMs,
+                boolean playing) {
             if (playing) {
                 attachmentImageView.setImageResource(R.drawable.ic_pause);
             } else {
@@ -476,7 +526,8 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         }
 
         @Override
-        public void bindAudioInfo(AudioAttachmentServiceBinding.AudioInfo audioInfo, MediaPlayerService.AudioOutput audioOutput, float playbackSpeed) {
+        public void bindAudioInfo(AudioAttachmentServiceBinding.AudioInfo audioInfo,
+                AudioOutput audioOutput, float playbackSpeed) {
             if (audioInfo.failed) {
                 attachmentImageView.setImageResource(R.drawable.mime_type_icon_audio_failed);
             } else {
@@ -490,16 +541,15 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         }
 
         @Override
-        public void setAudioOutput(MediaPlayerService.AudioOutput audioOutput, boolean somethingPlaying) {
+        public void setAudioOutput(AudioOutput audioOutput, boolean somethingPlaying) {
             // nothing to display, only switch the default audio output
-            if ((somethingPlaying && (audioOutput == MediaPlayerService.AudioOutput.PHONE)) != (activity.getVolumeControlStream() == AudioManager.STREAM_VOICE_CALL)) {
-                activity.setVolumeControlStream((somethingPlaying && (audioOutput == MediaPlayerService.AudioOutput.PHONE)) ? AudioManager.STREAM_VOICE_CALL : AudioManager.USE_DEFAULT_STREAM_TYPE);
+            if ((somethingPlaying && (audioOutput == AudioOutput.PHONE)) != (activity
+                    .getVolumeControlStream() == AudioManager.STREAM_VOICE_CALL)) {
+                activity.setVolumeControlStream(
+                        (somethingPlaying && (audioOutput == AudioOutput.PHONE))
+                                ? AudioManager.STREAM_VOICE_CALL
+                                : AudioManager.USE_DEFAULT_STREAM_TYPE);
             }
-        }
-
-        @Override
-        public void setPlaybackSpeed(float playbackSpeed) {
-            // nothing to do here
         }
 
         @Override
@@ -511,16 +561,17 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         }
     }
 
-
     private static class ShowPreviewTask implements Runnable {
-        static final Map<FyleMessageJoinWithStatusDao.FyleAndStatus, ShowPreviewTask> runningPreviews = Collections.synchronizedMap(new HashMap<>());
+        static final Map<FyleMessageJoinWithStatusDao.FyleAndStatus, ShowPreviewTask> runningPreviews = Collections
+                .synchronizedMap(new HashMap<>());
 
         private final FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus;
         private final WeakReference<AttachmentViewHolder> holderWeakReference;
         private volatile boolean interrupt;
         private final int previewPixelSize;
 
-        ShowPreviewTask(FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, AttachmentViewHolder holder, int previewPixelSize) {
+        ShowPreviewTask(FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, AttachmentViewHolder holder,
+                int previewPixelSize) {
             this.fyleAndStatus = fyleAndStatus;
             this.holderWeakReference = new WeakReference<>(holder);
             this.interrupt = false;
@@ -548,7 +599,8 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                 }
             }
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P || !fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().startsWith("image/")) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P
+                    || !fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().startsWith("image/")) {
                 showBitmapPreview();
             } else {
                 showDrawablePreview();
@@ -556,7 +608,8 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
         }
 
         private void showBitmapPreview() {
-            final Bitmap bitmap = PreviewUtils.getBitmapPreview(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus, previewPixelSize);
+            final Bitmap bitmap = PreviewUtils.getBitmapPreview(fyleAndStatus.fyle,
+                    fyleAndStatus.fyleMessageJoinWithStatus, previewPixelSize);
             synchronized (runningPreviews) {
                 ShowPreviewTask oldTask = runningPreviews.get(fyleAndStatus);
                 if (this.equals(oldTask)) {
@@ -568,18 +621,19 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                 return;
             }
             if (bitmap == null) {
-                new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageResource(PreviewUtils.getDrawableResourceForMimeType(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType())));
+                new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageResource(PreviewUtils
+                        .getDrawableResourceForMimeType(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType())));
             } else {
                 new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageBitmap(bitmap));
             }
         }
 
-
         @RequiresApi(api = Build.VERSION_CODES.P)
         private void showDrawablePreview() {
             final Drawable drawable;
             try {
-                drawable = PreviewUtilsWithDrawables.getDrawablePreview(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus, previewPixelSize);
+                drawable = PreviewUtilsWithDrawables.getDrawablePreview(fyleAndStatus.fyle,
+                        fyleAndStatus.fyleMessageJoinWithStatus, previewPixelSize);
             } catch (PreviewUtils.DrawablePreviewException e) {
                 showBitmapPreview();
                 return;
@@ -595,7 +649,8 @@ class AttachmentListAdapter extends RecyclerView.Adapter<AttachmentListAdapter.A
                 return;
             }
             if (drawable == null) {
-                new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageResource(PreviewUtils.getDrawableResourceForMimeType(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType())));
+                new Handler(Looper.getMainLooper()).post(() -> holder.attachmentImageView.setImageResource(PreviewUtils
+                        .getDrawableResourceForMimeType(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType())));
             } else {
                 new Handler(Looper.getMainLooper()).post(() -> {
                     if (drawable instanceof AnimatedImageDrawable) {

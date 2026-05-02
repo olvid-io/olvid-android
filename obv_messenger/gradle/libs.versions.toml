@@ -1,13 +1,13 @@
 [versions]
 # Plugins
-android-gradle-plugin = "9.1.0"
-kotlin = "2.3.10"
+android-gradle-plugin = "9.2.0"
+kotlin = "2.3.20"
 ksp = "2.3.5"
 google-services = "4.4.4"
 protobuf-plugin = "0.9.6"
 protobuf-protoc = "4.34.0"
 protobuf-protocgenjavalite = "3.0.0"
-oss-licenses-plugin = "0.10.10"
+oss-licenses-plugin = "0.11.0"
 navigation-args = "2.9.7"
 
 # Libraries
@@ -24,20 +24,20 @@ androidx-documentfile = "1.1.0"
 androidx-exifinterface = "1.4.2"
 androidx-biometric = "1.1.0"
 androidx-security-crypto = "1.1.0"
-androidx-camera = "1.5.3"
-androidx-media3 = "1.9.2"
+androidx-camera = "1.6.0"
+androidx-media3 = "1.10.0"
 androidx-media = "1.7.1"
 androidx-navigation = "2.9.7"
 androidx-lifecycle = "2.10.0"
 androidx-room = "2.8.4"
 androidx-paging = "3.4.2"
-androidx-work = "2.11.1"
+androidx-work = "2.11.2"
 androidx-datastore = "1.2.1"
 androidx-emoji2 = "1.6.0"
-androidx-credentials = "1.5.0"
+androidx-credentials = "1.6.0"
 androidx-sharetarget = "1.2.0"
 androidx-splashscreen = "1.2.0"
-androidx-compose-bom = "2026.03.00"
+androidx-compose-bom = "2026.03.01"
 
 google-material = "1.13.0"
 google-zxing = "3.3.3" # starting with zxing 3.4.0, API level 24 is required...
@@ -66,11 +66,12 @@ reorderable = "3.0.0"
 sqlcipher = "4.13.0"
 jackson = "2.13.4" # starting with jackson 2.14, API level 26 is required...
 jsoup = "1.22.1"
+zip4j = "2.11.6"
 appauth = "0.11.1"
 jose4j = "0.9.6"
 maplibre = "12.3.1" # maplibre 13.0.0 switches to vulkan which is incompatible with old Android versions. And the opengl-only version of maplibre is not compatible with maplibre annoatations
 maplibre-annotation = "3.0.2"
-commonmark = "0.27.1"
+commonmark = "0.28.0"
 okhttp = "4.12.0"
 okhttp5 = "5.3.2"
 simple-xml = "2.7.1"
@@ -102,6 +103,7 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "androidx-camera" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "androidx-camera" }
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "androidx-media3" }
+androidx-media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "androidx-media3" }
 androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "androidx-media3" }
 androidx-media = { group = "androidx.media", name = "media", version.ref = "androidx-media" }
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "androidx-navigation" }
@@ -174,6 +176,7 @@ reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.r
 sqlcipher-android = { group = "net.zetetic", name = "sqlcipher-android", version.ref = "sqlcipher" }
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+zip4j = { group = "net.lingala.zip4j", name = "zip4j", version.ref = "zip4j" }
 appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
 jose4j = { group = "org.bitbucket.b_c", name = "jose4j", version.ref = "jose4j" }
 maplibre-android-sdk = { group = "org.maplibre.gl", name = "android-sdk", version.ref = "maplibre" }
@@ -238,6 +241,7 @@ room = [
 ]
 media3 = [
     "androidx-media3-exoplayer",
+    "androidx-media3-session",
     "androidx-media3-ui",
 ]
 commonmark = [

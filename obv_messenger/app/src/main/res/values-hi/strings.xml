@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">संपर्क विवरण</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">उपयोगकर्ता विवरण</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">समूह विवरण</string>
@@ -258,7 +258,6 @@
 	<string name="text_you" state="needs_review" hash="672009142">तुम</string>
 	<string name="title_invite_chooser" state="needs_review" hash="1726572772">अपना निमंत्रण भेजने का तरीका चुनें</string>
 	<string name="title_sharing_chooser" state="needs_review" hash="291715689">साझा करने का तरीका चुनें</string>
-	<string name="toast_message_android_bug_attach_duplicate_uri" state="needs_review" hash="-776215584">आपके Android संस्करण में एक बग के कारण कुछ फ़ाइलों को संदेश से जोड़ा नहीं जा सका (कई फ़ाइलों ने समान URI लौटाया)। कृपया छूटी हुई फ़ाइलों को संलग्न करने का फिर से प्रयास करें।</string>
 	<string name="toast_message_attachment_being_copied" state="needs_review" hash="-978855599">एक अटैचमेंट अभी भी संसाधित की जा रही है। प्रसंस्करण समाप्त होने पर आपका संदेश भेजा जाएगा।</string>
 	<string name="toast_message_attachment_saved" state="needs_review" hash="-2073631581">अटैचमेंट सहेजा गया</string>
 	<string name="toast_message_camera_permission_denied" state="needs_review" hash="1896719877">कैमरे का उपयोग करने की अनुमति अस्वीकृत कर दी गई</string>
@@ -344,6 +343,9 @@
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">एक बार सक्रिय होने पर, Olvid आपके द्वारा भेजे गए लिंक का पूर्वावलोकन प्राप्त करेगा और उसे संदेश से जोड़ देगा।</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">प्राप्त लिंक के पूर्वावलोकन प्राप्त करें</string>
 	<string name="pref_link_preview_summary_inbound" state="needs_review" hash="-320325429">एक बार सक्रिय होने पर, Olvid आपके द्वारा प्राप्त लिंक के पूर्वावलोकन को स्वचालित रूप से प्राप्त करेगा (यदि कोई पूर्वावलोकन संदेश से जुड़ा नहीं है)।</string>
+	<string name="link_preview_menu_copy_link" state="needs_review" hash="1269903076">लिंक कॉपी करें</string>
+	<string name="link_preview_menu_open_in_browser" state="needs_review" hash="-1711141559">ब्राउज़र में खोलें</string>
+	<string name="link_preview_menu_open_image" state="needs_review" hash="-2013483894">तस्वीर देखें</string>
 	<string name="pref_discussion_read_receipt_title" state="needs_review" hash="-652307837">पढ़े जाने की रसीद भेजें</string>
 	<string name="pref_text_app_default" state="needs_review" hash="1920567018">अपनी डिफ़ॉल्ट सेटिंग का उपयोग करें</string>
 	<string name="pref_text_app_default_true" state="needs_review" hash="-948780646">अपनी डिफ़ॉल्ट सेटिंग का उपयोग करें (चालू)</string>
@@ -352,6 +354,10 @@
 	<string name="pref_text_discussion_read_receipt_on" state="needs_review" hash="983295321">सक्रिय, आपके संपर्क सूचित किए जाएंगे।</string>
 	<string name="pref_use_lock_screen_title" state="needs_review" hash="540058239">एप्लिकेशन लॉक स्क्रीन का उपयोग करें</string>
 	<string name="pref_use_lock_screen_summary" state="needs_review" hash="-399095273">Olvid को स्टार्टअप पर लॉक स्क्रीन से सुरक्षित रखने के लिए इसे चालू करें।</string>
+	<string name="pref_lock_screen_required_by_mdm" state="needs_review" hash="-500219406">आपके संगठन द्वारा आवश्यक</string>
+	<string name="lock_screen_setup_title" state="needs_review" hash="932203184">लॉक स्क्रीन आवश्यक है</string>
+	<string name="lock_screen_setup_explanation" state="needs_review" hash="169071212">आपके संगठन को आपसे यह ऐप लॉक स्क्रीन पिन या पासवर्ड से सुरक्षित रखने के लिए कहा गया है।</string>
+	<string name="lock_screen_setup_button" state="needs_review" hash="672169315">पिन सेट करें</string>
 	<string name="pref_category_notifications_title" state="needs_review" hash="1237583104">सूचनाएं</string>
 	<string name="pref_category_privacy_title" state="needs_review" hash="-1750659871">गोपनीयता</string>
 	<string name="pref_category_other_title" state="needs_review" hash="-1683901612">अन्य सेटिंग्स</string>
@@ -370,7 +376,7 @@
 	<string name="button_label_use_pin" state="needs_review" hash="918492771">पासवर्ड के बजाय पिन का उपयोग करें</string>
 	<string name="hint_enter_pin" state="needs_review" hash="999437557">पिन दर्ज करें</string>
 	<string name="hint_confirm_pin" state="needs_review" hash="1780268503">पिन की पुष्टि करें</string>
-	<string name="text_pin_creation_explanation" state="needs_review" hash="-1935715126">आपको Olvid को अनलॉक करने के लिए यह पिन दर्ज करना होगा।\nइसे पुनर्प्राप्त नहीं किया जा सकता है और यदि आप इसे भूल जाते हैं तो आप अपने Olvid डेटा तक पहुंच खो सकते हैं।</string>
+	<string name="text_pin_creation_explanation" state="needs_review" hash="1232246926">Olvid को अनलॉक करने के लिए आपको यह पिन दर्ज करना होगा।\nइसे पुनर्प्राप्त नहीं किया जा सकता है, और यदि आप इसे भूल जाते हैं, तो **आप अपने Olvid डेटा तक पहुंच खो सकते हैं**।</string>
 	<string name="error_text_pin_too_short" state="needs_review" hash="-1085309478">पिन बहुत छोटा है (न्यूनतम 4 अंक)</string>
 	<string name="error_text_pin_mismatch" state="needs_review" hash="-4525766">पिन बेमेल</string>
 	<string name="hint_enter_password" state="needs_review" hash="478503341">पासवर्ड दर्ज करें</string>
@@ -394,6 +400,7 @@
 	<string name="pref_text_lock_grace_time_infinity" state="needs_review" hash="146086108">Olvid को केवल मैन्युअल रूप से लॉक करें</string>
 	<string name="pref_unlock_biometry_summary_none_enrolled" state="needs_review" hash="-118589413">आपके डिवाइस पर बायोमेट्रिक प्रमाणीकरण अभी तक कॉन्फ़िगर नहीं किया गया है।</string>
 	<string name="dialog_title_unlock_olvid" state="needs_review" hash="-2054572246">बायोमेट्री के साथ Olvid अनलॉक करें</string>
+	<string name="dialog_title_unlock_neutral" state="needs_review" hash="761644522">बायोमेट्रिक्स से अनलॉक करें</string>
 	<string name="notification_channel_unified_service_name" state="needs_review" hash="1404446256">पृष्ठभूमि सेवा</string>
 	<string name="notification_channel_unified_service_description" state="needs_review" hash="-1204081836">Olvid की स्थिति दिखाने वाली स्थिर सूचना</string>
 	<string name="notification_title_olvid_is_unlocked" state="needs_review" hash="1688502744">Olvid अनलॉक हो गया है</string>
@@ -437,6 +444,7 @@
 	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">इस डिवाइस पर आपका प्रोफ़ाइल निष्क्रिय कर दिया गया है।\n\nऐसा प्रतीत होता है कि आपके पास वर्तमान में कोई सक्रिय डिवाइस नहीं है, इसलिए आप जब चाहें अपना प्रोफ़ाइल फिर से सक्रिय कर सकते हैं।\n\nयदि आप आगे बढ़ना चाहते हैं, तो नीचे "इस डिवाइस पर अपना प्रोफ़ाइल फिर से सक्रिय करें" दबाएं।\n\nइस संवाद को खारिज करने और इस डिवाइस को निष्क्रिय रखने के लिए "रद्द करें" दबाएं: आप इस डिवाइस पर संदेश भेजने या प्राप्त करने में सक्षम नहीं होंगे, लेकिन आप अभी भी अपनी पुरानी चर्चाओं को ब्राउज़ कर सकते हैं।</string>
 	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">इस डिवाइस पर आपका प्रोफ़ाइल निष्क्रिय कर दिया गया है.\n\nऐसा प्रतीत होता है कि आपके पास एक साथ कई डिवाइस पर Olvid का उपयोग करने का लाइसेंस नहीं है. इस डिवाइस को फिर से सक्रिय करने के लिए, आपको अपने किसी अन्य डिवाइस को निष्क्रिय करना होगा.\n\nयदि आप आगे बढ़ना चाहते हैं, तो कृपया नीचे दी गई सूची में से उस डिवाइस का चयन करें जिसे आप निष्क्रिय करना चाहते हैं, और फिर "इस डिवाइस पर अपना प्रोफ़ाइल फिर से सक्रिय करें" दबाएं.\n\nइस संवाद को खारिज करने और इस डिवाइस को निष्क्रिय रखने के लिए "रद्द करें" दबाएं: आप इस डिवाइस पर संदेश भेजने या प्राप्त करने में सक्षम नहीं होंगे, लेकिन आप अभी भी अपनी पुरानी चर्चाओं को ब्राउज़ कर सकते हैं.</string>
 	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">इस डिवाइस पर आपका प्रोफ़ाइल निष्क्रिय कर दिया गया है।\n\nऐसा प्रतीत होता है कि आपके सभी अन्य डिवाइस निकट भविष्य में निष्क्रिय होने के लिए सेट हैं, इसलिए आप जब चाहें इस डिवाइस पर अपना प्रोफ़ाइल फिर से सक्रिय कर सकते हैं। आपकी जानकारी के लिए, नीचे आपके वर्तमान सक्रिय उपकरणों की सूची दी गई है।\n\nयदि आप आगे बढ़ना चाहते हैं, तो नीचे "इस डिवाइस पर अपना प्रोफ़ाइल फिर से सक्रिय करें" दबाएं।\n\nइस संवाद को खारिज करने और इस डिवाइस को निष्क्रिय रखने के लिए "रद्द करें" दबाएं: आप इस डिवाइस पर संदेश भेजने या प्राप्त करने में सक्षम नहीं होंगे, लेकिन आप अभी भी अपनी पुरानी चर्चाओं को ब्राउज़ कर सकते हैं।</string>
+	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">इस डिवाइस पर आपका प्रोफ़ाइल निष्क्रिय कर दिया गया है।\n\nजब तक आप इसे फिर से सक्रिय नहीं करते, तब तक आप यहां संदेश नहीं भेज या प्राप्त कर पाएंगे।</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">इस डिवाइस पर अपना प्रोफ़ाइल फिर से सक्रिय करें</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">एक त्रुटि हुई. कृपया पुनः प्रयास करें।</string>
 	<string name="dialog_title_identity_activated" state="needs_review" hash="-1465666248">Olvid ID फिर से सक्रिय किया गया</string>
@@ -810,10 +818,7 @@
 	<string name="toast_message_voice_message_recording_failed" state="needs_review" hash="-632817078">वॉइस मैसेज रिकॉर्ड करने में विफल</string>
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">मीडिया प्लेयर</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Olvid में मीडिया चलाते समय प्ले/पॉज़ नियंत्रण</string>
-	<string name="notification_title_now_playing" state="needs_review" hash="-1042122929">चल रहा है…</string>
-	<string name="notification_action_pause" state="needs_review" hash="1931883968">रोकें</string>
-	<string name="notification_action_play" state="needs_review" hash="1143766922">चलाएं</string>
-	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="-1049639416">%1$s चलाने में असमर्थ</string>
+	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">ऑडियो फ़ाइल चलाने में असमर्थ</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">हटाएं</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">हर जगह हटाएं</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">हर जगह से हटाना संभव नहीं है। कृपया पुनः प्रयास करें।</string>
@@ -843,7 +848,6 @@
 	<string name="dialog_message_unmute_notifications" state="needs_review" hash="816867976">नए संदेश सूचनाएं वर्तमान में म्यूट हैं।\n\nक्या आप उन्हें अनम्यूट करना चाहते हैं?</string>
 	<string name="dialog_message_unmute_notifications_muted_until" state="needs_review" hash="-325454266">नए संदेश सूचनाएं %1$s तक म्यूट हैं.\n\nक्या आप उन्हें अनम्यूट करना चाहते हैं?</string>
 	<string name="notification_action_mute" state="needs_review" hash="-1553988068">म्यूट करें</string>
-	<string name="pref_scaled_turn_title" state="needs_review" hash="-1234636269">उपयोग करने के लिए क्षेत्रीय TURN सर्वर चुनें</string>
 	<string name="explanation_identity_creation_options" state="needs_review" hash="-795537312">यह स्क्रीन आपको अपने Olvid ID के निर्माण के लिए अतिरिक्त विकल्प चुनने देती है। आप इन विकल्पों को मैन्युअल रूप से दर्ज कर सकते हैं या कॉन्फ़िगरेशन QR-कोड स्कैन कर सकते हैं।</string>
 	<string name="button_label_check_options" state="needs_review" hash="-759177128">विकल्प जांचें</string>
 	<string name="hint_olvid_server" state="needs_review" hash="1097391633">ओलविड सर्वर</string>
@@ -859,6 +863,8 @@
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">ऐसा लगता है कि आपका Olvid सर्वर सुरक्षित कॉल शुरू करने का समर्थन नहीं करता है।\n\nअधिक जानकारी के लिए कृपया अपने व्यवस्थापक से संपर्क करें।</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">आईडी बनाने के विकल्प</string>
 	<string name="text_option_server" state="needs_review" hash="-1130676431">सर्वर: %1$s</string>
+	<string name="dialog_title_non_default_server" state="needs_review" hash="2119192219">एक गैर-डिफ़ॉल्ट सर्वर का उपयोग करना</string>
+	<string name="dialog_message_non_default_server" state="needs_review" hash="459308900">आप निम्नलिखित सर्वर पर एक प्रोफ़ाइल बनाने वाले हैं:\n\n%1$s\n\nयह डिफ़ॉल्ट Olvid सर्वर नहीं है। केवल तभी आगे बढ़ें जब आप इस सर्वर पर भरोसा करते हों।</string>
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">लाइसेंस: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">पहचान प्रदाता</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">पहचान प्रदाता सर्वर</string>
@@ -1201,8 +1207,6 @@
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">कनेक्टिविटी: कनेक्टेड</string>
 	<string name="label_ping_delay" state="needs_review" hash="25344924">पिंग: %1$dms</string>
 	<string name="label_over_max_ping_delay" state="needs_review" hash="-684190262">पिंग: &gt;%1$ds</string>
-	<string name="menu_action_copy_message_text" state="needs_review" hash="1799737962">संदेश पाठ प्रतिलिपि करें</string>
-	<string name="menu_action_copy_text_and_attachments" state="needs_review" hash="428315032">संदेश और अटैचमेंट कॉपी करें</string>
 	<string name="label_message_copied_from_olvid" state="needs_review" hash="1145396410">ओलविड से संदेश कॉपी किया गया</string>
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">पूरा संदेश क्लिपबोर्ड में कॉपी किया गया</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">संपर्क या समूह को एक क्लिक में पूर्वनिर्धारित संदेश भेजने के लिए क्रिया शॉर्टकट</string>
@@ -1402,7 +1406,6 @@
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">की प्रतिलिपि</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">स्थान भेजा गया</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">स्थान प्राप्त हुआ</string>
-	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">स्थान सेवाएं अनुपलब्ध हैं</string>
 	<string name="label_send_your_location" state="needs_review" hash="618026241">अपना स्थान भेजें</string>
 	<string name="notification_title_sharing_location" state="needs_review" hash="-1626101904">Olvid में स्थान साझा करना</string>
 	<string name="notification_action_stop_sharing" state="needs_review" hash="585626699">साझा करना बंद करें</string>
@@ -1531,6 +1534,8 @@
 	<string name="text_setting_lock_biometry" state="needs_review" hash="-1698353580">‣ बायोमेट्रिक्स से अनलॉक करें:</string>
 	<string name="text_setting_lock_notification" state="needs_review" hash="2022286622">‣ स्थायी लॉक स्क्रीन सूचना:\u0020</string>
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">‣ 3 गलत पिन डालने पर संवेदनशील संदेश मिटा दें:\u0020</string>
+	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">‣ स्क्रीन लॉक अनिवार्य करें:</string>
+	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">‣ लॉक स्क्रीन टोकन रीसेट करें:</string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">‣ संग्रहीत वार्तालापों के अटैचमेंट स्वतः डाउनलोड करें:\u0020</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">‣ सूचना पर चर्चा को अनआर्काइव करें:\u0020</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">‣ लिंक पूर्वावलोकन प्राप्त:\u0020</string>
@@ -1593,8 +1598,8 @@
 	<string name="label_open_original_link_with_trackers" state="needs_review" hash="-1586932660">ट्रैकिंग पैरामीटर युक्त मूल लिंक का उपयोग करें</string>
 	<string name="dialog_title_confirm_open_olvid_link" state="needs_review" hash="425949498">क्या आप यह लिंक ओलविड में खोलना चाहेंगे?</string>
 	<string name="toast_message_unable_to_open_url" state="needs_review" hash="-1486954792">URL खोलने में असमर्थ</string>
-	<string name="text_explanation_location_map_provider" state="needs_review" hash="-173394547">मानचित्र प्रदाता का चयन आपको मानचित्र पर साझा करने के लिए सटीक स्थान चुनने की अनुमति देता है। हालाँकि, इससे आपका स्थान (या आपके संपर्कों का स्थान) इस सेवा प्रदाता को प्रकट हो सकता है।</string>
-	<string name="text_explanation_location_map_provider_settings" state="needs_review" hash="68421420">यह विकल्प एप्लिकेशन सेटिंग्स से बदला जा सकता है।</string>
+	<string name="dialog_title_choose_map_provider" state="needs_review" hash="1225681568">एक मानचित्र प्रदाता चुनें</string>
+	<string name="dialog_message_choose_map_provider" state="needs_review" hash="-2129640593">जब आप किसी स्थान को देख रहे हों या साझा कर रहे हों, तो मानचित्र प्रदर्शित करने के लिए नीचे दिए गए मानचित्र प्रदाता में से किसी एक को चुनें।\n\nध्यान रखें कि इससे **आपका स्थान (या आपके संपर्कों का स्थान) इस सेवा प्रदाता को प्रकट हो सकता है**।</string>
 	<string name="button_label_choose_provider" state="needs_review" hash="-797956886">प्रदाता चुनें</string>
 	<string name="button_label_live_share" state="needs_review" hash="327122881">लाइव शेयर करें</string>
 	<string name="label_fetching_address" state="needs_review" hash="-839353954">पता प्राप्त किया जा रहा है…</string>
@@ -1803,7 +1808,9 @@
 	<string name="dialog_title_custom_address_server_url" state="needs_review" hash="-2071925830">कस्टम पता सर्वर</string>
 	<string name="hint_custom_address_server_url" state="needs_review" hash="1348105685">पता लुकअप सर्वर URL</string>
 	<string name="dialog_message_custom_address_server_url" state="needs_review" hash="401731382">Olvid केवल **Pelias** सर्वरों का समर्थन करता है पता लुकअप के लिए. कृपया नीचे उस सर्वर का URL दर्ज करें जिसे आप क्वेरी करना चाहते हैं, यह *https://pelias.olvid.io* जैसा कुछ होना चाहिए, और क्वेरी */v1/reverse* एंट्री पॉइंट पर भेजी जाएंगी.\n\nध्यान दें कि यह सर्वर आपकी स्थिति के बारे में कुछ जानकारी सीख सकता है. सुनिश्चित करें कि आप **एक ऐसे सर्वर का उपयोग करें जिस पर आप भरोसा करते हैं**.</string>
-	<string name="toast_message_playback_speed_not_supported_on_device" state="needs_review" hash="502764942">प्लेबैक गति बदलने में असमर्थ</string>
+	<string name="pref_location_gps_debug_title" state="needs_review" hash="1786532100">स्थान साझाकरण डिबगिंग सुविधाओं को सक्षम करें</string>
+	<string name="pref_location_gps_always_on_title" state="needs_review" hash="1250376384">हमेशा GPS चालू रखें</string>
+	<string name="pref_location_export_gps_logs_title" state="needs_review" hash="-459831250">जीपीएस गतिविधि लॉग निर्यात करें</string>
 	<string name="text_speed_1x" state="needs_review" hash="789822816">1×</string>
 	<string name="text_speed_1_5x" state="needs_review" hash="-120181054">1.5×</string>
 	<string name="text_speed_2x" state="needs_review" hash="1171767872">2×</string>
@@ -2144,15 +2151,11 @@
 	<string name="history_transfer_step_none" state="needs_review" hash="1228580785">कोई भी स्थानांतरण जारी नहीं है</string>
 	<string name="history_transfer_step_contacting_other_device" state="needs_review" hash="1719019815">दूसरे डिवाइस का इंतजार किया जा रहा है</string>
 	<string name="history_transfer_step_connecting" state="needs_review" hash="1836039168">दूसरे डिवाइस से कनेक्ट हो रहा है</string>
-	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">समझौता किया जा रहा है (चरण 1/3)</string>
-	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">संदेशों का स्थानांतरण (चरण 2/3)</string>
-	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">अटैचमेंट स्थानांतरित करना (चरण 3 में से 3)</string>
-	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">समझौता करना</string>
-	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">संदेशों का स्थानांतरण</string>
-	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">अटैचमेंट स्थानांतरित करना</string>
+	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">समझौता करना</string>
+	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">स्थानांतरण</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">स्थानांतरण पूरा हुआ</string>
-	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">स्थानांतरण बाधित</string>
-	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">चैट इतिहास स्थानांतरण (बीटा)</string>
+	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">स्थानांतरण विफल</string>
+	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">चैट इतिहास स्थानांतरण</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">स्थानांतर शुरू करने में असमर्थ। शायद कोई अन्य स्थानांतरण पहले से ही चल रहा है?</string>
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">\"जादुई लिंक\" का उपयोग करें</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">अमान्य मैजिक लिंक</string>
@@ -2165,18 +2168,111 @@
 	<string name="onboarding_transfer_keycloak_error_message_authentication_impossible" state="needs_review" hash="-1891385979">कोई भी समर्थित प्रमाणीकरण विधि उपलब्ध नहीं है।</string>
 	<string name="pref_use_alt_turn_servers_title" state="needs_review" hash="-1956132776">वैकल्पिक TURN सर्वर का उपयोग करें</string>
 	<string name="pref_use_alt_turn_servers_summary" state="needs_review" hash="357427162">घूर्णनशील आईपी पतों के साथ TURN सर्वर का उपयोग करने के लिए इस विकल्प को सक्रिय करें। यदि आप अनिश्चित हैं, तो इस विकल्प को बंद रखें 😁</string>
-	<string name="button_label_transfer_through_webrtc" state="needs_review" hash="-1809138918">स्थानीय नेटवर्क के माध्यम से स्थानांतरित करें</string>
-	<string name="button_label_export_zip" state="needs_review" hash="1575043364">ज़िप फ़ाइल के रूप में निर्यात करें</string>
-	<string name="button_label_import_zip" state="needs_review" hash="1299665090">ज़िप फ़ाइल आयात करें</string>
-	<string name="dialog_title_transfer_choose_target_device" state="needs_review" hash="218115750">इस स्थानांतरण के लिए लक्षित डिवाइस चुनें।</string>
-	<string name="transfer_label_no_other_active_device" state="needs_review" hash="-2135899221">कोई अन्य सक्रिय डिवाइस नहीं</string>
-	<string name="transfer_label_messages" state="needs_review" hash="-1639407912">संदेश</string>
-	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">थ्रूपुट</string>
-	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">शेष</string>
-	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">अटैचमेंट</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">यह सुविधा अभी भी बीटा परीक्षण चरण में है और वर्तमान कार्यान्वयन Olvid के इतिहास स्थानांतरण के अंतिम कार्यान्वयन के साथ संगत नहीं हो सकता है।\n\nइस सुविधा का उपयोग करने से पहले, कृपया सुनिश्चित करें कि आपके उपकरणों पर Olvid का नवीनतम संस्करण स्थापित है।</string>
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">क्या चल रहे स्थानांतरण को रद्द करें?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">वर्तमान में इतिहास स्थानांतरण चल रहा है। क्या आप इसे रद्द करना चाहते हैं?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">स्थानांतरण रद्द करें</string>
 	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">इस चर्चा में शामिल होने की प्रतीक्षा कर रहा हूँ</string>
+	<string name="label_your_other_device" state="needs_review" hash="-339632056">आपका दूसरा डिवाइस</string>
+	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">यह आपके चैट इतिहास को इस डिवाइस में स्थानांतरित करना चाहता है</string>
+	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">“%1$s” इस डिवाइस पर आपकी चैट हिस्ट्री को स्थानांतरित करना चाहता है।</string>
+	<string name="button_label_start_transfer" state="needs_review" hash="208526116">स्थानांतर शुरू करें</string>
+	<string name="pref_disable_secondary_notifications_title" state="needs_review" hash="29372078">\"द्वितीयक\" सूचनाओं को अक्षम करें</string>
+	<string name="pref_disable_secondary_notifications_summary" state="needs_review" hash="-402927980">यह सेटिंग आपके संदेशों पर प्रतिक्रियाओं या आपके पोल के नए उत्तरों के लिए सूचनाओं को अक्षम कर देती है।</string>
+	<string name="template_copy_multiple_messages" state="needs_review" hash="-1584473750">[%1$s] [%2$s]:\n[%3$s]</string>
+	<string name="label_export_your_chat_history" state="needs_review" hash="30036193">अपनी चैट हिस्ट्री निर्यात करें</string>
+	<string name="label_import_your_chat_history" state="needs_review" hash="-1058286401">अपनी चैट हिस्ट्री इम्पोर्ट करें</string>
+	<string name="explanation_export_your_chat_history" state="needs_review" hash="2042738985">यदि आप अपनी चैट इतिहास को इस डिवाइस **से** स्थानांतरित करना चाहते हैं, तो इस विकल्प का उपयोग करें।</string>
+	<string name="explanation_import_your_chat_history" state="needs_review" hash="366204152">यदि आप अपनी चैट इतिहास को इस डिवाइस में स्थानांतरित करना चाहते हैं, तो इस विकल्प का उपयोग करें।</string>
+	<string name="explanation_history_transfer" state="needs_review" hash="983501865">यह सुविधा आपको अपने चैट इतिहास को **सुरक्षित रूप से** अपने दो उपकरणों के बीच स्थानांतरित करने की अनुमति देती है।\n\nशुरू करने से पहले, आपका प्रोफ़ाइल **इन दोनों उपकरणों पर मौजूद** होना चाहिए।</string>
+	<string name="button_label_import" state="needs_review" hash="-984720905">आयात करें</string>
+	<string name="history_transfer_pick_profile_title" state="needs_review" hash="-1782334343">आप किस प्रोफ़ाइल के साथ आगे बढ़ना चाहेंगे?</string>
+	<string name="history_transfer_pick_profile_text_import" state="needs_review" hash="-1162713377">कृपया वह प्रोफ़ाइल चुनें जिसमें आप अपनी **चैट हिस्ट्री इम्पोर्ट** करना चाहते हैं।</string>
+	<string name="history_transfer_pick_profile_text_export" state="needs_review" hash="951522414">कृपया उस प्रोफ़ाइल का चयन करें जिससे आप अपनी **चैट हिस्ट्री को एक्सपोर्ट** करना चाहते हैं।</string>
+	<string name="history_transfer_pick_method_title" state="needs_review" hash="661094742">आप क्या करना चाहते हैं?</string>
+	<string name="history_transfer_pick_method_text_import" state="needs_review" hash="1116376527">कृपया चुनें कि आप अपने प्रोफ़ाइल **%1$s** की चैट हिस्ट्री को कैसे इम्पोर्ट करना चाहते हैं।</string>
+	<string name="history_transfer_pick_method_text_export" state="needs_review" hash="1750125743">कृपया चुनें कि आप अपने प्रोफ़ाइल **%1$s** की चैट हिस्ट्री को कैसे एक्सपोर्ट करना चाहते हैं।</string>
+	<string name="history_transfer_via_wifi_title" state="needs_review" hash="-2016953028">वाई-फाई के माध्यम से स्थानांतरित करें</string>
+	<string name="history_transfer_via_wifi_message" state="needs_review" hash="-758708700">बस अपने दोनों डिवाइस को एक ही वाई-फाई नेटवर्क से कनेक्ट करें।</string>
+	<string name="history_transfer_via_zip_title_import" state="needs_review" hash="1608302669">एक .zip फ़ाइल आयात करें</string>
+	<string name="history_transfer_via_zip_title_export" state="needs_review" hash="-1924849877">एक .zip फ़ाइल निर्यात करें</string>
+	<string name="history_transfer_via_zip_message_import" state="needs_review" hash="1766231761">उस .zip फ़ाइल को चुनें जिसे आपने अपने पुराने डिवाइस से कॉपी किया है।</string>
+	<string name="history_transfer_via_zip_message_export" state="needs_review" hash="-1123951975">एक .zip फ़ाइल डाउनलोड करें और उसे अपने नए डिवाइस में कॉपी करें।</string>
+	<string name="history_transfer_import_zip_description" state="needs_review" hash="855194374">अपनी चैट हिस्ट्री इम्पोर्ट करने के लिए, कृपया उस .zip फ़ाइल का चयन करें जिसे आपने **अपने दूसरे डिवाइस से एक्सपोर्ट किया है**।\n\nसुनिश्चित करें कि आपके द्वारा चुना गया प्रोफ़ाइल **%1$s** उस प्रोफ़ाइल से मेल खाता है जिसका उपयोग इस .zip फ़ाइल को जेनरेट करने के लिए किया गया था।</string>
+	<string name="button_label_choose_zip_file" state="needs_review" hash="-493688169">एक .zip फ़ाइल चुनें</string>
+	<string name="dialog_title_error_reading_zip" state="needs_review" hash="1059408985">.zip फ़ाइल पढ़ने में त्रुटि</string>
+	<string name="dialog_message_error_reading_zip" state="needs_review" hash="1864744526">दिए गए .zip फ़ाइल को पढ़ते समय एक त्रुटि हुई।\n\nकृपया सुनिश्चित करें कि आपने Olvid चैट इतिहास निर्यात फ़ाइल का चयन किया है।</string>
+	<string name="dialog_title_error_zip_password" state="needs_review" hash="1651240086">गलत पासवर्ड</string>
+	<string name="dialog_message_error_zip_password" state="needs_review" hash="216311562">आपके द्वारा प्रदान किया गया पासवर्ड चयनित .zip फ़ाइल को डिक्रिप्ट करने की अनुमति नहीं देता है।\n\nकृपया फिर से प्रयास करें।</string>
+	<string name="dialog_title_zip_password_required" state="needs_review" hash="-944166479">पासवर्ड आवश्यक है</string>
+	<string name="dialog_message_zip_password_required" state="needs_review" hash="548842041">चयनित .zip फ़ाइल पासवर्ड से सुरक्षित है. कृपया वह पासवर्ड दर्ज करें जिसे आपने अपने दूसरे डिवाइस पर अपनी चैट इतिहास निर्यात करते समय चुना था.</string>
+	<string name="history_transfer_export_scope_title_export" state="needs_review" hash="933575859">आप क्या निर्यात करना चाहते हैं?</string>
+	<string name="history_transfer_export_scope_title_transfer" state="needs_review" hash="-1971421411">आप क्या स्थानांतरित करना चाहते हैं?</string>
+	<string name="history_transfer_scope_messages_export_title" state="needs_review" hash="-1810394953">केवल संदेश निर्यात करें</string>
+	<string name="history_transfer_scope_messages_transfer_title" state="needs_review" hash="1119624141">केवल संदेशों को स्थानांतरित करें</string>
+	<string name="history_transfer_scope_messages_export_message" state="needs_review" hash="-2120867312">छोटा निर्यात। केवल टेक्स्ट संदेश शामिल हैं।</string>
+	<string name="history_transfer_scope_messages_transfer_message" state="needs_review" hash="2071005834">तेज़ स्थानांतरण। केवल टेक्स्ट संदेश शामिल हैं।</string>
+	<string name="history_transfer_scope_everything_export_title" state="needs_review" hash="463008259">संदेशों और अटैचमेंट को निर्यात करें</string>
+	<string name="history_transfer_scope_everything_transfer_title" state="needs_review" hash="-175297433">संदेश और अटैचमेंट स्थानांतरित करें</string>
+	<string name="history_transfer_scope_everything_export_message" state="needs_review" hash="-266277978">पूर्ण निर्यात। इसमें सभी संदेश और संलग्नक शामिल हैं।</string>
+	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">स्थानांतरण पूरा हुआ। इसमें सभी संदेश और अटैचमेंट शामिल हैं।</string>
+	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">अपनी चैट हिस्ट्री को .zip फ़ाइल के रूप में एक्सपोर्ट करें। बाद में आप इसे अपने प्रोफ़ाइल के किसी अन्य डिवाइस पर इम्पोर्ट कर सकते हैं **%1$s**।\n\nआप इस फ़ाइल को अनज़िप करके **अपनी चैट हिस्ट्री को वेब पेज पर प्रदर्शित** भी कर सकते हैं।</string>
+	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">एक .zip फ़ाइल बनाएँ</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d चर्चाएँ और %2$d संदेश</string>
+	<string name="label_computing" state="needs_review" hash="1393495921">गणना की जा रही है...</string>
+	<string name="label_total_size" state="needs_review" hash="-788411929">कुल आकार: %1$s</string>
+	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">अपने निर्यात की रक्षा करें</string>
+	<string name="dialog_message_protect_export" state="needs_review" hash="-900141026">आपकी सुरक्षा के लिए, हम अनुशंसा करते हैं कि आप अपने निर्यात को पासवर्ड से सुरक्षित रखें।</string>
+	<string name="button_label_generate_password" state="needs_review" hash="-1174237913">पासवर्ड बनाएं</string>
+	<string name="button_label_choose_password" state="needs_review" hash="-1893200284">एक पासवर्ड चुनें</string>
+	<string name="button_label_continue_without_password" state="needs_review" hash="-106870576">पासवर्ड के बिना जारी रखें</string>
+	<string name="dialog_title_choose_password" state="needs_review" hash="1927816439">एक पासवर्ड चुनें</string>
+	<string name="dialog_title_generated_password" state="needs_review" hash="-690449371">उत्पन्न पासवर्ड</string>
+	<string name="dialog_message_generated_password" state="needs_review" hash="1100314355">नीचे दिया गया पासवर्ड यादृच्छिक रूप से उत्पन्न किया गया था।\n\nसुनिश्चित करें कि आप **आगे बढ़ने से पहले इसे कहीं लिख लें**।</string>
+	<string name="button_label_copy_to_clipboard" state="needs_review" hash="-1309214553">क्लिपबोर्ड में कॉपी करें</string>
+	<string name="history_transfer_pick_target_device_title" state="needs_review" hash="1659408512">एक डिवाइस चुनें</string>
+	<string name="history_transfer_pick_target_device_text" state="needs_review" hash="-1456199559">कृपया वह डिवाइस चुनें जिसमें आप वर्तमान डिवाइस की चैट हिस्ट्री को स्थानांतरित करना चाहते हैं।\n\nक्या आपको वह डिवाइस नहीं मिल रहा है जिसकी आप तलाश कर रहे हैं? कृपया सुनिश्चित करें कि आपका प्रोफ़ाइल **%1$s** इस दूसरे डिवाइस पर **सक्रिय** है।</string>
+	<string name="history_transfer_no_other_device_explanation" state="needs_review" hash="-1034788616">ऐसा लगता है कि आपके प्रोफ़ाइल **%1$s** में कोई अन्य सक्रिय डिवाइस नहीं है।\n\nकृपया अपनी चैट इतिहास को स्थानांतरित करने से पहले **इस प्रोफ़ाइल में अपना नया डिवाइस जोड़ें**।\n\nआप बाद में अपने नए डिवाइस पर आयात करने के लिए एक **.zip फ़ाइल** भी निर्यात कर सकते हैं।</string>
+	<string name="history_transfer_webrtc_instructions_title" state="needs_review" hash="-1353013738">अपने दूसरे डिवाइस पर इन निर्देशों का पालन करें</string>
+	<string name="history_transfer_instructions_turn_on_other_import" state="needs_review" hash="-930696177">उस डिवाइस को चालू करें जिसमें आपकी चैट हिस्ट्री है।</string>
+	<string name="history_transfer_instructions_same_wifi_import" state="needs_review" hash="465388607">सुनिश्चित करें कि आपके दोनों डिवाइस एक ही वाई-फाई नेटवर्क से जुड़े हुए हैं।</string>
+	<string name="history_transfer_instructions_start_export" state="needs_review" hash="-1288439668">अपने दूसरे डिवाइस पर, Olvid की सेटिंग्स खोलें और चैट इतिहास स्थानांतरण निर्यात शुरू करें।</string>
+	<string name="history_transfer_instructions_turn_on_other_export" state="needs_review" hash="1280642155">अपने **%1$s** को चालू करें।</string>
+	<string name="history_transfer_instructions_same_wifi_export" state="needs_review" hash="284833986">सुनिश्चित करें कि यह डिवाइस और आपका **%1$s** एक ही वाई-फाई नेटवर्क से जुड़े हुए हैं।</string>
+	<string name="history_transfer_step_awaiting_confirmation" state="needs_review" hash="665601714">आपकी स्वीकृति की प्रतीक्षा की जा रही है।</string>
+	<string name="dialog_title_abort_history_transfer" state="needs_review" hash="1914158733">क्या चल रहे स्थानांतरण को बाधित किया जाए?</string>
+	<string name="dialog_title_abort_history_transfer_export" state="needs_review" hash="-856542741">क्या आप जारी निर्यात को रद्द करना चाहते हैं?</string>
+	<string name="dialog_title_abort_history_transfer_import" state="needs_review" hash="976007540">क्या आप जारी आयात को रद्द करना चाहते हैं?</string>
+	<string name="dialog_message_abort_history_transfer_webrtc" state="needs_review" hash="1807742093">क्या आप सुनिश्चित हैं कि आप चल रहे चैट इतिहास स्थानांतरण को बाधित करना चाहते हैं? \n\nयदि आप चाहें तो आप बाद में स्थानांतरण को फिर से शुरू कर सकते हैं। **पहले से स्थानांतरित की गई हर चीज़ को सुरक्षित रखा जाएगा** और इसे फिर से स्थानांतरित करने की आवश्यकता नहीं होगी।</string>
+	<string name="dialog_message_abort_history_transfer_zip_export" state="needs_review" hash="716134255">क्या आप सुनिश्चित हैं कि आप चल रहे .zip फ़ाइल निर्यात को रद्द करना चाहते हैं?\n\nऐसा करने से आपके डिवाइस पर एक **आंशिक .zip फ़ाइल** रह जाएगी जिसे आपको **मैन्युअल रूप से हटाना** होगा।</string>
+	<string name="dialog_message_abort_history_transfer_zip_import" state="needs_review" hash="1264487097">क्या आप सुनिश्चित हैं कि आप चल रहे .zip फ़ाइल आयात को रद्द करना चाहते हैं? \n\nयदि आप चाहें तो आप बाद में आयात को फिर से शुरू कर सकते हैं। **पहले से आयात की गई हर चीज़ को सुरक्षित रखा जाएगा** और इसे फिर से आयात करने की आवश्यकता नहीं होगी।</string>
+	<string name="button_label_interrupt_and_continue_later" state="needs_review" hash="-976034947">बीच में रोकें और बाद में फिर से शुरू करें</string>
+	<string name="button_label_abort_export" state="needs_review" hash="428199797">निर्यात रद्द करें</string>
+	<string name="button_label_abort_import" state="needs_review" hash="2031103191">आयात रद्द करें</string>
+	<string name="history_transfer_fail_reason_aborted" state="needs_review" hash="277351522">स्थानांतरण बाधित हो गया</string>
+	<string name="history_transfer_fail_reason_unknown" state="needs_review" hash="-1170630200">एक अज्ञात त्रुटि हुई (संभवतः नेटवर्क डिस्कनेक्ट)</string>
+	<string name="history_transfer_fail_reason_identity_mismatch" state="needs_review" hash="936267267">यह .zip फ़ाइल किसी अन्य प्रोफ़ाइल से निर्यात की गई थी।</string>
+	<string name="history_transfer_fail_reason_wrong_passwrod" state="needs_review" hash="1847441965">गलत पासवर्ड</string>
+	<string name="history_transfer_fail_reason_invalid_zip" state="needs_review" hash="-691417686">‎.zip फ़ाइल को पढ़ने में असमर्थ (क्या यह वास्तव में एक Olvid चैट इतिहास निर्यात फ़ाइल है?)</string>
+	<string name="transfer_label_sending_messages" state="needs_review" hash="2018039973">संदेश भेजना</string>
+	<string name="transfer_label_exporting_messages" state="needs_review" hash="1572454408">संदेशों का निर्यात</string>
+	<string name="transfer_label_importing_messages" state="needs_review" hash="1913024934">संदेशों का आयात</string>
+	<string name="transfer_label_receiving_messages" state="needs_review" hash="2015919003">संदेश प्राप्त करना</string>
+	<string name="transfer_label_sending_attachments" state="needs_review" hash="2102571371">अटैचमेंट भेजना</string>
+	<string name="transfer_label_exporting_attachments" state="needs_review" hash="-1029839434">अटैचमेंट एक्सपोर्ट करना</string>
+	<string name="transfer_label_importing_attachments" state="needs_review" hash="1078186262">अटैचमेंट आयात करना</string>
+	<string name="transfer_label_receiving_attachments" state="needs_review" hash="439049517">अटैचमेंट प्राप्त करना</string>
+	<string name="label_remaining_and_throughput" state="needs_review" hash="1772610397">लगभग %1$s शेष (%2$s)</string>
+	<string name="history_transfer_step_connecting_export" state="needs_review" hash="-28311439">.zip फ़ाइल बनाई जा रही है</string>
+	<string name="history_transfer_step_connecting_import" state="needs_review" hash="1323447620">‎.zip फ़ाइल खोलना</string>
+	<string name="history_transfer_step_failed_export" state="needs_review" hash="185890904">निर्यात विफल रहा</string>
+	<string name="history_transfer_step_finished_export" state="needs_review" hash="1156914922">निर्यात पूरा हुआ</string>
+	<string name="history_transfer_step_failed_import" state="needs_review" hash="-909085512">आयात विफल रहा</string>
+	<string name="history_transfer_step_finished_import" state="needs_review" hash="-653312310">आयात पूरा हुआ</string>
+	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">निर्यात किया जा रहा है</string>
+	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">आयात किया जा रहा है</string>
+	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">सामग्री का विश्लेषण</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">निर्यात किए गए वार्तालापों का विश्लेषण</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">OpenStreetMap स्टाइल फ़ाइल लोड करते समय एक त्रुटि हुई।</string>
+	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">ऐप के अंदर सदस्यता उपलब्ध नहीं है</string>
+	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">आपके द्वारा इंस्टॉल किया गया Olvid संस्करण Google के बिलिंग लाइब्रेरी को शामिल नहीं करता है और यह इन-ऐप खरीदारी का समर्थन नहीं करता है।\n\nअधिक जानकारी के लिए, कृपया **feedback@olvid.io** पर हमसे संपर्क करें।</string>
 </resources>

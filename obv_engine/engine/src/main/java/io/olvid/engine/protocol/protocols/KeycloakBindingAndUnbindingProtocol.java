@@ -27,7 +27,6 @@ import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.JsonWebKeySet;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -214,8 +213,8 @@ public class KeycloakBindingAndUnbindingProtocol extends ConcreteProtocol {
                 }
             }
             if (oidc != null) {
-                this.clientId = oidc.clientId();
-                this.clientSecret = oidc.clientSecret();
+                this.clientId = oidc.clientId;
+                this.clientSecret = oidc.clientSecret;
             } else {
                 this.clientId = null;
                 this.clientSecret = null;

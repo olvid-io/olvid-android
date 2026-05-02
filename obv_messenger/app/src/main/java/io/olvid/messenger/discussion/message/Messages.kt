@@ -601,6 +601,19 @@ fun Message(
                 }
             }
         }
+        if (discussionViewModel?.isSelectingForDeletion == true) {
+            // override click when selecting with proper methods
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .combinedClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple(color = colorResource(id = R.color.blueOrWhiteOverlay)),
+                        onClick = onClick,
+                        onLongClick = onLongClick
+                    )
+            )
+        }
     }
 }
 

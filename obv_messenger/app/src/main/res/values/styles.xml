@@ -87,8 +87,8 @@
         <item name="android:statusBarColor">@color/olvid_gradient_dark</item>
         <item name="android:textColorPrimary">@color/grey</item>
         <item name="android:textColorLink">@color/primary700</item>
-        <item name="titleTextColor">@color/alwaysWhite</item>
-        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back_white</item>
+        <item name="titleTextColor">@color/almostBlack</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
     </style>
 
     <!-- AppBar style to use for "blue/black" AppBar to force light icons -->
@@ -115,10 +115,6 @@
     <style name="FadeInAndOutAnimation">
         <item name="android:windowEnterAnimation">@anim/fade_in</item>
         <item name="android:windowExitAnimation">@anim/fade_out</item>
-    </style>
-
-    <style name="FadeInAnimation">
-        <item name="android:windowEnterAnimation">@anim/fade_in</item>
     </style>
 
     <!-- OnClick item-->
@@ -195,15 +191,5 @@
     </style>
     <style name="AppTheme.GreyAccent">
         <item name="colorAccent">@color/greyOverlay</item>
-    </style>
-
-    <!--  bottom sheet with transparent background  -->
-    <style name="TransparentBottomSheetDialogTheme" parent="Theme.Design.BottomSheetDialog">
-        <item name="bottomSheetStyle">@style/TransparentBottomSheetStyle</item>
-    </style>
-    <style name="TransparentBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@android:color/transparent</item>
-        <item name="behavior_skipCollapsed">true</item>
-        <item name="behavior_peekHeight">1000dp</item>
     </style>
 </resources>

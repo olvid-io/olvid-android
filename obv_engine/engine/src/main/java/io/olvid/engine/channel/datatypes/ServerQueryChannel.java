@@ -69,7 +69,7 @@ public class ServerQueryChannel extends Channel {
         switch (message.getSendChannelInfo().getChannelType()) {
             case SendChannelInfo.SERVER_QUERY_TYPE:
                 // Check that the toIdentity is an OwnedIdentity
-                if (channelManagerSession.identityDelegate.isOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getToIdentity())
+                if (channelManagerSession.identityDelegate.isOwnedIdentity(channelManagerSession.session, message.getSendChannelInfo().getToIdentity(), false)
                         || Objects.equals(message.getSendChannelInfo().getToIdentity().getServer(), Constants.EPHEMERAL_IDENTITY_SERVER)) {
                     return new ServerQueryChannel[]{
                             new ServerQueryChannel()

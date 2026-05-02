@@ -64,7 +64,6 @@ class JsonMessageInThread {
         @JsonIgnore
         fun jsonMessageStatusFromOutboundMessageStatus(outboundMessageStatus: Int) : Int? {
             return when(outboundMessageStatus) {
-                Message.STATUS_UNPROCESSED, Message.STATUS_PROCESSING, Message.STATUS_SENT_FROM_ANOTHER_DEVICE -> STATUS_SENT_FROM_ANOTHER_DEVICE
                 Message.STATUS_SENT -> STATUS_SENT
                 Message.STATUS_DELIVERED -> STATUS_DELIVERED
                 Message.STATUS_DELIVERED_AND_READ -> STATUS_DELIVERED_AND_READ
@@ -72,23 +71,28 @@ class JsonMessageInThread {
                 Message.STATUS_DELIVERED_ALL -> STATUS_DELIVERED_ALL
                 Message.STATUS_DELIVERED_ALL_READ_ONE -> STATUS_DELIVERED_ALL_READ_ONE
                 Message.STATUS_DELIVERED_ALL_READ_ALL -> STATUS_DELIVERED_ALL_READ_ALL
-                else -> null
+                // "else" includes Message.STATUS_UNPROCESSED, Message.STATUS_PROCESSING, Message.STATUS_SENT_FROM_ANOTHER_DEVICE (and inbound message statuses)
+                else -> STATUS_SENT_FROM_ANOTHER_DEVICE
             }
         }
 
         // for any received JsonMessageInThread. this is the status to give to the new Message (inbound or outbound)
         @JsonIgnore
-        fun messageStatusFromJsonMessageStatus(jsonMessageStatus: Int?) : Int {
-            return when(jsonMessageStatus) {
-                STATUS_SENT_FROM_ANOTHER_DEVICE -> Message.STATUS_SENT_FROM_ANOTHER_DEVICE
-                STATUS_SENT -> Message.STATUS_SENT
-                STATUS_DELIVERED -> Message.STATUS_DELIVERED
-                STATUS_DELIVERED_AND_READ -> Message.STATUS_DELIVERED_AND_READ
-                STATUS_UNDELIVERED -> Message.STATUS_UNDELIVERED
-                STATUS_DELIVERED_ALL -> Message.STATUS_DELIVERED_ALL
-                STATUS_DELIVERED_ALL_READ_ONE -> Message.STATUS_DELIVERED_ALL_READ_ONE
-                STATUS_DELIVERED_ALL_READ_ALL -> Message.STATUS_DELIVERED_ALL_READ_ALL
-                else -> Message.STATUS_READ // by default, mark inbound messages as read
+        fun messageStatusFromJsonMessageStatus(jsonMessageStatus: Int?, messageType: Int) : Int {
+            return if (jsonMessageStatus == null || messageType == Message.TYPE_INBOUND_MESSAGE) {
+                Message.STATUS_READ // by default, mark inbound messages as read
+            } else {
+                when (jsonMessageStatus) {
+                    STATUS_SENT_FROM_ANOTHER_DEVICE -> Message.STATUS_SENT_FROM_ANOTHER_DEVICE
+                    STATUS_SENT -> Message.STATUS_SENT
+                    STATUS_DELIVERED -> Message.STATUS_DELIVERED
+                    STATUS_DELIVERED_AND_READ -> Message.STATUS_DELIVERED_AND_READ
+                    STATUS_UNDELIVERED -> Message.STATUS_UNDELIVERED
+                    STATUS_DELIVERED_ALL -> Message.STATUS_DELIVERED_ALL
+                    STATUS_DELIVERED_ALL_READ_ONE -> Message.STATUS_DELIVERED_ALL_READ_ONE
+                    STATUS_DELIVERED_ALL_READ_ALL -> Message.STATUS_DELIVERED_ALL_READ_ALL
+                    else -> Message.STATUS_SENT_FROM_ANOTHER_DEVICE // for unknown statuses
+                }
             }
         }
     }

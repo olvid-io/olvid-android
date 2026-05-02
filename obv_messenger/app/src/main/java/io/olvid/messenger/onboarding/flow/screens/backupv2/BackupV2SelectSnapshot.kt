@@ -58,7 +58,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -73,14 +72,14 @@ import io.olvid.engine.engine.types.sync.ObvSyncSnapshot
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.ProfileBackupSnapshot
 import io.olvid.messenger.customClasses.StringUtils
-import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.customClasses.formatMarkdownToAnnotatedString
 import io.olvid.messenger.designsystem.constantSp
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.onboarding.flow.BackupSnapshotsFetchState
 import io.olvid.messenger.onboarding.flow.OnboardingRoutes
 import io.olvid.messenger.onboarding.flow.OnboardingScreen
 import io.olvid.messenger.onboarding.flow.OnboardingStep
-import io.olvid.messenger.settings.composables.getPlatformResource
+import io.olvid.messenger.settings.backupV2.composables.getPlatformResource
 
 
 fun NavGraphBuilder.backupV2SelectSnapshot(
@@ -148,7 +147,7 @@ fun NavGraphBuilder.backupV2SelectSnapshot(
 
                 Text(
                     modifier = Modifier.widthIn(max = 400.dp),
-                    text = AnnotatedString(stringResource(R.string.explanation_unable_to_fetch_snapshots)).formatMarkdown(),
+                    text = stringResource(R.string.explanation_unable_to_fetch_snapshots).formatMarkdownToAnnotatedString(),
                     color = colorResource(R.color.red),
                     style = OlvidTypography.body2,
                     textAlign = TextAlign.Center,
@@ -171,7 +170,7 @@ fun NavGraphBuilder.backupV2SelectSnapshot(
                 if (profileSnapshots.value.isEmpty()) {
                     Text(
                         modifier = Modifier.widthIn(max = 400.dp),
-                        text = AnnotatedString(stringResource(R.string.explanation_no_snapshots_for_profile)).formatMarkdown(),
+                        text = stringResource(R.string.explanation_no_snapshots_for_profile).formatMarkdownToAnnotatedString(),
                         color = colorResource(R.color.greyTint),
                         style = OlvidTypography.body2,
                         textAlign = TextAlign.Center,

@@ -69,6 +69,8 @@ import io.olvid.messenger.R
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.designsystem.components.OlvidActionButton
+import io.olvid.messenger.designsystem.components.OlvidOutlinedActionButton
+import io.olvid.messenger.designsystem.components.OlvidOutlinedSecondaryButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.openid.KeycloakManager
@@ -234,11 +236,8 @@ fun ContactInvitationPopup(
                         )
                         contactOrKeycloakDetails.contact?.let {
                             Spacer(modifier = Modifier.height(8.dp))
-                            OlvidActionButton(
+                            OlvidOutlinedActionButton(
                                 modifier = Modifier.fillMaxWidth(),
-                                containerColor = Color.Transparent,
-                                contentColor = colorResource(R.color.almostBlack),
-                                outlinedColor = colorResource(R.color.darkGrey),
                                 text = stringResource(R.string.button_label_see_details),
                                 onClick = {
                                     onDismiss.invoke()
@@ -281,11 +280,8 @@ fun ContactInvitationPopup(
                             )
 
                             Spacer(modifier = Modifier.height(24.dp))
-                            OlvidActionButton(
+                            OlvidOutlinedActionButton(
                                 modifier = Modifier.fillMaxWidth(),
-                                containerColor = Color.Transparent,
-                                contentColor = colorResource(R.color.olvid_gradient_light),
-                                outlinedColor = colorResource(R.color.olvid_gradient_light),
                                 text = stringResource(R.string.button_label_abort),
                                 onClick = {
                                     inviteSent?.let { invitation ->
@@ -297,11 +293,8 @@ fun ContactInvitationPopup(
                             )
                             contactOrKeycloakDetails.contact?.let {
                                 Spacer(modifier = Modifier.height(8.dp))
-                                OlvidActionButton(
+                                OlvidOutlinedSecondaryButton(
                                     modifier = Modifier.fillMaxWidth(),
-                                    containerColor = Color.Transparent,
-                                    contentColor = colorResource(R.color.almostBlack),
-                                    outlinedColor = colorResource(R.color.darkGrey),
                                     text = stringResource(R.string.button_label_see_details),
                                     onClick = {
                                         onDismiss.invoke()
@@ -311,11 +304,8 @@ fun ContactInvitationPopup(
                             }
                         } else {
                             Spacer(modifier = Modifier.height(24.dp))
-                            OlvidActionButton(
+                            OlvidOutlinedActionButton(
                                 modifier = Modifier.fillMaxWidth(),
-                                containerColor = Color.Transparent,
-                                contentColor = colorResource(R.color.olvid_gradient_light),
-                                outlinedColor = colorResource(R.color.olvid_gradient_light),
                                 text = stringResource(R.string.button_label_discuss),
                                 onClick = {
                                     onOpenDiscussion.invoke(bytesOwnedIdentity, bytesContactIdentity)

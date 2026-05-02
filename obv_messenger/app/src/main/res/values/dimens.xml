@@ -1,7 +1,6 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="attachment_small_preview_size">72dp</dimen>
-    <dimen name="attachment_corner_radius">6dp</dimen>
     <dimen name="notification_icon_size">64dp</dimen>
     <dimen name="shortcut_icon_size">108dp</dimen>
     <dimen name="inner_shortcut_icon_size">72dp</dimen>

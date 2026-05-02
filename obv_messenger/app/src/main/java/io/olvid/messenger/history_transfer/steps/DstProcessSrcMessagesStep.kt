@@ -164,7 +164,7 @@ class DstProcessSrcMessagesStep(
                 val messageType: Int =
                     if (sender.contentEquals(bytesOwnedIdentity)) Message.TYPE_OUTBOUND_MESSAGE else Message.TYPE_INBOUND_MESSAGE
                 val messageStatus =
-                    JsonMessageInThread.messageStatusFromJsonMessageStatus(jsonMessageInThread.status)
+                    JsonMessageInThread.messageStatusFromJsonMessageStatus(jsonMessageInThread.status, messageType)
 
                 val jsonMessage: JsonMessage = JsonMessage().apply {
                     body = jsonMessageInThread.body
@@ -334,7 +334,7 @@ class DstProcessSrcMessagesStep(
                 try {
                     try {
                         Fyle.acquireLock(sha256)
-                        // an null imageResolution means it should be computed, empty string means there is nothing to compute
+                        // a null imageResolution means it should be computed, empty string means there is nothing to compute
                         val imageResolution =
                             if (PreviewUtils.mimeTypeIsSupportedImageOrVideo(mimeType)) null else ""
                         var fyleId: Long

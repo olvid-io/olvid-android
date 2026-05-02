@@ -50,6 +50,7 @@ import io.olvid.messenger.customClasses.PreviewUtilsWithDrawables;
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.TextBlock;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import kotlin.Unit;
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryImageViewHolder> implements Observer<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> {
@@ -60,6 +61,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
 
     private final LayoutInflater layoutInflater;
     private final @Nullable ExoPlayer mediaPlayer;
+    private OpenGraph linkPreviewData;
 
     @NonNull
     private final GalleryAdapterCallbacks galleryAdapterCallbacks;
@@ -72,6 +74,10 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
         this.mediaPlayer = mediaPlayer;
         this.galleryAdapterCallbacks = galleryAdapterCallbacks;
         this.setHasStableIds(true);
+    }
+
+    public void setLinkPreviewData(io.olvid.messenger.discussion.linkpreview.OpenGraph linkPreviewData) {
+        this.linkPreviewData = linkPreviewData;
     }
 
     public void cleanup() {
@@ -138,6 +144,20 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
             }
 
             App.runThread(() -> {
+                if (io.olvid.messenger.discussion.linkpreview.OpenGraph.MIME_TYPE.equals(fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType())) {
+                    if (linkPreviewData != null && linkPreviewData.getBitmap() != null) {
+                        Bitmap bitmap = linkPreviewData.getBitmap();
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            holder.attachmentFailedTextView.setVisibility(View.GONE);
+                            holder.previewErrorTextView.setVisibility(View.GONE);
+                            if (bitmap != null) {
+                                holder.imageView.setImageBitmap(bitmap);
+                            }
+                        });
+                    }
+                    return;
+                }
+
                 try {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
                         Drawable drawable = PreviewUtilsWithDrawables.getDrawablePreview(fyleAndStatus.fyle, fyleAndStatus.fyleMessageJoinWithStatus, PreviewUtils.MAX_SIZE);

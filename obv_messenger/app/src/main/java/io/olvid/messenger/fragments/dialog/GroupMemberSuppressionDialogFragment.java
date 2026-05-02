@@ -86,7 +86,7 @@ public class GroupMemberSuppressionDialogFragment extends DialogFragment {
         Window window = dialog.getWindow();
         if (window != null) {
             window.requestFeature(Window.FEATURE_NO_TITLE);
-            if (SettingsActivity.preventScreenCapture()) {
+            if (SettingsActivity.preventScreenCapture(getContext())) {
                 window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
             }
         }

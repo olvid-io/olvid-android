@@ -34,6 +34,7 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.discussion.compose.VoiceMessageRecorder;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 @Dao
@@ -53,8 +54,32 @@ public interface FyleDao {
             " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
             " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = " +
             " ( SELECT id FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_DRAFT + " AND " + Message.DISCUSSION_ID + " = :discussionId ) " +
-            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " != '" + OpenGraph.MIME_TYPE + "' ")
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " != '" + OpenGraph.MIME_TYPE + "' " +
+            " ORDER BY FMjoin.rowid ASC")
     LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> getDiscussionDraftFyles(long discussionId);
+
+    @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = " +
+            " ( SELECT id FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_DRAFT + " AND " + Message.DISCUSSION_ID + " = :discussionId ) " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " != '" + OpenGraph.MIME_TYPE + "' " +
+            " AND (" +
+            "FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'audio/%' " +
+            " OR FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " NOT LIKE '%" + VoiceMessageRecorder.AUDIO_FILE_NAME_SUFFIX + "%'" +
+            ") " +
+            " ORDER BY FMjoin.rowid ASC")
+    LiveData<List<FyleMessageJoinWithStatusDao.FyleAndStatus>> getDiscussionDraftFylesWithoutVoiceRecordings(long discussionId);
+
+    @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " WHERE FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID + " = " +
+            " ( SELECT id FROM " + Message.TABLE_NAME + " WHERE " + Message.STATUS + " = " + Message.STATUS_DRAFT + " AND " + Message.DISCUSSION_ID + " = :discussionId ) " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " LIKE '%" + VoiceMessageRecorder.AUDIO_FILE_NAME_SUFFIX + "%' " +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'audio/%' " +
+            " LIMIT 1")
+    @Nullable LiveData<FyleMessageJoinWithStatusDao.FyleAndStatus> getDiscussionDraftVoiceRecording(long discussionId);
 
     @Query("SELECT * FROM " + Fyle.TABLE_NAME + " WHERE id = :fyleId")
     @Nullable Fyle getById(long fyleId);
@@ -80,7 +105,8 @@ public interface FyleDao {
             " WHERE fyle." + Fyle.SHA256 + " IS NOT NULL " +
             " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL " +
             " AND mess." + Message.DISCUSSION_ID + " IN (:discussionIds) " +
-            " AND mess." + Message.MESSAGE_TYPE + " IN ( " + Message.TYPE_OUTBOUND_MESSAGE + "," + Message.TYPE_INBOUND_MESSAGE + ") "
+            " AND mess." + Message.MESSAGE_TYPE + " IN ( " + Message.TYPE_OUTBOUND_MESSAGE + "," + Message.TYPE_INBOUND_MESSAGE + ") " +
+            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT
     )
     @NonNull List<Fyle> getAllTransferableForDiscussionIds(@NonNull List<Long> discussionIds);
 
@@ -94,7 +120,8 @@ public interface FyleDao {
             " WHERE fyle." + Fyle.SHA256 + " IS NOT NULL " +
             " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL " +
             " AND disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND mess." + Message.MESSAGE_TYPE + " IN ( " + Message.TYPE_OUTBOUND_MESSAGE + "," + Message.TYPE_INBOUND_MESSAGE + ") "
+            " AND mess." + Message.MESSAGE_TYPE + " IN ( " + Message.TYPE_OUTBOUND_MESSAGE + "," + Message.TYPE_INBOUND_MESSAGE + ") " +
+            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT
     )
     @NonNull List<Fyle> getAllTransferableForOwnedIdentity(@NonNull byte[] bytesOwnedIdentity);
 

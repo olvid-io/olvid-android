@@ -42,6 +42,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -56,7 +57,7 @@ import io.olvid.messenger.R
 import io.olvid.messenger.billing.FreeTrialView
 import io.olvid.messenger.billing.SubscriptionOfferViewModel
 import io.olvid.messenger.billing.SubscriptionUpdatedDialog
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.formatMarkdown
@@ -64,6 +65,7 @@ import io.olvid.messenger.databases.AppDatabase.Companion.getInstance
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.designsystem.components.BaseDialogContent
 import io.olvid.messenger.designsystem.components.DialogSecure
+import io.olvid.messenger.designsystem.components.OlvidCircularProgress
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.showDialog
 import io.olvid.messenger.designsystem.theme.OlvidTypography
@@ -223,6 +225,12 @@ class AppDialogShowActivity : LockableActivity() {
                         BaseDialogContent(
                             title = stringResource(R.string.dialog_title_subscription_required),
                             actions = {
+                                if (subscriptionOfferViewModel.freeTrialResults == null && subscriptionOfferViewModel.freeTrialFailed.not()) {
+                                    OlvidCircularProgress(
+                                        color = colorResource(R.color.greyTint),
+                                        size = 32.dp
+                                    )
+                                }
                                 Spacer(modifier = Modifier.weight(1f))
                                 OlvidTextButton(
                                     text = stringResource(R.string.button_label_check_subscription),

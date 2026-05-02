@@ -23,7 +23,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import io.olvid.engine.Logger
 import io.olvid.engine.engine.types.ObvBytesKey
+import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class SrcDiscussionRanges {
@@ -36,12 +38,16 @@ class SrcDiscussionRanges {
     var rangesByThreadAndSender: Map<ObvBytesKey, JsonRangesByThread>? = null
 
     @JsonIgnore
-    fun getRangesByThreadAndSender(): Map<ObvBytesKey, Map<String, List<List<Long>>>>? {
-        return rangesByThreadAndSender?.mapValues { (_, value) -> value.ranges ?: emptyMap() }
+    fun getRangesByThreadAndSender(): Map<ObvBytesKey, Map<UUID, List<List<Long>>>>? {
+        return rangesByThreadAndSender?.mapValues { (_, value) ->
+            value.ranges?.mapKeys { (key, _) -> UUID.fromString(key) } ?: emptyMap()
+        }
     }
 
     @JsonIgnore
-    fun setRangesByThreadAndSender(ranges: Map<ObvBytesKey, Map<String, List<List<Long>>>>?) {
-        rangesByThreadAndSender = ranges?.mapValues { (_, value) -> JsonRangesByThread(value) }
+    fun setRangesByThreadAndSender(ranges: Map<ObvBytesKey, Map<UUID, List<List<Long>>>>?) {
+        rangesByThreadAndSender = ranges?.mapValues { (_, value) ->
+            JsonRangesByThread(value.mapKeys { (key, _) -> Logger.getUuidString(key) })
+        }
     }
 }

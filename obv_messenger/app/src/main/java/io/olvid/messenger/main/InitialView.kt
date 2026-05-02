@@ -50,7 +50,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.InitialView
 
@@ -169,24 +168,22 @@ fun InitialView(
 @Preview
 @Composable
 private fun InitialViewPreview() {
-    AppCompatTheme {
-        Column(verticalArrangement = Arrangement.SpaceEvenly) {
-            InitialView(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .requiredSize(56.dp),
-                unreadMessages = true,
-                muted = true,
-                onCall = true,
-                initialViewSetup = { initialView -> initialView.setInitial(byteArrayOf(), "A") },
-            )
-            InitialView(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .requiredSize(56.dp),
-                selected = true,
-                initialViewSetup = { initialView -> initialView.setInitial(byteArrayOf(), "A") },
-            )
-        }
+    Column(verticalArrangement = Arrangement.SpaceEvenly) {
+        InitialView(
+            modifier = Modifier
+                .padding(16.dp)
+                .requiredSize(56.dp),
+            unreadMessages = true,
+            muted = true,
+            onCall = true,
+            initialViewSetup = { initialView -> initialView.setInitial(byteArrayOf(), "A") },
+        )
+        InitialView(
+            modifier = Modifier
+                .padding(16.dp)
+                .requiredSize(56.dp),
+            selected = true,
+            initialViewSetup = { initialView -> initialView.setInitial(byteArrayOf(), "A") },
+        )
     }
 }

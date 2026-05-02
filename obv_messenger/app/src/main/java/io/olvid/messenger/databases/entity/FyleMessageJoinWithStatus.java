@@ -42,10 +42,14 @@ import io.olvid.messenger.App;
 import io.olvid.messenger.customClasses.PreviewUtils;
 import io.olvid.messenger.customClasses.TextBlockKt;
 import io.olvid.messenger.databases.AppDatabase;
+import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao;
+import io.olvid.messenger.discussion.compose.WaveformExtractor;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.google_services.GoogleTextRecognizer;
 import io.olvid.messenger.settings.SettingsActivity;
 import kotlin.Unit;
+import kotlinx.coroutines.BuildersKt;
+import kotlinx.coroutines.Dispatchers;
 
 @SuppressWarnings("CanBeFinal")
 @Entity(
@@ -455,6 +459,15 @@ public class FyleMessageJoinWithStatus {
         App.runThread(() -> {
             try {
                 computeTextContentForFullTextSearch(db, fyle);
+                // if this is an audio file, also extract the waveform
+                if (getNonNullMimeType().startsWith("audio/")) {
+                    FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus = new FyleMessageJoinWithStatusDao.FyleAndStatus();
+                    fyleAndStatus.fyle = fyle;
+                    fyleAndStatus.fyleMessageJoinWithStatus = this;
+                    try {
+                        BuildersKt.runBlocking(Dispatchers.getIO(), (scope, continuation) -> WaveformExtractor.INSTANCE.getCachedAmplitudesOrExtracted(fyleAndStatus, continuation));
+                    } catch (InterruptedException ignored) { }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

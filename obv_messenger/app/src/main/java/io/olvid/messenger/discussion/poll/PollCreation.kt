@@ -570,7 +570,7 @@ private fun SendButton(
         Spacer(Modifier.width(8.dp))
         Icon(
             modifier = Modifier.size(20.dp),
-            painter = painterResource(R.drawable.ic_send),
+            painter = painterResource(R.drawable.ic_send_up),
             contentDescription = null,
         )
     }

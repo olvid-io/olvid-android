@@ -18,9 +18,14 @@
  */
 package io.olvid.messenger.discussion
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.text.format.DateFormat
+import android.view.Gravity
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -42,9 +47,11 @@ import androidx.paging.cachedIn
 import androidx.paging.liveData
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.R
 import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.customClasses.SecureDeleteEverywhereDialogBuilder
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.dao.DiscussionDao.DiscussionAndGroupMembersCount
 import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.dao.Group2MemberDao.Group2MemberOrPendingForMention
@@ -61,6 +68,7 @@ import io.olvid.messenger.databases.tasks.DeleteMessagesTask
 import io.olvid.messenger.databases.tasks.PropagateBookmarkedMessageChangeTask
 import io.olvid.messenger.databases.tasks.SetDraftReplyTask
 import io.olvid.messenger.discussion.DiscussionActivity.ScrollRequest
+import io.olvid.messenger.discussion.message.LocationContextMenuState
 import io.olvid.messenger.settings.SettingsActivity
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -68,8 +76,11 @@ import kotlinx.coroutines.flow.Flow
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
 
+
 class DiscussionViewModel : ViewModel(), DiscussionDelegate {
     private val db: AppDatabase = AppDatabase.getInstance()
+
+    var locationContextMenuState by mutableStateOf<LocationContextMenuState?>(null)
 
     // region select for deletion
     var isSelectingForDeletion: Boolean = false
@@ -483,6 +494,37 @@ class DiscussionViewModel : ViewModel(), DiscussionDelegate {
         }
     }
 
+    fun handleCopyMessages(context: Context) {
+        if (selectedMessageIds.isEmpty()) return
+
+        val ids = ArrayList(selectedMessageIds)
+        deselectAll()
+
+        App.runThread {
+            val messages = ids.mapNotNull { db.messageDao().get(it) }.sortedBy { it.sortIndex }
+            val sb = StringBuilder()
+            for (message in messages) {
+                val text = message.getStringContent(context, true)
+                val dateStr = DateFormat.format(
+                    DateFormat.getBestDateTimePattern(context.resources.configuration.locale, "yyyyMMdd jmm"),
+                    message.timestamp
+                ).toString()
+                val senderName = ContactCacheSingleton.getContactCustomDisplayName(message.senderIdentifier)
+                    ?: context.getString(R.string.text_deleted_contact)
+                if (sb.isNotEmpty()) sb.append("\n\n")
+                sb.append(context.getString(R.string.template_copy_multiple_messages, dateStr, senderName, text))
+            }
+            if (sb.isEmpty()) return@runThread
+            val clipData = ClipData.newPlainText(
+                context.getString(R.string.label_text_copied_from_olvid),
+                sb.toString()
+            )
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+            clipboard?.setPrimaryClip(clipData)
+            App.toast(context.resources.getQuantityString(R.plurals.toast_message_messages_copied_to_clipboard, messages.size, messages.size), Toast.LENGTH_SHORT, Gravity.BOTTOM)
+        }
+    }
+
     fun handleForwardMessages(context: Context) {
         if (selectedMessageIds.isNotEmpty()) {
             messageIdsToForward = ArrayList(selectedMessageIds)
@@ -633,12 +675,12 @@ class DiscussionViewModel : ViewModel(), DiscussionDelegate {
         scrollToMessageRequest = ScrollRequest(messageId)
     }
 
-    override fun replyToMessage(messageId: Long, rawNewMessageText: String) {
+    override fun replyToMessage(messageId: Long, currentComposeMessageTextToSaveToDraft: String) {
         App.runThread(
             SetDraftReplyTask(
                 discussionId,
                 messageId,
-                rawNewMessageText
+                currentComposeMessageTextToSaveToDraft
             )
         )
     }

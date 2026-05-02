@@ -39,7 +39,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -90,8 +89,7 @@ fun PhoneCallInfo(message: Message, callBack: (callLogId : Long) -> Unit) {
                 color = colorResource(id = R.color.primary700)
             )
             formattedCallDuration?.let {
-                // TODO align after message timestamp ?
-                Text(text = it, style = OlvidTypography.subtitle1, color = Color(0xCC7D7D7D))
+                Text(text = it, style = OlvidTypography.subtitle1, color = colorResource(R.color.greyTint))
             }
         }
     }

@@ -247,10 +247,12 @@ internal fun KeycloakContent(
             contentColor = colorResource(R.color.almostBlack)
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             if (discovering) {
                 OlvidCircularProgress(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(16.dp),
                     size = 64.dp,
                 )
             } else if (errorMessage != null) {

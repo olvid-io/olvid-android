@@ -38,12 +38,13 @@ import androidx.preference.SwitchPreference;
 
 import io.olvid.messenger.App;
 import io.olvid.messenger.R;
-import io.olvid.messenger.activities.LockScreenActivity;
+import io.olvid.messenger.lock_screen.LockScreenActivity;
+import io.olvid.messenger.services.MDMConfigurationSingleton;
 import io.olvid.messenger.customClasses.NoClickSwitchPreference;
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder;
 import io.olvid.messenger.fragments.dialog.EmergencyPINCreationDialogFragment;
-import io.olvid.messenger.fragments.dialog.LockScreenPINCreationDialogFragment;
-import io.olvid.messenger.fragments.dialog.LockScreenPINVerificationDialogFragment;
+import io.olvid.messenger.lock_screen.LockScreenPINCreationDialogFragment;
+import io.olvid.messenger.lock_screen.LockScreenPINVerificationDialogFragment;
 import io.olvid.messenger.services.UnifiedForegroundService;
 
 public class LockPreferenceFragment extends PreferenceFragmentCompat {
@@ -60,10 +61,28 @@ public class LockPreferenceFragment extends PreferenceFragmentCompat {
 
         NoClickSwitchPreference lockScreenPreference = screen.findPreference(SettingsActivity.PREF_KEY_USE_LOCK_SCREEN);
         if (lockScreenPreference != null) {
+            boolean mdmRequired = MDMConfigurationSingleton.isLockScreenRequired();
+            if (mdmRequired) {
+                lockScreenPreference.setEnabled(false);
+                lockScreenPreference.setSummary(R.string.pref_lock_screen_required_by_mdm);
+                // Remove the dependency so other lock settings remain accessible
+                for (String key : new String[]{
+                        SettingsActivity.PREF_KEY_UNLOCK_BIOMETRY,
+                        SettingsActivity.PREF_KEY_LOCK_GRACE_TIME,
+                        SettingsActivity.PREF_KEY_UNLOCK_FAILED_WIPE_MESSAGES,
+                        SettingsActivity.PREF_KEY_USE_EMERGENCY_PIN,
+                        SettingsActivity.PREF_KEY_KEEP_LOCK_SERVICE_OPEN,
+                        SettingsActivity.PREF_KEY_KEEP_LOCK_SCREEN_NEUTRAL,
+                        SettingsActivity.PREF_KEY_RESET_PIN,
+                }) {
+                    Preference pref = screen.findPreference(key);
+                    if (pref != null) {
+                        pref.setDependency(null);
+                    }
+                }
+            }
             lockScreenPreference.setOnPreferenceClickListener((Preference pref) -> {
-                if (pref instanceof NoClickSwitchPreference) {
-                    NoClickSwitchPreference preference = (NoClickSwitchPreference) pref;
-
+                if (pref instanceof NoClickSwitchPreference preference) {
                     if (preference.isChecked()) {
                         LockScreenPINVerificationDialogFragment lockScreenPINVerificationDialogFragment = LockScreenPINVerificationDialogFragment.newInstance();
                         lockScreenPINVerificationDialogFragment.setOnPINEnteredCallBack(() -> {
@@ -122,9 +141,7 @@ public class LockPreferenceFragment extends PreferenceFragmentCompat {
         NoClickSwitchPreference emergencyPinPreference = screen.findPreference(SettingsActivity.PREF_KEY_USE_EMERGENCY_PIN);
         if (emergencyPinPreference != null) {
             emergencyPinPreference.setOnPreferenceClickListener((Preference pref) -> {
-                if (pref instanceof NoClickSwitchPreference) {
-                    NoClickSwitchPreference preference = (NoClickSwitchPreference) pref;
-
+                if (pref instanceof NoClickSwitchPreference preference) {
                     if (preference.isChecked()) {
                         AlertDialog.Builder builder = new SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
                                 .setTitle(R.string.dialog_title_disable_emergency_pin)

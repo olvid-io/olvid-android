@@ -81,7 +81,7 @@ public class CreateServerSessionCoordinator implements Operation.OnFinishCallbac
     public void initialQueueing() {
         try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
             for (ServerSession serverSession: ServerSession.getAll(fetchManagerSession)) {
-                if (!fetchManagerSession.identityDelegate.isOwnedIdentity(fetchManagerSession.session, serverSession.getOwnedIdentity())) {
+                if (!fetchManagerSession.identityDelegate.isOwnedIdentity(fetchManagerSession.session, serverSession.getOwnedIdentity(), true)) {
                     // owned identity does not exist --> delete the session
                     serverSession.delete();
                 } else {

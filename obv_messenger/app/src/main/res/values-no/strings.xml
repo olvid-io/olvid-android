@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Kontaktinformasjon</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Brukerdetaljer</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Gruppedetaljer</string>
@@ -258,7 +258,6 @@
 	<string name="text_you" state="needs_review" hash="672009142">Du</string>
 	<string name="title_invite_chooser" state="needs_review" hash="1726572772">Velg hvordan du vil sende invitasjonen din</string>
 	<string name="title_sharing_chooser" state="needs_review" hash="291715689">Velg en delingsmetode</string>
-	<string name="toast_message_android_bug_attach_duplicate_uri" state="needs_review" hash="-776215584">Noen filer kunne ikke legges ved meldingen på grunn av en feil i din Android-versjon (flere filer returnerte samme URI). Prøv å legge ved de manglende filene på nytt.</string>
 	<string name="toast_message_attachment_being_copied" state="needs_review" hash="-978855599">Et vedlegg blir fortsatt behandlet. Meldingen din vil bli sendt når behandlingen er fullført.</string>
 	<string name="toast_message_attachment_saved" state="needs_review" hash="-2073631581">Vedlegg lagret</string>
 	<string name="toast_message_camera_permission_denied" state="needs_review" hash="1896719877">Tillatelse til å bruke kameraet ble nektet</string>
@@ -344,6 +343,9 @@
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">Når den er aktivert, henter Olvid en forhåndsvisning av lenkene du sender og legger den ved meldingen.</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">Hent forhåndsvisninger av mottatte lenker</string>
 	<string name="pref_link_preview_summary_inbound" state="needs_review" hash="-320325429">Når den er aktivert, henter Olvid automatisk forhåndsvisninger av lenker du mottar (hvis en forhåndsvisning ikke er vedlagt meldingen).</string>
+	<string name="link_preview_menu_copy_link" state="needs_review" hash="1269903076">Kopier lenke</string>
+	<string name="link_preview_menu_open_in_browser" state="needs_review" hash="-1711141559">Åpne i nettleser</string>
+	<string name="link_preview_menu_open_image" state="needs_review" hash="-2013483894">Vis bilde</string>
 	<string name="pref_discussion_read_receipt_title" state="needs_review" hash="-652307837">Lesekvitteringer</string>
 	<string name="pref_text_app_default" state="needs_review" hash="1920567018">Bruk standardinnstillingen</string>
 	<string name="pref_text_app_default_true" state="needs_review" hash="-948780646">Bruk din standardinnstilling (på)</string>
@@ -352,6 +354,10 @@
 	<string name="pref_text_discussion_read_receipt_on" state="needs_review" hash="983295321">På, kontaktene dine er informert</string>
 	<string name="pref_use_lock_screen_title" state="needs_review" hash="540058239">Bruk appens låseskjerm</string>
 	<string name="pref_use_lock_screen_summary" state="needs_review" hash="-399095273">Slå dette på for å beskytte Olvid med en låseskjerm ved oppstart.</string>
+	<string name="pref_lock_screen_required_by_mdm" state="needs_review" hash="-500219406">Kreves av organisasjonen din</string>
+	<string name="lock_screen_setup_title" state="needs_review" hash="932203184">Låseskjerm kreves</string>
+	<string name="lock_screen_setup_explanation" state="needs_review" hash="169071212">Organisasjonen din krever at du beskytter denne appen med en PIN-kode eller et passord for låseskjermen.</string>
+	<string name="lock_screen_setup_button" state="needs_review" hash="672169315">Angi PIN-kode</string>
 	<string name="pref_category_notifications_title" state="needs_review" hash="1237583104">Varsler</string>
 	<string name="pref_category_privacy_title" state="needs_review" hash="-1750659871">Personvern</string>
 	<string name="pref_category_other_title" state="needs_review" hash="-1683901612">Andre innstillinger</string>
@@ -370,7 +376,7 @@
 	<string name="button_label_use_pin" state="needs_review" hash="918492771">Bruk en PIN-kode i stedet for et passord</string>
 	<string name="hint_enter_pin" state="needs_review" hash="999437557">Angi PIN</string>
 	<string name="hint_confirm_pin" state="needs_review" hash="1780268503">Bekreft PIN</string>
-	<string name="text_pin_creation_explanation" state="needs_review" hash="-1935715126">Du må taste inn denne PIN-koden for å låse opp Olvid.\nDen kan ikke gjenopprettes, og du kan miste tilgangen til Olvid-dataene dine hvis du glemmer den.</string>
+	<string name="text_pin_creation_explanation" state="needs_review" hash="1232246926">Du må taste inn denne PIN-koden for å låse opp Olvid.\nDen kan ikke gjenopprettes, og du kan miste tilgangen til Olvid-dataene dine hvis du glemmer den.</string>
 	<string name="error_text_pin_too_short" state="needs_review" hash="-1085309478">PIN for kort (minimum 4 sifre)</string>
 	<string name="error_text_pin_mismatch" state="needs_review" hash="-4525766">Feil PIN</string>
 	<string name="hint_enter_password" state="needs_review" hash="478503341">Skriv inn passord</string>
@@ -394,6 +400,7 @@
 	<string name="pref_text_lock_grace_time_infinity" state="needs_review" hash="146086108">Lås Olvid manuelt</string>
 	<string name="pref_unlock_biometry_summary_none_enrolled" state="needs_review" hash="-118589413">Biometrisk autentisering er ikke konfigurert på enheten din ennå.</string>
 	<string name="dialog_title_unlock_olvid" state="needs_review" hash="-2054572246">Lås opp Olvid med biometri</string>
+	<string name="dialog_title_unlock_neutral" state="needs_review" hash="761644522">Lås opp med biometri</string>
 	<string name="notification_channel_unified_service_name" state="needs_review" hash="1404446256">Forgrunnstjeneste</string>
 	<string name="notification_channel_unified_service_description" state="needs_review" hash="-1204081836">Fast varsel som viser Olvids status</string>
 	<string name="notification_title_olvid_is_unlocked" state="needs_review" hash="1688502744">Olvid er ulåst</string>
@@ -437,6 +444,7 @@
 	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">Profilen din har blitt deaktivert på denne enheten.\n\nDet ser ut til at du ikke har noen aktive enheter for øyeblikket, så du kan reaktivere profilen din når du vil.\n\nHvis du vil fortsette, trykk på «aktiver profilen min på denne enheten» nedenfor.\n\nTrykk på «kanseller» for å lukke denne dialogen og holde denne enheten inaktiv: du kan ikke sende eller motta meldinger på denne enheten, men du kan fortsatt bla gjennom gamle diskusjoner.</string>
 	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">Profilen din har blitt deaktivert på denne enheten.\n\nDet ser ut til at du ikke har lisens til å bruke Olvid på flere enheter samtidig. For å reaktivere denne enheten må du deaktivere en annen av enhetene dine.\n\nHvis du ønsker å fortsette, velg enheten du vil deaktivere fra listen nedenfor og trykk deretter på «aktiver profilen min på denne enheten».\n\nTrykk på «avbryt» for å lukke denne dialogboksen og holde denne enheten inaktiv: du vil ikke kunne sende eller motta meldinger på denne enheten, men du kan fortsatt bla gjennom gamle samtaler.</string>
 	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">Profilen din har blitt deaktivert på denne enheten.\n\nDet ser ut til at alle dine andre enheter er satt til å bli deaktivert i nær fremtid, så du kan reaktivere profilen din på denne enheten når du vil. For din informasjon er listen over dine nåværende aktive enheter nedenfor.\n\nHvis du ønsker å fortsette, trykk på \"aktiver profilen min på denne enheten\" nedenfor.\n\nTrykk på \"kanseller\" for å lukke denne dialogboksen og holde denne enheten inaktiv: Du vil ikke kunne sende eller motta meldinger på denne enheten, men du kan fortsatt se dine gamle diskusjoner.</string>
+	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">Profilen din er deaktivert på denne enheten.\n\nDu vil ikke kunne sende eller motta meldinger her før du aktiverer den på nytt.</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">Reaktiver profilen min på denne enheten</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">En feil oppstod. Prøv igjen.</string>
 	<string name="dialog_title_identity_activated" state="needs_review" hash="-1465666248">Olvid ID reaktivert</string>
@@ -810,10 +818,7 @@
 	<string name="toast_message_voice_message_recording_failed" state="needs_review" hash="-632817078">Kunne ikke ta opp talemelding</string>
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Mediespiller</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Spill/pause-kontroller ved avspilling av media i Olvid</string>
-	<string name="notification_title_now_playing" state="needs_review" hash="-1042122929">Spiller…</string>
-	<string name="notification_action_pause" state="needs_review" hash="1931883968">Pause</string>
-	<string name="notification_action_play" state="needs_review" hash="1143766922">Spill av</string>
-	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="-1049639416">Kan ikke spille av %1$s</string>
+	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Kunne ikke spille av lydfilen.</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Slett</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Slett overalt</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Kunne ikke slette overalt. Prøv igjen.</string>
@@ -843,7 +848,6 @@
 	<string name="dialog_message_unmute_notifications" state="needs_review" hash="816867976">Varsler om nye meldinger er for øyeblikket dempet.\n\nVil du slå dem på igjen?</string>
 	<string name="dialog_message_unmute_notifications_muted_until" state="needs_review" hash="-325454266">Varsler om nye meldinger er dempet til: %1$s.\n\nVil du slå dem på igjen?</string>
 	<string name="notification_action_mute" state="needs_review" hash="-1553988068">Slå av lyden</string>
-	<string name="pref_scaled_turn_title" state="needs_review" hash="-1234636269">Velg hvilke regionale TURN-servere du vil bruke</string>
 	<string name="explanation_identity_creation_options" state="needs_review" hash="-795537312">Denne skjermen lar deg velge tilleggsvalg for opprettelsen av din Olvid ID. Du kan angi alternativene manuelt eller skanne en konfigurasjons-QR-kode.</string>
 	<string name="button_label_check_options" state="needs_review" hash="-759177128">Sjekk alternativer</string>
 	<string name="hint_olvid_server" state="needs_review" hash="1097391633">Olvid-server</string>
@@ -859,6 +863,8 @@
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Det ser ut som om Olvid-serveren din ikke støtter sikker oppstart av samtaler.\n\nKontakt administratoren din for mer informasjon.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">ID-opprettingsalternativer</string>
 	<string name="text_option_server" state="needs_review" hash="-1130676431">Server: %1$s</string>
+	<string name="dialog_title_non_default_server" state="needs_review" hash="2119192219">Bruker en annen server enn standard</string>
+	<string name="dialog_message_non_default_server" state="needs_review" hash="459308900">Du er i ferd med å opprette en profil på følgende server:\n\n%1$s\n\nDette er ikke standard Olvid-server. Fortsett bare hvis du stoler på denne serveren.</string>
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Lisens: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Identitetsleverandør</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Identitetsleverandørserver</string>
@@ -1202,8 +1208,6 @@
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Tilkobling: TILKOBLET</string>
 	<string name="label_ping_delay" state="needs_review" hash="25344924">Ping: %1$d ms</string>
 	<string name="label_over_max_ping_delay" state="needs_review" hash="-684190262">Ping: &gt;%1$ds</string>
-	<string name="menu_action_copy_message_text" state="needs_review" hash="1799737962">Kopier meldingstekst</string>
-	<string name="menu_action_copy_text_and_attachments" state="needs_review" hash="428315032">Kopier melding og vedlegg</string>
 	<string name="label_message_copied_from_olvid" state="needs_review" hash="1145396410">Melding kopiert fra Olvid</string>
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">Hele meldingen er kopiert til utklippstavlen</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">Snarvei for å sende en forhåndsdefinert melding til en kontakt eller gruppe med ett klikk</string>
@@ -1403,7 +1407,6 @@
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Kopi av \"\"</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Plassering sendt</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Plassering mottatt</string>
-	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">Plasseringstjenester er ikke tilgjengelig</string>
 	<string name="label_send_your_location" state="needs_review" hash="618026241">Send din posisjon</string>
 	<string name="notification_title_sharing_location" state="needs_review" hash="-1626101904">Deling plassering i Olvid</string>
 	<string name="notification_action_stop_sharing" state="needs_review" hash="585626699">Stopp deling</string>
@@ -1532,6 +1535,8 @@
 	<string name="text_setting_lock_biometry" state="needs_review" hash="-1698353580">‣ Lås opp med biometri:</string>
 	<string name="text_setting_lock_notification" state="needs_review" hash="2022286622">‣ Permanent skjermlås-varsel:</string>
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">‣ Slett sensitive meldinger etter 3 feil PIN-koder:</string>
+	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">‣ Krever låseskjerm: </string>
+	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">‣ Tilbakestill låseskjermkode: </string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">‣ Automatisk nedlasting av vedlegg fra arkiverte samtaler:</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">‣ Arkiver samtaler ved varsling:</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">‣ Linkforhåndsvisning mottatt:</string>
@@ -1594,8 +1599,8 @@
 	<string name="label_open_original_link_with_trackers" state="needs_review" hash="-1586932660">Bruk den originale lenken med sporingsparametere</string>
 	<string name="dialog_title_confirm_open_olvid_link" state="needs_review" hash="425949498">Åpne denne lenken i Olvid?</string>
 	<string name="toast_message_unable_to_open_url" state="needs_review" hash="-1486954792">Kunne ikke åpne URL</string>
-	<string name="text_explanation_location_map_provider" state="needs_review" hash="-173394547">Å velge en kartleverandør lar deg nøyaktig velge plasseringen du vil dele på et kart. Dette kan imidlertid avsløre din plassering (eller plasseringen til kontaktene dine) for denne tjenesteleverandøren.</string>
-	<string name="text_explanation_location_map_provider_settings" state="needs_review" hash="68421420">Dette valget kan endres fra applikasjonsinnstillingene.</string>
+	<string name="dialog_title_choose_map_provider" state="needs_review" hash="1225681568">Velg en kartleverandør.</string>
+	<string name="dialog_message_choose_map_provider" state="needs_review" hash="-2129640593">Velg en kartleverandør nedenfor for å vise et kart når du ser på eller deler en plassering.\n\nHusk at dette kan **avsløre din plassering (eller plasseringen til kontaktene dine) til denne tjenesteleverandøren**.</string>
 	<string name="button_label_choose_provider" state="needs_review" hash="-797956886">Velg en leverandør</string>
 	<string name="button_label_live_share" state="needs_review" hash="327122881">Direktedeling</string>
 	<string name="label_fetching_address" state="needs_review" hash="-839353954">Henter adresse…</string>
@@ -1804,7 +1809,9 @@
 	<string name="dialog_title_custom_address_server_url" state="needs_review" hash="-2071925830">Egendefinert adresse server</string>
 	<string name="hint_custom_address_server_url" state="needs_review" hash="1348105685">URL for adresseoppslagsserver</string>
 	<string name="dialog_message_custom_address_server_url" state="needs_review" hash="401731382">Olvid støtter kun **Pelias**-servere for adresseoppslag. Vennligst skriv inn URL-en til serveren du vil spørre nedenfor, den bør være noe som *https://pelias.olvid.io*, og spørringene vil bli sendt til inngangspunktet */v1/reverse*.\n\nVær oppmerksom på at denne serveren kan lære noe informasjon om din posisjon. Sørg for å **bruke en server du stoler på**.</string>
-	<string name="toast_message_playback_speed_not_supported_on_device" state="needs_review" hash="502764942">Kunne ikke endre avspillingshastigheten</string>
+	<string name="pref_location_gps_debug_title" state="needs_review" hash="1786532100">Aktiver feilsøkingsfunksjoner for lokasjonsdeling</string>
+	<string name="pref_location_gps_always_on_title" state="needs_review" hash="1250376384">Hold GPS-en på hele tiden.</string>
+	<string name="pref_location_export_gps_logs_title" state="needs_review" hash="-459831250">Eksporter GPS-aktivitetslogger</string>
 	<string name="text_speed_1x" state="needs_review" hash="789822816">1×</string>
 	<string name="text_speed_1_5x" state="needs_review" hash="-120181054">1,5×</string>
 	<string name="text_speed_2x" state="needs_review" hash="1171767872">2×</string>
@@ -2145,15 +2152,11 @@
 	<string name="history_transfer_step_none" state="needs_review" hash="1228580785">Ingen pågående overføring.</string>
 	<string name="history_transfer_step_contacting_other_device" state="needs_review" hash="1719019815">Venter på den andre enheten.</string>
 	<string name="history_transfer_step_connecting" state="needs_review" hash="1836039168">Kobler til en annen enhet</string>
-	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Forhandler (trinn 1 av 3)</string>
-	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Overfører meldinger (trinn 2 av 3)</string>
-	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Overfører vedlegg (trinn 3 av 3)</string>
-	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Forhandler</string>
-	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Overfører meldinger</string>
-	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Overfører vedlegg</string>
+	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Forhandler</string>
+	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Overfører</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Overføringen er fullført</string>
-	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Overføringen ble avbrutt.</string>
-	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Overføring av chatlogg (beta)</string>
+	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Overføringen mislyktes</string>
+	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Overfør chatlogg</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Kunne ikke starte overføringen. Det kan hende at en annen overføring allerede er i gang.</string>
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Bruk \"magisk lenke\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Ugyldig magisk lenke.</string>
@@ -2166,18 +2169,111 @@
 	<string name="onboarding_transfer_keycloak_error_message_authentication_impossible" state="needs_review" hash="-1891385979">Ingen av de støttede autentiseringsmetodene ser ut til å være tilgjengelig.</string>
 	<string name="pref_use_alt_turn_servers_title" state="needs_review" hash="-1956132776">Bruk alternative TURN-servere</string>
 	<string name="pref_use_alt_turn_servers_summary" state="needs_review" hash="357427162">Aktiver dette alternativet for å bruke TURN-servere med roterende IP-adresser. Hvis du er usikker, la dette alternativet være av 😁</string>
-	<string name="button_label_transfer_through_webrtc" state="needs_review" hash="-1809138918">Overfør via lokalt nettverk</string>
-	<string name="button_label_export_zip" state="needs_review" hash="1575043364">Eksporter som ZIP</string>
-	<string name="button_label_import_zip" state="needs_review" hash="1299665090">Importer ZIP</string>
-	<string name="dialog_title_transfer_choose_target_device" state="needs_review" hash="218115750">Velg enhetsmålet for denne overføringen.</string>
-	<string name="transfer_label_no_other_active_device" state="needs_review" hash="-2135899221">Ingen andre aktive enheter.</string>
-	<string name="transfer_label_messages" state="needs_review" hash="-1639407912">Meldinger</string>
-	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Gjennomstrømning</string>
-	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Gjenstående</string>
-	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Vedlegg</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Denne funksjonen er fortsatt i betatestfasen, og den nåværende implementeringen er kanskje ikke kompatibel med den endelige implementeringen av Olvids historikkoverføring.\n\nFør du bruker denne funksjonen, må du sørge for at enhetene dine kjører den nyeste versjonen av Olvid.</string>
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Avbryte pågående overføring?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Overføringen av meldingshistorikken er for øyeblikket i gang. Vil du avbryte den?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Avbryt overføringen</string>
 	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Venter på å bli med i denne samtalen.</string>
+	<string name="label_your_other_device" state="needs_review" hash="-339632056">Din andre enhet</string>
+	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">ønsker å overføre chatloggen din til denne enheten.</string>
+	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">\"%1$s\" ønsker å overføre chatloggen din til denne enheten.</string>
+	<string name="button_label_start_transfer" state="needs_review" hash="208526116">Start overføringen</string>
+	<string name="pref_disable_secondary_notifications_title" state="needs_review" hash="29372078">Deaktiver \"sekundære\" varsler</string>
+	<string name="pref_disable_secondary_notifications_summary" state="needs_review" hash="-402927980">Denne innstillingen deaktiverer varsler for reaksjoner på meldingene dine eller nye svar på avstemningene dine.</string>
+	<string name="template_copy_multiple_messages" state="needs_review" hash="-1584473750">[%1$s] [%2$s]:\n[%3$s]</string>
+	<string name="label_export_your_chat_history" state="needs_review" hash="30036193">Eksporter chatloggen din</string>
+	<string name="label_import_your_chat_history" state="needs_review" hash="-1058286401">Importer chatloggen din</string>
+	<string name="explanation_export_your_chat_history" state="needs_review" hash="2042738985">Bruk dette alternativet hvis du vil overføre chatloggen din **fra** denne enheten.</string>
+	<string name="explanation_import_your_chat_history" state="needs_review" hash="366204152">Bruk dette alternativet hvis du vil overføre chatloggen din til denne enheten.</string>
+	<string name="explanation_history_transfer" state="needs_review" hash="983501865">Denne funksjonen lar deg **sikkert overføre** chatloggen din mellom to av enhetene dine.\n\nFør du starter, må profilen din **finnes på begge enhetene** dine.</string>
+	<string name="button_label_import" state="needs_review" hash="-984720905">Importer</string>
+	<string name="history_transfer_pick_profile_title" state="needs_review" hash="-1782334343">Hvilken profil ønsker du å fortsette med?</string>
+	<string name="history_transfer_pick_profile_text_import" state="needs_review" hash="-1162713377">Velg profilen du vil importere chatloggen din til.</string>
+	<string name="history_transfer_pick_profile_text_export" state="needs_review" hash="951522414">Velg profilen du vil eksportere chatloggen fra.</string>
+	<string name="history_transfer_pick_method_title" state="needs_review" hash="661094742">Hva vil du gjøre?</string>
+	<string name="history_transfer_pick_method_text_import" state="needs_review" hash="1116376527">Vennligst velg hvordan du vil importere chatloggen for profilen din **%1$s**.</string>
+	<string name="history_transfer_pick_method_text_export" state="needs_review" hash="1750125743">Vennligst velg hvordan du vil eksportere chatloggen for profilen din **%1$s**.</string>
+	<string name="history_transfer_via_wifi_title" state="needs_review" hash="-2016953028">Overfør via Wi-Fi</string>
+	<string name="history_transfer_via_wifi_message" state="needs_review" hash="-758708700">Bare koble begge enhetene til det samme Wi-Fi-nettverket.</string>
+	<string name="history_transfer_via_zip_title_import" state="needs_review" hash="1608302669">Importer en .zip-fil.</string>
+	<string name="history_transfer_via_zip_title_export" state="needs_review" hash="-1924849877">Eksporter en .zip-fil</string>
+	<string name="history_transfer_via_zip_message_import" state="needs_review" hash="1766231761">Velg .zip-filen du har kopiert fra din gamle enhet.</string>
+	<string name="history_transfer_via_zip_message_export" state="needs_review" hash="-1123951975">Last ned en .zip-fil og kopier den til din nye enhet.</string>
+	<string name="history_transfer_import_zip_description" state="needs_review" hash="855194374">For å importere chatloggen din, velg .zip-filen du **eksporterte fra den andre enheten din**.\n\nSørg for at profilen **%1$s** du har valgt, stemmer overens med profilen som ble brukt til å generere denne .zip-filen.</string>
+	<string name="button_label_choose_zip_file" state="needs_review" hash="-493688169">Velg en .zip-fil.</string>
+	<string name="dialog_title_error_reading_zip" state="needs_review" hash="1059408985">Kunne ikke lese .zip-filen</string>
+	<string name="dialog_message_error_reading_zip" state="needs_review" hash="1864744526">Det oppstod en feil under lesing av den angitte .zip-filen.\n\nSørg for at du har valgt en Olvid-chatloggeksportfil.</string>
+	<string name="dialog_title_error_zip_password" state="needs_review" hash="1651240086">Feil passord</string>
+	<string name="dialog_message_error_zip_password" state="needs_review" hash="216311562">Passordet du oppga var ikke gyldig for å dekryptere den valgte .zip-filen.\n\nVennligst prøv igjen.</string>
+	<string name="dialog_title_zip_password_required" state="needs_review" hash="-944166479">Passord kreves</string>
+	<string name="dialog_message_zip_password_required" state="needs_review" hash="548842041">Den valgte .zip-filen er passordbeskyttet. Vennligst skriv inn passordet du valgte da du eksporterte chatloggen din på den andre enheten.</string>
+	<string name="history_transfer_export_scope_title_export" state="needs_review" hash="933575859">Hva vil du eksportere?</string>
+	<string name="history_transfer_export_scope_title_transfer" state="needs_review" hash="-1971421411">Hva vil du overføre?</string>
+	<string name="history_transfer_scope_messages_export_title" state="needs_review" hash="-1810394953">Bare eksporter meldinger</string>
+	<string name="history_transfer_scope_messages_transfer_title" state="needs_review" hash="1119624141">Overfør kun meldinger</string>
+	<string name="history_transfer_scope_messages_export_message" state="needs_review" hash="-2120867312">Mindre eksport. Kun tekstmeldinger er inkludert.</string>
+	<string name="history_transfer_scope_messages_transfer_message" state="needs_review" hash="2071005834">Raskere overføring. Kun tekstmeldinger er inkludert.</string>
+	<string name="history_transfer_scope_everything_export_title" state="needs_review" hash="463008259">Eksporter meldinger og vedlegg</string>
+	<string name="history_transfer_scope_everything_transfer_title" state="needs_review" hash="-175297433">Overfør meldinger og vedlegg</string>
+	<string name="history_transfer_scope_everything_export_message" state="needs_review" hash="-266277978">Fullstendig eksport. Inkluderer alle meldinger og vedlegg.</string>
+	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Overføringen er fullført. Inkluderer alle meldinger og vedlegg.</string>
+	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Eksporter chatloggen din som en .zip-fil. Du kan senere importere den på en annen enhet i profilen din **%1$s**.\n\nDu kan også pakke ut denne filen for å **vise chatloggen i en nettside**.</string>
+	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Opprett en .zip-fil</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d diskusjoner og %2$d meldinger</string>
+	<string name="label_computing" state="needs_review" hash="1393495921">Beregner…</string>
+	<string name="label_total_size" state="needs_review" hash="-788411929">Total størrelse: %1$s</string>
+	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Beskytt eksporten din.</string>
+	<string name="dialog_message_protect_export" state="needs_review" hash="-900141026">For din sikkerhet anbefaler vi at du beskytter eksporten din med et passord.</string>
+	<string name="button_label_generate_password" state="needs_review" hash="-1174237913">Generer et passord</string>
+	<string name="button_label_choose_password" state="needs_review" hash="-1893200284">Velg et passord.</string>
+	<string name="button_label_continue_without_password" state="needs_review" hash="-106870576">Fortsett uten passord</string>
+	<string name="dialog_title_choose_password" state="needs_review" hash="1927816439">Velg et passord.</string>
+	<string name="dialog_title_generated_password" state="needs_review" hash="-690449371">Generert passord</string>
+	<string name="dialog_message_generated_password" state="needs_review" hash="1100314355">Passordet nedenfor ble generert tilfeldig.\n\nSørg for å **skrive det ned før du fortsetter**.</string>
+	<string name="button_label_copy_to_clipboard" state="needs_review" hash="-1309214553">Kopier til utklippstavlen</string>
+	<string name="history_transfer_pick_target_device_title" state="needs_review" hash="1659408512">Velg en enhet</string>
+	<string name="history_transfer_pick_target_device_text" state="needs_review" hash="-1456199559">Vennligst velg enheten du vil overføre den nåværende enhetens chatlogg til.\n\nFinner du ikke enheten du leter etter? Sørg for at profilen din **%1$s** er **aktiv på denne andre enheten**.</string>
+	<string name="history_transfer_no_other_device_explanation" state="needs_review" hash="-1034788616">Det ser ut som profilen din **%1$s** ikke har noen andre aktive enheter.\n\nVennligst **legg til din nye enhet i denne profilen** før du fortsetter med overføringen av chatloggen din.\n\nDu kan også **eksportere en .zip-fil** for å importere den senere på din nye enhet.</string>
+	<string name="history_transfer_webrtc_instructions_title" state="needs_review" hash="-1353013738">Følg disse instruksjonene på den andre enheten din.</string>
+	<string name="history_transfer_instructions_turn_on_other_import" state="needs_review" hash="-930696177">Slå på enheten som inneholder chatloggen din.</string>
+	<string name="history_transfer_instructions_same_wifi_import" state="needs_review" hash="465388607">Sørg for at begge enhetene er koblet til det samme Wi-Fi-nettverket.</string>
+	<string name="history_transfer_instructions_start_export" state="needs_review" hash="-1288439668">På din andre enhet, åpne Olvids innstillinger og start en eksport av chatloggen.</string>
+	<string name="history_transfer_instructions_turn_on_other_export" state="needs_review" hash="1280642155">Slå på **%1$s**.</string>
+	<string name="history_transfer_instructions_same_wifi_export" state="needs_review" hash="284833986">Sørg for at denne enheten og din **%1$s** er koblet til det samme Wi-Fi-nettverket.</string>
+	<string name="history_transfer_step_awaiting_confirmation" state="needs_review" hash="665601714">Venter på at du godtar overføringen.</string>
+	<string name="dialog_title_abort_history_transfer" state="needs_review" hash="1914158733">Avbryte pågående overføring?</string>
+	<string name="dialog_title_abort_history_transfer_export" state="needs_review" hash="-856542741">Avbryte pågående eksport?</string>
+	<string name="dialog_title_abort_history_transfer_import" state="needs_review" hash="976007540">Avbryte pågående import?</string>
+	<string name="dialog_message_abort_history_transfer_webrtc" state="needs_review" hash="1807742093">Er du sikker på at du vil avbryte den pågående overføringen av chatloggen?\n\nDu kan alltid starte overføringen på nytt senere hvis du ønsker det. **Alt som allerede er overført, vil bli bevart** og trenger ikke å overføres igjen.</string>
+	<string name="dialog_message_abort_history_transfer_zip_export" state="needs_review" hash="716134255">Er du sikker på at du vil avbryte den pågående .zip-eksporten?\n\nDette vil etterlate en **delvis .zip-fil på enheten din** som du må **slette manuelt**.</string>
+	<string name="dialog_message_abort_history_transfer_zip_import" state="needs_review" hash="1264487097">Er du sikker på at du vil avbryte den pågående .zip-filimporten?\n\nDu kan alltid starte importen på nytt senere hvis du ønsker det. **Alt som allerede er importert, vil bli bevart** og trenger ikke å importeres på nytt.</string>
+	<string name="button_label_interrupt_and_continue_later" state="needs_review" hash="-976034947">Avbryt og fortsett senere</string>
+	<string name="button_label_abort_export" state="needs_review" hash="428199797">Avbryt eksport</string>
+	<string name="button_label_abort_import" state="needs_review" hash="2031103191">Avbryt import</string>
+	<string name="history_transfer_fail_reason_aborted" state="needs_review" hash="277351522">Overføringen ble avbrutt.</string>
+	<string name="history_transfer_fail_reason_unknown" state="needs_review" hash="-1170630200">En ukjent feil oppstod (sannsynligvis en nettverkstilkoblingsfeil).</string>
+	<string name="history_transfer_fail_reason_identity_mismatch" state="needs_review" hash="936267267">Denne .zip-filen ble eksportert fra en annen profil.</string>
+	<string name="history_transfer_fail_reason_wrong_passwrod" state="needs_review" hash="1847441965">Feil passord</string>
+	<string name="history_transfer_fail_reason_invalid_zip" state="needs_review" hash="-691417686">Kunne ikke lese .zip-filen (er det virkelig en Olvid-chatloggeksport?)</string>
+	<string name="transfer_label_sending_messages" state="needs_review" hash="2018039973">Sender meldinger</string>
+	<string name="transfer_label_exporting_messages" state="needs_review" hash="1572454408">Eksporter meldinger</string>
+	<string name="transfer_label_importing_messages" state="needs_review" hash="1913024934">Importerer meldinger</string>
+	<string name="transfer_label_receiving_messages" state="needs_review" hash="2015919003">Motta meldinger</string>
+	<string name="transfer_label_sending_attachments" state="needs_review" hash="2102571371">Sender vedlegg</string>
+	<string name="transfer_label_exporting_attachments" state="needs_review" hash="-1029839434">Eksporter vedlegg</string>
+	<string name="transfer_label_importing_attachments" state="needs_review" hash="1078186262">Importerer vedlegg</string>
+	<string name="transfer_label_receiving_attachments" state="needs_review" hash="439049517">Mottar vedlegg</string>
+	<string name="label_remaining_and_throughput" state="needs_review" hash="1772610397">Omtrent %1$s igjen (%2$s)</string>
+	<string name="history_transfer_step_connecting_export" state="needs_review" hash="-28311439">Oppretter .zip-fil</string>
+	<string name="history_transfer_step_connecting_import" state="needs_review" hash="1323447620">Åpner .zip-fil</string>
+	<string name="history_transfer_step_failed_export" state="needs_review" hash="185890904">Eksport mislyktes</string>
+	<string name="history_transfer_step_finished_export" state="needs_review" hash="1156914922">Eksport fullført</string>
+	<string name="history_transfer_step_failed_import" state="needs_review" hash="-909085512">Import mislyktes</string>
+	<string name="history_transfer_step_finished_import" state="needs_review" hash="-653312310">Import ferdig</string>
+	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">Eksporterer</string>
+	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Importerer</string>
+	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analyserer innhold</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Analyserer eksporterte samtaler</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Det oppstod en feil under lasting av OpenStreetMap-stilfilen.</string>
+	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Abonnementer i appen er ikke tilgjengelige.</string>
+	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Versjonen av Olvid du har installert, inneholder ikke Googles faktureringsbibliotek og støtter ikke kjøp i appen.\n\nFor mer informasjon, vennligst kontakt oss på **feedback@olvid.io**.</string>
 </resources>

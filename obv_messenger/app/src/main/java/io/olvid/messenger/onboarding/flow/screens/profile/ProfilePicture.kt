@@ -52,8 +52,6 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -67,6 +65,7 @@ import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.designsystem.components.OlvidActionButton
+import io.olvid.messenger.designsystem.components.OlvidOutlinedActionButton
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.main.InitialView
 import io.olvid.messenger.main.MainActivity
@@ -210,14 +209,11 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
             Row (
                 modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             ) {
-                OlvidActionButton(
+                OlvidOutlinedActionButton(
                     modifier = Modifier.weight(1f, true).fillMaxHeight(),
                     text = stringResource(id = R.string.menu_action_take_photo),
                     icon = R.drawable.ic_attach_camera,
-                    outlinedColor = colorResource(R.color.olvid_gradient_light),
-                    containerColor = Color.Transparent,
                     allowTwoLines = true,
-                    contentColor = colorResource(R.color.olvid_gradient_light),
                 ) {
                     val permissionCheckResult =
                         ContextCompat.checkSelfPermission(
@@ -233,14 +229,11 @@ fun NavGraphBuilder.profilePicture(context : Context, onboardingFlowViewModel: O
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                OlvidActionButton(
+                OlvidOutlinedActionButton(
                     modifier = Modifier.weight(1f, true).fillMaxHeight(),
                     text = stringResource(id = R.string.menu_action_choose_picture),
                     icon = R.drawable.ic_attach_image,
-                    outlinedColor = colorResource(R.color.olvid_gradient_light),
-                    containerColor = Color.Transparent,
                     allowTwoLines = true,
-                    contentColor = colorResource(R.color.olvid_gradient_light),
                 ) {
                     getContent.launch("image/*")
                 }

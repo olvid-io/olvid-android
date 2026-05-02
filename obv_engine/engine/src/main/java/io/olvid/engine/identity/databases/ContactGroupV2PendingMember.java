@@ -395,7 +395,7 @@ public class ContactGroupV2PendingMember implements ObvDatabase {
             try {
                 String sanitizedSerializedDetails = null;
                 try {
-                    // check whether the input is base64 or plain json (there was a bug on iOS where the details were base64 encoded)
+                    // check whether the input is base64 or plain JSON (there was a bug on iOS where the details were base64 encoded)
                     identityManagerSession.jsonObjectMapper.readValue(pojo.serialized_details, JsonIdentityDetails.class);
                     sanitizedSerializedDetails = pojo.serialized_details;
                 } catch (Exception ignored) {

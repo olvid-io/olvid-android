@@ -51,6 +51,8 @@ public class ConfigurationSettingsPojo {
     public Integer ld; // lock_delay_s;
     public Integer ln; // lock_notification;
     public Integer lw; // lock_wipe_on_fail;
+    public Integer lr; // lock_required;
+    public String lt; // lock_allow_bypass token;
 
     public Long ad; // auto_download_size;
     public Integer aa; // auto_download_archived;
@@ -119,6 +121,8 @@ public class ConfigurationSettingsPojo {
         if (ld != null) { pojo.lock_delay_s = ld; }
         if (ln != null) { pojo.lock_notification = ln != 0; }
         if (lw != null) { pojo.lock_wipe_on_fail = lw != 0; }
+//        if (lr != null) { pojo.lock_required = lr != 0; }
+//        if (lt != null) { pojo.lock_allow_bypass = lt; }
 
         if (ad != null) { pojo.auto_download_size = ad; }
         if (aa != null) { pojo.auto_download_archived = aa != 0; }

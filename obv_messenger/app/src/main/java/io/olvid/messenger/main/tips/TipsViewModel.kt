@@ -91,6 +91,14 @@ class TipsViewModel : ViewModel() {
     private val firstInstallTimestamp = installTimestamp() ?: 0L
 
     fun refreshTipToShow(activity: ComponentActivity) {
+        AppSingleton.getBytesCurrentIdentity()?.let { bytesCurrentIdentity ->
+            val ownedIdentity = AppDatabase.getInstance().ownedIdentityDao().get(bytesCurrentIdentity)
+            if (ownedIdentity?.active == false) {
+                tipToShow = Tip.IDENTITY_DEACTIVATED
+                return
+            }
+        }
+
         if (autoOpenOlvidPlusDialog.value) {
             showNextOlvidPlusTip()
             return
@@ -100,7 +108,6 @@ class TipsViewModel : ViewModel() {
             tipToShow = Tip.UNTRUSTED_ACCESSIBILITY_SERVICE
             return
         }
-
         AppSingleton.getBytesCurrentIdentity()?.let { bytesOwnedIdentity ->
             if (KeycloakManager.authenticationRequiredOwnedIdentities.contains(BytesKey(bytesOwnedIdentity))) {
                 tipToShow = Tip.AUTHENTICATION_REQUIRED
@@ -249,5 +256,6 @@ class TipsViewModel : ViewModel() {
         OLVID_PLUS_MULTIDEVICE,
         OLVID_PLUS_CALL,
         OLVID_PLUS_SUPPORT,
+        IDENTITY_DEACTIVATED,
     }
 }

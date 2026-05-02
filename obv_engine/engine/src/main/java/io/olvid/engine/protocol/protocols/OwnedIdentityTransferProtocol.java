@@ -1421,7 +1421,7 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
                 return restartStep(protocolManagerSession);
             }
 
-            if (protocolManagerSession.identityDelegate.isOwnedIdentity(protocolManagerSession.session, transferredIdentity)) {
+            if (protocolManagerSession.identityDelegate.isOwnedIdentity(protocolManagerSession.session, transferredIdentity, false)) {
                 Logger.w("OwnedIdentityTransferProtocol: transferred identity is already an owned identity!");
                 return failProtocol(this, startState.dialogUuid, ObvTransferStep.Fail.FAIL_REASON_TRANSFERRED_IDENTITY_ALREADY_EXISTS);
             }
@@ -1658,8 +1658,8 @@ public class OwnedIdentityTransferProtocol extends ConcreteProtocol {
 
                 JsonKeycloakConfiguration configuration = new JsonKeycloakConfiguration();
                 configuration.server = keycloakState.keycloakServer;
-                configuration.cid = oidc.clientId();
-                configuration.secret = oidc.clientSecret();
+                configuration.cid = oidc.clientId;
+                configuration.secret = oidc.clientSecret;
 
                 byte[] dataToSend = getJsonObjectMapper().writeValueAsBytes(configuration);
                 EncryptedBytes payload = Suite.getPublicKeyEncryption(startState.ephemeralIdentity.getEncryptionPublicKey()).encrypt(startState.ephemeralIdentity.getEncryptionPublicKey(), dataToSend, getPrng());

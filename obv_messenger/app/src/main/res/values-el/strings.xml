@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Λεπτομέρειες επικοινωνίας</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Λεπτομέρειες χρήστη</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Λεπτομέρειες ομάδας</string>
@@ -258,7 +258,6 @@
 	<string name="text_you" state="needs_review" hash="672009142">Εσύ</string>
 	<string name="title_invite_chooser" state="needs_review" hash="1726572772">Επιλέξτε πώς να στείλετε την πρόσκλησή σας</string>
 	<string name="title_sharing_chooser" state="needs_review" hash="291715689">Επιλέξτε μέθοδο κοινοποίησης</string>
-	<string name="toast_message_android_bug_attach_duplicate_uri" state="needs_review" hash="-776215584">Ορισμένα αρχεία δεν μπόρεσαν να επισυναφθούν στο μήνυμα λόγω σφάλματος στην έκδοση Android σας (πολλά αρχεία επέστρεψαν το ίδιο URI). Προσπαθήστε να επισυνάψετε ξανά τα χαμένα αρχεία.</string>
 	<string name="toast_message_attachment_being_copied" state="needs_review" hash="-978855599">Ένα συνημμένο αρχείο βρίσκεται ακόμη σε επεξεργασία. Το μήνυμά σας θα σταλεί όταν ολοκληρωθεί η επεξεργασία.</string>
 	<string name="toast_message_attachment_saved" state="needs_review" hash="-2073631581">Συνημμένο αποθηκεύτηκε</string>
 	<string name="toast_message_camera_permission_denied" state="needs_review" hash="1896719877">Η άδεια χρήσης της κάμερας απορρίφθηκε</string>
@@ -344,6 +343,9 @@
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">Μόλις ενεργοποιηθεί, το Olvid θα ανακτήσει μια προεπισκόπηση των συνδέσμων που στέλνετε και θα την επισυνάψει στο μήνυμα.</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">Λήψη προεπισκοπήσεων ληφθέντων συνδέσμων</string>
 	<string name="pref_link_preview_summary_inbound" state="needs_review" hash="-320325429">Μόλις ενεργοποιηθεί, το Olvid θα ανακτά αυτόματα προεπισκοπήσεις των συνδέσμων που λαμβάνεις (εάν μια προεπισκόπηση δεν είναι συνημμένη στο μήνυμα).</string>
+	<string name="link_preview_menu_copy_link" state="needs_review" hash="1269903076">Αντιγραφή συνδέσμου</string>
+	<string name="link_preview_menu_open_in_browser" state="needs_review" hash="-1711141559">Άνοιγμα στο πρόγραμμα περιήγησης</string>
+	<string name="link_preview_menu_open_image" state="needs_review" hash="-2013483894">Προβολή εικόνας</string>
 	<string name="pref_discussion_read_receipt_title" state="needs_review" hash="-652307837">Επιβεβαιώσεις ανάγνωσης</string>
 	<string name="pref_text_app_default" state="needs_review" hash="1920567018">Χρήση της προεπιλεγμένης ρύθμισης</string>
 	<string name="pref_text_app_default_true" state="needs_review" hash="-948780646">Χρησιμοποιήστε την προεπιλεγμένη ρύθμιση (ενεργοποιημένο)</string>
@@ -352,6 +354,10 @@
 	<string name="pref_text_discussion_read_receipt_on" state="needs_review" hash="983295321">Ενεργοποιημένο, οι επαφές σας ενημερώνονται</string>
 	<string name="pref_use_lock_screen_title" state="needs_review" hash="540058239">Χρήση οθόνης κλειδώματος εφαρμογής</string>
 	<string name="pref_use_lock_screen_summary" state="needs_review" hash="-399095273">Ενεργοποιήστε το για να προστατεύσετε το Olvid με μια οθόνη κλειδώματος κατά την εκκίνηση.</string>
+	<string name="pref_lock_screen_required_by_mdm" state="needs_review" hash="-500219406">Απαιτείται από τον οργανισμό σας</string>
+	<string name="lock_screen_setup_title" state="needs_review" hash="932203184">Απαιτείται κλείδωμα οθόνης</string>
+	<string name="lock_screen_setup_explanation" state="needs_review" hash="169071212">Ο οργανισμός σας απαιτεί να προστατεύετε αυτήν την εφαρμογή με έναν κωδικό PIN ή έναν κωδικό πρόσβασης στην οθόνη κλειδώματος.</string>
+	<string name="lock_screen_setup_button" state="needs_review" hash="672169315">Ρύθμιση PIN</string>
 	<string name="pref_category_notifications_title" state="needs_review" hash="1237583104">Ειδοποιήσεις</string>
 	<string name="pref_category_privacy_title" state="needs_review" hash="-1750659871">Απόρρητο</string>
 	<string name="pref_category_other_title" state="needs_review" hash="-1683901612">Άλλες ρυθμίσεις</string>
@@ -370,7 +376,7 @@
 	<string name="button_label_use_pin" state="needs_review" hash="918492771">Χρησιμοποιήστε έναν κωδικό PIN αντί για κωδικό πρόσβασης</string>
 	<string name="hint_enter_pin" state="needs_review" hash="999437557">Εισαγάγετε τον PIN</string>
 	<string name="hint_confirm_pin" state="needs_review" hash="1780268503">Επιβεβαίωση PIN</string>
-	<string name="text_pin_creation_explanation" state="needs_review" hash="-1935715126">Θα χρειαστεί να εισαγάγετε αυτόν τον PIN για να ξεκλειδώσετε το Olvid.\nΔεν μπορεί να ανακτηθεί και ενδέχεται να χάσετε την πρόσβαση στα δεδομένα σας Olvid εάν το ξεχάσετε.</string>
+	<string name="text_pin_creation_explanation" state="needs_review" hash="1232246926">Θα χρειαστεί να εισαγάγετε αυτόν τον κωδικό PIN για να ξεκλειδώσετε το Olvid.\nΔεν μπορεί να ανακτηθεί και **εάν το ξεχάσετε, ενδέχεται να χάσετε την πρόσβαση στα δεδομένα σας στο Olvid**.</string>
 	<string name="error_text_pin_too_short" state="needs_review" hash="-1085309478">PIN πολύ σύντομος (τουλάχιστον 4 ψηφία)</string>
 	<string name="error_text_pin_mismatch" state="needs_review" hash="-4525766">Λάθος PIN</string>
 	<string name="hint_enter_password" state="needs_review" hash="478503341">Εισαγάγετε τον κωδικό πρόσβασης</string>
@@ -394,6 +400,7 @@
 	<string name="pref_text_lock_grace_time_infinity" state="needs_review" hash="146086108">Κλείδωμα Olvid χειροκίνητα</string>
 	<string name="pref_unlock_biometry_summary_none_enrolled" state="needs_review" hash="-118589413">Η βιομετρική αυθεντικοποίηση δεν έχει ακόμη ρυθμιστεί στη συσκευή σας.</string>
 	<string name="dialog_title_unlock_olvid" state="needs_review" hash="-2054572246">Ξεκλειδώστε το Olvid με βιομετρία</string>
+	<string name="dialog_title_unlock_neutral" state="needs_review" hash="761644522">Ξεκλειδώστε με βιομετρία</string>
 	<string name="notification_channel_unified_service_name" state="needs_review" hash="1404446256">Υπηρεσία πρώτου πλάνου</string>
 	<string name="notification_channel_unified_service_description" state="needs_review" hash="-1204081836">ΕμPersistent ειδοποίηση που εμφανίζει την κατάσταση του Olvid</string>
 	<string name="notification_title_olvid_is_unlocked" state="needs_review" hash="1688502744">Το Olvid είναι ξεκλείδωτο</string>
@@ -437,6 +444,7 @@
 	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">Το προφίλ σας απενεργοποιήθηκε σε αυτή τη συσκευή.\n\nΦαίνεται ότι δεν έχετε καμία ενεργή συσκευή αυτή τη στιγμή, επομένως μπορείτε να ενεργοποιήσετε ξανά το προφίλ σας οποιαδήποτε στιγμή.\n\nΕάν θέλετε να συνεχίσετε, πατήστε «Ενεργοποίηση του προφίλ μου σε αυτή τη συσκευή» παρακάτω.\n\nΠατήστε «Ακύρωση» για να κλείσετε αυτό το παράθυρο διαλόγου και να αφήσετε αυτή τη συσκευή ανενεργή: δεν θα μπορείτε να στείλετε ή να λάβετε μηνύματα σε αυτή τη συσκευή, αλλά μπορείτε ακόμα να δείτε τις παλιές σας συζητήσεις.</string>
 	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">Το προφίλ σας απενεργοποιήθηκε σε αυτή τη συσκευή.\n\nΦαίνεται ότι δεν έχετε άδεια για να χρησιμοποιείτε το Olvid σε πολλές συσκευές ταυτόχρονα. Η επαναενεργοποίηση αυτής της συσκευής απαιτεί την απενεργοποίηση μιας άλλης συσκευής σας.\n\nΕάν επιθυμείτε να συνεχίσετε, επιλέξτε τη συσκευή που θέλετε να απενεργοποιήσετε από την παρακάτω λίστα και, στη συνέχεια, πατήστε «επαναενεργοποίηση του προφίλ μου σε αυτή τη συσκευή».\n\nΠατήστε «ακύρωση» για να κλείσετε αυτό το παράθυρο διαλόγου και να αφήσετε αυτή τη συσκευή ανενεργή: δεν θα μπορείτε να στείλετε ή να λάβετε μηνύματα σε αυτή τη συσκευή, αλλά θα μπορείτε να δείτε τις παλιές σας συνομιλίες.</string>
 	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">Το προφίλ σας απενεργοποιήθηκε σε αυτή τη συσκευή.\n\nΦαίνεται ότι όλες οι άλλες συσκευές σας έχουν ρυθμιστεί να απενεργοποιηθούν στο εγγύς μέλλον, οπότε μπορείτε να ενεργοποιήσετε ξανά το προφίλ σας σε αυτή τη συσκευή όποτε θέλετε. Για την ενημέρωσή σας, παρακάτω είναι η λίστα με τις τρέχουσες ενεργές συσκευές σας.\n\nΕάν επιθυμείτε να συνεχίσετε, πατήστε \"ενεργοποίηση του προφίλ μου σε αυτή τη συσκευή\" παρακάτω.\n\nΠατήστε \"ακύρωση\" για να κλείσετε αυτό το παράθυρο διαλόγου και να διατηρήσετε αυτή τη συσκευή ανενεργή: δεν θα μπορείτε να στείλετε ή να λάβετε μηνύματα σε αυτή τη συσκευή, αλλά θα μπορείτε να δείτε τις παλιές σας συζητήσεις.</string>
+	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">Το προφίλ σας είναι απενεργοποιημένο σε αυτή τη συσκευή.\n\nΔεν θα μπορείτε να στέλνετε ή να λαμβάνετε μηνύματα εδώ, εκτός εάν το ενεργοποιήσετε ξανά.</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">Ενεργοποίηση του προφίλ μου σε αυτή τη συσκευή</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">Παρουσιάστηκε ένα σφάλμα. Παρακαλώ προσπαθήστε ξανά.</string>
 	<string name="dialog_title_identity_activated" state="needs_review" hash="-1465666248">ID Olvid ενεργοποιήθηκε ξανά</string>
@@ -810,10 +818,7 @@
 	<string name="toast_message_voice_message_recording_failed" state="needs_review" hash="-632817078">Αποτυχία εγγραφής φωνητικού μηνύματος</string>
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Αναπαραγωγός πολυμέσων</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Έλεγχοι αναπαραγωγής/παύσης κατά την αναπαραγωγή πολυμέσων στο Olvid</string>
-	<string name="notification_title_now_playing" state="needs_review" hash="-1042122929">Εξαγωγή…</string>
-	<string name="notification_action_pause" state="needs_review" hash="1931883968">Παύση</string>
-	<string name="notification_action_play" state="needs_review" hash="1143766922">Αναπαραγωγή</string>
-	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="-1049639416">Δεν είναι δυνατή η αναπαραγωγή του %1$s</string>
+	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Δεν είναι δυνατή η αναπαραγωγή του αρχείου ήχου</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Διαγραφή</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Διαγραφή παντού</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Δεν ήταν δυνατή η διαγραφή παντού. Παρακαλώ προσπαθήστε ξανά.</string>
@@ -843,7 +848,6 @@
 	<string name="dialog_message_unmute_notifications" state="needs_review" hash="816867976">Οι ειδοποιήσεις για νέα μηνύματα είναι επί του παρόντος σε σίγαση.\n\nΘέλετε να τις ενεργοποιήσετε ξανά;</string>
 	<string name="dialog_message_unmute_notifications_muted_until" state="needs_review" hash="-325454266">Οι ειδοποιήσεις για νέα μηνύματα είναι σε σίγαση μέχρι: %1$s.\n\nΘέλεις να τις ενεργοποιήσεις ξανά;</string>
 	<string name="notification_action_mute" state="needs_review" hash="-1553988068">Σίγαση</string>
-	<string name="pref_scaled_turn_title" state="needs_review" hash="-1234636269">Επιλέξτε ποιοι περιφερειακοί διακομιστές TURN θα χρησιμοποιηθούν</string>
 	<string name="explanation_identity_creation_options" state="needs_review" hash="-795537312">Αυτή η οθόνη σας επιτρέπει να επιλέξετε επιπλέον επιλογές για τη δημιουργία του Olvid ID σας. Μπορείτε να εισαγάγετε τις επιλογές χειροκίνητα ή να σαρώσετε έναν κωδικό QR διαμόρφωσης.</string>
 	<string name="button_label_check_options" state="needs_review" hash="-759177128">Έλεγχος επιλογών</string>
 	<string name="hint_olvid_server" state="needs_review" hash="1097391633">Διακομιστής Olvid</string>
@@ -859,6 +863,8 @@
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Φαίνεται ότι ο διακομιστής Olvid σας δεν υποστηρίζει την ασφαλή έναρξη κλήσεων.\n\nΕπικοινωνήστε με τον διαχειριστή σας για περισσότερες λεπτομέρειες.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Επιλογές δημιουργίας ID</string>
 	<string name="text_option_server" state="needs_review" hash="-1130676431">Διακομιστής: %1$s</string>
+	<string name="dialog_title_non_default_server" state="needs_review" hash="2119192219">Χρήση ενός διακομιστή διαφορετικού από τον προεπιλεγμένο</string>
+	<string name="dialog_message_non_default_server" state="needs_review" hash="459308900">Είστε έτοιμοι να δημιουργήσετε ένα προφίλ στον παρακάτω διακομιστή:\n\n%1$s\n\nΑυτός δεν είναι ο προεπιλεγμένος διακομιστής Olvid. Συνεχίστε μόνο εάν εμπιστεύεστε αυτόν τον διακομιστή.</string>
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Άδεια: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Πάροχος ταυτότητας</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Διακομιστής παρόχου ταυτότητας</string>
@@ -1202,8 +1208,6 @@
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Συνδεσιμότητα: ΣΥΝΔΕΔΕΜΕΝΟ</string>
 	<string name="label_ping_delay" state="needs_review" hash="25344924">Ping: %1$d ms</string>
 	<string name="label_over_max_ping_delay" state="needs_review" hash="-684190262">Ping: &gt;%1$ds</string>
-	<string name="menu_action_copy_message_text" state="needs_review" hash="1799737962">Αντιγραφή κειμένου μηνύματος</string>
-	<string name="menu_action_copy_text_and_attachments" state="needs_review" hash="428315032">Αντιγραφή μηνύματος και συνημμένων</string>
 	<string name="label_message_copied_from_olvid" state="needs_review" hash="1145396410">Μήνυμα αντιγράφηκε από το Olvid</string>
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">Το πλήρες μήνυμα αντιγράφηκε στο πρόχειρο</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">Συντόμευση για την αποστολή ενός προκαθορισμένου μηνύματος σε μια επαφή ή ομάδα με ένα κλικ</string>
@@ -1403,7 +1407,6 @@
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Αντίγραφο του\u0020</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Έχουν σταλεί οι συντεταγμένες</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Λήφθηκε η τοποθεσία</string>
-	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">Οι υπηρεσίες τοποθεσίας δεν είναι διαθέσιμες</string>
 	<string name="label_send_your_location" state="needs_review" hash="618026241">Αποστολή τοποθεσίας</string>
 	<string name="notification_title_sharing_location" state="needs_review" hash="-1626101904">Κοινή χρήση τοποθεσίας στο Olvid</string>
 	<string name="notification_action_stop_sharing" state="needs_review" hash="585626699">Διακοπή κοινοποίησης</string>
@@ -1531,6 +1534,8 @@
 	<string name="text_setting_lock_biometry" state="needs_review" hash="-1698353580">‣ Ξεκλείδωμα με βιομετρία:</string>
 	<string name="text_setting_lock_notification" state="needs_review" hash="2022286622">‣ Μόνιμη ειδοποίηση στην κλειδωμένη οθόνη:</string>
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">‣ Διαγραφή ευαίσθητων μηνυμάτων μετά από 3 λανθασμένους κωδικούς PIN:\u0020</string>
+	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">‣ Απαιτείται κλείδωμα οθόνης:</string>
+	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">• Επαναφέρετε τον κωδικό πρόσβασης της οθόνης κλειδώματος:</string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">‣ Αυτόματη λήψη συνημμένων αρχειοθετημένων συνομιλιών:</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">‣ Αποαρχειοθέτηση συνομιλίας κατά τη λήψη ειδοποίησης:\u0020</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">• Λήφθηκε προεπισκόπηση συνδέσμου:\u0020</string>
@@ -1593,8 +1598,8 @@
 	<string name="label_open_original_link_with_trackers" state="needs_review" hash="-1586932660">Χρησιμοποιήστε τον αρχικό σύνδεσμο που περιέχει παραμέτρους παρακολούθησης</string>
 	<string name="dialog_title_confirm_open_olvid_link" state="needs_review" hash="425949498">Άνοιγμα αυτού του συνδέσμου στο Olvid;</string>
 	<string name="toast_message_unable_to_open_url" state="needs_review" hash="-1486954792">Δεν είναι δυνατό το άνοιγμα του URL</string>
-	<string name="text_explanation_location_map_provider" state="needs_review" hash="-173394547">Η επιλογή παρόχου χαρτών σας επιτρέπει να επιλέξετε με ακρίβεια την τοποθεσία που θέλετε να μοιραστείτε σε έναν χάρτη. Ωστόσο, αυτό μπορεί να αποκαλύψει την τοποθεσία σας (ή την τοποθεσία των επαφών σας) σε αυτόν τον πάροχο υπηρεσιών.</string>
-	<string name="text_explanation_location_map_provider_settings" state="needs_review" hash="68421420">Αυτή η επιλογή μπορεί να αλλάξει από τις ρυθμίσεις της εφαρμογής.</string>
+	<string name="dialog_title_choose_map_provider" state="needs_review" hash="1225681568">Επιλέξτε έναν πάροχο χαρτών</string>
+	<string name="dialog_message_choose_map_provider" state="needs_review" hash="-2129640593">Επιλέξτε έναν πάροχο χαρτών παρακάτω για να εμφανίζεται ένας χάρτης όταν βλέπετε ή μοιράζεστε μια τοποθεσία.\n\nΛάβετε υπόψη ότι αυτό μπορεί να **αποκαλύψει την τοποθεσία σας (ή την τοποθεσία των επαφών σας) σε αυτόν τον πάροχο υπηρεσιών**.</string>
 	<string name="button_label_choose_provider" state="needs_review" hash="-797956886">Επιλέξτε πάροχο</string>
 	<string name="button_label_live_share" state="needs_review" hash="327122881">Ζωντανή κοινοποίηση</string>
 	<string name="label_fetching_address" state="needs_review" hash="-839353954">Λήψη διεύθυνσης…</string>
@@ -1803,7 +1808,9 @@
 	<string name="dialog_title_custom_address_server_url" state="needs_review" hash="-2071925830">Προσαρμοσμένος διακομιστής διευθύνσεων</string>
 	<string name="hint_custom_address_server_url" state="needs_review" hash="1348105685">URL διακομιστή αναζήτησης διευθύνσεων</string>
 	<string name="dialog_message_custom_address_server_url" state="needs_review" hash="401731382">Το Olvid υποστηρίζει μόνο διακομιστές **Pelias** για την αναζήτηση διευθύνσεων. Παρακαλώ εισάγετε το URL του διακομιστή που θέλετε να χρησιμοποιήσετε παρακάτω, θα πρέπει να είναι κάτι σαν *https://pelias.olvid.io*, και τα ερωτήματα θα σταλούν στο σημείο εισόδου */v1/reverse*.\n\nΣημειώστε ότι αυτός ο διακομιστής ενδέχεται να μάθει ορισμένες πληροφορίες σχετικά με τη θέση σας. Βεβαιωθείτε ότι **χρησιμοποιείτε έναν διακομιστή που εμπιστεύεστε**.</string>
-	<string name="toast_message_playback_speed_not_supported_on_device" state="needs_review" hash="502764942">Δεν είναι δυνατή η αλλαγή της ταχύτητας αναπαραγωγής</string>
+	<string name="pref_location_gps_debug_title" state="needs_review" hash="1786532100">Ενεργοποιήστε τις λειτουργίες εντοπισμού σφαλμάτων για την κοινή χρήση τοποθεσίας</string>
+	<string name="pref_location_gps_always_on_title" state="needs_review" hash="1250376384">Διατηρήστε την GPS πάντα ενεργοποιημένη</string>
+	<string name="pref_location_export_gps_logs_title" state="needs_review" hash="-459831250">Εξαγωγή αρχείων καταγραφής δραστηριότητας GPS</string>
 	<string name="text_speed_1x" state="needs_review" hash="789822816">1×</string>
 	<string name="text_speed_1_5x" state="needs_review" hash="-120181054">1,5×</string>
 	<string name="text_speed_2x" state="needs_review" hash="1171767872">2×</string>
@@ -2144,15 +2151,11 @@
 	<string name="history_transfer_step_none" state="needs_review" hash="1228580785">Καμία τρέχουσα μεταφορά</string>
 	<string name="history_transfer_step_contacting_other_device" state="needs_review" hash="1719019815">Περιμένω για τη δεύτερη συσκευή</string>
 	<string name="history_transfer_step_connecting" state="needs_review" hash="1836039168">Σύνδεση με άλλη συσκευή</string>
-	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Διαπραγμάτευση (βήμα 1 από 3)</string>
-	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Μεταφορά μηνυμάτων (βήμα 2 από 3)</string>
-	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Μεταφορά συνημμένων (βήμα 3 από 3)</string>
-	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Διαπραγμάτευση</string>
-	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Μεταφορά μηνυμάτων</string>
-	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Μεταφορά συνημμένων αρχείων</string>
+	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Διαπραγμάτευση</string>
+	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Μεταφορά</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Η μεταφορά ολοκληρώθηκε</string>
-	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Η μεταφορά διακόπηκε</string>
-	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Μεταφορά ιστορικού συνομιλιών (beta)</string>
+	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Η μεταφορά απέτυχε</string>
+	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Μεταφορά ιστορικού συνομιλιών</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Δεν είναι δυνατή η έναρξη της μεταφοράς. Ίσως μια άλλη μεταφορά να είναι ήδη σε εξέλιξη;</string>
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Χρησιμοποιήστε τον \"μαγικό σύνδεσμο\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Μη έγκυρος μαγικός σύνδεσμος</string>
@@ -2165,18 +2168,111 @@
 	<string name="onboarding_transfer_keycloak_error_message_authentication_impossible" state="needs_review" hash="-1891385979">Δεν φαίνεται να είναι διαθέσιμη καμία υποστηριζόμενη μέθοδος ελέγχου ταυτότητας.</string>
 	<string name="pref_use_alt_turn_servers_title" state="needs_review" hash="-1956132776">Χρησιμοποιήστε εναλλακτικούς διακομιστές TURN</string>
 	<string name="pref_use_alt_turn_servers_summary" state="needs_review" hash="357427162">Ενεργοποιήστε αυτήν την επιλογή για να χρησιμοποιήσετε διακομιστές TURN με εναλλασσόμενες διευθύνσεις IP. Εάν δεν είστε σίγουροι, αφήστε αυτήν την επιλογή απενεργοποιημένη 😁</string>
-	<string name="button_label_transfer_through_webrtc" state="needs_review" hash="-1809138918">Μεταφορά μέσω του τοπικού δικτύου</string>
-	<string name="button_label_export_zip" state="needs_review" hash="1575043364">Εξαγωγή ZIP</string>
-	<string name="button_label_import_zip" state="needs_review" hash="1299665090">Εισαγωγή αρχείου ZIP</string>
-	<string name="dialog_title_transfer_choose_target_device" state="needs_review" hash="218115750">Επιλέξτε τη συσκευή προορισμού για αυτήν τη μεταφορά.</string>
-	<string name="transfer_label_no_other_active_device" state="needs_review" hash="-2135899221">Καμία άλλη ενεργή συσκευή</string>
-	<string name="transfer_label_messages" state="needs_review" hash="-1639407912">Μηνύματα</string>
-	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Ρυθμός μετάδοσης</string>
-	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Υπόλοιπο</string>
-	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Συνημμένα</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Αυτή η λειτουργία βρίσκεται ακόμη σε φάση δοκιμών beta και η τρέχουσα υλοποίηση ενδέχεται να μην είναι συμβατή με την τελική υλοποίηση της μεταφοράς ιστορικού του Olvid.\n\nΠριν χρησιμοποιήσετε αυτήν τη λειτουργία, βεβαιωθείτε ότι οι συσκευές σας εκτελούν την πιο πρόσφατη έκδοση του Olvid.</string>
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Διακοπή της τρέχουσας μεταφοράς;</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Ενεργή είναι αυτήν τη στιγμή η μεταφορά του ιστορικού. Θέλετε να τη διακόψετε;</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Διακοπή μεταφοράς</string>
 	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Περιμένω να συμμετάσχω σε αυτήν τη συζήτηση</string>
+	<string name="label_your_other_device" state="needs_review" hash="-339632056">Η άλλη σας συσκευή</string>
+	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">επιθυμεί να μεταφέρει το ιστορικό συνομιλιών σας σε αυτή τη συσκευή</string>
+	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">Το \"%1$s\" θέλει να μεταφέρει το ιστορικό συνομιλιών σας σε αυτή τη συσκευή.</string>
+	<string name="button_label_start_transfer" state="needs_review" hash="208526116">Έναρξη μεταφοράς</string>
+	<string name="pref_disable_secondary_notifications_title" state="needs_review" hash="29372078">Απενεργοποιήστε τις \"δευτερεύουσες\" ειδοποιήσεις</string>
+	<string name="pref_disable_secondary_notifications_summary" state="needs_review" hash="-402927980">Αυτή η ρύθμιση απενεργοποιεί τις ειδοποιήσεις για τις αντιδράσεις στα μηνύματά σας ή τις νέες απαντήσεις στις δημοσκοπήσεις σας.</string>
+	<string name="template_copy_multiple_messages" state="needs_review" hash="-1584473750">[%1$s] %2$s:\n%3$s</string>
+	<string name="label_export_your_chat_history" state="needs_review" hash="30036193">Εξαγωγή του ιστορικού συνομιλιών σας</string>
+	<string name="label_import_your_chat_history" state="needs_review" hash="-1058286401">Εισαγωγή του ιστορικού συνομιλιών σας</string>
+	<string name="explanation_export_your_chat_history" state="needs_review" hash="2042738985">Χρησιμοποιήστε αυτήν την επιλογή εάν θέλετε να μεταφέρετε το ιστορικό συνομιλιών σας **από** αυτήν τη συσκευή.</string>
+	<string name="explanation_import_your_chat_history" state="needs_review" hash="366204152">Χρησιμοποιήστε αυτήν την επιλογή εάν θέλετε να μεταφέρετε το ιστορικό συνομιλιών σας **σε** αυτήν τη συσκευή.</string>
+	<string name="explanation_history_transfer" state="needs_review" hash="983501865">Αυτή η λειτουργία σας επιτρέπει να **μεταφέρετε με ασφάλεια** το ιστορικό συνομιλιών σας μεταξύ δύο από τις συσκευές σας.\n\nΠριν ξεκινήσετε, το προφίλ σας πρέπει να **υπάρχει και στις δύο συσκευές**.</string>
+	<string name="button_label_import" state="needs_review" hash="-984720905">Εισαγωγή</string>
+	<string name="history_transfer_pick_profile_title" state="needs_review" hash="-1782334343">Με ποιο προφίλ θέλετε να συνεχίσετε;</string>
+	<string name="history_transfer_pick_profile_text_import" state="needs_review" hash="-1162713377">Επιλέξτε το προφίλ στο οποίο θέλετε να **εισάγετε το ιστορικό συνομιλιών** σας.</string>
+	<string name="history_transfer_pick_profile_text_export" state="needs_review" hash="951522414">Επιλέξτε το προφίλ από το οποίο θέλετε να **εξάγετε το ιστορικό συνομιλιών** σας.</string>
+	<string name="history_transfer_pick_method_title" state="needs_review" hash="661094742">Τι θέλετε να κάνετε;</string>
+	<string name="history_transfer_pick_method_text_import" state="needs_review" hash="1116376527">Επιλέξτε τον τρόπο με τον οποίο θέλετε να εισαγάγετε το ιστορικό συνομιλιών του προφίλ σας **%1$s**.</string>
+	<string name="history_transfer_pick_method_text_export" state="needs_review" hash="1750125743">Επιλέξτε τον τρόπο με τον οποίο θέλετε να εξαγάγετε το ιστορικό συνομιλιών του προφίλ σας **%1$s**.</string>
+	<string name="history_transfer_via_wifi_title" state="needs_review" hash="-2016953028">Μεταφορά μέσω Wi-Fi</string>
+	<string name="history_transfer_via_wifi_message" state="needs_review" hash="-758708700">Απλώς συνδέστε και τις δύο συσκευές σας στο ίδιο δίκτυο Wi-Fi.</string>
+	<string name="history_transfer_via_zip_title_import" state="needs_review" hash="1608302669">Εισαγωγή αρχείου .zip</string>
+	<string name="history_transfer_via_zip_title_export" state="needs_review" hash="-1924849877">Εξαγωγή αρχείου .zip</string>
+	<string name="history_transfer_via_zip_message_import" state="needs_review" hash="1766231761">Επιλέξτε το αρχείο .zip που έχετε αντιγράψει από την παλιά σας συσκευή.</string>
+	<string name="history_transfer_via_zip_message_export" state="needs_review" hash="-1123951975">Κατεβάστε ένα αρχείο .zip και αντιγράψτε το στη νέα σας συσκευή.</string>
+	<string name="history_transfer_import_zip_description" state="needs_review" hash="855194374">Για να εισαγάγετε το ιστορικό συνομιλιών σας, επιλέξτε το αρχείο .zip που **εξήγατε από την άλλη σας συσκευή**.\n\nΒεβαιωθείτε ότι το προφίλ **%1$s** που επιλέξατε ταιριάζει με το προφίλ που χρησιμοποιήθηκε για τη δημιουργία αυτού του αρχείου .zip.</string>
+	<string name="button_label_choose_zip_file" state="needs_review" hash="-493688169">Επιλέξτε ένα αρχείο .zip</string>
+	<string name="dialog_title_error_reading_zip" state="needs_review" hash="1059408985">Σφάλμα κατά την ανάγνωση του αρχείου .zip</string>
+	<string name="dialog_message_error_reading_zip" state="needs_review" hash="1864744526">Παρουσιάστηκε ένα σφάλμα κατά την ανάγνωση του παρεχόμενου αρχείου .zip.\n\nΒεβαιωθείτε ότι έχετε επιλέξει ένα αρχείο εξαγωγής ιστορικού συνομιλιών Olvid.</string>
+	<string name="dialog_title_error_zip_password" state="needs_review" hash="1651240086">Λάθος κωδικός πρόσβασης</string>
+	<string name="dialog_message_error_zip_password" state="needs_review" hash="216311562">Ο κωδικός πρόσβασης που εισαγάγατε δεν επέτρεψε την αποκρυπτογράφηση του επιλεγμένου αρχείου .zip.\n\nΠαρακαλούμε προσπαθήστε ξανά.</string>
+	<string name="dialog_title_zip_password_required" state="needs_review" hash="-944166479">Απαιτείται κωδικός πρόσβασης</string>
+	<string name="dialog_message_zip_password_required" state="needs_review" hash="548842041">Το επιλεγμένο αρχείο .zip είναι προστατευμένο με κωδικό πρόσβασης. Παρακαλούμε εισαγάγετε τον κωδικό πρόσβασης που επιλέξατε κατά την εξαγωγή του ιστορικού συνομιλιών σας στην άλλη συσκευή.</string>
+	<string name="history_transfer_export_scope_title_export" state="needs_review" hash="933575859">Τι θέλετε να εξαγάγετε;</string>
+	<string name="history_transfer_export_scope_title_transfer" state="needs_review" hash="-1971421411">Τι θέλετε να μεταφέρετε;</string>
+	<string name="history_transfer_scope_messages_export_title" state="needs_review" hash="-1810394953">Εξαγωγή μόνο μηνυμάτων</string>
+	<string name="history_transfer_scope_messages_transfer_title" state="needs_review" hash="1119624141">Μεταφορά μόνο μηνυμάτων</string>
+	<string name="history_transfer_scope_messages_export_message" state="needs_review" hash="-2120867312">Μικρότερη εξαγωγή. Περιλαμβάνονται μόνο τα μηνύματα κειμένου.</string>
+	<string name="history_transfer_scope_messages_transfer_message" state="needs_review" hash="2071005834">Ταχύτερη μεταφορά. Περιλαμβάνονται μόνο τα μηνύματα κειμένου.</string>
+	<string name="history_transfer_scope_everything_export_title" state="needs_review" hash="463008259">Εξαγωγή μηνυμάτων και συνημμένων</string>
+	<string name="history_transfer_scope_everything_transfer_title" state="needs_review" hash="-175297433">Μεταφορά μηνυμάτων και συνημμένων</string>
+	<string name="history_transfer_scope_everything_export_message" state="needs_review" hash="-266277978">Πλήρης εξαγωγή. Περιλαμβάνει όλα τα μηνύματα και τα συνημμένα.</string>
+	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Η μεταφορά ολοκληρώθηκε. Περιλαμβάνει όλα τα μηνύματα και τα συνημμένα.</string>
+	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Εξαγάγετε το ιστορικό συνομιλιών σας ως αρχείο .zip. Μπορείτε αργότερα να το εισαγάγετε σε μια άλλη συσκευή του προφίλ σας **%1$s**.\n\nΜπορείτε επίσης να αποσυμπιέσετε αυτό το αρχείο για να **εμφανίσετε το ιστορικό συνομιλιών σας σε μια ιστοσελίδα**.</string>
+	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Δημιουργία αρχείου .zip</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d συζητήσεις και %2$d μηνύματα</string>
+	<string name="label_computing" state="needs_review" hash="1393495921">Εκτελείται υπολογισμός…</string>
+	<string name="label_total_size" state="needs_review" hash="-788411929">Συνολικό μέγεθος: %1$s</string>
+	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Προστατέψτε τις εξαγωγές σας</string>
+	<string name="dialog_message_protect_export" state="needs_review" hash="-900141026">Για την ασφάλειά σας, συνιστούμε να προστατεύετε τις εξαγωγές σας με έναν κωδικό πρόσβασης.</string>
+	<string name="button_label_generate_password" state="needs_review" hash="-1174237913">Δημιουργία κωδικού πρόσβασης</string>
+	<string name="button_label_choose_password" state="needs_review" hash="-1893200284">Επιλέξτε έναν κωδικό πρόσβασης</string>
+	<string name="button_label_continue_without_password" state="needs_review" hash="-106870576">Συνεχίστε χωρίς κωδικό πρόσβασης</string>
+	<string name="dialog_title_choose_password" state="needs_review" hash="1927816439">Επιλέξτε έναν κωδικό πρόσβασης</string>
+	<string name="dialog_title_generated_password" state="needs_review" hash="-690449371">Δημιουργημένος κωδικός πρόσβασης</string>
+	<string name="dialog_message_generated_password" state="needs_review" hash="1100314355">Ο κωδικός πρόσβασης που εμφανίζεται παρακάτω δημιουργήθηκε τυχαία.\n\nΒεβαιωθείτε ότι θα τον **καταγράψετε πριν συνεχίσετε**.</string>
+	<string name="button_label_copy_to_clipboard" state="needs_review" hash="-1309214553">Αντιγραφή στην αποθήκη</string>
+	<string name="history_transfer_pick_target_device_title" state="needs_review" hash="1659408512">Επιλέξτε μια συσκευή</string>
+	<string name="history_transfer_pick_target_device_text" state="needs_review" hash="-1456199559">Επιλέξτε τη συσκευή στην οποία θέλετε να μεταφέρετε το ιστορικό συνομιλιών της τρέχουσας συσκευής.\n\nΔεν μπορείτε να βρείτε τη συσκευή που ψάχνετε; Βεβαιωθείτε ότι το προφίλ σας **%1$s** είναι **ενεργό σε αυτήν την άλλη συσκευή**.</string>
+	<string name="history_transfer_no_other_device_explanation" state="needs_review" hash="-1034788616">Φαίνεται ότι το προφίλ σας **%1$s** δεν έχει άλλες ενεργές συσκευές.\n\nΠαρακαλούμε **προσθέστε τη νέα σας συσκευή σε αυτό το προφίλ** πριν συνεχίσετε με τη μεταφορά του ιστορικού συνομιλιών σας.\n\nΜπορείτε επίσης να **εξάγετε ένα αρχείο .zip** για να το εισαγάγετε αργότερα στη νέα σας συσκευή.</string>
+	<string name="history_transfer_webrtc_instructions_title" state="needs_review" hash="-1353013738">Ακολουθήστε αυτές τις οδηγίες στη δεύτερη συσκευή σας</string>
+	<string name="history_transfer_instructions_turn_on_other_import" state="needs_review" hash="-930696177">Ενεργοποιήστε τη συσκευή που περιέχει το ιστορικό συνομιλιών σας.</string>
+	<string name="history_transfer_instructions_same_wifi_import" state="needs_review" hash="465388607">Βεβαιωθείτε ότι και οι δύο συσκευές σας είναι συνδεδεμένες στο ίδιο δίκτυο Wi-Fi.</string>
+	<string name="history_transfer_instructions_start_export" state="needs_review" hash="-1288439668">Στη δεύτερη συσκευή σας, ανοίξτε τις ρυθμίσεις του Olvid και ξεκινήστε την εξαγωγή του ιστορικού συνομιλιών.</string>
+	<string name="history_transfer_instructions_turn_on_other_export" state="needs_review" hash="1280642155">Ενεργοποιήστε το **%1$s** σας.</string>
+	<string name="history_transfer_instructions_same_wifi_export" state="needs_review" hash="284833986">Βεβαιωθείτε ότι αυτή η συσκευή και η **%1$s** σας είναι συνδεδεμένες στο ίδιο δίκτυο Wi-Fi.</string>
+	<string name="history_transfer_step_awaiting_confirmation" state="needs_review" hash="665601714">Περιμένω να αποδεχτείτε τη μεταφορά</string>
+	<string name="dialog_title_abort_history_transfer" state="needs_review" hash="1914158733">Διακοπή της τρέχουσας μεταφοράς;</string>
+	<string name="dialog_title_abort_history_transfer_export" state="needs_review" hash="-856542741">Να ακυρωθεί η τρέχουσα εξαγωγή;</string>
+	<string name="dialog_title_abort_history_transfer_import" state="needs_review" hash="976007540">Ακύρωση της τρέχουσας εισαγωγής;</string>
+	<string name="dialog_message_abort_history_transfer_webrtc" state="needs_review" hash="1807742093">Είστε σίγουροι ότι θέλετε να διακόψετε τη μεταφορά του ιστορικού συνομιλιών που βρίσκεται σε εξέλιξη;\n\nΜπορείτε πάντα να ξεκινήσετε ξανά τη μεταφορά αργότερα, εάν το επιθυμείτε. **Όλα όσα έχουν ήδη μεταφερθεί θα διατηρηθούν** και δεν θα χρειαστεί να μεταφερθούν ξανά.</string>
+	<string name="dialog_message_abort_history_transfer_zip_export" state="needs_review" hash="716134255">Είστε σίγουροι ότι θέλετε να διακόψετε την τρέχουσα εξαγωγή του αρχείου .zip;\n\nΑυτό θα αφήσει ένα **μερικώς συμπληρωμένο αρχείο .zip στη συσκευή σας**, το οποίο θα πρέπει να **διαγράψετε χειροκίνητα**.</string>
+	<string name="dialog_message_abort_history_transfer_zip_import" state="needs_review" hash="1264487097">Είστε σίγουροι ότι θέλετε να διακόψετε την τρέχουσα εισαγωγή του αρχείου .zip;\n\nΜπορείτε πάντα να επανεκκινήσετε την εισαγωγή αργότερα, εάν το επιθυμείτε. **Όλα όσα έχουν ήδη εισαχθεί θα διατηρηθούν** και δεν θα χρειαστεί να εισαχθούν ξανά.</string>
+	<string name="button_label_interrupt_and_continue_later" state="needs_review" hash="-976034947">Διακόψτε και συνεχίστε αργότερα</string>
+	<string name="button_label_abort_export" state="needs_review" hash="428199797">Ακύρωση εξαγωγής</string>
+	<string name="button_label_abort_import" state="needs_review" hash="2031103191">Ακύρωση εισαγωγής</string>
+	<string name="history_transfer_fail_reason_aborted" state="needs_review" hash="277351522">Η μεταφορά διακόπηκε</string>
+	<string name="history_transfer_fail_reason_unknown" state="needs_review" hash="-1170630200">Παρουσιάστηκε ένα άγνωστο σφάλμα (πιθανώς αποσύνδεση από το δίκτυο).</string>
+	<string name="history_transfer_fail_reason_identity_mismatch" state="needs_review" hash="936267267">Αυτό το αρχείο .zip εξήχθη από ένα διαφορετικό προφίλ</string>
+	<string name="history_transfer_fail_reason_wrong_passwrod" state="needs_review" hash="1847441965">Λάθος κωδικός πρόσβασης</string>
+	<string name="history_transfer_fail_reason_invalid_zip" state="needs_review" hash="-691417686">Δεν είναι δυνατή η ανάγνωση του αρχείου .zip (είναι όντως ένα αρχείο εξαγωγής ιστορικού συνομιλιών Olvid;)</string>
+	<string name="transfer_label_sending_messages" state="needs_review" hash="2018039973">Αποστολή μηνυμάτων</string>
+	<string name="transfer_label_exporting_messages" state="needs_review" hash="1572454408">Εξαγωγή μηνυμάτων</string>
+	<string name="transfer_label_importing_messages" state="needs_review" hash="1913024934">Εισαγωγή μηνυμάτων</string>
+	<string name="transfer_label_receiving_messages" state="needs_review" hash="2015919003">Λήψη μηνυμάτων</string>
+	<string name="transfer_label_sending_attachments" state="needs_review" hash="2102571371">Αποστολή συνημμένων</string>
+	<string name="transfer_label_exporting_attachments" state="needs_review" hash="-1029839434">Εξαγωγή συνημμένων</string>
+	<string name="transfer_label_importing_attachments" state="needs_review" hash="1078186262">Εισαγωγή συνημμένων</string>
+	<string name="transfer_label_receiving_attachments" state="needs_review" hash="439049517">Λήψη συνημμένων</string>
+	<string name="label_remaining_and_throughput" state="needs_review" hash="1772610397">Περίπου %1$s παραμένουν (%2$s)</string>
+	<string name="history_transfer_step_connecting_export" state="needs_review" hash="-28311439">Δημιουργία αρχείου .zip</string>
+	<string name="history_transfer_step_connecting_import" state="needs_review" hash="1323447620">Άνοιγμα του αρχείου .zip</string>
+	<string name="history_transfer_step_failed_export" state="needs_review" hash="185890904">Η εξαγωγή απέτυχε</string>
+	<string name="history_transfer_step_finished_export" state="needs_review" hash="1156914922">Η εξαγωγή ολοκληρώθηκε</string>
+	<string name="history_transfer_step_failed_import" state="needs_review" hash="-909085512">Η εισαγωγή απέτυχε</string>
+	<string name="history_transfer_step_finished_import" state="needs_review" hash="-653312310">Η εισαγωγή ολοκληρώθηκε</string>
+	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">Εξαγωγή</string>
+	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Εισαγωγή</string>
+	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Ανάλυση περιεχομένου</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Ανάλυση των εξαγόμενων συνομιλιών</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Παρουσιάστηκε ένα σφάλμα κατά τη φόρτωση του αρχείου στυλ OpenStreetMap.</string>
+	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Οι συνδρομές εντός της εφαρμογής δεν είναι διαθέσιμες</string>
+	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Η έκδοση του Olvid που έχετε εγκαταστήσει δεν περιλαμβάνει τη βιβλιοθήκη χρεώσεων της Google και δεν υποστηρίζει αγορές εντός της εφαρμογής.\n\nΓια περισσότερες πληροφορίες, επικοινωνήστε μαζί μας στο **feedback@olvid.io**.</string>
 </resources>

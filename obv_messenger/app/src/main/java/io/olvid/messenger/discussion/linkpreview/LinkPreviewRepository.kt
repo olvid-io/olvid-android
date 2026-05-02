@@ -92,7 +92,7 @@ class LinkPreviewRepository {
     fun userAgentForUrl(url: HttpUrl) : String {
         // if configured by MDM, use this user agent
         if (MDMConfigurationSingleton.overrideUserAgentForLinkPreviews()) {
-            return MDMConfigurationSingleton.getUserAgentOverride()
+            return MDMConfigurationSingleton.getUserAgentOverride() ?: "WhatsApp/2"
         }
         // we could use "facebookexternalhit/1.1" for some specific sites
         return "WhatsApp/2"

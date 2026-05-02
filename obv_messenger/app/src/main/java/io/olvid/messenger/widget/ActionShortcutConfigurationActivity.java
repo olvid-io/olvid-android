@@ -81,7 +81,7 @@ import io.olvid.messenger.AppSingleton;
 import io.olvid.messenger.R;
 import io.olvid.messenger.customClasses.EmptyRecyclerView;
 import io.olvid.messenger.customClasses.InitialView;
-import io.olvid.messenger.customClasses.LockScreenOrNotActivity;
+import io.olvid.messenger.lock_screen.LockScreenOrNotActivity;
 import io.olvid.messenger.customClasses.TextChangeListener;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.DiscussionDao;
@@ -771,7 +771,7 @@ public class ActionShortcutConfigurationActivity extends LockScreenOrNotActivity
             Window window = dialog.getWindow();
             if (window != null) {
                 window.requestFeature(Window.FEATURE_NO_TITLE);
-                if (SettingsActivity.preventScreenCapture()) {
+                if (SettingsActivity.preventScreenCapture(getContext())) {
                     window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
                 }
             }

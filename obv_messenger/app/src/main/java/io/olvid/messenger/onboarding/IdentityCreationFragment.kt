@@ -37,6 +37,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation.findNavController
 import io.olvid.engine.Logger
+import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.engine.engine.types.identities.ObvIdentity
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
@@ -272,9 +273,8 @@ class IdentityCreationFragment : Fragment() {
 
     private fun createIdentity() {
         val server = viewModel.server
-        if (server == null || server.isEmpty()) {
-            return
-        }
+        if (server.isNullOrEmpty()) return
+
         var apiKey = viewModel.apiKey
         @Suppress("SENSELESS_COMPARISON")
         if (apiKey == null && BuildConfig.HARDCODED_API_KEY != null) {
@@ -283,29 +283,40 @@ class IdentityCreationFragment : Fragment() {
 
         val identityDetails = detailsViewModel.jsonIdentityDetails
         val absolutePhotoUrl = detailsViewModel.absolutePhotoUrl
-        if (identityDetails.isEmpty) {
-            return
-        }
+        if (identityDetails.isEmpty) return
 
-        if (viewModel.forceDisabled.value != null && !viewModel.forceDisabled.value!!) {
-            viewModel.setForceDisabled(true)
-            AppSingleton.getInstance().generateIdentity(
-                server,
-                apiKey,
-                identityDetails,
-                absolutePhotoUrl,
-                detailsViewModel.nickname,
-                detailsViewModel.password,
-                detailsViewModel.salt,
-                viewModel.keycloakServer,
-                viewModel.getSupportedKeycloakAuthMethods(),
-                viewModel.keycloakJwks,
-                viewModel.keycloakSignatureKey,
-                viewModel.keycloakSerializedAuthState,
-                viewModel.isKeycloakTransferRestricted,
-                { obvIdentity: ObvIdentity -> this.identityCreatedCallback(obvIdentity) },
-                { viewModel.setForceDisabled(false) })
+        if (viewModel.forceDisabled.value == false) {
+            if (BuildConfig.SERVER_NAME != server) {
+                SecureAlertDialogBuilder(activity, R.style.CustomAlertDialog)
+                    .setTitle(R.string.dialog_title_non_default_server)
+                    .setMessage(getString(R.string.dialog_message_non_default_server, server))
+                    .setNegativeButton(R.string.button_label_cancel, null)
+                    .setPositiveButton(R.string.button_label_proceed) { _, _ -> doCreateIdentity(server, apiKey, identityDetails, absolutePhotoUrl) }
+                    .create().show()
+            } else {
+                doCreateIdentity(server, apiKey, identityDetails, absolutePhotoUrl)
+            }
         }
+    }
+
+    private fun doCreateIdentity(server: String, apiKey: UUID?, identityDetails: JsonIdentityDetails, absolutePhotoUrl: String?) {
+        viewModel.setForceDisabled(true)
+        AppSingleton.getInstance().generateIdentity(
+            server,
+            apiKey,
+            identityDetails,
+            absolutePhotoUrl,
+            detailsViewModel.nickname,
+            detailsViewModel.password,
+            detailsViewModel.salt,
+            viewModel.keycloakServer,
+            viewModel.getSupportedKeycloakAuthMethods(),
+            viewModel.keycloakJwks,
+            viewModel.keycloakSignatureKey,
+            viewModel.keycloakSerializedAuthState,
+            viewModel.isKeycloakTransferRestricted,
+            { obvIdentity: ObvIdentity -> this.identityCreatedCallback(obvIdentity) },
+            { viewModel.setForceDisabled(false) })
     }
 
     private fun identityCreatedCallback(obvIdentity: ObvIdentity) {

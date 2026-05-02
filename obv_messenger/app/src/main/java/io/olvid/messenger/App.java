@@ -81,7 +81,7 @@ import io.olvid.engine.datatypes.ObvBase64;
 import io.olvid.engine.engine.types.ObvPushNotificationType;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
 import io.olvid.messenger.activities.ContactDetailsActivity;
-import io.olvid.messenger.activities.LockScreenActivity;
+import io.olvid.messenger.lock_screen.LockScreenActivity;
 import io.olvid.messenger.activities.ObvLinkActivity;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.appdialogs.AppDialogShowActivity;
@@ -105,6 +105,7 @@ import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.entity.jsons.JsonWebrtcCallMessage;
 import io.olvid.messenger.databases.tasks.new_message.ProcessReadyToProcessOnHoldMessagesTask;
 import io.olvid.messenger.discussion.DiscussionActivity;
+import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 import io.olvid.messenger.discussion.message.MessageDetailsActivity;
 import io.olvid.messenger.discussion.message.attachments.RenderablePdfPage;
 import io.olvid.messenger.discussion.message.attachments.RenderablePdfPageFetcher;
@@ -128,9 +129,9 @@ import io.olvid.messenger.services.UnifiedForegroundService;
 import io.olvid.messenger.settings.AppIcon;
 import io.olvid.messenger.settings.AppIconSettingKt;
 import io.olvid.messenger.settings.SettingsActivity;
-import io.olvid.messenger.settings.composables.ProfilePictureFetcher;
-import io.olvid.messenger.settings.composables.ProfilePictureKeyer;
-import io.olvid.messenger.settings.composables.ProfilePictureLabelAndKey;
+import io.olvid.messenger.settings.backupV2.composables.ProfilePictureFetcher;
+import io.olvid.messenger.settings.backupV2.composables.ProfilePictureKeyer;
+import io.olvid.messenger.settings.backupV2.composables.ProfilePictureLabelAndKey;
 import io.olvid.messenger.webrtc.WebrtcCallActivity;
 import io.olvid.messenger.webrtc.WebrtcCallService;
 
@@ -366,6 +367,14 @@ public class App extends Application implements DefaultLifecycleObserver {
     public static void openDiscussionMediaGalleryActivity(Context activityContext, long discussionId) {
         Intent intent = new Intent(getContext(), io.olvid.messenger.discussion.gallery.DiscussionMediaGalleryActivity.class);
         intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
+        activityContext.startActivity(intent);
+    }
+
+    public static void openLinkPreviewGallery(Context activityContext, OpenGraph openGraph) {
+        // save the openGraph to the companion object of the gallery
+        GalleryActivity.Companion.setOpenGraphToShow(openGraph);
+        Intent intent = new Intent(getContext(), GalleryActivity.class);
+        intent.putExtra(GalleryActivity.LOAD_FROM_OPEN_GRAPH_INTENT_EXTRA, true);
         activityContext.startActivity(intent);
     }
 
@@ -616,7 +625,7 @@ public class App extends Application implements DefaultLifecycleObserver {
         intent.setDataAndType(fyleAndStatus.getContentUriForExternalSharing(), fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         if (getContext().getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
-            // if the mime type is not openable, try to fallback to the default mime type from extension
+            // if the mime type is not openable, try to fall back to the default mime type from extension
             String extension = StringUtils2.Companion.getExtensionFromFilename(fyleAndStatus.fyleMessageJoinWithStatus.fileName);
             String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
             if (type != null) {
@@ -936,7 +945,7 @@ public class App extends Application implements DefaultLifecycleObserver {
 
     public static void openAppDialogBackupRequiresSignIn() {
         if (System.currentTimeMillis() > backupRequireSignInCooldown) {
-            backupRequireSignInCooldown = System.currentTimeMillis() + 3_600_000L; // add a 1 hour cooldown between dialogs
+            backupRequireSignInCooldown = System.currentTimeMillis() + 3_600_000L; // add a 1-hour cooldown between dialogs
             showDialog(null, AppDialogShowActivity.DIALOG_BACKUP_REQUIRES_SIGN_IN, new HashMap<>());
         }
     }
@@ -1148,6 +1157,7 @@ public class App extends Application implements DefaultLifecycleObserver {
                 Logger.e("Error parsing MDM pushed settings configuration");
                 e.printStackTrace();
             }
+            SettingsActivity.clearPINIfBypassAllowed();
 
 
             ///////////////////////
@@ -1190,7 +1200,7 @@ public class App extends Application implements DefaultLifecycleObserver {
             // check if there are any sharing message in db, and ask LocationSharing service to handle them if needed
             ///////////////////////
             int count = AppDatabase.getInstance().messageDao().countOutboundSharingLocationMessages();
-            if (count > 0) {
+            if (count > 0 || SettingsActivity.getGpsAlwaysOn()) {
                 try {
                     UnifiedForegroundService.LocationSharingSubService.syncSharingMessages();
                 } catch (Exception ignored) {

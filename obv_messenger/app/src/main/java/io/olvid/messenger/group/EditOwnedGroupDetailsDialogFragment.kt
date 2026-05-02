@@ -51,7 +51,7 @@ class EditOwnedGroupDetailsDialogFragment : DialogFragment() {
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.window?.let { window ->
             window.requestFeature(Window.FEATURE_NO_TITLE)
-            if (SettingsActivity.preventScreenCapture()) {
+            if (SettingsActivity.preventScreenCapture(context)) {
                 window.setFlags(LayoutParams.FLAG_SECURE, LayoutParams.FLAG_SECURE)
             }
             window.setSoftInputMode(LayoutParams.SOFT_INPUT_ADJUST_RESIZE)

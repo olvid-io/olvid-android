@@ -55,7 +55,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -69,7 +68,7 @@ import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
-import io.olvid.messenger.customClasses.formatMarkdown
+import io.olvid.messenger.customClasses.formatMarkdownToAnnotatedString
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.designsystem.theme.OlvidTypography
@@ -364,7 +363,7 @@ fun NavGraphBuilder.sourceConfirmation(
                             style = OlvidTypography.body2.copy(
                                 color = colorResource(R.color.greyTint)
                             ),
-                            text = AnnotatedString(stringResource(R.string.explanation_transfer_restriction_authentication_needed)).formatMarkdown()
+                            text = stringResource(R.string.explanation_transfer_restriction_authentication_needed).formatMarkdownToAnnotatedString()
                         )
                     }
                 }

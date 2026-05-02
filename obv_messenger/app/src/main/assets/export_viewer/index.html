@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olvid Export Viewer</title>
+    <link rel="stylesheet" href="viewer.css">
+</head>
+<body>
+    <!-- Landing / File Picker -->
+    <div id="landing">
+        <div class="landing-card">
+            <h1>Olvid Export Viewer</h1>
+            <p>Select your <b>discussions_and_messages.json</b> file to view your chat history locally.</p>
+            <input type="file" id="file-input" accept=".json" style="display: none;">
+            <label for="file-input" class="btn-primary">Browse JSON File</label>
+            <p style="margin-top: 20px; font-size: 13px;">Or drag and drop the file here</p>
+        </div>
+    </div>
+
+    <!-- App UI -->
+    <div id="app-container" class="hidden">
+        <div class="sidebar">
+            <div class="sidebar-header"><h1>Olvid Export</h1></div>
+            <div class="discussion-list" id="list"></div>
+        </div>
+        <div class="main-chat" id="main">
+            <div class="empty-chat"><h3>Select a discussion to start</h3></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

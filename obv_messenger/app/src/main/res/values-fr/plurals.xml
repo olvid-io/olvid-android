@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <plurals name="label_files_count" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">%1$d fichier</item>
+        <item quantity="other">%1$d fichiers</item>
+    </plurals>
     <plurals name="text_files" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Fichier</item>
         <item quantity="other">%1$d fichiers</item>
@@ -266,5 +270,9 @@
     <plurals name="subscription_offer_month_free" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d mois offert</item>
         <item quantity="other">%1$d mois offerts</item>
+    </plurals>
+    <plurals name="toast_message_messages_copied_to_clipboard" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d message copié dans le presse-papier</item>
+        <item quantity="other">%1$d messages copiés dans le presse-papier</item>
     </plurals>
 </resources>

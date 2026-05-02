@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Chi tiết liên hệ</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Chi tiết người dùng</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Chi tiết nhóm</string>
@@ -258,7 +258,6 @@
 	<string name="text_you" state="needs_review" hash="672009142">Bạn</string>
 	<string name="title_invite_chooser" state="needs_review" hash="1726572772">Chọn cách gửi lời mời của bạn</string>
 	<string name="title_sharing_chooser" state="needs_review" hash="291715689">Chọn phương thức chia sẻ</string>
-	<string name="toast_message_android_bug_attach_duplicate_uri" state="needs_review" hash="-776215584">Một số tệp không thể đính kèm vào tin nhắn do lỗi trong phiên bản Android của bạn (nhiều tệp trả về cùng một URI). Vui lòng thử lại để đính kèm các tệp bị thiếu.</string>
 	<string name="toast_message_attachment_being_copied" state="needs_review" hash="-978855599">Tệp đính kèm vẫn đang được xử lý. Tin nhắn của bạn sẽ được gửi khi quá trình xử lý hoàn tất.</string>
 	<string name="toast_message_attachment_saved" state="needs_review" hash="-2073631581">Tệp đính kèm đã được lưu</string>
 	<string name="toast_message_camera_permission_denied" state="needs_review" hash="1896719877">Quyền truy cập camera đã bị từ chối</string>
@@ -344,6 +343,9 @@
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">Khi được kích hoạt, Olvid sẽ lấy bản xem trước của các liên kết bạn gửi và đính kèm nó vào tin nhắn.</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">Tải bản xem trước của các liên kết đã nhận</string>
 	<string name="pref_link_preview_summary_inbound" state="needs_review" hash="-320325429">Khi được kích hoạt, Olvid sẽ tự động tải bản xem trước của các liên kết bạn nhận được (nếu bản xem trước không được đính kèm trong tin nhắn).</string>
+	<string name="link_preview_menu_copy_link" state="needs_review" hash="1269903076">Sao chép liên kết</string>
+	<string name="link_preview_menu_open_in_browser" state="needs_review" hash="-1711141559">Mở trong trình duyệt</string>
+	<string name="link_preview_menu_open_image" state="needs_review" hash="-2013483894">Xem ảnh</string>
 	<string name="pref_discussion_read_receipt_title" state="needs_review" hash="-652307837">Xác nhận đã đọc</string>
 	<string name="pref_text_app_default" state="needs_review" hash="1920567018">Sử dụng cài đặt mặc định của bạn</string>
 	<string name="pref_text_app_default_true" state="needs_review" hash="-948780646">Sử dụng cài đặt mặc định của bạn (bật)</string>
@@ -352,6 +354,10 @@
 	<string name="pref_text_discussion_read_receipt_on" state="needs_review" hash="983295321">Đã bật, danh bạ của bạn sẽ được thông báo</string>
 	<string name="pref_use_lock_screen_title" state="needs_review" hash="540058239">Sử dụng màn hình khóa ứng dụng</string>
 	<string name="pref_use_lock_screen_summary" state="needs_review" hash="-399095273">Bật tùy chọn này để bảo vệ Olvid bằng màn hình khóa khi khởi động.</string>
+	<string name="pref_lock_screen_required_by_mdm" state="needs_review" hash="-500219406">Yêu cầu từ tổ chức của bạn</string>
+	<string name="lock_screen_setup_title" state="needs_review" hash="932203184">Yêu cầu bật khóa màn hình</string>
+	<string name="lock_screen_setup_explanation" state="needs_review" hash="169071212">Tổ chức của bạn yêu cầu bạn phải bảo vệ ứng dụng này bằng mã PIN hoặc mật khẩu trên màn hình khóa.</string>
+	<string name="lock_screen_setup_button" state="needs_review" hash="672169315">Thiết lập mã PIN</string>
 	<string name="pref_category_notifications_title" state="needs_review" hash="1237583104">Thông báo</string>
 	<string name="pref_category_privacy_title" state="needs_review" hash="-1750659871">Quyền riêng tư</string>
 	<string name="pref_category_other_title" state="needs_review" hash="-1683901612">Cài đặt khác</string>
@@ -370,7 +376,7 @@
 	<string name="button_label_use_pin" state="needs_review" hash="918492771">Sử dụng PIN thay vì mật khẩu</string>
 	<string name="hint_enter_pin" state="needs_review" hash="999437557">Nhập PIN</string>
 	<string name="hint_confirm_pin" state="needs_review" hash="1780268503">Xác nhận PIN</string>
-	<string name="text_pin_creation_explanation" state="needs_review" hash="-1935715126">Bạn sẽ cần nhập mã PIN này để mở khóa Olvid.\nKhông thể khôi phục và bạn có thể mất quyền truy cập vào dữ liệu Olvid nếu bạn quên nó.</string>
+	<string name="text_pin_creation_explanation" state="needs_review" hash="1232246926">Bạn sẽ cần nhập mã PIN này để mở khóa Olvid.\nKhông thể khôi phục mã này và **bạn có thể mất quyền truy cập vào dữ liệu Olvid nếu bạn quên nó**.</string>
 	<string name="error_text_pin_too_short" state="needs_review" hash="-1085309478">PIN quá ngắn (ít nhất 4 chữ số)</string>
 	<string name="error_text_pin_mismatch" state="needs_review" hash="-4525766">PIN không khớp</string>
 	<string name="hint_enter_password" state="needs_review" hash="478503341">Nhập mật khẩu</string>
@@ -394,6 +400,7 @@
 	<string name="pref_text_lock_grace_time_infinity" state="needs_review" hash="146086108">Khóa Olvid thủ công</string>
 	<string name="pref_unlock_biometry_summary_none_enrolled" state="needs_review" hash="-118589413">Xác thực sinh trắc học chưa được cấu hình trên thiết bị của bạn.</string>
 	<string name="dialog_title_unlock_olvid" state="needs_review" hash="-2054572246">Mở khóa Olvid bằng sinh trắc học</string>
+	<string name="dialog_title_unlock_neutral" state="needs_review" hash="761644522">Mở khóa bằng phương pháp sinh trắc học</string>
 	<string name="notification_channel_unified_service_name" state="needs_review" hash="1404446256">Dịch vụ nền trước</string>
 	<string name="notification_channel_unified_service_description" state="needs_review" hash="-1204081836">Thông báo cố định hiển thị trạng thái của Olvid</string>
 	<string name="notification_title_olvid_is_unlocked" state="needs_review" hash="1688502744">Olvid đã mở khóa</string>
@@ -437,6 +444,7 @@
 	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">Hồ sơ của bạn đã bị vô hiệu hóa trên thiết bị này.\n\nCó vẻ như bạn hiện không có thiết bị nào đang hoạt động, vì vậy bạn có thể kích hoạt lại hồ sơ của mình bất cứ khi nào bạn muốn.\n\nNếu bạn muốn tiếp tục, hãy nhấn \"kích hoạt lại hồ sơ của tôi trên thiết bị này\" bên dưới.\n\nNhấn \"hủy\" để đóng hộp thoại này và giữ cho thiết bị này không hoạt động: bạn sẽ không thể gửi hoặc nhận tin nhắn trên thiết bị này, nhưng vẫn có thể duyệt qua các cuộc thảo luận cũ của mình.</string>
 	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">Hồ sơ của bạn đã bị vô hiệu hóa trên thiết bị này.\n\nCó vẻ như bạn không có giấy phép sử dụng Olvid trên nhiều thiết bị cùng một lúc. Việc kích hoạt lại thiết bị này yêu cầu bạn phải vô hiệu hóa một thiết bị khác của mình.\n\nNếu bạn muốn tiếp tục, hãy chọn thiết bị bạn muốn vô hiệu hóa từ danh sách bên dưới, sau đó nhấn \"kích hoạt lại hồ sơ của tôi trên thiết bị này\".\n\nNhấn \"hủy\" để đóng hộp thoại này và giữ cho thiết bị này không hoạt động: bạn sẽ không thể gửi hoặc nhận tin nhắn trên thiết bị này, nhưng bạn vẫn có thể duyệt qua các cuộc thảo luận cũ của mình.</string>
 	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">Hồ sơ của bạn đã bị vô hiệu hóa trên thiết bị này.\n\nCó vẻ như tất cả các thiết bị khác của bạn cũng sẽ bị vô hiệu hóa trong tương lai gần, vì vậy bạn có thể kích hoạt lại hồ sơ của mình trên thiết bị này bất cứ khi nào bạn muốn. Danh sách các thiết bị hiện đang hoạt động của bạn được hiển thị bên dưới.\n\nNếu bạn muốn tiếp tục, hãy nhấn \"kích hoạt lại hồ sơ của tôi trên thiết bị này\" bên dưới.\n\nNhấn \"hủy\" để đóng hộp thoại này và giữ cho thiết bị này không hoạt động: bạn sẽ không thể gửi hoặc nhận tin nhắn trên thiết bị này, nhưng vẫn có thể duyệt qua các cuộc thảo luận cũ của mình.</string>
+	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">Hồ sơ của bạn đã bị tắt trên thiết bị này.\n\nBạn sẽ không thể gửi hoặc nhận tin nhắn ở đây cho đến khi bạn kích hoạt lại nó.</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">Kích hoạt lại hồ sơ của tôi trên thiết bị này</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">Đã xảy ra lỗi. Vui lòng thử lại.</string>
 	<string name="dialog_title_identity_activated" state="needs_review" hash="-1465666248">ID Olvid đã được kích hoạt lại</string>
@@ -810,10 +818,7 @@
 	<string name="toast_message_voice_message_recording_failed" state="needs_review" hash="-632817078">Không thể ghi âm tin nhắn thoại</string>
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Trình phát đa phương tiện</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Điều khiển phát/tạm dừng khi phát nội dung đa phương tiện trong Olvid</string>
-	<string name="notification_title_now_playing" state="needs_review" hash="-1042122929">Đang phát…</string>
-	<string name="notification_action_pause" state="needs_review" hash="1931883968">Tạm dừng</string>
-	<string name="notification_action_play" state="needs_review" hash="1143766922">Phát</string>
-	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="-1049639416">Không thể phát %1$s</string>
+	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Không thể phát tệp âm thanh</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Xóa</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Xóa ở mọi nơi</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Không thể xóa trên tất cả các thiết bị. Vui lòng thử lại.</string>
@@ -843,7 +848,6 @@
 	<string name="dialog_message_unmute_notifications" state="needs_review" hash="816867976">Thông báo tin nhắn mới hiện đang bị tắt tiếng.\n\nBạn có muốn bật lại chúng không?</string>
 	<string name="dialog_message_unmute_notifications_muted_until" state="needs_review" hash="-325454266">Thông báo tin nhắn mới sẽ bị tắt tiếng cho đến: %1$s.\n\nBạn có muốn mở âm thanh lại không?</string>
 	<string name="notification_action_mute" state="needs_review" hash="-1553988068">Tắt tiếng</string>
-	<string name="pref_scaled_turn_title" state="needs_review" hash="-1234636269">Chọn các máy chủ TURN khu vực để sử dụng</string>
 	<string name="explanation_identity_creation_options" state="needs_review" hash="-795537312">Màn hình này cho phép bạn chọn các tùy chọn bổ sung để tạo Olvid ID của mình. Bạn có thể nhập các tùy chọn này theo cách thủ công hoặc quét mã QR cấu hình.</string>
 	<string name="button_label_check_options" state="needs_review" hash="-759177128">Kiểm tra tùy chọn</string>
 	<string name="hint_olvid_server" state="needs_review" hash="1097391633">Máy chủ Olvid</string>
@@ -859,6 +863,8 @@
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Có vẻ như máy chủ Olvid của bạn không hỗ trợ khởi tạo cuộc gọi bảo mật.\nVui lòng liên hệ với quản trị viên của bạn để biết thêm chi tiết.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Tùy chọn tạo ID</string>
 	<string name="text_option_server" state="needs_review" hash="-1130676431">Máy chủ: %1$s</string>
+	<string name="dialog_title_non_default_server" state="needs_review" hash="2119192219">Sử dụng máy chủ tùy chỉnh</string>
+	<string name="dialog_message_non_default_server" state="needs_review" hash="459308900">Bạn sắp tạo một hồ sơ trên máy chủ sau:\n\n%1$s\n\nĐây không phải là máy chủ Olvid mặc định. Chỉ tiếp tục nếu bạn tin tưởng máy chủ này.</string>
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Giấy phép: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Nhà cung cấp danh tính</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Máy chủ cung cấp danh tính</string>
@@ -1202,8 +1208,6 @@
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Kết nối: ĐÃ KẾT NỐI</string>
 	<string name="label_ping_delay" state="needs_review" hash="25344924">Ping: %1$dms</string>
 	<string name="label_over_max_ping_delay" state="needs_review" hash="-684190262">Ping: &gt;%1$ds</string>
-	<string name="menu_action_copy_message_text" state="needs_review" hash="1799737962">Sao chép văn bản tin nhắn</string>
-	<string name="menu_action_copy_text_and_attachments" state="needs_review" hash="428315032">Sao chép tin nhắn và tệp đính kèm</string>
 	<string name="label_message_copied_from_olvid" state="needs_review" hash="1145396410">Tin nhắn đã được sao chép từ Olvid</string>
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">Đã sao chép toàn bộ tin nhắn vào khay nhớ tạm</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">Phím tắt để gửi một tin nhắn được xác định trước đến một liên hệ hoặc nhóm chỉ với một cú nhấp chuột</string>
@@ -1403,7 +1407,6 @@
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Sao chép của</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Đã gửi vị trí</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Đã nhận vị trí</string>
-	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">Dịch vụ định vị không khả dụng</string>
 	<string name="label_send_your_location" state="needs_review" hash="618026241">Gửi vị trí của bạn</string>
 	<string name="notification_title_sharing_location" state="needs_review" hash="-1626101904">Chia sẻ vị trí trên Olvid</string>
 	<string name="notification_action_stop_sharing" state="needs_review" hash="585626699">Dừng chia sẻ</string>
@@ -1532,6 +1535,8 @@
 	<string name="text_setting_lock_biometry" state="needs_review" hash="-1698353580">‣ Mở khóa bằng sinh trắc học:</string>
 	<string name="text_setting_lock_notification" state="needs_review" hash="2022286622">‣ Thông báo khóa màn hình vĩnh viễn:</string>
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">‣ Xóa các tin nhắn nhạy cảm sau 3 lần nhập PIN sai:</string>
+	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">‣ Yêu cầu khóa màn hình:</string>
+	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">‣ Đặt lại mã PIN khóa màn hình:</string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">‣ Tự động tải xuống các tệp đính kèm của cuộc trò chuyện đã lưu trữ:</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">‣ Mở lại cuộc trò chuyện khi nhận thông báo tin nhắn mới:</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">‣ Xem trước liên kết đã nhận:</string>
@@ -1594,8 +1599,8 @@
 	<string name="label_open_original_link_with_trackers" state="needs_review" hash="-1586932660">Sử dụng liên kết gốc chứa các tham số theo dõi</string>
 	<string name="dialog_title_confirm_open_olvid_link" state="needs_review" hash="425949498">Bạn có muốn mở liên kết này trong Olvid không?</string>
 	<string name="toast_message_unable_to_open_url" state="needs_review" hash="-1486954792">Không thể mở URL</string>
-	<string name="text_explanation_location_map_provider" state="needs_review" hash="-173394547">Việc chọn nhà cung cấp bản đồ cho phép bạn chọn chính xác vị trí bạn muốn chia sẻ trên bản đồ. Tuy nhiên, điều này có thể tiết lộ vị trí của bạn (hoặc vị trí của những người liên hệ của bạn) cho nhà cung cấp dịch vụ này.</string>
-	<string name="text_explanation_location_map_provider_settings" state="needs_review" hash="68421420">Bạn có thể thay đổi tùy chọn này trong cài đặt ứng dụng.</string>
+	<string name="dialog_title_choose_map_provider" state="needs_review" hash="1225681568">Chọn một nhà cung cấp bản đồ</string>
+	<string name="dialog_message_choose_map_provider" state="needs_review" hash="-2129640593">Chọn một nhà cung cấp bản đồ bên dưới để hiển thị bản đồ khi xem hoặc chia sẻ vị trí.\n\nXin lưu ý rằng điều này có thể **tiết lộ vị trí của bạn (hoặc vị trí của danh bạ của bạn) cho nhà cung cấp dịch vụ này**.</string>
 	<string name="button_label_choose_provider" state="needs_review" hash="-797956886">Chọn nhà cung cấp</string>
 	<string name="button_label_live_share" state="needs_review" hash="327122881">Chia sẻ trực tiếp</string>
 	<string name="label_fetching_address" state="needs_review" hash="-839353954">Đang lấy địa chỉ…</string>
@@ -1804,7 +1809,9 @@
 	<string name="dialog_title_custom_address_server_url" state="needs_review" hash="-2071925830">Máy chủ địa chỉ tùy chỉnh</string>
 	<string name="hint_custom_address_server_url" state="needs_review" hash="1348105685">URL máy chủ tra cứu địa chỉ</string>
 	<string name="dialog_message_custom_address_server_url" state="needs_review" hash="401731382">Olvid chỉ hỗ trợ các máy chủ **Pelias** để tra cứu địa chỉ. Vui lòng nhập URL của máy chủ bạn muốn truy vấn bên dưới, nó phải có dạng *https://pelias.olvid.io*, và các truy vấn sẽ được gửi đến điểm truy cập */v1/reverse*.\n\nXin lưu ý rằng máy chủ này có thể học một số thông tin về vị trí của bạn. Hãy chắc chắn **sử dụng một máy chủ mà bạn tin tưởng**.</string>
-	<string name="toast_message_playback_speed_not_supported_on_device" state="needs_review" hash="502764942">Không thể thay đổi tốc độ phát</string>
+	<string name="pref_location_gps_debug_title" state="needs_review" hash="1786532100">Bật các tính năng gỡ lỗi cho việc chia sẻ vị trí</string>
+	<string name="pref_location_gps_always_on_title" state="needs_review" hash="1250376384">Luôn bật GPS</string>
+	<string name="pref_location_export_gps_logs_title" state="needs_review" hash="-459831250">Xuất nhật ký hoạt động GPS</string>
 	<string name="text_speed_1x" state="needs_review" hash="789822816">×1</string>
 	<string name="text_speed_1_5x" state="needs_review" hash="-120181054">1,5×</string>
 	<string name="text_speed_2x" state="needs_review" hash="1171767872">2×</string>
@@ -2145,15 +2152,11 @@
 	<string name="history_transfer_step_none" state="needs_review" hash="1228580785">Không có chuyển tiếp nào đang diễn ra</string>
 	<string name="history_transfer_step_contacting_other_device" state="needs_review" hash="1719019815">Đang chờ thiết bị khác</string>
 	<string name="history_transfer_step_connecting" state="needs_review" hash="1836039168">Đang kết nối đến thiết bị khác</string>
-	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">Đang thương lượng (bước 1 trong 3)</string>
-	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Đang chuyển các tin nhắn (bước 2 trong 3)</string>
-	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Đang chuyển các tệp đính kèm (bước 3 trong 3)</string>
-	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Đàm phán</string>
-	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Đang chuyển tin nhắn</string>
-	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Đang chuyển các tệp đính kèm</string>
+	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Đàm phán</string>
+	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Đang chuyển</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Quá trình truyền đã hoàn tất</string>
-	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Quá trình truyền bị gián đoạn</string>
-	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Chuyển lịch sử trò chuyện (phiên bản thử nghiệm)</string>
+	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Truyền tải thất bại</string>
+	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Chuyển lịch sử trò chuyện</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Không thể bắt đầu quá trình truyền. Có thể một quá trình truyền khác đã đang chạy?</string>
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Sử dụng \"liên kết ma thuật\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Liên kết ma thuật không hợp lệ</string>
@@ -2166,18 +2169,111 @@
 	<string name="onboarding_transfer_keycloak_error_message_authentication_impossible" state="needs_review" hash="-1891385979">Không có phương thức xác thực nào được hỗ trợ.</string>
 	<string name="pref_use_alt_turn_servers_title" state="needs_review" hash="-1956132776">Sử dụng các máy chủ TURN khác</string>
 	<string name="pref_use_alt_turn_servers_summary" state="needs_review" hash="357427162">Bật tùy chọn này để sử dụng các máy chủ TURN với địa chỉ IP thay đổi. Nếu bạn không chắc chắn, hãy tắt tùy chọn này 😁</string>
-	<string name="button_label_transfer_through_webrtc" state="needs_review" hash="-1809138918">Truyền qua mạng cục bộ</string>
-	<string name="button_label_export_zip" state="needs_review" hash="1575043364">Xuất ZIP</string>
-	<string name="button_label_import_zip" state="needs_review" hash="1299665090">Nhập tệp ZIP</string>
-	<string name="dialog_title_transfer_choose_target_device" state="needs_review" hash="218115750">Chọn thiết bị đích để chuyển dữ liệu.</string>
-	<string name="transfer_label_no_other_active_device" state="needs_review" hash="-2135899221">Không có thiết bị nào khác đang hoạt động</string>
-	<string name="transfer_label_messages" state="needs_review" hash="-1639407912">Tin nhắn</string>
-	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Thông lượng</string>
-	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Số còn lại</string>
-	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Tệp đính kèm</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Tính năng này vẫn đang trong giai đoạn thử nghiệm beta và phiên bản hiện tại có thể không tương thích với phiên bản cuối cùng của tính năng chuyển dữ liệu lịch sử của Olvid.\n\nTrước khi sử dụng tính năng này, hãy đảm bảo rằng các thiết bị của bạn đang chạy phiên bản Olvid mới nhất.</string>
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Hủy bỏ quá trình truyền dữ liệu đang diễn ra?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Hiện tại đang diễn ra quá trình chuyển dữ liệu lịch sử. Bạn có muốn hủy bỏ không?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Hủy bỏ quá trình truyền</string>
 	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Đang chờ để tham gia cuộc trò chuyện này</string>
+	<string name="label_your_other_device" state="needs_review" hash="-339632056">Thiết bị khác của bạn</string>
+	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">muốn chuyển lịch sử trò chuyện của bạn sang thiết bị này</string>
+	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">“%1$s” muốn chuyển lịch sử trò chuyện của bạn sang thiết bị này.</string>
+	<string name="button_label_start_transfer" state="needs_review" hash="208526116">Bắt đầu chuyển</string>
+	<string name="pref_disable_secondary_notifications_title" state="needs_review" hash="29372078">Tắt thông báo \"thứ cấp\"</string>
+	<string name="pref_disable_secondary_notifications_summary" state="needs_review" hash="-402927980">Cài đặt này tắt thông báo cho các phản hồi về tin nhắn của bạn hoặc các phản hồi mới về các cuộc thăm dò ý kiến của bạn.</string>
+	<string name="template_copy_multiple_messages" state="needs_review" hash="-1584473750">[%1$s] [%2$s]:\n[%3$s]</string>
+	<string name="label_export_your_chat_history" state="needs_review" hash="30036193">Xuất lịch sử trò chuyện của bạn</string>
+	<string name="label_import_your_chat_history" state="needs_review" hash="-1058286401">Nhập lịch sử trò chuyện của bạn</string>
+	<string name="explanation_export_your_chat_history" state="needs_review" hash="2042738985">Sử dụng tùy chọn này nếu bạn muốn chuyển lịch sử trò chuyện **từ** thiết bị này.</string>
+	<string name="explanation_import_your_chat_history" state="needs_review" hash="366204152">Sử dụng tùy chọn này nếu bạn muốn chuyển lịch sử trò chuyện của mình **sang** thiết bị này.</string>
+	<string name="explanation_history_transfer" state="needs_review" hash="983501865">Tính năng này cho phép bạn **chuyển giao an toàn** lịch sử trò chuyện giữa hai thiết bị của bạn.\n\nTrước khi bắt đầu, hồ sơ của bạn cần **có mặt trên cả hai thiết bị này**.</string>
+	<string name="button_label_import" state="needs_review" hash="-984720905">Nhập</string>
+	<string name="history_transfer_pick_profile_title" state="needs_review" hash="-1782334343">Bạn muốn tiếp tục với hồ sơ nào?</string>
+	<string name="history_transfer_pick_profile_text_import" state="needs_review" hash="-1162713377">Vui lòng chọn hồ sơ mà bạn muốn **nhập lịch sử trò chuyện** của mình.</string>
+	<string name="history_transfer_pick_profile_text_export" state="needs_review" hash="951522414">Vui lòng chọn hồ sơ từ đó bạn muốn **xuất lịch sử trò chuyện** của mình.</string>
+	<string name="history_transfer_pick_method_title" state="needs_review" hash="661094742">Bạn muốn làm gì?</string>
+	<string name="history_transfer_pick_method_text_import" state="needs_review" hash="1116376527">Vui lòng chọn cách bạn muốn nhập lịch sử trò chuyện của hồ sơ **%1$s** của mình.</string>
+	<string name="history_transfer_pick_method_text_export" state="needs_review" hash="1750125743">Vui lòng chọn cách bạn muốn xuất lịch sử trò chuyện của hồ sơ **%1$s** của mình.</string>
+	<string name="history_transfer_via_wifi_title" state="needs_review" hash="-2016953028">Truyền qua Wi-Fi</string>
+	<string name="history_transfer_via_wifi_message" state="needs_review" hash="-758708700">Chỉ cần kết nối cả hai thiết bị của bạn với cùng một mạng Wi-Fi.</string>
+	<string name="history_transfer_via_zip_title_import" state="needs_review" hash="1608302669">Nhập tệp .zip</string>
+	<string name="history_transfer_via_zip_title_export" state="needs_review" hash="-1924849877">Xuất tệp .zip</string>
+	<string name="history_transfer_via_zip_message_import" state="needs_review" hash="1766231761">Chọn tệp .zip mà bạn đã sao chép từ thiết bị cũ của mình.</string>
+	<string name="history_transfer_via_zip_message_export" state="needs_review" hash="-1123951975">Tải xuống tệp .zip và sao chép vào thiết bị mới của bạn.</string>
+	<string name="history_transfer_import_zip_description" state="needs_review" hash="855194374">Để nhập lịch sử trò chuyện của bạn, vui lòng chọn tệp .zip mà bạn đã **xuất từ thiết bị khác**.\n\nĐảm bảo rằng hồ sơ **%1$s** bạn đã chọn khớp với hồ sơ được sử dụng để tạo tệp .zip này.</string>
+	<string name="button_label_choose_zip_file" state="needs_review" hash="-493688169">Chọn một tệp .zip</string>
+	<string name="dialog_title_error_reading_zip" state="needs_review" hash="1059408985">Lỗi khi đọc tệp .zip</string>
+	<string name="dialog_message_error_reading_zip" state="needs_review" hash="1864744526">Đã xảy ra lỗi khi đọc tệp .zip đã cung cấp.\n\nVui lòng đảm bảo rằng bạn đã chọn tệp xuất lịch sử trò chuyện Olvid.</string>
+	<string name="dialog_title_error_zip_password" state="needs_review" hash="1651240086">Mật khẩu không đúng</string>
+	<string name="dialog_message_error_zip_password" state="needs_review" hash="216311562">Mật khẩu bạn cung cấp không cho phép giải mã tệp .zip đã chọn.\nVui lòng thử lại.</string>
+	<string name="dialog_title_zip_password_required" state="needs_review" hash="-944166479">Yêu cầu mật khẩu</string>
+	<string name="dialog_message_zip_password_required" state="needs_review" hash="548842041">Tệp .zip đã chọn được bảo vệ bằng mật khẩu. Vui lòng nhập mật khẩu bạn đã chọn khi xuất lịch sử trò chuyện trên thiết bị khác.</string>
+	<string name="history_transfer_export_scope_title_export" state="needs_review" hash="933575859">Bạn muốn xuất gì?</string>
+	<string name="history_transfer_export_scope_title_transfer" state="needs_review" hash="-1971421411">Bạn muốn chuyển gì?</string>
+	<string name="history_transfer_scope_messages_export_title" state="needs_review" hash="-1810394953">Chỉ xuất tin nhắn</string>
+	<string name="history_transfer_scope_messages_transfer_title" state="needs_review" hash="1119624141">Chỉ chuyển các tin nhắn</string>
+	<string name="history_transfer_scope_messages_export_message" state="needs_review" hash="-2120867312">Xuất bản nhỏ hơn. Chỉ bao gồm tin nhắn văn bản.</string>
+	<string name="history_transfer_scope_messages_transfer_message" state="needs_review" hash="2071005834">Truyền dữ liệu nhanh hơn. Chỉ bao gồm các tin nhắn văn bản.</string>
+	<string name="history_transfer_scope_everything_export_title" state="needs_review" hash="463008259">Xuất tin nhắn và tệp đính kèm</string>
+	<string name="history_transfer_scope_everything_transfer_title" state="needs_review" hash="-175297433">Chuyển các tin nhắn và tệp đính kèm</string>
+	<string name="history_transfer_scope_everything_export_message" state="needs_review" hash="-266277978">Đã hoàn tất xuất dữ liệu. Bao gồm tất cả tin nhắn và tệp đính kèm.</string>
+	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Đã hoàn tất quá trình chuyển. Bao gồm tất cả tin nhắn và tệp đính kèm.</string>
+	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Xuất lịch sử trò chuyện của bạn dưới dạng tệp .zip. Sau đó, bạn có thể nhập nó vào một thiết bị khác trong hồ sơ của mình **%1$s**.\n\nBạn cũng có thể giải nén tệp này để **hiển thị lịch sử trò chuyện trên một trang web**.</string>
+	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Tạo tệp .zip</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d cuộc thảo luận và %2$d tin nhắn</string>
+	<string name="label_computing" state="needs_review" hash="1393495921">Đang tính toán…</string>
+	<string name="label_total_size" state="needs_review" hash="-788411929">Tổng kích thước: %1$s</string>
+	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Bảo vệ dữ liệu đã xuất của bạn</string>
+	<string name="dialog_message_protect_export" state="needs_review" hash="-900141026">Để đảm bảo an toàn cho bạn, chúng tôi khuyên bạn nên bảo vệ dữ liệu đã xuất bằng mật khẩu.</string>
+	<string name="button_label_generate_password" state="needs_review" hash="-1174237913">Tạo mật khẩu</string>
+	<string name="button_label_choose_password" state="needs_review" hash="-1893200284">Chọn mật khẩu</string>
+	<string name="button_label_continue_without_password" state="needs_review" hash="-106870576">Tiếp tục không cần mật khẩu</string>
+	<string name="dialog_title_choose_password" state="needs_review" hash="1927816439">Chọn mật khẩu</string>
+	<string name="dialog_title_generated_password" state="needs_review" hash="-690449371">Mật khẩu đã được tạo</string>
+	<string name="dialog_message_generated_password" state="needs_review" hash="1100314355">Mật khẩu bên dưới được tạo ngẫu nhiên.\n\nĐảm bảo **ghi lại mật khẩu trước khi tiếp tục**.</string>
+	<string name="button_label_copy_to_clipboard" state="needs_review" hash="-1309214553">Sao chép vào khay nhớ tạm</string>
+	<string name="history_transfer_pick_target_device_title" state="needs_review" hash="1659408512">Chọn một thiết bị</string>
+	<string name="history_transfer_pick_target_device_text" state="needs_review" hash="-1456199559">Vui lòng chọn thiết bị mà bạn muốn chuyển lịch sử trò chuyện từ thiết bị hiện tại.\n\nKhông tìm thấy thiết bị bạn đang tìm kiếm? Vui lòng đảm bảo rằng hồ sơ **%1$s** của bạn đang **hoạt động trên thiết bị kia**.</string>
+	<string name="history_transfer_no_other_device_explanation" state="needs_review" hash="-1034788616">Có vẻ như hồ sơ **%1$s** của bạn không có thiết bị nào khác đang hoạt động.\n\nVui lòng **thêm thiết bị mới của bạn vào hồ sơ này** trước khi tiếp tục chuyển lịch sử trò chuyện.\n\nBạn cũng có thể **xuất một tệp .zip** để nhập vào thiết bị mới sau này.</string>
+	<string name="history_transfer_webrtc_instructions_title" state="needs_review" hash="-1353013738">Làm theo các hướng dẫn này trên thiết bị khác của bạn</string>
+	<string name="history_transfer_instructions_turn_on_other_import" state="needs_review" hash="-930696177">Bật thiết bị chứa lịch sử trò chuyện của bạn.</string>
+	<string name="history_transfer_instructions_same_wifi_import" state="needs_review" hash="465388607">Đảm bảo cả hai thiết bị của bạn đều được kết nối với cùng một mạng Wi-Fi.</string>
+	<string name="history_transfer_instructions_start_export" state="needs_review" hash="-1288439668">Trên thiết bị khác của bạn, hãy mở cài đặt của Olvid và bắt đầu quá trình xuất lịch sử trò chuyện.</string>
+	<string name="history_transfer_instructions_turn_on_other_export" state="needs_review" hash="1280642155">Bật **%1$s** của bạn.</string>
+	<string name="history_transfer_instructions_same_wifi_export" state="needs_review" hash="284833986">Đảm bảo rằng thiết bị này và **%1$s** của bạn được kết nối với cùng một mạng Wi-Fi.</string>
+	<string name="history_transfer_step_awaiting_confirmation" state="needs_review" hash="665601714">Đang chờ bạn xác nhận việc chuyển</string>
+	<string name="dialog_title_abort_history_transfer" state="needs_review" hash="1914158733">Ngắt quá trình truyền dữ liệu đang diễn ra?</string>
+	<string name="dialog_title_abort_history_transfer_export" state="needs_review" hash="-856542741">Hủy bỏ quá trình xuất hiện tại?</string>
+	<string name="dialog_title_abort_history_transfer_import" state="needs_review" hash="976007540">Hủy bỏ quá trình nhập hiện tại?</string>
+	<string name="dialog_message_abort_history_transfer_webrtc" state="needs_review" hash="1807742093">Bạn có chắc muốn dừng quá trình chuyển lịch sử trò chuyện đang diễn ra không?\n\nBạn luôn có thể bắt đầu lại quá trình chuyển sau nếu muốn. **Mọi thứ đã được chuyển sẽ được giữ lại** và không cần chuyển lại.</string>
+	<string name="dialog_message_abort_history_transfer_zip_export" state="needs_review" hash="716134255">Bạn có chắc muốn hủy bỏ quá trình xuất tệp .zip đang thực hiện không?\n\nViệc này sẽ để lại **một tệp .zip không đầy đủ trên thiết bị của bạn** và bạn sẽ cần phải **xóa thủ công**.</string>
+	<string name="dialog_message_abort_history_transfer_zip_import" state="needs_review" hash="1264487097">Bạn có chắc muốn hủy bỏ quá trình nhập tệp .zip đang diễn ra không?\n\nBạn luôn có thể khởi động lại quá trình nhập sau này nếu muốn. **Tất cả dữ liệu đã nhập trước đó sẽ được giữ lại** và không cần phải nhập lại.</string>
+	<string name="button_label_interrupt_and_continue_later" state="needs_review" hash="-976034947">Tạm dừng và tiếp tục sau</string>
+	<string name="button_label_abort_export" state="needs_review" hash="428199797">Hủy bỏ quá trình xuất</string>
+	<string name="button_label_abort_import" state="needs_review" hash="2031103191">Hủy bỏ quá trình nhập</string>
+	<string name="history_transfer_fail_reason_aborted" state="needs_review" hash="277351522">Quá trình truyền đã bị gián đoạn</string>
+	<string name="history_transfer_fail_reason_unknown" state="needs_review" hash="-1170630200">Đã xảy ra lỗi không xác định (có thể là do kết nối mạng bị gián đoạn)</string>
+	<string name="history_transfer_fail_reason_identity_mismatch" state="needs_review" hash="936267267">Tệp .zip này đã được xuất từ một cấu hình khác.</string>
+	<string name="history_transfer_fail_reason_wrong_passwrod" state="needs_review" hash="1847441965">Mật khẩu không đúng</string>
+	<string name="history_transfer_fail_reason_invalid_zip" state="needs_review" hash="-691417686">Không thể đọc tệp .zip (có phải đây thực sự là tệp xuất lịch sử trò chuyện của Olvid không?)</string>
+	<string name="transfer_label_sending_messages" state="needs_review" hash="2018039973">Đang gửi tin nhắn</string>
+	<string name="transfer_label_exporting_messages" state="needs_review" hash="1572454408">Xuất tin nhắn</string>
+	<string name="transfer_label_importing_messages" state="needs_review" hash="1913024934">Nhập tin nhắn</string>
+	<string name="transfer_label_receiving_messages" state="needs_review" hash="2015919003">Nhận tin nhắn</string>
+	<string name="transfer_label_sending_attachments" state="needs_review" hash="2102571371">Đang gửi tệp đính kèm</string>
+	<string name="transfer_label_exporting_attachments" state="needs_review" hash="-1029839434">Xuất tệp đính kèm</string>
+	<string name="transfer_label_importing_attachments" state="needs_review" hash="1078186262">Nhập tệp đính kèm</string>
+	<string name="transfer_label_receiving_attachments" state="needs_review" hash="439049517">Nhận tệp đính kèm</string>
+	<string name="label_remaining_and_throughput" state="needs_review" hash="1772610397">Khoảng %1$s còn lại (%2$s)</string>
+	<string name="history_transfer_step_connecting_export" state="needs_review" hash="-28311439">Đang tạo tệp .zip</string>
+	<string name="history_transfer_step_connecting_import" state="needs_review" hash="1323447620">Mở tệp .zip</string>
+	<string name="history_transfer_step_failed_export" state="needs_review" hash="185890904">Xuất không thành công</string>
+	<string name="history_transfer_step_finished_export" state="needs_review" hash="1156914922">Xuất hoàn tất</string>
+	<string name="history_transfer_step_failed_import" state="needs_review" hash="-909085512">Nhập không thành công</string>
+	<string name="history_transfer_step_finished_import" state="needs_review" hash="-653312310">Nhập đã hoàn tất</string>
+	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">Đang xuất</string>
+	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Đang nhập</string>
+	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Phân tích nội dung</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Phân tích các cuộc trò chuyện đã xuất</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Đã xảy ra lỗi khi tải tệp kiểu OpenStreetMap.</string>
+	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Không khả dụng tính năng đăng ký trong ứng dụng</string>
+	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Phiên bản Olvid bạn đã cài đặt không bao gồm thư viện thanh toán của Google và không hỗ trợ mua hàng trong ứng dụng.\n\nĐể biết thêm thông tin, vui lòng liên hệ với chúng tôi theo địa chỉ **feedback@olvid.io**.</string>
 </resources>

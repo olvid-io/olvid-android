@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 	<string name="activity_title_contact_details" state="needs_review" hash="119340068">Detalji kontakta</string>
 	<string name="activity_title_user_details" state="needs_review" hash="769208060">Detalji korisnika</string>
 	<string name="activity_title_group_details" state="needs_review" hash="-212072671">Detalji grupe</string>
@@ -258,7 +258,6 @@
 	<string name="text_you" state="needs_review" hash="672009142">Ti</string>
 	<string name="title_invite_chooser" state="needs_review" hash="1726572772">Odaberite kako želite poslati svoju pozivnicu</string>
 	<string name="title_sharing_chooser" state="needs_review" hash="291715689">Odaberite način dijeljenja</string>
-	<string name="toast_message_android_bug_attach_duplicate_uri" state="needs_review" hash="-776215584">Neki se datotečni privici nisu mogli priložiti poruci zbog pogreške u vašoj verziji Androida (više datoteka je vratilo istu URI adresu). Pokušajte ponovno priložiti nedostajuće datoteke.</string>
 	<string name="toast_message_attachment_being_copied" state="needs_review" hash="-978855599">Prilog se još obrađuje. Vaša poruka će biti poslana kada se obrada završi.</string>
 	<string name="toast_message_attachment_saved" state="needs_review" hash="-2073631581">Priloženi fajl je spremljen</string>
 	<string name="toast_message_camera_permission_denied" state="needs_review" hash="1896719877">Dozvola za korištenje kamere je odbijena</string>
@@ -344,6 +343,9 @@
 	<string name="pref_link_preview_summary_outbound" state="needs_review" hash="759185205">Nakon aktivacije, Olvid će dohvaćati pregled poveznica koje šaljete i priložiti ga uz poruku.</string>
 	<string name="pref_link_preview_inbound_title" state="needs_review" hash="1165732154">Dohvati pregled primljenih poveznica</string>
 	<string name="pref_link_preview_summary_inbound" state="needs_review" hash="-320325429">Nakon aktivacije, Olvid će automatski dohvaćati pregled poveznica koje primite (ako pregled nije priložen poruci).</string>
+	<string name="link_preview_menu_copy_link" state="needs_review" hash="1269903076">Kopiraj poveznicu</string>
+	<string name="link_preview_menu_open_in_browser" state="needs_review" hash="-1711141559">Otvorite u pregledniku</string>
+	<string name="link_preview_menu_open_image" state="needs_review" hash="-2013483894">Prikaži sliku</string>
 	<string name="pref_discussion_read_receipt_title" state="needs_review" hash="-652307837">Potvrde o čitanju</string>
 	<string name="pref_text_app_default" state="needs_review" hash="1920567018">Koristite zadanu postavku</string>
 	<string name="pref_text_app_default_true" state="needs_review" hash="-948780646">Koristite zadanu postavku (uključeno)</string>
@@ -352,6 +354,10 @@
 	<string name="pref_text_discussion_read_receipt_on" state="needs_review" hash="983295321">Uključeno, vaši kontakti su obaviješteni</string>
 	<string name="pref_use_lock_screen_title" state="needs_review" hash="540058239">Koristite zaključani zaslon aplikacije</string>
 	<string name="pref_use_lock_screen_summary" state="needs_review" hash="-399095273">Uključite ovo za zaštitu Olvida zaslonom za zaključavanje pri pokretanju.</string>
+	<string name="pref_lock_screen_required_by_mdm" state="needs_review" hash="-500219406">Zahtijeva vaša organizacija</string>
+	<string name="lock_screen_setup_title" state="needs_review" hash="932203184">Zahtijeva se zaključani zaslon</string>
+	<string name="lock_screen_setup_explanation" state="needs_review" hash="169071212">Vaša organizacija zahtijeva da zaštitite ovu aplikaciju PIN-om ili lozinkom za zaključavanje zaslona.</string>
+	<string name="lock_screen_setup_button" state="needs_review" hash="672169315">Postavi PIN</string>
 	<string name="pref_category_notifications_title" state="needs_review" hash="1237583104">Obavijesti</string>
 	<string name="pref_category_privacy_title" state="needs_review" hash="-1750659871">Privatnost</string>
 	<string name="pref_category_other_title" state="needs_review" hash="-1683901612">Ostale postavke</string>
@@ -370,7 +376,7 @@
 	<string name="button_label_use_pin" state="needs_review" hash="918492771">Koristite PIN umjesto lozinke</string>
 	<string name="hint_enter_pin" state="needs_review" hash="999437557">Unesite PIN</string>
 	<string name="hint_confirm_pin" state="needs_review" hash="1780268503">Potvrdi PIN</string>
-	<string name="text_pin_creation_explanation" state="needs_review" hash="-1935715126">Morat ćete unijeti ovaj PIN za otključavanje Olvida.\nNe može se oporaviti i možete izgubiti pristup svojim Olvid podacima ako ga zaboravite.</string>
+	<string name="text_pin_creation_explanation" state="needs_review" hash="1232246926">Morat ćete unijeti ovaj PIN za otključavanje Olvida.\nNe može se oporaviti, i **ako ga zaboravite, možete izgubiti pristup svojim Olvid podacima**.</string>
 	<string name="error_text_pin_too_short" state="needs_review" hash="-1085309478">PIN je prekratak (minimalno 4 znamenke)</string>
 	<string name="error_text_pin_mismatch" state="needs_review" hash="-4525766">PIN nije odgovarao</string>
 	<string name="hint_enter_password" state="needs_review" hash="478503341">Unesite lozinku</string>
@@ -394,6 +400,7 @@
 	<string name="pref_text_lock_grace_time_infinity" state="needs_review" hash="146086108">Ručno zaključavanje Olvida</string>
 	<string name="pref_unlock_biometry_summary_none_enrolled" state="needs_review" hash="-118589413">Biometrijska autentifikacija još nije konfigurirana na vašem uređaju.</string>
 	<string name="dialog_title_unlock_olvid" state="needs_review" hash="-2054572246">Otključajte Olvid biometrijom</string>
+	<string name="dialog_title_unlock_neutral" state="needs_review" hash="761644522">Otključajte pomoću biometrijskih podataka</string>
 	<string name="notification_channel_unified_service_name" state="needs_review" hash="1404446256">Servis u prvom planu</string>
 	<string name="notification_channel_unified_service_description" state="needs_review" hash="-1204081836">Stalna obavijest koja prikazuje status Olvida</string>
 	<string name="notification_title_olvid_is_unlocked" state="needs_review" hash="1688502744">Olvid je otključan</string>
@@ -437,6 +444,7 @@
 	<string name="dialog_message_identity_deactivated_no_device" state="needs_review" hash="1487588318">Vaš profil je deaktiviran na ovom uređaju.\n\nČini se da trenutno nemate aktivnih uređaja, pa možete ponovno aktivirati svoj profil kad god želite.\n\nAko želite nastaviti, pritisnite \"ponovno aktiviraj moj profil na ovom uređaju\" u nastavku.\n\nPritisnite \"poništi\" da zatvorite ovaj dijalog i ostavite ovaj uređaj neaktivan: nećete moći slati ili primati poruke na ovom uređaju, ali ćete i dalje moći pregledavati svoje stare rasprave.</string>
 	<string name="dialog_message_identity_deactivated_choose_device" state="needs_review" hash="1063561957">Vaš profil je deaktiviran na ovom uređaju.\n\nČini se da nemate licencu za korištenje Olvida na više uređaja istovremeno. Ponovna aktivacija ovog uređaja zahtijeva deaktivaciju drugog vašeg uređaja.\n\nAko želite nastaviti, odaberite uređaj koji želite deaktivirati iz popisa ispod, a zatim pritisnite \"ponovo aktiviraj moj profil na ovom uređaju\".\n\nPritisnite \"otkaži\" da biste zatvorili ovaj dijalog i ostavili ovaj uređaj neaktivan: nećete moći slati ili primati poruke na ovom uređaju, ali ćete i dalje moći pregledavati svoje stare rasprave.</string>
 	<string name="dialog_message_identity_deactivated_only_expiring" state="needs_review" hash="1765337997">Vaš profil je deaktiviran na ovom uređaju.\n\nČini se da će svi vaši ostali uređaji biti deaktivirani u skoroj budućnosti, pa možete ponovno aktivirati svoj profil na ovom uređaju kad god želite. Ispod je popis vaših trenutno aktivnih uređaja.\n\nAko želite nastaviti, pritisnite \"ponovno aktiviraj moj profil na ovom uređaju\" u nastavku.\n\nPritisnite \"otkaži\" da biste zatvorili ovaj dijalog i ostavili ovaj uređaj neaktivan: nećete moći slati ili primati poruke na ovom uređaju, ali ćete i dalje moći pregledavati svoje stare rasprave.</string>
+	<string name="tip_identity_deactivated_message" state="needs_review" hash="386122101">Vaš je profil deaktiviran na ovom uređaju.\n\nNećete moći slati ili primati poruke ovdje dok ga ne reaktivirate.</string>
 	<string name="button_label_reactivate_identity" state="needs_review" hash="357646769">Ponovno aktiviraj moj profil na ovom uređaju</string>
 	<string name="toast_message_error_retry" state="needs_review" hash="-527001243">Dogodila se pogreška. Molimo pokušajte ponovno.</string>
 	<string name="dialog_title_identity_activated" state="needs_review" hash="-1465666248">Olvid ID je ponovno aktiviran</string>
@@ -810,10 +818,7 @@
 	<string name="toast_message_voice_message_recording_failed" state="needs_review" hash="-632817078">Nije uspjelo snimanje glasovne poruke</string>
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Medijski player</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Kontrole za reprodukciju/pauzu prilikom reprodukcije medija u Olvid</string>
-	<string name="notification_title_now_playing" state="needs_review" hash="-1042122929">Sada se reproducira…</string>
-	<string name="notification_action_pause" state="needs_review" hash="1931883968">Pauza</string>
-	<string name="notification_action_play" state="needs_review" hash="1143766922">Reproducir</string>
-	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="-1049639416">Nije moguće reproducirati %1$s</string>
+	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Nije moguće reproducirati audio datoteku</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Izbriši</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Izbriši svugdje</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Nije moguće izbrisati sa svih uređaja. Molimo pokušajte ponovno.</string>
@@ -843,7 +848,6 @@
 	<string name="dialog_message_unmute_notifications" state="needs_review" hash="816867976">Obavijesti o novim porukama su trenutno isključene.\n\nŽelite li ih ponovno uključiti?</string>
 	<string name="dialog_message_unmute_notifications_muted_until" state="needs_review" hash="-325454266">Obavijesti o novim porukama su isključene do: %1$s.\n\nŽelite li ih ponovno uključiti?</string>
 	<string name="notification_action_mute" state="needs_review" hash="-1553988068">Isključi zvuk</string>
-	<string name="pref_scaled_turn_title" state="needs_review" hash="-1234636269">Odaberite regionalne TURN poslužitelje za korištenje</string>
 	<string name="explanation_identity_creation_options" state="needs_review" hash="-795537312">Ovaj zaslon vam omogućuje odabir dodatnih opcija za stvaranje vašeg Olvid ID-a. Možete unijeti opcije ručno ili skenirati QR kod konfiguracije.</string>
 	<string name="button_label_check_options" state="needs_review" hash="-759177128">Provjeri opcije</string>
 	<string name="hint_olvid_server" state="needs_review" hash="1097391633">Olvid poslužitelj</string>
@@ -859,6 +863,8 @@
 	<string name="dialog_message_call_initiation_not_supported" state="needs_review" hash="1760333819">Čini se da vaš Olvid poslužitelj ne podržava pokretanje sigurnih poziva.\n\nMolimo, kontaktirajte svog administratora za više informacija.</string>
 	<string name="label_identity_creation_options" state="needs_review" hash="1180456032">Opcije za stvaranje ID-a</string>
 	<string name="text_option_server" state="needs_review" hash="-1130676431">Poslužitelj: %1$s</string>
+	<string name="dialog_title_non_default_server" state="needs_review" hash="2119192219">Korištenje prilagođenog poslužitelja</string>
+	<string name="dialog_message_non_default_server" state="needs_review" hash="459308900">Uskoro ćete kreirati profil na sljedećem poslužitelju:\n\n%1$s\n\nOvo nije zadani Olvid poslužitelj. Nastavite samo ako vjerujete ovom poslužitelju.</string>
 	<string name="text_option_license_code" state="needs_review" hash="1222068504">Licenca: %1$s</string>
 	<string name="activity_title_identity_provider" state="needs_review" hash="-673587096">Davatelj identiteta</string>
 	<string name="hint_identity_provider_server" state="needs_review" hash="-1537402976">Poslužitelj pružatelja identiteta</string>
@@ -1202,8 +1208,6 @@
 	<string name="label_ping_connectivity_connected" state="needs_review" hash="1069284374">Povezanost: POVEZANO</string>
 	<string name="label_ping_delay" state="needs_review" hash="25344924">Ping: %1$dms</string>
 	<string name="label_over_max_ping_delay" state="needs_review" hash="-684190262">Ping: &gt;%1$ds</string>
-	<string name="menu_action_copy_message_text" state="needs_review" hash="1799737962">Kopiraj tekst poruke</string>
-	<string name="menu_action_copy_text_and_attachments" state="needs_review" hash="428315032">Kopiraj poruku i priloge</string>
 	<string name="label_message_copied_from_olvid" state="needs_review" hash="1145396410">Poruka kopirana iz Olvida</string>
 	<string name="toast_message_complete_message_copied_to_clipboard" state="needs_review" hash="2071969749">Cijela poruka kopirana je u međuspremnik</string>
 	<string name="widget_action_shortcut_description" state="needs_review" hash="554287393">Prečnica za slanje unaprijed definiranih poruka kontaktu ili grupi jednim klikom</string>
@@ -1403,7 +1407,6 @@
 	<string name="text_copy_of_prefix" state="needs_review" hash="1742775139">Kopija od</string>
 	<string name="text_message_location_sent" state="needs_review" hash="457397663">Lokacija je poslana</string>
 	<string name="text_message_location_received" state="needs_review" hash="-594593319">Lokacija primljena</string>
-	<string name="toast_message_location_services_unavailable" state="needs_review" hash="1313434940">Usluga određivanja lokacije nije dostupna</string>
 	<string name="label_send_your_location" state="needs_review" hash="618026241">Pošaljite svoju lokaciju</string>
 	<string name="notification_title_sharing_location" state="needs_review" hash="-1626101904">Dijeljenje lokacije u Olvidu</string>
 	<string name="notification_action_stop_sharing" state="needs_review" hash="585626699">Prekini dijeljenje</string>
@@ -1532,6 +1535,8 @@
 	<string name="text_setting_lock_biometry" state="needs_review" hash="-1698353580">‣ Otključavanje pomoću biometrije:</string>
 	<string name="text_setting_lock_notification" state="needs_review" hash="2022286622">‣ Trajna obavijest na zaključanom zaslonu:</string>
 	<string name="text_setting_lock_wipe_on_fail" state="needs_review" hash="658363602">‣ Izbriši osjetljive poruke nakon 3 neispravna PIN-a: </string>
+	<string name="text_setting_lock_required" state="needs_review" hash="-2070676943">‣ Zahtijeva zaključani zaslon:</string>
+	<string name="text_setting_lock_allow_bypass" state="needs_review" hash="1235721652">‣ Resetiraj token zaključanog zaslona:</string>
 	<string name="text_setting_auto_download_archived" state="needs_review" hash="799227996">‣ Automatsko preuzimanje priloga arhiviranih razgovora:</string>
 	<string name="text_setting_unarchive_on_notification" state="needs_review" hash="871807380">‣ Ponovno arhiviranje rasprave na obavijest o novoj poruci:</string>
 	<string name="text_setting_link_preview_inbound" state="needs_review" hash="1879206490">‣ Primljen pregled poveznice: </string>
@@ -1594,8 +1599,8 @@
 	<string name="label_open_original_link_with_trackers" state="needs_review" hash="-1586932660">Koristite izvorni link koji sadrži parametre praćenja</string>
 	<string name="dialog_title_confirm_open_olvid_link" state="needs_review" hash="425949498">Želite li otvoriti ovu poveznicu u Olvidu?</string>
 	<string name="toast_message_unable_to_open_url" state="needs_review" hash="-1486954792">Nije moguće otvoriti URL</string>
-	<string name="text_explanation_location_map_provider" state="needs_review" hash="-173394547">Odabir davatelja karata omogućuje vam da precizno odaberete lokaciju koju želite podijeliti na karti. Međutim, to može otkriti vašu lokaciju (ili lokaciju vaših kontakata) ovom pružatelju usluga.</string>
-	<string name="text_explanation_location_map_provider_settings" state="needs_review" hash="68421420">Ovu postavku možete promijeniti u postavkama aplikacije.</string>
+	<string name="dialog_title_choose_map_provider" state="needs_review" hash="1225681568">Odaberite pružatelja karata</string>
+	<string name="dialog_message_choose_map_provider" state="needs_review" hash="-2129640593">Odaberite pružatelja karata u nastavku kako biste prikazali kartu prilikom pregleda ili dijeljenja lokacije.\n\nImajte na umu da ovo može **otkriti vašu lokaciju (ili lokaciju vaših kontakata) ovom pružatelju usluge**.</string>
 	<string name="button_label_choose_provider" state="needs_review" hash="-797956886">Odaberite pružatelja usluge</string>
 	<string name="button_label_live_share" state="needs_review" hash="327122881">Izravno dijeljenje</string>
 	<string name="label_fetching_address" state="needs_review" hash="-839353954">Dohvaćanje adrese…</string>
@@ -1804,7 +1809,9 @@
 	<string name="dialog_title_custom_address_server_url" state="needs_review" hash="-2071925830">Prilagođeni poslužitelj adresa</string>
 	<string name="hint_custom_address_server_url" state="needs_review" hash="1348105685">URL poslužitelja za pretraživanje adresa</string>
 	<string name="dialog_message_custom_address_server_url" state="needs_review" hash="401731382">Olvid podržava samo **Pelias** poslužitelje za pretraživanje adresa. Molimo vas da u polje ispod unesete URL poslužitelja koji želite koristiti, trebao bi biti sličan *https://pelias.olvid.io*, a upiti će biti poslani na ulaznu točku */v1/reverse*.\n\nImajte na umu da ovaj poslužitelj može učiti neke informacije o vašoj lokaciji. Obavezno **koristite poslužitelj kojem vjerujete**.</string>
-	<string name="toast_message_playback_speed_not_supported_on_device" state="needs_review" hash="502764942">Nije moguće promijeniti brzinu reprodukcije</string>
+	<string name="pref_location_gps_debug_title" state="needs_review" hash="1786532100">Omogući značajke za otklanjanje pogrešaka pri dijeljenju lokacije</string>
+	<string name="pref_location_gps_always_on_title" state="needs_review" hash="1250376384">Uvijek držite GPS uključenim</string>
+	<string name="pref_location_export_gps_logs_title" state="needs_review" hash="-459831250">Izvezi zapise aktivnosti GPS-a</string>
 	<string name="text_speed_1x" state="needs_review" hash="789822816">×1</string>
 	<string name="text_speed_1_5x" state="needs_review" hash="-120181054">1,5×</string>
 	<string name="text_speed_2x" state="needs_review" hash="1171767872">2×</string>
@@ -2145,15 +2152,11 @@
 	<string name="history_transfer_step_none" state="needs_review" hash="1228580785">Nema aktivnih prijenosa</string>
 	<string name="history_transfer_step_contacting_other_device" state="needs_review" hash="1719019815">Čekam drugi uređaj</string>
 	<string name="history_transfer_step_connecting" state="needs_review" hash="1836039168">Povezivanje s drugim uređajem</string>
-	<string name="history_transfer_step_negotiating" state="needs_review" hash="542829407">U tijeku (korak 1 od 3)</string>
-	<string name="history_transfer_step_transferring_messages" state="needs_review" hash="1906529976">Prenos poruka (korak 2 od 3)</string>
-	<string name="history_transfer_step_transferring_files" state="needs_review" hash="-49397632">Prenos priloga (korak 3 od 3)</string>
-	<string name="history_transfer_step_negotiating_short" state="needs_review" hash="2025825777">Pregovaranje</string>
-	<string name="history_transfer_step_transferring_messages_short" state="needs_review" hash="-1105685790">Prenos poruka</string>
-	<string name="history_transfer_step_transferring_files_short" state="needs_review" hash="-390125750">Prenos priloga</string>
+	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Pregovaranje</string>
+	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Prenosim</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Prijenos završen</string>
-	<string name="history_transfer_step_failed" state="needs_review" hash="-292738979">Prijenos prekinut</string>
-	<string name="pref_category_history_transfer_title" state="needs_review" hash="426525321">Prijenos povijesti chata (beta verzija)</string>
+	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Prijenos nije uspio</string>
+	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Prijenos povijesti chata</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Nije moguće započeti prijenos. Možda je već pokrenut neki drugi prijenos?</string>
 	<string name="button_label_use_magic_link" state="needs_review" hash="500618317">Koristite \"magičnu poveznicu\"</string>
 	<string name="toast_message_magic_link_failed" state="needs_review" hash="-2046183433">Neispravna magična poveznica</string>
@@ -2166,18 +2169,111 @@
 	<string name="onboarding_transfer_keycloak_error_message_authentication_impossible" state="needs_review" hash="-1891385979">Čini se da nijedna podržana metoda autentifikacije nije dostupna.</string>
 	<string name="pref_use_alt_turn_servers_title" state="needs_review" hash="-1956132776">Koristite alternativne TURN poslužitelje</string>
 	<string name="pref_use_alt_turn_servers_summary" state="needs_review" hash="357427162">Uključite ovu opciju kako biste koristili TURN poslužitelje s rotirajućim IP adresama. Ako niste sigurni, ostavite ovu opciju isključenom 😁</string>
-	<string name="button_label_transfer_through_webrtc" state="needs_review" hash="-1809138918">Prijenos putem lokalne mreže</string>
-	<string name="button_label_export_zip" state="needs_review" hash="1575043364">Izvezi kao ZIP</string>
-	<string name="button_label_import_zip" state="needs_review" hash="1299665090">Uvezi ZIP datoteku</string>
-	<string name="dialog_title_transfer_choose_target_device" state="needs_review" hash="218115750">Odaberite ciljni uređaj za ovaj prijenos</string>
-	<string name="transfer_label_no_other_active_device" state="needs_review" hash="-2135899221">Nema drugih aktivnih uređaja</string>
-	<string name="transfer_label_messages" state="needs_review" hash="-1639407912">Poruke</string>
-	<string name="transfer_label_throughput" state="needs_review" hash="-969920066">Propusnost</string>
-	<string name="transfer_label_remaining" state="needs_review" hash="-1186772259">Preostalo</string>
-	<string name="transfer_label_attachments" state="needs_review" hash="1171691562">Prilozi</string>
-	<string name="transfer_disclaimer_beta" state="needs_review" hash="-1992015383">Ova značajka je još uvijek u fazi beta testiranja i trenutna implementacija možda neće biti kompatibilna s konačnom implementacijom prijenosa povijesti Olvid-a.\n\nPrije korištenja ove značajke, provjerite jesu li na vašim uređajima instalirana najnovija izdanja Olvida.</string>
 	<string name="history_transfer_abort_dialog_title" state="needs_review" hash="-1257390112">Prekinuti trenutni prijenos?</string>
 	<string name="history_transfer_abort_dialog_message" state="needs_review" hash="-1759296671">Prijenos povijesti je trenutno u tijeku. Želite li ga prekinuti?</string>
 	<string name="button_label_abort_transfer" state="needs_review" hash="-520659986">Otkaži prijenos</string>
 	<string name="message_discussion_waiting_to_join" state="needs_review" hash="-1639833276">Čekam da se pridružim ovoj raspravi</string>
+	<string name="label_your_other_device" state="needs_review" hash="-339632056">Vaš drugi uređaj</string>
+	<string name="dialog_message_wants_to_transfer_history" state="needs_review" hash="-1902805890">želi prenijeti vašu povijest razgovora na ovaj uređaj</string>
+	<string name="notification_content_wants_to_transfer_history" state="needs_review" hash="968115404">\"%1$s\" želi prenijeti vašu povijest razgovora na ovaj uređaj</string>
+	<string name="button_label_start_transfer" state="needs_review" hash="208526116">Pokreni prijenos</string>
+	<string name="pref_disable_secondary_notifications_title" state="needs_review" hash="29372078">Isključite \"sekundarne\" obavijesti</string>
+	<string name="pref_disable_secondary_notifications_summary" state="needs_review" hash="-402927980">Ova postavka onemogućuje obavijesti o reakcijama na vaše poruke ili nove odgovore na vaše ankete.</string>
+	<string name="template_copy_multiple_messages" state="needs_review" hash="-1584473750">[%1$s] [%2$s]:\n[%3$s]</string>
+	<string name="label_export_your_chat_history" state="needs_review" hash="30036193">Izvezite povijest svojih razgovora</string>
+	<string name="label_import_your_chat_history" state="needs_review" hash="-1058286401">Uvezi povijest svojih razgovora</string>
+	<string name="explanation_export_your_chat_history" state="needs_review" hash="2042738985">Koristite ovu opciju ako prenosite svoju povijest razgovora **s** ovog uređaja.</string>
+	<string name="explanation_import_your_chat_history" state="needs_review" hash="366204152">Koristite ovu opciju ako prenosite svoju povijest razgovora **na** ovaj uređaj.</string>
+	<string name="explanation_history_transfer" state="needs_review" hash="983501865">Ova značajka vam omogućuje **sigurno prenošenje** vaše povijesti razgovora između dva vašeg uređaja.\n\nPrije nego što započnete, vaš profil mora **postojati na oba uređaja**.</string>
+	<string name="button_label_import" state="needs_review" hash="-984720905">Uvezi</string>
+	<string name="history_transfer_pick_profile_title" state="needs_review" hash="-1782334343">S kojim profilom želite nastaviti?</string>
+	<string name="history_transfer_pick_profile_text_import" state="needs_review" hash="-1162713377">Odaberite profil u koji želite **uvesti povijest svojih razgovora**.</string>
+	<string name="history_transfer_pick_profile_text_export" state="needs_review" hash="951522414">Odaberite profil iz kojeg želite **izvesti povijest svojih razgovora**.</string>
+	<string name="history_transfer_pick_method_title" state="needs_review" hash="661094742">Što želite učiniti?</string>
+	<string name="history_transfer_pick_method_text_import" state="needs_review" hash="1116376527">Odaberite kako želite uvesti povijest chata svog profila **%1$s**.</string>
+	<string name="history_transfer_pick_method_text_export" state="needs_review" hash="1750125743">Odaberite kako želite izvesti povijest chata vašeg profila **%1$s**.</string>
+	<string name="history_transfer_via_wifi_title" state="needs_review" hash="-2016953028">Prijenos putem Wi-Fi-ja</string>
+	<string name="history_transfer_via_wifi_message" state="needs_review" hash="-758708700">Jednostavno povežite oba uređaja na istu Wi-Fi mrežu.</string>
+	<string name="history_transfer_via_zip_title_import" state="needs_review" hash="1608302669">Uvezi .zip datoteku</string>
+	<string name="history_transfer_via_zip_title_export" state="needs_review" hash="-1924849877">Izvezite .zip datoteku</string>
+	<string name="history_transfer_via_zip_message_import" state="needs_review" hash="1766231761">Odaberite .zip datoteku koju ste kopirali sa svog starog uređaja.</string>
+	<string name="history_transfer_via_zip_message_export" state="needs_review" hash="-1123951975">Preuzmite .zip datoteku i kopirajte je na svoj novi uređaj.</string>
+	<string name="history_transfer_import_zip_description" state="needs_review" hash="855194374">Za uvoz povijesti vaših razgovora, odaberite .zip datoteku koju ste **izvezli s drugog uređaja**.\n\nProvjerite je li profil **%1$s** koji ste odabrali isti profil koji je korišten za generiranje ove .zip datoteke.</string>
+	<string name="button_label_choose_zip_file" state="needs_review" hash="-493688169">Odaberite .zip datoteku</string>
+	<string name="dialog_title_error_reading_zip" state="needs_review" hash="1059408985">Greška pri čitanju .zip datoteke</string>
+	<string name="dialog_message_error_reading_zip" state="needs_review" hash="1864744526">Došlo je do pogreške pri čitanju navedene .zip datoteke.\n\nProvjerite jeste li odabrali datoteku za izvoz povijesti chata Olvid.</string>
+	<string name="dialog_title_error_zip_password" state="needs_review" hash="1651240086">Netočna lozinka</string>
+	<string name="dialog_message_error_zip_password" state="needs_review" hash="216311562">Uneseni lozinka nije omogućila dešifriranje odabrane .zip datoteke.\n\nMolimo, pokušajte ponovno.</string>
+	<string name="dialog_title_zip_password_required" state="needs_review" hash="-944166479">Potrebna lozinka</string>
+	<string name="dialog_message_zip_password_required" state="needs_review" hash="548842041">Odabrana .zip datoteka je zaštićena lozinkom. Molimo, unesite lozinku koju ste odabrali prilikom izvoza povijesti vaših razgovora na drugom uređaju.</string>
+	<string name="history_transfer_export_scope_title_export" state="needs_review" hash="933575859">Što želite izvesti?</string>
+	<string name="history_transfer_export_scope_title_transfer" state="needs_review" hash="-1971421411">Što želite prenijeti?</string>
+	<string name="history_transfer_scope_messages_export_title" state="needs_review" hash="-1810394953">Izvoz samo poruka</string>
+	<string name="history_transfer_scope_messages_transfer_title" state="needs_review" hash="1119624141">Prenesi samo poruke</string>
+	<string name="history_transfer_scope_messages_export_message" state="needs_review" hash="-2120867312">Manji izvoz. Uključeni su samo tekstualni poruke.</string>
+	<string name="history_transfer_scope_messages_transfer_message" state="needs_review" hash="2071005834">Brži prijenos. Uključeni su samo tekstualni sadržaji poruka.</string>
+	<string name="history_transfer_scope_everything_export_title" state="needs_review" hash="463008259">Izvezi poruke i priloge</string>
+	<string name="history_transfer_scope_everything_transfer_title" state="needs_review" hash="-175297433">Prenesite poruke i priloge</string>
+	<string name="history_transfer_scope_everything_export_message" state="needs_review" hash="-266277978">Potpuni izvoz. Sadrži sve poruke i priloge.</string>
+	<string name="history_transfer_scope_everything_transfer_message" state="needs_review" hash="-817983568">Prijenos je završen. Sadrži sve poruke i priloge.</string>
+	<string name="history_transfer_export_zip_description" state="needs_review" hash="53726340">Izvezite povijest svojih razgovora u .zip datoteku. Kasnije je možete uvesti na drugi uređaj u svom profilu **%1$s**.\n\nTakođer možete raspakirati ovu datoteku kako biste **prikazali povijest svojih razgovora na web-stranici**.</string>
+	<string name="button_label_create_zip_file" state="needs_review" hash="-1602658834">Kreiraj .zip datoteku</string>
+	<string name="label_discussions_and_messages_count" state="needs_review" hash="1701435434">%1$d rasprava i %2$d poruka</string>
+	<string name="label_computing" state="needs_review" hash="1393495921">Izračunava se…</string>
+	<string name="label_total_size" state="needs_review" hash="-788411929">Ukupna veličina: %1$s</string>
+	<string name="dialog_title_protect_export" state="needs_review" hash="1071043068">Zaštitite svoj izvoz</string>
+	<string name="dialog_message_protect_export" state="needs_review" hash="-900141026">Radi vaše sigurnosti, preporučujemo da zaštitite svoj izvoz lozinkom.</string>
+	<string name="button_label_generate_password" state="needs_review" hash="-1174237913">Generiraj lozinku</string>
+	<string name="button_label_choose_password" state="needs_review" hash="-1893200284">Odaberite lozinku</string>
+	<string name="button_label_continue_without_password" state="needs_review" hash="-106870576">Nastavite bez lozinke</string>
+	<string name="dialog_title_choose_password" state="needs_review" hash="1927816439">Odaberite lozinku</string>
+	<string name="dialog_title_generated_password" state="needs_review" hash="-690449371">Generirana lozinka</string>
+	<string name="dialog_message_generated_password" state="needs_review" hash="1100314355">Lozinka u nastavku generirana je nasumično.\n\nObavezno je **zapišite prije nego nastavite**.</string>
+	<string name="button_label_copy_to_clipboard" state="needs_review" hash="-1309214553">Kopiraj u međuspremnik</string>
+	<string name="history_transfer_pick_target_device_title" state="needs_review" hash="1659408512">Odaberite uređaj</string>
+	<string name="history_transfer_pick_target_device_text" state="needs_review" hash="-1456199559">Odaberite uređaj na koji želite prenijeti povijest razgovora s trenutnog uređaja.\n\nNe možete pronaći uređaj koji tražite? Provjerite je li vaš profil **%1$s** aktivan na tom drugom uređaju.</string>
+	<string name="history_transfer_no_other_device_explanation" state="needs_review" hash="-1034788616">Čini se da vaš profil **%1$s** nema drugih aktivnih uređaja.\n\nMolimo, **dodajte novi uređaj ovom profilu** prije nastavka prijenosa povijesti vaših razgovora.\n\nTakođer možete **izvesti .zip datoteku** kako biste je kasnije mogli uvesti na novi uređaj.</string>
+	<string name="history_transfer_webrtc_instructions_title" state="needs_review" hash="-1353013738">Slijedite ove upute na vašem drugom uređaju</string>
+	<string name="history_transfer_instructions_turn_on_other_import" state="needs_review" hash="-930696177">Uključite uređaj koji sadrži vašu povijest razgovora.</string>
+	<string name="history_transfer_instructions_same_wifi_import" state="needs_review" hash="465388607">Provjerite jesu li oba vaša uređaja povezana na istu Wi-Fi mrežu.</string>
+	<string name="history_transfer_instructions_start_export" state="needs_review" hash="-1288439668">Na vašem drugom uređaju otvorite postavke aplikacije Olvid i započnite izvoz povijesti vaših razgovora.</string>
+	<string name="history_transfer_instructions_turn_on_other_export" state="needs_review" hash="1280642155">Uključite svoj **%1$s**.</string>
+	<string name="history_transfer_instructions_same_wifi_export" state="needs_review" hash="284833986">Provjerite je li ovaj uređaj i vaš **%1$s** povezan na istu Wi-Fi mrežu.</string>
+	<string name="history_transfer_step_awaiting_confirmation" state="needs_review" hash="665601714">Čekamo da prihvatite prijenos</string>
+	<string name="dialog_title_abort_history_transfer" state="needs_review" hash="1914158733">Prekidanje trenutnog prijenosa?</string>
+	<string name="dialog_title_abort_history_transfer_export" state="needs_review" hash="-856542741">Prekinuti trenutni izvoz?</string>
+	<string name="dialog_title_abort_history_transfer_import" state="needs_review" hash="976007540">Prekinuti trenutni uvoz?</string>
+	<string name="dialog_message_abort_history_transfer_webrtc" state="needs_review" hash="1807742093">Jeste li sigurni da želite prekinuti prijenos trenutne povijesti chata?\n\nUvijek možete ponovno pokrenuti prijenos kasnije ako želite. **Sve što je već preneseno bit će sačuvano** i neće biti potrebno ponovno prenositi.</string>
+	<string name="dialog_message_abort_history_transfer_zip_export" state="needs_review" hash="716134255">Jeste li sigurni da želite prekinuti izvoz .zip datoteke?\n\nTime će se na vašem uređaju ostaviti **nepotpun .zip fajl** koji ćete morati **ručno izbrisati**.</string>
+	<string name="dialog_message_abort_history_transfer_zip_import" state="needs_review" hash="1264487097">Jeste li sigurni da želite prekinuti trenutni uvoz .zip datoteke?\n\nUvijek možete ponovno pokrenuti uvoz kasnije ako želite. **Sve što je već uvezeno bit će sačuvano** i neće biti potrebno ponovno uvoziti.</string>
+	<string name="button_label_interrupt_and_continue_later" state="needs_review" hash="-976034947">Prekini i nastavi kasnije</string>
+	<string name="button_label_abort_export" state="needs_review" hash="428199797">Otkaži izvoz</string>
+	<string name="button_label_abort_import" state="needs_review" hash="2031103191">Otkaži uvoz</string>
+	<string name="history_transfer_fail_reason_aborted" state="needs_review" hash="277351522">Prijenos je prekinut</string>
+	<string name="history_transfer_fail_reason_unknown" state="needs_review" hash="-1170630200">Došlo do nepoznate pogreške (vjerojatno prekid mrežne veze)</string>
+	<string name="history_transfer_fail_reason_identity_mismatch" state="needs_review" hash="936267267">Ovaj .zip fajl je izvezen iz drugog profila</string>
+	<string name="history_transfer_fail_reason_wrong_passwrod" state="needs_review" hash="1847441965">Netočna lozinka</string>
+	<string name="history_transfer_fail_reason_invalid_zip" state="needs_review" hash="-691417686">Nije moguće učitati .zip datoteku (je li to doista izvoz povijesti chata Olvid?)</string>
+	<string name="transfer_label_sending_messages" state="needs_review" hash="2018039973">Slanje poruka</string>
+	<string name="transfer_label_exporting_messages" state="needs_review" hash="1572454408">Izvoz poruka</string>
+	<string name="transfer_label_importing_messages" state="needs_review" hash="1913024934">Uvoz poruka</string>
+	<string name="transfer_label_receiving_messages" state="needs_review" hash="2015919003">Primanje poruka</string>
+	<string name="transfer_label_sending_attachments" state="needs_review" hash="2102571371">Slanje priloga</string>
+	<string name="transfer_label_exporting_attachments" state="needs_review" hash="-1029839434">Izvoz priloga</string>
+	<string name="transfer_label_importing_attachments" state="needs_review" hash="1078186262">Uvoz privitaka</string>
+	<string name="transfer_label_receiving_attachments" state="needs_review" hash="439049517">Primanje priloga</string>
+	<string name="label_remaining_and_throughput" state="needs_review" hash="1772610397">Otprilike %1$s preostalo (%2$s)</string>
+	<string name="history_transfer_step_connecting_export" state="needs_review" hash="-28311439">Kreiranje .zip datoteke</string>
+	<string name="history_transfer_step_connecting_import" state="needs_review" hash="1323447620">Otvaranje .zip datoteke</string>
+	<string name="history_transfer_step_failed_export" state="needs_review" hash="185890904">Izvoz nije uspio</string>
+	<string name="history_transfer_step_finished_export" state="needs_review" hash="1156914922">Izvoz završen</string>
+	<string name="history_transfer_step_failed_import" state="needs_review" hash="-909085512">Uvoz nije uspio</string>
+	<string name="history_transfer_step_finished_import" state="needs_review" hash="-653312310">Uvoz završen</string>
+	<string name="history_transfer_step_transferring_export" state="needs_review" hash="-1469081391">Izvoz u tijeku</string>
+	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">U tijeku uvoz</string>
+	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analiziranje sadržaja</string>
+	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Analiziram izvezene razgovore</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Došlo je do pogreške prilikom učitavanja datoteke sa stilom OpenStreetMap-a</string>
+	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Pretplate unutar aplikacije nisu dostupne</string>
+	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Verzija aplikacije Olvid koju ste instalirali ne uključuje Googleovu biblioteku za naplatu i ne podržava kupnje unutar aplikacije.\n\nZa više informacija, obratite nam se na **feedback@olvid.io**.</string>
 </resources>

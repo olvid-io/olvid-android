@@ -329,6 +329,9 @@ public class ServerQueryOperation extends Operation {
                                 case DEVICE_MANAGEMENT_SET_NICKNAME_QUERY_ID:
                                 case DEVICE_MANAGEMENT_DEACTIVATE_DEVICE_QUERY_ID:
                                 case DEVICE_MANAGEMENT_SET_UNEXPIRING_DEVICE_QUERY_ID:
+                                    serverResponse = null;
+                                    finished = true;
+                                    return;
                                 case REGISTER_API_KEY_QUERY_ID:
                                 case TRANSFER_SOURCE_QUERY_ID:
                                 case TRANSFER_TARGET_QUERY_ID:
@@ -374,7 +377,7 @@ public class ServerQueryOperation extends Operation {
 
     @Override
     public void doCancel() {
-        // Nothings special to do on cancel
+        // Nothing special to do on cancel
     }
 }
 

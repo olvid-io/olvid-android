@@ -243,6 +243,7 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED, userInfo);
                 break;
             }
+            case DownloadAttachmentOperation.RFC_NOT_FOUND_ON_SERVER:
             case DownloadAttachmentOperation.RFC_INVALID_SIGNED_URL: {
                 waitForRefreshedUrls(ownedIdentity, messageUid, attachmentNumber, priorityCategory, initialPriority);
                 refreshInboxAttachmentSignedUrlDelegate.refreshInboxAttachmentSignedUrl(ownedIdentity, messageUid, attachmentNumber);
@@ -256,7 +257,6 @@ public class DownloadAttachmentCoordinator implements InboxAttachment.InboxAttac
                 notificationPostingDelegate.postNotification(DownloadNotifications.NOTIFICATION_ATTACHMENT_DOWNLOAD_WAS_PAUSED, userInfo);
                 break;
             }
-            case DownloadAttachmentOperation.RFC_NOT_YET_AVAILABLE_ON_SERVER:
             case DownloadAttachmentOperation.RFC_NETWORK_ERROR:
             default:
                 scheduleNewDownloadAttachmentOperationQueueing(ownedIdentity, messageUid, attachmentNumber, priorityCategory, initialPriority);

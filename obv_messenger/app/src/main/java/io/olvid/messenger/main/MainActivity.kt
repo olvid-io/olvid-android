@@ -100,16 +100,14 @@ import io.olvid.messenger.billing.SubscriptionRepository
 import io.olvid.messenger.customClasses.ConfigurationPojo
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog
-import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog.OnIntegrationSelectedListener
-import io.olvid.messenger.customClasses.LockableActivity
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.OpenHiddenProfileDialog
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.discussion.DiscussionActivity
-import io.olvid.messenger.discussion.DiscussionActivity.Companion.FULL_SCREEN_MAP_FRAGMENT_TAG
-import io.olvid.messenger.discussion.location.FullscreenMapDialogFragment
+import io.olvid.messenger.discussion.location.LocationActivity
 import io.olvid.messenger.fragments.dialog.CallContactDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment.OnOwnedIdentitySelectedListener
@@ -117,7 +115,6 @@ import io.olvid.messenger.history_transfer.HistoryTransferActivity
 import io.olvid.messenger.history_transfer.TransferNotificationService
 import io.olvid.messenger.history_transfer.TransferService
 import io.olvid.messenger.history_transfer.components.TransferNotification
-import io.olvid.messenger.history_transfer.types.TransferProgress
 import io.olvid.messenger.main.calls.CallLogFragment
 import io.olvid.messenger.main.contacts.ContactListFragment
 import io.olvid.messenger.main.discussions.DiscussionListFragment
@@ -276,7 +273,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                 }
                 AnimatedVisibility(
                     // visibility is the && otherwise when currentCallData becomes non-null,
-                    // cachedCallData is still null and the animation applies to a empty CallNotification
+                    // cachedCallData is still null and the animation applies to an empty CallNotification
                     visible = cachedCallData != null && CallNotificationManager.currentCallData != null
                 ) {
                     cachedCallData?.let {
@@ -293,37 +290,49 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
 
 
                 // ongoing history transfer notification
-                var cachedOngoingTransferVisibility: Boolean by remember { mutableStateOf(false) }
-                var cachedState: TransferProgress? by remember { mutableStateOf(null) }
-                TransferService.getTransferProgress()?.value?.let {
-                    cachedState = it
-                }
+                var cachedOngoingTransferId: String? by remember { mutableStateOf(null) }
                 LaunchedEffect(TransferService.transferInProgress.value) {
-                    if (TransferService.transferInProgress.value) {
-                        cachedOngoingTransferVisibility = true
-                    } else {
-                        delay(500)
-                        cachedOngoingTransferVisibility = false
+                    TransferService.transferInProgress.value?.also { transferId ->
+                        cachedOngoingTransferId = transferId
+                    } ?: run {
+                        try {
+                            delay(500)
+                        } finally {
+                            if (TransferService.transferInProgress.value == null) {
+                                cachedOngoingTransferId = null
+                            }
+                        }
                     }
                 }
+
                 AnimatedVisibility(
-                    visible = cachedOngoingTransferVisibility && cachedState != null
+                    visible = cachedOngoingTransferId != null
                 ) {
-                    cachedState?.let {
+                    val transferProgress = cachedOngoingTransferId?.let { TransferService.getTransferProgress(it)?.third }
+                    transferProgress?.let {
                         TransferNotification(
                             modifier = Modifier
                                 .padding(
                                     top = 8.dp,
                                     bottom = dimensionResource(R.dimen.tab_bar_size) + 12.dp
                                 ),
-                            transferProgress = it,
-                            onClick = {
-                                startActivity(Intent(this@MainActivity, HistoryTransferActivity::class.java).apply {
-                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                })
+                            transferProgress = it.value,
+                            onAcceptTransfer = {
+                                TransferService.acceptTransferRequest()
+                            },
+                            openTransferActivity = {
+                                startActivity(
+                                    Intent(
+                                        this@MainActivity,
+                                        HistoryTransferActivity::class.java
+                                    ).apply {
+                                        putExtra(HistoryTransferActivity.TRANSFER_ID_INTENT_EXTRA, cachedOngoingTransferId)
+                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    })
                             },
                             onAbort = {
                                 startService(Intent(this@MainActivity, TransferNotificationService::class.java).apply {
+                                    putExtra(TransferNotificationService.EXTRA_TRANSFER_ID, cachedOngoingTransferId)
                                     action = TransferNotificationService.ACTION_ABORT
                                 })
                             }
@@ -636,10 +645,10 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                             )
                             val dialogTitleResourceId: Int =
                                 if (configurationPojo.keycloak != null) {
-                                    // offer to chose a profile or create a new one for profile binding
+                                    // offer to choose a profile or create a new one for profile binding
                                     R.string.dialog_title_chose_profile_keycloak_configuration
                                 } else {
-                                    // offer to chose a profile or create a new one for license activation or configuration
+                                    // offer to choose a profile or create a new one for license activation or configuration
                                     R.string.dialog_title_chose_profile_configuration
                                 }
                             val ownedIdentitySelectionDialogFragment =
@@ -686,7 +695,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                             Logger.x(e)
                         }
                     } else if (ObvLinkActivity.INVITATION_PATTERN.matcher(uri).find()) {
-                        // offer to chose a profile
+                        // offer to choose a profile
                         val ownedIdentitySelectionDialogFragment =
                             OwnedIdentitySelectionDialogFragment.newInstance(
                                 this,
@@ -724,7 +733,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                             "ownedIdentitySelectionDialogFragment"
                         )
                     } else if (ObvLinkActivity.WEB_CLIENT_PATTERN.matcher(uri).find()) {
-                        // offer to chose a profile
+                        // offer to choose a profile
                         val ownedIdentitySelectionDialogFragment =
                             OwnedIdentitySelectionDialogFragment.newInstance(
                                 this,
@@ -946,8 +955,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                 when (SettingsActivity.locationIntegration) {
                     LocationIntegrationEnum.NONE -> LocationIntegrationSelectorDialog(
                         this,
-                        false,
-                        object : OnIntegrationSelectedListener {
+                        object : LocationIntegrationSelectorDialog.OnIntegrationSelectedListener {
                             override fun onIntegrationSelected(
                                 integration: LocationIntegrationEnum,
                                 customOsmServerUrl: String?
@@ -957,14 +965,12 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                                     customOsmServerUrl
                                 )
                                 if (integration == LocationIntegrationEnum.OSM || integration == LocationIntegrationEnum.MAPS || integration == LocationIntegrationEnum.BASIC || integration == LocationIntegrationEnum.CUSTOM_OSM) {
-                                    FullscreenMapDialogFragment.newInstance(
+                                    LocationActivity.start(
+                                        this@MainActivity,
                                         null,
                                         null,
                                         AppSingleton.getBytesCurrentIdentity(),
                                         SettingsActivity.locationIntegration
-                                    )?.show(
-                                        supportFragmentManager,
-                                        FULL_SCREEN_MAP_FRAGMENT_TAG
                                     )
                                 } else {
                                     invalidateOptionsMenu()
@@ -974,12 +980,13 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
 
                     LocationIntegrationEnum.OSM,
                     LocationIntegrationEnum.MAPS,
-                    LocationIntegrationEnum.CUSTOM_OSM -> FullscreenMapDialogFragment.newInstance(
+                    LocationIntegrationEnum.CUSTOM_OSM -> LocationActivity.start(
+                        this,
                         null,
                         null,
                         AppSingleton.getBytesCurrentIdentity(),
                         SettingsActivity.locationIntegration
-                    )?.show(supportFragmentManager, FULL_SCREEN_MAP_FRAGMENT_TAG)
+                    )
 
                     else -> Unit
                 }

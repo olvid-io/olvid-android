@@ -340,7 +340,6 @@ fun handleNormalMessage(
                     }
                 }
 
-                // TODO: why stop? We should be able to share/receive share from 2 devices in the same discussion
                 // if start sharing location message check this contact is not already sharing their location in this discussion
                 // if already sharing force end of previous sharing message
                 if (message.locationType == Message.LOCATION_TYPE_SHARE) {

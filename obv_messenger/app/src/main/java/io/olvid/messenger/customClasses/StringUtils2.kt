@@ -40,16 +40,16 @@ import androidx.core.text.util.LinkifyCompat
 import androidx.core.util.PatternsCompat
 import androidx.emoji2.text.EmojiCompat
 import androidx.emoji2.text.EmojiSpan
-import io.olvid.messenger.customClasses.StringUtils.isEmojiCodepoint
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
+import io.olvid.messenger.customClasses.StringUtils.isEmojiCodepoint
 import io.olvid.messenger.customClasses.StringUtils.unAccentPattern
+import io.olvid.messenger.customClasses.StringUtils2.Companion.normalize
 import java.text.Normalizer
 import java.util.BitSet
 import java.util.Locale
-import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 fun String.linkify(context: Context): AnnotatedString {
@@ -84,10 +84,10 @@ fun String.linkify(context: Context): AnnotatedString {
                             )
                     ),
                     linkInteractionListener = { annotation ->
-                        (annotation as? Url)?.let {
+                        (annotation as? Url)?.let { url ->
                             App.openLink(
                                 context,
-                                it.url.toUri()
+                                url.url.toUri()
                             )
                         }
                     }
@@ -103,8 +103,8 @@ fun String.linkify(context: Context): AnnotatedString {
 class StringUtils2 {
     companion object {
         fun getLink(s: String?): Pair<String, String?>? {
-            s?.let { _s ->
-                val source = SpannableString(_s)
+            s?.let { nonNullS ->
+                val source = SpannableString(nonNullS)
                 val urlSpan = source
                     .apply {
                         LinkifyCompat.addLinks(
@@ -119,10 +119,10 @@ class StringUtils2 {
                             null
                         )
                     }
-                    .getSpans(0, _s.length, URLSpan::class.java).firstOrNull()
+                    .getSpans(0, nonNullS.length, URLSpan::class.java).firstOrNull()
                 return urlSpan?.let {
                     Pair(
-                        _s.subSequence(source.getSpanStart(it), source.getSpanEnd(it)).toString(),
+                        nonNullS.subSequence(source.getSpanStart(it), source.getSpanEnd(it)).toString(),
                         it.url
                     )
                 }
@@ -139,18 +139,18 @@ class StringUtils2 {
         }
 
 
-        fun normalize(source: CharSequence?): String {
+        fun CharSequence.normalize(): String {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 UCharacter.toLowerCase(
                     unAccentPattern.matcher(
                         Normalizer.normalize(
-                            source,
+                            this,
                             Normalizer.Form.NFKD
                         )
                     ).replaceAll("")
                 )
             } else {
-                unAccentPattern.matcher(Normalizer.normalize(source, Normalizer.Form.NFKD))
+                unAccentPattern.matcher(Normalizer.normalize(this, Normalizer.Form.NFKD))
                     .replaceAll("").lowercase(Locale.getDefault())
             }
         }
@@ -159,7 +159,7 @@ class StringUtils2 {
             input: String,
             unaccentedRegexes: List<Regex>
         ): List<Pair<Int, Int>> {
-            val normalizedInput: String = normalize(input)
+            val normalizedInput: String = input.normalize()
             val positionMapping = PositionsMapping(input)
 
             val highlighted = BitSet(input.length)
@@ -257,11 +257,11 @@ data class PositionsMapping(val input: String) {
     }
 
     private fun compute() {
-        // Compute Diacritical Marks and ligature delta from normalisation
+        // Compute Diacritical Marks and ligature delta from normalization
         var cur = 0
         for (i in input.indices) {
             val ch = input.substring(i, i + 1)
-            val normalized = StringUtils2.normalize(ch)
+            val normalized = ch.normalize()
             // Compute the delta between a substring of length one input and its normalization
             val delta = ch.length - normalized.length
             if (delta != 0) {

@@ -100,7 +100,7 @@ public class BatchUploadMessagesOperation extends Operation {
                     // we need to block sending message for any inactive ownedIdentity, but, if the ownedIdentity was deleted, we should send the message
                     // this is required for the OwnedIdentityDeletion protocol, to inform your contacts
                     if (!sendManagerSession.identityDelegate.isActiveOwnedIdentity(sendManagerSession.session,ownedIdentity)
-                            && sendManagerSession.identityDelegate.isOwnedIdentity(sendManagerSession.session, ownedIdentity)) {
+                            && sendManagerSession.identityDelegate.isOwnedIdentity(sendManagerSession.session, ownedIdentity, true)) {
                         for (UID messageUid : messageUids) {
                             identityInactiveMessageUids.add(new IdentityAndUid(ownedIdentity, messageUid));
                         }

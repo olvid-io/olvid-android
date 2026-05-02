@@ -627,7 +627,6 @@ public class AppSingleton {
                 }
             } else {
                 instance.deactivatedIdentities.add(new BytesKey(ownedIdentity.bytesOwnedIdentity));
-                App.openAppDialogIdentityDeactivated(ownedIdentity);
             }
         }
     }
@@ -673,7 +672,7 @@ public class AppSingleton {
                     db.ownedIdentityDao().insert(ownedIdentity);
                 } catch (Exception e) {
                     Logger.x(e);
-                    // unable to create ownedIdentity on app side, try delete on engine side
+                    // unable to create ownedIdentity on app side, try to delete on engine side
                     try {
                         engine.deleteOwnedIdentity(obvOwnedIdentity.getBytesIdentity());
                     } catch (Exception ex) {

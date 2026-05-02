@@ -311,8 +311,11 @@ fun DiscussionTopAppBar(
         selection = discussionViewModel.selectedMessageIds,
         selectedStringResource = R.plurals.action_mode_title_discussion,
         selectionActions = buildList {
-            add(R.drawable.ic_delete to {
+            add(R.drawable.ic_delete_outline to {
                 discussionViewModel.handleDeleteMessages(context)
+            })
+            add(R.drawable.ic_swipe_copy to {
+                discussionViewModel.handleCopyMessages(context)
             })
             if (discussionViewModel.areAllSelectedMessagesBookmarkable()) {
                 if (discussionViewModel.areAllSelectedMessagesBookmarked()) {
@@ -326,7 +329,7 @@ fun DiscussionTopAppBar(
                 }
             }
             if (discussionViewModel.areAllSelectedMessagesForwardable()) {
-                add(R.drawable.ic_forward to {
+                add(R.drawable.ic_swipe_forward to {
                     discussionViewModel.handleForwardMessages(context)
                 })
             }
