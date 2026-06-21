@@ -303,7 +303,7 @@ public class EngineNotificationProcessorForContacts implements EngineNotificatio
                             if (discussion != null) {
                                 Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, bytesContactIdentity);
                                 newDetailsMessage.id = db.messageDao().insert(newDetailsMessage);
-                                UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
+                                UnreadCountsSingleton.INSTANCE.newUnreadMessage(bytesOwnedIdentity, discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
                                 if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
                                     db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                                 }

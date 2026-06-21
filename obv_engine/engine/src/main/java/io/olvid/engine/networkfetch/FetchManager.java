@@ -448,6 +448,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
                     inboxAttachment.getUrl(),
                     inboxAttachment.getPlaintextExpectedLength(),
                     inboxAttachment.getPlaintextReceivedLength(),
+                    inboxAttachment.isUploadCancelledBySender(),
                     inboxAttachment.isDownloadRequested());
         } catch (SQLException e) {
             Logger.e("FetchManager was unable to getAttachment " + messageUid + "-" + attachmentNumber);
@@ -594,6 +595,7 @@ public class FetchManager implements FetchManagerSessionFactory, NetworkFetchDel
                     attachments[i].getUrl(),
                     attachments[i].getPlaintextExpectedLength(),
                     attachments[i].getPlaintextReceivedLength(),
+                    attachments[i].isUploadCancelledBySender(),
                     attachments[i].isDownloadRequested());
         }
         return new ObvMessage(inboxMessage.getDecryptedApplicationMessage(), receivedAttachments);

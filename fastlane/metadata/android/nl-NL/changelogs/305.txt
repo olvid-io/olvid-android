@@ -1,0 +1,4 @@
+- Nieuw ontwerp van verschillende app-onderdelen: contactkaart, profielkaart, opslagbeheer, enz.
+- Kalenderweergave toegevoegd aan het gesprek om snel naar een specifiek tijdstip te springen.
+- Interne "actief afspelen" controller toegevoegd om eenvoudig tussen spraakberichten te schakelen. Verbeteringen aangebracht in de gebaren voor het afspelen van spraakberichten.
+- Mogelijkheid toegevoegd om een bijlage-upload te annuleren.

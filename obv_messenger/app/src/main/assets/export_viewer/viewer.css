@@ -119,6 +119,7 @@ body {
 
 .discussion-item .title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
 .discussion-item .preview { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.untitled { font-style: italic; color: var(--text-secondary); }
 
 .main-chat { 
     flex: 1; 

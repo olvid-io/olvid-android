@@ -1,0 +1,5 @@
+- Hersien van verskeie toepassingskomponente: kontakkaart, profielkaart, bergingbestuurder, ens.
+- 'n Kalenderansig by die gesprek gevoeg om vinnig na 'n spesifieke tydstip te spring.
+- 'n Interne "lopende weergawe" beheerder bygevoeg om maklik tussen stemboodskappe te skakel.
+- Die vermoë bygevoeg om 'n aanhegsel-oplaai te kanselleer.
+- Misgelukte kennisgewings word vertoon wanneer die profiel se dempmodus verstryk.

@@ -1,0 +1,1 @@
+- Ondersteuning toegevoegd voor 18 nieuwe talen: Bulgaars, Bengaals, Ests, Filipijns, Gujarati, Indonesisch, Kannada, Lets, Litouws, Malayaals, Marathi, Punjabi, Servisch, Swahili, Tamil, Telugu, Thais en Urdu.

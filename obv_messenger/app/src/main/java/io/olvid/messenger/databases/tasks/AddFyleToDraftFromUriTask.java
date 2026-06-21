@@ -43,6 +43,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import io.olvid.engine.Logger;
 import io.olvid.messenger.App;
@@ -56,6 +57,7 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.discussion.compose.VoiceMessageRecorder;
 import io.olvid.messenger.services.AvailableSpaceHelper;
 import io.olvid.messenger.settings.SettingsActivity;
 
@@ -75,6 +77,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
     @Nullable
     private final byte[] webclientProvidedSha256;
 
+    // used when replacing the whole draft when sharing in the discussion
     public AddFyleToDraftFromUriTask(@NonNull Uri uri, long discussionId) {
         this.uri = uri;
         this.localFile = null;
@@ -84,6 +87,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
         this.webclientProvidedSha256 = null;
     }
 
+    // used when attaching a normal attachment from the system in the discussion
     public AddFyleToDraftFromUriTask(@NonNull Uri uri, @Nullable String fileName, @Nullable String mimeType, long discussionId) {
         this.uri = uri;
         this.localFile = null;
@@ -93,15 +97,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
         this.webclientProvidedSha256 = null;
     }
 
-    public AddFyleToDraftFromUriTask(@NonNull Uri uri, @NonNull File localFile, long discussionId) {
-        this.uri = uri;
-        this.localFile = localFile;
-        this.discussionId = discussionId;
-        this.mimeType = null;
-        this.fileName = null;
-        this.webclientProvidedSha256 = null;
-    }
-
+    // used when the file is available locally inside the app storage, e.g.: voice recorder and link previews
     public AddFyleToDraftFromUriTask(@NonNull File localFile, @NonNull String fileName, @NonNull String mimeType, long discussionId) {
         this.uri = null;
         this.localFile = localFile;
@@ -111,6 +107,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
         this.webclientProvidedSha256 = null;
     }
 
+    // used only by webClient
     public AddFyleToDraftFromUriTask(@NonNull File localFile, long discussionId, @NonNull String mimeType, @NonNull String fileName, @NonNull byte[] webclientProvidedSha256) {
         this.uri = null;
         this.localFile = localFile;
@@ -173,7 +170,7 @@ public class AddFyleToDraftFromUriTask implements Runnable {
             String mimeType = computeMimeType(contentResolver);
 
             if (this.fileName != null) {
-                fileName = this.fileName;
+                fileName = localFile != null ? this.fileName : cleanFileNameFromVoiceMessagePattern(this.fileName);
                 if (mimeType == null) {
                     mimeType = PreviewUtils.getNonNullMimeType(null, fileName);
                 }
@@ -183,7 +180,8 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                     if ((cursor != null) && cursor.moveToFirst()) {
                         int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
                         if (nameIndex >= 0) {
-                            fileName = cursor.getString(nameIndex);
+                            // in the case where the uri != null, we always need to clean the file name
+                            fileName = cleanFileNameFromVoiceMessagePattern(cursor.getString(nameIndex));
                         }
                         try {
                             int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
@@ -564,5 +562,14 @@ public class AddFyleToDraftFromUriTask implements Runnable {
                 reDraftMessage.post(false, null);
             }
         });
+    }
+
+    @NonNull
+    public static String cleanFileNameFromVoiceMessagePattern(@NonNull String fileName) {
+        String cleanFileName = fileName.replace(VoiceMessageRecorder.AUDIO_FILE_NAME_SUFFIX, "");
+        if (cleanFileName.isBlank()) {
+            cleanFileName = "unnamed";
+        }
+        return cleanFileName;
     }
 }

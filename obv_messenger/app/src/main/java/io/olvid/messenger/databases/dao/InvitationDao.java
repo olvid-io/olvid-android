@@ -22,6 +22,7 @@ package io.olvid.messenger.databases.dao;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
+import androidx.room.ColumnInfo;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -44,6 +45,22 @@ public interface InvitationDao {
 
     @Query("SELECT * FROM " + Invitation.TABLE_NAME)
     List<Invitation> getAll();
+
+    @Query("SELECT " + Invitation.DIALOG_UUID + ", " + Invitation.BYTES_OWNED_IDENTITY + ", " + Invitation.CATEGORY_ID + " FROM " + Invitation.TABLE_NAME)
+    List<InvitationStub> getAllStubs();
+
+    class InvitationStub {
+        @ColumnInfo(name = Invitation.DIALOG_UUID)
+        @NonNull
+        public UUID dialogUuid;
+
+        @ColumnInfo(name = Invitation.BYTES_OWNED_IDENTITY)
+        @NonNull
+        public byte[] bytesOwnedIdentity;
+
+        @ColumnInfo(name = Invitation.CATEGORY_ID)
+        public int categoryId;
+    }
 
     @Query("SELECT * FROM " + Invitation.TABLE_NAME +
             " WHERE " + Invitation.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +

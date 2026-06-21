@@ -3010,6 +3010,7 @@ class WebrtcCallService : Service() {
                                 AppDatabase.getInstance().messageDao().insert(callMessage)
                             if (callMessage.status == Message.STATUS_UNREAD) {
                                 UnreadCountsSingleton.newUnreadMessage(
+                                    it.bytesOwnedIdentity,
                                     it.id,
                                     callMessage.id,
                                     false,

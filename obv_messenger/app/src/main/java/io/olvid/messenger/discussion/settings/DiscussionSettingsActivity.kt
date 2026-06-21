@@ -19,7 +19,6 @@
 package io.olvid.messenger.discussion.settings
 
 import android.content.DialogInterface
-import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -34,7 +33,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updateMargins
@@ -97,17 +95,12 @@ class DiscussionSettingsActivity : LockableActivity(), OnPreferenceStartFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
 
         delegate.onCreate(savedInstanceState)
         super.onCreate(savedInstanceState)
-
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.elevation = 0f

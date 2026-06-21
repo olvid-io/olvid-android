@@ -56,6 +56,7 @@ class MediaPlaybackService : MediaSessionService() {
         const val EXTRAS_DISCUSSION_ID = "discussion_id"
         const val EXTRAS_MESSAGE_ID = "olvid_message_id"
         const val EXTRAS_OWNED_IDENTITY = "owned_identity"
+        const val EXTRAS_SENDER_IDENTITY = "sender_identity"
 
         // Helper to build media item with necessary metadata for notification
         fun createMediaItem(
@@ -72,6 +73,7 @@ class MediaPlaybackService : MediaSessionService() {
                 if (discussionId != null) putLong(EXTRAS_DISCUSSION_ID, discussionId)
                 if (messageId != null) putLong(EXTRAS_MESSAGE_ID, messageId)
                 if (bytesOwnedIdentity != null) putByteArray(EXTRAS_OWNED_IDENTITY, bytesOwnedIdentity)
+                if (senderIdentity != null) putByteArray(EXTRAS_SENDER_IDENTITY, senderIdentity)
             }
 
             val metadata = androidx.media3.common.MediaMetadata.Builder()

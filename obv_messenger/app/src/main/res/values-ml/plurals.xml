@@ -1,0 +1,285 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="label_files_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="6081130">%1$d ഫയൽ</item>
+		<item quantity="other" state="needs_review" hash="2115209750">%1$d ഫയലുകൾ</item>
+	</plurals>
+	<plurals name="text_files" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1591553998">ഫയൽ</item>
+		<item quantity="other" state="needs_review" hash="2115209750">%1$d ഫയലുകൾ</item>
+	</plurals>
+	<plurals name="text_audios" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-779820608">ഓഡിയോ</item>
+		<item quantity="other" state="needs_review" hash="1428618080">%1$d ഓഡിയോകൾ</item>
+	</plurals>
+	<plurals name="text_others" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1866852709">%1$d മറ്റുള്ളവ</item>
+		<item quantity="other" state="needs_review" hash="-2006565347">%1$d മറ്റുള്ളവർ</item>
+	</plurals>
+	<plurals name="text_images" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1471675200">ഫോട്ടോ</item>
+		<item quantity="other" state="needs_review" hash="1150196960">%1$d ഫോട്ടോകൾ</item>
+	</plurals>
+	<plurals name="text_videos" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="366973148">വീഡിയോ</item>
+		<item quantity="other" state="needs_review" hash="-67686396">%1$d വീഡിയോകൾ</item>
+	</plurals>
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" കൂടാതെ 1 മറ്റ് ഗ്രൂപ്പിൽ പങ്കുചേർന്നു</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" കൂടാതെ %2$d മറ്റ് ഗ്രൂപ്പുകൾക്ക് പൊതുവായത്</item>
+	</plurals>
+	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1156880361">നിങ്ങളുടെ ഉപകരണങ്ങളിൽ ഒന്നു %1$d ദിവസത്തിനുള്ളിൽ കാലഹരണപ്പെട്ട് പ്രവർത്തനരഹിതമാകും.\nഅത് സജീവമായി നിലനിർത്താൻ നിങ്ങൾക്ക് ഒരു **Olvid+** സബ്സ്ക്രിപ്ഷൻ വാങ്ങാവുന്നതാണ്.</item>
+		<item quantity="other" state="needs_review" hash="-574658149">നിങ്ങളുടെ ഉപകരണങ്ങളിൽ ഒന്നു %1$d ദിവസത്തിനുള്ളിൽ കാലഹരണപ്പെട്ട് പ്രവർത്തനരഹിതമാകും.\nഅത് സജീവമായി നിലനിർത്താൻ നിങ്ങൾക്ക് ഒരു **Olvid+** സബ്സ്ക്രിപ്ഷൻ വാങ്ങാവുന്നതാണ്.</item>
+	</plurals>
+	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-683497602">%1$s ഗ്രൂപ്പിൽ ചേർന്നു</item>
+		<item quantity="other" state="needs_review" hash="51603026">%1$s ഗ്രൂപ്പിൽ ചേർന്നു</item>
+	</plurals>
+	<plurals name="text_left_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="399208793">%1$s ഗ്രൂപ്പിൽ നിന്ന് പുറത്തായി</item>
+		<item quantity="other" state="needs_review" hash="1945116549">%1$s ഗ്രൂപ്പിൽ നിന്ന് പുറത്തായി</item>
+	</plurals>
+	<plurals name="label_poll_answers" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="1797058436">മറുപടിയില്ല</item>
+		<item quantity="one" state="needs_review" hash="-7151672">%1$d ഉത്തരം</item>
+		<item quantity="other" state="needs_review" hash="1394570044">%1$d പ്രതികരണങ്ങൾ</item>
+	</plurals>
+	<plurals name="label_remove_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="312762041">%1$d എന്ന അംഗത്തെ നീക്കം ചെയ്യുക</item>
+		<item quantity="other" state="needs_review" hash="1816849257">%1$d അംഗങ്ങളെ നീക്കം ചെയ്യുക</item>
+	</plurals>
+	<plurals name="label_add_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1537484553">%1$d അംഗത്തെ ചേർക്കുക</item>
+		<item quantity="other" state="needs_review" hash="1091232977">%1$d അംഗങ്ങളെ ചേർക്കുക</item>
+	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">%1$d എന്ന കോൺടാക്റ്റിലേക്ക് പരിചയപ്പെടുത്തുക</item>
+		<item quantity="other" state="needs_review" hash="222947824">%1$d എന്ന നിങ്ങളുടെ കോൺടാക്റ്റുകളിലേക്ക് പരിചയപ്പെടുത്തുക</item>
+	</plurals>
+	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1131862199">ഈ ഉപകരണത്തിൽ, നിങ്ങളുടെ പഴയ ഉപകരണം താഴെ കാണുന്ന രീതിയിൽ നിർജ്ജീവമാക്കപ്പെടും:</item>
+		<item quantity="other" state="needs_review" hash="-2011302529">ഈ ഉപകരണത്തിൽ, താഴെ കാണിച്ചിരിക്കുന്ന നിങ്ങളുടെ മറ്റ് ഉപകരണങ്ങൾ പ്രവർത്തനരഹിതമാക്കും:</item>
+	</plurals>
+	<plurals name="label_backups_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1088606803">%1$d ബാക്കപ്പ് കണ്ടെത്തി</item>
+		<item quantity="other" state="needs_review" hash="-577868099">%1$d ബാക്കപ്പുകൾ കണ്ടെത്തി</item>
+	</plurals>
+	<plurals name="label_profiles_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1498976610">%1$d പ്രൊഫൈൽ കണ്ടെത്തി</item>
+		<item quantity="other" state="needs_review" hash="749391135">%1$d പ്രൊഫൈലുകൾ കണ്ടെത്തി</item>
+	</plurals>
+	<plurals name="label_backup_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="-174007554">ഗ്രൂപ്പുകളില്ല</item>
+		<item quantity="one" state="needs_review" hash="237276495">%1$d ഗ്രൂപ്പ്</item>
+		<item quantity="other" state="needs_review" hash="900821953">%1$d ഗ്രൂപ്പുകൾ</item>
+	</plurals>
+	<plurals name="label_backup_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="246373927">ഒരു കോൺടാക്റ്റുമില്ല</item>
+		<item quantity="one" state="needs_review" hash="-1671298344">%1$d കോൺടാക്റ്റ്</item>
+		<item quantity="other" state="needs_review" hash="1022571360">%1$d കോൺടാക്റ്റുകൾ</item>
+	</plurals>
+	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1772966333">സംഭാഷണം ആർക്കൈവ് ചെയ്തു</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d സംഭാഷണങ്ങൾ ആർക്കൈവ് ചെയ്തു</item>
+	</plurals>
+	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1312483800">സംഭാഷണം പുനഃസ്ഥാപിച്ചു</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d സംഭാഷണങ്ങൾ പുനഃസ്ഥാപിച്ചു</item>
+	</plurals>
+	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2045500103">സന്ദേശം ബുക്ക്മാർക്കിൽ നിന്ന് നീക്കം ചെയ്തു</item>
+		<item quantity="other" state="needs_review" hash="204728896">%1$d സന്ദേശങ്ങൾ ബുക്ക്മാർക്ക് ചെയ്തതിൽ നിന്ന് നീക്കം ചെയ്തു</item>
+	</plurals>
+	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-716893580">തിരഞ്ഞെടുത്ത സംഭാഷണം നീക്കം ചെയ്യണോ?</item>
+		<item quantity="other" state="needs_review" hash="-15840526">തിരഞ്ഞെടുത്ത സംഭാഷണങ്ങൾ നീക്കം ചെയ്യണോ?</item>
+	</plurals>
+	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-862879351">തിരഞ്ഞെടുത്ത സന്ദേശം നീക്കം ചെയ്യണോ?</item>
+		<item quantity="other" state="needs_review" hash="-2020248805">തിരഞ്ഞെടുത്ത സന്ദേശങ്ങൾ നീക്കം ചെയ്യണോ?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-931157230">നിങ്ങൾ തിരഞ്ഞെടുത്ത സംഭാഷണം അതിലുള്ള എല്ലാ സന്ദേശങ്ങളും നീക്കം ചെയ്യാൻ നിങ്ങൾ ശരിക്കും ആഗ്രഹിക്കുന്നുണ്ടോ? ഈ പ്രവർത്തനം പഴയ രീതിയിലേക്ക് മാറ്റാൻ കഴിയില്ല.</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">%1$d എന്നതിലേക്ക് നിങ്ങൾ തിരഞ്ഞെടുത്ത സംഭാഷണങ്ങളും അതിലുള്ള എല്ലാ സന്ദേശങ്ങളും നീക്കം ചെയ്യാൻ നിങ്ങൾ ശരിക്കും ആഗ്രഹിക്കുന്നുണ്ടോ? ഈ പ്രവർത്തനം പഴയ രീതിയിലേക്ക് മാറ്റാൻ കഴിയില്ല.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2139168692">നിങ്ങൾ തിരഞ്ഞെടുത്ത സംഭാഷണം, അതിലുള്ള എല്ലാ സന്ദേശങ്ങളും എങ്ങനെ നീക്കം ചെയ്യാനാണ് ആഗ്രഹിക്കുന്നത്? ഈ പ്രവർത്തനം പഴയ രീതിയിലേക്ക് മാറ്റാൻ കഴിയില്ല.</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">%1$d എന്നതിലേക്ക് നിങ്ങൾ തിരഞ്ഞെടുത്ത സംഭാഷണങ്ങളും അതിലുള്ള എല്ലാ സന്ദേശങ്ങളും എങ്ങനെ നീക്കം ചെയ്യണമെന്നാണ് നിങ്ങൾ ആഗ്രഹിക്കുന്നത്? ഈ പ്രവർത്തനം പഴയ രീതിയിലേക്ക് മാറ്റാൻ കഴിയില്ല.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-947341357">നിങ്ങൾ തിരഞ്ഞെടുത്ത സന്ദേശം ശരിക്കും ഇല്ലാതാക്കാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?\nഈ പ്രവർത്തനം പഴയ രീതിയിലേക്ക് മാറ്റാൻ കഴിയില്ല.</item>
+		<item quantity="other" state="needs_review" hash="-752621695">%1$d എന്ന് തിരഞ്ഞെടുത്ത സന്ദേശങ്ങൾ നിങ്ങൾ ശരിക്കും ഇല്ലാതാക്കാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?\nഈ പ്രവർത്തനം പഴയ രീതിയിലേക്ക് മാറ്റാൻ കഴിയില്ല.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-474913536">നിങ്ങൾ തിരഞ്ഞെടുത്ത സന്ദേശം എങ്ങനെ നീക്കം ചെയ്യാനാണ് ആഗ്രഹിക്കുന്നത്?\nഈ പ്രവർത്തനം പഴയ രീതിയിലേക്ക് മാറ്റാൻ കഴിയില്ല.</item>
+		<item quantity="other" state="needs_review" hash="-895867176">%1$d എന്നതിലേക്ക് നിങ്ങൾ തിരഞ്ഞെടുത്ത സന്ദേശങ്ങൾ എങ്ങനെ നീക്കം ചെയ്യണമെന്നാണ് നിങ്ങൾ ആഗ്രഹിക്കുന്നത്?\nഈ പ്രവർത്തനം പഴയ രീതിയിലേക്ക് മാറ്റാൻ കഴിയില്ല.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-606769319">നിങ്ങൾ ഈ സംഭാഷണത്തിലുള്ള എല്ലാവർക്കും ഒരു സന്ദേശം **സ്ഥിരമായി** നീക്കം ചെയ്യാൻ പോകുന്നു. നിങ്ങൾ ഇത് തന്നെയാണ് ചെയ്യാൻ ആഗ്രഹിക്കുന്നതെന്ന് ഉറപ്പാക്കുക.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">നിങ്ങൾ %1$d സന്ദേശങ്ങൾ ഈ സംഭാഷണത്തിലുള്ള എല്ലാവർക്കും **സ്ഥിരമായി** നീക്കം ചെയ്യാൻ പോകുന്നു. നിങ്ങൾ ഇത് തന്നെയാണ് ചെയ്യാൻ ആഗ്രഹിക്കുന്നതെന്ന് ഉറപ്പാക്കുക.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118446236">നിങ്ങൾ ഒരു സംഭാഷണം, അതിലുള്ള സന്ദേശങ്ങൾ എന്നിവ ഈ സംഭാഷണത്തിലുള്ള എല്ലാവർക്കും എന്നെന്നേക്കുമായി നീക്കം ചെയ്യാൻ പോകുന്നു. നിങ്ങൾ ഇത് തന്നെയാണ് ചെയ്യാൻ ആഗ്രഹിക്കുന്നതെന്ന് ഉറപ്പാക്കുക.</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">നിങ്ങൾ %1$d സംഭാഷണങ്ങളെയും അതിലുള്ള സന്ദേശങ്ങളെയും **എന്നെന്നേക്കുമായി** ഇല്ലാതാക്കാൻ പോകുകയാണ്, ഈ സംഭാഷണങ്ങളിലെ **എല്ലാവർക്കും** ഇത് ബാധകമായിരിക്കും. നിങ്ങൾ ഇത് തന്നെയാണ് ചെയ്യാൻ ആഗ്രഹിക്കുന്നതെന്ന് ഉറപ്പാക്കുക.</item>
+	</plurals>
+	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1306576418">നിങ്ങൾ ഈ ഗ്രൂപ്പിലെ ഓരോ അംഗങ്ങളെയും, നിങ്ങൾക്കൊരു ചാനൽ ഉള്ളവരെയും (നിലവിൽ 1 അംഗം), ഒരു സ്വകാര്യ സംഭാഷണത്തിലേക്ക് ക്ഷണിക്കാൻ പോകുകയാണ്.\nനിങ്ങൾ മുന്നോട്ട് പോകാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">നിങ്ങൾ ഈ ഗ്രൂപ്പിലെ ഓരോ അംഗങ്ങളെയും (നിലവിൽ %1$d അംഗങ്ങൾ), നിങ്ങൾക്കൊരു ചാനൽ ഉള്ളതിനാൽ, ഒരു സ്വകാര്യ സംഭാഷണത്തിലേക്ക് ക്ഷണിക്കാൻ പോകുകയാണ്.\nനിങ്ങൾ മുന്നോട്ട് പോകാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">ഒരു ഗ്രൂപ്പിലെ അംഗത്തെ ഒരു സ്വകാര്യ ചർച്ചയിലേക്ക് ക്ഷണിക്കാവുന്നതാണ്</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d ഗ്രൂപ്പിലെ അംഗങ്ങളെ ഒരു സ്വകാര്യ ചർച്ചയിലേക്ക് ക്ഷണിക്കാവുന്നതാണ്</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1699852572">1 പൊതു ഗ്രൂപ്പ്</item>
+		<item quantity="other" state="needs_review" hash="-261780100">%1$d പൊതു ഗ്രൂപ്പുകൾ</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1000092559">. മുന്നോട്ട് പോകുവാൻ നിങ്ങൾ ഈ ഗ്രൂപ്പിൽ നിന്ന് പുറത്തുവരേണ്ടതുണ്ട്.</item>
+		<item quantity="other" state="needs_review" hash="-1973752801">. നിങ്ങൾ മുന്നോട്ട് പോകുന്നതിന് മുമ്പ് ഈ ഗ്രൂപ്പുകളിൽ നിന്ന് പുറത്തുകടക്കേണ്ടതുണ്ട്.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_with_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1290867480">നിങ്ങൾ %1$s-നെ മറ്റ് ഉപയോക്താക്കളുടെ ലിസ്റ്റിൽ നിന്ന് നീക്കാൻ പോകുകയാണ്.\n\n%1$s-നെ നിങ്ങൾ അംഗമായ %2$d ഗ്രൂപ്പിലേക്ക് ക്ഷണിച്ചിരുന്നു. അവർ അതിൽ ചേർന്നാൽ, അവർ വീണ്ടും ഈ ലിസ്റ്റിൽ ചേർക്കപ്പെടും. ഇത് ഒഴിവാക്കാൻ നിങ്ങൾ ഈ ഗ്രൂപ്പിൽ നിന്ന് പുറത്തുകടക്കാൻ ആഗ്രഹിച്ചേക്കാം.\n\nഈ ഉപയോക്താവിനെ ശരിക്കും നീക്കണോ?</item>
+		<item quantity="other" state="needs_review" hash="1544662217">നിങ്ങൾ %1$s-നെ നിങ്ങളുടെ മറ്റ് ഉപയോക്താക്കളുടെ ലിസ്റ്റിൽ നിന്ന് നീക്കാൻ പോകുകയാണ്.\n\n%1$s-നെ നിങ്ങൾ അംഗമായ %2$d ഗ്രൂപ്പുകളിലേക്ക് ക്ഷണിച്ചിട്ടുണ്ട്. അവർ അതിൽ ഏതെങ്കിലും ഒന്നിയിൽ ചേർന്നാൽ, അവരെ വീണ്ടും ഈ ലിസ്റ്റിൽ ചേർക്കും. ഇത് ഒഴിവാക്കാൻ നിങ്ങൾ ഈ ഗ്രൂപ്പുകളിൽ നിന്ന് പുറത്തുകടക്കാൻ ആഗ്രഹിച്ചേക്കാം.\n\nഈ ഉപയോക്താവിനെ ശരിക്കും നീക്കണോ?</item>
+	</plurals>
+	<plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-97256410">ഈ ക്രമീകരണം മാറ്റുന്നത്, நிலுவையில் உள்ள ഒരു ഗ്രൂപ്പ് ക്ഷണത്തെ സ്വയമേവ അംഗീകരിക്കും.\nനിങ്ങളുടെ തിരഞ്ഞെടുப்பை സ്ഥിരീകരിക്കാനും ഈ ഗ്രൂപ്പിൽ ചേരാനും ശരി എന്ന് അമർത്തുക.</item>
+		<item quantity="other" state="needs_review" hash="1009007696">ഈ ക്രമീകരണം മാറ്റുന്നത് %1$d എന്നതിലുള്ള நிலுவையில் உள்ள ഗ്രൂപ്പ് ക്ഷണങ്ങളെ സ്വയമേവ അംഗീകരിക്കും.\nനിങ്ങളുടെ തിരഞ്ഞെടുப்பை സ്ഥിരീകരിക്കാനും ഈ ഗ്രൂപ്പുകളിൽ ചേരാനും ശരി ക്ലിക്ക് ചെയ്യുക.</item>
+	</plurals>
+	<plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1768885312">നിങ്ങളോട് ആവശ്യപ്പെടുമ്പോൾ, തിരഞ്ഞെടുത്ത അറ്റാച്ച്‌മെന്റ് സംരക്ഷിക്കാൻ നിങ്ങൾ തിരഞ്ഞെടുക്കാൻ ആഗ്രഹിക്കുന്ന ഫോൾഡർ തിരഞ്ഞെടുക്കുക.\n ചില ഫോൾഡറുകളിലേക്കുള്ള പ്രവേശനം നിയന്ത്രിച്ചിരിക്കാം എന്നത് ശ്രദ്ധിക്കുക.</item>
+		<item quantity="other" state="needs_review" hash="-1416662415">അറിയിപ്പ് നൽകുന്ന സമയത്ത്, നിങ്ങൾ തിരഞ്ഞെടുത്ത %1$d അറ്റാച്ച്‌മെന്റുകൾ സംരക്ഷിക്കേണ്ട ഫോൾഡർ തിരഞ്ഞെടുക്കുക.\n ചില ഫോൾഡറുകളിലേക്കുള്ള പ്രവേശനം നിയന്ത്രിച്ചിരിക്കാം എന്നത് ശ്രദ്ധിക്കുക.</item>
+	</plurals>
+	<plurals name="action_mode_title_storage" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d തിരഞ്ഞെടുക്കപ്പെട്ടു</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d തിരഞ്ഞെടുക്കപ്പെട്ടു</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1117804388">നിങ്ങൾ തിരഞ്ഞെടുത്ത അറ്റാച്ച്‌മെന്റ് ശരിക്കും ഇല്ലാതാക്കാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?</item>
+		<item quantity="other" state="needs_review" hash="-1540151013">%1$d എന്നതിലേക്ക് നിങ്ങൾ തിരഞ്ഞെടുത്ത അറ്റാച്ച്‌മെന്റുകൾ ശരിക്കും ഇല്ലാതാക്കാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">ഈ അറ്റാച്ച്‌മെന്റ് ഒന്നിലധികം സന്ദേശങ്ങളിൽ ചേർത്തിട്ടുണ്ടെങ്കിൽ, അറ്റാച്ച്‌മെന്റിന്റെ എല്ലാ കോപ്പികളും നീക്കം ചെയ്യപ്പെടും.</item>
+		<item quantity="other" state="needs_review" hash="890537395">ഈ അറ്റാച്ച്‌മെന്റുകൾ ഒന്നിലധികം സന്ദേശങ്ങളിൽ ചേർത്തിട്ടുണ്ടെങ്കിൽ, അറ്റാച്ച്‌മെന്റുകളുടെ എല്ലാ കോപ്പികളും നീക്കം ചെയ്യപ്പെടും.</item>
+	</plurals>
+	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1400550170">%1$d ദിവസം, %2$02d മണിക്കൂർ %3$02d മിനിറ്റ് %4$02d സെക്കൻഡ്</item>
+		<item quantity="other" state="needs_review" hash="-1847999182">%1$d ദിവസം, %2$02d മണിക്കൂർ, %3$02d മിനിറ്റ്, %4$02d സെക്കൻഡ്</item>
+	</plurals>
+	<plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1040869757">%1$d കാണാത്ത സന്ദേശം…</item>
+		<item quantity="other" state="needs_review" hash="-970055416">%1$d കാണാനില്ലാത്ത സന്ദേശങ്ങൾ…</item>
+	</plurals>
+	<plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="800251665">%2$sഉം മറ്റൊരാളും ഉൾപ്പെടെയുള്ള ഗ്രൂപ്പ് കോൾ</item>
+		<item quantity="other" state="needs_review" hash="-1654053808">%2$sഉം %1$d മറ്റ് ആളുകളുമായി ഒരു ഗ്രൂപ്പ് കോൾ</item>
+	</plurals>
+	<plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1313506338">%2$sഉം മറ്റൊരാളും ഉൾപ്പെടെയുള്ള ഗ്രൂപ്പ് കോളിൽ പ്രതികരണം ലഭിച്ചില്ല</item>
+		<item quantity="other" state="needs_review" hash="1027194941">%2$sഉം %1$d മറ്റ് ആളുകളുമായി നടത്തിയ ഗ്രൂപ്പ് കോൾ, അതിൽ ആരും ഉത്തരം നൽകിയിട്ടില്ല.</item>
+	</plurals>
+	<plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="575911091">%2$sഉം മറ്റൊരാളുമായി നടത്തിയ ഗ്രൂപ്പ് കോൾ പരാജയപ്പെട്ടു</item>
+		<item quantity="other" state="needs_review" hash="1768048524">%2$sഉം %1$d മറ്റ് ആളുകളുമായുള്ള ഗ്രൂപ്പ് കോൾ പരാജയപ്പെട്ടു</item>
+	</plurals>
+	<plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1115369211">%2$sഉം മറ്റൊരാളും തിരക്കിലായിരിക്കുമ്പോൾ ഗ്രൂപ്പ് കോൾ</item>
+		<item quantity="other" state="needs_review" hash="-332659300">%2$sഉം %1$dഉം മറ്റ് ആളുകൾ തിരക്കുള്ള സമയത്ത് ഗ്രൂപ്പ് കോൾ</item>
+	</plurals>
+	<plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1401449639">%2$s ഉം മറ്റൊരാളും ചേർന്ന ഗ്രൂപ്പ് കോൾ നിരസിച്ചു.</item>
+		<item quantity="other" state="needs_review" hash="-150166810">%2$sഉം %1$d മറ്റ് ആളുകളും ചേർന്ന ഗ്രൂപ്പ് കോൾ നിരസിച്ചു</item>
+	</plurals>
+	<plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-366344569">%2$s ഉം മറ്റൊരാളും ചേർന്ന് ഗ്രൂപ്പ് കോൾ</item>
+		<item quantity="other" state="needs_review" hash="1471743578">%2$sഉം %1$d ഉൾപ്പെടെയുള്ളവരുടെ ഗ്രൂപ്പ് കോൾ</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="461822174">%1$d തിരഞ്ഞെടുക്കപ്പെട്ടു</item>
+		<item quantity="other" state="needs_review" hash="1431585621">%1$d തിരഞ്ഞെടുക്കപ്പെട്ടു</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion_list" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">%1$d തിരഞ്ഞെടുക്കപ്പെട്ടു</item>
+		<item quantity="other" state="needs_review" hash="1429480972">%1$d തിരഞ്ഞെടുക്കപ്പെട്ടു</item>
+	</plurals>
+	<plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d പുതിയ സന്ദേശം</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d പുതിയ സന്ദേശങ്ങൾ</item>
+	</plurals>
+	<plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1495957123">%3$s-നെ %2$s എന്ന ഗ്രൂപ്പിൽ ചേരാൻ ക്ഷണിക്കും.</item>
+		<item quantity="other" state="needs_review" hash="-250521442">താഴെക്കൊടുത്തിട്ടുള്ള %1$d ആളുകളെ %2$s എന്ന ഗ്രൂപ്പിൽ ചേരാൻ ക്ഷണിക്കും: %3$s.</item>
+	</plurals>
+	<plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1633684901">%3$s-നെ %2$s ഗ്രൂപ്പിൽ നിന്ന് നീക്കം ചെയ്യും.</item>
+		<item quantity="other" state="needs_review" hash="2062819899">%1$d താഴെ പറയുന്ന ഗ്രൂപ്പിലെ അംഗങ്ങളെ %2$s എന്ന ഗ്രൂപ്പിൽ നിന്ന് നീക്കം ചെയ്യും: %3$s.</item>
+	</plurals>
+	<plurals name="text_unread_message_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d പുതിയ സന്ദേശം</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d പുതിയ സന്ദേശങ്ങൾ</item>
+	</plurals>
+	<plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118984743">%1$d അറ്റാച്ച്‌മെന്റ്</item>
+		<item quantity="other" state="needs_review" hash="1321323314">%1$d അറ്റാച്ച്‌മെന്റുകൾ</item>
+	</plurals>
+	<plurals name="text_and_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-226443285">കൂടാതെ %1$d മറ്റുള്ളവ</item>
+		<item quantity="other" state="needs_review" hash="-2101659023">കൂടാതെ %1$d പേർ</item>
+	</plurals>
+	<plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-970333">&amp; %1$d മറ്റുള്ളവ</item>
+		<item quantity="other" state="needs_review" hash="1931856055">&amp; %1$d മറ്റുള്ളവർ</item>
+	</plurals>
+	<plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-202072457">നിങ്ങൾ തിരഞ്ഞെടുത്ത നിലനിർത്തൽ നയം ഉപയോഗിച്ചാൽ ഒരു സന്ദേശം നീക്കം ചെയ്യപ്പെടും.\nഇത് തുടരണമോ എന്ന് ഉറപ്പാക്കുക.</item>
+		<item quantity="other" state="needs_review" hash="-576713525">നിങ്ങൾ തിരഞ്ഞെടുത്ത നിലനിർത്തൽ നയം ഉപയോഗിക്കുന്നതിലൂടെ %1$d സന്ദേശങ്ങൾ നീക്കം ചെയ്യപ്പെടും.\nഇത് തുടരണമോ എന്ന് ഉറപ്പാക്കുക.</item>
+	</plurals>
+	<plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="812170692">...കൂടുതൽ ഒരു തിരയൽ ഫലം.\nനിങ്ങളുടെ തിരയൽ കൂടുതൽ കൃത്യമാക്കുക.</item>
+		<item quantity="other" state="needs_review" hash="1969873890">...കൂടാതെ %1$d കൂടുതൽ തിരയൽ ഫലങ്ങൾ.\nനിങ്ങളുടെ തിരയൽ കൂടുതൽ കൃത്യമാക്കുക.</item>
+	</plurals>
+	<plurals name="duration_seconds" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="251130693">1 സെക്കൻഡ്</item>
+		<item quantity="other" state="needs_review" hash="624952161">%1$d\u00a0സെക്കൻ്റ്</item>
+	</plurals>
+	<plurals name="duration_minutes" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1053938976">1 മിനിറ്റ്</item>
+		<item quantity="other" state="needs_review" hash="-1051808">%1$d മിനിറ്റ്</item>
+	</plurals>
+	<plurals name="duration_hours" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1004063951">1 മണിക്കൂർ</item>
+		<item quantity="other" state="needs_review" hash="1322950935">%1$d\u00a0മണിക്കൂർ</item>
+	</plurals>
+	<plurals name="duration_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1264358968">1 ദിവസം</item>
+		<item quantity="other" state="needs_review" hash="-1170846734">%1$d\u00a0ദിവസങ്ങൾ</item>
+	</plurals>
+	<plurals name="duration_years" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="388401904">1 വർഷം</item>
+		<item quantity="other" state="needs_review" hash="298429520">%1$d\u00a0വർഷങ്ങൾ</item>
+	</plurals>
+	<plurals name="other_members_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1379655782">1 അംഗം</item>
+		<item quantity="other" state="needs_review" hash="965402074">%1$d\u00a0അംഗങ്ങൾ</item>
+	</plurals>
+	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1006155949">നിങ്ങളുടെ സംഭാഷണങ്ങളിൽ നിലവിൽ ഒരു വിദൂരമായി നീക്കം ചെയ്ത സന്ദേശം ഉണ്ട്. നിങ്ങൾ അത് നീക്കം ചെയ്യാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">നിങ്ങളുടെ സംഭാഷണങ്ങളിൽ നിലവിൽ %1$d എണ്ണം വിദൂരമായി നീക്കം ചെയ്ത സന്ദേശങ്ങളുണ്ട്. അത്തരം എല്ലാ അടയാളങ്ങളും നിങ്ങൾ നീക്കം ചെയ്യാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?</item>
+	</plurals>
+	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1367750681">1 കോൺടാക്റ്റ് അവരുടെ ലൊക്കേഷൻ പങ്കിടുന്നു</item>
+		<item quantity="other" state="needs_review" hash="1164266856">%1$d എന്ന നിങ്ങളുടെ കോൺടാക്റ്റുകൾ അവരുടെ ലൊക്കേഷൻ പങ്കിടുന്നു</item>
+	</plurals>
+	<plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1602016664">നിങ്ങളും മറ്റൊരാളും അവരുടെ ലൊക്കേഷൻ പങ്കിടുന്നു</item>
+		<item quantity="other" state="needs_review" hash="1789697147">നിങ്ങളും %1$d മറ്റ് ആളുകളും അവരുടെ ലൊക്കേഷൻ പങ്കിടുന്നു</item>
+	</plurals>
+	<plurals name="subscription_offer_month_free" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1966265224">%1$d മാസത്തേക്ക് സൗജന്യം</item>
+		<item quantity="other" state="needs_review" hash="-599634154">%1$d മാസത്തേക്ക് സൗജന്യം</item>
+	</plurals>
+	<plurals name="toast_message_messages_copied_to_clipboard" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1393207312">%1$d സന്ദേശം ക്ലിപ്പ്ബോർഡിലേക്ക് പകർത്തപ്പെട്ടു</item>
+		<item quantity="other" state="needs_review" hash="-604999755">%1$d സന്ദേശങ്ങൾ ക്ലിപ്പ്ബോർഡിലേക്ക് പകർത്തപ്പെട്ടു</item>
+	</plurals>
+</resources>

@@ -135,6 +135,7 @@ public interface IdentityDelegate {
     void expireCurrentDeviceOwnedPreKeys(Session session, Identity ownedIdentity, long currentServerTimestamp) throws SQLException;
     long getLatestChannelCreationPingTimestampForOwnedDevice(Session session, Identity ownedIdentity, UID ownedDeviceUid) throws SQLException;
     void setLatestChannelCreationPingTimestampForOwnedDevice(Session session, Identity ownedIdentity, UID ownedDeviceUid, long timestamp) throws Exception;
+    boolean isCurrentDeviceNeverRegistered(Session session, Identity ownedIdentity) throws SQLException;
 
 
     void addContactIdentity(Session session, Identity contactIdentity, String serializedDetails, Identity ownedIdentity, TrustOrigin trustOrigin, boolean oneToOne) throws Exception;

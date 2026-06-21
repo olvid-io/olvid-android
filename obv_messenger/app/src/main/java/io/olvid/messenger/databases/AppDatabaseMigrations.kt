@@ -38,6 +38,21 @@ import java.util.regex.Pattern
 
 internal object AppDatabaseMigrations {
     val MIGRATIONS: Array<Migration> = arrayOf(
+        object : Migration(83, 84) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                Logger.w("ROOM MIGRATING FROM VERSION 83 TO 84")
+                db.execSQL("ALTER TABLE `identity_table` ADD COLUMN `pref_mute_notifications_start_timestamp` INTEGER DEFAULT NULL")
+            }
+        },
+
+        object : Migration(82, 83) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                Logger.w("ROOM MIGRATING FROM VERSION 82 TO 83")
+                db.execSQL("CREATE INDEX `index_fyle_message_join_with_status_size` ON `fyle_message_join_with_status` (`size`)")
+                db.execSQL("CREATE INDEX `index_fyle_message_join_with_status_file_type` ON `fyle_message_join_with_status` (`file_type`)")
+            }
+        },
+
         object : Migration(81, 82) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 Logger.w("ROOM MIGRATING FROM VERSION 81 TO 82")

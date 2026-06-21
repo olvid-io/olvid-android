@@ -24,7 +24,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
@@ -52,8 +51,10 @@ import androidx.appcompat.widget.Toolbar
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.LaunchedEffect
@@ -74,7 +75,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.Insets
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.inputmethod.EditorInfoCompat
 import androidx.core.view.updateLayoutParams
@@ -82,6 +82,9 @@ import androidx.core.view.updateMargins
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.switchMap
 import androidx.preference.PreferenceManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -93,20 +96,21 @@ import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
-import io.olvid.messenger.activities.ContactDetailsActivity
+import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.activities.ObvLinkActivity
-import io.olvid.messenger.activities.storage_manager.StorageManagerActivity
 import io.olvid.messenger.billing.SubscriptionRepository
+import io.olvid.messenger.contact.ContactDetailsActivity
+import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.ConfigurationPojo
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.LocationIntegrationSelectorDialog
-import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.OpenHiddenProfileDialog
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.discussion.DiscussionActivity
+import io.olvid.messenger.discussion.audio.AudioPlaybackNotification
 import io.olvid.messenger.discussion.location.LocationActivity
 import io.olvid.messenger.fragments.dialog.CallContactDialogFragment
 import io.olvid.messenger.fragments.dialog.OwnedIdentitySelectionDialogFragment
@@ -115,6 +119,7 @@ import io.olvid.messenger.history_transfer.HistoryTransferActivity
 import io.olvid.messenger.history_transfer.TransferNotificationService
 import io.olvid.messenger.history_transfer.TransferService
 import io.olvid.messenger.history_transfer.components.TransferNotification
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.main.calls.CallLogFragment
 import io.olvid.messenger.main.contacts.ContactListFragment
 import io.olvid.messenger.main.discussions.DiscussionListFragment
@@ -128,13 +133,16 @@ import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity
 import io.olvid.messenger.plus_button.PlusButtonContainer
 import io.olvid.messenger.plus_button.scan.ScanActivity
+import io.olvid.messenger.services.AudioPlaybackNotificationManager
 import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
 import io.olvid.messenger.settings.SettingsActivity.LocationIntegrationEnum
+import io.olvid.messenger.storage_manager.StorageManagerActivity
 import io.olvid.messenger.troubleshooting.TroubleshootingActivity
 import io.olvid.messenger.webrtc.CallNotificationManager
 import io.olvid.messenger.webrtc.components.CallNotification
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 
 class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -183,17 +191,13 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
         }
 
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
 
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        AudioPlaybackNotificationManager.bind(this)
 
         onBackPressed {
             if (!moveTaskToBack(true)) {
@@ -267,7 +271,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                     if (CallNotificationManager.currentCallData != null) {
                         cachedCallData = CallNotificationManager.currentCallData
                     } else {
-                        delay(500)
+                        delay(500.milliseconds)
                         cachedCallData = null
                     }
                 }
@@ -278,12 +282,31 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                 ) {
                     cachedCallData?.let {
                         CallNotification(
-                            modifier = Modifier
-                                .padding(
-                                    top = 8.dp,
-                                    bottom = dimensionResource(R.dimen.tab_bar_size) + 12.dp
-                                ),
+                            modifier = Modifier.padding(top = 8.dp),
                             callData = it
+                        )
+                    }
+                }
+
+
+                var cachedAudioTrack by remember {
+                    mutableStateOf(AudioPlaybackNotificationManager.currentTrack)
+                }
+                LaunchedEffect(AudioPlaybackNotificationManager.currentTrack) {
+                    if (AudioPlaybackNotificationManager.currentTrack != null) {
+                        cachedAudioTrack = AudioPlaybackNotificationManager.currentTrack
+                    } else {
+                        delay(500.milliseconds)
+                        cachedAudioTrack = null
+                    }
+                }
+                AnimatedVisibility(
+                    visible = cachedAudioTrack != null && AudioPlaybackNotificationManager.currentTrack != null
+                ) {
+                    cachedAudioTrack?.let {
+                        AudioPlaybackNotification(
+                            modifier = Modifier.padding(top = 8.dp),
+                            track = it,
                         )
                     }
                 }
@@ -296,7 +319,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                         cachedOngoingTransferId = transferId
                     } ?: run {
                         try {
-                            delay(500)
+                            delay(500.milliseconds)
                         } finally {
                             if (TransferService.transferInProgress.value == null) {
                                 cachedOngoingTransferId = null
@@ -311,11 +334,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                     val transferProgress = cachedOngoingTransferId?.let { TransferService.getTransferProgress(it)?.third }
                     transferProgress?.let {
                         TransferNotification(
-                            modifier = Modifier
-                                .padding(
-                                    top = 8.dp,
-                                    bottom = dimensionResource(R.dimen.tab_bar_size) + 12.dp
-                                ),
+                            modifier = Modifier.padding(top = 8.dp),
                             transferProgress = it.value,
                             onAcceptTransfer = {
                                 TransferService.acceptTransferRequest()
@@ -338,6 +357,14 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
                             }
                         )
                     }
+                }
+
+                AnimatedVisibility(
+                    visible = cachedOngoingTransferId != null
+                            || (cachedAudioTrack != null && AudioPlaybackNotificationManager.currentTrack != null)
+                            || cachedCallData != null && CallNotificationManager.currentCallData != null
+                ) {
+                    Spacer(Modifier.height(dimensionResource(R.dimen.tab_bar_size) + 12.dp))
                 }
             }
         }
@@ -456,33 +483,44 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
         }
 
 
-        // observe unread messages
-        AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
-            if (ownedIdentity == null) {
-                return@switchMap null
-            }
-            AppDatabase.getInstance().messageDao()
-                .hasUnreadMessagesOrDiscussionsOrInvitations(ownedIdentity.bytesOwnedIdentity)
-        }.observe(this) { unreadMessages: Boolean? ->
-            if (unreadMessages != null && unreadMessages) {
-                tabsPagerAdapter!!.showNotificationDot(DISCUSSIONS_TAB)
-            } else {
-                tabsPagerAdapter!!.hideNotificationDot(DISCUSSIONS_TAB)
-            }
+        val countsLiveData = UnreadCountsSingleton.getUnreadCountsByOwnedIdentityLiveData()
+        val mutedLiveData = UnreadCountsSingleton.getMutedOwnedIdentitiesLiveData()
+        val mutedExceptMentionLiveData = UnreadCountsSingleton.getMutedExceptMentionOwnedIdentitiesLiveData()
+        val nonHiddenIdentitiesLiveData = AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenLiveData()
+
+        // discussions tab dot — fires for current identity
+        combineLatest(
+            AppSingleton.getCurrentIdentityLiveData(),
+            countsLiveData,
+        ) {
+            val key = AppSingleton.getBytesCurrentIdentity()?.let { BytesKey(it) }
+            key != null && countsLiveData.value?.get(key)?.hasNotificationDot() == true
+        }.distinctUntilChanged().observe(this) { hasDot ->
+            if (hasDot == true) tabsPagerAdapter!!.showNotificationDot(DISCUSSIONS_TAB)
+            else tabsPagerAdapter!!.hideNotificationDot(DISCUSSIONS_TAB)
         }
+
+        // profile picture red dot — fires when any *other* non-hidden, non-muted identity has unread
         val unreadMarker = findViewById<ImageView>(R.id.owned_identity_unread_marker_image_view)
-        AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
-            if (ownedIdentity == null) {
-                return@switchMap null
+        combineLatest(
+            AppSingleton.getCurrentIdentityLiveData(),
+            countsLiveData,
+            mutedLiveData,
+            mutedExceptMentionLiveData,
+            nonHiddenIdentitiesLiveData,
+        ) {
+            val counts = countsLiveData.value.orEmpty()
+            val muted = mutedLiveData.value.orEmpty()
+            val mutedExceptMention = mutedExceptMentionLiveData.value.orEmpty()
+            val nonHidden = nonHiddenIdentitiesLiveData.value.orEmpty()
+            val currentKey = AppSingleton.getBytesCurrentIdentity()?.let { BytesKey(it) }
+            nonHidden.any { oi ->
+                val key = BytesKey(oi.bytesOwnedIdentity)
+                key != currentKey && counts[key]?.hasNotificationDot() == true
+                        && (key !in muted || (key in mutedExceptMention && counts[key]?.mentionMessageCountNonArchived?.let { it > 0} == true))
             }
-            AppDatabase.getInstance().ownedIdentityDao()
-                .otherNotHiddenOwnedIdentityHasMessageOrInvitation(ownedIdentity.bytesOwnedIdentity)
-        }.observe(this) { hasUnread: Boolean? ->
-            if (hasUnread != null && hasUnread) {
-                unreadMarker.visibility = View.VISIBLE
-            } else {
-                unreadMarker.visibility = View.GONE
-            }
+        }.distinctUntilChanged().observe(this) { hasUnread ->
+            unreadMarker.visibility = if (hasUnread == true) View.VISIBLE else View.GONE
         }
         if (savedInstanceState != null && savedInstanceState.getBoolean(
                 ALREADY_CREATED_BUNDLE_EXTRA,
@@ -788,6 +826,7 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
 
     override fun onDestroy() {
         super.onDestroy()
+        AudioPlaybackNotificationManager.unbind()
         tabsPagerAdapter = null
         contactListFragment = null
         Utils.dialogShowing = false
@@ -1134,3 +1173,9 @@ class MainActivity : LockableActivity(), OnClickListener, SharedPreferences.OnSh
         const val CALLS_TAB = 3
     }
 }
+
+private fun <T> combineLatest(vararg sources: LiveData<*>, compute: () -> T): LiveData<T> =
+    MediatorLiveData<T>().apply {
+        val update = { value = compute() }
+        sources.forEach { addSource(it) { update() } }
+    }

@@ -1,0 +1,1 @@
+- Corretto un problema con la desugaring dei record Java, che non funzionava correttamente nell'ultima versione di Android Studio.

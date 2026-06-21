@@ -73,10 +73,13 @@ fun AnimatedEmoji(
     val spec = LottieCompositionSpec.Asset(shortEmoji.getEmojiAssetName())
     val composition by rememberLottieComposition(spec = spec)
     composition?.let {
+        // Snap to the "rest" marker when authored, otherwise to the first frame.
+        // The start pose is the natural neutral position for emojis without an explicit
+        // rest marker, and avoids landing on a transient "end of animation" state that
+        // happens to have hands/eyes in motion.
         val restProgress =
             composition?.getProgressForFrame(
-                composition?.markers?.find { it.name == "rest" }?.startFrame
-                    ?: composition?.endFrame ?: 0f
+                composition?.markers?.find { it.name == "rest" }?.startFrame ?: 0f
             ) ?: 0f
         val lottieAnimatable = rememberLottieAnimatable()
         LaunchedEffect(autoPlay) {

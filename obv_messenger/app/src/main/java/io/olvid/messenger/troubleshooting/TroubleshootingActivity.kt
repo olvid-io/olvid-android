@@ -23,7 +23,6 @@ import android.Manifest.permission
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -79,7 +78,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle.State.RESUMED
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -110,16 +108,11 @@ import kotlinx.coroutines.launch
 class TroubleshootingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
         if (VERSION.SDK_INT >= VERSION_CODES.S) {
             window?.setHideOverlayWindows(true)
         }

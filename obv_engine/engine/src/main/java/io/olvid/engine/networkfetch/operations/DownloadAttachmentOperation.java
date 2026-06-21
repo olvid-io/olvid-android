@@ -133,17 +133,24 @@ public class DownloadAttachmentOperation extends PriorityOperation {
                         cancel(RFC_DOWNLOAD_PAUSED);
                         return;
                     }
-                    if (attachment.getChunkDownloadPrivateUrls().length == 0) {
+                    if (attachment.isUploadCancelledBySender()) {
+                        cancel(RFC_UPLOAD_CANCELLED_BY_SENDER);
+                        return;
+                    }
+                    String[] downloadUrls = attachment.getChunkDownloadPrivateUrls();
+                    if (downloadUrls.length == 0) {
                         cancel(RFC_INVALID_SIGNED_URL);
                         return;
                     }
-                    if (attachment.getChunkDownloadPrivateUrls()[attachment.getReceivedChunkCount()].isEmpty()) {
+                    // TODO 2026-06-06
+                    //   ==> this can be removed once all inbox attachments have been created using server-API-21-compatible code
+                    if (downloadUrls[attachment.getReceivedChunkCount()].isEmpty()) {
                         cancel(RFC_UPLOAD_CANCELLED_BY_SENDER);
                         return;
                     }
 
                     DownloadAttachmentServerMethodForS3 serverMethod = new DownloadAttachmentServerMethodForS3(
-                            attachment.getChunkDownloadPrivateUrls()[attachment.getReceivedChunkCount()]
+                            downloadUrls[attachment.getReceivedChunkCount()]
                     );
                     serverMethod.setSslSocketFactory(sslSocketFactory, userAgentOverride);
                     serverMethod.setProgressListener(150, new ServerMethodForS3.ServerMethodForS3ProgressListener() {

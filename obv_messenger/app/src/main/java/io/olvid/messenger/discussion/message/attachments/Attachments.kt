@@ -174,6 +174,7 @@ fun Attachments(
     showStatuses: Boolean = true,
     audioAttachmentServiceBinding: AudioAttachmentServiceBinding?,
     onAttachmentLongClick: (FyleAndStatus) -> Unit,
+    onCancelAttachmentUpload: (FyleAndStatus) -> Unit,
     maxWidth: Dp,
     openOnClick: Boolean = true,
     onLocationClicked: (() -> Unit)? = null,
@@ -306,6 +307,7 @@ fun Attachments(
                         visibility = VISIBLE,
                         readOnce = false,
                         multipleAttachment = attachments.size > 1,
+                        onCancelAttachmentUpload = onCancelAttachmentUpload,
                         saveAttachment = saveAttachment,
                         saveAllAttachments = saveAllAttachments
                     )
@@ -332,7 +334,10 @@ fun Attachments(
                                     )
                                 )
                                 .then(if (blockClicks.not() && openOnClick) {
-                                    Modifier.clickable {
+                                    Modifier.clickable(
+                                        indication = ripple(),
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) {
                                         downloadAwareClick {
                                             App.runThread(
                                                 InboundEphemeralMessageClicked(
@@ -470,6 +475,7 @@ fun Attachments(
                                                             message.discussionId,
                                                             attachment.fyleMessageJoinWithStatus.messageId,
                                                             attachment.fyle.id,
+                                                            null,
                                                             true,
                                                             showTextBlocksInGallery
                                                         )
@@ -703,6 +709,7 @@ fun Attachments(
                                             readOnce = false,
                                             multipleAttachment = attachments.size > 1,
                                             onDismiss = { menuOpened = false },
+                                            onCancelAttachmentUpload = onCancelAttachmentUpload,
                                             saveAttachment = saveAttachment,
                                             saveAllAttachments = saveAllAttachments
                                         )
@@ -723,11 +730,10 @@ fun Attachments(
                                         downloadAwareClick {
                                             App.openFyleViewer(
                                                 context,
-                                                attachment.fyleAndStatus
-                                            ) {
-                                                openViewerCallback?.invoke()
-                                                attachment.fyleMessageJoinWithStatus.markAsOpened()
-                                            }
+                                                attachment.fyleAndStatus,
+                                                { attachment.fyleMessageJoinWithStatus.markAsOpened() },
+                                                { openViewerCallback?.invoke() }
+                                            )
                                         }
                                     }
                                 },
@@ -747,6 +753,7 @@ fun Attachments(
                                             readOnce = false,
                                             multipleAttachment = attachments.size > 1,
                                             onDismiss = { menuOpened = false },
+                                            onCancelAttachmentUpload = onCancelAttachmentUpload,
                                             saveAttachment = saveAttachment,
                                             saveAllAttachments = saveAllAttachments
                                         )
@@ -911,6 +918,7 @@ private fun BoxScope.AttachmentReceptionStatusIcon(receptionStatus: Int) {
         FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED_ALL -> R.drawable.ic_message_status_delivered_all
         FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED_ALL_READ_ONE -> R.drawable.ic_message_status_delivered_all_read_one
         FyleMessageJoinWithStatus.RECEPTION_STATUS_DELIVERED_ALL_READ_ALL -> R.drawable.ic_message_status_delivered_all_read_all
+        FyleMessageJoinWithStatus.RECEPTION_STATUS_CANCELLED -> R.drawable.ic_message_status_undelivered
         else -> null
     }?.apply {
         Image(
@@ -1039,6 +1047,7 @@ fun AttachmentContextMenu(
     readOnce: Boolean,
     multipleAttachment: Boolean,
     openViewerCallback: (() -> Unit)? = null,
+    onCancelAttachmentUpload: (FyleAndStatus) -> Unit,
     saveAttachment: () -> Unit,
     saveAllAttachments: () -> Unit
 ) {
@@ -1093,14 +1102,17 @@ fun AttachmentContextMenu(
                         message.discussionId,
                         attachment.fyleMessageJoinWithStatus.messageId,
                         attachment.fyleMessageJoinWithStatus.fyleId,
+                        null,
                         true,
                         false
                     )
                 } else {
-                    App.openFyleViewer(context, attachment.fyleAndStatus) {
-                        openViewerCallback?.invoke()
-                        attachment.fyleMessageJoinWithStatus.markAsOpened()
-                    }
+                    App.openFyleViewer(
+                        context,
+                        attachment.fyleAndStatus,
+                        { attachment.fyleMessageJoinWithStatus.markAsOpened() },
+                        { openViewerCallback?.invoke() }
+                    )
                 }
                 onDismiss()
             },
@@ -1156,6 +1168,17 @@ fun AttachmentContextMenu(
                 },
                 text = stringResource(id = R.string.menu_action_share),
             )
+            if (attachment.fyleMessageJoinWithStatus.status == FyleMessageJoinWithStatus.STATUS_UPLOADING) {
+                // cancel attachment upload
+                OlvidDropdownMenuItem(
+                    onClick = {
+                        onCancelAttachmentUpload(attachment.fyleAndStatus)
+                        onDismiss()
+                    },
+                    textColor = colorResource(R.color.red),
+                    text = stringResource(id = R.string.menu_action_cancel_upload),
+                )
+            }
             if (message.status != Message.STATUS_UNPROCESSED && message.status != Message.STATUS_COMPUTING_PREVIEW && message.status != Message.STATUS_PROCESSING) {
                 delete()
             }

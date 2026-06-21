@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">Lägg till %1$d medlem</item>
 		<item quantity="other" state="needs_review" hash="1091232977">Lägg till %1$d medlemmar</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Introducera %1$d till kontakten</item>
+		<item quantity="other" state="needs_review" hash="222947824">Presentera %1$d för dina kontakter</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">\" på den här enheten kommer din tidigare enhet nedan att inaktiveras:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">\" på den här enheten kommer dina tidigare enheter att inaktiveras:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">Vill du verkligen ta bort den valda bilagan?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">Vill du verkligen ta bort de %1$d valda bilagorna?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Om den här bilagan är bifogad till flera meddelanden kommer alla kopior av bilagan att raderas.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Om dessa bilagor är bifogade till flera meddelanden kommer alla kopior av bilagorna att raderas.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d dag, %2$02dh %3$02dm %4$02ds</item>

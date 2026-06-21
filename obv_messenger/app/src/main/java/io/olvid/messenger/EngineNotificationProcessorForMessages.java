@@ -30,6 +30,7 @@ import java.util.Objects;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.EtaEstimator;
 import io.olvid.engine.engine.Engine;
 import io.olvid.engine.engine.types.EngineNotificationListener;
@@ -125,10 +126,17 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                             break;
                         }
                         try {
-                            Fyle.SizeAndSha256 sizeAndSha256 = Fyle.computeSHA256FromFile(App.absolutePathFromRelative(downloadedAttachment.getUrl()));
+                            Fyle.SizeAndSha256 sizeAndSha256 = null;
+                            for (int i = 0; i < 5; i++) {
+                                sizeAndSha256 = Fyle.computeSHA256FromFile(App.absolutePathFromRelative(downloadedAttachment.getUrl()));
+                                if (sizeAndSha256 != null) {
+                                    break;
+                                }
+                            }
                             Fyle.acquireLock(sha256);
                             if ((sizeAndSha256 == null) || !Arrays.equals(sha256, sizeAndSha256.sha256)) {
                                 // OMG, the metadata contained an erroneous sha256!!! Delete everything
+                                Logger.e("SHA256 verification failed --> removing received attachment");
                                 List<Long> messageIds = db.fyleMessageJoinWithStatusDao().getMessageIdsForFyleSync(fyle.id);
                                 if ((messageIds.size() == 1) && (messageIds.get(0) == fyleMessageJoinWithStatus.messageId)) {
                                     fyle.delete();
@@ -215,6 +223,8 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                     FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
                     if (fyleMessageJoinWithStatus != null) {
                         fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_FAILED;
+                        // when we mark a FyleMessageJoinWithStatus as FAILED, we also mark it open so we never send a "read receipt" for it
+                        fyleMessageJoinWithStatus.wasOpened = true;
                         FyleProgressSingleton.INSTANCE.finishProgress(fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.messageId);
                         db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                     }
@@ -289,7 +299,6 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                 break;
             }
             case EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED: {
-                // TODO: handle this differently than ATTACHMENT_UPLOADED to show users that the attachment was never actually sent.
                 byte[] bytesOwnedIdentity = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_BYTES_OWNED_IDENTITY_KEY);
                 byte[] engineMessageIdentifier = (byte[]) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_MESSAGE_IDENTIFIER_KEY);
                 Integer engineNumber = (Integer) userInfo.get(EngineNotifications.ATTACHMENT_UPLOAD_CANCELLED_ATTACHMENT_NUMBER_KEY);
@@ -299,10 +308,13 @@ public class EngineNotificationProcessorForMessages implements EngineNotificatio
                         FyleMessageJoinWithStatus fyleMessageJoinWithStatus = db.fyleMessageJoinWithStatusDao().getByEngineIdentifierAndNumber(bytesOwnedIdentity, engineMessageIdentifier, engineNumber);
                         if (fyleMessageJoinWithStatus != null) {
                             fyleMessageJoinWithStatus.status = FyleMessageJoinWithStatus.STATUS_COMPLETE;
+                            fyleMessageJoinWithStatus.receptionStatus = FyleMessageJoinWithStatus.RECEPTION_STATUS_CANCELLED;
                             FyleProgressSingleton.INSTANCE.finishProgress(fyleMessageJoinWithStatus.fyleId, fyleMessageJoinWithStatus.messageId);
                             db.fyleMessageJoinWithStatusDao().update(fyleMessageJoinWithStatus);
                         }
 
+                        // even if the attachment upload was canceled, we still mark the attachment as send in the MessageRecipientInfo
+                        // this allows to properly mark the message as sent and stop the message upload foreground service
                         List<MessageRecipientInfo> messageRecipientInfos = db.messageRecipientInfoDao().getAllByEngineMessageIdentifier(bytesOwnedIdentity, engineMessageIdentifier);
                         if (!messageRecipientInfos.isEmpty()) {
                             long timestamp = System.currentTimeMillis();

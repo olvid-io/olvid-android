@@ -1,0 +1,4 @@
+- Mitmete rakenduse komponentide ümberkujundamine: kontaktkaardid, profiilikaardid, salvestusruumi haldur jne.
+- Lisatud kalendrivaade vestlusse, et kiiresti konkreetsele ajapunktile hüpata.
+- Lisatud sisemine „käimasoleva taasesituse“ kontroller, et hõlpsasti häälteadete vahel vahetada. Häälteadete taasesituse žestide täiustamine.
+- Lisatud võimalus manuse üleslaadimise tühistada.

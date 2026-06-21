@@ -1,0 +1,1 @@
+- 18 yeni dil için destek eklendi: Bulgarca, Bengalce, Estonca, Filipince, Guceratça, Endonezce, Kannada, Letonca, Litvanca, Malayalam, Marathi, Pencapça, Sırpça, Svahili, Tamil, Telugu, Tayca ve Urduca.

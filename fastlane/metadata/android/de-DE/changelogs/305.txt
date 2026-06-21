@@ -1,0 +1,4 @@
+- Neugestaltung verschiedener App-Komponenten: Kontaktkarte, Profilkarte, Speicherverwaltung usw.
+- Hinzufügen einer Kalenderansicht zur Konversation, um schnell zu einem bestimmten Zeitpunkt zu springen.
+- Hinzufügen einer internen „Laufende Wiedergabe“-Steuerung, um einfach zwischen Sprachnachrichten zu wechseln. Einige Verbesserungen der Gesten für die Sprachnachrichtenwiedergabe.
+- Hinzufügen der Möglichkeit, einen Anhangs-Upload abzubrechen.

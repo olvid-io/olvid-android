@@ -3,14 +3,20 @@
 	<string-array name="app_language_choice">
 		<item>@string/pref_text_default_device_language</item>
 		<item>Afrikaans</item>
+		<item>Bahasa Indonesia</item>
 		<item>Català</item>
 		<item>Dansk</item>
 		<item>Deutsch</item>
+		<item>Eesti</item>
 		<item>English</item>
 		<item>Español</item>
+		<item>Filipino</item>
 		<item>Français</item>
 		<item>Hrvatski</item>
 		<item>Italiano</item>
+		<item>Kiswahili</item>
+		<item>Latviešu</item>
+		<item>Lietuvių</item>
 		<item>Magyar</item>
 		<item>Nederlands</item>
 		<item>Norsk</item>
@@ -26,12 +32,24 @@
 		<item>Türkçe</item>
 		<item>Čeština</item>
 		<item>Ελληνικά</item>
+		<item>Български</item>
 		<item>Русский</item>
+		<item>Српски</item>
 		<item>Українська</item>
 		<item>עברית</item>
+		<item>اردو</item>
 		<item>اَلْعَرَبِيَّةُ</item>
 		<item>فارسی</item>
+		<item>मराठी</item>
 		<item>हिन्दी</item>
+		<item>বাংলা</item>
+		<item>ਪੰਜਾਬੀ</item>
+		<item>ગુજરાતી</item>
+		<item>தமிழ்</item>
+		<item>తెలుగు</item>
+		<item>ಕನ್ನಡ</item>
+		<item>മലയാളം</item>
+		<item>ภาษาไทย</item>
 		<item>日本語</item>
 		<item>漢語</item>
 		<item>简体中文</item>
@@ -40,14 +58,20 @@
 	<string-array name="app_language_choice_values">
 		<item>default</item>
 		<item>af</item>
+		<item>in</item>
 		<item>ca</item>
 		<item>da</item>
 		<item>de</item>
+		<item>et</item>
 		<item>en</item>
 		<item>es</item>
+		<item>fil</item>
 		<item>fr</item>
 		<item>hr</item>
 		<item>it</item>
+		<item>sw</item>
+		<item>lv</item>
+		<item>lt</item>
 		<item>hu</item>
 		<item>nl</item>
 		<item>no</item>
@@ -63,12 +87,24 @@
 		<item>tr</item>
 		<item>cs</item>
 		<item>el</item>
+		<item>bg</item>
 		<item>ru</item>
+		<item>sr</item>
 		<item>uk</item>
 		<item>iw</item>
+		<item>ur</item>
 		<item>ar</item>
 		<item>fa</item>
+		<item>mr</item>
 		<item>hi</item>
+		<item>bn</item>
+		<item>pa</item>
+		<item>gu</item>
+		<item>ta</item>
+		<item>te</item>
+		<item>kn</item>
+		<item>ml</item>
+		<item>th</item>
 		<item>ja</item>
 		<item>zh-rTW</item>
 		<item>zh</item>

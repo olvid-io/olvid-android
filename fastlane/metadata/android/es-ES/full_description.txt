@@ -1,0 +1,19 @@
+Olvid es la primera aplicación de mensajería instantánea privada para todos. Envía mensajes, fotos, archivos y realiza llamadas de teléfono y videollamadas seguras.
+
+
+¿Qué es un mensajero "privado"?
+
+Es un mensajero:
+- Que no te impone nuevos contactos. Tú tienes el control: tú eliges con quién quieres hablar. Olvid ofrece varias formas de invitar a otros usuarios de Olvid, ya sea en persona o de forma remota.
+- Que no requiere ningún dato personal. Olvid no te pedirá tu número de teléfono ni tu correo electrónico. A diferencia de tu anterior aplicación de mensajería, Olvid nunca solicitará acceso a tu agenda de contactos.
+- En la que nunca recibirás mensajes no solicitados o mensajes de una fuente desconocida.
+- Donde todos los intercambios se benefician de la misma seguridad y privacidad que una conversación en el mundo real a puerta cerrada. Olvid ofrece cifrado de extremo a extremo y autenticación de extremo a extremo de forma predeterminada, siempre, para todo lo que envíes y recibas.
+
+Olvid te garantiza espacios seguros, inmunes a la agresión externa, que te aíslan del ruido digital y la violencia de otras redes sociales. Crea grupos con tu familia, amigos y colaboradores clave. Sin spam, sin publicidad. Finalmente, recuperas el control total de tus comunicaciones.
+
+Olvid ha sido diseñado para ser el mejor lugar para intercambiar información sobre temas que importan, con las personas que te importan.
+
+
+Olvid - Tecnología
+
+En el corazón de Olvid, un "motor criptográfico" que proviene de varios años de investigación, permite demostrar matemáticamente la integridad, la confidencialidad y el anonimato de tus comunicaciones.

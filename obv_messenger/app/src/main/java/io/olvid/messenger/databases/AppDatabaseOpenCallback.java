@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import io.olvid.engine.Logger;
 import io.olvid.engine.engine.Engine;
+import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto;
 import io.olvid.engine.engine.types.ObvCapability;
 import io.olvid.engine.engine.types.ObvContactInfo;
 import io.olvid.engine.engine.types.identities.ObvGroup;
@@ -148,6 +149,7 @@ public class AppDatabaseOpenCallback implements Runnable {
                 if (!obvDialogUuids.contains(invitation.dialogUuid)) {
                     // this dialog no longer exists on engine side --> delete it
                     db.invitationDao().delete(invitation);
+                    UnreadCountsSingleton.INSTANCE.invitationDeleted(invitation.dialogUuid);
                 }
             }
 
@@ -163,6 +165,7 @@ public class AppDatabaseOpenCallback implements Runnable {
             for (Discussion discussion : db.discussionDao().getAllPreDiscussions()) {
                 if (!db.invitationDao().discussionHasInvitations(discussion.id)) {
                     db.discussionDao().delete(discussion);
+                    UnreadCountsSingleton.INSTANCE.discussionDeleted(discussion.id);
                     ShortcutActivity.disableShortcut(discussion.id);
                 }
             }
@@ -366,6 +369,21 @@ public class AppDatabaseOpenCallback implements Runnable {
                                     break;
                             }
                         }
+                    }
+                }
+                {
+                    // check the photoUrl is up to date
+                    JsonIdentityDetailsWithVersionAndPhoto[] detailsWithVersionAndPhotos = engine.getOwnedIdentityPublishedAndLatestDetails(ownedIdentity.getBytesIdentity());
+                    String publishedPhotoUrl = detailsWithVersionAndPhotos[0].getPhotoUrl();
+                    if (!Objects.equals(publishedPhotoUrl, dbOwnedIdentity.photoUrl)) {
+                        Logger.i("Engine -> App sync: Update OwnedIdentity photoUrl");
+                        dbOwnedIdentity.photoUrl = publishedPhotoUrl;
+                        db.ownedIdentityDao().updateIdentityDetailsAndPhoto(
+                                dbOwnedIdentity.bytesOwnedIdentity,
+                                dbOwnedIdentity.identityDetails,
+                                dbOwnedIdentity.displayName,
+                                publishedPhotoUrl
+                        );
                     }
                 }
                 identitiesHashMap.remove(new BytesKey(ownedIdentity.getBytesIdentity()));

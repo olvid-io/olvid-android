@@ -1,0 +1,4 @@
+- Mendesain ulang beberapa komponen aplikasi: kartu kontak, kartu profil, pengelola penyimpanan, dll.
+- Menambahkan tampilan kalender ke dalam percakapan untuk dengan cepat melompat ke titik waktu tertentu.
+- Menambahkan pengontrol "pemutaran berkelanjutan" internal untuk beralih dengan mudah di antara pesan suara. Beberapa peningkatan pada gerakan pemutaran pesan suara.
+- Menambahkan kemampuan untuk membatalkan pengunggahan lampiran.

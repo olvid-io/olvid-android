@@ -21,7 +21,6 @@ package io.olvid.messenger.group
 import android.animation.LayoutTransition
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Typeface
 import android.graphics.drawable.Animatable
 import android.graphics.drawable.Drawable
@@ -57,7 +56,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updateMargins
@@ -79,7 +77,6 @@ import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.customClasses.EmptyRecyclerView
 import io.olvid.messenger.customClasses.InitialView
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider
-import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.onBackPressed
@@ -97,6 +94,7 @@ import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment
 import io.olvid.messenger.group.EditOwnedGroupDetailsDialogFragment.Companion.newInstance
 import io.olvid.messenger.group.GroupDetailsActivity.GroupMembersAdapter.GroupMemberViewHolder
 import io.olvid.messenger.group.GroupDetailsActivity.PendingGroupMembersAdapter.PendingGroupMemberViewHolder
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.main.MainActivity
 import io.olvid.messenger.webrtc.WebrtcCallService
 
@@ -128,17 +126,11 @@ class GroupDetailsActivity : LockableActivity(), OnClickListener, EngineNotifica
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
 
         super.onCreate(savedInstanceState)
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
 
         setContentView(R.layout.activity_group_details)
         findViewById<CoordinatorLayout>(R.id.group_details_coordinatorLayout)?.let {

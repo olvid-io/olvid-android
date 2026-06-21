@@ -167,7 +167,7 @@ public class ServerQueryOperation extends Operation {
                     }
                     case GET_USER_DATA_QUERY_ID: {
                         ServerQuery.GetUserDataQuery getUserDataQuery = (ServerQuery.GetUserDataQuery) queryType;
-                        serverMethod = new GetUserDataServerMethod(getUserDataQuery.identity, getUserDataQuery.serverLabel, fetchManagerSession.engineBaseDirectory);
+                        serverMethod = new GetUserDataServerMethod(getUserDataQuery.identity, getUserDataQuery.serverLabel, getUserDataQuery.retryIfNotFound, fetchManagerSession.engineBaseDirectory);
                         break;
                     }
                     case CHECK_KEYCLOAK_REVOCATION_QUERY_ID: {
@@ -562,13 +562,15 @@ class GetUserDataServerMethod extends ServerQueryServerMethod {
     protected final Identity identity;
     protected final UID serverLabel;
     protected final String engineBaseDirectory;
+    protected final boolean retryIfNotFound;
 
     protected Encoded serverResponse;
 
-    public GetUserDataServerMethod(Identity identity, UID serverLabel, String engineBaseDirectory) {
+    public GetUserDataServerMethod(Identity identity, UID serverLabel, boolean retryIfNotFound, String engineBaseDirectory) {
         this.server = identity.getServer();
         this.identity = identity;
         this.serverLabel = serverLabel;
+        this.retryIfNotFound = retryIfNotFound;
         this.engineBaseDirectory = engineBaseDirectory;
     }
 
@@ -607,7 +609,7 @@ class GetUserDataServerMethod extends ServerQueryServerMethod {
                 Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
-        } else if (returnStatus == ServerMethod.DELETED_FROM_SERVER) {
+        } else if (returnStatus == ServerMethod.DELETED_FROM_SERVER && !retryIfNotFound) {
             returnStatus = ServerMethod.OK;
             serverResponse = Encoded.of("");
         }
@@ -1480,7 +1482,7 @@ class BackupsV2DownloadProfilePictureServerMethod extends GetUserDataServerMetho
     private final AuthEncKey photoKey;
 
     public BackupsV2DownloadProfilePictureServerMethod(Identity identity, UID photoLabel, AuthEncKey photoKey) {
-        super(identity, photoLabel, null);
+        super(identity, photoLabel, false, null);
         this.photoKey = photoKey;
     }
 

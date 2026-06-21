@@ -45,6 +45,7 @@ public class AlarmPermissionStateChangeReceiver extends BroadcastReceiver {
 
                 // reschedule expiration
                 App.runThread(MessageExpirationService::scheduleNextExpiration);
+                App.runThread(MuteExpirationService::scheduleNextExpiration);
             }
         }
     }

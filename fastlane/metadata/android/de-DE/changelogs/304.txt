@@ -1,0 +1,1 @@
+- Unterstützung für 18 neue Sprachen hinzugefügt: Bulgarisch, Bengalisch, Estnisch, Philippinisch, Gujarati, Indonesisch, Kannada, Lettisch, Litauisch, Malayalam, Marathi, Punjabi, Serbisch, Suaheli, Tamil, Telugu, Thai und Urdu.

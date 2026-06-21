@@ -44,6 +44,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
+
+private const val MAX_BITMAP_BYTES = 80L * 1024 * 1024
 
 class PdfBitmapConverter {
     var renderer: PdfRenderer? = null
@@ -72,8 +75,8 @@ class PdfBitmapConverter {
                     openPage(index).use { page ->
                         val pageRatio = page.width.toFloat() / page.height
                         val screenRatio = maxPageWidthPx / maxPageHeightPx
-                        val width: Int
-                        val height: Int
+                        var width: Int
+                        var height: Int
                         if (pageRatio > screenRatio) {
                             width = maxPageWidthPx.roundToInt()
                             height = (maxPageWidthPx / pageRatio).roundToInt()
@@ -81,10 +84,18 @@ class PdfBitmapConverter {
                             height = maxPageHeightPx.roundToInt()
                             width = (maxPageHeightPx * pageRatio).roundToInt()
                         }
+                        // Canvas refuses to draw bitmaps larger than ~100 MiB; clamp safely below that
+                        val maxBitmapBytes = MAX_BITMAP_BYTES
+                        val estimatedBytes = width.toLong() * height.toLong() * 4
+                        if (estimatedBytes > maxBitmapBytes) {
+                            val scale = sqrt(maxBitmapBytes.toDouble() / estimatedBytes)
+                            width = (width * scale).roundToInt().coerceAtLeast(1)
+                            height = (height * scale).roundToInt().coerceAtLeast(1)
+                        }
                         RenderablePdfPage(
                             width = width,
                             height = height,
-                            key = "${filePath}-${index}",
+                            key = "${filePath}-${index}-${width}x${height}",
                             originalWidth = page.width,
                             originalHeight = page.height,
                             linkContents = if (Build.VERSION.SDK_INT >= 35) page.linkContents else emptyList(),
@@ -92,10 +103,7 @@ class PdfBitmapConverter {
                         ) {
                             val bitmap = createBitmap(width, height)
 
-                            Canvas(bitmap).apply {
-                                drawColor(Color.WHITE)
-                                drawBitmap(bitmap, 0f, 0f, null)
-                            }
+                            Canvas(bitmap).drawColor(Color.WHITE)
 
                             // we synchronize here as old Android API throw an exception when opening a page if another one is already open
                             // on API35 this works fine without the lock

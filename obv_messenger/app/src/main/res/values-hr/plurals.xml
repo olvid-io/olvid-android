@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">Dodaj %1$d člana</item>
 		<item quantity="other" state="needs_review" hash="1091232977">Dodaj %1$d članova</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Predstavite %1$d kontaktu</item>
+		<item quantity="other" state="needs_review" hash="222947824">Predstavite %1$d kontaktima</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">\" na ovom uređaju, vaš prethodni uređaj ispod će biti deaktiviran:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">\" na ovom uređaju, vaši uređaji u nastavku će biti deaktivirani:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">Jeste li sigurni da želite izbrisati odabrani prilog?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">Jeste li sigurni da želite izbrisati odabrane %1$d priloge?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Ako je ovaj prilog priložen više poruka, sve kopije priloga bit će izbrisane.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Ako su ove priloge priložene više poruka, sve kopije priloga bit će izbrisane.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d dan, %2$02dh %3$02dmin %4$02ds</item>

@@ -50,7 +50,7 @@
 	<string name="dialog_message_contact_introduction" state="needs_review" hash="-398698689">Wil je %1$s en %2$s aan elkaar voorstellen?</string>
 	<string name="dialog_message_contact_introduction_multiple" state="needs_review" hash="-1743988418">Wil je %1$s voorstellen aan de %2$d volgende contacten?\n\n%3$s</string>
 	<string name="dialog_message_delete_attachment" state="needs_review" hash="-235504816">Wil je de bijlage %1$s echt verwijderen uit dit bericht?\nDeze actie kan niet ongedaan worden gemaakt.</string>
-	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="-273205987">Wil je de bijlage %1$s echt verwijderen?\nDeze actie kan niet worden ongedaan gemaakt.</string>
+	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="1647132381">Wilt u de bijlage **%1$s** echt verwijderen?\nDeze actie kan niet ongedaan worden gemaakt.</string>
 	<string name="dialog_message_disband_group" state="needs_review" hash="-1617503323">Wil je de groep %1$s ontbinden?\nHet zal dan niet meer mogelijk zijn om berichten naar deze groep te sturen. Bestaande groepsberichten worden hierdoor niet beïnvloed.</string>
 	<string name="dialog_message_disband_non_empty_group_confirmation" state="needs_review" hash="1096257228">Je staat op het punt de groep %1$s te ontbinden.\nDit verwijdert alle leden en wachtende leden uit de groep. Er zijn momenteel:\n- %2$d leden\n- %3$d wachtende leden\n\nGa je door met het ontbinden van deze groep?</string>
 	<string name="dialog_message_exchange_digits" state="needs_review" hash="1612882609">Wil je codes uitwisselen met %1$s om zijn/haar identiteit opnieuw te bevestigen?</string>
@@ -65,6 +65,7 @@
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">Verwijdering bevestigen?</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">Groep ontbinden?</string>
 	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">Zoek een gesprek…</string>
+	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">Voer een datum in.</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">Groepsgegevens bewerken</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">Bewerk je gegevens</string>
 	<string name="dialog_title_exchange_digits" state="needs_review" hash="864614114">Codes uitwisselen</string>
@@ -91,14 +92,18 @@
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Een beheerder heeft de groepsnaam gewijzigd naar:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Een beheerder heeft de groepsbeschrijving gewijzigd naar:</string>
 	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">Een beheerder heeft de groepsfoto gewijzigd.</string>
-	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">Je contact heeft zijn/haar Olvid Card bijgewerkt. Zowel de oude als de nieuwe versie worden hieronder weergegeven.\n\nDruk op \"bijwerken\" om de informatie van je contact bij te werken met deze nieuwe versie.</string>
+	<string name="explanation_new_contact_card_name" state="needs_review" hash="-1601853738">Je contact heeft zijn/haar naam gewijzigd naar:</string>
+	<string name="explanation_new_contact_card_position" state="needs_review" hash="184144104">Je contact heeft zijn/haar functie/bedrijf bijgewerkt.</string>
+	<string name="explanation_new_contact_card_photo" state="needs_review" hash="-252626818">Je contact heeft zijn/haar profielfoto bijgewerkt.</string>
+	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">Je naam is bijgewerkt naar:</string>
+	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">Uw functie/bedrijf is bijgewerkt naar:</string>
+	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">Je profielfoto is bijgewerkt.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">Er wordt momenteel een beveiligd communicatiekanaal opgezet. Je kunt geen gesprek met dit contact starten totdat dit voltooid is. Dit proces zou slechts enkele seconden moeten duren als jij en je contact online zijn.\n\nAls je denkt dat er iets mis is gegaan, kun je het opzetten van het kanaal opnieuw starten.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">Geen contact gevonden</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">Geen groep gevonden</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">Geen berichten gevonden</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Geen bijlage gevonden</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Geen link gevonden</string>
-	<string name="format_identity_details_custom_field" state="needs_review" hash="-1073344790">%1$s: %2$s</string>
 	<string name="hint_company" state="needs_review" hash="379200324">Bedrijf (optioneel)</string>
 	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Bericht schrijven</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Verwijdervolle bericht</string>
@@ -164,15 +169,10 @@
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">Groepskaart - Ongepubliceerde conceptversie</string>
 	<string name="label_group_members" state="needs_review" hash="1460220752">Groepslidmaatschap</string>
 	<string name="label_other_group_members" state="needs_review" hash="-2121490032">Andere groepsleden</string>
-	<string name="label_groups" state="needs_review" hash="-990226727">Groepen</string>
+	<string name="label_groups_common" state="needs_review" hash="1252823567">Gemeenschappelijke groepen</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">Uitnodiging\nafgewezen</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">Groepsgegevens bijgewerkt</string>
-	<string name="label_new_olvid_card" state="needs_review" hash="688199407">Contactgegevens bijgewerkt</string>
 	<string name="label_not_part_of_a_group" state="needs_review" hash="1667979596">Nog geen lid van een groep</string>
-	<string name="label_olvid_card" state="needs_review" hash="-1953461576">Olvid Card</string>
-	<string name="label_olvid_card_published" state="needs_review" hash="-1038740778">Olvid Card - Gepubliceerd</string>
-	<string name="label_olvid_card_published_update" state="needs_review" hash="391148752">Olvid Card - Nieuw</string>
-	<string name="label_olvid_card_unpublished_draft" state="needs_review" hash="-786284715">Olvid Card - Niet-gepubliceerde conceptversie</string>
 	<string name="label_pending_group_members" state="needs_review" hash="1481357803">In afwachting zijnde groepsleden</string>
 	<string name="label_text_copied_from_olvid" state="needs_review" hash="1675378287">Tekst gekopieerd van Olvid</string>
 	<string name="label_trust_origins" state="needs_review" hash="-1177760062">Vertrouwde bronnen</string>
@@ -285,12 +285,16 @@
 	<string name="toast_message_shortcut_not_supported" state="needs_review" hash="-1300016753">Het maken van snelkoppelingen wordt niet ondersteund op uw apparaat</string>
 	<string name="toast_message_unable_to_open_file" state="needs_review" hash="392405293">Er kon geen geschikte applicatie worden gevonden om dit bestandstype te openen</string>
 	<string name="toast_message_unparsable_url" state="needs_review" hash="-135719133">Kan de URL niet correct parsen</string>
-	<string name="trust_origin_direct_type" state="needs_review" hash="-67248053">%1$s - Directe verificatie</string>
-	<string name="trust_origin_group_type" state="needs_review" hash="230302215">%1$s - Groepsuitnodiging van [PLACEHOLDER_2] geaccepteerd</string>
-	<string name="trust_origin_group_v2_type" state="needs_review" hash="-1152079590">%1$s - Uitnodiging voor groep geaccepteerd</string>
-	<string name="trust_origin_introduction_type" state="needs_review" hash="328494718">%1$s - Introductie van</string>
-	<string name="trust_origin_keycloak_type" state="needs_review" hash="1983748673">%2$s - Validatie door de identiteitsprovider op %1$s</string>
-	<string name="trust_origin_unknown_type" state="needs_review" hash="2084263523">%1$s - Onbekende vertrouwensbron</string>
+	<string name="trust_origin_direct_type" state="needs_review" hash="1798276315">Directe verificatie</string>
+	<string name="trust_origin_group_type" state="needs_review" hash="1222060749">Groepsuitnodiging geaccepteerd van</string>
+	<string name="trust_origin_group_v2_type" state="needs_review" hash="-566733151">Uitnodiging voor de groep geaccepteerd</string>
+	<string name="trust_origin_introduction_type" state="needs_review" hash="-266148171">Introductie door </string>
+	<string name="trust_origin_keycloak_type" state="needs_review" hash="-1113573733">Validatie door de identiteitsprovider op %1$s.</string>
+	<string name="trust_origin_unknown_type" state="needs_review" hash="-491114965">Onbekende vertrouwde bron</string>
+	<string name="trust_origin_direct_title" state="needs_review" hash="-1849285555">Je hebt elkaar toegevoegd als contactpersoon.</string>
+	<string name="trust_origin_introduction_title" state="needs_review" hash="-1034826640">Introductie</string>
+	<string name="trust_origin_group_title" state="needs_review" hash="1252823567">Gemeenschappelijke groepen</string>
+	<string name="trust_origin_keycloak_title" state="needs_review" hash="-1917629373">Toegevoegd via het bedrijfsregister</string>
 	<string name="menu_action_delete_contact" state="needs_review" hash="1849106991">Contact verwijderen</string>
 	<string name="menu_action_delete_user" state="needs_review" hash="1683580694">Gebruiker verwijderen</string>
 	<string name="dialog_title_delete_user" state="needs_review" hash="-56212547">Gebruiker verwijderen?</string>
@@ -299,6 +303,7 @@
 	<string name="text_empty_group" state="needs_review" hash="-464714974">Lege groep</string>
 	<string name="message_error_group_name_empty" state="needs_review" hash="1137468023">Voer een groepsnaam in</string>
 	<string name="hint_search_contact_name" state="needs_review" hash="-242911449">Contactnaam zoeken…</string>
+	<string name="hint_search_group_name" state="needs_review" hash="-265074656">Zoek een groep…</string>
 	<string name="menu_action_search" state="needs_review" hash="-2085358317">Zoeken</string>
 	<string name="toast_message_polling_failed" state="needs_review" hash="402242307">Kon geen berichten ophalen</string>
 	<string name="dialog_message_battery_optimization" state="needs_review" hash="1191860407">Batterijoptimalisatie op Android werkt door bepaalde achtergrondgebeurtenissen uit te stellen en ze in batches uit te voeren. Dit kan de ontvangst van binnenkomende Olvid-berichten vertragen.\n\nOm ervoor te zorgen dat je berichten snel worden ontvangen, moet je Olvid toestaan om \"altijd op de achtergrond te draaien\". Druk op \"Instellingen\" hieronder en vervolgens op \"Toestaan\".</string>
@@ -819,6 +824,11 @@
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Mediaspeler</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Afspelen/pauzeren tijdens het afspelen van media in Olvid</string>
 	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Kan het audi bestand niet afspelen.</string>
+	<string name="label_voice_message" state="needs_review" hash="-348491668">Spraakbericht</string>
+	<string name="content_description_skip_previous" state="needs_review" hash="836036575">Vorige audio</string>
+	<string name="content_description_skip_next" state="needs_review" hash="-878180801">Volgende audio</string>
+	<string name="content_description_audio_play" state="needs_review" hash="1143766922">Afspelen</string>
+	<string name="content_description_audio_pause" state="needs_review" hash="1931883968">Pauze</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Verwijderen</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Overal verwijderen</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Kon niet overal verwijderen. Probeer het opnieuw.</string>
@@ -919,6 +929,7 @@
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Je Olvid-ID wordt momenteel beheerd door de identiteitsprovider van je bedrijf. Je kunt geen Olvid-licentie handmatig activeren.\n\nNeem contact op met je beheerder voor meer informatie.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Gemiste oproep</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Contactgegevens bijgewerkt</string>
+	<string name="text_own_details_updated" state="needs_review" hash="-1335488506">Details bijgewerkt</string>
 	<string name="text_group_details_updated" state="needs_review" hash="1016500852">Groepsgegevens bijgewerkt</string>
 	<string name="dialog_title_sd_card_ringtone_bugged_android_9" state="needs_review" hash="-1202187296">Android 9 notificatiegeluid bug</string>
 	<string name="dialog_message_sd_card_ringtone_bugged_android_9" state="needs_review" hash="1449296723">Olvid kan het door jou geselecteerde meldinggeluid niet gebruiken. Het is uitgeschakeld. Een bug in Android 9 verhindert het gebruik van aangepaste meldinggeluiden in apps die geen toegang tot externe opslag/SD-kaart aanvragen.\n\nProbeer een standaardmeldinggeluid te selecteren. Tot die tijd blijven je meldingen stil.</string>
@@ -1014,6 +1025,10 @@
 	<string name="dialog_title_available_space_low" state="needs_review" hash="610249394">Opslagruimte van het apparaat bijna vol</string>
 	<string name="dialog_message_available_space_low" state="needs_review" hash="78499573">Je apparaat heeft weinig beschikbare ruimte. Verwacht onverwachte fouten bij het ontvangen of verzenden van bestanden met Olvid.\n\nDit is waarschijnlijk het juiste moment om ruimte op je apparaat vrij te maken.</string>
 	<string name="button_label_manage_storage" state="needs_review" hash="-918485427">Opslag beheren</string>
+	<string name="label_storage_all_files" state="needs_review" hash="1735747130">Alle bestanden</string>
+	<string name="label_storage_sent_by_me" state="needs_review" hash="640456592">Verzonden door mij</string>
+	<string name="label_storage_large_files" state="needs_review" hash="-257706820">Groter dan 5 MB</string>
+	<string name="label_storage_discussions" state="needs_review" hash="491497248">Gesprekken</string>
 	<string name="pref_use_internal_image_viewer_title" state="needs_review" hash="1319400578">Gebruik interne afbeeldingsviewer</string>
 	<string name="pref_use_internal_image_viewer_summary" state="needs_review" hash="1248137666">Wanneer geactiveerd, opent het klikken op een bijlage met een afbeelding deze in de interne viewer. Anders wordt de standaardafbeeldingstoepassing van je apparaat gebruikt.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Afbeelding kan niet worden weergegeven</string>
@@ -1166,7 +1181,7 @@
 	<string name="dialog_message_delete_profile_multi" state="needs_review" hash="-2003495595">Het verwijderen van een profiel verwijdert alle informatie die met dit profiel op je apparaat is gekoppeld. Dit omvat je contacten, groepen en de inhoud van al je gesprekken (berichten en bijlagen) voor dit profiel. Je andere profielen worden niet beïnvloed door deze bewerking.\n\nDruk op \"volgende\" om te kiezen hoe dit profiel moet worden verwijderd.</string>
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Het verwijderen van een profiel verwijdert alle informatie die aan dit profiel op uw apparaat is gekoppeld. Dit omvat uw contacten, groepen en de inhoud van al uw gesprekken (berichten en bijlagen) voor dit profiel.\n\n<b>Dit is uw enige zichtbare profiel en als u verborgen profielen heeft, worden deze tegelijkertijd verwijderd.</b>\n\nDruk op \"volgende\" om te kiezen hoe dit profiel verwijderd moet worden.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Profiel <b>overal</b> verwijderen</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">Typ \"%1$s\" hier om verder te gaan</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">Typ hier \\"%1$s\\" om verder te gaan</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">Als je ervoor kiest om je profiel <b>overal</b> te verwijderen:\n - het wordt lokaal verwijderd <b>en</b> van de apparaten van je contacten\n - je verlaat de groepen waar je lid van bent\n - groepen die je beheert worden ontbonden\n\nAls je je profiel niet <b>overal</b> verwijdert, wordt het alleen lokaal op je apparaat verwijderd. Tenzij je van plan bent een back-up op een ander apparaat te herstellen, kunnen je contacten nog steeds proberen je berichten te sturen en zich mogelijk niet realiseren dat deze berichten niet kunnen worden afgeleverd.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">Je huidige profiel lijkt inactief, waarschijnlijk omdat je het naar een ander apparaat hebt overgezet. Als je van plan bent om dit profiel op je andere apparaat te blijven gebruiken, kun je het hier veilig verwijderen.\n\nAls je dit profiel nooit meer wilt gebruiken, moet je het eerst op dit apparaat opnieuw activeren, wachten tot de beveiligde kanalen met je contacten opnieuw zijn aangemaakt en pas dan dit profiel verwijderen door de optie \"overal verwijderen\" te kiezen.</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">Je profiel is momenteel actief op meerdere apparaten.\n\nAls je ervoor kiest om je profiel <b>overal</b> te verwijderen:\n	- het wordt verwijderd van al je apparaten <b>en</b> van de apparaten van je contacten\n	- je verlaat de groepen waar je lid van bent\n	- de groepen die je beheert worden ontbonden\n\nAls je je profiel niet <b>overal</b> verwijdert, wordt het alleen lokaal verwijderd en kun je het normaal blijven gebruiken op je andere apparaten.</string>
@@ -1250,9 +1265,6 @@
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Groepen v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
 	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Gebruik geanimeerde emoji\'s (indien beschikbaar)</string>
-	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Opslagruimte profiel</string>
-	<string name="label_photos" state="needs_review" hash="1539779714">Foto\'s</string>
-	<string name="label_videos" state="needs_review" hash="-101497740">Video\'s</string>
 	<string name="label_audio" state="needs_review" hash="-779820608">Audio</string>
 	<string name="label_other" state="needs_review" hash="-543765264">Overige</string>
 	<string name="label_all" state="needs_review" hash="752498555">Alle</string>
@@ -1267,14 +1279,7 @@
 	<string name="menu_action_sort_date_alt" state="needs_review" hash="646746321">Sorteer op datum (oudste eerst)</string>
 	<string name="menu_action_sort_size_alt" state="needs_review" hash="1986077505">Sorteer op grootte (kleinste eerst)</string>
 	<string name="menu_action_sort_name_alt" state="needs_review" hash="-802793419">Sorteer op naam (omgekeerd)</string>
-	<string name="text_sent_by_xx" state="needs_review" hash="248848108">Verzonden door %1$s</string>
 	<string name="text_unknown_sender" state="needs_review" hash="1913018414">Onbekende afzender</string>
-	<string name="text_sent_to_xx" state="needs_review" hash="918571953">Verzonden naar %1$s</string>
-	<string name="text_draft_for_xx" state="needs_review" hash="2063814784">Concept voor %1$s</string>
-	<string name="label_loading_attachments" state="needs_review" hash="856026474">Bijlagen worden geladen…</string>
-	<string name="dialog_message_delete_attachment_for_many_messages" state="needs_review" hash="1800265017">De bijlage %2$s is bijgevoegd aan %1$d verschillende berichten. Wil je alleen deze verwijderen, of deze verwijderen uit alle %1$d berichten?\nDeze actie kan niet ongedaan worden gemaakt.</string>
-	<string name="button_label_delete_one" state="needs_review" hash="-1916938532">Eén verwijderen</string>
-	<string name="button_label_delete_all" state="needs_review" hash="-985749327">Verwijder alle %1$d</string>
 	<string name="dialog_title_save_selected_attachments" state="needs_review" hash="-405982081">Geselecteerde bijlagen opslaan</string>
 	<string name="pref_category_contacts_and_groups" state="needs_review" hash="1531647661">Contacten en groepen</string>
 	<string name="pref_auto_join_groups_title" state="needs_review" hash="29822089">Accepteer groepsuitnodigingen automatisch…</string>
@@ -1636,7 +1641,7 @@
 	<string name="button_label_remove" state="needs_review" hash="1097276765">Verwijderen</string>
 	<string name="menu_action_remove_expiration" state="needs_review" hash="-156931599">Houd dit apparaat actief</string>
 	<string name="dialog_title_set_unexpiring_device" state="needs_review" hash="-1488033285">Houd een apparaat actief</string>
-	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1293464179">Je hebt momenteel geen licentie om meerdere actieve apparaten te gebruiken. Als je zo\'n licentie wilt aanschaffen, sluit dan dit dialoogvenster en druk op \"Bekijk abonnementen\" hieronder.\n\nOm verder te gaan en apparaat \"%1$s\" actief te houden, wordt apparaat \"%2$s\" in plaats daarvan gedeactiveerd. Wil je doorgaan?</string>
+	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1457083107">U heeft momenteel geen licentie om meerdere actieve apparaten te gebruiken. Als u een dergelijke licentie wilt aanschaffen, sluit u dan dit dialoogvenster en klikt u op \"Bekijk abonnementen\" hieronder.\n\nOm verder te gaan en apparaat \"%1$s\" actief te houden, wordt apparaat \"%2$s\" in plaats daarvan gedeactiveerd. Wilt u doorgaan?</string>
 	<string name="dialog_title_remove_background_image" state="needs_review" hash="488158841">Huidige achtergrondafbeelding verwijderen?</string>
 	<string name="dialog_title_introducing_markdown" state="needs_review" hash="175399162">We introduceren berichtopmaak!</string>
 	<string name="dialog_message_introducing_markdown" state="needs_review" hash="1738415115">Olvid staat je nu toe om je berichten op te maken met behulp van markdown syntax🎨!\n\nSchrijf in **<b>vet</b>**, in *<i>cursief</i>*, voeg # <big>KOPSCHRIFTEN</big> toe, etc.\n\nJe vindt de lijst met alle ondersteunde tags🦍 op:\nhttps://www.olvid.io/faq/format-your-messages/</string>
@@ -2041,6 +2046,7 @@
 	<string name="button_label_this_way" state="needs_review" hash="747183939">Hiernaartoe</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">Code gekopieerd</string>
 	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">Selecteer wie je aan deze groep wilt toevoegen.</string>
+	<string name="explanation_choose_contact_introduction" state="needs_review" hash="1113777517">Selecteer aan wie je %1$s wilt voorstellen.</string>
 	<string name="label_group_administration" state="needs_review" hash="871355986">Groepsbeheer</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">Oproep geblokkeerd</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid staat het niet toe om een gesprek te starten met meer dan %1$d personen.</string>
@@ -2154,6 +2160,7 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Bezig met onderhandelen</string>
 	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Bezig met overdragen</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Overdracht voltooid</string>
+	<string name="history_transfer_step_processing_buffered_data" state="needs_review" hash="-1359029280">Verwerking van de ontvangen gegevens</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Overdracht mislukt</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Chatgeschiedenis overzetten</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Kan de overdracht niet starten. Mogelijk is er al een andere overdracht gaande.</string>
@@ -2272,7 +2279,8 @@
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Bezig met importeren</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analyseer inhoud</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Geëxporteerde gesprekken worden geanalyseerd</string>
-	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Er is een fout opgetreden bij het laden van het OpenStreetMap-stijlbestand.</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">Er is een fout opgetreden bij het laden van het OpenStreetMap-stijlbestand.</string>
 	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">In-app abonnementen zijn niet beschikbaar.</string>
 	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">De versie van Olvid die u heeft geïnstalleerd, bevat niet de Google Billing-bibliotheek en ondersteunt geen in-app-aankopen.\n\nNeem voor meer informatie contact met ons op via **feedback@olvid.io**.</string>
+	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">Upload annuleren</string>
 </resources>

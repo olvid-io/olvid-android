@@ -1,0 +1,1 @@
+- Pridėta 18 naujų kalbų palaikymas: bulgarų, bengalų, estų, filipinų, gudžaratų, indoneziečių, kanadų, latvių, lietuvių, malajalių, marathų, pandžabų, serbų, suahilių, tamilų, telugų, tajų ir urdų.

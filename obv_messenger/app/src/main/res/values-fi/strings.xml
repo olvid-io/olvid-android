@@ -50,7 +50,7 @@
 	<string name="dialog_message_contact_introduction" state="needs_review" hash="-398698689">Haluatko esitellä %1$s:n ja %2$s:n toisilleen?</string>
 	<string name="dialog_message_contact_introduction_multiple" state="needs_review" hash="-1743988418">Haluatko esitellä %1$s seuraaville %2$d kontaktille?\n\n%3$s</string>
 	<string name="dialog_message_delete_attachment" state="needs_review" hash="-235504816">Haluatko todella poistaa liitteen %1$s tästä viestistä?\nTätä toimintoa ei voi peruuttaa.</string>
-	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="-273205987">Haluatko todella poistaa liitteen %1$s?\nTätä toimintoa ei voi peruuttaa.</string>
+	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="1647132381">Haluatko todella poistaa liitteen **%1$s**?\nTätä toimintoa ei voi peruuttaa.</string>
 	<string name="dialog_message_disband_group" state="needs_review" hash="-1617503323">Haluatko hajottaa ryhmän %1$s?\nRyhmään ei enää voi lähettää viestejä. Olemassa olevat ryhmäviestit eivät muutu.</string>
 	<string name="dialog_message_disband_non_empty_group_confirmation" state="needs_review" hash="1096257228">Olet aikeissa hajottaa ryhmän %1$s.\nTämä poistaa kaikki jäsenet ja odottavat jäsenet ryhmästä. Tällä hetkellä on:\n- %2$d jäsentä\n- %3$d odottavaa jäsentä\n\nJatketaanko ryhmän hajottamista?</string>
 	<string name="dialog_message_exchange_digits" state="needs_review" hash="1612882609">Haluatko vaihtaa koodeja käyttäjän %1$s kanssa vahvistaaksesi hänen henkilöllisyytensä uudelleen?</string>
@@ -65,6 +65,7 @@
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">Vahvista poisto?</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">Hajota ryhmä?</string>
 	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">Etsi keskustelua…</string>
+	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">Syötä päivämäärä</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">Muokkaa ryhmän tietoja</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">Muokkaa tietojasi</string>
 	<string name="dialog_title_exchange_digits" state="needs_review" hash="864614114">Vaihda koodeja</string>
@@ -91,14 +92,18 @@
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Ylläpitäjä muutti ryhmän nimen muotoon:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Ylläpitäjä muutti ryhmän kuvauksen muotoon:</string>
 	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">Ryhmän ylläpitäjä vaihtoi ryhmäkuvan.</string>
-	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">Yhteyshenkilösi on päivittänyt Olvid Cardinsa. Sekä vanha että uusi versio näkyvät alla.\n\nPaina \"päivitä\" päivittääksesi yhteyshenkilösi tiedot tällä uudella versiolla.</string>
+	<string name="explanation_new_contact_card_name" state="needs_review" hash="-1601853738">Yhteyshenkilösi on päivittänyt nimensä:</string>
+	<string name="explanation_new_contact_card_position" state="needs_review" hash="184144104">Yhteyshenkilösi on päivittänyt sijaintiaan/työpaikkaansa:</string>
+	<string name="explanation_new_contact_card_photo" state="needs_review" hash="-252626818">Yhteyshenkilösi on päivittänyt profiilikuvan.</string>
+	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">Nimesi on päivitetty:</string>
+	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">Tittelisi/yrityksesi on päivitetty:</string>
+	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">Profiilikuvasi on päivitetty.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">Turvallinen viestintäkanava luodaan parhaillaan. Et voi aloittaa keskustelua tämän kontaktin kanssa ennen kuin se on valmis. Tämän prosessin pitäisi kestää vain muutaman sekunnin, jos sinä ja kontaktisi olette online-tilassa.\n\nJos uskot, että jotain meni pieleen, voit käynnistää kanavan luonnin uudelleen.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">Yhteyttä ei löytynyt</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">Ryhmää ei löytynyt</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">Viestiä ei löytynyt</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Yhtään liitettä ei löytynyt</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Linkkiä ei löytynyt</string>
-	<string name="format_identity_details_custom_field" state="needs_review" hash="-1073344790">%1$s: %2$s</string>
 	<string name="hint_company" state="needs_review" hash="379200324">Yritys (valinnainen)</string>
 	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Kirjoita viesti</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Lyhytaikainen viesti</string>
@@ -164,15 +169,10 @@
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">Ryhmäkortti - Julkaisematon luonnos</string>
 	<string name="label_group_members" state="needs_review" hash="1460220752">Ryhmän jäsenet</string>
 	<string name="label_other_group_members" state="needs_review" hash="-2121490032">Muut ryhmän jäsenet</string>
-	<string name="label_groups" state="needs_review" hash="-990226727">Ryhmät</string>
+	<string name="label_groups_common" state="needs_review" hash="1252823567">Yhteiset ryhmät</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">Kutsu\nhylätty</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">Ryhmän tiedot päivitetty</string>
-	<string name="label_new_olvid_card" state="needs_review" hash="688199407">Yhteystiedot päivitetty</string>
 	<string name="label_not_part_of_a_group" state="needs_review" hash="1667979596">Et vielä osana yhtään ryhmää</string>
-	<string name="label_olvid_card" state="needs_review" hash="-1953461576">Olvid Card</string>
-	<string name="label_olvid_card_published" state="needs_review" hash="-1038740778">Olvid Card - Julkaistu</string>
-	<string name="label_olvid_card_published_update" state="needs_review" hash="391148752">Olvid Card - Uusi</string>
-	<string name="label_olvid_card_unpublished_draft" state="needs_review" hash="-786284715">Olvid Card - Julkaisematon luonnos</string>
 	<string name="label_pending_group_members" state="needs_review" hash="1481357803">Odotavat ryhmän jäsenet</string>
 	<string name="label_text_copied_from_olvid" state="needs_review" hash="1675378287">Teksti kopioitu Olvidista</string>
 	<string name="label_trust_origins" state="needs_review" hash="-1177760062">Luotettavat lähteet</string>
@@ -285,12 +285,16 @@
 	<string name="toast_message_shortcut_not_supported" state="needs_review" hash="-1300016753">Pikanäppäimien luominen ei ole tuettu laitteellasi</string>
 	<string name="toast_message_unable_to_open_file" state="needs_review" hash="392405293">Sovellusta ei löytynyt tämän tiedostotyypin avaamiseen</string>
 	<string name="toast_message_unparsable_url" state="needs_review" hash="-135719133">URL-osoitetta ei voitu jäsentää oikein</string>
-	<string name="trust_origin_direct_type" state="needs_review" hash="-67248053">%1$s - Suora vahvistus</string>
-	<string name="trust_origin_group_type" state="needs_review" hash="230302215">%1$s - Ryhmäkutsun hyväksytty käyttäjältä [PLACEHOLDER_2]</string>
-	<string name="trust_origin_group_v2_type" state="needs_review" hash="-1152079590">%1$s - Kutsu ryhmään hyväksytty</string>
-	<string name="trust_origin_introduction_type" state="needs_review" hash="328494718">%1$s - Esittely\u0020</string>
-	<string name="trust_origin_keycloak_type" state="needs_review" hash="1983748673">%2$s - Identiteetintarjoajan vahvistus klo %1$s</string>
-	<string name="trust_origin_unknown_type" state="needs_review" hash="2084263523">%1$s - Tuntematon luottamuksen lähde</string>
+	<string name="trust_origin_direct_type" state="needs_review" hash="1798276315">Henkilökohtainen vahvistus</string>
+	<string name="trust_origin_group_type" state="needs_review" hash="1222060749">Hyväksytty kutsukutsu ryhmään, jonka on luonut</string>
+	<string name="trust_origin_group_v2_type" state="needs_review" hash="-566733151">Kutsu ryhmään hyväksytty</string>
+	<string name="trust_origin_introduction_type" state="needs_review" hash="-266148171">Esittelyn tarjoaa</string>
+	<string name="trust_origin_keycloak_type" state="needs_review" hash="-1113573733">Identiteettipalveluntarjoajan vahvistus kohdassa %1$s</string>
+	<string name="trust_origin_unknown_type" state="needs_review" hash="-491114965">Tuntematon luottamuksen lähde</string>
+	<string name="trust_origin_direct_title" state="needs_review" hash="-1849285555">Olette lisänneet toisenne yhteystietoihinne</string>
+	<string name="trust_origin_introduction_title" state="needs_review" hash="-1034826640">Esittely</string>
+	<string name="trust_origin_group_title" state="needs_review" hash="1252823567">Yhteiset ryhmät</string>
+	<string name="trust_origin_keycloak_title" state="needs_review" hash="-1917629373">Lisätty osoitehakemiston kautta</string>
 	<string name="menu_action_delete_contact" state="needs_review" hash="1849106991">Poista yhteyshenkilö</string>
 	<string name="menu_action_delete_user" state="needs_review" hash="1683580694">Poista käyttäjä</string>
 	<string name="dialog_title_delete_user" state="needs_review" hash="-56212547">Poista käyttäjä?</string>
@@ -299,6 +303,7 @@
 	<string name="text_empty_group" state="needs_review" hash="-464714974">Tyhjä ryhmä</string>
 	<string name="message_error_group_name_empty" state="needs_review" hash="1137468023">Anna ryhmän nimi</string>
 	<string name="hint_search_contact_name" state="needs_review" hash="-242911449">Etsi kontaktin nimi…</string>
+	<string name="hint_search_group_name" state="needs_review" hash="-265074656">Hae ryhmän nimeä…</string>
 	<string name="menu_action_search" state="needs_review" hash="-2085358317">Hae</string>
 	<string name="toast_message_polling_failed" state="needs_review" hash="402242307">Viestien hakeminen epäonnistui</string>
 	<string name="dialog_message_battery_optimization" state="needs_review" hash="1191860407">Androidin virransäästö toimii viivästyttämällä tiettyjä taustatoimintoja ja suorittamalla ne yhdessä erässä. Tämä voi viivästyttää saapuvien Olvid-viestien vastaanottoa.\n\nJotta viestisi vastaanotetaan nopeasti, sinun tulee sallia Olvidin \"toimia aina taustalla\". Paina alla olevaa \"Asetukset\"-painiketta ja valitse sitten \"Salli\".</string>
@@ -819,6 +824,11 @@
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Mediasoitin</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Toisto-/tauko-ohjaimet median toiston aikana Olvidissa</string>
 	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Äänitiedoston toisto ei onnistu</string>
+	<string name="label_voice_message" state="needs_review" hash="-348491668">Ääniviesti</string>
+	<string name="content_description_skip_previous" state="needs_review" hash="836036575">Edellinen ääniviesti</string>
+	<string name="content_description_skip_next" state="needs_review" hash="-878180801">Seuraava ääniviesti</string>
+	<string name="content_description_audio_play" state="needs_review" hash="1143766922">Toista</string>
+	<string name="content_description_audio_pause" state="needs_review" hash="1931883968">Tauko</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Poista</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Poista kaikkialta</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Poistaminen ei onnistunut kaikista laitteista. Yritä uudelleen.</string>
@@ -919,6 +929,7 @@
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Olvid-tunnuksesi hallinnoi tällä hetkellä yrityksesi identiteetintarjoaja. Et voi aktivoida Olvid-lisenssiä manuaalisesti.\n\nOta yhteyttä järjestelmänvalvojaan saadaksesi lisätietoja.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Puuttuva soitto</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Yhteystiedot päivitetty</string>
+	<string name="text_own_details_updated" state="needs_review" hash="-1335488506">Tiedot päivitetty</string>
 	<string name="text_group_details_updated" state="needs_review" hash="1016500852">Ryhmän tiedot päivitetty</string>
 	<string name="dialog_title_sd_card_ringtone_bugged_android_9" state="needs_review" hash="-1202187296">Android 9 ilmoitusääni virhe</string>
 	<string name="dialog_message_sd_card_ringtone_bugged_android_9" state="needs_review" hash="1449296723">Olvid ei voi käyttää valitsemaasi ilmoitusääntä. Se on poistettu käytöstä. Android 9:n virhe estää mukautettujen ilmoitusäänien käytön sovelluksissa, jotka eivät pyydä pääsyä ulkoiseen tallennustilaan/SD-korttiin.\n\nKokeile valita oletusilmoitusääni. Siihen asti ilmoituksesi pysyvät hiljaisina.</string>
@@ -1014,6 +1025,10 @@
 	<string name="dialog_title_available_space_low" state="needs_review" hash="610249394">Laitteen tallennustila on lähes täynnä</string>
 	<string name="dialog_message_available_space_low" state="needs_review" hash="78499573">Laitteessasi on vähän vapaata tilaa. Voit odottaa odottamattomia virheitä tiedostojen vastaanottamisessa tai lähettämisessä Olvidin avulla.\n\nTämä on todennäköisesti oikea aika vapauttaa tilaa laitteellasi.</string>
 	<string name="button_label_manage_storage" state="needs_review" hash="-918485427">Hallitse tallennustilaa</string>
+	<string name="label_storage_all_files" state="needs_review" hash="1735747130">Kaikki tiedostot</string>
+	<string name="label_storage_sent_by_me" state="needs_review" hash="640456592">Minä lähetin</string>
+	<string name="label_storage_large_files" state="needs_review" hash="-257706820">Suurempi kuin 5 Mt</string>
+	<string name="label_storage_discussions" state="needs_review" hash="491497248">Keskustelut</string>
 	<string name="pref_use_internal_image_viewer_title" state="needs_review" hash="1319400578">Käytä sisäistä kuvankatselinta</string>
 	<string name="pref_use_internal_image_viewer_summary" state="needs_review" hash="1248137666">Kun se on käytössä, kuvan liitetiedostoon klikkaaminen avaa sen sisäisessä katseluohjelmassa. Muussa tapauksessa käytetään laitteesi oletuskuvasovellusta.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Kuvaa ei voitu näyttää</string>
@@ -1167,7 +1182,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Profiilin poistaminen poistaa kaikki tähän profiiliin liittyvät tiedot laitteeltasi. Tämä sisältää yhteystietosi, ryhmäsi ja kaikkien keskustelujesi sisällön (viestit ja liitteet) tälle profiilille.\n\n<b>Tämä on ainoa näkyvä profiilisi ja jos sinulla on piilotettuja profiileja, ne poistetaan samanaikaisesti.</b>\n\nPaina \"Seuraava\" valitaksesi, miten tämä profiili poistetaan.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Poista profiili <b>kaikkialta</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">Kirjoita \"%1$s\" tähän jatkaaksesi</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">Kirjoita \\"%1$s\\" tähän jatkaaksesi</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">Jos valitset poistaa profiilisi <b>kaikkialta</b>:\n - se poistetaan paikallisesti <b>ja</b> yhteystietojesi laitteilta\n - poistut kaikista liitymistäsi ryhmistä\n - hallinnoimasi ryhmät hajotetaan\n\nJos <b>et</b> poista profiiliasi kaikkialta, se poistetaan vain paikallisesti laitteeltasi. Ellei sinulla ole suunnitelmissa palauttaa varmuuskopiota toiselle laitteelle, yhteystietosi saattavat edelleen yrittää lähettää sinulle viestejä eivätkä välttämättä ymmärrä, että näitä viestejä ei voida toimittaa.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">Nykyinen profiilisi näyttää olevan epäaktiivinen, todennäköisesti koska olet siirtänyt sen toiseen laitteeseen. Jos aiot jatkaa tämän profiilin käyttöä toisessa laitteessa, voit poistaa sen turvallisesti täältä.\n\nJos et enää halua käyttää tätä profiilia, sinun on ensin aktivoitava se uudelleen tässä laitteessa, odotettava suojattujen kanavien palautumista yhteystietojesi kanssa ja vasta sitten poistettava tämä profiili valitsemalla vaihtoehto \"poista kaikkialta\".</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">Profiilisi on tällä hetkellä käytössä useilla laitteilla.\n\nJos valitset poistaa profiilisi <b>kaikkialta</b>:\n - se poistetaan kaikista laitteistasi <b>ja</b> yhteystietojesi laitteista\n - poistut kaikista liittymistäsi ryhmistä\n - hallinnoimasi ryhmät hajotetaan\n\nJos <b>et</b> poista profiiliasi kaikkialta, se poistetaan vain paikallisesti ja voit jatkaa sen käyttöä normaalisti muilla laitteillasi.</string>
@@ -1251,9 +1266,6 @@
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Ryhmät v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
 	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Käytä animoituja hymiöitä (jos saatavilla)</string>
-	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Profiilin tallennustilan käyttö</string>
-	<string name="label_photos" state="needs_review" hash="1539779714">Kuvat</string>
-	<string name="label_videos" state="needs_review" hash="-101497740">Videot</string>
 	<string name="label_audio" state="needs_review" hash="-779820608">Ääni</string>
 	<string name="label_other" state="needs_review" hash="-543765264">Muut</string>
 	<string name="label_all" state="needs_review" hash="752498555">Kaikki</string>
@@ -1268,14 +1280,7 @@
 	<string name="menu_action_sort_date_alt" state="needs_review" hash="646746321">Lajittele päivämäärän mukaan (vanhimmat ensin)</string>
 	<string name="menu_action_sort_size_alt" state="needs_review" hash="1986077505">Lajittele koon mukaan (pienimmästä alkaen)</string>
 	<string name="menu_action_sort_name_alt" state="needs_review" hash="-802793419">Lajittele nimen mukaan (käänteinen)</string>
-	<string name="text_sent_by_xx" state="needs_review" hash="248848108">Lähetetty %1$s:n kautta</string>
 	<string name="text_unknown_sender" state="needs_review" hash="1913018414">Tuntematon lähettäjä</string>
-	<string name="text_sent_to_xx" state="needs_review" hash="918571953">Lähetetty %1$s:lle</string>
-	<string name="text_draft_for_xx" state="needs_review" hash="2063814784">Luonnos %1$s:lle</string>
-	<string name="label_loading_attachments" state="needs_review" hash="856026474">Liitteiden lataus…</string>
-	<string name="dialog_message_delete_attachment_for_many_messages" state="needs_review" hash="1800265017">Liite %2$s on liitetty %1$d eri viestiin. Haluatko poistaa vain tämän, vai poistaa sen kaikista %1$d viestistä?\nTätä toimintoa ei voi peruuttaa.</string>
-	<string name="button_label_delete_one" state="needs_review" hash="-1916938532">Poista yksi</string>
-	<string name="button_label_delete_all" state="needs_review" hash="-985749327">Poista kaikki %1$d</string>
 	<string name="dialog_title_save_selected_attachments" state="needs_review" hash="-405982081">Tallenna valitut liitteet</string>
 	<string name="pref_category_contacts_and_groups" state="needs_review" hash="1531647661">Yhteystiedot ja ryhmät</string>
 	<string name="pref_auto_join_groups_title" state="needs_review" hash="29822089">Hyväksy ryhmäkutsu automaattisesti…</string>
@@ -1637,7 +1642,7 @@
 	<string name="button_label_remove" state="needs_review" hash="1097276765">Poista</string>
 	<string name="menu_action_remove_expiration" state="needs_review" hash="-156931599">Pidä tämä laite aktiivisena</string>
 	<string name="dialog_title_set_unexpiring_device" state="needs_review" hash="-1488033285">Pidä laite aktiivisena</string>
-	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1293464179">Sinulla ei ole tällä hetkellä lisenssiä useisiin aktiivisiin laitteisiin. Jos haluat ostaa tällaisen lisenssin, sulje tämä valintaikkuna ja paina alla olevaa painiketta \"Katso tilauspaketit\".\n\nJatkaaksesi ja pitääksesi laitteen \"%1$s\" aktiivisena, laite \"%2$s\" deaktivoidaan sen sijaan. Haluatko jatkaa?</string>
+	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1457083107">Sinulla ei tällä hetkellä ole lisenssiä, joka sallisi useiden laitteiden samanaikaisen käytön. Jos haluat ostaa tällaisen lisenssin, sulje tämä ikkuna ja paina alla olevaa painiketta \\"Näytä tilausvaihtoehdot\\".\n\nJatkaaksesi ja pitääksesi laitteen \\"%1$s\\" aktiivisena, laite \\"%2$s\\" deaktivoidaan sen sijaan. Haluatko jatkaa?</string>
 	<string name="dialog_title_remove_background_image" state="needs_review" hash="488158841">Poistetaanko nykyinen taustakuva?</string>
 	<string name="dialog_title_introducing_markdown" state="needs_review" hash="175399162">Esittelemme viestien muotoilua!</string>
 	<string name="dialog_message_introducing_markdown" state="needs_review" hash="1738415115">Olvidin avulla voit nyt muotoilla viestisi markdown-syntaksilla 🎨!\n\nKirjoita **<b>lihavoitu</b>**, *<i>kursivoitu</i>*, lisää # <big>OTSIKOT</big>, jne.\n\nLöydät luettelon kaikista tuetuista tunnisteista 🦍 osoitteesta:\nhttps://www.olvid.io/faq/format-your-messages/</string>
@@ -2042,6 +2047,7 @@
 	<string name="button_label_this_way" state="needs_review" hash="747183939">Täältä</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">Koodi kopioitu</string>
 	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">Valitse, ketkä haluat lisätä tähän ryhmään.</string>
+	<string name="explanation_choose_contact_introduction" state="needs_review" hash="1113777517">Valitse, kenelle haluat esitellä %1$s.</string>
 	<string name="label_group_administration" state="needs_review" hash="871355986">Ryhmän hallinta</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">Estetty puhelu</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid ei salli puhelun aloittamista yli %1$d henkilön kanssa.</string>
@@ -2155,6 +2161,7 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Neuvottelemassa</string>
 	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Siirtäminen</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Siirto valmis</string>
+	<string name="history_transfer_step_processing_buffered_data" state="needs_review" hash="-1359029280">Vastaanotettujen tietojen käsittely</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Siirto epäonnistui</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Chat-historian siirto</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Siirtoa ei voitu aloittaa. Onko jokin muu siirto jo käynnissä?</string>
@@ -2273,7 +2280,8 @@
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Tuodaan</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Sisällön analysointi</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Viedytettyjen keskustelujen analysointi</string>
-	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">OpenStreetMap-tyylitiedoston lataamisessa tapahtui virhe.</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">OpenStreetMap-tyylitiedoston lataamisessa tapahtui virhe.</string>
 	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Sovelluksen sisäiset tilaukset eivät ole käytettävissä</string>
 	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Asentamasi Olvid-versio ei sisällä Googlen laskutuskirjastoa, eikä se tue sovelluksen sisäisiä ostoksia.\n\nLisätietoja saat ottamalla meihin yhteyttä osoitteessa **feedback@olvid.io**.</string>
+	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">Peruuta lähetys</string>
 </resources>

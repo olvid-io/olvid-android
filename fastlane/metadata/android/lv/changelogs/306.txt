@@ -1,0 +1,5 @@
+- Atjaunināts vairāku lietotnes komponentu dizains: kontaktpersonu karte, profila karte, krātuves pārvaldnieks utt.
+- Pievienots kalendāra skats sarunā, lai ātri pārietu uz konkrētu laika punktu.
+- Pievienots iekšējs "pašreizējās atskaņošanas" kontrolieris, lai ērti pārslēgtos starp balss ziņām.
+- Pievienota iespēja atcelt pielikuma augšupielādi.
+- Rāda palaistus garām paziņojumus, kad beidzas profila izslēgšanas laiks.

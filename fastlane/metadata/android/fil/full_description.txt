@@ -1,0 +1,19 @@
+Ang Olvid ang unang pribadong instant messaging application para sa lahat. Magpadala ng mga mensahe, larawan, file, at gumawa ng mga secure na tawag sa telepono at video.
+
+
+Ano ang isang "pribadong" messenger?
+
+Ito ay isang messenger:
+- Na hindi nagtutulak ng mga bagong contact sa iyo. Ikaw ang may kontrol: ikaw ang pumipili kung sino ang gusto mong kausapin. Nag-aalok ang Olvid ng ilang paraan upang makipag-ugnayan sa iba pang mga gumagamit ng Olvid, alinman sa personal o malayuan.
+- Na hindi nangangailangan ng anumang personal na data. Hindi hihingin ng Olvid ang iyong numero ng telepono, o ang iyong email. Hindi tulad ng iyong nakaraang messenger, hindi hihingi ang Olvid ng access sa iyong address book.
+- Kung saan hindi ka makakatanggap ng mga hindi hinihinging mensahe o mga mensahe mula sa hindi kilalang pinagmulan.
+- Kung saan ang lahat ng mga pagpapalitan ay nakikinabang sa parehong seguridad at privacy tulad ng isang pag-uusap sa totoong buhay sa likod ng mga saradong pinto. Nag-aalok ang Olvid ng end-to-end encryption at end-to-end authentication bilang default, palagi, para sa lahat ng iyong ipinapadala o natatanggap.
+
+Ginagarantiya ng Olvid sa iyo ang mga ligtas na espasyo, na immune sa panlabas na agresyon, na naghihiwalay sa iyo mula sa digital na ingay at karahasan ng iba pang mga social network. Gumawa ng mga grupo kasama ang iyong pamilya, mga kaibigan, at mga pangunahing collaborator. Walang spam, walang advertising. Sa wakas, muling makukuha mo ang ganap na kontrol sa iyong mga komunikasyon.
+
+Ang Olvid ay idinisenyo upang maging pinakamahusay na lugar upang makipagpalitan sa mga paksang mahalaga, kasama ang mga taong mahalaga sa iyo.
+
+
+Olvid - Teknolohiya
+
+Sa puso ng Olvid, ang isang 'cryptographic engine' na nagmula sa ilang taon ng pananaliksik ay nagpapahintulot na patunayan sa matematika ang integridad, pagiging kumpidensyal, at pagiging hindi nagpapakilala ng iyong mga komunikasyon.

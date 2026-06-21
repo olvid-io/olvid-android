@@ -77,6 +77,7 @@ import io.olvid.engine.metamanager.PushNotificationDelegate;
 import io.olvid.engine.protocol.coordinators.ProtocolStepCoordinator;
 import io.olvid.engine.protocol.databases.ChannelCreationPingSignatureReceived;
 import io.olvid.engine.protocol.databases.ChannelCreationProtocolInstance;
+import io.olvid.engine.protocol.databases.GroupV2PreShotVersionSeedReceived;
 import io.olvid.engine.protocol.databases.GroupV2SignatureReceived;
 import io.olvid.engine.protocol.databases.IdentityDeletionSignatureReceived;
 import io.olvid.engine.protocol.databases.LinkBetweenProtocolInstances;
@@ -208,6 +209,9 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             // delete all unfinished transfer instances
             ProtocolInstance.deleteAllTransfer(protocolManagerSession);
 
+            // expire some GroupV2PreShotVersionSeedReceived
+            GroupV2PreShotVersionSeedReceived.expire(protocolManagerSession, System.currentTimeMillis() - Constants.GROUP_V2_PRE_SHOT_VERSION_SEED_TTL);
+
             protocolManagerSession.session.commit();
         } catch (Exception e) {
             Logger.x(e);
@@ -254,6 +258,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
             TrustEstablishmentCommitmentReceived.createTable(protocolManagerSession.session);
             MutualScanSignatureReceived.createTable(protocolManagerSession.session);
             GroupV2SignatureReceived.createTable(protocolManagerSession.session);
+            GroupV2PreShotVersionSeedReceived.createTable(protocolManagerSession.session);
             IdentityDeletionSignatureReceived.createTable(protocolManagerSession.session);
             protocolManagerSession.session.commit();
         } catch (SQLException e) {
@@ -272,6 +277,7 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         TrustEstablishmentCommitmentReceived.upgradeTable(session, oldVersion, newVersion);
         MutualScanSignatureReceived.upgradeTable(session, oldVersion, newVersion);
         GroupV2SignatureReceived.upgradeTable(session, oldVersion, newVersion);
+        GroupV2PreShotVersionSeedReceived.upgradeTable(session, oldVersion, newVersion);
         IdentityDeletionSignatureReceived.upgradeTable(session, oldVersion, newVersion);
     }
 
@@ -414,6 +420,8 @@ public class ProtocolManager implements ProtocolDelegate, ProtocolStarterDelegat
         MutualScanSignatureReceived.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         // delete GroupV2SignatureReceived
         GroupV2SignatureReceived.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
+        // delete GroupV2PreShotVersionSeedReceived
+        GroupV2PreShotVersionSeedReceived.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         // delete LinkBetweenProtocolInstances
         LinkBetweenProtocolInstances.deleteAllForOwnedIdentity(wrapSession(session), ownedIdentity);
         // delete ChannelCreationProtocolInstance

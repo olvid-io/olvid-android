@@ -36,12 +36,27 @@ function linkify(text) {
     const div = document.createElement('div');
     div.textContent = text;
     const escaped = div.innerHTML;
-    
+
     // Replace URLs with links
     const urlPattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
 
     return escaped
         .replace(urlPattern, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text == null ? '' : String(text);
+    return div.innerHTML;
+}
+
+// Renders a discussion title, falling back to an italic placeholder
+// when the title is missing/empty (e.g. locked discussion with no custom name).
+function displayTitle(title) {
+    const trimmed = title == null ? '' : String(title).trim();
+    return trimmed.length > 0
+        ? escapeHtml(trimmed)
+        : '<span class="untitled">(Untitled)</span>';
 }
 
 function initViewer(data) {
@@ -67,7 +82,7 @@ function initViewer(data) {
         const item = document.createElement('div');
         item.className = 'discussion-item';
         item.dataset.id = d.discussion.id;
-        item.innerHTML = `<div class="title">${d.title}</div>`;
+        item.innerHTML = `<div class="title">${displayTitle(d.title)}</div>`;
         item.onclick = () => loadChat(d.discussion.id, d.title);
         list.appendChild(item);
     });
@@ -102,7 +117,7 @@ function loadChat(id, title) {
     const main = document.getElementById('main');
     main.innerHTML = `
         <div class="chat-header">
-            <h2>${title}</h2>
+            <h2>${displayTitle(title)}</h2>
             <div class="meta">${sorted.length} messages</div>
         </div>
         <div class="messages-container" id="msgs">

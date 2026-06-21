@@ -1,0 +1,4 @@
+- Atnaujintas kelių programos elementų dizainas: kontaktų kortelė, profilio kortelė, atminties valdiklis ir kt.
+- Pridėta kalendoriaus peržiūra pokalbyje, kad būtų galima greitai pereiti prie konkretaus laiko.
+- Pridėtas vidinis „veikianio atkūrimo“ valdiklis, kad būtų lengva perjungti balso pranešimus. Patobulintos balso pranešimų atkūrimo gestai.
+- Pridėta galimybė atšaukti prisegto failo siuntimą.

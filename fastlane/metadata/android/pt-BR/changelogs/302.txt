@@ -1,0 +1,1 @@
+- Corrigido um problema com a otimização de registros Java que não funcionava corretamente na versão mais recente do Android Studio.

@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">Lisää %1$d jäsen</item>
 		<item quantity="other" state="needs_review" hash="1091232977">Lisää %1$d jäsentä</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Esittele %1$d -yhteyshenkilölle</item>
+		<item quantity="other" state="needs_review" hash="222947824">Esittele %1$d -kontakteillesi</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">» Tällä laitteella edellinen laitteesi deaktivoidaan:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">» Tällä laitteella alla olevat laitteesi deaktivoidaan:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">Haluatko todella poistaa valitun liitteen?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">Haluatko todella poistaa valitut %1$d liitteet?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Jos tämä liitetiedosto on liitetty useisiin viesteihin, kaikki liitetiedoston kopiot poistetaan.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Jos nämä liitetiedostot on liitetty useisiin viesteihin, kaikki liitetiedostojen kopiot poistetaan.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d päivää, %2$02dt %3$02dmin %4$02ds</item>

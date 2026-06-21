@@ -50,7 +50,7 @@
 	<string name="dialog_message_contact_introduction" state="needs_review" hash="-398698689">Chceš predstaviť %1$s a %2$s jeden druhému?</string>
 	<string name="dialog_message_contact_introduction_multiple" state="needs_review" hash="-1743988418">Chceš predstaviť %1$s nasledujúcim %2$d kontaktom?\n\n%3$s</string>
 	<string name="dialog_message_delete_attachment" state="needs_review" hash="-235504816">Naozaj chcete odstrániť prílohu %1$s z tejto správy?\nTúto akciu nemožno zrušiť.</string>
-	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="-273205987">Naozaj chcete vymazať prílohu %1$s?\nTúto akciu nemožno zrušiť.</string>
+	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="1647132381">Naozaj chcete odstrániť prílohu **%1$s**?\nTáto akcia sa nedá vrátiť späť.</string>
 	<string name="dialog_message_disband_group" state="needs_review" hash="-1617503323">Chceš rozpustiť skupinu %1$s?\nUž nebude možné posielať správy do tejto skupiny. Existujúce správy v skupine nebudú ovplyvnené.</string>
 	<string name="dialog_message_disband_non_empty_group_confirmation" state="needs_review" hash="1096257228">Chystáš sa rozpustiť skupinu %1$s.\nTo odstráni všetkých členov a čakajúcich členov zo skupiny. V súčasnosti je tu:\n- %2$d členov\n- %3$d čakajúcich členov\n\nPokračovať v rozpúšťaní tejto skupiny?</string>
 	<string name="dialog_message_exchange_digits" state="needs_review" hash="1612882609">Chceš si vymeniť kódy s %1$s, aby sa opätovne overila jeho identita?</string>
@@ -65,6 +65,7 @@
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">Potvrdiť vymazanie?</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">Rozpustiť skupinu?</string>
 	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">Hľadať konverzáciu…</string>
+	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">Zadajte dátum</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">Upraviť podrobnosti skupiny</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">Upravte svoje údaje</string>
 	<string name="dialog_title_exchange_digits" state="needs_review" hash="864614114">Vymeňte kódy</string>
@@ -91,14 +92,18 @@
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Administrátor zmenil názov skupiny na:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Administrátor zmenil popis skupiny na:</string>
 	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">Administrátor zmenil skupinovú fotografiu.</string>
-	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">Tvoj kontakt aktualizoval svoju Olvid Card. Stará aj nová verzia sú uvedené nižšie.\n\nStlač \"aktualizovať\" a aktualizuj informácie o svojom kontakte touto novou verziou.</string>
+	<string name="explanation_new_contact_card_name" state="needs_review" hash="-1601853738">Váš kontakt aktualizoval svoje meno na:</string>
+	<string name="explanation_new_contact_card_position" state="needs_review" hash="184144104">Váš kontakt aktualizoval svoju pozíciu/spoločnosť na:</string>
+	<string name="explanation_new_contact_card_photo" state="needs_review" hash="-252626818">Váš kontakt aktualizoval svoju profilovú fotografiu.</string>
+	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">Vaše meno bolo aktualizované na:</string>
+	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">Vaša pozícia/spoločnosť bola aktualizovaná na:</string>
+	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">Vaša fotografia bola aktualizovaná.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">Bezpečný komunikačný kanál sa práve nadväzuje. Nemôžete začať žiadnu diskusiu s týmto kontaktom, kým sa to nedokončí. Tento proces by mal trvať len niekoľko sekúnd, ak vy a váš kontakt ste online.\n\nAk si myslíte, že sa niečo pokazilo, môžete reštartovať nadväzovanie kanála.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">Nenašli sme žiadny kontakt</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">Nenašli sme žiadnu skupinu</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">Nenašli sa žiadne správy</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Nenašli sa žiadne prílohy</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Žiadny odkaz sa nenašiel</string>
-	<string name="format_identity_details_custom_field" state="needs_review" hash="-1073344790">%1$s: %2$s</string>
 	<string name="hint_company" state="needs_review" hash="379200324">Spoločnosť (voliteľné)</string>
 	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Napísať správu</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Dočasná správa</string>
@@ -164,15 +169,10 @@
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">Skupinová karta - Neopublikovaný návrh</string>
 	<string name="label_group_members" state="needs_review" hash="1460220752">Členovia skupiny</string>
 	<string name="label_other_group_members" state="needs_review" hash="-2121490032">Ostatní členovia skupiny</string>
-	<string name="label_groups" state="needs_review" hash="-990226727">Skupiny</string>
+	<string name="label_groups_common" state="needs_review" hash="1252823567">Spoločné skupiny</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">Pozvánka\nzamietnutá</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">Detaily skupiny aktualizované</string>
-	<string name="label_new_olvid_card" state="needs_review" hash="688199407">Kontaktné údaje aktualizované</string>
 	<string name="label_not_part_of_a_group" state="needs_review" hash="1667979596">Zatiaľ nie ste súčasťou žiadnej skupiny</string>
-	<string name="label_olvid_card" state="needs_review" hash="-1953461576">Olvid Card</string>
-	<string name="label_olvid_card_published" state="needs_review" hash="-1038740778">Olvid Card - Zverejnená</string>
-	<string name="label_olvid_card_published_update" state="needs_review" hash="391148752">Olvid Card - Nový</string>
-	<string name="label_olvid_card_unpublished_draft" state="needs_review" hash="-786284715">Olvid Card - Neopublikovaný návrh</string>
 	<string name="label_pending_group_members" state="needs_review" hash="1481357803">Čakajúci členovia skupiny</string>
 	<string name="label_text_copied_from_olvid" state="needs_review" hash="1675378287">Text skopírovaný z Olvid</string>
 	<string name="label_trust_origins" state="needs_review" hash="-1177760062">Dôveryhodné zdroje</string>
@@ -285,12 +285,16 @@
 	<string name="toast_message_shortcut_not_supported" state="needs_review" hash="-1300016753">Vytvorenie skratky nie je na vašom zariadení podporované</string>
 	<string name="toast_message_unable_to_open_file" state="needs_review" hash="392405293">Nepodarilo sa nájsť vhodnú aplikáciu na otvorenie tohto typu súboru</string>
 	<string name="toast_message_unparsable_url" state="needs_review" hash="-135719133">Nepodarilo sa správne analyzovať URL</string>
-	<string name="trust_origin_direct_type" state="needs_review" hash="-67248053">%1$s - Priame overenie</string>
-	<string name="trust_origin_group_type" state="needs_review" hash="230302215">%1$s - Prijaté pozvanie do skupiny od\u0020</string>
-	<string name="trust_origin_group_v2_type" state="needs_review" hash="-1152079590">%1$s - Prijaté pozvanie do skupiny</string>
-	<string name="trust_origin_introduction_type" state="needs_review" hash="328494718">%1$s - Predstavenie od\u0020</string>
-	<string name="trust_origin_keycloak_type" state="needs_review" hash="1983748673">%2$s - Overenie poskytovateľom identity o %1$s</string>
-	<string name="trust_origin_unknown_type" state="needs_review" hash="2084263523">%1$s - Neznámy zdroj dôvery</string>
+	<string name="trust_origin_direct_type" state="needs_review" hash="1798276315">Osobné overenie</string>
+	<string name="trust_origin_group_type" state="needs_review" hash="1222060749">Prijal/a som pozvanie do skupiny od </string>
+	<string name="trust_origin_group_v2_type" state="needs_review" hash="-566733151">Prijatá pozvánka do skupiny</string>
+	<string name="trust_origin_introduction_type" state="needs_review" hash="-266148171">Predstavené od</string>
+	<string name="trust_origin_keycloak_type" state="needs_review" hash="-1113573733">Overenie poskytovateľom identity na %1$s</string>
+	<string name="trust_origin_unknown_type" state="needs_review" hash="-491114965">Neznámy zdroj dôvery</string>
+	<string name="trust_origin_direct_title" state="needs_review" hash="-1849285555">Pridali ste sa navzájom ako kontakty.</string>
+	<string name="trust_origin_introduction_title" state="needs_review" hash="-1034826640">Predstavenie</string>
+	<string name="trust_origin_group_title" state="needs_review" hash="1252823567">Spoločné skupiny</string>
+	<string name="trust_origin_keycloak_title" state="needs_review" hash="-1917629373">Pridaný prostredníctvom adresára</string>
 	<string name="menu_action_delete_contact" state="needs_review" hash="1849106991">Odstrániť kontakt</string>
 	<string name="menu_action_delete_user" state="needs_review" hash="1683580694">Vymazať používateľa</string>
 	<string name="dialog_title_delete_user" state="needs_review" hash="-56212547">Vymazať používateľa?</string>
@@ -299,6 +303,7 @@
 	<string name="text_empty_group" state="needs_review" hash="-464714974">Prázdna skupina</string>
 	<string name="message_error_group_name_empty" state="needs_review" hash="1137468023">Zadajte názov skupiny</string>
 	<string name="hint_search_contact_name" state="needs_review" hash="-242911449">Vyhľadať meno kontaktu…</string>
+	<string name="hint_search_group_name" state="needs_review" hash="-265074656">Vyhľadať názov skupiny…</string>
 	<string name="menu_action_search" state="needs_review" hash="-2085358317">Hľadať</string>
 	<string name="toast_message_polling_failed" state="needs_review" hash="402242307">Nepodarilo sa získať správy</string>
 	<string name="dialog_message_battery_optimization" state="needs_review" hash="1191860407">Optimalizácia batérie v systéme Android funguje tak, že odkladá určité udalosti na pozadí, aby ich mohla spúšťať v dávkach. To môže oneskoriť prijatie prichádzajúcich správ Olvid.\n\nAby ste zaistili, že vaše správy budú prijaté včas, mali by ste povoliť Olvid \"vždy bežať na pozadí\". Stlačte \"Nastavenia\" nižšie a potom \"Povoliť\".</string>
@@ -819,6 +824,11 @@
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Prehrávač médií</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Ovládanie prehrávania/pauzy pri prehrávaní médií v Olvid</string>
 	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Nepodarilo sa prehrať zvukový súbor</string>
+	<string name="label_voice_message" state="needs_review" hash="-348491668">Hlasová správa</string>
+	<string name="content_description_skip_previous" state="needs_review" hash="836036575">Predchádzajúca zvuková nahrávka</string>
+	<string name="content_description_skip_next" state="needs_review" hash="-878180801">Ďalší zvukový záznam</string>
+	<string name="content_description_audio_play" state="needs_review" hash="1143766922">Prehrať</string>
+	<string name="content_description_audio_pause" state="needs_review" hash="1931883968">Pozastaviť</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Vymazať</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Vymazať všade</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Nepodarilo sa vymazať všade. Skúste to znova.</string>
@@ -919,6 +929,7 @@
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Tvoj Olvid ID je v súčasnosti spravovaný poskytovateľom identity tvojej spoločnosti. Nemôžeš manuálne aktivovať licenciu Olvid.\n\nKontaktuj svojho správcu pre viac informácií.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Zmeškaný hovor</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Kontaktné údaje aktualizované</string>
+	<string name="text_own_details_updated" state="needs_review" hash="-1335488506">Podrobnosti aktualizované</string>
 	<string name="text_group_details_updated" state="needs_review" hash="1016500852">Detaily skupiny aktualizované</string>
 	<string name="dialog_title_sd_card_ringtone_bugged_android_9" state="needs_review" hash="-1202187296">Chyba zvuku upozornení v Android 9</string>
 	<string name="dialog_message_sd_card_ringtone_bugged_android_9" state="needs_review" hash="1449296723">Olvid nemôže použiť vybraný zvuk upozornenia. Bol deaktivovaný. Chyba v Androide 9 bráni používaniu vlastných zvukov upozornení aplikáciami, ktoré si nevyžadujú prístup k externému úložisku/SD karte.\n\nSkúste vybrať štandardný zvuk upozornenia. Dovtedy zostanú vaše upozornenia tiché!</string>
@@ -1014,6 +1025,10 @@
 	<string name="dialog_title_available_space_low" state="needs_review" hash="610249394">Úložisko zariadenia je takmer plné</string>
 	<string name="dialog_message_available_space_low" state="needs_review" hash="78499573">Na tvojom zariadení sa zmenšuje dostupný priestor. Môžeš očakávať neočakávané chyby pri prijímaní alebo odosielaní súborov s Olvid.\n\nPravdepodobne je to správny čas na uvoľnenie miesta na tvojom zariadení.</string>
 	<string name="button_label_manage_storage" state="needs_review" hash="-918485427">Spravovanie úložiska</string>
+	<string name="label_storage_all_files" state="needs_review" hash="1735747130">Všetky súbory</string>
+	<string name="label_storage_sent_by_me" state="needs_review" hash="640456592">Poslal/a som</string>
+	<string name="label_storage_large_files" state="needs_review" hash="-257706820">Väčšie ako 5 MB</string>
+	<string name="label_storage_discussions" state="needs_review" hash="491497248">Diskusie</string>
 	<string name="pref_use_internal_image_viewer_title" state="needs_review" hash="1319400578">Použiť interný prehliadač obrázkov</string>
 	<string name="pref_use_internal_image_viewer_summary" state="needs_review" hash="1248137666">Po aktivácii kliknutie na prílohu obrázku ju otvorí vo vnútornom prehliadači. Inak sa použije predvolená aplikácia pre obrázky vo vašom zariadení.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Obrázok sa nedá zobraziť</string>
@@ -1167,7 +1182,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Vymazanie profilu vymaže všetky informácie súvisiace s týmto profilom na vašom zariadení. To zahŕňa vaše kontakty, skupiny a obsah všetkých vašich diskusií (správy a prílohy) pre tento profil.\n\n<b>Toto je váš jediný viditeľný profil a ak máte skryté profily, budú vymazané súčasne.</b>\n\nStlačte \"ďalej\", aby ste zvolili spôsob vymazania tohto profilu.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Vymazať profil <b>vsade</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">Napíšte \"%1$s\" sem, aby ste pokračovali</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">Zadajte \"%1$s\" tu, aby ste mohli pokračovať</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">Ak sa rozhodnete vymazať svoj profil <b>vsade</b>:\n - bude vymazaný lokálne <b>a</b> na zariadeniach vašich kontaktov\n - opustíte skupiny, do ktorých ste vstúpili\n - skupiny, ktoré spravujete, budú rozpustené\n\nAk <b>ne</b>vymažete svoj profil vsade, bude vymazaný iba lokálne na vašom zariadení. Ak neplánujete obnoviť zálohu na inom zariadení, vaše kontakty môžu stále skúšať posielať vám správy a nemusia si uvedomiť, že tieto správy nemôžu byť doručené.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">Váš aktuálny profil sa zdá byť neaktívny, pravdepodobne preto, že ste ho preniesli na iné zariadenie. Ak plánujete pokračovať v používaní tohto profilu na inom zariadení, môžete ho bezpečne vymazať tu.\n\nAk už tento profil nechcete používať, musíte ho najprv znova aktivovať na tomto zariadení, počkať na obnovenie zabezpečených kanálov s vašimi kontaktmi a až potom vymazať tento profil výberom možnosti „vymazať všade“.</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">Váš profil je aktuálne povolený na viacerých zariadeniach.\n\nAk sa rozhodnete odstrániť tento profil <b>vsade</b>: - bude odstránený zo všetkých vašich zariadení <b>a</b> zo zariadení vašich kontaktov - opustíte skupiny, do ktorých ste sa pripojili - skupiny, ktoré spravujete, budú rozpustené\n\nAk <b>nenecháte</b> tento profil odstrániť všade, bude odstránený iba lokálne a budete ho môcť normálne používať na vašich ďalších zariadeniach.</string>
@@ -1251,9 +1266,6 @@
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Skupiny v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
 	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Používajte animované emotikony (ak sú dostupné)</string>
-	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Používanie úložného priestoru profilu</string>
-	<string name="label_photos" state="needs_review" hash="1539779714">Fotky</string>
-	<string name="label_videos" state="needs_review" hash="-101497740">Videá</string>
 	<string name="label_audio" state="needs_review" hash="-779820608">Zvuk</string>
 	<string name="label_other" state="needs_review" hash="-543765264">Iné</string>
 	<string name="label_all" state="needs_review" hash="752498555">Všetko</string>
@@ -1268,14 +1280,7 @@
 	<string name="menu_action_sort_date_alt" state="needs_review" hash="646746321">Triediť podľa dátumu (najstaršie prv)</string>
 	<string name="menu_action_sort_size_alt" state="needs_review" hash="1986077505">Triediť podľa veľkosti (od najmenšieho)</string>
 	<string name="menu_action_sort_name_alt" state="needs_review" hash="-802793419">Triediť podľa mena (odvrátene)</string>
-	<string name="text_sent_by_xx" state="needs_review" hash="248848108">Odoslané cez %1$s</string>
 	<string name="text_unknown_sender" state="needs_review" hash="1913018414">Neznámy odosielateľ</string>
-	<string name="text_sent_to_xx" state="needs_review" hash="918571953">Odoslané %1$s</string>
-	<string name="text_draft_for_xx" state="needs_review" hash="2063814784">Návrh pre %1$s</string>
-	<string name="label_loading_attachments" state="needs_review" hash="856026474">Načítanie príloh…</string>
-	<string name="dialog_message_delete_attachment_for_many_messages" state="needs_review" hash="1800265017">Príloha %2$s je priložená k %1$d rôznym správam. Chcete vymazať iba túto, alebo ju vymazať zo všetkých %1$d správ?\nTáto akcia sa nedá vrátiť.</string>
-	<string name="button_label_delete_one" state="needs_review" hash="-1916938532">Vymazať jeden</string>
-	<string name="button_label_delete_all" state="needs_review" hash="-985749327">Vymazať všetko %1$d</string>
 	<string name="dialog_title_save_selected_attachments" state="needs_review" hash="-405982081">Uložiť vybrané prílohy</string>
 	<string name="pref_category_contacts_and_groups" state="needs_review" hash="1531647661">Kontakty a skupiny</string>
 	<string name="pref_auto_join_groups_title" state="needs_review" hash="29822089">Automaticky prijímať skupinové pozvánky…</string>
@@ -1636,7 +1641,7 @@
 	<string name="button_label_remove" state="needs_review" hash="1097276765">Odstrániť</string>
 	<string name="menu_action_remove_expiration" state="needs_review" hash="-156931599">Udržiavajte toto zariadenie aktívne</string>
 	<string name="dialog_title_set_unexpiring_device" state="needs_review" hash="-1488033285">Udržujte zariadenie aktívne</string>
-	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1293464179">V súčasnosti nemáte licenciu na používanie viacerých aktívnych zariadení. Ak si chcete takúto licenciu zakúpiť, zatvorte toto okno a stlačte tlačidlo „Pozrieť plány predplatného“ nižšie.\n\nAk chcete pokračovať a ponechať zariadenie „%1$s“ aktívne, zariadenie „%2$s“ bude deaktivované namiesto neho. Chcete pokračovať?</string>
+	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1457083107">Momentálne nemáte licenciu, ktorá by vám umožňovala používať viacero aktívnych zariadení. Ak si chcete zakúpiť takúto licenciu, zatvorte toto okno a kliknite na tlačidlo „Pozrieť si plány predplatného“.\n\nAk chcete pokračovať a ponechať zariadenie „%1$s“ aktívne, namiesto toho bude deaktivované zariadenie „%2$s“. Chcete pokračovať?</string>
 	<string name="dialog_title_remove_background_image" state="needs_review" hash="488158841">Odstrániť aktuálny obrázok na pozadí?</string>
 	<string name="dialog_title_introducing_markdown" state="needs_review" hash="175399162">Predstavujeme formátovanie správ!</string>
 	<string name="dialog_message_introducing_markdown" state="needs_review" hash="1738415115">Olvid teraz umožňuje formátovať vaše správy pomocou syntaxe markdown 🎨!\n\nPíšte **<b>tučne</b>**, v *<i>kurzíve</i>*, pridajte # <big>NADPISE</big>, atď.\n\nZoznam všetkých podporovaných značiek 🦍 nájdete na:\nhttps://www.olvid.io/faq/format-your-messages/</string>
@@ -2041,6 +2046,7 @@
 	<string name="button_label_this_way" state="needs_review" hash="747183939">Sem</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">Kód skopírovaný</string>
 	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">Prosím, vyberte, koho pridať do tejto skupiny.</string>
+	<string name="explanation_choose_contact_introduction" state="needs_review" hash="1113777517">Vyberte, komu chcete predstaviť %1$s.</string>
 	<string name="label_group_administration" state="needs_review" hash="871355986">Správa skupiny</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">Hovor zablokovaný</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid neumožňuje začať hovor s viac ako %1$d osobami.</string>
@@ -2154,6 +2160,7 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Vyjednávanie</string>
 	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Prenášam</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Prenos dokončený</string>
+	<string name="history_transfer_step_processing_buffered_data" state="needs_review" hash="-1359029280">Spracúvanie prijatých údajov</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Prenos zlyhal</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Prenos histórie chatu</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Nepodarilo sa iniciovať prenos. Možno už prebieha iný prenos?</string>
@@ -2272,7 +2279,8 @@
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Importujem</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analyzujem obsah</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Analyzujem exportované diskusie</string>
-	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Pri načítavaní súboru štýlu OpenStreetMap došlo k chybe.</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">Pri načítavaní súboru štýlu OpenStreetMap došlo k chybe.</string>
 	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Predplatné v aplikácii nie sú dostupné</string>
 	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Verzia aplikácie Olvid, ktorú ste nainštalovali, neobsahuje knižnicu Google Billing a nepodporuje nákupy v aplikácii.\n\nAk potrebujete ďalšie informácie, kontaktujte nás na adrese **feedback@olvid.io**.</string>
+	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">Zrušiť nahrávanie</string>
 </resources>

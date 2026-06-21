@@ -1,0 +1,1 @@
+- Dodana podrška za 18 novih jezika: bugarski, bengalski, estonski, filipinski, gudžaratski, indonezijski, kannada, latvijski, litvanski, malajalam, marathi, pandžabi, srpski, svahili, tamilski, telugu, tajlandski i urdu.

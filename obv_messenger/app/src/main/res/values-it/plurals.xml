@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">Aggiungi %1$d membro</item>
 		<item quantity="other" state="needs_review" hash="1091232977">Aggiungi %1$d membri</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Presenta il contatto %1$d</item>
+		<item quantity="other" state="needs_review" hash="222947824">Presenta %1$d ai tuoi contatti</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">\" su questo dispositivo, il tuo dispositivo precedente elencato di seguito verrà disattivato:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">\" su questo dispositivo, i tuoi dispositivi elencati di seguito verranno disattivati:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">Sei sicuro di voler eliminare l\'allegato selezionato?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">Vuoi davvero eliminare gli %1$d allegati selezionati?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Se questo allegato è allegato a più messaggi, tutte le copie dell\'allegato verranno eliminate.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Se questi allegati sono allegati a più messaggi, tutte le copie degli allegati verranno eliminate.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d giorno, %2$02dh %3$02dm %4$02ds</item>

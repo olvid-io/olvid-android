@@ -401,6 +401,12 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     if (contactIdentities.length > 0) {
                         Logger.i("Found " + contactIdentities.length + " contacts with no device. Starting corresponding deviceDiscoveryProtocols.");
                         for (ContactIdentity contactIdentity : contactIdentities) {
+                            // skip device discovery for contacts if the current device has not been registered yet (e.g. after a transfer)
+                            OwnedDevice currentDevice = OwnedDevice.getCurrentDeviceOfOwnedIdentity(identityManagerSession, contactIdentity.getOwnedIdentity());
+                            if (currentDevice == null || currentDevice.getLastRegistrationTimestamp() == null) {
+                                Logger.i("Skip discovery because device is not registered yet");
+                                continue;
+                            }
                             protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(identityManagerSession.session, contactIdentity.getOwnedIdentity(), contactIdentity.getContactIdentity());
                             contactIdentity.setLastContactDeviceDiscoveryTimestamp(System.currentTimeMillis());
                         }
@@ -416,6 +422,12 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
                     if (contactIdentities.length > 0) {
                         Logger.i("Found " + contactIdentities.length + " contacts with outdated device discovery. Starting corresponding deviceDiscoveryProtocols.");
                         for (ContactIdentity contactIdentity : contactIdentities) {
+                            // skip device discovery for contacts if the current device has not been registered yet (e.g. after a transfer)
+                            OwnedDevice currentDevice = OwnedDevice.getCurrentDeviceOfOwnedIdentity(identityManagerSession, contactIdentity.getOwnedIdentity());
+                            if (currentDevice == null || currentDevice.getLastRegistrationTimestamp() == null) {
+                                Logger.i("Skip discovery because device is not registered yet");
+                                continue;
+                            }
                             protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(identityManagerSession.session, contactIdentity.getOwnedIdentity(), contactIdentity.getContactIdentity());
                             contactIdentity.setLastContactDeviceDiscoveryTimestamp(System.currentTimeMillis());
                         }
@@ -1527,6 +1539,21 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
             }
             if (!Objects.equals(expirationTimestamp, ownedDevice.getExpirationTimestamp())
                     || !Objects.equals(lastRegistrationTimestamp, ownedDevice.getLastRegistrationTimestamp())) {
+                // check if this is the first registration of the current device
+                if (ownedDevice.isCurrentDevice() && ownedDevice.getLastRegistrationTimestamp() == null && lastRegistrationTimestamp != null) {
+                    // after the first registration of the current device, start all contact device discoveries
+                    Identity[] contactIdentities = getContactsOfOwnedIdentity(session, ownedIdentity);
+                    if (contactIdentities != null && contactIdentities.length > 0) {
+                        Logger.i("Found " + contactIdentities.length + " contacts for first device discovery. Starting corresponding deviceDiscoveryProtocols.");
+                        for (Identity contactIdentity : contactIdentities) {
+                            try {
+                                protocolStarterDelegate.startDeviceDiscoveryProtocolWithinTransaction(session, ownedIdentity, contactIdentity);
+                            } catch (Exception e) {
+                                Logger.x(e);
+                            }
+                        }
+                    }
+                }
                 ownedDevice.setTimestamps(expirationTimestamp, lastRegistrationTimestamp);
             }
             if (preKeyBlob == null) {
@@ -1659,6 +1686,11 @@ public class IdentityManager implements IdentityDelegate, SolveChallengeDelegate
         }
     }
 
+    @Override
+    public boolean isCurrentDeviceNeverRegistered(Session session, Identity ownedIdentity) throws SQLException {
+        OwnedDevice currentDevice = OwnedDevice.getCurrentDeviceOfOwnedIdentity(wrapSession(session), ownedIdentity);
+        return currentDevice != null && currentDevice.getLastRegistrationTimestamp() == null;
+    }
 
     // endregion
 

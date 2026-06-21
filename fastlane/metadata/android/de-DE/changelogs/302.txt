@@ -1,0 +1,1 @@
+- Behebung eines Problems, bei dem die Java-Records-Desugaring in der neuesten Version von Android Studio nicht korrekt funktionierte.

@@ -33,13 +33,14 @@ import io.olvid.messenger.discussion.linkpreview.OpenGraph
 interface GlobalSearchDao {
     @Query(
         "SELECT m.id, NULL AS fyleId, m." + Message.TIMESTAMP + ", m." + Message.SORT_INDEX + " AS sortIndex  FROM " + Message.TABLE_NAME + " AS m " +
-                " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid" +
+                " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid " +
                 " WHERE m." + Message.MESSAGE_TYPE + " <= " + Message.TYPE_OUTBOUND_MESSAGE +
-                " AND m." + Message.DISCUSSION_ID + " = :discussionId" +
-                " AND " + Message.FTS_TABLE_NAME + " MATCH :query" +
+                " AND m." + Message.DISCUSSION_ID + " = :discussionId " +
+                " AND " + Message.FTS_TABLE_NAME + " MATCH :query " +
+                " AND m." + Message.SORT_INDEX + " < :maxSortIndex " +
                 " ORDER BY m." + Message.SORT_INDEX + " DESC LIMIT :limit"
     )
-    fun discussionSearchMessages(discussionId: Long, query: String, limit: Int): List<MessageIdAndTimestamp>
+    fun discussionSearchMessages(discussionId: Long, query: String, maxSortIndex: Double, limit: Int): List<MessageIdAndTimestamp>
 
     @Query(
         " SELECT m.id, FMjoin.fyle_id AS fyleId, m." + Message.TIMESTAMP + ", m." + Message.SORT_INDEX + " AS sortIndex FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
@@ -49,10 +50,31 @@ interface GlobalSearchDao {
                 " AND m." + Message.DISCUSSION_ID + " = :discussionId " +
                 " JOIN " + FyleMessageJoinWithStatus.FTS_TABLE_NAME +
                 " ON FMJoin.rowid = " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + ".rowid " +
-                " WHERE " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " MATCH :query" +
-                " ORDER BY m." + Message.SORT_INDEX + " DESC LIMIT :limit"
+                " WHERE " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " MATCH :query " +
+                " AND m." + Message.SORT_INDEX + " < :maxSortIndex " +
+                " ORDER BY m." + Message.SORT_INDEX + " DESC LIMIT :limit "
     )
-    fun discussionSearchAttachments(discussionId: Long, query: String, limit: Int): List<MessageIdAndTimestamp>
+    fun discussionSearchAttachments(discussionId: Long, query: String, maxSortIndex: Double, limit: Int): List<MessageIdAndTimestamp>
+
+    @Query(
+        "SELECT COUNT(*) FROM (" +
+                " SELECT m.id FROM " + Message.TABLE_NAME + " AS m " +
+                " JOIN " + Message.FTS_TABLE_NAME + " ON m.id = " + Message.FTS_TABLE_NAME + ".rowid" +
+                " WHERE m." + Message.MESSAGE_TYPE + " <= " + Message.TYPE_OUTBOUND_MESSAGE +
+                " AND m." + Message.DISCUSSION_ID + " = :discussionId" +
+                " AND " + Message.FTS_TABLE_NAME + " MATCH :query" +
+                " UNION " +
+                " SELECT m.id FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+                " INNER JOIN " + Message.TABLE_NAME + " AS m " +
+                " ON m.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+                " AND m." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+                " AND m." + Message.DISCUSSION_ID + " = :discussionId " +
+                " JOIN " + FyleMessageJoinWithStatus.FTS_TABLE_NAME +
+                " ON FMJoin.rowid = " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + ".rowid " +
+                " WHERE " + FyleMessageJoinWithStatus.FTS_TABLE_NAME + " MATCH :query" +
+                ")"
+    )
+    fun discussionSearchTotalCount(discussionId: Long, query: String): Int
 
     data class MessageIdAndTimestamp(val id: Long, val fyleId: Long, val timestamp: Long, val sortIndex: Double)
 

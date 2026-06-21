@@ -1,0 +1,19 @@
+Olvid és la primera aplicació de missatgeria instantània privada per a tothom. Envia missatges, fotos, fitxers i fes trucades telefòniques i de vídeo segures.
+
+
+Què és un missatger "privat"?
+
+És un missatger:
+- Que no t'imposa nous contactes. Tu tens el control: tu decideixes amb qui vols parlar. Olvid ofereix diverses maneres d'afegir altres usuaris d'Olvid, ja sigui en persona o de forma remota.
+- Que no requereix cap dada personal. Olvid no et demanarà el teu número de telèfon ni el teu correu electrònic. A diferència del teu missatger anterior, Olvid mai sol·licitarà accés a la teva llibreta d'adreces.
+- On mai reps missatges no sol·licitats o missatges d'una font desconeguda.
+- On tots els intercanvis es beneficien del mateix nivell de seguretat i privacitat que una conversa real en un lloc privat. Olvid ofereix xifratge d'extrem a extrem i autenticació d'extrem a extrem per defecte, sempre, per a tot el que envies o reps.
+
+Olvid et garanteix espais segurs, immunes a l'agressió externa, que t'aïllen del soroll digital i la violència d'altres xarxes socials. Crea grups amb la teva família, amics i col·laboradors clau. Sense spam, sense publicitat. Finalment, recuperes el control total de les teves comunicacions.
+
+Olvid ha estat dissenyada per ser el millor lloc per parlar sobre temes importants, amb les persones que t'importen.
+
+
+Olvid - Tecnologia
+
+Al cor d'Olvid, hi ha un "motor criptogràfic" que prové de diversos anys de recerca i que permet demostrar matemàticament la integritat, la confidencialitat i l'anonimat de les teves comunicacions.

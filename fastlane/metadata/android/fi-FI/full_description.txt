@@ -1,0 +1,17 @@
+Olvid on ensimmäinen yksityinen pikaviestisovellus kaikille. Lähetä viestejä, valokuvia ja tiedostoja sekä tee suojattuja puhe- ja videopuheluita.
+
+Mikä on "yksityinen" viestisovellus?
+
+Se on viestisovellus:
+- joka ei tyrkytä uusia kontakteja. Sinä päätät, kenen kanssa haluat keskustella. Olvid tarjoaa useita tapoja ottaa yhteyttä muihin Olvid-käyttäjiin, joko kasvotusten tai etänä.
+- joka ei vaadi henkilökohtaisia tietoja. Olvid ei kysy puhelinnumeroasi tai sähköpostiosoitettasi. Toisin kuin edellisessä viestisovelluksessasi, Olvid ei koskaan pyydä pääsyä osoitekirjaasi.
+- jossa et koskaan saa ei-toivottuja viestejä tai viestejä tuntemattomasta lähteestä.
+- jossa kaikilla viesteillä on sama suojaus ja yksityisyys kuin todellisessa keskustelussa suljettujen ovien takana. Olvid tarjoaa oletusarvoisesti päästä päähän -salauksen ja -todennuksen, aina, kaikkeen, mitä lähetät tai vastaanotat.
+
+Olvid takaa sinulle turvalliset tilat, jotka ovat immuuneja ulkopuolisille hyökkäyksille, ja jotka eristävät sinut muiden sosiaalisten verkostojen digitaalisesta melusta ja väkivallasta. Luo ryhmiä perheesi, ystäviesi ja tärkeimpien yhteistyökumppaneidesi kanssa. Ei roskapostia, ei mainoksia. Saat vihdoin täyden hallinnan viestinnästäsi.
+
+Olvid on suunniteltu olemaan paras paikka keskustella tärkeistä aiheista niiden ihmisten kanssa, jotka ovat sinulle tärkeitä.
+
+Olvid - Teknologia
+
+Olvidin ytimessä on "kryptografinen moottori", joka on kehitetty useiden vuosien tutkimuksen tuloksena, ja jonka avulla voidaan matemaattisesti todistaa viestiesi eheys, luottamuksellisuus ja anonymiteetti.

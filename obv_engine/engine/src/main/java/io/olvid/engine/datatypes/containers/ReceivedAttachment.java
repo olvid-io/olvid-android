@@ -31,9 +31,10 @@ public class ReceivedAttachment {
     private final String url;
     private final long expectedLength;
     private final long receivedLength;
+    private final boolean uploadCancelledByTheSender;
     private final boolean downloadRequested;
 
-    public ReceivedAttachment(Identity ownedIdentity, UID messageUid, int attachmentNumber, byte[] metadata, String url, long expectedLength, long receivedLength, boolean downloadRequested) {
+    public ReceivedAttachment(Identity ownedIdentity, UID messageUid, int attachmentNumber, byte[] metadata, String url, long expectedLength, long receivedLength, boolean uploadCancelledByTheSender, boolean downloadRequested) {
         this.ownedIdentity = ownedIdentity;
         this.messageUid = messageUid;
         this.attachmentNumber = attachmentNumber;
@@ -41,6 +42,7 @@ public class ReceivedAttachment {
         this.url = url;
         this.expectedLength = expectedLength;
         this.receivedLength = receivedLength;
+        this.uploadCancelledByTheSender = uploadCancelledByTheSender;
         this.downloadRequested = downloadRequested;
     }
 
@@ -70,6 +72,10 @@ public class ReceivedAttachment {
 
     public long getReceivedLength() {
         return receivedLength;
+    }
+
+    public boolean isUploadCancelledByTheSender() {
+        return uploadCancelledByTheSender;
     }
 
     public boolean isDownloadRequested() {

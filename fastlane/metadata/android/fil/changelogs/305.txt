@@ -1,0 +1,4 @@
+- Muling pagdidisenyo ng ilang bahagi ng app: card ng contact, card ng profile, tagapamahala ng storage, atbp.
+- Idinagdag ang kalendaryo sa loob ng usapan upang mabilis na makapunta sa isang partikular na oras.
+- Idinagdag ang panloob na "patuloy na pagtugtog" na controller upang madaling lumipat sa pagitan ng mga voice message. Ilang pagpapabuti sa mga galaw para sa pagtugtog ng voice message.
+- Idinagdag ang kakayahang kanselahin ang pag-upload ng attachment.

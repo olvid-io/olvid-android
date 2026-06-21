@@ -51,7 +51,7 @@ public abstract class ServerMethod {
     public static final byte ANOTHER_DEVICE_IS_ALREADY_REGISTERED = 0x0a;
     public static final byte DEVICE_IS_NOT_REGISTERED = 0x0b;
     public static final byte INVALID_NONCE = 0x0c;
-//    public static final byte UPLOAD_CANCELLED = 0x0d;
+    public static final byte UPLOAD_CANCELLED = 0x0d;
     public static final byte PERMISSION_DENIED = 0x0e;
     public static final byte FREE_TRIAL_ALREADY_USED = 0x0f;
 //    public static final byte STATUS_RECEIPT_IS_EXPIRED = 0x10; // used on iOS only

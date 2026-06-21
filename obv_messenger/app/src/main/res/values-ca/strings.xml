@@ -50,7 +50,7 @@
 	<string name="dialog_message_contact_introduction" state="needs_review" hash="-398698689">Vols presentar %1$s a %2$s?</string>
 	<string name="dialog_message_contact_introduction_multiple" state="needs_review" hash="-1743988418">Vols presentar %1$s als %2$d contactes següents?\n\n%3$s</string>
 	<string name="dialog_message_delete_attachment" state="needs_review" hash="-235504816">Vol realment eliminar l\'adjunt %1$s d\'aquest missatge?\nAquesta acció no es pot desfer.</string>
-	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="-273205987">Realment vols eliminar l\'adjunt %1$s?\nAquesta acció no es pot desfer.</string>
+	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="1647132381">Vols eliminar realment l\'arxiu adjunt **%1$s**?\nAquesta acció no es pot desfer.</string>
 	<string name="dialog_message_disband_group" state="needs_review" hash="-1617503323">Vols dissoldre el grup %1$s?\nJa no serà possible enviar missatges a aquest grup. Els missatges de grup existents no es veuran afectats.</string>
 	<string name="dialog_message_disband_non_empty_group_confirmation" state="needs_review" hash="1096257228">Estàs a punt de dissoldre el grup %1$s.\nAixò eliminarà tots els membres i membres pendents del grup. Actualment hi ha:\n- %2$d membres\n- %3$d membres pendents\n\nProcedir amb la dissolució d\'aquest grup?</string>
 	<string name="dialog_message_exchange_digits" state="needs_review" hash="1612882609">Vols intercanviar codis amb %1$s per tornar a verificar la seva identitat?</string>
@@ -65,6 +65,7 @@
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">Confirmar eliminació?</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">¿Dissoldre el grup?</string>
 	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">Buscar una conversa…</string>
+	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">Introdueix una data</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">Editar els detalls del grup</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">Edita els teus detalls</string>
 	<string name="dialog_title_exchange_digits" state="needs_review" hash="864614114">Intercanvia codis</string>
@@ -91,14 +92,18 @@
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Un administrador ha canviat el nom del grup a:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Un administrador ha canviat la descripció del grup a:</string>
 	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">Un administrador ha canviat la foto del grup.</string>
-	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">El teu contacte ha actualitzat la seva Olvid Card. Es mostren a continuació tant la versió antiga com la nova.\n\nPrem \"actualitzar\" per actualitzar la informació del teu contacte amb aquesta nova versió.</string>
+	<string name="explanation_new_contact_card_name" state="needs_review" hash="-1601853738">El teu contacte ha actualitzat el seu nom a:</string>
+	<string name="explanation_new_contact_card_position" state="needs_review" hash="184144104">El teu contacte ha actualitzat el seu càrrec/empresa a:</string>
+	<string name="explanation_new_contact_card_photo" state="needs_review" hash="-252626818">El teu contacte ha actualitzat la seva foto de perfil.</string>
+	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">El teu nom s\'ha actualitzat a:</string>
+	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">El teu càrrec/empresa s\'ha actualitzat a:</string>
+	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">La teva foto de perfil s\'ha actualitzat.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">S\'està establint actualment un canal de comunicació segur. No podràs iniciar cap conversa amb aquest contacte fins que es completi. Aquest procés hauria de trigar només uns segons si tu i el teu contacte esteu en línia.\n\nSi creus que alguna cosa ha fallat, pots reiniciar l\'establiment del canal.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">No s\'ha trobat cap contacte</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">No s\'ha trobat cap grup</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">No s\'han trobat missatges</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">No s\'ha trobat cap fitxer adjunt</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">No s\'ha trobat cap enllaç</string>
-	<string name="format_identity_details_custom_field" state="needs_review" hash="-1073344790">%1$s: %2$s</string>
 	<string name="hint_company" state="needs_review" hash="379200324">Empresa (opcional)</string>
 	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Escriu un missatge</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Missatge efímer</string>
@@ -164,15 +169,10 @@
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">Targeta de grup - Esborrany no publicat</string>
 	<string name="label_group_members" state="needs_review" hash="1460220752">Membres del grup</string>
 	<string name="label_other_group_members" state="needs_review" hash="-2121490032">Altres membres del grup</string>
-	<string name="label_groups" state="needs_review" hash="-990226727">Grups</string>
+	<string name="label_groups_common" state="needs_review" hash="1252823567">Grups en comú</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">Invitació\nrebutjada</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">Detalls del grup actualitzats</string>
-	<string name="label_new_olvid_card" state="needs_review" hash="688199407">Detalls del contacte actualitzats</string>
 	<string name="label_not_part_of_a_group" state="needs_review" hash="1667979596">Encara no forma part de cap grup</string>
-	<string name="label_olvid_card" state="needs_review" hash="-1953461576">Olvid Card</string>
-	<string name="label_olvid_card_published" state="needs_review" hash="-1038740778">Olvid Card - Publicada</string>
-	<string name="label_olvid_card_published_update" state="needs_review" hash="391148752">Olvid Card - Nou</string>
-	<string name="label_olvid_card_unpublished_draft" state="needs_review" hash="-786284715">Olvid Card - Esborrany no publicat</string>
 	<string name="label_pending_group_members" state="needs_review" hash="1481357803">Membres del grup pendents</string>
 	<string name="label_text_copied_from_olvid" state="needs_review" hash="1675378287">Text copiat d\'Olvid</string>
 	<string name="label_trust_origins" state="needs_review" hash="-1177760062">Orígens de confiança</string>
@@ -285,12 +285,16 @@
 	<string name="toast_message_shortcut_not_supported" state="needs_review" hash="-1300016753">La creació d\'accés directe no és compatible amb el teu dispositiu</string>
 	<string name="toast_message_unable_to_open_file" state="needs_review" hash="392405293">No s\'ha pogut trobar cap aplicació adequada per obrir aquest tipus de fitxer</string>
 	<string name="toast_message_unparsable_url" state="needs_review" hash="-135719133">No s\'ha pogut analitzar l\'URL correctament</string>
-	<string name="trust_origin_direct_type" state="needs_review" hash="-67248053">%1$s - Verificació directa</string>
-	<string name="trust_origin_group_type" state="needs_review" hash="230302215">%1$s - Invitació a un grup acceptada de</string>
-	<string name="trust_origin_group_v2_type" state="needs_review" hash="-1152079590">%1$s - Invitació al grup acceptada</string>
-	<string name="trust_origin_introduction_type" state="needs_review" hash="328494718">%1$s - Presentació de</string>
-	<string name="trust_origin_keycloak_type" state="needs_review" hash="1983748673">%2$s - Validació pel proveïdor d\'identitat a les %1$s</string>
-	<string name="trust_origin_unknown_type" state="needs_review" hash="2084263523">%1$s - Origen de confiança desconegut</string>
+	<string name="trust_origin_direct_type" state="needs_review" hash="1798276315">Verificació directa</string>
+	<string name="trust_origin_group_type" state="needs_review" hash="1222060749">S\'ha acceptat la invitació al grup de .</string>
+	<string name="trust_origin_group_v2_type" state="needs_review" hash="-566733151">S\'ha acceptat la invitació al grup.</string>
+	<string name="trust_origin_introduction_type" state="needs_review" hash="-266148171">Presentació de</string>
+	<string name="trust_origin_keycloak_type" state="needs_review" hash="-1113573733">Validació per part del proveïdor d\'identitat a %1$s</string>
+	<string name="trust_origin_unknown_type" state="needs_review" hash="-491114965">Origen de confiança desconegut</string>
+	<string name="trust_origin_direct_title" state="needs_review" hash="-1849285555">Us heu afegit mútuament com a contactes.</string>
+	<string name="trust_origin_introduction_title" state="needs_review" hash="-1034826640">Presentació</string>
+	<string name="trust_origin_group_title" state="needs_review" hash="1252823567">Grups en comú</string>
+	<string name="trust_origin_keycloak_title" state="needs_review" hash="-1917629373">Afegit a través del directori</string>
 	<string name="menu_action_delete_contact" state="needs_review" hash="1849106991">Eliminar contacte</string>
 	<string name="menu_action_delete_user" state="needs_review" hash="1683580694">Eliminar usuari</string>
 	<string name="dialog_title_delete_user" state="needs_review" hash="-56212547">¿Eliminar usuari?</string>
@@ -299,6 +303,7 @@
 	<string name="text_empty_group" state="needs_review" hash="-464714974">Grup buit</string>
 	<string name="message_error_group_name_empty" state="needs_review" hash="1137468023">Si us plau, introduïu un nom de grup</string>
 	<string name="hint_search_contact_name" state="needs_review" hash="-242911449">Buscar nom de contacte…</string>
+	<string name="hint_search_group_name" state="needs_review" hash="-265074656">Cerca el nom del grup…</string>
 	<string name="menu_action_search" state="needs_review" hash="-2085358317">Cerca</string>
 	<string name="toast_message_polling_failed" state="needs_review" hash="402242307">No s\'han pogut obtenir els missatges</string>
 	<string name="dialog_message_battery_optimization" state="needs_review" hash="1191860407">L\'optimització de la bateria a Android funciona retardant certs esdeveniments en segon pla per executar-los en lots. Això pot retardar la recepció de missatges entrants d\'Olvid.\n\nPer assegurar-te que els teus missatges es rebin ràpidament, hauries de permetre que Olvid \"sempre s\'executi en segon pla\". Prem \"Configuració\" a continuació i després \"Permetre\".</string>
@@ -819,6 +824,11 @@
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Reproductor multimèdia</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Controls de reproducció al reproduir contingut multimèdia a Olvid</string>
 	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">No es possible reproduir el fitxer d\'àudio</string>
+	<string name="label_voice_message" state="needs_review" hash="-348491668">Missatge de veu</string>
+	<string name="content_description_skip_previous" state="needs_review" hash="836036575">Àudio anterior</string>
+	<string name="content_description_skip_next" state="needs_review" hash="-878180801">Següent clip d\'àudio</string>
+	<string name="content_description_audio_play" state="needs_review" hash="1143766922">Reproduir</string>
+	<string name="content_description_audio_pause" state="needs_review" hash="1931883968">Pausa</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Eliminar</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Eliminar a tot arreu</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">No s\'ha pogut eliminar a tot arreu. Si us plau, torneu-ho a provar.</string>
@@ -919,6 +929,7 @@
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">El vostre ID d\'Olvid està gestionat actualment pel proveïdor d\'identitat de la vostra empresa. No podeu activar manualment una llicència d\'Olvid.\n\nSi us plau, poseu-vos en contacte amb el vostre administrador per obtenir més detalls.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Trucada perduda</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Detalls del contacte actualitzats</string>
+	<string name="text_own_details_updated" state="needs_review" hash="-1335488506">Detalls actualitzats</string>
 	<string name="text_group_details_updated" state="needs_review" hash="1016500852">Detalls del grup actualitzats</string>
 	<string name="dialog_title_sd_card_ringtone_bugged_android_9" state="needs_review" hash="-1202187296">Error de so de notificació a Android 9</string>
 	<string name="dialog_message_sd_card_ringtone_bugged_android_9" state="needs_review" hash="1449296723">Olvid no pot utilitzar el so de notificació que has seleccionat. Ha estat desactivat. Un error a Android 9 impedeix l\'ús de sons de notificació personalitzats en aplicacions que no sol·liciten accés a l\'emmagatzematge extern/targeta SD.\n\nHauries d\'intentar seleccionar un so de notificació estàndard. Fins llavors, les teves notificacions romandran en silenci.</string>
@@ -1014,6 +1025,10 @@
 	<string name="dialog_title_available_space_low" state="needs_review" hash="610249394">Emmagatzematge del dispositiu gairebé ple</string>
 	<string name="dialog_message_available_space_low" state="needs_review" hash="78499573">El teu dispositiu s\'està quedant sense espai disponible. És probable que trobis errors inesperats a l\'hora de rebre o enviar fitxers amb Olvid.\n\nProbablement sigui un bon moment per alliberar espai al teu dispositiu.</string>
 	<string name="button_label_manage_storage" state="needs_review" hash="-918485427">Gestionar l\'emmagatzematge</string>
+	<string name="label_storage_all_files" state="needs_review" hash="1735747130">Tots els fitxers</string>
+	<string name="label_storage_sent_by_me" state="needs_review" hash="640456592">Enviat per mi</string>
+	<string name="label_storage_large_files" state="needs_review" hash="-257706820">Més gran que 5 MB</string>
+	<string name="label_storage_discussions" state="needs_review" hash="491497248">Converses</string>
 	<string name="pref_use_internal_image_viewer_title" state="needs_review" hash="1319400578">Utilitzar el visualitzador d\'imatges integrat</string>
 	<string name="pref_use_internal_image_viewer_summary" state="needs_review" hash="1248137666">Quan s\'activa, fer clic en un fitxer adjunt d\'imatge l\'obrirà al visualitzador intern. Si no, s\'utilitzarà l\'aplicació d\'imatges predeterminada del teu dispositiu.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">No es possible mostrar la imatge</string>
@@ -1167,7 +1182,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Eliminar un perfil suprimirà qualsevol informació relacionada amb aquest perfil al vostre dispositiu. Això inclou els vostres contactes, grups i el contingut de totes les vostres converses (missatges i adjunts) per a aquest perfil.\n\n<b>Aquest és el vostre únic perfil visible i si teniu perfils ocults, també es suprimiran simultàniament.</b>\n\nPremeu \"Següent\" per triar com suprimir aquest perfil.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Eliminar el perfil <b>arreu</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">Escriviu \"%1$s\" aquí per continuar</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">Introdueix \\"%1$s\\" aquí per continuar</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">Si trieu eliminar el vostre perfil <b>arreu</b>:\n - es eliminarà localment <b>i</b> als dispositius dels vostres contactes\n - abandonareu els grups als quals us vau unir\n - els grups que administreu es dissoldran\n\nSi <b>no</b> suprimiu el vostre perfil arreu, només es suprimirà localment al vostre dispositiu. Si no teniu previst restaurar una còpia de seguretat a un altre dispositiu, els vostres contactes podrien continuar intentant enviar-vos missatges i podrien no adonar-se que aquests missatges no es poden entregar.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">El teu perfil actual sembla estar inactiu, cosa que probablement significa que l\'has transferit a un altre dispositiu. Si vols continuar utilitzant aquest perfil al teu altre dispositiu, pots eliminar-lo aquí sense problemes.\n\nSi ja no vols utilitzar aquest perfil, primer hauràs de reactivar-lo en aquest dispositiu, esperar que es recreïn els canals segurs amb els teus contactes i, només llavors, eliminar aquest perfil triant l\'opció \"eliminar a tot arreu\".</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">El teu perfil està actualment activat en diversos dispositius.\n\nSi tries eliminar el teu perfil <b>arreu</b>:\n - es suprimirà de tots els teus dispositius <b>i</b> dels dispositius dels teus contactes\n - sortiràs dels grups als quals t\'has unit\n - els grups que administres es dissoldran\n\nSi <b>no</b> elimines el teu perfil arreu, només se suprimirà localment i podràs continuar utilitzant-lo normalment als teus altres dispositius.</string>
@@ -1251,9 +1266,6 @@
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Grups v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
 	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Utilitza emojis animats (si estan disponibles)</string>
-	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Emmagatzematge del perfil</string>
-	<string name="label_photos" state="needs_review" hash="1539779714">Fotos</string>
-	<string name="label_videos" state="needs_review" hash="-101497740">Vídeos</string>
 	<string name="label_audio" state="needs_review" hash="-779820608">Àudio</string>
 	<string name="label_other" state="needs_review" hash="-543765264">Altres</string>
 	<string name="label_all" state="needs_review" hash="752498555">Tot</string>
@@ -1268,14 +1280,7 @@
 	<string name="menu_action_sort_date_alt" state="needs_review" hash="646746321">Ordenar per data (més antics primer)</string>
 	<string name="menu_action_sort_size_alt" state="needs_review" hash="1986077505">Ordenar per mida (el més petit primer)</string>
 	<string name="menu_action_sort_name_alt" state="needs_review" hash="-802793419">Ordenar per nom (invers)</string>
-	<string name="text_sent_by_xx" state="needs_review" hash="248848108">Enviat per %1$s</string>
 	<string name="text_unknown_sender" state="needs_review" hash="1913018414">Remitent desconegut</string>
-	<string name="text_sent_to_xx" state="needs_review" hash="918571953">Enviat a %1$s</string>
-	<string name="text_draft_for_xx" state="needs_review" hash="2063814784">Esborrany per a %1$s</string>
-	<string name="label_loading_attachments" state="needs_review" hash="856026474">Carregant fitxers adjunts…</string>
-	<string name="dialog_message_delete_attachment_for_many_messages" state="needs_review" hash="1800265017">L\'arxiu adjunt %2$s està adjunt a %1$d missatges diferents. Vols eliminar només aquest, o eliminar-lo de tots els %1$d missatges?\nAquesta acció no es pot desfer.</string>
-	<string name="button_label_delete_one" state="needs_review" hash="-1916938532">Eliminar-ne un</string>
-	<string name="button_label_delete_all" state="needs_review" hash="-985749327">Eliminar els %1$d</string>
 	<string name="dialog_title_save_selected_attachments" state="needs_review" hash="-405982081">Guardar els adjunts seleccionats</string>
 	<string name="pref_category_contacts_and_groups" state="needs_review" hash="1531647661">Contactes i grups</string>
 	<string name="pref_auto_join_groups_title" state="needs_review" hash="29822089">Acceptar automàticament les invitacions de grup…</string>
@@ -1636,7 +1641,7 @@
 	<string name="button_label_remove" state="needs_review" hash="1097276765">Eliminar</string>
 	<string name="menu_action_remove_expiration" state="needs_review" hash="-156931599">Mantén aquest dispositiu actiu</string>
 	<string name="dialog_title_set_unexpiring_device" state="needs_review" hash="-1488033285">Mantingueu un dispositiu actiu</string>
-	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1293464179">Actualment no tens una llicència per tenir múltiples dispositius actius. Si vols adquirir aquesta llicència, tanca aquest diàleg i prem \"Veure plans de subscripció\" a continuació.\n\nPer continuar i mantenir actiu el dispositiu \"%1$s\", el dispositiu \"%2$s\" es desactivarà en el seu lloc. Vols continuar?</string>
+	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1457083107">Actualment, no disposeu d\'una llicència que us permeti tenir diversos dispositius actius. Si voleu adquirir aquesta llicència, tanqueu aquesta finestra i feu clic a \"Veure els plans de subscripció\".\n\nPer continuar i mantenir el dispositiu \"%1$s\" actiu, el dispositiu \"%2$s\" es desactivarà en el seu lloc. Voleu continuar?</string>
 	<string name="dialog_title_remove_background_image" state="needs_review" hash="488158841">¿Eliminar la imatge de fons actual?</string>
 	<string name="dialog_title_introducing_markdown" state="needs_review" hash="175399162">Presentem el formatatge de missatges!</string>
 	<string name="dialog_message_introducing_markdown" state="needs_review" hash="1738415115">Ara Olvid permet formatar els teus missatges utilitzant la sintaxi markdown 🎨!\n\nEscriu en **<b>negreta</b>**, en *<i>cursiva</i>*, afegeix # <big>TÍTOLS</big>, etc.\n\nTroba la llista de totes les etiquetes admeses 🦍 a:\nhttps://www.olvid.io/faq/format-your-messages/</string>
@@ -2041,6 +2046,7 @@
 	<string name="button_label_this_way" state="needs_review" hash="747183939">Per aquí</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">Codi copiat</string>
 	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">Si us plau, tria qui vols afegir a aquest grup.</string>
+	<string name="explanation_choose_contact_introduction" state="needs_review" hash="1113777517">Si us plau, trieu a qui voleu presentar %1$s.</string>
 	<string name="label_group_administration" state="needs_review" hash="871355986">Administració del grup</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">Trucada bloquejada</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid no permet iniciar una trucada amb més de %1$d persones.</string>
@@ -2154,6 +2160,7 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Negociant</string>
 	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Transferint</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Transferència completada</string>
+	<string name="history_transfer_step_processing_buffered_data" state="needs_review" hash="-1359029280">Processant les dades rebudes</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">La transferència ha fallat</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Transferència de l\'historial de xat</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">No s\'ha pogut iniciar la transferència. Potser ja hi ha una altra transferència en curs?</string>
@@ -2272,7 +2279,8 @@
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">S\'està important</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analitzant el contingut</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">S\'estan analitzant les converses exportades</string>
-	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">S\'ha produït un error en carregar el fitxer d\'estil OpenStreetMap.</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">S\'ha produït un error en carregar el fitxer d\'estil OpenStreetMap.</string>
 	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Les subscripcions a l\'aplicació no estan disponibles</string>
 	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">La versió d\'Olvid que has instal·lat no inclou la biblioteca de facturació de Google i no admet compres dins de l\'aplicació.\n\nPer a més informació, si us plau, poseu-vos en contacte amb nosaltres a **feedback@olvid.io**.</string>
+	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">Cancel·la la càrrega</string>
 </resources>

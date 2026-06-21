@@ -60,6 +60,12 @@ interface ReactionDao {
     )
     fun getMyReactionForMessage(messageId: Long): Reaction?
 
+    @Query("SELECT * FROM ${Reaction.TABLE_NAME} " +
+            " WHERE ${Reaction.MESSAGE_ID} = :messageId " +
+            " AND ${Reaction.BYTES_IDENTITY} = :bytesSenderIdentity "
+    )
+    fun getReactionForSenderAndMessage(bytesSenderIdentity: ByteArray?, messageId: Long): Reaction?
+
     @Query("DELETE FROM ${Reaction.TABLE_NAME} " +
             " WHERE ${Reaction.MESSAGE_ID} = :messageId "
     )

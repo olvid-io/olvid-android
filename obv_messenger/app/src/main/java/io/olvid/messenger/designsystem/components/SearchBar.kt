@@ -35,7 +35,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-//noinspection UsingMaterialAndMaterial3Libraries --> this only exists in material
+//noinspection UsingMaterialAndMaterial3Libraries --> OutlinedTextFieldDecorationBox only exists in material, not material3
 import androidx.compose.material.TextFieldDefaults.OutlinedTextFieldDecorationBox
 import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.Close
@@ -88,9 +88,11 @@ fun SearchBar(
     placeholderText: String = "",
     onSearchTextChanged: (String) -> Unit = {},
     onClearClick: () -> Unit = {},
+    alwaysShowClearButton: Boolean = false,
     focusState: MutableState<Boolean>? = null,
     requestFocus: Boolean = false,
     leadingIcon: @Composable (() -> Unit)? = null,
+    trailingExtraContent: @Composable (() -> Unit)? = null,
     selectAllBeacon: Any? = null, // any time selectAllBeacon object changes, the text of the search bar is fully selected
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = colorResource(R.color.olvid_gradient_dark),
@@ -111,8 +113,10 @@ fun SearchBar(
                 onSearchTextChanged = onSearchTextChanged,
                 focusState = focusState,
                 onClearClick = onClearClick,
+                alwaysShowClearButton = alwaysShowClearButton,
                 selectAllBeacon = selectAllBeacon,
                 leadingIcon = leadingIcon,
+                trailingExtraContent = trailingExtraContent,
                 requestFocus = requestFocus,
                 colors = colors,
             )
@@ -127,13 +131,15 @@ private fun SearchBarInput(
     placeholderText: String = "",
     onSearchTextChanged: (String) -> Unit = {},
     onClearClick: () -> Unit = {},
+    alwaysShowClearButton: Boolean,
     focusState: MutableState<Boolean>? = null,
     selectAllBeacon: Any? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
+    trailingExtraContent: @Composable (() -> Unit)? = null,
     requestFocus: Boolean = false,
     colors: TextFieldColors
 ) {
-    var showClearButton by remember { mutableStateOf(false) }
+    var showClearButton by remember { mutableStateOf(alwaysShowClearButton) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -175,7 +181,7 @@ private fun SearchBarInput(
                 focusState?.let {
                     it.value = focus.isFocused
                 }
-                showClearButton = (focus.isFocused)
+                showClearButton = (focus.isFocused) || alwaysShowClearButton
             }
             .focusRequester(focusRequester),
         value = textFieldValue,
@@ -218,22 +224,25 @@ private fun SearchBarInput(
                     )
                 },
                 trailingIcon = {
-                    val alpha by animateFloatAsState(if (showClearButton) 1f else 0f)
-                    IconButton(
-                        modifier = Modifier.alpha(alpha),
-                        onClick = {
-                            if (showClearButton) {
-                                onClearClick()
-                                focusManager.clearFocus()
-                            } else {
-                                focusRequester.requestFocus()
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        trailingExtraContent?.invoke()
+                        val alpha by animateFloatAsState(if (showClearButton) 1f else 0f)
+                        IconButton(
+                            modifier = Modifier.alpha(alpha),
+                            onClick = {
+                                if (showClearButton) {
+                                    onClearClick()
+                                    focusManager.clearFocus()
+                                } else {
+                                    focusRequester.requestFocus()
+                                }
                             }
+                        ) {
+                            Icon(
+                                imageVector = Filled.Close,
+                                contentDescription = "Close",
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Filled.Close,
-                            contentDescription = "Close",
-                        )
                     }
                 },
                 colors = androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(

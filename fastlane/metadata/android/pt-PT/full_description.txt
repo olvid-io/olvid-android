@@ -1,0 +1,19 @@
+Olvid é o primeiro aplicativo de mensagens instantâneas privadas para todos. Envie mensagens, fotos, arquivos e faça chamadas de voz e vídeo seguras.
+
+
+O que é um mensageiro "privado"?
+
+É um mensageiro:
+- Que não impõe novos contatos a você. Você está no controle: você escolhe com quem deseja conversar. Olvid oferece várias maneiras de convidar outros usuários do Olvid, seja pessoalmente ou remotamente.
+- Que não requer nenhum dado pessoal. Olvid não solicitará seu número de telefone ou seu e-mail. Ao contrário do seu mensageiro anterior, Olvid nunca solicitará acesso à sua lista de contatos.
+- No qual você nunca receberá mensagens não solicitadas ou de uma fonte desconhecida.
+- Onde todas as trocas se beneficiam da mesma segurança e privacidade de uma discussão real em um ambiente fechado. Olvid oferece criptografia de ponta a ponta e autenticação de ponta a ponta por padrão, sempre, para tudo o que você enviar ou receber.
+
+Olvid garante espaços seguros, imunes a agressões externas, que o isolam do ruído digital e da violência de outras redes sociais. Crie grupos com sua família, amigos e colaboradores importantes. Sem spam, sem publicidade. Você finalmente recupera o controle total sobre suas comunicações.
+
+Olvid foi projetado para ser o melhor lugar para trocar informações sobre assuntos importantes, com aqueles que importam para você.
+
+
+Olvid - Tecnologia
+
+No coração do Olvid, um "motor criptográfico", resultado de vários anos de pesquisa, permite provar matematicamente a integridade, a confidencialidade e o anonimato de suas comunicações.

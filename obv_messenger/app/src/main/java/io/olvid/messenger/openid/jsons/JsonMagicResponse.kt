@@ -29,4 +29,10 @@ class JsonMagicResponse {
     var accessToken: String? = null
     @JsonProperty("refresh_token")
     var refreshToken: String? = null
+
+    // if a refreshToken is provided, the clientId should be here too (except on Keycloak Olvid plugin versions before 4.6.2)
+    @JsonProperty("client_id")
+    var clientId: String? = null
+    @JsonProperty("client_secret")
+    var clientSecret: String? = null
 }

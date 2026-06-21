@@ -29,15 +29,14 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.content.ContextCompat
 import io.olvid.engine.engine.types.EngineNotifications
 import io.olvid.engine.engine.types.SimpleEngineNotificationListener
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Contact
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.main.MainActivity.Companion.LINK_URI_INTENT_EXTRA
 import io.olvid.messenger.plus_button.PlusButtonViewModel
 
@@ -49,10 +48,7 @@ class ScanActivity : LockableActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(
-                Color.Transparent.toArgb(),
-                ContextCompat.getColor(this, R.color.blackOverlay)
-            )
+            navigationBarStyle = SystemBarStyle.dark(Color.Transparent.toArgb())
         )
 
         super.onCreate(savedInstanceState)

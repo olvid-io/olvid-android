@@ -39,6 +39,7 @@ public class RefreshInboxAttachmentSignedUrlOperation extends Operation {
     public static final int RFC_ATTACHMENT_NOT_FOUND = 2;
     public static final int RFC_DELETED_FROM_SERVER = 3;
     public static final int RFC_IDENTITY_IS_INACTIVE = 4;
+    public static final int RFC_UPLOAD_CANCELLED = 5;
 
     private final FetchManagerSessionFactory fetchManagerSessionFactory;
     private final SSLSocketFactory sslSocketFactory;
@@ -108,6 +109,9 @@ public class RefreshInboxAttachmentSignedUrlOperation extends Operation {
                         return;
                     case ServerMethod.DELETED_FROM_SERVER:
                         cancel(RFC_DELETED_FROM_SERVER);
+                        return;
+                    case ServerMethod.UPLOAD_CANCELLED:
+                        cancel(RFC_UPLOAD_CANCELLED);
                         return;
                     case ServerMethod.IDENTITY_IS_NOT_ACTIVE:
                         cancel(RFC_IDENTITY_IS_INACTIVE);

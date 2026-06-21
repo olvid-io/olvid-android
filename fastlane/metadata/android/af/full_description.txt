@@ -1,0 +1,19 @@
+Olvid is die eerste privaat-klets-toepassing vir almal. Stuur boodskappe, foto's en lêers, en maak veilige telefoon- en video-oproepe.
+
+
+Wat is 'n "private" boodskapper?
+
+Dit is 'n boodskapper:
+- Wat nie nuwe kontakte op jou afdwing nie. Jy is in beheer: jy kies met wie jy wil gesels. Olvid bied verskeie maniere om met ander Olvid-gebruikers in kontak te kom, hetsy persoonlik of op afstand.
+- Wat geen persoonlike data vereis nie. Olvid sal nie jou telefoonnommer of e-posadres vra nie. In teenstelling met jou vorige boodskapper, sal Olvid nooit toegang tot jou adresboek versoek nie.
+- Waarop jy nooit ongevraagde boodskappe of boodskappe van 'n onbekende bron sal ontvang nie.
+- Waar alle uitruilings die voordeel van dieselfde sekuriteit en privaatheid geniet as 'n gesprek in die regte lewe agter geslote deure. Olvid bied end-tot-end-enkripsie en end-tot-end-verifikasie, altyd, vir alles wat jy stuur of ontvang.
+
+Olvid waarborg veilige ruimtes vir jou, wat immuun is teen eksterne aggressie, en isoleer jou van die digitale geraas en geweld van ander sosiale netwerke. Skep groepe met jou familie, vriende en sleutelmedewerkers. Geen strooipos, geen advertensies nie. Jy kry uiteindelik weer volledige beheer oor jou kommunikasie.
+
+Olvid is ontwerp om die beste plek te wees om oor belangrike onderwerpe te gesels, met die mense wat vir jou belangrik is.
+
+
+Olvid - Tegnologie
+
+In die hart van Olvid is 'n "kriptografiese enjin" wat uit jare se navorsing ontstaan en wiskundig bewys dat die integriteit, vertroulikheid en anonimiteit van jou kommunikasie verseker word.

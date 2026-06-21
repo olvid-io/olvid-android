@@ -46,6 +46,7 @@ import io.olvid.messenger.databases.entity.Fyle;
 import io.olvid.messenger.databases.entity.FyleMessageJoinWithStatus;
 import io.olvid.messenger.databases.entity.Invitation;
 import io.olvid.messenger.databases.entity.Message;
+import io.olvid.messenger.databases.entity.MessageMetadata;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
 
 @Dao
@@ -403,6 +404,22 @@ public interface MessageDao {
     @Query("SELECT MAX(" + Message.SORT_INDEX + ") FROM " + Message.TABLE_NAME + " WHERE " + Message.DISCUSSION_ID + " = :discussionId")
     @Nullable Double getDiscussionMaxSortIndex(long discussionId);
 
+    @Query("SELECT id FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND " + Message.TIMESTAMP + " >= :timestamp " +
+            " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " ORDER BY " + Message.TIMESTAMP + " ASC " +
+            " LIMIT 1")
+    @Nullable Long getFirstMessageIdOnOrAfterTimestamp(long discussionId, long timestamp);
+
+    @Query("SELECT id FROM " + Message.TABLE_NAME +
+            " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND " + Message.TIMESTAMP + " <= :timestamp " +
+            " AND " + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " ORDER BY " + Message.TIMESTAMP + " DESC " +
+            " LIMIT 1")
+    @Nullable Long getLastMessageIdOnOrBeforeTimestamp(long discussionId, long timestamp);
+
     @Query("SELECT count(*) FROM " + Message.TABLE_NAME + " AS mess " +
             " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
             " ON mess." + Message.DISCUSSION_ID + " = disc.id " +
@@ -432,33 +449,6 @@ public interface MessageDao {
             " AND " + Message.DISCUSSION_ID + " = :discussionId" +
             " AND " + Message.TIMESTAMP + " <= :timestamp ")
     void markDiscussionMessagesReadUpTo(long discussionId, long timestamp);
-
-    @Query("SELECT EXISTS " +
-            " ( SELECT 1 FROM " + Message.TABLE_NAME + " AS message " +
-            " INNER JOIN " + Discussion.TABLE_NAME + " AS discussion " +
-            " ON discussion.id = " + Message.DISCUSSION_ID +
-            " WHERE discussion." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND discussion." + Discussion.ARCHIVED + " = 0 " +
-            " AND message." + Message.STATUS + " = " + Message.STATUS_UNREAD +
-            " " +
-            " UNION " +
-            " SELECT 1 FROM " + Discussion.TABLE_NAME +
-            " WHERE " + Discussion.UNREAD + " = 1 " +
-            " AND " + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " " +
-            " UNION " +
-            " SELECT 1 FROM " + Invitation.TABLE_NAME + " AS inv " +
-            " WHERE inv." + Invitation.CATEGORY_ID + " IN ( " +
-            ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY +  ") " +
-            " AND inv." + Invitation.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " )")
-    LiveData<Boolean> hasUnreadMessagesOrDiscussionsOrInvitations(@NonNull byte[] bytesOwnedIdentity);
 
     @Query("SELECT COUNT(*) as unread_count, id as message_id, min(" + Message.SORT_INDEX + ") as min_sort_index FROM " + Message.TABLE_NAME +
             " WHERE " + Message.DISCUSSION_ID + " = :discussionId " +
@@ -503,6 +493,23 @@ public interface MessageDao {
             " ORDER BY " + Message.SENDER_IDENTIFIER + ", " + Message.SENDER_THREAD_IDENTIFIER + ", " + Message.SENDER_SEQUENCE_NUMBER + " ASC "
     )
     @NonNull List<Message> getAllTransferableForDiscussion(long discussionId);
+
+    @Query("SELECT mess.* FROM " + Message.TABLE_NAME + " AS mess " +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON mess." + Message.DISCUSSION_ID + " = disc.id " +
+            // The mute window boundaries are local-clock timestamps, but mess.timestamp is the server
+            // timestamp. Comparing against the server timestamp would drop messages that were silenced by
+            // the mute but delivered late or with clock skew (server timestamp outside the local window).
+            // Join the local reception time instead (KIND_DELIVERED metadata, stamped with the local clock
+            // on receipt), falling back to the server timestamp for legacy messages with no such metadata.
+            " LEFT JOIN " + MessageMetadata.TABLE_NAME + " AS meta ON meta." + MessageMetadata.MESSAGE_ID + " = mess.id AND meta." + MessageMetadata.KIND + " = " + MessageMetadata.KIND_DELIVERED +
+            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND mess." + Message.MESSAGE_TYPE + " IN (" + Message.TYPE_INBOUND_MESSAGE + "," + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE + ") " +
+            " AND mess." + Message.STATUS + " = " + Message.STATUS_UNREAD +
+            " AND mess." + Message.WIPE_STATUS + " = " + Message.WIPE_STATUS_NONE +
+            " AND COALESCE(meta." + MessageMetadata.TIMESTAMP + ", mess." + Message.TIMESTAMP + ") >= :startTimestamp " +
+            " AND COALESCE(meta." + MessageMetadata.TIMESTAMP + ", mess." + Message.TIMESTAMP + ") < :endTimestamp " +
+            " ORDER BY mess." + Message.TIMESTAMP + " ASC")
+    @NonNull List<Message> getInboundMessagesReceivedInWindow(@NonNull byte[] bytesOwnedIdentity, long startTimestamp, long endTimestamp);
 
 
     @Query("SELECT COUNT(*) FROM " + Message.TABLE_NAME + " AS mess " +

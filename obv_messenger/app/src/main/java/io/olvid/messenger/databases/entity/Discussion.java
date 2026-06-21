@@ -520,6 +520,7 @@ public class Discussion {
         if (db.messageDao().countMessagesInDiscussion(id) == 0) {
             // discussion is empty and will be locked --> delete it
             db.discussionDao().delete(this);
+            UnreadCountsSingleton.INSTANCE.discussionDeleted(id);
             ShortcutActivity.disableShortcut(id);
         } else {
             // clear the LatestDiscussionSenderSequenceNumber to avoid "xx messages missing" if you re-join this discussion

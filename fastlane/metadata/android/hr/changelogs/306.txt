@@ -1,0 +1,5 @@
+- Redizajn nekih komponenti aplikacije: kartica kontakta, profilna kartica, upravitelj pohrane itd.
+- Dodan prikaz kalendara u razgovoru za brzi pristup određenom vremenu.
+- Dodan interni upravljač za "reprodukciju u tijeku" za jednostavnu promjenu između glasovnih poruka.
+- Dodana mogućnost poništavanja slanja privitka.
+- Prikazuju se propuštene obavijesti kada istekne isključivanje profila.

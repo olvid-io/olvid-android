@@ -1,0 +1,19 @@
+Olvid este prima aplicație de mesagerie instantanee privată pentru toată lumea. Trimiteți mesaje, fotografii, fișiere și efectuați apeluri telefonice și video securizate.
+
+
+Ce este o aplicație de mesagerie "privată"?
+
+Este o aplicație de mesagerie:
+- Care nu vă impune contacte noi. Voi sunteți la control: voi alegeți cu cine doriți să discutați. Olvid oferă mai multe modalități de a invita alți utilizatori Olvid, fie față în față, fie de la distanță.
+- Care nu necesită date personale. Olvid nu vă va cere numărul de telefon sau adresa de e-mail. Spre deosebire de aplicația dvs. de mesagerie anterioară, Olvid nu va solicita niciodată acces la agenda dvs. de contacte.
+- Pe care nu veți primi niciodată mesaje nesolicitate sau de la o sursă necunoscută.
+- Unde toate conversațiile beneficiază de aceeași securitate și confidențialitate ca o discuție reală, în spatele ușilor închise. Olvid oferă criptare end-to-end și autentificare end-to-end în mod implicit, întotdeauna, pentru tot ceea ce trimiteți sau primiți.
+
+Olvid vă garantează spații sigure, imune la agresiuni externe, care vă izolează de zgomotul digital și de violența altor rețele sociale. Creați grupuri cu familia, prietenii și colaboratorii cheie. Fără spam, fără publicitate. În cele din urmă, recăpătați controlul total asupra comunicațiilor dvs.
+
+Olvid a fost conceput pentru a fi cel mai bun loc pentru a discuta despre subiecte importante, cu cei care contează pentru dvs.
+
+
+Olvid - Tehnologie
+
+În centrul Olvid, un "motor criptografic", rezultat din mai mulți ani de cercetare, permite să se demonstreze matematic integritatea, confidențialitatea și anonimatul comunicațiilor dvs.

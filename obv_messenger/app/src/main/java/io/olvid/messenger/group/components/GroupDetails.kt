@@ -25,11 +25,16 @@ import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -76,6 +81,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
@@ -95,6 +101,7 @@ import io.olvid.messenger.databases.ContactCacheSingleton
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Group2
 import io.olvid.messenger.designsystem.components.OlvidActionButton
+import io.olvid.messenger.designsystem.components.OlvidActionRow
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.group.GroupV2DetailsViewModel
@@ -104,6 +111,7 @@ import io.olvid.messenger.main.contacts.ContactListItem
 import io.olvid.messenger.settings.SettingsActivity
 import java.io.File
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun GroupDetailsScreen(
     groupV2DetailsViewModel: GroupV2DetailsViewModel = viewModel(),
@@ -113,7 +121,8 @@ fun GroupDetailsScreen(
     onFullMembersList: () -> Unit = {},
     onEditMembers: () -> Unit = {},
     onEditAdmins: () -> Unit = {},
-    onGroupType: () -> Unit = {}
+    onGroupType: () -> Unit = {},
+    sharedTransitionScope: SharedTransitionScope,
 ) {
     val context = LocalContext.current
     val group by groupV2DetailsViewModel.group.observeAsState()
@@ -128,21 +137,38 @@ fun GroupDetailsScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            InitialView(
-                modifier = Modifier
-                    .size(112.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple(
-                            bounded = false,
-                            color = colorResource(R.color.blueOrWhiteOverlay)
-                        ),
-                    ) { imageClick(group?.customPhotoUrl ?: group?.photoUrl) },
-                initialViewSetup = { initialView ->
-                    group?.let {
-                        initialView.setGroup2(it)
+            with(sharedTransitionScope) {
+                Box(
+                    modifier = Modifier
+                        .size(112.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(
+                                bounded = false,
+                                color = colorResource(R.color.blueOrWhiteOverlay)
+                            ),
+                        ) { imageClick(group?.customPhotoUrl ?: group?.photoUrl) }
+                ) {
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = groupV2DetailsViewModel.fullScreenPhotoUrl == null,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        InitialView(
+                            modifier = Modifier
+                                .sharedElement(
+                                    sharedContentState = rememberSharedContentState(key = "profile-photo"),
+                                    animatedVisibilityScope = this
+                                ),
+                            initialViewSetup = { initialView ->
+                                group?.let {
+                                    initialView.setGroup2(it)
+                                }
+                            }
+                        )
                     }
-                })
+                }
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = group?.truncatedCustomName?.takeIf { it.isNotEmpty() }
@@ -290,7 +316,7 @@ fun GroupDetailsScreen(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 6.dp),
+                    .padding(top = 16.dp, bottom = 6.dp, start = 8.dp),
                 text = stringResource(R.string.label_group_administration),
                 style = OlvidTypography.h3.copy(color = colorResource(R.color.almostBlack)),
                 maxLines = 1,
@@ -338,7 +364,7 @@ fun GroupDetailsScreen(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 6.dp),
+                    .padding(top = 16.dp, bottom = 6.dp, start = 8.dp),
                 text = stringResource(R.string.label_group_members) + " (${it.size + 1})",
                 style = OlvidTypography.h3.copy(color = colorResource(R.color.almostBlack)),
                 maxLines = 1,
@@ -442,6 +468,22 @@ fun GroupDetailsScreen(
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Column(
+                modifier = Modifier
+                    .background(
+                        color = colorResource(R.color.lighterGrey),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .clip(RoundedCornerShape(16.dp))
+            ) {
+                OlvidActionRow(
+                    icon = R.drawable.ic_gallery,
+                    label = stringResource(R.string.label_gallery)
+                ) {
+                    groupV2DetailsViewModel.openGallery(context)
+                }
+            }
         }
     }
 }
@@ -450,7 +492,11 @@ fun GroupDetailsScreen(
 private fun GroupActionRow(@DrawableRes icon: Int, label: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
-            .clickable { onClick() }
+            .clickable(
+                indication = ripple(),
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onClick
+            )
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -615,7 +661,7 @@ private fun GroupUpdate(
                                         append(name)
                                     }
                                 },
-                                style = OlvidTypography.body2
+                                style = OlvidTypography.body2.copy(fontWeight = FontWeight.Bold)
                             )
                         }
                     }
@@ -636,8 +682,14 @@ private fun GroupUpdate(
                         )
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = stringResource(R.string.explanation_new_group_v2_card_description))
-                            Text(text = description)
+                            Text(
+                                text = stringResource(R.string.explanation_new_group_v2_card_description),
+                                style = OlvidTypography.body2
+                            )
+                            Text(
+                                text = description,
+                                style = OlvidTypography.body2.copy(fontWeight = FontWeight.Bold)
+                            )
                         }
                     }
                 }
@@ -899,7 +951,9 @@ fun GroupUpdatePreview() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun GroupDetailsScreenPreview() {
-    GroupDetailsScreen()
+    SharedTransitionScope {
+        GroupDetailsScreen(sharedTransitionScope = this)
+    }
 }
 
 //@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)

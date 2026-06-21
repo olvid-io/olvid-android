@@ -1,0 +1,1 @@
+- Ditambahkan dukungan untuk 18 bahasa baru: Bulgaria, Bengali, Estonia, Filipina, Gujarati, Indonesia, Kannada, Latvia, Lituania, Malayalam, Marathi, Punjabi, Serbia, Swahili, Tamil, Telugu, Thailand, dan Urdu.

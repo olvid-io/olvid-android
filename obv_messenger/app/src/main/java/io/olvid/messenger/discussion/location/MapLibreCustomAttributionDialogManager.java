@@ -43,6 +43,7 @@ public class MapLibreCustomAttributionDialogManager extends AttributionDialogMan
             "© ProtoMaps",
             "© MapLibre",
             "© Qwant Maps",
+            "© Versatiles",
             "© Olvid"
     };
     private final String[] attributionsUrls = new String[]{
@@ -51,6 +52,7 @@ public class MapLibreCustomAttributionDialogManager extends AttributionDialogMan
             "https://github.com/protomaps/basemaps",
             "https://maplibre.org/",
             "https://github.com/Qwant/qwant-basic-gl-style",
+            "https://versatiles.org/",
             "https://olvid.io/"
     };
 

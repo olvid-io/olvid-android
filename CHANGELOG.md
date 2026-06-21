@@ -1,3 +1,33 @@
+# Build 306 (4.4)
+2026-06-21
+
+- Show missed notifications when profile mute expires.
+- Show total matches count in discussion search.
+- Improved gestures during video playback.
+
+# ~~Build 305 (4.4)~~
+2026-06-14
+
+- Redesign of several app components: contact card, profile card, storage manager, etc.
+- Added a calendar view to the discussion to quickly jump to a specific point in time.
+- Added an internal "ongoing playback" controller to easily switch between voice messages. Some improvements to voice message playback gestures.
+- Added the ability to cancel an attachment upload.
+- Improvements to the group v2 update protocol (more reliable key rotation).
+- Improved handling of received batch GPS locations when sharing your position.
+- Minor adjustments to the history transfer protocol.
+- Optimizations of the way unread messages display a "red dot" in various app parts.
+- Fix session refresh for magic link Keycloak authentication.
+
+# ~~Build 304 (4.3)~~
+2026-05-19
+
+- Added support for 18 new languages: Bulgarian, Bengali, Estonian, Filipino, Gujarati, Indonesian, Kannada, Latvian, Lithuanian, Malayalam, Marathi, Punjabi, Serbian, Swahili, Tamil, Telugu, Thai, and Urdu.
+
+# ~~Build 303 (4.3)~~
+2026-04-30
+
+- Added support for 18 new languages: Bulgarian, Bengali, Estonian, Filipino, Gujarati, Indonesian, Kannada, Latvian, Lithuanian, Malayalam, Marathi, Punjabi, Serbian, Swahili, Tamil, Telugu, Thai, and Urdu.
+
 # Build 302 (4.3)
 2026-05-02
 

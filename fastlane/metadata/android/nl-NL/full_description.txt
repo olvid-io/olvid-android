@@ -1,0 +1,19 @@
+Olvid is de eerste persoonlijke instant messaging-app voor iedereen. Stuur berichten, foto's en bestanden en voer veilige telefoon- en videogesprekken.
+
+
+Wat is een "persoonlijke" messenger?
+
+Het is een messenger:
+- die geen nieuwe contacten aan je opdringt. Jij hebt de controle: je kiest zelf met wie je wilt communiceren. Olvid biedt verschillende manieren om contact te leggen met andere Olvid-gebruikers, zowel persoonlijk als op afstand.
+- die geen persoonlijke gegevens vereist. Olvid vraagt niet om je telefoonnummer of e-mailadres. In tegenstelling tot je vorige messenger, zal Olvid nooit toegang vragen tot je adresboek.
+- waarop je nooit ongevraagde berichten of berichten van een onbekende bron ontvangt.
+- waarbij alle uitwisselingen dezelfde beveiliging en privacy genieten als een gesprek in de echte wereld achter gesloten deuren. Olvid biedt standaard end-to-end encryptie en end-to-end authenticatie, altijd, voor alles wat je verzendt en ontvangt.
+
+Olvid garandeert je veilige ruimtes, beschermd tegen externe agressie, die je isoleren van de digitale ruis en het geweld van andere sociale netwerken. Maak groepen aan met je familie, vrienden en belangrijke contacten. Geen spam, geen advertenties. Je krijgt eindelijk weer volledige controle over je communicatie.
+
+Olvid is ontworpen om de beste plek te zijn om te communiceren over belangrijke onderwerpen, met de mensen die belangrijk voor je zijn.
+
+
+Olvid - Technologie
+
+In het hart van Olvid bevindt zich een "cryptografische engine", het resultaat van jarenlange research, waarmee de integriteit, vertrouwelijkheid en anonimiteit van je communicatie wiskundig bewezen kunnen worden.

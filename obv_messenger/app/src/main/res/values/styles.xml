@@ -183,9 +183,6 @@
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
-    <style name="AppTheme.OrangeAccent">
-        <item name="colorAccent">@color/orange</item>
-    </style>
     <style name="AppTheme.BlueAccent">
         <item name="colorAccent">@color/olvid_gradient_light</item>
     </style>

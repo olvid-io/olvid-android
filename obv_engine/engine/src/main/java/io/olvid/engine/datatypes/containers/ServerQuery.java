@@ -327,20 +327,28 @@ public class ServerQuery {
         public final String server;
         public final Identity identity;
         public final UID serverLabel;
+        public final boolean retryIfNotFound;
 
-        public GetUserDataQuery(Identity identity, UID serverLabel) {
+        public GetUserDataQuery(Identity identity, UID serverLabel, boolean retryIfNotFound) {
             this.server = identity.getServer();
             this.identity = identity;
             this.serverLabel = serverLabel;
+            this.retryIfNotFound = retryIfNotFound;
         }
 
         public GetUserDataQuery(String server, Encoded[] encodedParts) throws DecodingException {
             this.server = server;
-            if (encodedParts.length != 2) {
+            // length == 2 is for legacy queries, before we had retryIfNotFound
+            if (encodedParts.length != 2 && encodedParts.length != 3) {
                 throw new DecodingException();
             }
             this.identity = encodedParts[0].decodeIdentity();
             this.serverLabel = encodedParts[1].decodeUid();
+            if (encodedParts.length == 3) {
+                this.retryIfNotFound = encodedParts[2].decodeBoolean();
+            } else {
+                this.retryIfNotFound = false;
+            }
         }
 
         @Override
@@ -358,6 +366,7 @@ public class ServerQuery {
             return new Encoded[]{
                     Encoded.of(identity),
                     Encoded.of(serverLabel),
+                    Encoded.of(retryIfNotFound),
             };
         }
 

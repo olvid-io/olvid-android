@@ -1,0 +1,5 @@
+- Ny design for flere av appens komponenter: kontaktkort, profilkort, lagringshåndtering osv.
+- Kalendervisning lagt til i samtalen for raskt å hoppe til et bestemt tidspunkt.
+- Intern "pågående avspilling" -kontroller lagt til for enkelt å bytte mellom talebeskjeder.
+- Mulighet for å avbryte en vedleggsopplasting.
+- Viser tapte varsler når profilens dempefunksjon utløper.

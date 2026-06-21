@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">Přidejte člena %1$d</item>
 		<item quantity="other" state="needs_review" hash="1091232977">Přidejte %1$d členů</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Představ %1$d kontaktu</item>
+		<item quantity="other" state="needs_review" hash="222947824">Představ %1$d tvým kontaktům</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">\" na tomto zařízení bude vaše předchozí zařízení níže deaktivováno:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">\" na tomto zařízení budou vaše starší zařízení deaktivovány:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">Opravdu chcete smazat vybraný soubor?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">Opravdu chcete smazat vybrané přílohy %1$d?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Pokud je tato příloha připojena k více zprávám, budou smazány všechny kopie přílohy.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Pokud jsou tyto přílohy připojeny k více zprávám, budou smazány všechny kopie příloh.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d den, %2$02dh %3$02dm %4$02ds</item>

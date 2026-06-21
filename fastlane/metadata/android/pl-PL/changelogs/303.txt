@@ -1,0 +1,1 @@
+- Dodano obsługę 18 nowych języków: bułgarskiego, bengalskiego, estońskiego, filipińskiego, gudżarackiego, indonezyjskiego, kannady, łotewskiego, litewskiego, malajalam, marathiego, pendżabskiego, serbskiego, suahili, tamilskiego, telugu, tajskiego i urdu.

@@ -58,6 +58,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
 
 object SubscriptionRepository {
 
@@ -80,7 +81,7 @@ object SubscriptionRepository {
                     .enablePendingPurchases(
                         PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()
                     )
-                    .setListener { billingResult, purchases ->
+                    .setListener { billingResult, _ ->
                         Logger.i("💲 onPurchase: new subscription?")
                         _purchasesUpdated.tryEmit(billingResult)
                         refreshSubscriptions()
@@ -251,7 +252,7 @@ object SubscriptionRepository {
     }
 
     suspend fun getSubscriptionPlans(productIds: List<String>): List<ProductDetails>? {
-        return withTimeoutOrNull(QUERY_TIMEOUT) {
+        return withTimeoutOrNull(QUERY_TIMEOUT.milliseconds) {
             if (!ensureConnection()) return@withTimeoutOrNull null
             val client = billingClient ?: return@withTimeoutOrNull null
 

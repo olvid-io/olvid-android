@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">%1$d सदस्य जोड़ें</item>
 		<item quantity="other" state="needs_review" hash="1091232977">%1$d सदस्यों को जोड़ें</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">%1$d संपर्क से परिचय कराएं</item>
+		<item quantity="other" state="needs_review" hash="222947824">%1$d संपर्कों से परिचित कराएं</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">» इस डिवाइस पर, आपका पिछला डिवाइस निष्क्रिय कर दिया जाएगा:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">» इस डिवाइस पर, आपके नीचे दिए गए डिवाइस निष्क्रिय कर दिए जाएंगे:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">क्या आप वाकई में चयनित अटैचमेंट को हटाना चाहते हैं?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">क्या आप वाकई में %1$d चयनित अटैचमेंट को हटाना चाहते हैं?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">यदि यह अटैचमेंट कई संदेशों से जुड़ा हुआ है, तो अटैचमेंट की सभी प्रतियां हटा दी जाएंगी।</item>
+		<item quantity="other" state="needs_review" hash="890537395">यदि ये अटैचमेंट कई संदेशों से जुड़े हैं, तो अटैचमेंट की सभी प्रतियां हटा दी जाएंगी।</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d दिन, %2$02dघंटे %3$02dमिनट %4$02dसेकंड</item>

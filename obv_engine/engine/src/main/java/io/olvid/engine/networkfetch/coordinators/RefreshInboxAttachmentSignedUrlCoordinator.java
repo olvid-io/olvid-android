@@ -152,6 +152,7 @@ public class RefreshInboxAttachmentSignedUrlCoordinator implements Operation.OnF
                 waitForIdentityReactivation(ownedIdentity, messageUid, attachmentNumber);
                 break;
             case RefreshInboxAttachmentSignedUrlOperation.RFC_DELETED_FROM_SERVER:
+            case RefreshInboxAttachmentSignedUrlOperation.RFC_UPLOAD_CANCELLED:
                 try (FetchManagerSession fetchManagerSession = fetchManagerSessionFactory.getSession()) {
                     InboxAttachment attachment = InboxAttachment.get(fetchManagerSession, ownedIdentity, messageUid, attachmentNumber);
                     if (attachment != null) {

@@ -34,7 +34,6 @@ import androidx.compose.runtime.mutableStateOf
 import com.fasterxml.jackson.core.JsonProcessingException
 import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.EtaEstimator
-import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor
 import io.olvid.engine.engine.types.ObvBytesKey
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
@@ -68,6 +67,7 @@ import io.olvid.messenger.history_transfer.steps.SrcSendMessagesStep
 import io.olvid.messenger.history_transfer.types.AttachmentProgressListener
 import io.olvid.messenger.history_transfer.types.DstTransferProtocolState
 import io.olvid.messenger.history_transfer.types.SrcTransferProtocolState
+import io.olvid.messenger.history_transfer.types.TrackingExecutor
 import io.olvid.messenger.history_transfer.types.TransferAbort
 import io.olvid.messenger.history_transfer.types.TransferFailReason
 import io.olvid.messenger.history_transfer.types.TransferListener
@@ -93,7 +93,7 @@ class TransferService(
 ): TransferListener {
     var aborted = TransferAbort.NONE
     var currentFailReason: TransferFailReason? = null
-    val executor = NoExceptionSingleThreadExecutor("History transfer executor")
+    val executor = TrackingExecutor("History transfer executor")
     val fileOutputStreams: MutableMap<BytesKey, FileOutputStream> = mutableMapOf()
 
     var transferTransportLayerState = TransferTransportLayerState.NOT_STARTED
@@ -173,7 +173,45 @@ class TransferService(
                 }
             }
 
+            TransferTransportLayerState.PROCESSING_RECEIVED_DATA -> {
+                // Nothing to do here, we just wait for the buffered data to be processed
+            }
+
             TransferTransportLayerState.CLOSED -> {
+                // Special case to handle disconnects when receiving history and some messages are buffered
+                // there is a race condition hare: if the last pendingTrackedExecute happens at the exact wrong moment we might never reach the CLOSED state
+                // we estimate the risk is negligible and the impact is minor (the user simply has to press abort)
+                if (transferTransportDelegate is WebRTCTransferTransportDelegate
+                    && role == TransferRole.DESTINATION
+                    && aborted != TransferAbort.USER_ABORT
+                    && executor.hasPendingTrackedExecutes()
+                    && currentFailReason == null) {
+                    Logger.w("onTransportLayerStateChange CLOSED with some pendingTrackedExecutes")
+                    val progress = transferProtocolState.transferProgress.value as? TransferProgress.Transferring
+                    if (progress != null) {
+                        // we change outside the executor so the state is changed instantly. Following calls to updateProgress() should maintain this state
+                        transferProtocolState.transferProgress.value = TransferProgress.ProcessingReceivedData(
+                                messagesProgress = progress.messagesProgress,
+                                messagesTotal = progress.messagesTotal,
+                                filesProgress = progress.filesProgress,
+                                filesTotal = progress.filesTotal
+                            )
+                        onTransportLayerStateChange(TransferTransportLayerState.PROCESSING_RECEIVED_DATA)
+                        return
+                    } else if (transferProtocolState.transferProgress.value == TransferProgress.Negotiating) {
+                        // if there are very few messages to process, DST might still be in Negotiating state
+                        // ---> we build a dummy ProcessingReceivedData state
+                        transferProtocolState.transferProgress.value = TransferProgress.ProcessingReceivedData(
+                            messagesProgress = 0,
+                            messagesTotal = 1,
+                            filesProgress = 0,
+                            filesTotal = 1
+                        )
+                        onTransportLayerStateChange(TransferTransportLayerState.PROCESSING_RECEIVED_DATA)
+                        return
+                    }
+                }
+
                 currentFailReason?.let {
                     transferProtocolState.transferProgress.value = TransferProgress.Failed(it)
                 } ?: run {
@@ -241,7 +279,7 @@ class TransferService(
         if (aborted != TransferAbort.NONE) {
             return
         }
-        executor.execute {
+        executor.executeTracked(onLastTrackedExecuted = ::onLastTrackedExecuted) {
             try {
                 when (messageType) {
                     TransferMessageType.ACK -> Unit // this is handled at the transport layer
@@ -329,6 +367,14 @@ class TransferService(
             } catch (e: JsonProcessingException) {
                 Logger.x(e)
             }
+        }
+    }
+
+    private fun onLastTrackedExecuted() {
+        if (transferTransportLayerState == TransferTransportLayerState.PROCESSING_RECEIVED_DATA) {
+            // we were processing buffered received data and the last message was processed --> we can now close the connection
+            Logger.i("Finished processing all buffered messages")
+            onTransportLayerStateChange(TransferTransportLayerState.CLOSED)
         }
     }
 

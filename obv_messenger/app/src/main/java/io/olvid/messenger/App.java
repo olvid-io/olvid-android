@@ -80,12 +80,12 @@ import io.olvid.engine.Logger;
 import io.olvid.engine.datatypes.ObvBase64;
 import io.olvid.engine.engine.types.ObvPushNotificationType;
 import io.olvid.engine.engine.types.identities.ObvIdentity;
-import io.olvid.messenger.activities.ContactDetailsActivity;
 import io.olvid.messenger.lock_screen.LockScreenActivity;
 import io.olvid.messenger.activities.ObvLinkActivity;
 import io.olvid.messenger.activities.ShortcutActivity;
 import io.olvid.messenger.appdialogs.AppDialogShowActivity;
 import io.olvid.messenger.appdialogs.AppDialogTag;
+import io.olvid.messenger.contact.ContactDetailsActivity;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.ConfigurationPojo;
 import io.olvid.messenger.customClasses.LinkUtils;
@@ -106,10 +106,10 @@ import io.olvid.messenger.databases.entity.jsons.JsonWebrtcCallMessage;
 import io.olvid.messenger.databases.tasks.new_message.ProcessReadyToProcessOnHoldMessagesTask;
 import io.olvid.messenger.discussion.DiscussionActivity;
 import io.olvid.messenger.discussion.linkpreview.OpenGraph;
-import io.olvid.messenger.discussion.message.MessageDetailsActivity;
 import io.olvid.messenger.discussion.message.attachments.RenderablePdfPage;
 import io.olvid.messenger.discussion.message.attachments.RenderablePdfPageFetcher;
 import io.olvid.messenger.discussion.message.attachments.RenderablePdfPageKeyer;
+import io.olvid.messenger.discussion.message.details.MessageDetailsActivity;
 import io.olvid.messenger.gallery.GalleryActivity;
 import io.olvid.messenger.group.GroupClone;
 import io.olvid.messenger.group.GroupCreationActivity;
@@ -123,6 +123,7 @@ import io.olvid.messenger.owneddetails.OwnedIdentityDetailsActivity;
 import io.olvid.messenger.services.AvailableSpaceHelper;
 import io.olvid.messenger.services.MDMConfigurationSingleton;
 import io.olvid.messenger.services.MessageExpirationService;
+import io.olvid.messenger.services.MuteExpirationService;
 import io.olvid.messenger.services.NetworkStateMonitorReceiver;
 import io.olvid.messenger.services.PeriodicTasksScheduler;
 import io.olvid.messenger.services.UnifiedForegroundService;
@@ -325,13 +326,25 @@ public class App extends Application implements DefaultLifecycleObserver {
         activityContext.startActivity(intent);
     }
 
-    public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId, boolean ascending, boolean showTextBlocks) {
+    public static void openDiscussionGalleryActivity(Context activityContext, long discussionId, long messageId, long fyleId, @Nullable String sortOrder, boolean ascending, boolean showTextBlocks) {
         Intent intent = new Intent(getContext(), GalleryActivity.class);
         intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
         intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
+        intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA, sortOrder);
         intent.putExtra(GalleryActivity.ASCENDING_INTENT_EXTRA, ascending);
         intent.putExtra(GalleryActivity.SHOW_TEXT_BLOCKS_INTENT_EXTRA, showTextBlocks);
+        activityContext.startActivity(intent);
+    }
+
+    public static void openDiscussionGalleryActivityFromStorageManager(Context activityContext, long discussionId, long messageId, long fyleId, @Nullable String sortOrder, boolean ascending) {
+        Intent intent = new Intent(getContext(), GalleryActivity.class);
+        intent.putExtra(GalleryActivity.DISCUSSION_ID_INTENT_EXTRA, discussionId);
+        intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
+        intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
+        intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA, sortOrder);
+        intent.putExtra(GalleryActivity.ASCENDING_INTENT_EXTRA, ascending);
+        intent.putExtra(GalleryActivity.FROM_STORAGE_MANAGER_INTENT_EXTRA, true);
         activityContext.startActivity(intent);
     }
 
@@ -357,8 +370,34 @@ public class App extends Application implements DefaultLifecycleObserver {
         intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
         if (sortOrder != null) {
             intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA, sortOrder);
-            intent.putExtra(GalleryActivity.ASCENDING_INTENT_EXTRA, ascending);
         }
+        intent.putExtra(GalleryActivity.ASCENDING_INTENT_EXTRA, ascending);
+        intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
+        intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
+        activityContext.startActivity(intent);
+    }
+
+    public static void openSentByMeGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, @Nullable String sortOrder, boolean ascending, long messageId, long fyleId) {
+        Intent intent = new Intent(getContext(), GalleryActivity.class);
+        intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
+        intent.putExtra(GalleryActivity.SENT_BY_ME_INTENT_EXTRA, true);
+        if (sortOrder != null) {
+            intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA, sortOrder);
+        }
+        intent.putExtra(GalleryActivity.ASCENDING_INTENT_EXTRA, ascending);
+        intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
+        intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
+        activityContext.startActivity(intent);
+    }
+
+    public static void openLargeFilesGalleryActivity(Context activityContext, byte[] bytesOwnedIdentity, long minFileSize, @Nullable String sortOrder, boolean ascending, long messageId, long fyleId) {
+        Intent intent = new Intent(getContext(), GalleryActivity.class);
+        intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_INTENT_EXTRA, bytesOwnedIdentity);
+        intent.putExtra(GalleryActivity.MIN_FILE_SIZE_INTENT_EXTRA, minFileSize);
+        if (sortOrder != null) {
+            intent.putExtra(GalleryActivity.BYTES_OWNED_IDENTITY_SORT_ORDER_INTENT_EXTRA, sortOrder);
+        }
+        intent.putExtra(GalleryActivity.ASCENDING_INTENT_EXTRA, ascending);
         intent.putExtra(GalleryActivity.INITIAL_MESSAGE_ID_INTENT_EXTRA, messageId);
         intent.putExtra(GalleryActivity.INITIAL_FYLE_ID_INTENT_EXTRA, fyleId);
         activityContext.startActivity(intent);
@@ -485,7 +524,7 @@ public class App extends Application implements DefaultLifecycleObserver {
                         Message missedCallMessage = Message.createPhoneCallMessage(AppDatabase.getInstance(), discussion.id, bytesContactIdentity, callLogItem);
                         missedCallMessage.id = AppDatabase.getInstance().messageDao().insert(missedCallMessage);
                         if (missedCallMessage.status == Message.STATUS_UNREAD) {
-                            UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, missedCallMessage.id, false, missedCallMessage.timestamp);
+                            UnreadCountsSingleton.INSTANCE.newUnreadMessage(bytesOwnedIdentity, discussion.id, missedCallMessage.id, false, missedCallMessage.timestamp);
                         }
                         if (discussion.updateLastMessageTimestamp(missedCallMessage.timestamp)) {
                             AppDatabase.getInstance().discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
@@ -607,6 +646,10 @@ public class App extends Application implements DefaultLifecycleObserver {
     }
 
     public static void openFyleViewer(Context context, FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, Runnable onOpenCallback) {
+        openFyleViewer(context, fyleAndStatus, onOpenCallback, null);
+    }
+
+    public static void openFyleViewer(Context context, FyleMessageJoinWithStatusDao.FyleAndStatus fyleAndStatus, Runnable onOpenCallback, Runnable onlyIfExternalCallback) {
         if (SettingsActivity.useInternalPdfViewer()
                 && fyleAndStatus.fyle.isComplete()
                 && fyleAndStatus.fyleMessageJoinWithStatus.getNonNullMimeType().equalsIgnoreCase("application/pdf")
@@ -616,7 +659,14 @@ public class App extends Application implements DefaultLifecycleObserver {
             }
             new PdfViewerDialog(fyleAndStatus).show(((AppCompatActivity) context).getSupportFragmentManager(), null);
         } else {
-            openFyleInExternalViewer(context, fyleAndStatus, onOpenCallback);
+            openFyleInExternalViewer(context, fyleAndStatus, () -> {
+                if (onOpenCallback != null) {
+                    onOpenCallback.run();
+                }
+                if (onlyIfExternalCallback != null) {
+                    onlyIfExternalCallback.run();
+                }
+            });
         }
     }
 
@@ -1125,6 +1175,13 @@ public class App extends Application implements DefaultLifecycleObserver {
             Intent expirationIntent = new Intent(getContext(), MessageExpirationService.class);
             expirationIntent.setAction(MessageExpirationService.EXPIRE_MESSAGES_ACTION);
             getContext().sendBroadcast(expirationIntent);
+
+            //////////////////////////
+            // catch up on profile-wide mutes that expired while the app wasn't running, and schedule the next one
+            //////////////////////////
+            Intent muteExpirationIntent = new Intent(getContext(), MuteExpirationService.class);
+            muteExpirationIntent.setAction(MuteExpirationService.MUTE_EXPIRED_ACTION);
+            getContext().sendBroadcast(muteExpirationIntent);
 
 
             //////////////////////////

@@ -1,0 +1,4 @@
+- Ny design for flere av appens komponenter: kontaktkort, profilkort, lagringshåndtering osv.
+- Kalendervisning lagt til i samtalen for raskt å kunne gå til et bestemt tidspunkt.
+- Intern "avspilling pågår" kontroller lagt til for enkelt å bytte mellom talebeskjeder. Noen forbedringer i gestene for avspilling av talebeskjeder.
+- Mulighet for å avbryte en vedleggsopplasting lagt til.

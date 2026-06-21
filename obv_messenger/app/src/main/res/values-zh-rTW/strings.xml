@@ -50,7 +50,7 @@
 	<string name="dialog_message_contact_introduction" state="needs_review" hash="-398698689">您想讓%1$s和%2$s互相認識嗎？</string>
 	<string name="dialog_message_contact_introduction_multiple" state="needs_review" hash="-1743988418">您想將%1$s介紹給以下%2$d位聯絡人嗎？\n\n%3$s</string>
 	<string name="dialog_message_delete_attachment" state="needs_review" hash="-235504816">您確定要刪除此訊息中的附件 %1$s 嗎？\n此動作無法復原。</string>
-	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="-273205987">您確定要刪除附件 %1$s 嗎？\n這個動作無法復原。</string>
+	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="1647132381">您真的要刪除附件 **%1$s** 嗎？\n此操作無法撤銷。</string>
 	<string name="dialog_message_disband_group" state="needs_review" hash="-1617503323">您確定要解散群組 %1$s？\n之後將無法再傳送訊息到這個群組。現有的群組訊息不會受到影響。</string>
 	<string name="dialog_message_disband_non_empty_group_confirmation" state="needs_review" hash="1096257228">您即將解散群組 %1$s.\n這將移除所有成員和待加入成員。\n目前有：\n- %2$d 名成員\n- %3$d 名待加入成員\n\n確定要解散此群組嗎？</string>
 	<string name="dialog_message_exchange_digits" state="needs_review" hash="1612882609">您想與 %1$s 交換驗證碼以重新確認他們的身份嗎？</string>
@@ -65,6 +65,7 @@
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">確認刪除？</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">解除群組？</string>
 	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">搜尋對話…</string>
+	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">輸入日期</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">編輯群組詳情</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">編輯您的資料</string>
 	<string name="dialog_title_exchange_digits" state="needs_review" hash="864614114">交換碼</string>
@@ -91,14 +92,18 @@
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">管理員已將群組名稱變更為：</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">管理員已更改群組描述為：</string>
 	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">管理員變更了群組照片。</string>
-	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">您的聯絡人更新了他們的 Olvid Card。舊版和新版資訊如下所示。\n\n請按一下「更新」以更新您聯絡人的資訊為最新版本。</string>
+	<string name="explanation_new_contact_card_name" state="needs_review" hash="-1601853738">您的聯絡人已將其姓名更新為：</string>
+	<string name="explanation_new_contact_card_position" state="needs_review" hash="184144104">您的聯絡人已更新其職位/公司資訊：</string>
+	<string name="explanation_new_contact_card_photo" state="needs_review" hash="-252626818">您的聯絡人已更新他們的照片。</string>
+	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">您的姓名已更新為：</string>
+	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">您的職位/公司已更新為：</string>
+	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">您的照片已更新。</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">正在建立安全的討論頻道。在完成之前，您無法與此聯絡人開始任何討論。如果雙方都上線，此過程應該只需幾秒鐘。\n\n如果您認為發生了問題，您可以重新啟動頻道建立。</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">找不到聯絡人</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">找不到群組</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">找不到任何訊息</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">找不到附件</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">找不到連結</string>
-	<string name="format_identity_details_custom_field" state="needs_review" hash="-1073344790">%1$s：%2$s</string>
 	<string name="hint_company" state="needs_review" hash="379200324">公司 (選填)</string>
 	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">輸入訊息</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">臨時訊息</string>
@@ -164,15 +169,10 @@
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">群組卡 - 未發布草稿</string>
 	<string name="label_group_members" state="needs_review" hash="1460220752">群組成員</string>
 	<string name="label_other_group_members" state="needs_review" hash="-2121490032">其他群組成員</string>
-	<string name="label_groups" state="needs_review" hash="-990226727">群組</string>
+	<string name="label_groups_common" state="needs_review" hash="1252823567">共同群組</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">邀請\n已婉拒</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">群組資訊已更新</string>
-	<string name="label_new_olvid_card" state="needs_review" hash="688199407">聯絡人資訊已更新</string>
 	<string name="label_not_part_of_a_group" state="needs_review" hash="1667979596">尚未加入任何群組</string>
-	<string name="label_olvid_card" state="needs_review" hash="-1953461576">歐維卡</string>
-	<string name="label_olvid_card_published" state="needs_review" hash="-1038740778">Olvid Card - 已發布</string>
-	<string name="label_olvid_card_published_update" state="needs_review" hash="391148752">Olvid Card - 全新</string>
-	<string name="label_olvid_card_unpublished_draft" state="needs_review" hash="-786284715">Olvid Card - 未發布草稿</string>
 	<string name="label_pending_group_members" state="needs_review" hash="1481357803">待加入群組成員</string>
 	<string name="label_text_copied_from_olvid" state="needs_review" hash="1675378287">已從 Olvid 複製文字</string>
 	<string name="label_trust_origins" state="needs_review" hash="-1177760062">信任來源</string>
@@ -285,12 +285,16 @@
 	<string name="toast_message_shortcut_not_supported" state="needs_review" hash="-1300016753">您的裝置不支援建立捷徑</string>
 	<string name="toast_message_unable_to_open_file" state="needs_review" hash="392405293">無法找到適合開啟此檔案類型之應用程式</string>
 	<string name="toast_message_unparsable_url" state="needs_review" hash="-135719133">無法正確解析網址</string>
-	<string name="trust_origin_direct_type" state="needs_review" hash="-67248053">%1$s - 一對一驗證</string>
-	<string name="trust_origin_group_type" state="needs_review" hash="230302215">%1$s - 接受來自 的群組邀請</string>
-	<string name="trust_origin_group_v2_type" state="needs_review" hash="-1152079590">%1$s - 已接受群組邀請</string>
-	<string name="trust_origin_introduction_type" state="needs_review" hash="328494718">%1$s - 來自\u0020</string>
-	<string name="trust_origin_keycloak_type" state="needs_review" hash="1983748673">%2$s - 由 %1$s 身分驗證供應商驗證</string>
-	<string name="trust_origin_unknown_type" state="needs_review" hash="2084263523">%1$s - 信任來源不明</string>
+	<string name="trust_origin_direct_type" state="needs_review" hash="1798276315">一對一驗證</string>
+	<string name="trust_origin_group_type" state="needs_review" hash="1222060749">已接受來自 的群組邀請</string>
+	<string name="trust_origin_group_v2_type" state="needs_review" hash="-566733151">已接受群組邀請</string>
+	<string name="trust_origin_introduction_type" state="needs_review" hash="-266148171">由...介紹</string>
+	<string name="trust_origin_keycloak_type" state="needs_review" hash="-1113573733">由身份驗證提供商在 %1$s 進行驗證</string>
+	<string name="trust_origin_unknown_type" state="needs_review" hash="-491114965">未知的信任來源</string>
+	<string name="trust_origin_direct_title" state="needs_review" hash="-1849285555">你們已將彼此添加為聯絡人</string>
+	<string name="trust_origin_introduction_title" state="needs_review" hash="-1034826640">介紹</string>
+	<string name="trust_origin_group_title" state="needs_review" hash="1252823567">共同群組</string>
+	<string name="trust_origin_keycloak_title" state="needs_review" hash="-1917629373">透過通訊錄新增</string>
 	<string name="menu_action_delete_contact" state="needs_review" hash="1849106991">移除聯絡人</string>
 	<string name="menu_action_delete_user" state="needs_review" hash="1683580694">刪除使用者</string>
 	<string name="dialog_title_delete_user" state="needs_review" hash="-56212547">刪除使用者？</string>
@@ -299,6 +303,7 @@
 	<string name="text_empty_group" state="needs_review" hash="-464714974">空白群組</string>
 	<string name="message_error_group_name_empty" state="needs_review" hash="1137468023">請輸入群組名稱</string>
 	<string name="hint_search_contact_name" state="needs_review" hash="-242911449">搜尋聯絡人姓名…</string>
+	<string name="hint_search_group_name" state="needs_review" hash="-265074656">搜尋群組名稱…</string>
 	<string name="menu_action_search" state="needs_review" hash="-2085358317">搜尋</string>
 	<string name="toast_message_polling_failed" state="needs_review" hash="402242307">無法取得訊息</string>
 	<string name="dialog_message_battery_optimization" state="needs_review" hash="1191860407">Android 系統的省電優化功能會延遲某些背景事件的執行，將它們分批處理。這可能會延遲接收 Olvid 傳入訊息。\n\n為了確保您的訊息能即時送達，請允許 Olvid 「持續在背景執行」。請按下下方的「設定」，然後「允許」。</string>
@@ -819,6 +824,11 @@
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">媒體播放器</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">在 Olvid 播放媒體時的播放/暫停控制</string>
 	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">無法播放音訊檔案</string>
+	<string name="label_voice_message" state="needs_review" hash="-348491668">語音訊息</string>
+	<string name="content_description_skip_previous" state="needs_review" hash="836036575">之前的音訊</string>
+	<string name="content_description_skip_next" state="needs_review" hash="-878180801">下一個音訊</string>
+	<string name="content_description_audio_play" state="needs_review" hash="1143766922">播放</string>
+	<string name="content_description_audio_pause" state="needs_review" hash="1931883968">暫停</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">刪除</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">刪除所有裝置</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">無法從所有裝置刪除。請稍後再試。</string>
@@ -919,6 +929,7 @@
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">您的 Olvid ID 目前由您的公司身分驗證供應商管理。您無法手動啟用 Olvid 授權。\n\n請聯絡您的管理員以獲取更多詳細資訊。</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">漏接電話</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">聯絡人資訊已更新</string>
+	<string name="text_own_details_updated" state="needs_review" hash="-1335488506">詳細資訊已更新</string>
 	<string name="text_group_details_updated" state="needs_review" hash="1016500852">群組資訊已更新</string>
 	<string name="dialog_title_sd_card_ringtone_bugged_android_9" state="needs_review" hash="-1202187296">Android 9 通知音錯誤</string>
 	<string name="dialog_message_sd_card_ringtone_bugged_android_9" state="needs_review" hash="1449296723">Olvid 無法使用您選擇的訊息通知音。該功能已被停用。Android 9 的一個錯誤導致應用程式若未要求存取外部儲存空間/SD 卡，則無法使用自訂通知音。\n\n您應該嘗試選擇標準通知音。在此之前，您的通知將保持靜音！</string>
@@ -1014,6 +1025,10 @@
 	<string name="dialog_title_available_space_low" state="needs_review" hash="610249394">裝置儲存空間即將滿載</string>
 	<string name="dialog_message_available_space_low" state="needs_review" hash="78499573">您的裝置可用空間不足。使用 Olvid 接收或傳送檔案時，可能會遇到意料之外的錯誤。\n\n現在可能是釋放裝置上一些空間的好時機。</string>
 	<string name="button_label_manage_storage" state="needs_review" hash="-918485427">管理儲存空間</string>
+	<string name="label_storage_all_files" state="needs_review" hash="1735747130">所有檔案</string>
+	<string name="label_storage_sent_by_me" state="needs_review" hash="640456592">由我發送</string>
+	<string name="label_storage_large_files" state="needs_review" hash="-257706820">大於 5 MB</string>
+	<string name="label_storage_discussions" state="needs_review" hash="491497248">討論</string>
 	<string name="pref_use_internal_image_viewer_title" state="needs_review" hash="1319400578">使用內建圖片檢視器</string>
 	<string name="pref_use_internal_image_viewer_summary" state="needs_review" hash="1248137666">啟用後，點擊圖片附件將在內建檢視器中開啟。否則，將使用您裝置的預設圖片應用程式。</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">無法顯示圖片</string>
@@ -1167,7 +1182,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">刪除檔案將刪除您裝置上與此檔案相關的所有資訊。這包括您的聯絡人、群組以及此檔案下所有對話（訊息和附件）的內容。\n\n<b>這是您唯一可見的檔案，如果您有隱藏的檔案，它們將會同時刪除。</b>\n\n按「下一步」選擇如何刪除此檔案。</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">刪除帳戶<b>所有裝置</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">在此輸入 \"%1$s\" 以繼續</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">在此處輸入 \"%1$s\" 以繼續</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">如果您選擇<b>完全</b>刪除您的個人資料：\n - 它將在本機刪除，<b>並且</b>刪除您聯絡人裝置上的資料\n - 您將退出您加入的所有群組\n - 您管理的群組將會解散\n\n如果您<b>沒有</b>選擇完全刪除您的個人資料，它只會在本機裝置上刪除。除非您打算在其他裝置上還原備份，否則您的聯絡人可能仍然會嘗試傳送訊息給您，而他們可能不會意識到這些訊息無法送達。</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">您的目前個人檔案似乎已停用，這表示您可能已將其轉移到另一部裝置。如果您打算繼續在其他裝置上使用此個人檔案，您可以安全地在此處刪除它。\n\n如果您不再想使用此個人檔案，您需要先在本裝置上重新啟用它，等待與您聯絡人的安全通道重新建立，然後再選擇「刪除所有裝置」選項刪除此個人檔案。</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">您的個人資料目前已在多個裝置上啟用。\n\n如果您選擇<b>完全</b>刪除您的個人資料：\n - 它將會從您的所有裝置<b>和</b>您的聯絡人裝置上刪除\n - 您將退出您加入的群組\n - 您管理的群組將會解散\n\n如果您<b>不</b>完全刪除您的個人資料，它將僅在本地刪除，您可以繼續在其他裝置上正常使用它。</string>
@@ -1251,9 +1266,6 @@
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">群組 v2：%1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
 	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">使用動態表情符號（如果可用）</string>
-	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">個人檔案儲存空間</string>
-	<string name="label_photos" state="needs_review" hash="1539779714">照片</string>
-	<string name="label_videos" state="needs_review" hash="-101497740">影片</string>
 	<string name="label_audio" state="needs_review" hash="-779820608">音訊</string>
 	<string name="label_other" state="needs_review" hash="-543765264">其他</string>
 	<string name="label_all" state="needs_review" hash="752498555">全部</string>
@@ -1268,14 +1280,7 @@
 	<string name="menu_action_sort_date_alt" state="needs_review" hash="646746321">依日期排序 (最早的在最前)</string>
 	<string name="menu_action_sort_size_alt" state="needs_review" hash="1986077505">依大小排序 (由小到大)</string>
 	<string name="menu_action_sort_name_alt" state="needs_review" hash="-802793419">依姓名排序 (反向)</string>
-	<string name="text_sent_by_xx" state="needs_review" hash="248848108">由 %1$s 傳送</string>
 	<string name="text_unknown_sender" state="needs_review" hash="1913018414">未知發送者</string>
-	<string name="text_sent_to_xx" state="needs_review" hash="918571953">已傳送給 %1$s</string>
-	<string name="text_draft_for_xx" state="needs_review" hash="2063814784">%1$s 的草稿</string>
-	<string name="label_loading_attachments" state="needs_review" hash="856026474">正在載入附件…</string>
-	<string name="dialog_message_delete_attachment_for_many_messages" state="needs_review" hash="1800265017">附件 %2$s 已附加到 %1$d 則不同的訊息。您想要僅刪除這個，還是從這 %1$d 則訊息中全部刪除？\n這個動作無法復原。</string>
-	<string name="button_label_delete_one" state="needs_review" hash="-1916938532">刪除一筆</string>
-	<string name="button_label_delete_all" state="needs_review" hash="-985749327">刪除全部 %1$d</string>
 	<string name="dialog_title_save_selected_attachments" state="needs_review" hash="-405982081">儲存選取的附件</string>
 	<string name="pref_category_contacts_and_groups" state="needs_review" hash="1531647661">聯絡人與群組</string>
 	<string name="pref_auto_join_groups_title" state="needs_review" hash="29822089">自動接受群組邀請…</string>
@@ -1637,7 +1642,7 @@
 	<string name="button_label_remove" state="needs_review" hash="1097276765">移除</string>
 	<string name="menu_action_remove_expiration" state="needs_review" hash="-156931599">維持此裝置處於作用狀態</string>
 	<string name="dialog_title_set_unexpiring_device" state="needs_review" hash="-1488033285">維持裝置處於作用狀態</string>
-	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1293464179">您目前沒有授權使用多個裝置。如果您想購買此授權，請關閉此對話框，然後按下下方的「查看訂閱方案」。\n\n為了繼續使用並保持裝置「%1$s」處於啟用狀態，裝置「%2$s」將會停用。您是否要繼續？</string>
+	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1457083107">您目前沒有購買多設備同時在線的授權。如果您希望購買此授權，請關閉此對話框，然後點擊下方的“查看訂閱方案”。\n\n為了繼續使用並保持設備“%1$s”的在線狀態，我們將停用設備“%2$s”。您是否要繼續？</string>
 	<string name="dialog_title_remove_background_image" state="needs_review" hash="488158841">移除目前背景圖片？</string>
 	<string name="dialog_title_introducing_markdown" state="needs_review" hash="175399162">隆重推出訊息格式化功能！</string>
 	<string name="dialog_message_introducing_markdown" state="needs_review" hash="1738415115">Olvid 現在允許您使用 Markdown 語法格式化您的訊息🎨！\n\n以 **<b>粗體</b>**、*<i>斜體</i>* 撰寫，加入 # <big>標題</big> 等。\n\n您可以在這裡找到所有支援的標籤🦍：\nhttps://www.olvid.io/faq/format-your-messages/</string>
@@ -2042,6 +2047,7 @@
 	<string name="button_label_this_way" state="needs_review" hash="747183939">這邊</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">程式碼已複製</string>
 	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">請選擇要加入此群組的人。</string>
+	<string name="explanation_choose_contact_introduction" state="needs_review" hash="1113777517">請選擇您要向誰介紹 %1$s。</string>
 	<string name="label_group_administration" state="needs_review" hash="871355986">群組管理</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">通話已封鎖</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid 不允許開始包含超過 %1$d 人的通話。</string>
@@ -2155,6 +2161,7 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">協商</string>
 	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">傳輸中</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">傳輸完成</string>
+	<string name="history_transfer_step_processing_buffered_data" state="needs_review" hash="-1359029280">正在處理接收到的數據</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">傳輸失敗</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">聊天記錄轉移</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">無法啟動傳輸。可能另一個傳輸正在進行中？</string>
@@ -2273,7 +2280,8 @@
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">正在匯入</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">分析內容</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">分析導出的對話</string>
-	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">加載 OpenStreetMap 樣式文件時發生錯誤。</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">加載 OpenStreetMap 樣式文件時發生錯誤。</string>
 	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">應用內訂閱不可用</string>
 	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">您安裝的 Olvid 版本不包含 Google 結算庫，也不支援應用內購買。\n\n如需了解更多資訊，請透過 **feedback@olvid.io** 與我們聯繫。</string>
+	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">取消上傳</string>
 </resources>

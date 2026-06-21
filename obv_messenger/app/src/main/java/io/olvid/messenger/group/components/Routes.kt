@@ -21,6 +21,8 @@ package io.olvid.messenger.group.components
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -85,6 +87,7 @@ object Routes {
     const val GROUP_TYPE = "group_type"
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.groupDetails(
     groupV2DetailsViewModel: GroupV2DetailsViewModel,
     call: (Group2) -> Unit = {},
@@ -93,7 +96,8 @@ fun NavGraphBuilder.groupDetails(
     onInviteMembers: () -> Unit = {},
     onEditMembers: () -> Unit = {},
     onEditAdmins: () -> Unit = {},
-    onGroupType: () -> Unit = {}
+    onGroupType: () -> Unit = {},
+    sharedTransitionScope: SharedTransitionScope,
 ) {
     composable(
         Routes.GROUP_DETAILS,
@@ -110,7 +114,8 @@ fun NavGraphBuilder.groupDetails(
             onFullMembersList = onFullMembersList,
             onEditMembers = onEditMembers,
             onEditAdmins = onEditAdmins,
-            onGroupType = onGroupType
+            onGroupType = onGroupType,
+            sharedTransitionScope = sharedTransitionScope
         )
     }
 }

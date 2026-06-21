@@ -166,8 +166,8 @@ fun MessageActionItemsList(
             if (message.isForwardable) {
                 add(MessageActionType.SHARE)
                 add(MessageActionType.FORWARD)
-                add(MessageActionType.COPY)
-            } else if (message.isPollMessage) {
+            }
+            if (message.isCopyable) {
                 add(MessageActionType.COPY)
             }
             add(MessageActionType.SELECT)

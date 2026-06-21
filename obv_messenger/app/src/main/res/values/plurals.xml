@@ -53,6 +53,10 @@
         <item quantity="one">Add %1$d member</item>
         <item quantity="other">Add %1$d members</item>
     </plurals>
+    <plurals name="label_introduce_contacts">
+        <item quantity="one">Introduce to %1$d contact</item>
+        <item quantity="other">Introduce to %1$d contacts</item>
+    </plurals>
     <plurals name="explanation_backup_v2_device_expiration_end">
         <item quantity="one">\" on this device, your previous device below will be deactivated:</item>
         <item quantity="other">\" on this device, your devices below will be deactivated:</item>
@@ -154,6 +158,10 @@
     <plurals name="dialog_message_delete_attachments">
         <item quantity="one">Do you really want to delete the selected attachment?</item>
         <item quantity="other">Do you really want to delete the %1$d selected attachments?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments_mutli_explanation">
+        <item quantity="one">If this attachment is attached to multiple messages, all copies of the attachment will be deleted.</item>
+        <item quantity="other">If these attachments are attached to multiple messages, all copies of the attachments will be deleted.</item>
     </plurals>
     <plurals name="text_app_uptime_days">
         <item quantity="one">%1$d\u00a0day,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>

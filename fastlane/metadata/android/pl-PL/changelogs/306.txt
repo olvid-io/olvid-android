@@ -1,0 +1,5 @@
+- Przeprojektowano kilka elementów aplikacji: karta kontaktu, karta profilu, menedżer pamięci itp.
+- Dodano widok kalendarza w konwersacji, aby szybko przechodzić do określonego momentu w czasie.
+- Dodano wewnętrzny kontroler „bieżącego odtwarzania”, aby łatwo przełączać się między wiadomościami głosowymi.
+- Dodano możliwość anulowania przesyłania załącznika.
+- Wyświetlane są pominięte powiadomienia po wygaśnięciu wyciszenia profilu.

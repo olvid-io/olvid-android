@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">Afegeix %1$d membre</item>
 		<item quantity="other" state="needs_review" hash="1091232977">Afegeix %1$d membres</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Presenta %1$d al contacte</item>
+		<item quantity="other" state="needs_review" hash="222947824">Presenta %1$d als teus contactes</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">\" en aquest dispositiu, el teu dispositiu anterior que apareix a continuació es desactivarà:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">\" en aquest dispositiu, els teus dispositius anteriors es desactivaran:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">Realment vols eliminar l\'adjunt seleccionat?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">Vols realment eliminar els %1$d adjunts seleccionats?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Si aquest fitxer adjunt està adjunt a diversos missatges, totes les còpies del fitxer adjunt es suprimiran.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Si aquests fitxers adjunts estan adjunts a diversos missatges, es suprimiran totes les còpies dels fitxers adjunts.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d dia, %2$02dh %3$02dm %4$02ds</item>

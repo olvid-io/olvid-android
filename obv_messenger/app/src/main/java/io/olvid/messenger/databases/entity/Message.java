@@ -1620,13 +1620,13 @@ public class Message {
         } else if (messageType == Message.TYPE_CONTACT_RE_ADDED) {
             return context.getString(R.string.text_user_added_to_contacts);
         } else if (messageType == Message.TYPE_RE_JOINED_GROUP) {
-            String inviterName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(senderIdentifier);
+            String inviterName = Arrays.equals(senderIdentifier, AppSingleton.getBytesCurrentIdentity()) ? null : ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(senderIdentifier);
             if (inviterName != null) {
                 return context.getString(R.string.text_group_re_joined_by, inviterName);
             }
             return context.getString(R.string.text_group_re_joined);
         } else if (messageType == Message.TYPE_JOINED_GROUP) {
-            String inviterName = ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(senderIdentifier);
+            String inviterName = Arrays.equals(senderIdentifier, AppSingleton.getBytesCurrentIdentity()) ? null : ContactCacheSingleton.INSTANCE.getContactCustomDisplayName(senderIdentifier);
             if (inviterName != null) {
                 return context.getString(R.string.text_group_joined_by, inviterName);
             }
@@ -1784,6 +1784,11 @@ public class Message {
                 && wipeStatus == Message.WIPE_STATUS_NONE
                 && !limitedVisibility
                 && !isPollMessage();
+    }
+
+    public boolean isCopyable() {
+        return (messageType == Message.TYPE_INBOUND_MESSAGE || messageType == Message.TYPE_OUTBOUND_MESSAGE)
+                && (wipeStatus == Message.WIPE_STATUS_NONE || wipeStatus == Message.WIPE_STATUS_WIPE_ON_READ);
     }
 
     public boolean isBookmarkableAndDetailable() {

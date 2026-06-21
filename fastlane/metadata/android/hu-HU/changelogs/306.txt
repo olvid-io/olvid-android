@@ -1,0 +1,5 @@
+- Az alkalmazás több komponensének újratervezése: névjegykártya, profilkártya, tárolókezelő stb.
+- Naptárnézet hozzáadása a beszélgetéshez, hogy gyorsan átkereshesd az időpontokat.
+- Belső "folyamatos lejátszás" vezérlő hozzáadása a hangüzenetek közötti egyszerű váltáshoz.
+- Lehetőség a melléklet feltöltésének törlésére.
+- Kimaradt értesítések megjelenítése a profil némításának lejáratakor.

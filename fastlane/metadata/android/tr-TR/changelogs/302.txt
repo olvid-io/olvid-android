@@ -1,0 +1,1 @@
+- En son Android Studio sürümünde Java Records'un "desugaring" özelliğinin düzgün çalışmaması sorunu giderildi.

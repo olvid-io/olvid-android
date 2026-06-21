@@ -87,6 +87,7 @@ public class ObvMessage {
             this.attachments[i] = new ObvAttachment(
                     receivedAttachment.getMetadata(),
                     receivedAttachment.getUrl(),
+                    receivedAttachment.isUploadCancelledByTheSender(),
                     receivedAttachment.isDownloadRequested(),
                     receivedAttachment.getOwnedIdentity(),
                     receivedAttachment.getMessageUid(),

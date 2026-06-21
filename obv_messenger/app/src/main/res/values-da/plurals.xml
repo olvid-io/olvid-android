@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">Tilføj %1$d medlem</item>
 		<item quantity="other" state="needs_review" hash="1091232977">Tilføj %1$d medlemmer</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Introducer til %1$d kontakt</item>
+		<item quantity="other" state="needs_review" hash="222947824">Introducer til %1$d kontakter</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">\" på denne enhed vil din tidligere enhed nedenfor blive deaktiveret:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">\" på denne enhed vil dine enheder nedenfor blive deaktiveret:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">Vil du virkelig slette det valgte vedhæftede fil?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">Vil du virkelig slette de %1$d valgte vedhæftede filer?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Hvis dette vedhæftede fil er vedhæftet flere beskeder, vil alle kopier af filen blive slettet.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Hvis disse vedhæftede filer er vedhæftet flere beskeder, vil alle kopier af vedhæftede filer blive slettet.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d dag, %2$02dt %3$02dm %4$02ds</item>

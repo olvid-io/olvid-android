@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">أضف عضو %1$d</item>
 		<item quantity="other" state="needs_review" hash="1091232977">أضف %1$d عضوًا</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">قدّم %1$d إلى جهة الاتصال</item>
+		<item quantity="other" state="needs_review" hash="222947824">عرّف %1$d على جهات الاتصال الخاصة بك</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">\" على هذا الجهاز، سيتم إلغاء تنشيط جهازك السابق أدناه:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">\" على هذا الجهاز، سيتم إلغاء تنشيط أجهزتك القديمة:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">هل أنت متأكد حقًا من أنك تريد حذف المرفق المحدد؟</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">هل أنت متأكد من أنك تريد حذف المرفقات المحددة %1$d؟</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">إذا تم إرفاق هذا المرفق برسائل متعددة، فسيتم حذف جميع نسخ المرفق.</item>
+		<item quantity="other" state="needs_review" hash="890537395">إذا كانت هذه المرفقات مرفقة برسائل متعددة، فسيتم حذف جميع نسخ المرفقات.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d يوم، %2$02dساعة %3$02dدقيقة %4$02dثانية</item>

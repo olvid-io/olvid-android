@@ -1,0 +1,1 @@
+- Fix an issue with desugaring of Java records not working properly in latest Android Studio.

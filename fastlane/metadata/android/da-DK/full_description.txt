@@ -1,0 +1,19 @@
+Olvid er den første private beskedapplikation for alle. Send beskeder, billeder, filer og foretag sikre telefon- og videoopkald.
+
+
+Hvad er en "privat" beskedapp?
+
+Det er en beskedapp:
+- Som ikke påtvinger dig nye kontakter. Du har kontrollen: du vælger, hvem du vil kommunikere med. Olvid tilbyder flere måder at invitere andre Olvid-brugere, enten ansigt til ansigt eller på afstand.
+- Som ikke kræver personlige data. Olvid vil ikke bede om dit telefonnummer eller din e-mailadresse. I modsætning til din tidligere beskedapp vil Olvid aldrig anmode om adgang til din adressebog.
+- Hvor du aldrig vil modtage uønskede beskeder eller beskeder fra en ukendt kilde.
+- Hvor alle udvekslinger nyder godt af den samme sikkerhed og privatliv som en samtale bag lukkede døre. Olvid tilbyder end-to-end-kryptering og end-to-end-godkendelse som standard, altid, for alt hvad du sender og modtager.
+
+Olvid garanterer dig sikre rum, der er immune over for ekstern aggression, og som isolerer dig fra det digitale støj og den vold, der findes i andre sociale netværk. Opret grupper med din familie, dine venner og dine vigtigste samarbejdspartnere. Ingen spam, ingen reklamer. Du får endelig fuld kontrol over din kommunikation.
+
+Olvid er designet til at være det bedste sted at udveksle information om emner, der betyder noget, med dem, der betyder noget for dig.
+
+
+Olvid - Teknologi
+
+I hjertet af Olvid findes en "kryptografisk motor", der er resultatet af flere års forskning, og som gør det muligt at matematisk bevise integriteten, fortroligheden og anonymiteten i din kommunikation.

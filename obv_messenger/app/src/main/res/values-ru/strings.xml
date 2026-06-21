@@ -50,7 +50,7 @@
 	<string name="dialog_message_contact_introduction" state="needs_review" hash="-398698689">Хотите познакомить %1$s и %2$s друг с другом?</string>
 	<string name="dialog_message_contact_introduction_multiple" state="needs_review" hash="-1743988418">Хотите представить %1$s следующим %2$d контактам?\n\n%3$s</string>
 	<string name="dialog_message_delete_attachment" state="needs_review" hash="-235504816">Вы действительно хотите удалить вложение %1$s из этого сообщения?\nЭто действие нельзя отменить.</string>
-	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="-273205987">Вы действительно хотите удалить вложение %1$s?\nЭто действие нельзя отменить.</string>
+	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="1647132381">Вы действительно хотите удалить вложение **%1$s**?\nЭто действие нельзя отменить.</string>
 	<string name="dialog_message_disband_group" state="needs_review" hash="-1617503323">Вы хотите распустить группу %1$s?\nБольше не будет возможности отправлять сообщения в эту группу. Существующие сообщения группы не будут затронуты.</string>
 	<string name="dialog_message_disband_non_empty_group_confirmation" state="needs_review" hash="1096257228">Вы собираетесь распустить группу %1$s.\nЭто удалит всех участников и ожидающих участников из группы. В настоящее время:\n- %2$d участников\n- %3$d ожидающих участников\n\nПродолжить расформирование этой группы?</string>
 	<string name="dialog_message_exchange_digits" state="needs_review" hash="1612882609">Хотите обменяться кодами с %1$s, чтобы повторно подтвердить его личность?</string>
@@ -65,6 +65,7 @@
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">Подтвердить удаление?</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">Распустить группу?</string>
 	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">Поиск диалога…</string>
+	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">Введите дату</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">Редактировать сведения о группе</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">Редактировать данные</string>
 	<string name="dialog_title_exchange_digits" state="needs_review" hash="864614114">Обменяться кодами</string>
@@ -91,14 +92,18 @@
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Администратор изменил название группы на:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Администратор изменил описание группы на:</string>
 	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">Администратор изменил фотографию группы.</string>
-	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">Ваш контакт обновил свою Olvid Card. Старая и новая версии отображены ниже.\n\nНажмите «обновить», чтобы обновить информацию о контакте этой новой версией.</string>
+	<string name="explanation_new_contact_card_name" state="needs_review" hash="-1601853738">Ваш контакт изменил свое имя на:</string>
+	<string name="explanation_new_contact_card_position" state="needs_review" hash="184144104">Ваш контакт обновил информацию о должности/компании: </string>
+	<string name="explanation_new_contact_card_photo" state="needs_review" hash="-252626818">Ваш контакт обновил свою фотографию.</string>
+	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">Ваше имя было обновлено до:</string>
+	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">Ваша должность/компания была обновлена до:</string>
+	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">Ваша фотография была обновлена.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">В настоящее время устанавливается защищенный канал связи. Вы не сможете начать обсуждение с этим контактом, пока это не будет завершено. Этот процесс должен занять всего несколько секунд, если вы и ваш контакт находитесь в сети.\n\nЕсли вы считаете, что что-то пошло не так, вы можете перезапустить установку канала.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">Контакт не найден</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">Группа не найдена</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">Сообщений не найдено</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Вложение не найдено</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Ссылка не найдена</string>
-	<string name="format_identity_details_custom_field" state="needs_review" hash="-1073344790">%1$s: %2$s</string>
 	<string name="hint_company" state="needs_review" hash="379200324">Компания (необязательно)</string>
 	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Написать сообщение</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Временное сообщение</string>
@@ -164,15 +169,10 @@
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">Карточка группы - Неопубликованный черновик</string>
 	<string name="label_group_members" state="needs_review" hash="1460220752">Участники группы</string>
 	<string name="label_other_group_members" state="needs_review" hash="-2121490032">Другие участники группы</string>
-	<string name="label_groups" state="needs_review" hash="-990226727">Группы</string>
+	<string name="label_groups_common" state="needs_review" hash="1252823567">Общие группы</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">Приглашение\nотклонено</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">Информация о группе обновлена</string>
-	<string name="label_new_olvid_card" state="needs_review" hash="688199407">Детали контакта обновлены</string>
 	<string name="label_not_part_of_a_group" state="needs_review" hash="1667979596">Ещё не состоит в группах</string>
-	<string name="label_olvid_card" state="needs_review" hash="-1953461576">Olvid Card</string>
-	<string name="label_olvid_card_published" state="needs_review" hash="-1038740778">Olvid Card - Опубликовано</string>
-	<string name="label_olvid_card_published_update" state="needs_review" hash="391148752">Olvid Card - Новый</string>
-	<string name="label_olvid_card_unpublished_draft" state="needs_review" hash="-786284715">Olvid Card - Неопубликованный черновик</string>
 	<string name="label_pending_group_members" state="needs_review" hash="1481357803">Ожидающие участники группы</string>
 	<string name="label_text_copied_from_olvid" state="needs_review" hash="1675378287">Текст скопирован из Olvid</string>
 	<string name="label_trust_origins" state="needs_review" hash="-1177760062">Надёжные источники</string>
@@ -285,12 +285,16 @@
 	<string name="toast_message_shortcut_not_supported" state="needs_review" hash="-1300016753">Создание ярлыков не поддерживается на вашем устройстве</string>
 	<string name="toast_message_unable_to_open_file" state="needs_review" hash="392405293">Не удалось найти подходящее приложение для открытия этого типа файла</string>
 	<string name="toast_message_unparsable_url" state="needs_review" hash="-135719133">Не удалось правильно разобрать URL</string>
-	<string name="trust_origin_direct_type" state="needs_review" hash="-67248053">%1$s - Прямая проверка</string>
-	<string name="trust_origin_group_type" state="needs_review" hash="230302215">%1$s - Принято приглашение в группу от\u0020</string>
-	<string name="trust_origin_group_v2_type" state="needs_review" hash="-1152079590">%1$s - Принято приглашение в группу</string>
-	<string name="trust_origin_introduction_type" state="needs_review" hash="328494718">%1$s - Введение от\u0020</string>
-	<string name="trust_origin_keycloak_type" state="needs_review" hash="1983748673">%2$s - Подтверждение поставщиком удостоверений в %1$s</string>
-	<string name="trust_origin_unknown_type" state="needs_review" hash="2084263523">%1$s - Неизвестный источник доверия</string>
+	<string name="trust_origin_direct_type" state="needs_review" hash="1798276315">Прямая проверка</string>
+	<string name="trust_origin_group_type" state="needs_review" hash="1222060749">Принял(а) приглашение в группу, созданную </string>
+	<string name="trust_origin_group_v2_type" state="needs_review" hash="-566733151">Принято приглашение в группу</string>
+	<string name="trust_origin_introduction_type" state="needs_review" hash="-266148171">Представлено</string>
+	<string name="trust_origin_keycloak_type" state="needs_review" hash="-1113573733">Подтверждение через поставщика идентификационных данных по адресу %1$s</string>
+	<string name="trust_origin_unknown_type" state="needs_review" hash="-491114965">Неизвестный источник доверия</string>
+	<string name="trust_origin_direct_title" state="needs_review" hash="-1849285555">Вы добавили друг друга в контакты</string>
+	<string name="trust_origin_introduction_title" state="needs_review" hash="-1034826640">Введение</string>
+	<string name="trust_origin_group_title" state="needs_review" hash="1252823567">Общие группы</string>
+	<string name="trust_origin_keycloak_title" state="needs_review" hash="-1917629373">Добавлен через каталог</string>
 	<string name="menu_action_delete_contact" state="needs_review" hash="1849106991">Удалить контакт</string>
 	<string name="menu_action_delete_user" state="needs_review" hash="1683580694">Удалить пользователя</string>
 	<string name="dialog_title_delete_user" state="needs_review" hash="-56212547">Удалить пользователя?</string>
@@ -299,6 +303,7 @@
 	<string name="text_empty_group" state="needs_review" hash="-464714974">Пустая группа</string>
 	<string name="message_error_group_name_empty" state="needs_review" hash="1137468023">Пожалуйста, введите название группы</string>
 	<string name="hint_search_contact_name" state="needs_review" hash="-242911449">Поиск имени контакта…</string>
+	<string name="hint_search_group_name" state="needs_review" hash="-265074656">Поиск по названию группы…</string>
 	<string name="menu_action_search" state="needs_review" hash="-2085358317">Поиск</string>
 	<string name="toast_message_polling_failed" state="needs_review" hash="402242307">Не удалось получить сообщения</string>
 	<string name="dialog_message_battery_optimization" state="needs_review" hash="1191860407">Оптимизация батареи в Android работает путем отсрочки определенных фоновых событий для их пакетной обработки. Это может задержать получение входящих сообщений Olvid.\n\nЧтобы гарантировать своевременное получение сообщений, вам следует разрешить Olvid \"всегда работать в фоновом режиме\". Нажмите \"Настройки\" ниже, а затем \"Разрешить\".</string>
@@ -819,6 +824,11 @@
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Медиаплеер</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Управление воспроизведением/паузой при воспроизведении медиафайлов в Olvid</string>
 	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Не удалось воспроизвести аудиофайл</string>
+	<string name="label_voice_message" state="needs_review" hash="-348491668">Голосовое сообщение</string>
+	<string name="content_description_skip_previous" state="needs_review" hash="836036575">Предыдущая аудиозапись</string>
+	<string name="content_description_skip_next" state="needs_review" hash="-878180801">Следующее аудиосообщение</string>
+	<string name="content_description_audio_play" state="needs_review" hash="1143766922">Воспроизвести</string>
+	<string name="content_description_audio_pause" state="needs_review" hash="1931883968">Пауза</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Удалить</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Удалить везде</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Не удалось удалить везде. Пожалуйста, попробуйте еще раз.</string>
@@ -919,6 +929,7 @@
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Ваш Olvid ID в настоящее время управляется поставщиком удостоверений вашей компании. Вы не можете вручную активировать лицензию Olvid.\n\nОбратитесь к вашему администратору для получения более подробной информации.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Пропущенный вызов</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Детали контакта обновлены</string>
+	<string name="text_own_details_updated" state="needs_review" hash="-1335488506">Подробности обновлены</string>
 	<string name="text_group_details_updated" state="needs_review" hash="1016500852">Информация о группе обновлена</string>
 	<string name="dialog_title_sd_card_ringtone_bugged_android_9" state="needs_review" hash="-1202187296">Ошибка звука уведомлений в Android 9</string>
 	<string name="dialog_message_sd_card_ringtone_bugged_android_9" state="needs_review" hash="1449296723">Olvid не может использовать выбранный вами звук уведомлений. Он был отключен. Ошибка в Android 9 не позволяет использовать пользовательские звуки уведомлений в приложениях, которые не запрашивают доступ к внешней памяти/SD-карте.\n\nПопробуйте выбрать стандартный звук уведомлений. До тех пор ваши уведомления будут оставаться без звука.</string>
@@ -1014,6 +1025,10 @@
 	<string name="dialog_title_available_space_low" state="needs_review" hash="610249394">Память устройства почти заполнена</string>
 	<string name="dialog_message_available_space_low" state="needs_review" hash="78499573">На вашем устройстве заканчивается доступное место. Ожидайте возникновения неожиданных ошибок при получении или отправке файлов с Olvid.\n\nВероятно, сейчас самое подходящее время, чтобы освободить место на вашем устройстве.</string>
 	<string name="button_label_manage_storage" state="needs_review" hash="-918485427">Управление хранилищем</string>
+	<string name="label_storage_all_files" state="needs_review" hash="1735747130">Все файлы</string>
+	<string name="label_storage_sent_by_me" state="needs_review" hash="640456592">Отправлено мной</string>
+	<string name="label_storage_large_files" state="needs_review" hash="-257706820">Больше 5 МБ</string>
+	<string name="label_storage_discussions" state="needs_review" hash="491497248">Обсуждения</string>
 	<string name="pref_use_internal_image_viewer_title" state="needs_review" hash="1319400578">Использовать встроенный просмотрщик изображений</string>
 	<string name="pref_use_internal_image_viewer_summary" state="needs_review" hash="1248137666">При активации нажатие на вложение-изображение откроет его во встроенном просмотрщике. В противном случае будет использоваться приложение для изображений по умолчанию на вашем устройстве.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Не удалось отобразить изображение</string>
@@ -1167,7 +1182,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Удаление профиля удалит всю информацию, связанную с этим профилем на вашем устройстве. Это включает ваши контакты, группы и содержимое всех ваших обсуждений (сообщения и вложения) для этого профиля.\n\n<b>Это ваш единственный видимый профиль, и если у вас есть скрытые профили, они будут удалены одновременно.</b>\n\nНажмите «далее», чтобы выбрать способ удаления этого профиля.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Удалить профиль <b>везде</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">Введите \"%1$s\" здесь, чтобы продолжить</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">Введите \"%1$s\" здесь, чтобы продолжить</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">Если вы выберете удалить свой профиль <b>везде</b>:\n - он будет удален локально <b>и</b> на устройствах ваших контактов\n - вы покинете группы, к которым присоединились\n - управляемые вами группы будут распущены\n\nЕсли вы <b>не</b> удалите свой профиль везде, он будет удален только локально на вашем устройстве. Если вы не планируете восстанавливать резервную копию на другом устройстве, ваши контакты могут продолжать пытаться отправлять вам сообщения и могут не понять, что эти сообщения не могут быть доставлены.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">Ваш текущий профиль, похоже, неактивен, вероятно, потому что вы перенесли его на другое устройство. Если вы планируете продолжать использовать этот профиль на другом устройстве, вы можете безопасно удалить его здесь.\n\nЕсли вы больше никогда не планируете использовать этот профиль, вам сначала нужно будет реактивировать его на этом устройстве, дождаться восстановления защищенных каналов связи с вашими контактами, и только потом удалить этот профиль, выбрав опцию «удалить везде».</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">Ваш профиль в настоящее время активен на нескольких устройствах.\n\nЕсли вы выберете удалить профиль <b>везде</b>: - он будет удален со всех ваших устройств <b>и</b> с устройств ваших контактов - вы покинете группы, к которым присоединились - группы, которыми вы управляете, будут распущены\n\nЕсли вы <b>не</b> удалите профиль везде, он будет удален только локально, и вы сможете продолжать использовать его как обычно на других устройствах.</string>
@@ -1251,9 +1266,6 @@
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Группы v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
 	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Использовать анимированные эмодзи (если доступны)</string>
-	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Использование хранилища профиля</string>
-	<string name="label_photos" state="needs_review" hash="1539779714">Фотографии</string>
-	<string name="label_videos" state="needs_review" hash="-101497740">Видео</string>
 	<string name="label_audio" state="needs_review" hash="-779820608">Аудио</string>
 	<string name="label_other" state="needs_review" hash="-543765264">Другие</string>
 	<string name="label_all" state="needs_review" hash="752498555">Все</string>
@@ -1268,14 +1280,7 @@
 	<string name="menu_action_sort_date_alt" state="needs_review" hash="646746321">Сортировать по дате (от старых к новым)</string>
 	<string name="menu_action_sort_size_alt" state="needs_review" hash="1986077505">Сортировать по размеру (от меньшего к большему)</string>
 	<string name="menu_action_sort_name_alt" state="needs_review" hash="-802793419">Сортировать по имени (в обратном порядке)</string>
-	<string name="text_sent_by_xx" state="needs_review" hash="248848108">Отправлено через %1$s</string>
 	<string name="text_unknown_sender" state="needs_review" hash="1913018414">Неизвестный отправитель</string>
-	<string name="text_sent_to_xx" state="needs_review" hash="918571953">Отправлено %1$s</string>
-	<string name="text_draft_for_xx" state="needs_review" hash="2063814784">Черновик для %1$s</string>
-	<string name="label_loading_attachments" state="needs_review" hash="856026474">Загрузка вложений…</string>
-	<string name="dialog_message_delete_attachment_for_many_messages" state="needs_review" hash="1800265017">Вложение %2$s прикреплено к %1$d разным сообщениям. Вы хотите удалить только это вложение, или удалить его во всех %1$d сообщениях?\nЭто действие нельзя отменить.</string>
-	<string name="button_label_delete_one" state="needs_review" hash="-1916938532">Удалить один</string>
-	<string name="button_label_delete_all" state="needs_review" hash="-985749327">Удалить все %1$d</string>
 	<string name="dialog_title_save_selected_attachments" state="needs_review" hash="-405982081">Сохранить выбранные вложения</string>
 	<string name="pref_category_contacts_and_groups" state="needs_review" hash="1531647661">Контакты и группы</string>
 	<string name="pref_auto_join_groups_title" state="needs_review" hash="29822089">Автоматически принимать групповые приглашения…</string>
@@ -1636,7 +1641,7 @@
 	<string name="button_label_remove" state="needs_review" hash="1097276765">Удалить</string>
 	<string name="menu_action_remove_expiration" state="needs_review" hash="-156931599">Держите это устройство активным</string>
 	<string name="dialog_title_set_unexpiring_device" state="needs_review" hash="-1488033285">Поддерживать устройство активным</string>
-	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1293464179">У вас нет лицензии на использование нескольких активных устройств. Если вы хотите приобрести такую лицензию, закройте это окно и нажмите «Посмотреть тарифные планы» ниже.\n\nЧтобы продолжить и оставить устройство «%1$s» активным, устройство «%2$s» будет деактивировано вместо него. Вы хотите продолжить?</string>
+	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1457083107">У вас в настоящее время нет лицензии, позволяющей использовать несколько активных устройств. Если вы хотите приобрести такую лицензию, закройте это окно и нажмите кнопку «Посмотреть варианты подписки».\n\nЧтобы продолжить и сохранить устройство «%1$s» активным, устройство «%2$s» будет деактивировано. Вы хотите продолжить?</string>
 	<string name="dialog_title_remove_background_image" state="needs_review" hash="488158841">Удалить текущее фоновое изображение?</string>
 	<string name="dialog_title_introducing_markdown" state="needs_review" hash="175399162">Представляем форматирование сообщений!</string>
 	<string name="dialog_message_introducing_markdown" state="needs_review" hash="1738415115">Olvid теперь позволяет форматировать ваши сообщения, используя синтаксис markdown 🎨!\n\nПишите **<b>жирным</b>**, *<i>курсивом</i>*, добавляйте # <big>ЗАГОЛОВКИ</big>, и т.д.\n\nСписок всех поддерживаемых тегов 🦍 можно найти по адресу:\nhttps://www.olvid.io/faq/format-your-messages/</string>
@@ -2041,6 +2046,7 @@
 	<string name="button_label_this_way" state="needs_review" hash="747183939">Сюда</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">Код скопирован</string>
 	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">Пожалуйста, выберите, кого добавить в эту группу.</string>
+	<string name="explanation_choose_contact_introduction" state="needs_review" hash="1113777517">Пожалуйста, выберите, кому представить %1$s.</string>
 	<string name="label_group_administration" state="needs_review" hash="871355986">Управление группой</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">Вызов заблокирован</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid не позволяет начать вызов с количеством участников больше %1$d.</string>
@@ -2154,6 +2160,7 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Ведутся переговоры</string>
 	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Передача</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Передача завершена</string>
+	<string name="history_transfer_step_processing_buffered_data" state="needs_review" hash="-1359029280">Обработка полученных данных</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Передача не удалась</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Перенос истории чатов</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Не удалось начать передачу. Возможно, уже выполняется другая передача?</string>
@@ -2272,7 +2279,8 @@
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Импорт</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Анализ содержимого</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Анализ экспортированных обсуждений</string>
-	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Произошла ошибка при загрузке файла стилей OpenStreetMap</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">Произошла ошибка при загрузке файла стилей OpenStreetMap</string>
 	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Подписки в приложении недоступны</string>
 	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Установленная вами версия Olvid не включает библиотеку Google Billing и не поддерживает покупки внутри приложения.\n\nДля получения дополнительной информации, пожалуйста, свяжитесь с нами по адресу **feedback@olvid.io**.</string>
+	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">Отменить загрузку</string>
 </resources>

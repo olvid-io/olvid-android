@@ -1,0 +1,1 @@
+- Thêm hỗ trợ cho 18 ngôn ngữ mới: tiếng Bulgaria, tiếng Bengal, tiếng Estonia, tiếng Philippines, tiếng Gujarati, tiếng Indonesia, tiếng Kannada, tiếng Latvia, tiếng Litva, tiếng Malayalam, tiếng Marathi, tiếng Punjabi, tiếng Serbia, tiếng Swahili, tiếng Tamil, tiếng Telugu, tiếng Thái và tiếng Urdu.

@@ -1,0 +1,1 @@
+- Idinagdag ang suporta para sa 18 bagong wika: Bulgarian, Bengali, Estonian, Filipino, Gujarati, Indonesian, Kannada, Latvian, Lithuanian, Malayalam, Marathi, Punjabi, Serbian, Swahili, Tamil, Telugu, Thai, at Urdu.

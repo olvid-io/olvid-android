@@ -82,6 +82,7 @@ import android.content.Context.CLIPBOARD_SERVICE
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.ContactCacheSingleton
+import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.jsons.JsonExpiration
 import io.olvid.messenger.databases.tasks.InboundEphemeralMessageClicked
@@ -258,6 +259,7 @@ fun LocationMessage(
     scale: Float,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    onCancelAttachmentUpload: (FyleAndStatus) -> Unit,
     highlighter: ((Context, AnnotatedString) -> AnnotatedString)? = null,
     blockClicks: Boolean,
 ) {
@@ -351,6 +353,7 @@ fun LocationMessage(
         },
         onClick = onClick,
         onLongClick = onLongClick,
+        onCancelAttachmentUpload = onCancelAttachmentUpload,
         highlighter = highlighter,
         blockClicks = blockClicks,
     )
@@ -371,6 +374,7 @@ private fun LocationMessageContent(
     onCopyCoordinates: () -> Unit,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    onCancelAttachmentUpload: (FyleAndStatus) -> Unit,
     highlighter: ((Context, AnnotatedString) -> AnnotatedString)?,
     blockClicks: Boolean,
 ) {
@@ -383,6 +387,7 @@ private fun LocationMessageContent(
                 maxWidth = maxWidth,
                 onLocationClicked = onClick,
                 discussionSearchViewModel = null,
+                onCancelAttachmentUpload = onCancelAttachmentUpload,
                 saveAttachment = {},
                 saveAllAttachments = {},
                 blockClicks = blockClicks,
@@ -610,6 +615,7 @@ fun LocationMessageContentPreview() {
             address = "2 rue de la Paix, 75000 Paris, France",
             onClick = {},
             onLongClick = {},
+            onCancelAttachmentUpload = {},
             onStopSharingLocation = {},
             onCopyCoordinates = {},
             highlighter = null,

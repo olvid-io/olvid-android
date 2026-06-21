@@ -1,0 +1,19 @@
+Olvid er den første personlige meldingsappen for alle. Send meldinger, bilder og filer, og foreta sikre telefon- og videosamtaler.
+
+
+Hva er en "personlig" meldingstjeneste?
+
+Det er en meldingstjeneste:
+- som ikke påtvinger deg nye kontakter. Du har kontrollen: du velger selv hvem du vil kommunisere med. Olvid tilbyr flere måter å komme i kontakt med andre Olvid-brukere, enten ansikt til ansikt eller på avstand.
+- som ikke krever noen personlige data. Olvid vil ikke spørre om telefonnummeret eller e-postadressen din. I motsetning til din forrige meldingstjeneste, vil Olvid aldri be om tilgang til adresseboken din.
+- der du aldri vil motta uønskede meldinger eller meldinger fra en ukjent kilde.
+- der all kommunikasjon har samme sikkerhet og personvern som en samtale i virkeligheten bak lukkede dører. Olvid tilbyr ende-til-ende-kryptering og ende-til-ende-autentisering som standard, alltid, for alt du sender og mottar.
+
+Olvid garanterer deg trygge rom, beskyttet mot ekstern aggresjon, som isolerer deg fra den digitale støyen og volden i andre sosiale nettverk. Opprett grupper med familie, venner og viktige samarbeidspartnere. Ingen spam, ingen reklame. Du får endelig full kontroll over kommunikasjonen din.
+
+Olvid er designet for å være det beste stedet å kommunisere om viktige emner, med de som betyr noe for deg.
+
+
+Olvid - Teknologi
+
+I hjertet av Olvid ligger en "kryptografisk motor", som er resultatet av flere års forskning, og som gjør det mulig å matematisk bevise integriteten, konfidensialiteten og anonymiteten til kommunikasjonen din.

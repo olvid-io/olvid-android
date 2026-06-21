@@ -29,7 +29,10 @@ import androidx.room.Delete;
 import androidx.room.Embedded;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.RawQuery;
+import androidx.room.RoomWarnings;
 import androidx.room.Update;
+import androidx.sqlite.db.SupportSQLiteQuery;
 
 import java.security.SecureRandom;
 import java.util.List;
@@ -200,26 +203,6 @@ public interface FyleMessageJoinWithStatusDao {
     @Nullable FyleMessageJoinWithStatus getByIdAndAttachmentNumber(long messageId, int attachmentNumber);
 
 
-    String IMAGE_AND_VIDEO_FOR_DISCUSSION_QUERY = "SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
-            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
-            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
-            " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
-            " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
-            " WHERE mess." + Message.DISCUSSION_ID + " = :discussionId " +
-            " AND ( FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != ''" +
-            " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL) " +
-            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
-            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT;
-
-    @Query(IMAGE_AND_VIDEO_FOR_DISCUSSION_QUERY +
-            " ORDER BY mess." + Message.SORT_INDEX + " ASC, " +
-            " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " ASC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForDiscussion(long discussionId);
-
-    @Query(IMAGE_AND_VIDEO_FOR_DISCUSSION_QUERY +
-            " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
-            " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForDiscussionDescending(long discussionId);
 
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
@@ -246,6 +229,22 @@ public interface FyleMessageJoinWithStatusDao {
             " ORDER BY mess." + Message.SORT_INDEX + " DESC, " +
             " FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + " DESC")
     LiveData<List<FyleAndStatusTimestamped>> getGalleryMediasForDiscussion(long discussionId);
+
+    @SuppressWarnings(RoomWarnings.QUERY_MISMATCH)
+    @Query("SELECT fyle.*, FMjoin.*, " + "mess." + Message.TIMESTAMP + " AS " + Message.TIMESTAMP + ", MIN(FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER + ") AS first_engine_number FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
+            " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " WHERE mess." + Message.DISCUSSION_ID + " = :discussionId " +
+            " AND ( FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != '' " +
+            " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL) " +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT +
+            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL" +
+            " GROUP BY mess." + Message.SORT_INDEX +
+            " ORDER BY mess." + Message.SORT_INDEX + " DESC")
+    LiveData<List<FyleAndStatusTimestamped>> getGalleryMediasForCalendar(long discussionId);
 
     @Query("SELECT fyle.*, FMjoin.*, " + "mess." + Message.TIMESTAMP + " AS " + Message.TIMESTAMP + " FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
@@ -293,41 +292,20 @@ public interface FyleMessageJoinWithStatusDao {
     LiveData<List<FyleAndStatusTimestamped>> getGalleryAudiosForDiscussion(long discussionId);
 
 
-    String IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY = "SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
-            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
-            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
-            " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
-            " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
-            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
-            " ON mess." + Message.DISCUSSION_ID + " = disc.id " +
-            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND ( FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != ''" +
-            " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL) " +
-            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE;
+    // ---- Raw base queries for FyleAndStatus gallery (positional ? params) ----
+    String IMAGE_AND_VIDEO_FOR_DISCUSSION_RAW_BASE = "SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
+            " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " WHERE mess." + Message.DISCUSSION_ID + " = ?" +
+            " AND (FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != ''" +
+            " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL)" +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " AND mess." + Message.STATUS + " != " + Message.STATUS_DRAFT;
+    String SORT_COLUMN_SORT_INDEX = "mess." + Message.SORT_INDEX;
+    String SORT_COLUMN_ENGINE_NUMBER = "FMjoin." + FyleMessageJoinWithStatus.ENGINE_NUMBER;
 
-    @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
-            " ORDER BY mess." + Message.TIMESTAMP + " DESC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentity(@NonNull byte[] bytesOwnedIdentity);
-
-    @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
-            " ORDER BY mess." + Message.TIMESTAMP + " ASC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityAscending(@NonNull byte[] bytesOwnedIdentity);
-
-    @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
-            " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityBySize(@NonNull byte[] bytesOwnedIdentity);
-
-    @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
-            " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " ASC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityBySizeAscending(@NonNull byte[] bytesOwnedIdentity);
-
-    @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
-            " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityByName(@NonNull byte[] bytesOwnedIdentity);
-
-    @Query(IMAGE_AND_VIDEO_FOR_OWNED_IDENTITY_QUERY +
-            " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " ASC")
-    LiveData<List<FyleAndStatus>> getImageAndVideoFylesAndStatusesForOwnedIdentityByNameAscending(@NonNull byte[] bytesOwnedIdentity);
+    @RawQuery(observedEntities = {FyleMessageJoinWithStatus.class, Fyle.class, Message.class, Discussion.class})
+    LiveData<List<FyleAndStatus>> getImageAndVideoFylesRaw(SupportSQLiteQuery query);
 
 
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
@@ -350,34 +328,6 @@ public interface FyleMessageJoinWithStatusDao {
             " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL")
     List<FyleAndStatus> getCompleteFyleAndStatusWithoutResolution();
 
-    @Query("SELECT SUM(size) FROM (SELECT MAX(FMjoin." + FyleMessageJoinWithStatus.SIZE + ") AS size, fyle. " + Fyle.SHA256 +
-            " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
-            " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle " +
-            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
-            " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
-            " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
-            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
-            " ON mess." + Message.DISCUSSION_ID + " = disc.id " +
-            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL " + // only count complete attachments
-            " GROUP BY fyle." + Fyle.SHA256 + ")")
-    LiveData<Long> getTotalUsage(@NonNull byte[] bytesOwnedIdentity);
-
-    @Query("SELECT SUM(size) FROM (SELECT MAX(FMjoin." + FyleMessageJoinWithStatus.SIZE + ") AS size, fyle. " + Fyle.SHA256 +
-            " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
-            " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle " +
-            " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
-            " INNER JOIN " + Message.TABLE_NAME + " AS mess " +
-            " ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
-            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
-            " ON mess." + Message.DISCUSSION_ID + " = disc.id " +
-            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
-            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL " + // only count complete attachments
-            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE :mimeStart " +
-            " GROUP BY fyle." + Fyle.SHA256 + ")")
-    LiveData<Long> getMimeUsage(@NonNull byte[] bytesOwnedIdentity, @NonNull String mimeStart);
-
-
     @Query("SELECT fyle.*, FMjoin.* FROM " + Fyle.TABLE_NAME + " AS fyle " +
             " INNER JOIN " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
             " ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
@@ -393,6 +343,7 @@ public interface FyleMessageJoinWithStatusDao {
     )
     LiveData<List<FyleAndStatus>> getAllTransferableForOwnedIdentity(@NonNull byte[] bytesOwnedIdentity);
 
+
     String FYLE_AND_ORIGIN_QUERY = "SELECT " + DiscussionDao.PREFIX_DISCUSSION_COLUMNS + ", " + MessageDao.PREFIX_MESSAGE_COLUMNS + ", fyle.*, FMjoin.* " +
             " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
             " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle " +
@@ -402,70 +353,124 @@ public interface FyleMessageJoinWithStatusDao {
             " INNER JOIN " + Discussion.TABLE_NAME + " AS disc " +
             " ON disc.id = mess." + Message.DISCUSSION_ID +
             " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE;
+
+    String GROUP_BY_SHA256 = " GROUP BY fyle." + Fyle.SHA256;
+    String SENT_BY_ME_CONDITION = " AND mess." + Message.MESSAGE_TYPE + " = 1";
+    String LARGE_FILE_CONDITION = " AND FMjoin." + FyleMessageJoinWithStatus.SIZE + " > :minSize";
+
+    // ---- Type filter conditions (no params, used with @RawQuery) ----
+    String MEDIA_TYPE_CONDITION =
+            " AND (FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " != ''" +
+            " OR FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " = 'image/svg+xml'" +
+            " OR FMjoin." + FyleMessageJoinWithStatus.IMAGE_RESOLUTION + " IS NULL)" +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'audio/%'";
+    String AUDIO_TYPE_CONDITION =
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'audio/%'";
+    String FILE_TYPE_CONDITION =
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'audio/%'" +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'video/%'" +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'image/%'" +
+            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " != '" + OpenGraph.MIME_TYPE + "'";
+
+    // ---- Sort column expressions (used with @RawQuery) ----
+    String SORT_COLUMN_SIZE = " FMjoin." + FyleMessageJoinWithStatus.SIZE;
+    String SORT_COLUMN_DATE = " mess." + Message.TIMESTAMP;
+    String SORT_COLUMN_NAME = " FMjoin." + FyleMessageJoinWithStatus.FILE_NAME;
+
+    // ---- Raw base queries (positional ? params, for @RawQuery) ----
+    String FYLE_AND_ORIGIN_RAW_BASE = "SELECT " + DiscussionDao.PREFIX_DISCUSSION_COLUMNS + ", " + MessageDao.PREFIX_MESSAGE_COLUMNS + ", fyle.*, FMjoin.* " +
+            " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = mess." + Message.DISCUSSION_ID +
+            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = ?" +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE;
+    String FYLE_AND_ORIGIN_FOR_DISCUSSION_RAW_BASE = "SELECT " + DiscussionDao.PREFIX_DISCUSSION_COLUMNS + ", " + MessageDao.PREFIX_MESSAGE_COLUMNS + ", fyle.*, FMjoin.* " +
+            " FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = mess." + Message.DISCUSSION_ID +
+            " WHERE disc.id = ?" +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE;
+    String LARGE_FILE_RAW_CONDITION = " AND FMjoin." + FyleMessageJoinWithStatus.SIZE + " > ? ";
+
+    // ---- "All files" bucket ----
+
+    @Query(FYLE_AND_ORIGIN_QUERY + GROUP_BY_SHA256 + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC LIMIT 15")
+    LiveData<List<FyleAndOrigin>> getAllFilesFylePreview(@NonNull byte[] bytesOwnedIdentity);
+
+    @Query("SELECT COUNT(DISTINCT fyle." + Fyle.SHA256 + ") FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = mess." + Message.DISCUSSION_ID +
+            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE)
+    LiveData<Integer> getAllFilesFyleCount(@NonNull byte[] bytesOwnedIdentity);
+
+    @RawQuery(observedEntities = {FyleMessageJoinWithStatus.class, Fyle.class, Message.class, Discussion.class})
+    LiveData<List<FyleAndOrigin>> getFyleAndOriginRaw(SupportSQLiteQuery query);
+
+    // ---- Discussions with storage usage ----
+    String DISCUSSIONS_WITH_USAGE_QUERY = "SELECT " + DiscussionDao.PREFIX_DISCUSSION_COLUMNS + ", " +
+            " SUM(deduped.maxSize) AS totalSize " +
+            " FROM " + Discussion.TABLE_NAME + " AS disc " +
+            " INNER JOIN (" +
+            "  SELECT mess2." + Message.DISCUSSION_ID + " AS dedupDiscId, MAX(FMjoin2." + FyleMessageJoinWithStatus.SIZE + ") AS maxSize " +
+            "  FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin2 " +
+            "  INNER JOIN " + Fyle.TABLE_NAME + " AS fyle2 ON fyle2.id = FMjoin2." + FyleMessageJoinWithStatus.FYLE_ID +
+            "  INNER JOIN " + Message.TABLE_NAME + " AS mess2 ON mess2.id = FMjoin2." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            "  WHERE fyle2." + Fyle.FILE_PATH + " IS NOT NULL " + // only consider complete fyles
+            "  GROUP BY mess2." + Message.DISCUSSION_ID + ", fyle2." + Fyle.SHA256 +
+            " ) AS deduped ON deduped.dedupDiscId = disc.id " +
+            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " GROUP BY disc.id ";
+
+    @Query(DISCUSSIONS_WITH_USAGE_QUERY + " ORDER BY totalSize DESC")
+    LiveData<List<DiscussionAndUsage>> getDiscussionsWithUsageSizeDesc(@NonNull byte[] bytesOwnedIdentity);
+
+    @Query(DISCUSSIONS_WITH_USAGE_QUERY + " ORDER BY disc." + Discussion.LAST_MESSAGE_TIMESTAMP + " DESC")
+    LiveData<List<DiscussionAndUsage>> getDiscussionsWithUsageDateDesc(@NonNull byte[] bytesOwnedIdentity);
+
+    // ---- Total storage size for a single identity ----
+    @Query("SELECT COALESCE(SUM(deduped.maxSize), 0) FROM (" +
+            "  SELECT MAX(FMjoin." + FyleMessageJoinWithStatus.SIZE + ") AS maxSize" +
+            "  FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin" +
+            "  INNER JOIN " + Fyle.TABLE_NAME + " AS fyle ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            "  INNER JOIN " + Message.TABLE_NAME + " AS mess ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            "  INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = mess." + Message.DISCUSSION_ID +
+            "  WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity" +
+            "  AND fyle." + Fyle.FILE_PATH + " IS NOT NULL " + // only consider complete fyles
+            "  GROUP BY fyle." + Fyle.SHA256 +
+            ") AS deduped")
+    LiveData<Long> getTotalStorageSizeForIdentity(@NonNull byte[] bytesOwnedIdentity);
+
+    // ---- "Sent by me" bucket ----
+    @Query(FYLE_AND_ORIGIN_QUERY + SENT_BY_ME_CONDITION + GROUP_BY_SHA256 + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC LIMIT 15")
+    LiveData<List<FyleAndOrigin>> getSentByMeFylePreview(@NonNull byte[] bytesOwnedIdentity);
+
+    @Query("SELECT COUNT(DISTINCT fyle." + Fyle.SHA256 + ") FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = mess." + Message.DISCUSSION_ID +
+            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
             " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
-            " AND fyle." + Fyle.FILE_PATH + " IS NOT NULL ";
+            " AND mess." + Message.MESSAGE_TYPE + " = 1")
+    LiveData<Integer> getSentByMeFyleCount(@NonNull byte[] bytesOwnedIdentity);
 
-    String MEDIA_FYLE_AND_ORIGIN_QUERY = FYLE_AND_ORIGIN_QUERY +
-            " AND (FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'video/%' " +
-            " OR FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'image/%')";
-    String AUDIO_FYLE_AND_ORIGIN_QUERY = FYLE_AND_ORIGIN_QUERY +
-            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " LIKE 'audio/%' ";
-    String FILE_FYLE_AND_ORIGIN_QUERY = FYLE_AND_ORIGIN_QUERY +
-            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'audio/%' " +
-            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'video/%' " +
-            " AND FMjoin." + FyleMessageJoinWithStatus.MIME_TYPE + " NOT LIKE 'image/%' ";
+    // ---- "Large files" bucket ----
 
-    @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " ASC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginSizeAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginSizeDesc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " ASC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginDateAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " DESC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginDateDesc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " ASC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginNameAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(MEDIA_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC ")
-    LiveData<List<FyleAndOrigin>> getMediaFyleAndOriginNameDesc(@NonNull byte[] bytesOwnedIdentity);
+    @Query(FYLE_AND_ORIGIN_QUERY + LARGE_FILE_CONDITION + GROUP_BY_SHA256 + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC LIMIT 15")
+    LiveData<List<FyleAndOrigin>> getLargeFileFylePreview(@NonNull byte[] bytesOwnedIdentity, long minSize);
 
-    @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginSizeAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginSizeDesc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginDateAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginDateDesc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginNameAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(FILE_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFileFyleAndOriginNameDesc(@NonNull byte[] bytesOwnedIdentity);
-
-    @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " ASC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginSizeAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginSizeDesc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " ASC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginDateAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " DESC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginDateDesc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " ASC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginNameAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(AUDIO_FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC ")
-    LiveData<List<FyleAndOrigin>> getAudioFyleAndOriginNameDesc(@NonNull byte[] bytesOwnedIdentity);
-
-    @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginSizeAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.SIZE + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginSizeDesc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginDateAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY mess." + Message.TIMESTAMP + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginDateDesc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " ASC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginNameAsc(@NonNull byte[] bytesOwnedIdentity);
-    @Query(FYLE_AND_ORIGIN_QUERY + " ORDER BY FMjoin." + FyleMessageJoinWithStatus.FILE_NAME + " DESC ")
-    LiveData<List<FyleAndOrigin>> getFyleAndOriginNameDesc(@NonNull byte[] bytesOwnedIdentity);
+    @Query("SELECT COUNT(DISTINCT fyle." + Fyle.SHA256 + ") FROM " + FyleMessageJoinWithStatus.TABLE_NAME + " AS FMjoin " +
+            " INNER JOIN " + Fyle.TABLE_NAME + " AS fyle ON fyle.id = FMjoin." + FyleMessageJoinWithStatus.FYLE_ID +
+            " INNER JOIN " + Message.TABLE_NAME + " AS mess ON mess.id = FMjoin." + FyleMessageJoinWithStatus.MESSAGE_ID +
+            " INNER JOIN " + Discussion.TABLE_NAME + " AS disc ON disc.id = mess." + Message.DISCUSSION_ID +
+            " WHERE disc." + Discussion.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity " +
+            " AND mess." + Message.MESSAGE_TYPE + " != " + Message.TYPE_INBOUND_EPHEMERAL_MESSAGE +
+            " AND FMjoin." + FyleMessageJoinWithStatus.SIZE + " > :minSize")
+    LiveData<Integer> getLargeFileFyleCount(@NonNull byte[] bytesOwnedIdentity, long minSize);
 
     @Query("SELECT " + DiscussionDao.PREFIX_DISCUSSION_COLUMNS + ", " + MessageDao.PREFIX_MESSAGE_COLUMNS
             + ", fyle.*, FMjoin.* " +
@@ -490,10 +495,9 @@ public interface FyleMessageJoinWithStatusDao {
 
         @Override
         public boolean equals(@Nullable Object obj) {
-            if (!(obj instanceof FyleAndStatusTimestamped)) {
+            if (!(obj instanceof FyleAndStatusTimestamped other)) {
                 return false;
             }
-            FyleAndStatusTimestamped other = (FyleAndStatusTimestamped) obj;
             return (other.timestamp == timestamp) && (other.fyleAndStatus.equals(fyleAndStatus)) && Objects.equals(other.fyleAndStatus.fyle.filePath, fyleAndStatus.fyle.filePath);
         }
     }
@@ -507,6 +511,14 @@ public interface FyleMessageJoinWithStatusDao {
 
         @Embedded(prefix = "disc_")
         public Discussion discussion;
+    }
+
+    class DiscussionAndUsage {
+        @Embedded(prefix = "disc_")
+        public Discussion discussion;
+
+        @androidx.room.ColumnInfo(name = "totalSize")
+        public long totalSize;
     }
 
     class FyleAndStatus {
@@ -542,10 +554,9 @@ public interface FyleMessageJoinWithStatusDao {
 
         @Override
         public boolean equals(@Nullable Object obj) {
-            if (!(obj instanceof FyleAndStatus)) {
+            if (!(obj instanceof FyleAndStatus other)) {
                 return false;
             }
-            FyleAndStatus other = (FyleAndStatus) obj;
             return (other.fyle.id == fyle.id) && (other.fyleMessageJoinWithStatus.messageId == fyleMessageJoinWithStatus.messageId);
         }
 

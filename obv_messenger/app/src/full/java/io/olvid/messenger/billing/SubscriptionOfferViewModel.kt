@@ -37,6 +37,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 class SubscriptionOfferViewModel : ViewModel() {
 
@@ -102,7 +103,7 @@ class SubscriptionOfferViewModel : ViewModel() {
         loading = addDelay
         viewModelScope.launch {
             if (addDelay) {
-                delay(1000)
+                delay(1000.milliseconds)
             }
             val details = SubscriptionRepository.getSubscriptionPlans(
                 listOf(
@@ -151,7 +152,7 @@ class SubscriptionOfferViewModel : ViewModel() {
         freeTrialJob = viewModelScope.launch {
             // Timeout
             val timeoutJob = launch {
-                delay(SubscriptionRepository.QUERY_TIMEOUT)
+                delay(SubscriptionRepository.QUERY_TIMEOUT.milliseconds)
                 if (freeTrialResults == null) {
                     freeTrialFailed = true
                 }

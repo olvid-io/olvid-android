@@ -36,9 +36,17 @@ public class NoExceptionSingleThreadExecutor implements Executor {
     @Override
     public void execute(Runnable r) {
         try {
-            executor.execute(r);
+            executor.execute(() -> {
+                try {
+                    r.run();
+                } catch (Error | Exception e) {
+                    // do nothing, this is sometimes normal
+                    Logger.x(e);
+                }
+            });
         } catch (Error | Exception e) {
             // do nothing, this is sometimes normal
+            Logger.x(e);
         }
     }
 

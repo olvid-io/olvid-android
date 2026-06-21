@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.olvid.messenger.AppSingleton
@@ -81,7 +82,10 @@ fun PollMessageBody(
         Text(
             text = highlighter?.invoke(context, AnnotatedString(jsonPoll.question))
                 ?: AnnotatedString(jsonPoll.question),
-            style = OlvidTypography.h2.copy(color = colorResource(R.color.almostBlack))
+            style = OlvidTypography.body1.copy(
+                fontWeight = FontWeight.Medium,
+                color = colorResource(R.color.almostBlack)
+            )
         )
         if (jsonPoll.multipleChoice) {
             Text(

@@ -64,6 +64,9 @@ public class AddExistingFyleToDraft implements Runnable {
             }
         });
         Message draftMessage = db.messageDao().getDiscussionDraftMessageSync(discussionId);
+        if (draftMessage == null) {
+            return;
+        }
         try {
             final Fyle finalFyle = fyle;
             final String finalOutputFile = Fyle.buildFylePath(sha256);
@@ -77,7 +80,7 @@ public class AddExistingFyleToDraft implements Runnable {
                         draftMessage.id,
                         draftMessage.senderIdentifier,
                         finalOutputFile,
-                        fileName,
+                        AddFyleToDraftFromUriTask.cleanFileNameFromVoiceMessagePattern(fileName),
                         mimeType,
                         size
                 );

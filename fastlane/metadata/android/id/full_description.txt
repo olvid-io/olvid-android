@@ -1,0 +1,19 @@
+Olvid adalah aplikasi perpesanan instan pribadi pertama untuk semua orang. Kirim pesan, foto, file, dan lakukan panggilan telepon dan video yang aman.
+
+
+Apa itu "messenger" pribadi?
+
+Ini adalah messenger:
+- Yang tidak memaksakan kontak baru kepada Anda. Anda yang memegang kendali: Anda memilih dengan siapa Anda ingin berdiskusi. Olvid menawarkan beberapa cara untuk mengundang pengguna Olvid lainnya, baik secara langsung maupun dari jarak jauh.
+- Yang tidak memerlukan data pribadi apa pun. Olvid tidak akan meminta nomor telepon atau email Anda. Tidak seperti messenger Anda sebelumnya, Olvid tidak akan pernah meminta akses ke buku alamat Anda.
+- Di mana Anda tidak akan pernah menerima pesan yang tidak diminta atau pesan dari sumber yang tidak dikenal.
+- Di mana semua pertukaran mendapatkan manfaat dari keamanan dan privasi yang sama seperti diskusi dunia nyata di balik pintu tertutup. Olvid menawarkan enkripsi ujung-ke-ujung dan autentikasi ujung-ke-ujung secara default, selalu, untuk semua yang Anda kirim atau terima.
+
+Olvid menjamin Anda ruang yang aman, kebal terhadap agresi eksternal, yang mengisolasi Anda dari kebisingan digital dan kekerasan jaringan sosial lainnya. Buat grup dengan keluarga, teman, dan kolaborator utama Anda. Tidak ada spam, tidak ada iklan. Anda akhirnya mendapatkan kembali kendali penuh atas komunikasi Anda.
+
+Olvid dirancang untuk menjadi tempat terbaik untuk bertukar tentang topik yang penting, dengan orang-orang yang penting bagi Anda.
+
+
+Olvid - Teknologi
+
+Di jantung Olvid, 'mesin kriptografi' yang berasal dari beberapa tahun penelitian memungkinkan untuk membuktikan secara matematis integritas, kerahasiaan, dan anonimitas komunikasi Anda.

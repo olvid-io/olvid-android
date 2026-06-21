@@ -1,0 +1,1 @@
+- En bugg har åtgärdats där "desugaring" av Java Records inte fungerade korrekt i den senaste versionen av Android Studio.

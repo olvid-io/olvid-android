@@ -1,0 +1,1 @@
+- S'ha afegit el suport per a 18 idiomes nous: búlgar, bengalí, estonià, filipí, gujarati, indonesi, kannada, letó, lituà, malayalam, marathi, punjabi, serbi, suahili, tàmil, telugu, tailandès i urdú.

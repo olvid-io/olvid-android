@@ -1,0 +1,1 @@
+- Ajout de la prise en charge de 18 nouvelles langues : bulgare, bengali, estonien, philippin, gujarati, indonésien, kannada, letton, lituanien, malayalam, marathi, pendjabi, serbe, swahili, tamoul, télougou, thaï et ourdou.

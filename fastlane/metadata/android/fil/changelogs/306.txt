@@ -1,0 +1,5 @@
+- Muling pagdidisenyo ng ilang bahagi ng app: card ng contact, card ng profile, tagapamahala ng storage, atbp.
+- Idinagdag ang kalendaryo sa loob ng usapan upang mabilis na makapunta sa isang partikular na oras.
+- Idinagdag ang panloob na "controller ng kasalukuyang pagtugtog" upang madaling lumipat sa pagitan ng mga voice message.
+- Idinagdag ang kakayahang kanselahin ang pag-upload ng attachment.
+- Ipinapakita ang mga napalampas na notification kapag natapos na ang pag-mute ng profile.

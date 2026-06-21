@@ -1,0 +1,5 @@
+- Uygulama bileşenlerinin yeniden tasarımı: kişi kartı, profil kartı, depolama yöneticisi vb.
+- Sohbetlerde belirli bir zamana hızlıca geçiş yapmak için takvim görünümü eklendi.
+- Sesli mesajlar arasında kolayca geçiş yapmak için dahili "devam eden çalma" denetleyicisi eklendi.
+- Ek yüklemeyi iptal etme özelliği eklendi.
+- Profil sessiz modu sona erdiğinde kaçırılan bildirimler gösterilir.

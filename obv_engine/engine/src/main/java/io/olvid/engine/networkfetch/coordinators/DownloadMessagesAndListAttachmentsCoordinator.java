@@ -200,6 +200,7 @@ public class DownloadMessagesAndListAttachmentsCoordinator implements Operation.
                         attachments[i].getUrl(),
                         attachments[i].getPlaintextExpectedLength(),
                         attachments[i].getPlaintextReceivedLength(),
+                        attachments[i].isUploadCancelledBySender(),
                         attachments[i].isDownloadRequested());
             }
             userInfo.put(DownloadNotifications.NOTIFICATION_MESSAGE_DECRYPTED_ATTACHMENTS_KEY, receivedAttachments);

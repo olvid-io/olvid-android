@@ -4,7 +4,6 @@
     <dimen name="notification_icon_size">64dp</dimen>
     <dimen name="shortcut_icon_size">108dp</dimen>
     <dimen name="inner_shortcut_icon_size">72dp</dimen>
-    <dimen name="main_activity_page_margin">8dp</dimen>
 
     <dimen name="identity_details_margin">4dp</dimen>
 

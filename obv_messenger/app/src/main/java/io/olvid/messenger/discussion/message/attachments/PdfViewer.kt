@@ -70,7 +70,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
@@ -118,7 +117,7 @@ fun PdfViewerScreen(
     onClose: () -> Unit,
 ) {
     val minZoom = .8f
-    val maxZoom = 3f
+    val maxZoom = 2.5f
     val context = LocalContext.current
     val density = LocalDensity.current
     val containerSize = LocalWindowInfo.current.containerSize
@@ -237,11 +236,11 @@ fun PdfViewerScreen(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .requiredWidth(screenWidthDp * scale),
-                contentPadding = WindowInsets.safeDrawing.asPaddingValues() + PaddingValues(top = 8.dp, start = 8.dp, end = 8.dp, bottom = 24.dp), // add more bottom padding to account for the shadow
+                contentPadding = WindowInsets.safeDrawing.asPaddingValues() + PaddingValues(horizontal = 8.dp, vertical = 8.dp),
                 state = lazyListState,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                itemsIndexed(renderablePages) { index, page ->
+                itemsIndexed(renderablePages, key = { _, page -> page.key }) { index, page ->
                     PdfPage(
                         page = page,
                         goto = ::goto,
@@ -428,7 +427,6 @@ fun PdfPage(
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
             .aspectRatio(page.width.toFloat() / page.height.toFloat())
-            .shadow(elevation = 12.dp)
             .onSizeChanged {
                 canvasSize = it.toSize()
             }

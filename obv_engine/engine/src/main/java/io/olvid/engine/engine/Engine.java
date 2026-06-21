@@ -961,7 +961,7 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                     || keycloakState.supportedAuthenticationMethods.stream().noneMatch(authType -> authType instanceof ObvKeycloakAuthType.IdBased)
                     || keycloakUsedId == null) {
                 Logger.w("ID-based authentication failed: PERMANENT_ERROR");
-                return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.PERMANENT_ERROR, null, null);
+                return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.PERMANENT_ERROR);
             }
             byte[] nonce = prng.bytes(Constants.SERVER_SESSION_NONCE_LENGTH);
             StandaloneServerQueryOperation standaloneServerQueryOperation = new StandaloneServerQueryOperation(new ServerQuery(null, ownedIdentity, new ServerQuery.KeycloakIdBasedAuthRequestChallengeQuery(keycloakState.keycloakServer, keycloakUsedId, nonce)), sslSocketFactory, userAgentOverride);
@@ -974,10 +974,10 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
             if (standaloneServerQueryOperation.isCancelled() || standaloneServerQueryOperation.getServerResponse() == null) {
                 if (standaloneServerQueryOperation.getReasonForCancel() != null && standaloneServerQueryOperation.getReasonForCancel() == StandaloneServerQueryOperation.RFC_NETWORK_ERROR) {
                     Logger.w("ID-based authentication failed: NETWORK_ERROR");
-                    return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.NETWORK_ERROR, null, null);
+                    return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.NETWORK_ERROR);
                 }
                 Logger.w("ID-based authentication failed: ERROR");
-                return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.ERROR, null, null);
+                return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.ERROR);
             }
 
             byte[] challenge = standaloneServerQueryOperation.getServerResponse().decodeBytes();
@@ -995,28 +995,28 @@ public class Engine implements UserInterfaceDialogListener, EngineSessionFactory
                 if (standaloneServerQueryOperation.getReasonForCancel() != null) {
                     switch (standaloneServerQueryOperation.getReasonForCancel()) {
                         case StandaloneServerQueryOperation.RFC_NETWORK_ERROR:
-                            return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.NETWORK_ERROR, null, null);
+                            return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.NETWORK_ERROR);
                         case StandaloneServerQueryOperation.RFC_PERMISSION_DENIED:
-                            return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.PERMANENT_ERROR, null, null);
+                            return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.PERMANENT_ERROR);
                         case StandaloneServerQueryOperation.RFC_SERVER_PARSING_ERROR:
                         case StandaloneServerQueryOperation.RFC_INVALID_SERVER_SESSION:
                             break;
                     }
                 }
                 Logger.w("ID-based authentication failed: ERROR");
-                return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.ERROR, null, null);
+                return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.ERROR);
             }
 
             byte[] serializedAuthSession = standaloneServerQueryOperation.getServerResponse().decodeBytes();
             ObvKeycloakIdBasedAuthResult.GetSessionResponse getSessionResponse = jsonObjectMapper.readValue(serializedAuthSession, ObvKeycloakIdBasedAuthResult.GetSessionResponse.class);
 
             Logger.i("ID-based authentication success");
-            return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.SUCCESS, getSessionResponse.accessToken, getSessionResponse.refreshToken);
+            return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.SUCCESS, getSessionResponse.accessToken, getSessionResponse.refreshToken, getSessionResponse.clientId, getSessionResponse.clientSecret);
         } catch (Exception e) {
             Logger.x(e);
         }
         Logger.w("ID-based authentication failed: ERROR");
-        return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.ERROR, null, null);
+        return new ObvKeycloakIdBasedAuthResult(ObvKeycloakIdBasedAuthResult.Status.ERROR);
     }
 
     @Override

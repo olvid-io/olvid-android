@@ -50,7 +50,7 @@
 	<string name="dialog_message_contact_introduction" state="needs_review" hash="-398698689">آیا می‌خواهید %1$s را به %2$s معرفی کنید؟</string>
 	<string name="dialog_message_contact_introduction_multiple" state="needs_review" hash="-1743988418">آیا می‌خواهید %1$s را به مخاطبین %2$d زیر معرفی کنید؟\n\n%3$s</string>
 	<string name="dialog_message_delete_attachment" state="needs_review" hash="-235504816">آیا واقعاً می‌خواهید فایل پیوست %1$s را از این پیام حذف کنید؟\nاین عمل قابل برگشت نیست.</string>
-	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="-273205987">آیا واقعاً می‌خواهید فایل پیوست %1$s را حذف کنید؟\nاین عمل قابل برگشت نیست.</string>
+	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="1647132381">آیا واقعاً می‌خواهید فایل پیوست **%1$s** را حذف کنید؟\nاین عمل قابل برگشت نیست.</string>
 	<string name="dialog_message_disband_group" state="needs_review" hash="-1617503323">آیا مایل به انحلال گروه %1$s هستید؟\nدیگر ارسال پیام به این گروه امکان‌پذیر نخواهد بود. پیام‌های گروهی موجود تحت تأثیر قرار نخواهند گرفت.</string>
 	<string name="dialog_message_disband_non_empty_group_confirmation" state="needs_review" hash="1096257228">در حال انحلال گروه %1$s هستید.\nاین کار تمام اعضا و اعضای در انتظار را از گروه حذف می‌کند. در حال حاضر:\n- %2$d عضو\n- %3$d عضو در انتظار\n\nآیا مطمئن هستید که می‌خواهید این گروه را منحل کنید؟</string>
 	<string name="dialog_message_exchange_digits" state="needs_review" hash="1612882609">آیا می‌خواهید کدها را با %1$s تبادل کنید تا هویت او را دوباره تأیید کنید؟</string>
@@ -65,6 +65,7 @@
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">حذف را تایید کنید؟</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">گروه را منحل کنیم؟</string>
 	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">جستجوی گفتگو…</string>
+	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">یک تاریخ وارد کنید</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">ویرایش جزئیات گروه</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">اطلاعات خود را ویرایش کنید</string>
 	<string name="dialog_title_exchange_digits" state="needs_review" hash="864614114">کدهای تبادل</string>
@@ -91,14 +92,18 @@
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">مدیر نام گروه را به این تغییر داد:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">یک مدیر، توضیحات گروه را به این صورت تغییر داد:</string>
 	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">یک مدیر عکس گروه را تغییر داد.</string>
-	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">کارت Olvid مخاطب شما به‌روزرسانی شد. نسخه‌های قدیمی و جدید در زیر نشان داده شده‌اند.\n\nبرای به‌روزرسانی اطلاعات مخاطب خود با این نسخه جدید، روی \"به‌روزرسانی\" کلیک کنید.</string>
+	<string name="explanation_new_contact_card_name" state="needs_review" hash="-1601853738">نام مخاطب شما به این صورت به‌روزرسانی شد:</string>
+	<string name="explanation_new_contact_card_position" state="needs_review" hash="184144104">موقعیت/شرکت مخاطب شما به‌روزرسانی شد:</string>
+	<string name="explanation_new_contact_card_photo" state="needs_review" hash="-252626818">عکس پروفایل مخاطب شما به‌روزرسانی شد.</string>
+	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">نام شما به این صورت به‌روزرسانی شد:</string>
+	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">عنوان/شرکت شما به این صورت به‌روزرسانی شد:</string>
+	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">عکس پروفایل شما به‌روزرسانی شد.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">در حال حاضر یک کانال ارتباطی امن در حال ایجاد است. تا زمانی که این فرآیند تکمیل نشود، نمی‌توانید هیچ گفتگویی با این مخاطب آغاز کنید. اگر هر دوی شما و مخاطبتان آنلاین باشید، این فرآیند باید چند ثانیه طول بکشد.\n\nاگر فکر می‌کنید مشکلی پیش آمده است، می‌توانید ایجاد کانال را دوباره شروع کنید.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">تلاشی انجام نشد</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">هیچ گروهی یافت نشد</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">پیامی یافت نشد</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">فایلی ضمیمه نشده یافت نشد</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">هیچ لینکی یافت نشد</string>
-	<string name="format_identity_details_custom_field" state="needs_review" hash="-1073344790">%1$s : %2$s</string>
 	<string name="hint_company" state="needs_review" hash="379200324">شرکت (اختیاری)</string>
 	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">پیام بنویس</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">پیام موقت</string>
@@ -164,15 +169,10 @@
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">کارت گروه - پیش‌نویس منتشر نشده</string>
 	<string name="label_group_members" state="needs_review" hash="1460220752">اعضای گروه</string>
 	<string name="label_other_group_members" state="needs_review" hash="-2121490032">سایر اعضای گروه</string>
-	<string name="label_groups" state="needs_review" hash="-990226727">گروه‌ها</string>
+	<string name="label_groups_common" state="needs_review" hash="1252823567">گروه‌های مشترک</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">دعوت رد شد</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">جزئیات گروه به‌روز شد</string>
-	<string name="label_new_olvid_card" state="needs_review" hash="688199407">جزئیات مخاطب به‌روز شد</string>
 	<string name="label_not_part_of_a_group" state="needs_review" hash="1667979596">هنوز عضو هیچ گروهی نیستید</string>
-	<string name="label_olvid_card" state="needs_review" hash="-1953461576">کارت اولوید</string>
-	<string name="label_olvid_card_published" state="needs_review" hash="-1038740778">کارت Olvid - منتشر شد</string>
-	<string name="label_olvid_card_published_update" state="needs_review" hash="391148752">کارت Olvid - جدید</string>
-	<string name="label_olvid_card_unpublished_draft" state="needs_review" hash="-786284715">کارت Olvid - پیش‌نویس منتشر نشده</string>
 	<string name="label_pending_group_members" state="needs_review" hash="1481357803">اعضای معلق گروه</string>
 	<string name="label_text_copied_from_olvid" state="needs_review" hash="1675378287">متن از Olvid کپی شد</string>
 	<string name="label_trust_origins" state="needs_review" hash="-1177760062">منابع معتبر</string>
@@ -285,12 +285,16 @@
 	<string name="toast_message_shortcut_not_supported" state="needs_review" hash="-1300016753">ایجاد میانبر در دستگاه شما پشتیبانی نمی‌شود</string>
 	<string name="toast_message_unable_to_open_file" state="needs_review" hash="392405293">برنامه مناسبی برای باز کردن این نوع فایل یافت نشد</string>
 	<string name="toast_message_unparsable_url" state="needs_review" hash="-135719133">نمی‌توان آدرس اینترنتی را به درستی تجزیه کرد</string>
-	<string name="trust_origin_direct_type" state="needs_review" hash="-67248053">%1$s - تأیید هویت مستقیم</string>
-	<string name="trust_origin_group_type" state="needs_review" hash="230302215">%1$s - دعوت به گروه از طرف </string>
-	<string name="trust_origin_group_v2_type" state="needs_review" hash="-1152079590">%1$s - دعوت به گروه پذیرفته شد</string>
-	<string name="trust_origin_introduction_type" state="needs_review" hash="328494718">%1$s - معرفی از </string>
-	<string name="trust_origin_keycloak_type" state="needs_review" hash="1983748673">%2$s - تایید شده توسط ارائه‌دهنده هویت %1$s</string>
-	<string name="trust_origin_unknown_type" state="needs_review" hash="2084263523">%1$s - منبع اعتماد ناشناخته</string>
+	<string name="trust_origin_direct_type" state="needs_review" hash="1798276315">تأیید هویت مستقیم</string>
+	<string name="trust_origin_group_type" state="needs_review" hash="1222060749">دعوت به گروه از طرف</string>
+	<string name="trust_origin_group_v2_type" state="needs_review" hash="-566733151">دعوت به گروه پذیرفته شد</string>
+	<string name="trust_origin_introduction_type" state="needs_review" hash="-266148171">معرفی از</string>
+	<string name="trust_origin_keycloak_type" state="needs_review" hash="-1113573733">تایید توسط ارائه‌دهنده هویت در %1$s</string>
+	<string name="trust_origin_unknown_type" state="needs_review" hash="-491114965">منبع اعتماد ناشناخته</string>
+	<string name="trust_origin_direct_title" state="needs_review" hash="-1849285555">شما یکدیگر را به لیست مخاطبین اضافه کردید</string>
+	<string name="trust_origin_introduction_title" state="needs_review" hash="-1034826640">معرفی</string>
+	<string name="trust_origin_group_title" state="needs_review" hash="1252823567">گروه‌های مشترک</string>
+	<string name="trust_origin_keycloak_title" state="needs_review" hash="-1917629373">اضافه شده از طریق فهرست</string>
 	<string name="menu_action_delete_contact" state="needs_review" hash="1849106991">حذف مخاطب</string>
 	<string name="menu_action_delete_user" state="needs_review" hash="1683580694">حذف کاربر</string>
 	<string name="dialog_title_delete_user" state="needs_review" hash="-56212547">حذف کاربر؟</string>
@@ -299,6 +303,7 @@
 	<string name="text_empty_group" state="needs_review" hash="-464714974">گروه خالی</string>
 	<string name="message_error_group_name_empty" state="needs_review" hash="1137468023">لطفاً نام گروه را وارد کنید</string>
 	<string name="hint_search_contact_name" state="needs_review" hash="-242911449">جستجوی نام مخاطب…</string>
+	<string name="hint_search_group_name" state="needs_review" hash="-265074656">جستجوی نام گروه...</string>
 	<string name="menu_action_search" state="needs_review" hash="-2085358317">جستجو</string>
 	<string name="toast_message_polling_failed" state="needs_review" hash="402242307">دریافت پیام‌ها با خطا مواجه شد</string>
 	<string name="dialog_message_battery_optimization" state="needs_review" hash="1191860407">بهینه‌سازی باتری در اندروید با به تعویق انداختن برخی رویدادهای پس‌زمینه و اجرای آن‌ها به صورت دسته‌ای کار می‌کند. این ممکن است دریافت پیام‌های ورودی Olvid را به تأخیر بیندازد.\n\nبرای اطمینان از دریافت سریع پیام‌های خود، باید به Olvid اجازه دهید که «همیشه در پس‌زمینه اجرا شود». روی «تنظیمات» در زیر کلیک کنید و سپس «اجازه دهید».</string>
@@ -819,6 +824,11 @@
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">پخش‌کننده رسانه</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">کنترل‌های پخش/مکث هنگام پخش رسانه در Olvid</string>
 	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">امکان پخش فایل صوتی وجود ندارد</string>
+	<string name="label_voice_message" state="needs_review" hash="-348491668">پیام صوتی</string>
+	<string name="content_description_skip_previous" state="needs_review" hash="836036575">صدای قبلی</string>
+	<string name="content_description_skip_next" state="needs_review" hash="-878180801">صدای بعدی</string>
+	<string name="content_description_audio_play" state="needs_review" hash="1143766922">پخش</string>
+	<string name="content_description_audio_pause" state="needs_review" hash="1931883968">مکث</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">حذف</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">حذف در همه جا</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">امکان حذف از همه دستگاه‌ها وجود ندارد. لطفاً دوباره تلاش کنید.</string>
@@ -919,6 +929,7 @@
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">شناسه Olvid شما در حال حاضر توسط ارائه‌دهنده هویت شرکت شما مدیریت می‌شود. شما نمی‌توانید به صورت دستی یک لایسنس Olvid را فعال کنید.\n\nلطفاً برای کسب اطلاعات بیشتر با مدیر سیستم خود تماس بگیرید.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">تماس از دست رفته</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">جزئیات مخاطب به‌روز شد</string>
+	<string name="text_own_details_updated" state="needs_review" hash="-1335488506">جزئیات به‌روزرسانی شد</string>
 	<string name="text_group_details_updated" state="needs_review" hash="1016500852">جزئیات گروه به‌روز شد</string>
 	<string name="dialog_title_sd_card_ringtone_bugged_android_9" state="needs_review" hash="-1202187296">مشکل صدای اعلان اندروید ۹</string>
 	<string name="dialog_message_sd_card_ringtone_bugged_android_9" state="needs_review" hash="1449296723">متاسفیم، Olvid قادر به استفاده از صدای اعلان انتخابی شما نیست. این صدا غیرفعال شده است. یک اشکال در اندروید 9 مانع استفاده از صداهای اعلان سفارشی در برنامه‌هایی می‌شود که دسترسی به حافظه خارجی/کارت SD را درخواست نمی‌کنند.\n\nتوصیه می‌کنیم یک صدای اعلان استاندارد را انتخاب کنید. تا رفع این مشکل، اعلان‌های شما بی‌صدا خواهند ماند!</string>
@@ -1014,6 +1025,10 @@
 	<string name="dialog_title_available_space_low" state="needs_review" hash="610249394">فضای ذخیره‌سازی دستگاه تقریبا پر است</string>
 	<string name="dialog_message_available_space_low" state="needs_review" hash="78499573">فضای ذخیره‌سازی دستگاه شما در حال اتمام است. هنگام دریافت یا ارسال فایل با Olvid، انتظار خطاهای غیرمنتظره را داشته باشید.\n\nاحتمالاً اکنون زمان مناسبی برای آزاد کردن فضای دستگاه شماست.</string>
 	<string name="button_label_manage_storage" state="needs_review" hash="-918485427">مدیریت حافظه</string>
+	<string name="label_storage_all_files" state="needs_review" hash="1735747130">همه فایل‌ها</string>
+	<string name="label_storage_sent_by_me" state="needs_review" hash="640456592">توسط من ارسال شد</string>
+	<string name="label_storage_large_files" state="needs_review" hash="-257706820">بزرگتر از 5 مگابایت</string>
+	<string name="label_storage_discussions" state="needs_review" hash="491497248">گفتگوها</string>
 	<string name="pref_use_internal_image_viewer_title" state="needs_review" hash="1319400578">از نمایشگر تصویر داخلی استفاده کنید</string>
 	<string name="pref_use_internal_image_viewer_summary" state="needs_review" hash="1248137666">با فعال‌سازی این گزینه، با کلیک بر روی پیوست تصویر، آن در نمایشگر داخلی باز می‌شود. در غیر این صورت، برنامه پیش‌فرض تصویر دستگاه شما استفاده خواهد شد.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">نمایش تصویر امکان‌پذیر نیست</string>
@@ -1167,7 +1182,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">حذف پروفایل، تمام اطلاعات مربوط به این پروفایل را از دستگاه شما پاک می‌کند. این شامل مخاطبین و گروه‌های شما و محتوای تمام گفتگوهای شما (پیام‌ها و پیوست‌ها) برای این پروفایل است.\n\n<b>این تنها پروفایل قابل مشاهده شماست و اگر پروفایل مخفی دیگری داشته باشید، همزمان حذف خواهند شد.</b>\n\nبرای انتخاب نحوه حذف این پروفایل، روی \"بعدی\" کلیک کنید.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">حذف پروفایل در <b>همه جا</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">\"%1$s\" را اینجا تایپ کنید تا ادامه دهید</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">برای ادامه، \\"%1$s\\" را در اینجا وارد کنید.</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">اگر انتخاب کنید پروفایل خود را <b>همه‌جا</b> حذف کنید:\n - این پروفایل به‌صورت محلی <b>و</b> از دستگاه‌های مخاطبین شما حذف خواهد شد\n - از گروه‌هایی که به آن‌ها پیوسته‌اید خارج خواهید شد\n - گروه‌هایی که مدیریت می‌کنید منحل خواهند شد\n\nاگر پروفایل خود را <b>همه‌جا</b> حذف نکنید، فقط به‌صورت محلی از دستگاه شما حذف خواهد شد. مگر اینکه قصد بازگردانی پشتیبان‌گیری روی دستگاه دیگری را داشته باشید، ممکن است مخاطبین شما همچنان سعی کنند برای شما پیام بفرستند و متوجه نشوند که این پیام‌ها قابل تحویل نیست.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">به نظر می‌رسد پروفایل فعلی شما غیرفعال است، به این معنی که احتمالاً آن را به دستگاه دیگری منتقل کرده‌اید. اگر قصد دارید از این پروفایل روی دستگاه دیگر خود به استفاده ادامه دهید، می‌توانید آن را از اینجا با خیال راحت حذف کنید.\n\nاگر دیگر قصد استفاده از این پروفایل را ندارید، ابتدا باید آن را روی این دستگاه دوباره فعال کنید، منتظر بازسازی کانال‌های امن با مخاطبین خود باشید و سپس این پروفایل را با انتخاب گزینه «حذف همه‌جا» حذف کنید.</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">پروفایل شما در حال حاضر روی چندین دستگاه فعال است.\n\nاگر انتخاب کنید پروفایل خود را <b>همه‌جا</b> حذف کنید:\n - از تمام دستگاه‌های شما <b>و</b> از دستگاه‌های مخاطبین شما حذف خواهد شد\n - از گروه‌هایی که به آن‌ها پیوسته‌اید خارج خواهید شد\n - گروه‌هایی که مدیریت می‌کنید منحل خواهند شد\n\nاگر پروفایل خود را <b>همه‌جا</b> حذف نکنید، فقط به صورت محلی از دستگاه شما حذف می‌شود و می‌توانید به طور معمول از آن در دستگاه‌های دیگر خود استفاده کنید.</string>
@@ -1251,9 +1266,6 @@
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">گروه‌ها v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
 	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">از ایموجی‌های متحرک استفاده کنید (در صورت وجود)</string>
-	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">فضای ذخیره‌سازی پروفایل</string>
-	<string name="label_photos" state="needs_review" hash="1539779714">عکس‌ها</string>
-	<string name="label_videos" state="needs_review" hash="-101497740">ویدیوها</string>
 	<string name="label_audio" state="needs_review" hash="-779820608">صوتی</string>
 	<string name="label_other" state="needs_review" hash="-543765264">سایر</string>
 	<string name="label_all" state="needs_review" hash="752498555">همه</string>
@@ -1268,14 +1280,7 @@
 	<string name="menu_action_sort_date_alt" state="needs_review" hash="646746321">مرتب‌سازی بر اساس تاریخ (قدیمی‌ترین اول)</string>
 	<string name="menu_action_sort_size_alt" state="needs_review" hash="1986077505">مرتب‌سازی بر اساس اندازه (کوچک‌ترین اول)</string>
 	<string name="menu_action_sort_name_alt" state="needs_review" hash="-802793419">مرتب‌سازی بر اساس نام (معکوس)</string>
-	<string name="text_sent_by_xx" state="needs_review" hash="248848108">ارسال شده توسط %1$s</string>
 	<string name="text_unknown_sender" state="needs_review" hash="1913018414">فرستنده ناشناس</string>
-	<string name="text_sent_to_xx" state="needs_review" hash="918571953">ارسال شده به %1$s</string>
-	<string name="text_draft_for_xx" state="needs_review" hash="2063814784">پیش‌نویس برای %1$s</string>
-	<string name="label_loading_attachments" state="needs_review" hash="856026474">در حال بارگذاری پیوست‌ها…</string>
-	<string name="dialog_message_delete_attachment_for_many_messages" state="needs_review" hash="1800265017">فایل پیوست %2$s به %1$d پیام متفاوت پیوست شده است. آیا می‌خواهید فقط این فایل را حذف کنید یا آن را از همه %1$d پیام حذف کنید؟\nاین اقدام قابل برگشت نیست.</string>
-	<string name="button_label_delete_one" state="needs_review" hash="-1916938532">حذف یک مورد</string>
-	<string name="button_label_delete_all" state="needs_review" hash="-985749327">حذف همه %1$d</string>
 	<string name="dialog_title_save_selected_attachments" state="needs_review" hash="-405982081">ذخیره پیوست‌های انتخاب‌شده</string>
 	<string name="pref_category_contacts_and_groups" state="needs_review" hash="1531647661">مخاطبین و گروه‌ها</string>
 	<string name="pref_auto_join_groups_title" state="needs_review" hash="29822089">پذیرش خودکار دعوت‌نامه‌های گروهی…</string>
@@ -1637,7 +1642,7 @@
 	<string name="button_label_remove" state="needs_review" hash="1097276765">حذف کردن</string>
 	<string name="menu_action_remove_expiration" state="needs_review" hash="-156931599">این دستگاه را فعال نگه دارید</string>
 	<string name="dialog_title_set_unexpiring_device" state="needs_review" hash="-1488033285">حفظ دستگاه فعال</string>
-	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1293464179">شما در حال حاضر مجوز استفاده از چند دستگاه فعال را ندارید. اگر مایل به خرید چنین مجوزی هستید، این پنجره را ببندید و دکمه \"مشاهده طرح‌های اشتراک\" را در زیر فشار دهید.\n\nبرای ادامه و حفظ دستگاه «%1$s» فعال، دستگاه «%2$s» به جای آن غیرفعال خواهد شد. آیا مایل به ادامه هستید؟</string>
+	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1457083107">در حال حاضر شما لایسنس لازم برای استفاده از چندین دستگاه فعال را ندارید. اگر مایل به خرید چنین لایسنس هستید، این پنجره را ببندید و روی دکمه «مشاهده طرح‌های اشتراک» در زیر کلیک کنید.\n\nبرای ادامه و حفظ دستگاه «%1$s» به عنوان دستگاه فعال، دستگاه «%2$s» به جای آن غیرفعال خواهد شد. آیا می‌خواهید ادامه دهید؟</string>
 	<string name="dialog_title_remove_background_image" state="needs_review" hash="488158841">آیا تصویر پس‌زمینه فعلی را حذف کنم؟</string>
 	<string name="dialog_title_introducing_markdown" state="needs_review" hash="175399162">معرفی فرمت‌بندی پیام‌ها!</string>
 	<string name="dialog_message_introducing_markdown" state="needs_review" hash="1738415115">اولوید اکنون به شما امکان می‌دهد پیام‌های خود را با استفاده از نحو ماردون فرمت کنید 🎨!\n\nدر **<b>بولد</b>**, *<i>ایتالیک</i>*, # <big>سرتیترها</big> بنویسید و غیره.\n\nلیست تمام تگ‌های پشتیبانی‌شده 🦍 را در اینجا بیابید:\nhttps://www.olvid.io/faq/format-your-messages/</string>
@@ -2042,6 +2047,7 @@
 	<string name="button_label_this_way" state="needs_review" hash="747183939">این طرف</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">کد کپی شد</string>
 	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">لطفاً انتخاب کنید چه کسی را به این گروه اضافه کنید.</string>
+	<string name="explanation_choose_contact_introduction" state="needs_review" hash="1113777517">لطفاً انتخاب کنید که %1$s را به چه کسی معرفی کنید.</string>
 	<string name="label_group_administration" state="needs_review" hash="871355986">مدیریت گروه</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">تماس مسدود شد</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid اجازه شروع تماس با بیش از %1$d نفر را نمی‌دهد.</string>
@@ -2156,6 +2162,7 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">در حال مذاکره</string>
 	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">انتقال</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">انتقال با موفقیت انجام شد</string>
+	<string name="history_transfer_step_processing_buffered_data" state="needs_review" hash="-1359029280">در حال پردازش داده‌های دریافتی</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">انتقال انجام نشد</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">انتقال تاریخچه چت</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">انتقال انجام نشد. ممکن است انتقال دیگری در حال انجام باشد؟</string>
@@ -2274,7 +2281,8 @@
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">در حال وارد کردن</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">تحلیل محتوا</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">تجزیه و تحلیل گفتگوهای صادر شده</string>
-	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">هنگام بارگیری فایل استایل OpenStreetMap خطایی رخ داد.</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">هنگام بارگیری فایل استایل OpenStreetMap خطایی رخ داد.</string>
 	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">اشتراک درون‌برنامه‌ای در دسترس نیست</string>
 	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">نسخه‌ای از Olvid که نصب کرده‌اید، شامل کتابخانه صورتحساب گوگل نیست و از خریدهای درون‌برنامه‌ای پشتیبانی نمی‌کند.\n\nبرای اطلاعات بیشتر، لطفاً از طریق **feedback@olvid.io** با ما تماس بگیرید.</string>
+	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">لغو بارگذاری</string>
 </resources>

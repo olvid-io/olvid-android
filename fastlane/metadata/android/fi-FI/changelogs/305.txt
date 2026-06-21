@@ -1,0 +1,4 @@
+- Useiden sovelluksen osien uudelleensuunnittelu: yhteystiedot, profiili, tallennustilan hallinta jne.
+- Kalenterinäkymä lisätty keskusteluun, jotta voit siirtyä nopeasti tiettyyn ajankohtaan.
+- Lisätty sisäinen "käynnissä oleva toisto" -ohjain, jolla voit helposti vaihtaa ääniviestien välillä. Joitain parannuksia ääniviestien toistoliikkeisiin.
+- Lisätty mahdollisuus peruuttaa liitteen lähetys.

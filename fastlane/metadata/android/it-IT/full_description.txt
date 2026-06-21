@@ -1,0 +1,19 @@
+Olvid è la prima applicazione di messaggistica istantanea privata per tutti. Invia messaggi, foto, file ed effettua chiamate vocali e video sicure.
+
+
+Cos'è un'app di messaggistica "privata"?
+
+È un'app di messaggistica:
+- che non ti impone nuovi contatti. Sei tu a decidere con chi vuoi comunicare. Olvid offre diversi modi per entrare in contatto con altri utenti Olvid, sia di persona che a distanza.
+- che non richiede dati personali. Olvid non ti chiederà il tuo numero di telefono o la tua email. A differenza della tua precedente app di messaggistica, Olvid non richiederà mai l'accesso alla tua rubrica.
+- su cui non riceverai mai messaggi non richiesti o provenienti da fonti sconosciute.
+- in cui tutte le comunicazioni beneficiano della stessa sicurezza e privacy di una conversazione reale a porte chiuse. Olvid offre la crittografia end-to-end e l'autenticazione end-to-end per impostazione predefinita, sempre, per tutto ciò che invii o ricevi.
+
+Olvid ti garantisce spazi sicuri, protetti da aggressioni esterne, che ti isolano dal rumore digitale e dalla violenza degli altri social network. Crea gruppi con la tua famiglia, i tuoi amici e i tuoi collaboratori chiave. Niente spam, niente pubblicità. Riprendi finalmente il controllo completo delle tue comunicazioni.
+
+Olvid è stata progettata per essere il luogo migliore in cui scambiare opinioni su argomenti importanti, con le persone che contano per te.
+
+
+Olvid - Tecnologia
+
+Al centro di Olvid, un "motore crittografico", frutto di anni di ricerca e sviluppo, consente di dimostrare matematicamente l'integrità, la riservatezza e l'anonimato delle tue comunicazioni.

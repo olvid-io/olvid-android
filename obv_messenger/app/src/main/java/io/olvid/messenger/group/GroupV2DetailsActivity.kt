@@ -31,15 +31,23 @@ import android.view.MotionEvent
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -54,10 +62,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -67,6 +76,7 @@ import androidx.core.content.FileProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.containers.GroupV2.Identifier
 import io.olvid.engine.encoder.DecodingException
@@ -76,7 +86,6 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.BytesKey
-import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.onBackPressed
@@ -88,7 +97,6 @@ import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
 import io.olvid.messenger.designsystem.components.OlvidTopAppBar
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
-import io.olvid.messenger.fragments.FullScreenImageFragment
 import io.olvid.messenger.fragments.dialog.EditNameAndPhotoDialogFragment
 import io.olvid.messenger.fragments.dialog.MultiCallStartDialogFragment
 import io.olvid.messenger.group.components.GroupUpdatesListener
@@ -102,6 +110,7 @@ import io.olvid.messenger.group.components.groupDetails
 import io.olvid.messenger.group.components.groupType
 import io.olvid.messenger.group.components.inviteGroupMembers
 import io.olvid.messenger.group.components.removeMembers
+import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.openid.KeycloakManager
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoActivity
 import io.olvid.messenger.webrtc.WebrtcCallService
@@ -149,28 +158,27 @@ class GroupV2DetailsActivity : LockableActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+            statusBarStyle = SystemBarStyle.auto(
+                Color.Transparent.toArgb(),
+                Color.Transparent.toArgb()
+            ),
+            navigationBarStyle = SystemBarStyle.auto(
+                Color.Transparent.toArgb(),
+                ContextCompat.getColor(this, R.color.blackOverlay)
+            )
         )
 
         super.onCreate(savedInstanceState)
         onBackPressed {
-            val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
-                FULL_SCREEN_IMAGE_FRAGMENT_TAG
-            )
-            if (fullScreenImageFragment != null) {
-                supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(0, R.anim.fade_out)
-                    .remove(fullScreenImageFragment)
-                    .commit()
+            if (groupDetailsViewModel.fullScreenPhotoUrl != null) {
+                groupDetailsViewModel.fullScreenPhotoUrl = null
             } else {
                 finish()
             }
         }
         handleIntent(intent)
 
-        setContentView(R.layout.activity_group_v2_details)
-        findViewById<ComposeView>(R.id.compose_view)?.setContent {
+        setContent {
             GroupUpdatesListener(
                 groupDetailsViewModel = groupDetailsViewModel,
                 onUpdate = { detailsAndPhoto ->
@@ -191,198 +199,234 @@ class GroupV2DetailsActivity : LockableActivity() {
             }
             val navController = rememberNavController()
             val currentDestination by navController.currentBackStackEntryAsState()
-            Scaffold(
-                containerColor = colorResource(R.color.almostWhite),
-                contentColor = colorResource(R.color.almostBlack),
-                topBar = {
-                    OlvidTopAppBar(
-                        titleText = when (currentDestination?.destination?.route) {
-                            Routes.GROUP_DETAILS -> stringResource(R.string.activity_title_group_details)
-                            Routes.FULL_GROUP_MEMBERS -> stringResource(R.string.label_group_members)
-                            Routes.INVITE_GROUP_MEMBERS -> stringResource(R.string.button_label_invite_members)
-                            Routes.EDIT_GROUP_DETAILS -> stringResource(R.string.dialog_title_edit_group_details)
-                            Routes.EDIT_GROUP_MEMBERS -> stringResource(R.string.button_label_edit_group_members)
-                            Routes.ADD_GROUP_MEMBERS -> stringResource(R.string.button_label_add_members)
-                            Routes.REMOVE_GROUP_MEMBERS -> stringResource(R.string.button_label_remove_members)
-                            Routes.EDIT_ADMINS -> stringResource(R.string.label_group_choose_admins)
-                            Routes.GROUP_TYPE -> stringResource(R.string.label_group_type)
-                            else -> stringResource(R.string.activity_title_group_details)
-                        },
-                        onBackPressed = onBackPressedDispatcher::onBackPressed,
-                        actions = {
-                            when (currentDestination?.destination?.route) {
-                                Routes.GROUP_DETAILS -> {
-                                    IconButton(onClick = {
-                                        if (groupAdmin) {
-                                            navController.navigate(Routes.EDIT_GROUP_DETAILS)
-                                        } else {
-                                            groupDetailsViewModel.group.value?.let {
-                                                val editNameAndPhotoDialogFragment =
-                                                    EditNameAndPhotoDialogFragment.newInstance(
-                                                        this@GroupV2DetailsActivity,
-                                                        it
-                                                    )
-                                                editNameAndPhotoDialogFragment.show(
-                                                    supportFragmentManager,
-                                                    "dialog"
-                                                )
-                                            }
-                                        }
-                                    }) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_pencil),
-                                            tint = colorResource(R.color.almostBlack),
-                                            contentDescription = stringResource(R.string.menu_action_edit_group_details)
-                                        )
-                                    }
-                                    var mainMenuOpened by remember {
-                                        mutableStateOf(false)
-                                    }
-                                    IconButton(onClick = {
-                                        mainMenuOpened = true
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Default.MoreVert,
-                                            tint = colorResource(R.color.almostBlack),
-                                            contentDescription = "menu"
-                                        )
-                                        OlvidDropdownMenu(
-                                            expanded = mainMenuOpened,
-                                            onDismissRequest = { mainMenuOpened = false }
-                                        ) {
-                                            getGroupMenu().forEach { menuItem ->
-                                                OlvidDropdownMenuItem(
-                                                    text = stringResource(menuItem.label),
-                                                    onClick = {
-                                                        mainMenuOpened = false
-                                                        menuItem.onClick()
-                                                    },
-                                                    textColor = if (menuItem.action in listOf(
-                                                            MenuItem.Action.LEAVE,
-                                                            MenuItem.Action.DISBAND
+            SharedTransitionLayout {
+                Scaffold(
+                    containerColor = colorResource(R.color.almostWhite),
+                    contentColor = colorResource(R.color.almostBlack),
+                    topBar = {
+                        OlvidTopAppBar(
+                            titleText = when (currentDestination?.destination?.route) {
+                                Routes.GROUP_DETAILS -> stringResource(R.string.activity_title_group_details)
+                                Routes.FULL_GROUP_MEMBERS -> stringResource(R.string.label_group_members)
+                                Routes.INVITE_GROUP_MEMBERS -> stringResource(R.string.button_label_invite_members)
+                                Routes.EDIT_GROUP_DETAILS -> stringResource(R.string.dialog_title_edit_group_details)
+                                Routes.EDIT_GROUP_MEMBERS -> stringResource(R.string.button_label_edit_group_members)
+                                Routes.ADD_GROUP_MEMBERS -> stringResource(R.string.button_label_add_members)
+                                Routes.REMOVE_GROUP_MEMBERS -> stringResource(R.string.button_label_remove_members)
+                                Routes.EDIT_ADMINS -> stringResource(R.string.label_group_choose_admins)
+                                Routes.GROUP_TYPE -> stringResource(R.string.label_group_type)
+                                else -> stringResource(R.string.activity_title_group_details)
+                            },
+                            onBackPressed = onBackPressedDispatcher::onBackPressed,
+                            actions = {
+                                when (currentDestination?.destination?.route) {
+                                    Routes.GROUP_DETAILS -> {
+                                        IconButton(onClick = {
+                                            if (groupAdmin) {
+                                                navController.navigate(Routes.EDIT_GROUP_DETAILS)
+                                            } else {
+                                                groupDetailsViewModel.group.value?.let {
+                                                    val editNameAndPhotoDialogFragment =
+                                                        EditNameAndPhotoDialogFragment.newInstance(
+                                                            this@GroupV2DetailsActivity,
+                                                            it
                                                         )
+                                                    editNameAndPhotoDialogFragment.show(
+                                                        supportFragmentManager,
+                                                        "dialog"
                                                     )
-                                                        colorResource(R.color.red)
-                                                    else
-                                                        null
-                                                )
+                                                }
                                             }
-                                        }
-                                    }
-                                }
-
-                                Routes.EDIT_ADMINS -> {
-                                    if (groupDetailsViewModel.isEditingAdminsAfterTypeChange.not()) {
-                                        IconButton(
-                                            onClick = {
-                                                groupDetailsViewModel.isEditingAdmins =
-                                                    !groupDetailsViewModel.isEditingAdmins
-                                            }) {
+                                        }) {
                                             Icon(
-                                                painter = painterResource(id = if (groupDetailsViewModel.isEditingAdmins) R.drawable.ic_close else R.drawable.ic_pencil),
-                                                tint = colorResource(id = R.color.almostBlack),
-                                                contentDescription = stringResource(R.string.label_group_choose_admins)
+                                                painter = painterResource(id = R.drawable.ic_pencil),
+                                                tint = colorResource(R.color.almostBlack),
+                                                contentDescription = stringResource(R.string.menu_action_edit_group_details)
                                             )
                                         }
+                                        var mainMenuOpened by remember {
+                                            mutableStateOf(false)
+                                        }
+                                        IconButton(onClick = {
+                                            mainMenuOpened = true
+                                        }) {
+                                            Icon(
+                                                imageVector = Icons.Default.MoreVert,
+                                                tint = colorResource(R.color.almostBlack),
+                                                contentDescription = "menu"
+                                            )
+                                            OlvidDropdownMenu(
+                                                expanded = mainMenuOpened,
+                                                onDismissRequest = { mainMenuOpened = false }
+                                            ) {
+                                                getGroupMenu().forEach { menuItem ->
+                                                    OlvidDropdownMenuItem(
+                                                        text = stringResource(menuItem.label),
+                                                        onClick = {
+                                                            mainMenuOpened = false
+                                                            menuItem.onClick()
+                                                        },
+                                                        textColor = if (menuItem.action in listOf(
+                                                                MenuItem.Action.LEAVE,
+                                                                MenuItem.Action.DISBAND
+                                                            )
+                                                        )
+                                                            colorResource(R.color.red)
+                                                        else
+                                                            null
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Routes.EDIT_ADMINS -> {
+                                        if (groupDetailsViewModel.isEditingAdminsAfterTypeChange.not()) {
+                                            IconButton(
+                                                onClick = {
+                                                    groupDetailsViewModel.isEditingAdmins =
+                                                        !groupDetailsViewModel.isEditingAdmins
+                                                }) {
+                                                Icon(
+                                                    painter = painterResource(id = if (groupDetailsViewModel.isEditingAdmins) R.drawable.ic_close else R.drawable.ic_pencil),
+                                                    tint = colorResource(id = R.color.almostBlack),
+                                                    contentDescription = stringResource(R.string.label_group_choose_admins)
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        }
-                    )
-                }) { contentPadding ->
-                Box(
-                    modifier = Modifier
-                        .padding(top = contentPadding.calculateTopPadding())
-                        .cutoutHorizontalPadding()
-                        .systemBarsHorizontalPadding()
-                        .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
-                ) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = Routes.GROUP_DETAILS
+                        )
+                    }) { contentPadding ->
+                    Box(
+                        modifier = Modifier
+                            .padding(top = contentPadding.calculateTopPadding())
+                            .cutoutHorizontalPadding()
+                            .systemBarsHorizontalPadding()
+                            .consumeWindowInsets(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
                     ) {
-                        groupDetails(
-                            groupV2DetailsViewModel = groupDetailsViewModel,
-                            call = ::call,
-                            imageClick = ::onPhotoClicked,
-                            onFullMembersList = { navController.navigate(Routes.FULL_GROUP_MEMBERS) },
-                            onInviteMembers = { navController.navigate(Routes.INVITE_GROUP_MEMBERS) },
-                            onEditMembers = { navController.navigate(Routes.EDIT_GROUP_MEMBERS) },
-                            onGroupType = { navController.navigate(Routes.GROUP_TYPE) },
-                            onEditAdmins = {
-                                groupDetailsViewModel.isEditingAdmins = false
-                                groupDetailsViewModel.isEditingAdminsAfterTypeChange = false
-                                navController.navigate(Routes.EDIT_ADMINS)
-                            }
-                        )
-                        fullGroupMembers(
-                            groupV2DetailsViewModel = groupDetailsViewModel,
-                            onBack = { navController.popBackStack() }
-                        )
-                        inviteGroupMembers(
-                            groupV2DetailsViewModel = groupDetailsViewModel,
-                            onBack = { navController.popBackStack() }
-                        )
-                        editGroupDetails(
-                            groupV2DetailsViewModel = groupDetailsViewModel,
-                            editGroupDetailsViewModel = ownedGroupDetailsViewModel,
-                            onTakePicture = ::onTakePicture,
-                            onBack = { navController.popBackStack() },
-                            onValidate = {
-                                ownedGroupDetailsViewModel.publish()
-                                navController.popBackStack()
-                            }
-                        )
-                        editGroupMembers(
-                            groupV2DetailsViewModel = groupDetailsViewModel,
-                            onAddMembers = { navController.navigate(Routes.ADD_GROUP_MEMBERS) },
-                            onRemoveMembers = { navController.navigate(Routes.REMOVE_GROUP_MEMBERS) },
-                        )
-                        addMembers(
-                            groupV2DetailsViewModel = groupDetailsViewModel,
-                            onValidate = { selectedContacts ->
-                                groupDetailsViewModel.startEditingMembers()
-                                groupDetailsViewModel.membersAdded(selectedContacts.mapNotNull { it.contact })
-                                groupDetailsViewModel.publishGroupEdits()
-                                navController.popBackStack(
-                                    route = Routes.GROUP_DETAILS,
-                                    inclusive = false
+                        NavHost(
+                            navController = navController,
+                            startDestination = Routes.GROUP_DETAILS
+                        ) {
+                            groupDetails(
+                                groupV2DetailsViewModel = groupDetailsViewModel,
+                                call = ::call,
+                                imageClick = ::onPhotoClicked,
+                                onFullMembersList = { navController.navigate(Routes.FULL_GROUP_MEMBERS) },
+                                onInviteMembers = { navController.navigate(Routes.INVITE_GROUP_MEMBERS) },
+                                onEditMembers = { navController.navigate(Routes.EDIT_GROUP_MEMBERS) },
+                                onGroupType = { navController.navigate(Routes.GROUP_TYPE) },
+                                onEditAdmins = {
+                                    groupDetailsViewModel.isEditingAdmins = false
+                                    groupDetailsViewModel.isEditingAdminsAfterTypeChange = false
+                                    navController.navigate(Routes.EDIT_ADMINS)
+                                },
+                                sharedTransitionScope = this@SharedTransitionLayout
+                            )
+                            fullGroupMembers(
+                                groupV2DetailsViewModel = groupDetailsViewModel,
+                                onBack = { navController.popBackStack() }
+                            )
+                            inviteGroupMembers(
+                                groupV2DetailsViewModel = groupDetailsViewModel,
+                                onBack = { navController.popBackStack() }
+                            )
+                            editGroupDetails(
+                                groupV2DetailsViewModel = groupDetailsViewModel,
+                                editGroupDetailsViewModel = ownedGroupDetailsViewModel,
+                                onTakePicture = ::onTakePicture,
+                                onBack = { navController.popBackStack() },
+                                onValidate = {
+                                    ownedGroupDetailsViewModel.publish()
+                                    navController.popBackStack()
+                                }
+                            )
+                            editGroupMembers(
+                                groupV2DetailsViewModel = groupDetailsViewModel,
+                                onAddMembers = { navController.navigate(Routes.ADD_GROUP_MEMBERS) },
+                                onRemoveMembers = { navController.navigate(Routes.REMOVE_GROUP_MEMBERS) },
+                            )
+                            addMembers(
+                                groupV2DetailsViewModel = groupDetailsViewModel,
+                                onValidate = { selectedContacts ->
+                                    groupDetailsViewModel.startEditingMembers()
+                                    groupDetailsViewModel.membersAdded(selectedContacts.mapNotNull { it.contact })
+                                    groupDetailsViewModel.publishGroupEdits()
+                                    navController.popBackStack(
+                                        route = Routes.GROUP_DETAILS,
+                                        inclusive = false
+                                    )
+                                }
+                            )
+                            removeMembers(
+                                groupV2DetailsViewModel = groupDetailsViewModel,
+                                onValidate = {
+                                    groupDetailsViewModel.publishGroupEdits()
+                                    navController.popBackStack(
+                                        route = Routes.GROUP_DETAILS,
+                                        inclusive = false
+                                    )
+                                }
+                            )
+                            editAdmins(
+                                groupV2DetailsViewModel = groupDetailsViewModel,
+                                onValidate = {
+                                    groupDetailsViewModel.publishGroupEdits()
+                                    navController.popBackStack(
+                                        route = Routes.GROUP_DETAILS,
+                                        inclusive = false
+                                    )
+                                }
+                            )
+                            groupType(
+                                groupV2DetailsViewModel = groupDetailsViewModel,
+                                validationLabel = getString(R.string.button_label_publish),
+                                onSelectAdmins = {
+                                    groupDetailsViewModel.isEditingAdmins = true
+                                    groupDetailsViewModel.isEditingAdminsAfterTypeChange = true
+                                    navController.navigate(Routes.EDIT_ADMINS)
+                                },
+                                onBack = { navController.popBackStack() },
+                                onValidate = {
+                                    groupDetailsViewModel.publishGroupTypeChanged()
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                    }
+                }
+                AnimatedVisibility(
+                    visible = groupDetailsViewModel.fullScreenPhotoUrl != null,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(colorResource(R.color.blackDarkOverlay))
+                            .clickable(
+                                indication = null,
+                                interactionSource = null,
+                            ) { groupDetailsViewModel.fullScreenPhotoUrl = null },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AsyncImage(
+                            model = groupDetailsViewModel.fullScreenPhotoUrl?.let {
+                                App.absolutePathFromRelative(
+                                    it
                                 )
-                            }
-                        )
-                        removeMembers(
-                            groupV2DetailsViewModel = groupDetailsViewModel,
-                            onValidate = {
-                                groupDetailsViewModel.publishGroupEdits()
-                                navController.popBackStack(
-                                    route = Routes.GROUP_DETAILS,
-                                    inclusive = false
-                                )
-                            }
-                        )
-                        editAdmins(
-                            groupV2DetailsViewModel = groupDetailsViewModel,
-                            onValidate = {
-                                groupDetailsViewModel.publishGroupEdits()
-                                navController.popBackStack(
-                                    route = Routes.GROUP_DETAILS,
-                                    inclusive = false
-                                )
-                            }
-                        )
-                        groupType(
-                            groupV2DetailsViewModel = groupDetailsViewModel,
-                            validationLabel = getString(R.string.button_label_publish),
-                            onSelectAdmins = {
-                                groupDetailsViewModel.isEditingAdmins = true
-                                groupDetailsViewModel.isEditingAdminsAfterTypeChange = true
-                                navController.navigate(Routes.EDIT_ADMINS)
                             },
-                            onBack = { navController.popBackStack() },
-                            onValidate = {
-                                groupDetailsViewModel.publishGroupTypeChanged()
-                                navController.popBackStack()
-                            }
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .sharedElement(
+                                    rememberSharedContentState(key = "profile-photo"),
+                                    animatedVisibilityScope = this@AnimatedVisibility
+                                ),
+                            contentScale = ContentScale.Fit
                         )
                     }
                 }
@@ -471,12 +515,7 @@ class GroupV2DetailsActivity : LockableActivity() {
 
     fun onPhotoClicked(photoUrl: String?) {
         photoUrl?.takeIf { it.isNotEmpty() }?.let {
-            val fullScreenImageFragment =
-                FullScreenImageFragment.newInstance(App.absolutePathFromRelative(photoUrl))
-            supportFragmentManager.beginTransaction()
-                .setCustomAnimations(R.anim.fade_in, 0)
-                .replace(R.id.overlay, fullScreenImageFragment, FULL_SCREEN_IMAGE_FRAGMENT_TAG)
-                .commit()
+            groupDetailsViewModel.fullScreenPhotoUrl = it
         }
     }
 
@@ -696,14 +735,8 @@ class GroupV2DetailsActivity : LockableActivity() {
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         if (event.actionMasked == MotionEvent.ACTION_UP) {
-            val fullScreenImageFragment = supportFragmentManager.findFragmentByTag(
-                FULL_SCREEN_IMAGE_FRAGMENT_TAG
-            )
-            if (fullScreenImageFragment != null) {
-                supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(0, R.anim.fade_out)
-                    .remove(fullScreenImageFragment)
-                    .commit()
+            if (groupDetailsViewModel.fullScreenPhotoUrl != null) {
+                groupDetailsViewModel.fullScreenPhotoUrl = null
             }
         }
         return super.dispatchTouchEvent(event)
@@ -842,7 +875,6 @@ class GroupV2DetailsActivity : LockableActivity() {
     companion object {
         const val BYTES_OWNED_IDENTITY_INTENT_EXTRA = "bytes_owned_identity"
         const val BYTES_GROUP_IDENTIFIER_INTENT_EXTRA = "group_identifier"
-        const val FULL_SCREEN_IMAGE_FRAGMENT_TAG = "full_screen_image"
         const val REQUEST_CODE_PERMISSION_CAMERA = 8511
         const val REQUEST_CODE_CHOOSE_IMAGE = 8596
         const val REQUEST_CODE_TAKE_PICTURE = 8597

@@ -1,0 +1,1 @@
+- S'ha corregit un problema amb el processament de registres Java que no funcionava correctament a l'última versió d'Android Studio.

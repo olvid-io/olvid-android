@@ -105,6 +105,9 @@ class DiscussionViewModel : ViewModel(), DiscussionDelegate {
     var canEdit by mutableStateOf<Boolean?>(null)
     var fullScreenPhotoUrl by mutableStateOf<String?>(null)
 
+    var showCalendarView by mutableStateOf(false)
+    var calendarInitialDateMillis by mutableStateOf<Long?>(null)
+
     @JvmField
     var messageIdsToForward: List<Long>? = null
     val discussionIdLiveData = MutableLiveData<Long?>()
@@ -267,6 +270,36 @@ class DiscussionViewModel : ViewModel(), DiscussionDelegate {
             db.messageDao()
                 .getCurrentlySharingLocationMessagesInDiscussionLiveData(discussionId)
         }
+
+    val galleryMediasGroupedByDate: LiveData<Map<Long, FyleAndStatus>> = discussionIdLiveData.switchMap { discussionId: Long? ->
+        if (discussionId == null) {
+            return@switchMap null
+        }
+        db.fyleMessageJoinWithStatusDao().getGalleryMediasForCalendar(discussionId).map { fyles ->
+            HashMap<Long, FyleAndStatus>().also {
+                fyles.forEach { fyleAndStatusTimestamped ->
+                    val localDate = java.time.Instant.ofEpochMilli(fyleAndStatusTimestamped.timestamp).atZone(java.time.ZoneId.of("UTC")).toLocalDate()
+                    val startOfDayUtc = localDate.atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
+                    it[startOfDayUtc] = fyleAndStatusTimestamped.fyleAndStatus
+                }
+            }
+        }
+    }
+
+    fun scrollToDate(dateMillis: Long) {
+        val discussionId = this.discussionId ?: return
+        App.runThread {
+            val messageId = AppDatabase.getInstance().messageDao()
+                .getFirstMessageIdOnOrAfterTimestamp(discussionId, dateMillis)
+                ?: AppDatabase.getInstance().messageDao()
+                    .getLastMessageIdOnOrBeforeTimestamp(discussionId, dateMillis)
+            if (messageId != null) {
+                Handler(Looper.getMainLooper()).post {
+                    scrollToMessageRequest = ScrollRequest(messageId = messageId, highlight = true, triggeredBySearch = true)
+                }
+            }
+        }
+    }
 
     var discussionId: Long?
         get() = discussionIdLiveData.value

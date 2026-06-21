@@ -1,0 +1,1 @@
+- Ispravljen problem s procesom "desugaringa" Java zapisa koji nije pravilno funkcionirao u najnovijoj verziji Android Studija.

@@ -1,0 +1,19 @@
+Olvid on esimene privaatne kiirsõnumside rakendus, mis on mõeldud kõigile. Saatke sõnumeid, fotosid, faile ning pidage turvalisi telefonikõnesid ja videokõnesid.
+
+
+Mis on „privaatne“ sõnumside rakendus?
+
+See on sõnumside rakendus:
+- mis ei suru teile peale uusi kontakte. Teil on kontroll: te otsustate, kellega soovite suhelda. Olvid pakub mitmeid viise, kuidas teiste Olvid kasutajatega ühendust võtta, kas näost näkku või kaugjuhtimisega.
+- mis ei nõua isiklikke andmeid. Olvid ei küsi teie telefoninumbrit ega e-posti aadressi. Erinevalt teie varasemast sõnumside rakendusest ei küsi Olvid kunagi teie aadressiraamatu juurdepääsu.
+- mille kaudu te ei saa kunagi soovimatuid sõnumeid või sõnumeid tundmatust allikast.
+- mille puhul kõik vestlused saavad kasu samast turvalisusest ja privaatsusest, mis on reaalses maailmas toimuv vestlus kinniste uste taga. Olvid pakub vaikimisi otsast-otsani krüpteerimist ja autentimist, alati, kõigi teie saadetud ja vastu võetud sõnumite jaoks.
+
+Olvid tagab teile turvalised ruumid, mis on kaitstud väliste rünnakute eest, mis isoleerivad teid teiste sotsiaalsete võrgustike digitaalsest mürast ja vägivallast. Looge grupid oma pere, sõprade ja peamiste kaastöölistega. Ei ole spämmi, ei ole reklaami. Saate lõpuks tagasi täieliku kontrolli oma suhtluse üle.
+
+Olvid on loodud selleks, et olla parim koht, kus arutada olulisi teemasid koos nende inimestega, kes teile olulised on.
+
+
+Olvid – tehnoloogia
+
+Olvid'i südamikus on „krüptograafiline mootor”, mis on mitmeaastase teadus- ja arendustegevuse tulemus ning mis võimaldab matemaatiliselt tõestada teie suhtluse terviklikkust, konfidentsiaalsust ja anonüümsust.

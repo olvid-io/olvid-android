@@ -1,0 +1,19 @@
+Olvid ir pirmā privātā tūlītējās ziņojumapmaiņas lietotne, kas paredzēta visiem. Sūtiet ziņas, fotoattēlus, failus un veiciet drošas telefona un video zvanus.
+
+
+Kas ir "privāta" ziņojumapmaiņas lietotne?
+
+Šī ir lietotne:
+- Kura neuzspiež jaunus kontaktus. Jūs kontrolējat, ar ko vēlaties sazināties. Olvid piedāvā vairākus veidus, kā sazināties ar citiem Olvid lietotājiem, gan klātienē, gan attālināti.
+- Kurai nav nepieciešami nekādi personas dati. Olvid neprasīs jūsu tālruņa numuru vai e-pasta adresi. Atšķirībā no jūsu iepriekšējās ziņojumapmaiņas lietotnes, Olvid nekad nepieprasīs piekļuvi jūsu adresāru.
+- Kurā jūs nekad nesaņemsiet nevēlamas ziņas vai ziņas no nezināma avota.
+- Kur visas sarunas ir aizsargātas ar tādu pašu drošību un konfidencialitāti kā reāla saruna aiz slēgtām durvīm. Olvid pēc noklusējuma nodrošina gal-uz-galu šifrēšanu un autentifikāciju, vienmēr, visām jūsu sūtītajām un saņemtajām ziņām.
+
+Olvid nodrošina jums drošu vidi, kas ir pasargāta no ārējiem uzbrukumiem, kas izolē jūs no digitālā trokšņa un citu sociālo tīklu vardarbības. Izveidojiet grupas ar savu ģimeni, draugiem un svarīgākajiem sadarbības partneriem. Nav nevēlamas reklāmas. Jūs beidzot atgūstat pilnu kontroli pār savu komunikāciju.
+
+Olvid ir izstrādāta, lai būtu labākā vieta, kur runāt par svarīgām lietām ar tiem, kas jums ir svarīgi.
+
+
+Olvid - Tehnoloģija
+
+Olvid pamatā ir "kriptogrāfiskais dzinējs", kas izstrādāts vairāku gadu pētījumu rezultātā, un tas ļauj matemātiski pierādīt jūsu komunikācijas integritāti, konfidencialitāti un anonimitāti.

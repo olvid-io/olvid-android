@@ -1,0 +1,19 @@
+Olvid je prva zasebna aplikacija za takojšnje sporočanje za vse. Pošiljajte sporočila, fotografije, datoteke in izvajajte varne telefonske in video klice.
+
+
+Kaj je "zasebna" aplikacija za sporočanje?
+
+To je aplikacija:
+- ki vam ne nalaga novih kontaktov. Sami ste v nadzoru: sami se odločate, s komu želite komunicirati. Olvid ponuja več načinov, kako povabiti druge uporabnike Olvid, osebno ali na daljavo.
+- ki ne zahteva nobenih osebnih podatkov. Olvid vas ne bo prosil za vašo telefonsko številko ali e-poštni naslov. Za razliko od vaše prejšnje aplikacije za sporočanje, Olvid nikoli ne bo zahteval dostopa do vašega imenika.
+- na kateri ne boste nikoli prejeli neželenih sporočil ali sporočil iz neznanega vira.
+- kjer vse izmenjave informacij uživajo enako raven varnosti in zasebnosti kot pogovor v resničnem življenju za zaprtimi vrati. Olvid ponuja šifriranje od konca do konca in avtentikacijo od konca do konca, vedno, za vse, kar pošiljate ali prejemate.
+
+Olvid vam zagotavlja varna okolja, ki so zaščitena pred zunanjimi vplivi, in vas izolira od digitalnega hrupa in nasilja drugih družbenih omrežij. Ustvarite skupine z družino, prijatelji in ključnimi sodelavci. Brez neželene pošte, brez oglasov. Končno ponovno prevzamete popoln nadzor nad svojo komunikacijo.
+
+Olvid je bil zasnovan, da bi bil najboljše mesto za izmenjavo informacij o temah, ki so pomembne, z ljudmi, ki so vam pomembni.
+
+
+Olvid - Tehnologija
+
+V središču Olvid je "kriptografski mehanizem", ki je rezultat večletnega raziskovanja in omogoča matematično dokazovanje celovitosti, zaupnosti in anonimnosti vaše komunikacije.

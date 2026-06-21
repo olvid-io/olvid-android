@@ -1,0 +1,1 @@
+- Aggiunto il supporto per 18 nuove lingue: bulgaro, bengali, estone, filippino, gujarati, indonesiano, kannada, lettone, lituano, malayalam, marathi, punjabi, serbo, swahili, tamil, telugu, thailandese e urdu.

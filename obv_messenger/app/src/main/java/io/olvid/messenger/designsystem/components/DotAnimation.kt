@@ -34,8 +34,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -75,7 +75,10 @@ fun DotAnimation(
             Box(
                 modifier = Modifier
                     .size(dotSize)
-                    .scale(scaleX = scaleX, scaleY = scaleY)
+                    .graphicsLayer {
+                        this.scaleX = scaleX
+                        this.scaleY = scaleY
+                    }
                     .background(color = dotColor, shape = CircleShape)
             )
         }

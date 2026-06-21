@@ -60,7 +60,7 @@ class MultiCallStartDialogFragment : DialogFragment() {
                 args.getByteArray(BYTES_GROUP_OWNER_AND_UID_OR_IDENTIFIER_KEY)
             groupV2 = false
 
-            args.getParcelableArrayList<BytesKey?>(BYTES_KEY_CONTACT_IDENTITIES_KEY)?.let {
+            args.getParcelableArrayList<BytesKey>(BYTES_KEY_CONTACT_IDENTITIES_KEY)?.let {
                 bytesContactIdentitiesHashSet.addAll(it)
             }
         }

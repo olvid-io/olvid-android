@@ -53,6 +53,7 @@ import io.olvid.messenger.services.AvailableSpaceHelper
 import io.olvid.messenger.services.MessageExpirationService
 import io.olvid.messenger.services.UnifiedForegroundService
 import io.olvid.messenger.settings.SettingsActivity
+import java.io.File
 import java.util.UUID
 import java.util.concurrent.Callable
 
@@ -459,7 +460,7 @@ fun handleNormalMessage(
             engine.runTaskOnEngineNotificationQueue(ProcessReadyToProcessOnHoldMessagesTask(engine, db, discussion.bytesOwnedIdentity))
 
             if (message.status == Message.STATUS_UNREAD) {
-                newUnreadMessage(message.discussionId, message.id, message.mentioned, message.timestamp)
+                newUnreadMessage(discussion.bytesOwnedIdentity, message.discussionId, message.id, message.mentioned, message.timestamp)
             }
             if (message.isLocationMessage && message.locationType == Message.LOCATION_TYPE_SHARE) {
                 newLocationSharingMessage(message.discussionId, message.id)
@@ -495,6 +496,10 @@ fun handleNormalMessage(
                             fyleId = fyle.id
                             // we know this attachment
                             if (fyle.isComplete) {
+                                val fileSize = runCatching {
+                                    File(App.absolutePathFromRelative(fyle.filePath!!)!!).length()
+                                }.getOrNull().takeIf { it != 0L } ?: attachment.expectedLength
+
                                 // the fyle is already complete, simply link it and cancel the download
                                 val fyleMessageJoinWithStatus = FyleMessageJoinWithStatus(
                                     fyle.id,
@@ -504,12 +509,12 @@ fun handleNormalMessage(
                                     attachmentMetadata.fileName,
                                     attachmentMetadata.type,
                                     FyleMessageJoinWithStatus.STATUS_COMPLETE,
-                                    attachment.expectedLength,
+                                     fileSize,
                                     attachment.messageIdentifier,
                                     attachment.number,
                                     imageResolution
                                 )
-                                if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                                if (messageSender.type == MessageSender.Type.OWNED_IDENTITY || attachment.isUploadCancelledByTheSender) {
                                     fyleMessageJoinWithStatus.wasOpened = true
                                 }
                                 db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus)
@@ -525,7 +530,7 @@ fun handleNormalMessage(
                                     attachment.url,
                                     attachmentMetadata.fileName,
                                     attachmentMetadata.type,
-                                    if (attachment.isDownloadRequested) FyleMessageJoinWithStatus.STATUS_DOWNLOADING else FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE,
+                                    if (attachment.isUploadCancelledByTheSender) FyleMessageJoinWithStatus.STATUS_FAILED else if (attachment.isDownloadRequested) FyleMessageJoinWithStatus.STATUS_DOWNLOADING else FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE,
                                     attachment.expectedLength,
                                     attachment.messageIdentifier,
                                     attachment.number,
@@ -535,11 +540,15 @@ fun handleNormalMessage(
                                     updateProgress(fyle.id, message.id, attachment.receivedLength.toFloat() / attachment.expectedLength, null)
                                 }
 
-                                if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                                if (messageSender.type == MessageSender.Type.OWNED_IDENTITY || attachment.isUploadCancelledByTheSender) {
                                     fyleMessageJoinWithStatus.wasOpened = true
                                 }
                                 db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus)
-                                fyleMessageJoinWithStatusesToDownload.add(fyleMessageJoinWithStatus)
+                                if (attachment.isUploadCancelledByTheSender) {
+                                    engine.markAttachmentForDeletion(attachment)
+                                } else {
+                                    fyleMessageJoinWithStatusesToDownload.add(fyleMessageJoinWithStatus)
+                                }
                             }
                         } else {
                             // the file is unknown, create it and a STATUS_DOWNLOADABLE FyleMessageJoinWithStatus
@@ -554,7 +563,7 @@ fun handleNormalMessage(
                                 attachment.url,
                                 attachmentMetadata.fileName,
                                 attachmentMetadata.type,
-                                if (attachment.isDownloadRequested) FyleMessageJoinWithStatus.STATUS_DOWNLOADING else FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE,
+                                if (attachment.isUploadCancelledByTheSender) FyleMessageJoinWithStatus.STATUS_FAILED else if (attachment.isDownloadRequested) FyleMessageJoinWithStatus.STATUS_DOWNLOADING else FyleMessageJoinWithStatus.STATUS_DOWNLOADABLE,
                                 attachment.expectedLength,
                                 attachment.messageIdentifier,
                                 attachment.number,
@@ -564,11 +573,15 @@ fun handleNormalMessage(
                                 updateProgress(newFyle.id, message.id, attachment.receivedLength.toFloat() / attachment.expectedLength, null)
                             }
 
-                            if (messageSender.type == MessageSender.Type.OWNED_IDENTITY) {
+                            if (messageSender.type == MessageSender.Type.OWNED_IDENTITY || attachment.isUploadCancelledByTheSender) {
                                 fyleMessageJoinWithStatus.wasOpened = true
                             }
                             db.fyleMessageJoinWithStatusDao().insert(fyleMessageJoinWithStatus)
-                            fyleMessageJoinWithStatusesToDownload.add(fyleMessageJoinWithStatus)
+                            if (attachment.isUploadCancelledByTheSender) {
+                                engine.markAttachmentForDeletion(attachment)
+                            } else {
+                                fyleMessageJoinWithStatusesToDownload.add(fyleMessageJoinWithStatus)
+                            }
                         }
                         if (message.linkPreviewFyleId == null && attachmentMetadata.type == OpenGraph.MIME_TYPE) {
                             message.linkPreviewFyleId = fyleId

@@ -228,7 +228,7 @@ public class CreateOrUpdateGroupV2Task implements Runnable {
                 if (insertDetailsUpdatedMessage) {
                     Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, discussion.bytesOwnedIdentity); // always use Syste.currentTimeMillis() for this
                     newDetailsMessage.id = db.messageDao().insert(newDetailsMessage);
-                    UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
+                    UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.bytesOwnedIdentity, discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
                     if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }

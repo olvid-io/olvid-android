@@ -1,0 +1,4 @@
+- Redesign of several app components: contact card, profile card, storage manager, etc.
+- Added a calendar view to the discussion to quickly jump to a specific point in time.
+- Added an internal "ongoing playback" controller to easily switch between voice messages. Some improvements to voice message playback gestures.
+- Added the ability to cancel an attachment upload.

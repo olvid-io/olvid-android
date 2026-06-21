@@ -106,118 +106,35 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
 
                     LocaleManager localeManager = activity.getSystemService(LocaleManager.class);
                     LocaleList localeList = localeManager.getApplicationLocales();
+                    String[] supportedValues = getResources().getStringArray(R.array.app_language_choice_values);
                     if (!localeList.isEmpty()) {
                         String lang = localeList.get(0).getLanguage();
-                        String country = localeList.get(0).getCountry();
+                        // Normalise BCP-47 codes back to the Java legacy forms used in picker values
+                        // (Locale.getLanguage() may return "he"/"id"/"yi" on modern Android even though
+                        // our values use the legacy "iw"/"in"/"ji").
                         switch (lang) {
-                            case "fr":
-                                languagePreference.setValue("fr");
-                                break;
-                            case "en":
-                                languagePreference.setValue("en");
-                                break;
-                            case "af":
-                                languagePreference.setValue("af");
-                                break;
-                            case "ar":
-                                languagePreference.setValue("ar");
-                                break;
-                            case "ca":
-                                languagePreference.setValue("ca");
-                                break;
-                            case "cs":
-                                languagePreference.setValue("cs");
-                                break;
-                            case "da":
-                                languagePreference.setValue("da");
-                                break;
-                            case "de":
-                                languagePreference.setValue("de");
-                                break;
-                            case "el":
-                                languagePreference.setValue("el");
-                                break;
-                            case "es":
-                                languagePreference.setValue("es");
-                                break;
-                            case "fa":
-                                languagePreference.setValue("fa");
-                                break;
-                            case "fi":
-                                languagePreference.setValue("fi");
-                                break;
-                            case "hi":
-                                languagePreference.setValue("hi");
-                                break;
-                            case "hu":
-                                languagePreference.setValue("hu");
-                                break;
-                            case "hr":
-                                languagePreference.setValue("hr");
-                                break;
-                            case "it":
-                                languagePreference.setValue("it");
-                                break;
-                            case "iw":
-                                languagePreference.setValue("iw");
-                                break;
-                            case "ja":
-                                languagePreference.setValue("ja");
-                                break;
-                            case "ko":
-                                languagePreference.setValue("ko");
-                                break;
-                            case "nl":
-                                languagePreference.setValue("nl");
-                                break;
-                            case "no":
-                                languagePreference.setValue("no");
-                                break;
-                            case "pl":
-                                languagePreference.setValue("pl");
-                                break;
-                            case "pt":
-                                if (country.equalsIgnoreCase("BR")) {
-                                    languagePreference.setValue("pt-rBR");
-                                } else {
-                                    languagePreference.setValue("pt");
-                                }
-                                break;
-                            case "ro":
-                                languagePreference.setValue("ro");
-                                break;
-                            case "ru":
-                                languagePreference.setValue("ru");
-                                break;
-                            case "sk":
-                                languagePreference.setValue("sk");
-                                break;
-                            case "sl":
-                                languagePreference.setValue("sl");
-                                break;
-                            case "sv":
-                                languagePreference.setValue("sv");
-                                break;
-                            case "tr":
-                                languagePreference.setValue("tr");
-                                break;
-                            case "uk":
-                                languagePreference.setValue("uk");
-                                break;
-                            case "vi":
-                                languagePreference.setValue("vi");
-                                break;
-                            case "zh":
-                                if (country.equalsIgnoreCase("TW")) {
-                                    languagePreference.setValue("zh-rTW");
-                                } else {
-                                    languagePreference.setValue("zh");
-                                }
-                                break;
-                            default:
-                                languagePreference.setValue("default");
-                                break;
+                            case "he": lang = "iw"; break;
+                            case "id": lang = "in"; break;
+                            case "yi": lang = "ji"; break;
                         }
+                        String country = localeList.get(0).getCountry();
+                        String fullTag = country.isEmpty() ? lang : lang + "-r" + country.toUpperCase();
+                        String matched = "default";
+                        for (String code : supportedValues) {
+                            if (code.equalsIgnoreCase(fullTag)) {
+                                matched = code;
+                                break;
+                            }
+                        }
+                        if ("default".equals(matched)) {
+                            for (String code : supportedValues) {
+                                if (code.equalsIgnoreCase(lang)) {
+                                    matched = code;
+                                    break;
+                                }
+                            }
+                        }
+                        languagePreference.setValue(matched);
                     } else {
                         languagePreference.setValue("default");
                     }
@@ -225,112 +142,11 @@ public class CustomizationPreferenceFragment extends PreferenceFragmentCompat {
 
                     languagePreference.setOnPreferenceChangeListener((Preference preference, Object newValue) -> {
                         if (newValue instanceof String) {
-                            switch ((String) newValue) {
-                                case "fr":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("fr"));
-                                    break;
-                                case "en":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("en"));
-                                    break;
-                                case "af":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("af"));
-                                    break;
-                                case "ar":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("ar"));
-                                    break;
-                                case "ca":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("ca"));
-                                    break;
-                                case "cs":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("cs"));
-                                    break;
-                                case "da":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("da"));
-                                    break;
-                                case "de":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("de"));
-                                    break;
-                                case "el":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("el"));
-                                    break;
-                                case "es":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("es"));
-                                    break;
-                                case "fa":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("fa"));
-                                    break;
-                                case "fi":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("fi"));
-                                    break;
-                                case "hi":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("hi"));
-                                    break;
-                                case "hr":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("hr"));
-                                    break;
-                                case "hu":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("hu"));
-                                    break;
-                                case "it":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("it"));
-                                    break;
-                                case "iw":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("iw"));
-                                    break;
-                                case "ja":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("ja"));
-                                    break;
-                                case "ko":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("ko"));
-                                    break;
-                                case "nl":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("nl"));
-                                    break;
-                                case "no":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("no"));
-                                    break;
-                                case "pl":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("pl"));
-                                    break;
-                                case "pt":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("pt"));
-                                    break;
-                                case "pt-rBR":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("pt-br"));
-                                    break;
-                                case "ro":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("ro"));
-                                    break;
-                                case "ru":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("ru"));
-                                    break;
-                                case "sk":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("sk"));
-                                    break;
-                                case "sl":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("sl"));
-                                    break;
-                                case "sv":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("sv"));
-                                    break;
-                                case "tr":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("tr"));
-                                    break;
-                                case "uk":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("uk"));
-                                    break;
-                                case "vi":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("vi"));
-                                    break;
-                                case "zh":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("zh"));
-                                    break;
-                                case "zh-rTW":
-                                    localeManager.setApplicationLocales(LocaleList.forLanguageTags("zh-tw"));
-                                    break;
-                                default:
-                                    localeManager.setApplicationLocales(LocaleList.getEmptyLocaleList());
-                                    break;
+                            String value = (String) newValue;
+                            if ("default".equals(value)) {
+                                localeManager.setApplicationLocales(LocaleList.getEmptyLocaleList());
+                            } else {
+                                localeManager.setApplicationLocales(LocaleList.forLanguageTags(value.replace("-r", "-").toLowerCase()));
                             }
                         }
                         return false;

@@ -1,0 +1,1 @@
+- Se corrigió un problema con la desugarización de los registros de Java, que no funcionaba correctamente en la última versión de Android Studio.

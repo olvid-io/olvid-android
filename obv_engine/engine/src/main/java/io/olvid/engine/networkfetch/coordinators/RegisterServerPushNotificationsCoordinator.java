@@ -155,11 +155,6 @@ public class RegisterServerPushNotificationsCoordinator implements RegisterServe
         Identity ownedIdentity = ((RegisterPushNotificationOperation) operation).getOwnedIdentity();
         UID deviceUid = ((RegisterPushNotificationOperation) operation).getDeviceUid();
         scheduler.clearFailedCount(ownedIdentity);
-        // sync is not needed after a register
-//        if (deviceUid != null) {
-//            // after a registration, always start a downloadMessages
-//            downloadMessagesAndListAttachmentsDelegate.downloadMessagesAndListAttachments(ownedIdentity, deviceUid);
-//        }
         if (notificationPostingDelegate != null) {
             HashMap<String, Object> userInfo = new HashMap<>();
             userInfo.put(DownloadNotifications.NOTIFICATION_PUSH_NOTIFICATION_REGISTERED_OWNED_IDENTITY_KEY, ownedIdentity);

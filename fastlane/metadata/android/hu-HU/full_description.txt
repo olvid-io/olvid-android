@@ -1,0 +1,19 @@
+Az Olvid az első privát azonnali üzenetküldő alkalmazás, amely mindenki számára elérhető. Küldjön üzeneteket, fényképeket, fájlokat, és indítson biztonságos telefon- és videohívásokat.
+
+
+Mi a "privát" üzenetküldő?
+
+Ez egy olyan üzenetküldő:
+- amely nem erőltet rád új kapcsolatokat. Te döntöd el, kivel szeretnél kommunikálni. Az Olvid többféle módot kínál arra, hogy kapcsolatba lépj más Olvid-felhasználókkal, akár személyesen, akár távolról.
+- amely nem igényel személyes adatokat. Az Olvid nem kérheti a telefonszámodat vagy az e-mail címedet. A korábbi üzenetküldő alkalmazásoddal ellentétben, az Olvid soha nem fogja kérni a hozzáférést a címtáradhoz.
+- amelyen soha nem fogsz nem kívánt üzeneteket vagy ismeretlen forrásból származó üzeneteket kapni.
+- amelyben minden kommunikáció a valóságban zajló, zárt ajtók mögötti beszélgetéshez hasonló biztonsággal és privát élettel rendelkezik. Az Olvid alapértelmezés szerint végpontok közötti titkosítást és hitelesítést kínál, mindig, minden küldött és fogadott üzenetre.
+
+Az Olvid garantálja a biztonságos teret, amely védve van a külső támadásoktól, és elszigetel téged a digitális zajtól és más közösségi hálózatok erőszakától. Hozz létre csoportokat a családoddal, barátaiddal és kulcsfontosságú munkatársaiddal. Nincs spam, nincs reklám. Végre visszanyerheted a teljes kontrollt a kommunikációd felett.
+
+Az Olvid úgy lett megtervezve, hogy a legjobb hely legyen a fontos témák megvitatására azoknak, akik fontosak számodra.
+
+
+Olvid - Technológia
+
+Az Olvid központi eleme egy "kriptográfiai motor", amely több éves kutatás eredménye, és lehetővé teszi a kommunikációid integritásának, bizalmasságának és anonimitásának matematikai bizonyítását.

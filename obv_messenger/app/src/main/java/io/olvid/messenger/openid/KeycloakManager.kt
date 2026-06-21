@@ -18,14 +18,17 @@
  */
 package io.olvid.messenger.openid
 
+import androidx.core.content.edit
 import androidx.core.util.Pair
 import androidx.preference.PreferenceManager
 import io.olvid.engine.Logger
 import io.olvid.engine.datatypes.NoExceptionSingleThreadExecutor
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.engine.engine.types.JsonKeycloakUserDetails
+import io.olvid.engine.engine.types.ObvKeycloakIdBasedAuthResult
 import io.olvid.engine.engine.types.RegisterApiKeyResult
 import io.olvid.engine.engine.types.identities.ObvIdentity
+import io.olvid.engine.engine.types.identities.ObvKeycloakAuthType
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.BuildConfig
@@ -33,7 +36,10 @@ import io.olvid.messenger.customClasses.BytesKey
 import io.olvid.messenger.notifications.AndroidNotificationManager
 import io.olvid.messenger.openid.jsons.KeycloakServerRevocationsAndStuff
 import io.olvid.messenger.openid.jsons.KeycloakUserDetailsAndStuff
+import io.olvid.messenger.openid.jsons.OlvidWellKnownJson
 import io.olvid.messenger.settings.SettingsActivity
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import net.openid.appauth.AuthState
 import org.jose4j.jwk.JsonWebKey
 import org.jose4j.jwk.JsonWebKeySet
@@ -44,12 +50,6 @@ import java.util.Timer
 import java.util.TimerTask
 import java.util.UUID
 import kotlin.math.max
-import androidx.core.content.edit
-import io.olvid.engine.engine.types.ObvKeycloakIdBasedAuthResult
-import io.olvid.engine.engine.types.identities.ObvKeycloakAuthType
-import io.olvid.messenger.openid.jsons.OlvidWellKnownJson
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 
 object KeycloakManager {
     private val ownedIdentityStates: HashMap<BytesKey, KeycloakManagerState?> = HashMap()
@@ -132,8 +132,8 @@ object KeycloakManager {
             )
 
             authenticationRequiredOwnedIdentities.remove(identityBytesKey)
-            val kms = ownedIdentityStates.get(identityBytesKey)
-                ?: return@execute
+            val kms = ownedIdentityStates[identityBytesKey] ?: return@execute
+
             // reset the synchronization time to force a full re-sync
             kms.lastSynchronization = 0
             jwks?.let {
@@ -360,7 +360,7 @@ object KeycloakManager {
                                                 authResult.accessToken?.let {
                                                     // if successful, update the authState
                                                     kms.authState?.apply {
-                                                        update(authResult.accessToken, authResult.refreshToken)
+                                                        initializeFromMagicLinkOrIdBasedAuthResponse(authResult.accessToken, authResult.refreshToken, authResult.clientId, authResult.clientSecret)
                                                         reAuthenticationSuccessful(kms.bytesOwnedIdentity, null, this)
                                                     } ?: run {
                                                         // if authState is null (this is the case after a transfer or backup restore), we need to rediscover
@@ -371,7 +371,7 @@ object KeycloakManager {
                                                                 jwks: JsonWebKeySet,
                                                                 olvidWellKnown: OlvidWellKnownJson?
                                                             ) {
-                                                                authState.update(authResult.accessToken, authResult.refreshToken)
+                                                                authState.initializeFromMagicLinkOrIdBasedAuthResponse(authResult.accessToken, authResult.refreshToken, authResult.clientId, authResult.clientSecret)
                                                                 reAuthenticationSuccessful(kms.bytesOwnedIdentity, jwks, authState)
                                                             }
 

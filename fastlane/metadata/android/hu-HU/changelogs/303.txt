@@ -1,0 +1,1 @@
+- 18 új nyelv támogatása: bolgár, bengáli, észt, filippínó, gudzsaráti, indonéz, kannada, lett, litván, malajálam, maráthi, pandzsábi, szerb, szuahéli, tamil, telugu, thai és urdu.

@@ -1,0 +1,5 @@
+- Thiết kế lại một số thành phần của ứng dụng: thẻ liên hệ, thẻ hồ sơ, trình quản lý bộ nhớ, v.v.
+- Thêm chế độ xem lịch vào cuộc trò chuyện để nhanh chóng chuyển đến một thời điểm cụ thể.
+- Thêm bộ điều khiển "phát lại liên tục" để dễ dàng chuyển đổi giữa các tin nhắn thoại.
+- Thêm khả năng hủy tải lên tệp đính kèm.
+- Hiển thị các thông báo bị bỏ lỡ khi chế độ tắt tiếng của hồ sơ hết hạn.

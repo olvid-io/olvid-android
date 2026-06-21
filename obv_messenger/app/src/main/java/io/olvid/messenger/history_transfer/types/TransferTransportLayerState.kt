@@ -24,5 +24,6 @@ enum class TransferTransportLayerState {
     INITIALIZING, // transport layer is starting
     CONNECTING, // transport layer is starting
     READY, // transport layer is functional, messages can be sent
+    PROCESSING_RECEIVED_DATA, // special state for DST side: the connection is closed but we are still processing received messages
     CLOSED, // transport layer closed
 }

@@ -178,11 +178,11 @@ fun MembersScreenContainer(
                                                 RoundedCornerShape(
                                                     topStart = 16.dp,
                                                     topEnd = 16.dp,
-                                                    bottomStart = if (it.isEmpty()) 16.dp else 0.dp,
-                                                    bottomEnd = if (it.isEmpty()) 16.dp else 0.dp,
+                                                    bottomStart = if (it.lastIndex == 0) 16.dp else 0.dp,
+                                                    bottomEnd = if (it.lastIndex == 0) 16.dp else 0.dp,
                                                 )
                                             )
-                                            it.size -> Modifier.clip(
+                                            it.lastIndex -> Modifier.clip(
                                                 RoundedCornerShape(
                                                     bottomStart = 16.dp,
                                                     bottomEnd = 16.dp,
@@ -350,6 +350,7 @@ fun MembersScreenContainer(
 fun MembersRow(
     modifier: Modifier = Modifier,
     members: List<GroupMember>,
+    explanation: String = stringResource(R.string.explanation_choose_members),
     onMemberRemoved: ((GroupMember) -> Unit)? = null
 ) {
     val context = LocalContext.current
@@ -370,8 +371,8 @@ fun MembersRow(
             exit = fadeOut()
         ) {
             Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.explanation_choose_members),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                text = explanation,
                 textAlign = TextAlign.Center,
                 style = OlvidTypography.body2.copy(color = colorResource(R.color.greyTint))
             )

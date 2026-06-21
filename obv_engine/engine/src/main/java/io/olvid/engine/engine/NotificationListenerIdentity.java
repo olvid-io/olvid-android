@@ -85,7 +85,13 @@ public class NotificationListenerIdentity implements NotificationListener {
                         break;
                     }
 
-                    engine.protocolManager.startDeviceDiscoveryProtocol(ownedIdentity, contactIdentity);
+                    // skip device discovery if the current device has not been registered on the server yet (e.g. after a transfer)
+                    // it will be triggered later, once push notification registration is confirmed
+                    if (engine.identityManager.isCurrentDeviceNeverRegistered(engineSession.session, ownedIdentity)) {
+                        Logger.i("Skip discovery because device is not registered yet");
+                    } else {
+                        engine.protocolManager.startDeviceDiscoveryProtocol(ownedIdentity, contactIdentity);
+                    }
 
                     HashMap<String, Object> engineInfo = new HashMap<>();
                     JsonIdentityDetails contactDetails = engine.identityManager.getContactIdentityTrustedDetails(engineSession.session, ownedIdentity, contactIdentity);
@@ -251,8 +257,13 @@ public class NotificationListenerIdentity implements NotificationListener {
                 }
 
                 if (active) {
-                    try {
-                        engine.protocolManager.startDeviceDiscoveryProtocol(ownedIdentity, contactIdentity);
+                    try (EngineSession engineSession = engine.getSession()) {
+                        // skip device discovery if the current device has not been registered on the server yet (e.g. after a transfer)
+                        if (engine.identityManager.isCurrentDeviceNeverRegistered(engineSession.session, ownedIdentity)) {
+                            Logger.i("Skip discovery because device is not registered yet");
+                        } else {
+                            engine.protocolManager.startDeviceDiscoveryProtocol(ownedIdentity, contactIdentity);
+                        }
                     } catch (Exception ignored) {}
                 }
 

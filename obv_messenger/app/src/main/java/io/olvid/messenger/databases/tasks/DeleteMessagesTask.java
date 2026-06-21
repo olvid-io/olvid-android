@@ -179,6 +179,7 @@ public class DeleteMessagesTask implements Runnable {
                     }
                 } else {
                     db.discussionDao().delete(discussion);
+                    UnreadCountsSingleton.INSTANCE.discussionDeleted(discussionId);
                     ShortcutActivity.disableShortcut(discussionId);
                 }
             } else if (db.messageDao().getDiscussionDraftMessageSync(discussionId) == null && !db.invitationDao().discussionHasInvitations(discussionId)) {
@@ -194,6 +195,7 @@ public class DeleteMessagesTask implements Runnable {
                         // do not actually delete empty locked discussion if any invitation is pending
                         if (!db.invitationDao().discussionHasInvitations(discussionId)) {
                             db.discussionDao().delete(aDiscussion);
+                            UnreadCountsSingleton.INSTANCE.discussionDeleted(discussionId);
                             ShortcutActivity.disableShortcut(discussionId);
                         }
                     }

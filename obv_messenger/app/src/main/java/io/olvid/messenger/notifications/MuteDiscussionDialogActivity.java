@@ -40,6 +40,7 @@ import io.olvid.messenger.databases.entity.Discussion;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 import io.olvid.messenger.databases.tasks.ApplySyncAtomTaskKt;
+import io.olvid.messenger.services.MuteExpirationService;
 import io.olvid.messenger.settings.SettingsActivity;
 
 public class MuteDiscussionDialogActivity extends AppCompatActivity {
@@ -93,7 +94,8 @@ public class MuteDiscussionDialogActivity extends AppCompatActivity {
                                 ownedIdentity.prefMuteNotifications = true;
                                 ownedIdentity.prefMuteNotificationsTimestamp = muteExpirationTimestamp;
                                 ownedIdentity.prefMuteNotificationsExceptMentioned = muteExceptMentioned;
-                                AppDatabase.getInstance().ownedIdentityDao().updateMuteNotifications(ownedIdentity.bytesOwnedIdentity, ownedIdentity.prefMuteNotifications, ownedIdentity.prefMuteNotificationsTimestamp, ownedIdentity.prefMuteNotificationsExceptMentioned);
+                                AppDatabase.getInstance().ownedIdentityDao().updateMuteNotifications(ownedIdentity.bytesOwnedIdentity, ownedIdentity.prefMuteNotificationsTimestamp, ownedIdentity.prefMuteNotificationsExceptMentioned, System.currentTimeMillis());
+                                MuteExpirationService.scheduleNextExpiration();
                             }
                         } else {
                             DiscussionCustomization discussionCustomization = AppDatabase.getInstance().discussionCustomizationDao().get(discussionId);

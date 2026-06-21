@@ -71,8 +71,18 @@ fun handleReaction(
                     return HandleMessageOutput.DELETE_MESSAGE_AND_ATTACHMENTS
                 }
 
+                var messageServerTimestamp = obvMessage.serverTimestamp
+                if (jsonReaction.originalServerTimestamp != null && discussion.discussionType == Discussion.TYPE_GROUP_V2) {
+                    messageServerTimestamp = messageServerTimestamp.coerceAtMost(jsonReaction.originalServerTimestamp)
+                }
+
+                // get current reaction from the reaction sender
+                val previousReaction = db.reactionDao().getReactionForSenderAndMessage(messageSender.senderIdentity.takeIf { messageSender.type == MessageSender.Type.CONTACT }, message.id)
+
                 // only show a notification if a contact reacted to an outbound message or a message I am mentioned in
-                if (messageSender.type == MessageSender.Type.CONTACT && message.messageType == Message.TYPE_OUTBOUND_MESSAGE) {
+                // and do not show a notification if the reaction is the same as the previous one, or is older
+                if (messageSender.type == MessageSender.Type.CONTACT && message.messageType == Message.TYPE_OUTBOUND_MESSAGE
+                    && (previousReaction == null || (previousReaction.emoji != jsonReaction.reaction && previousReaction.timestamp < messageServerTimestamp))) {
                     val ownedIdentity = db.ownedIdentityDao().get(messageSender.bytesOwnedIdentity)
                     AndroidNotificationManager.displayReactionNotification(
                         ownedIdentity,
@@ -81,11 +91,6 @@ fun handleReaction(
                         jsonReaction.reaction,
                         messageSender.contact!! // the messageSender type is CONTACT, so contact is non-null
                     )
-                }
-
-                var messageServerTimestamp = obvMessage.serverTimestamp
-                if (jsonReaction.originalServerTimestamp != null && discussion.discussionType == Discussion.TYPE_GROUP_V2) {
-                    messageServerTimestamp = messageServerTimestamp.coerceAtMost(jsonReaction.originalServerTimestamp)
                 }
 
 

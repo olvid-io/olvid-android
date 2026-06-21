@@ -83,6 +83,7 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao.FyleAndStatus
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.jsons.JsonLocation
@@ -108,6 +109,9 @@ import io.olvid.messenger.notifications.AndroidNotificationManager
 import io.olvid.messenger.services.UnifiedForegroundService.LocationSharingSubService
 import io.olvid.messenger.webrtc.CallNotificationManager
 import io.olvid.messenger.webrtc.components.CallNotification
+import io.olvid.messenger.discussion.audio.AudioPlaybackNotification
+import io.olvid.messenger.discussion.audio.openPlayingAudioMessage
+import io.olvid.messenger.services.AudioPlaybackNotificationManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -127,6 +131,7 @@ fun MessageList(
     messageEditHandler: MessageEditHandler,
     sendReadReceipt: Boolean,
     messageClicked: (Message) -> Unit,
+    onCancelAttachmentUpload: (FyleAndStatus) -> Unit,
     saveAttachment: () -> Unit,
     saveAllAttachments: () -> Unit,
     openMap: () -> Unit,
@@ -577,8 +582,9 @@ fun MessageList(
                                 openViewerCallback = {
                                     discussionViewModel.markAsReadOnPause = false
                                 },
-                                saveAttachment = { saveAttachment() },
-                                saveAllAttachments = { saveAllAttachments() },
+                                onCancelAttachmentUpload = onCancelAttachmentUpload,
+                                saveAttachment = saveAttachment,
+                                saveAllAttachments = saveAllAttachments,
                             )
                         }
                         // date header
@@ -595,7 +601,11 @@ fun MessageList(
                             ).toString()
                             DateHeader(
                                 modifier = Modifier.animateItem(),
-                                date = date
+                                date = date,
+                                onClick = {
+                                    discussionViewModel.calendarInitialDateMillis = message.timestamp
+                                    discussionViewModel.showCalendarView = true
+                                }
                             )
                         }
                     }
@@ -650,6 +660,41 @@ fun MessageList(
                 ) {
                     cachedCallData?.let {
                         CallNotification(callData = it)
+                    }
+                }
+
+                var cachedAudioTrack by remember {
+                    mutableStateOf(AudioPlaybackNotificationManager.currentTrack)
+                }
+                LaunchedEffect(AudioPlaybackNotificationManager.currentTrack) {
+                    if (AudioPlaybackNotificationManager.currentTrack != null) {
+                        cachedAudioTrack = AudioPlaybackNotificationManager.currentTrack
+                    } else {
+                        delay(500)
+                        cachedAudioTrack = null
+                    }
+                }
+                AnimatedVisibility(
+                    visible = cachedAudioTrack != null && AudioPlaybackNotificationManager.currentTrack != null
+                ) {
+                    cachedAudioTrack?.let { track ->
+                        AudioPlaybackNotification(
+                            track = track,
+                            onClick = { tapped ->
+                                val targetMessageId = tapped.messageId
+                                if (tapped.discussionId == discussionViewModel.discussionId
+                                    && targetMessageId != null
+                                ) {
+                                    discussionViewModel.scrollToMessageRequest =
+                                        DiscussionActivity.ScrollRequest(
+                                            messageId = targetMessageId,
+                                            highlight = true,
+                                        )
+                                } else {
+                                    openPlayingAudioMessage(context, tapped)
+                                }
+                            },
+                        )
                     }
                 }
 

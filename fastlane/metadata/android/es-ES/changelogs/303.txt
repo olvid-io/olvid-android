@@ -1,0 +1,1 @@
+- Se agregó compatibilidad con 18 idiomas nuevos: búlgaro, bengalí, estonio, filipino, guyaratí, indonesio, kannada, letón, lituano, malayalam, maratí, punjabi, serbio, suajili, tamil, télugu, tailandés y urdu.

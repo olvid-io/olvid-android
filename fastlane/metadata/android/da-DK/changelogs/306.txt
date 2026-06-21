@@ -1,0 +1,5 @@
+- Omdesign af flere app-komponenter: kontaktkort, profilkort, lageradministrator osv.
+- Tilføjet en kalendervisning til samtalen, så du hurtigt kan springe til et bestemt tidspunkt.
+- Tilføjet en intern "afspilningsstyring", så du nemt kan skifte mellem talebeskeder.
+- Tilføjet mulighed for at annullere en vedhæftningsupload.
+- Vis manglende notifikationer, når profilens lydløs-tilstand udløber.

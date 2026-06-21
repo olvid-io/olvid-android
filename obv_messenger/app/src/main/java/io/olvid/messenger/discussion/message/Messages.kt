@@ -233,7 +233,8 @@ private fun ScrollDownButtonPreview() {
 @Composable
 fun DateHeader(
     date: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier
@@ -241,13 +242,23 @@ fun DateHeader(
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.Center
     ) {
+        val backgroundModifier = Modifier.background(
+            color = colorResource(id = R.color.primary400_90),
+            shape = CircleShape
+        )
         Text(
-            modifier = Modifier
-                .background(
-                    color = colorResource(id = R.color.primary400_90),
-                    shape = CircleShape
-                )
-                .padding(vertical = 4.dp, horizontal = 8.dp),
+            modifier = if (onClick != null) {
+                backgroundModifier
+                    .clip(CircleShape)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple(),
+                        onClick = onClick
+                    )
+                    .padding(vertical = 4.dp, horizontal = 8.dp)
+            } else {
+                backgroundModifier.padding(vertical = 4.dp, horizontal = 8.dp)
+            },
             textAlign = TextAlign.Center,
             text = date,
             color = Color.White
@@ -284,6 +295,7 @@ fun Message(
     openDiscussionDetailsCallback: (() -> Unit)? = null,
     openOnClick: Boolean = true,
     openViewerCallback: (() -> Unit)? = null,
+    onCancelAttachmentUpload: (FyleAndStatus) -> Unit = {},
     saveAttachment: () -> Unit = {},
     saveAllAttachments: () -> Unit = {},
     blockSwipe: Boolean = false,
@@ -522,6 +534,7 @@ fun Message(
                             messageBubbleInteractionSource = interactionSource,
                             jsonPoll = jsonPoll,
                             pollResults = pollResults?.value,
+                            onCancelAttachmentUpload = onCancelAttachmentUpload,
                             interactionSource = interactionSource,
                             blockClicks = blockClicks,
                         )
@@ -570,6 +583,7 @@ fun Message(
                                     onAttachmentLongClick = onAttachmentLongClick,
                                     openViewerCallback = openViewerCallback,
                                     discussionSearchViewModel = discussionSearchViewModel,
+                                    onCancelAttachmentUpload = onCancelAttachmentUpload,
                                     saveAttachment = saveAttachment,
                                     saveAllAttachments = saveAllAttachments,
                                     blockClicks = blockClicks,
@@ -964,6 +978,7 @@ fun MessageBody(
     messageBubbleInteractionSource: MutableInteractionSource,
     jsonPoll: JsonPoll?,
     pollResults: List<PollVote>?,
+    onCancelAttachmentUpload: (FyleAndStatus) -> Unit,
     interactionSource: MutableInteractionSource? = null,
     blockClicks: Boolean,
 ) {
@@ -1063,6 +1078,7 @@ fun MessageBody(
             scale = scale,
             onClick = onClick,
             onLongClick = onLongClick,
+            onCancelAttachmentUpload = onCancelAttachmentUpload,
             highlighter = discussionSearchViewModel?.let {
                 it::highlight
             },

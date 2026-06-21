@@ -188,7 +188,7 @@ class WebrtcPeerConnectionHolder(
                 .setVideoEncoderFactory(videoEncoderFactory)
                 .setVideoDecoderFactory(videoDecoderFactory)
 
-            // check if a proxy is required for WebRCT
+            // check if a proxy is required for WebRTC
             try {
                 val proxies =
                     ProxySelector.getDefault().select(URI.create("https://turn.olvid.io/"))
@@ -205,6 +205,7 @@ class WebrtcPeerConnectionHolder(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            // set a user agent (for the proxy)
             System.getProperty("http.agent")?.let {
                 builder.setUserAgent(it)
             }

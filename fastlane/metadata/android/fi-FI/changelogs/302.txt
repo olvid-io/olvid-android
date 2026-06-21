@@ -1,0 +1,1 @@
+- Korjattu ongelma, joka aiheutti Java-tietueiden muunnoksen (desugaring) toimimattomuuden uusimmassa Android Studio -versiossa.

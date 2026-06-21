@@ -1,0 +1,1 @@
+- Odpravljena težava, zaradi katere funkcija "desugaring" za Java Records ni pravilno delovala v najnovejši različici Android Studio.

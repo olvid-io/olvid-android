@@ -1,0 +1,5 @@
+- Refonte de plusieurs composants de l'application : carte de contact, carte de profil, gestionnaire de stockage, etc.
+- Ajout d'une vue calendrier dans la discussion pour facilement remonter à un point précis.
+- Ajout d'un contrôleur pour la « lecture en cours » afin de facillement basculer entre vocaux.
+- Ajout de la possibilité d'annuler un envoi de pièce jointe.
+- Affichage des notifications ratées quand le mode silencieux expire.

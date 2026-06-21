@@ -19,15 +19,28 @@
 package io.olvid.messenger.owneddetails
 
 import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.switchMap
+import androidx.lifecycle.viewModelScope
 import io.olvid.engine.engine.types.JsonIdentityDetails
 import io.olvid.engine.engine.types.JsonIdentityDetailsWithVersionAndPhoto
 import io.olvid.messenger.App
+import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.entity.OwnedDevice
+import io.olvid.messenger.databases.entity.OwnedIdentity
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsViewModel.ValidStatus.INVALID
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsViewModel.ValidStatus.PUBLISH
 import io.olvid.messenger.owneddetails.OwnedIdentityDetailsViewModel.ValidStatus.SAVE
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class OwnedIdentityDetailsViewModel : ViewModel() {
     private var oldDetails: JsonIdentityDetailsWithVersionAndPhoto? = null
@@ -244,5 +257,87 @@ class OwnedIdentityDetailsViewModel : ViewModel() {
             }
             return out
         }
+    }
+
+    // activity part
+    val showRefreshSpinner: MutableLiveData<Boolean> = MutableLiveData(false)
+    val ownedIdentityActive: MutableLiveData<Boolean?> = MutableLiveData(null)
+    val ownedDevicesLiveData: LiveData<List<OwnedDevice>> =
+        AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
+            if (ownedIdentity == null) {
+                if (ownedIdentityActive.value != true) {
+                    ownedIdentityActive.postValue(true)
+                }
+                return@switchMap MutableLiveData(
+                    emptyList()
+                )
+            }
+            if (ownedIdentityActive.value != ownedIdentity.active) {
+                ownedIdentityActive.postValue(ownedIdentity.active)
+            }
+            AppDatabase.getInstance().ownedDeviceDao()
+                .getAllSorted(ownedIdentity.bytesOwnedIdentity)
+        }
+
+    var fullScreenPhotoUrl: String? by mutableStateOf(null)
+    var keycloakManaged: Boolean by mutableStateOf(false)
+    var latestDetails: JsonIdentityDetailsWithVersionAndPhoto? by mutableStateOf(null)
+    var publishedDetails: JsonIdentityDetailsWithVersionAndPhoto? by mutableStateOf(null)
+
+    fun refresh(bytesOwnedIdentity: ByteArray) {
+        viewModelScope.launch {
+            val details = withContext(Dispatchers.IO) {
+                AppSingleton.getEngine().getOwnedIdentityPublishedAndLatestDetails(bytesOwnedIdentity)
+            }
+            if (details != null && details.isNotEmpty()) {
+                val published = details[0]
+                publishedDetails = published
+
+                if (details.size == 2) {
+                    latestDetails = details[1]
+                } else {
+                    latestDetails = published
+                }
+
+                withContext(Dispatchers.IO) {
+                    val dbIdentity = AppDatabase.getInstance().ownedIdentityDao()[bytesOwnedIdentity]
+                    if (dbIdentity != null) {
+                        // Update unpublishedDetails flag
+                        if (details.size == 2) {
+                            if (dbIdentity.unpublishedDetails == OwnedIdentity.UNPUBLISHED_DETAILS_NOTHING_NEW) {
+                                AppDatabase.getInstance().ownedIdentityDao().updateUnpublishedDetails(
+                                    dbIdentity.bytesOwnedIdentity,
+                                    OwnedIdentity.UNPUBLISHED_DETAILS_EXIST
+                                )
+                            }
+                        } else {
+                            if (dbIdentity.unpublishedDetails != OwnedIdentity.UNPUBLISHED_DETAILS_NOTHING_NEW) {
+                                AppDatabase.getInstance().ownedIdentityDao().updateUnpublishedDetails(
+                                    dbIdentity.bytesOwnedIdentity,
+                                    OwnedIdentity.UNPUBLISHED_DETAILS_NOTHING_NEW
+                                )
+                            }
+                        }
+                    }
+                }
+
+                val keycloakState = withContext(Dispatchers.IO) {
+                    AppSingleton.getEngine().getOwnedIdentityKeycloakState(bytesOwnedIdentity)
+                }
+                keycloakManaged = keycloakState != null && keycloakState.keycloakServer != null
+            }
+        }
+    }
+
+    fun reload() {
+        AppSingleton.getBytesCurrentIdentity()?.let { refresh(it) }
+    }
+
+    fun showRefreshSpinner() {
+        showRefreshSpinner.postValue(true)
+    }
+
+    fun hideRefreshSpinner() {
+        showRefreshSpinner.postValue(false)
     }
 }

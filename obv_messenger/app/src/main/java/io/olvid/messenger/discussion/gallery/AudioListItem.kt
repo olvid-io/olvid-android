@@ -39,7 +39,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -93,6 +92,7 @@ fun AudioListItem(
     onEnableMessageSwipe: ((Boolean) -> Unit)? = null,
     audioAttachmentServiceBinding: AudioAttachmentServiceBinding?,
     discussionId: Long,
+    onClick: (() -> Unit)? = null,
     onLongClick: () -> Unit,
     onIncompleteClick: (() -> Unit)? = null,
     contextMenu: @Composable (() -> Unit)? = null
@@ -203,14 +203,18 @@ fun AudioListItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(),
                 onClick = {
-                    if (playable) {
-                        audioAttachmentServiceBinding?.playPause(
-                            fyleAndStatus,
-                            discussionId
-                        )
-                        fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened()
+                    if (onClick == null) {
+                        if (playable) {
+                            audioAttachmentServiceBinding?.playPause(
+                                fyleAndStatus,
+                                discussionId
+                            )
+                            fyleAndStatus.fyleMessageJoinWithStatus.markAsOpened()
+                        } else {
+                            onIncompleteClick?.invoke()
+                        }
                     } else {
-                        onIncompleteClick?.invoke()
+                        onClick.invoke()
                     }
                 },
                 onLongClick = {
@@ -352,6 +356,19 @@ fun AudioListItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (playable) {
+                    val seekCallback: (Float) -> Unit = remember(
+                        fyleAndStatus.fyle.id,
+                        audioAttachmentServiceBinding,
+                    ) {
+                        { seekProgress ->
+                            duration?.takeIf { it > 0 }?.let {
+                                audioAttachmentServiceBinding?.seekAudioAttachment(
+                                    fyleAndStatus,
+                                    (seekProgress * 1000).roundToInt()
+                                )
+                            }
+                        }
+                    }
                     StaticSoundWave(
                         modifier = Modifier
                             .fillMaxHeight()
@@ -362,14 +379,7 @@ fun AudioListItem(
                         } ?: 0f,
                         durationMs = duration,
                         playtimeMs = playtime,
-                        onSeek = { seekProgress ->
-                            duration?.takeIf { it > 0 }?.let {
-                                audioAttachmentServiceBinding?.seekAudioAttachment(
-                                    fyleAndStatus,
-                                    (seekProgress * 1000).roundToInt()
-                                )
-                            }
-                        },
+                        onSeek = if (isPlaying) seekCallback else null,
                         onSeekStarted = { onEnableMessageSwipe?.invoke(false) },
                         onSeekEnded = { onEnableMessageSwipe?.invoke(true) }
                     )

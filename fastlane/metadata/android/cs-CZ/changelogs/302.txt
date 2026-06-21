@@ -1,0 +1,1 @@
+- Opraven problém s tím, že zpracování Java záznamů nefungovalo správně v nejnovější verzi Android Studia.

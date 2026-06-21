@@ -24,10 +24,8 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.awaitHorizontalTouchSlopOrCancellation
-import androidx.compose.foundation.gestures.horizontalDrag
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -55,7 +53,6 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
@@ -69,7 +66,6 @@ import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding.Companion.
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 
 @Composable
@@ -230,27 +226,33 @@ fun StaticSoundWave(
                 .onGloballyPositioned { coordinates ->
                     canvasWidth = coordinates.size.width.toFloat()
                 }
-                .pointerInput(onSeek) {
-                    if (onSeek == null) return@pointerInput
-                    if (canvasWidth <= 0) return@pointerInput
-
-                    awaitEachGesture {
-                        val down = awaitFirstDown()
-                        down.consume()
-                        onSeek((down.position.x / canvasWidth).coerceIn(0f, 1f))
-
-                        awaitHorizontalTouchSlopOrCancellation(down.id) { change, _ ->
-                            change.consume()
-                        } ?.let {
-                            onSeekStarted?.invoke()
-                            horizontalDrag(down.id) { change ->
-                                onSeek((change.position.x / canvasWidth).coerceIn(0f, 1f))
-                                if (change.positionChange() != Offset.Zero) change.consume()
+                .then(
+                    if (onSeek == null) Modifier
+                    else Modifier
+                        .pointerInput(onSeek) {
+                            // detectTapGestures only fires on a confirmed tap (up without
+                            // crossing slop), so vertical scrolls in the parent list are
+                            // not interpreted as seeks.
+                            detectTapGestures { offset ->
+                                val w = canvasWidth
+                                if (w > 0f) {
+                                    onSeek((offset.x / w).coerceIn(0f, 1f))
+                                }
                             }
-                            onSeekEnded?.invoke()
                         }
-                    }
-                }
+                        .pointerInput(onSeek) {
+                            detectHorizontalDragGestures(
+                                onDragStart = { onSeekStarted?.invoke() },
+                                onDragEnd = { onSeekEnded?.invoke() },
+                                onDragCancel = { onSeekEnded?.invoke() },
+                            ) { change, _ ->
+                                val w = canvasWidth
+                                if (w > 0f) {
+                                    onSeek((change.position.x / w).coerceIn(0f, 1f))
+                                }
+                            }
+                        }
+                )
         ) {
             val isRtl = layoutDirection == LayoutDirection.Rtl
             val canvasWidthPrecise = size.width

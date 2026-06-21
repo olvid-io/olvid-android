@@ -1,0 +1,5 @@
+- Redesign pentru mai multe componente ale aplicației: card de contact, card de profil, manager de stocare etc.
+- Adăugată o vizualizare calendar în conversație pentru a naviga rapid la un anumit moment.
+- Adăugat un control intern pentru "redarea în curs", pentru a comuta ușor între mesajele vocale.
+- Adăugată posibilitatea de a anula încărcarea unui fișier.
+- Afișează notificările pierdute când expiră perioada de silențiu a profilului.

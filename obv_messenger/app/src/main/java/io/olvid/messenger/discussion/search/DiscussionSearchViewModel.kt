@@ -21,7 +21,9 @@ package io.olvid.messenger.discussion.search
 
 import android.content.Context
 import androidx.annotation.ColorRes
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
@@ -45,11 +47,15 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import java.util.concurrent.CancellationException
 
+private const val SEARCH_PAGE_SIZE = 50
+private const val PREFETCH_THRESHOLD = 10
+
 class DiscussionSearchViewModel : ViewModel() {
-    private var currentPosition: Int = 0
+    private var currentPosition: Int by mutableIntStateOf(0)
     var focusSearchOnOpen by mutableStateOf(true)
     var searchExpanded by mutableStateOf(false)
     var searchText by mutableStateOf("")
@@ -59,10 +65,50 @@ class DiscussionSearchViewModel : ViewModel() {
     var hasPrevious by mutableStateOf(false)
 
     var matchedMessageAndFyleIds by mutableStateOf<List<Pair<Long, Pair<Long?, Double>>>>(emptyList()) // messageId, fyleId
+    var totalMatchedMessageCount by mutableIntStateOf(0)
+        private set
+
+    var hasMoreMessages by mutableStateOf(false)
+    var hasMoreAttachments by mutableStateOf(false)
+    // (sortIndex, id) keyset cursor — id breaks the tie when two messages share a sortIndex
+    // (Message.sortIndex is timestamp-seeded and not guaranteed unique)
+    private var lastLoadedMessageSortIndex: Double = Double.MAX_VALUE
+    private var lastLoadedAttachmentSortIndex: Double = Double.MAX_VALUE
+    private val hasMoreToLoad: Boolean
+        get() = hasMoreMessages || hasMoreAttachments
+
+    val currentMatchedMessagePosition: Int by derivedStateOf {
+        if (matchedMessageAndFyleIds.isEmpty()) {
+            0
+        } else {
+            val capped = currentPosition.coerceIn(0, matchedMessageAndFyleIds.lastIndex)
+            matchedMessageAndFyleIds.subList(0, capped + 1).distinctBy { it.first }.size
+        }
+    }
 
     var initialFoundItem by mutableStateOf<Long?>(null)
 
     var filterJob: Job? by mutableStateOf(null)
+    private var loadMoreJob: Job? by mutableStateOf(null)
+    private var countJob: Job? = null
+
+    val isLoading: Boolean
+        get() = filterJob != null || loadMoreJob != null
+
+    private var pagingDiscussionId: Long? = null
+    private var pagingTokenizedQuery: String? = null
+
+    private fun resetPagingState() {
+        totalMatchedMessageCount = 0
+        hasMoreMessages = false
+        hasMoreAttachments = false
+        lastLoadedMessageSortIndex = Double.MAX_VALUE
+        lastLoadedAttachmentSortIndex = Double.MAX_VALUE
+        loadMoreJob?.cancel()
+        loadMoreJob = null
+        countJob?.cancel()
+        countJob = null
+    }
 
     fun reset() {
         currentPosition = 0
@@ -73,6 +119,9 @@ class DiscussionSearchViewModel : ViewModel() {
         hasNext = false
         hasPrevious = false
         matchedMessageAndFyleIds = emptyList()
+        resetPagingState()
+        pagingDiscussionId = null
+        pagingTokenizedQuery = null
         initialFoundItem = null
     }
 
@@ -87,9 +136,11 @@ class DiscussionSearchViewModel : ViewModel() {
             if (pos < matchedMessageAndFyleIds.size) {
                 currentPosition = pos
                 updateHasNextAndPrevious()
+                maybePrefetch()
                 return matchedMessageAndFyleIds[currentPosition].first
             }
         }
+        maybePrefetch()
         return null
     }
 
@@ -112,10 +163,74 @@ class DiscussionSearchViewModel : ViewModel() {
 
     private fun updateHasNextAndPrevious() {
         // only show next/previous if there is an item in the list AND this item points to a different message
-        hasNext = (currentPosition in 0..< matchedMessageAndFyleIds.lastIndex)
+        val canStepForwardInLoaded = (currentPosition in 0..< matchedMessageAndFyleIds.lastIndex)
                 && (matchedMessageAndFyleIds.last().first != matchedMessageAndFyleIds[currentPosition].first)
+        hasNext = canStepForwardInLoaded || (hasMoreToLoad && matchedMessageAndFyleIds.isNotEmpty())
         hasPrevious = (currentPosition in 1.. matchedMessageAndFyleIds.lastIndex)
                 && (matchedMessageAndFyleIds.first().first != matchedMessageAndFyleIds[currentPosition].first)
+    }
+
+    private fun maybePrefetch() {
+        if (loadMoreJob != null) return
+        if (!hasMoreToLoad) return
+        if (matchedMessageAndFyleIds.isEmpty()) return
+        if (currentPosition < matchedMessageAndFyleIds.lastIndex - PREFETCH_THRESHOLD) return
+        loadMore()
+    }
+
+    private fun loadMore() {
+        val discussionId = pagingDiscussionId ?: return
+        val tokenizedQuery = pagingTokenizedQuery ?: return
+        if (loadMoreJob != null) return
+        if (!hasMoreToLoad) return
+        val job = viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val dao = AppDatabase.getInstance().globalSearchDao()
+                val moreMessages = if (hasMoreMessages) {
+                    dao.discussionSearchMessages(discussionId, tokenizedQuery, lastLoadedMessageSortIndex, SEARCH_PAGE_SIZE)
+                } else emptyList()
+                val moreAttachments = if (hasMoreAttachments) {
+                    dao.discussionSearchAttachments(discussionId, tokenizedQuery, lastLoadedAttachmentSortIndex, SEARCH_PAGE_SIZE)
+                } else emptyList()
+
+                if (tokenizedQuery != pagingTokenizedQuery || discussionId != pagingDiscussionId) {
+                    return@launch
+                }
+
+                val merged = (moreMessages + moreAttachments)
+                    .sortedBy { -it.sortIndex }
+                    .map { it.id to Pair(it.fyleId, it.sortIndex) }
+
+                withContext(Dispatchers.Main.immediate) {
+                    if (hasMoreMessages) {
+                        hasMoreMessages = moreMessages.size == SEARCH_PAGE_SIZE
+                        moreMessages.lastOrNull()?.let {
+                            lastLoadedMessageSortIndex = it.sortIndex
+                        }
+                    }
+                    if (hasMoreAttachments) {
+                        hasMoreAttachments = moreAttachments.size == SEARCH_PAGE_SIZE
+                        moreAttachments.lastOrNull()?.let {
+                            lastLoadedAttachmentSortIndex = it.sortIndex
+                        }
+                    }
+                    if (merged.isNotEmpty()) {
+                        matchedMessageAndFyleIds = matchedMessageAndFyleIds + merged
+                    }
+                    updateHasNextAndPrevious()
+                }
+            } catch (_: CancellationException) {
+                // job was cancelled; whoever cancelled us is responsible for clearing loadMoreJob
+            } catch (e: Exception) {
+                Logger.x(e)
+            }
+        }
+        loadMoreJob = job
+        job.invokeOnCompletion {
+            if (loadMoreJob === job) {
+                loadMoreJob = null
+            }
+        }
     }
 
     var lastSearchTokenizedQuery: String? = null
@@ -136,7 +251,11 @@ class DiscussionSearchViewModel : ViewModel() {
         }
         filterJob?.cancel()
         filterJob = null
+        // also resets the paging cursors/flags so any spurious maybePrefetch() during the search no-ops
+        resetPagingState()
         lastSearchTokenizedQuery = tokenizedQuery
+        pagingDiscussionId = discussionId
+        pagingTokenizedQuery = tokenizedQuery
 
         if (tokenizedQuery.isNullOrBlank()) {
             matchedMessageAndFyleIds = emptyList()
@@ -144,6 +263,7 @@ class DiscussionSearchViewModel : ViewModel() {
             updateHasNextAndPrevious()
             filterRegexes = null
         } else {
+
             filterJob = viewModelScope.launch(Dispatchers.IO) {
                 supervisorScope {
                     try {
@@ -152,16 +272,12 @@ class DiscussionSearchViewModel : ViewModel() {
                         var firstMessageSortIndex: Double? = null
                         val deferredSearches = listOf(
                             async(Dispatchers.IO) {
-                                val startTime = System.currentTimeMillis()
                                 resultMessages = AppDatabase.getInstance().globalSearchDao()
-                                    .discussionSearchMessages(discussionId, tokenizedQuery, 50)
-                                Logger.d("🤡 Message search took ${System.currentTimeMillis() - startTime}ms")
+                                    .discussionSearchMessages(discussionId, tokenizedQuery, Double.MAX_VALUE, SEARCH_PAGE_SIZE)
                             },
                             async(Dispatchers.IO) {
-                                val startTime = System.currentTimeMillis()
                                 resultAttachments = AppDatabase.getInstance().globalSearchDao()
-                                    .discussionSearchAttachments(discussionId, tokenizedQuery, 50)
-                                Logger.d("🤡 Attachment search took ${System.currentTimeMillis() - startTime}ms")
+                                    .discussionSearchAttachments(discussionId, tokenizedQuery, Double.MAX_VALUE, SEARCH_PAGE_SIZE)
                             },
                             async(Dispatchers.IO) {
                                 firstVisibleMessageMessageId?.let {
@@ -189,6 +305,43 @@ class DiscussionSearchViewModel : ViewModel() {
                             yield()
 
                             matchedMessageAndFyleIds = result
+                            hasMoreMessages = resultMessages.size == SEARCH_PAGE_SIZE
+                            hasMoreAttachments = resultAttachments.size == SEARCH_PAGE_SIZE
+                            resultMessages.lastOrNull()?.let {
+                                lastLoadedMessageSortIndex = it.sortIndex
+                            }
+                            resultAttachments.lastOrNull()?.let {
+                                lastLoadedAttachmentSortIndex = it.sortIndex
+                            }
+
+                            // only run the count query if needed
+                            if (hasMoreMessages || hasMoreAttachments) {
+                                // total count runs separately — it's slow (UNION dedup) and shouldn't gate page-1 display.
+                                // Possible optimization: replace discussionSearchTotalCount with two COUNT(DISTINCT m.id)
+                                // queries (one per FTS source) summed in Kotlin. Drops the count from hundreds of ms to a
+                                // few, but overcounts messages that match both content and an attachment.
+                                countJob = viewModelScope.launch(Dispatchers.IO) {
+                                    try {
+                                        val totalCount = AppDatabase.getInstance().globalSearchDao()
+                                            .discussionSearchTotalCount(discussionId, tokenizedQuery)
+                                        withContext(Dispatchers.Main.immediate) {
+                                            if (tokenizedQuery == pagingTokenizedQuery && discussionId == pagingDiscussionId) {
+                                                totalMatchedMessageCount = totalCount
+                                            }
+                                        }
+                                    } catch (_: CancellationException) {
+                                        return@launch
+                                    } catch (e: Exception) {
+                                        Logger.x(e)
+                                    }
+                                    if (isActive) {
+                                        countJob = null
+                                    }
+                                }
+                            } else {
+                                totalMatchedMessageCount = -1
+                            }
+
                             val found: Boolean
                             // if the discussion was opened with a target message, always select this one
                             if (messageIdToSetAsCurrent != null) {
@@ -222,6 +375,7 @@ class DiscussionSearchViewModel : ViewModel() {
                             if (currentPosition in 0..<matchedMessageAndFyleIds.size) {
                                 initialFoundItem = matchedMessageAndFyleIds[currentPosition].first
                             }
+                            maybePrefetch()
                         }
                     } catch (_: CancellationException) {
                         // if the job was canceled, make sure not to set filterJob to null

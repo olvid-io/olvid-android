@@ -1,0 +1,5 @@
+- Prepracovanie viacerých častí aplikácie: karta kontaktu, profilová karta, správca úložiska a pod.
+- Pridaný kalendárny pohľad do konverzácie na rýchly presun na konkrétny čas.
+- Pridaný interný ovládač „prebiehajúceho prehrávania“ na jednoduché prepínanie medzi hlasovými správami.
+- Pridaná možnosť zrušiť nahrávanie prílohy.
+- Zobrazovanie zmeškaných upozornení po uplynutí času stlmenia profilu.

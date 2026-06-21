@@ -28,6 +28,7 @@ import io.olvid.engine.metamanager.NetworkFetchDelegate;
 public class ObvAttachment {
     private final byte[] metadata;
     private final String url; // should always be the getNoBackupFilesDir() relative path to the file
+    private final boolean uploadCancelledByTheSender;
     private final boolean downloadRequested;
     private final Identity ownedIdentity;
     private final UID messageUid;
@@ -42,6 +43,10 @@ public class ObvAttachment {
 
     public String getUrl() {
         return url;
+    }
+
+    public boolean isUploadCancelledByTheSender() {
+        return uploadCancelledByTheSender;
     }
 
     public boolean isDownloadRequested() {
@@ -81,9 +86,10 @@ public class ObvAttachment {
     }
 
 
-    ObvAttachment(byte[] metadata, String url, boolean downloadRequested, Identity ownedIdentity, UID messageUid, long messageServerTimestamp, int number, long expectedLength, long receivedLength) {
+    ObvAttachment(byte[] metadata, String url, boolean uploadCancelledByTheSender, boolean downloadRequested, Identity ownedIdentity, UID messageUid, long messageServerTimestamp, int number, long expectedLength, long receivedLength) {
         this.metadata = metadata;
         this.url = url;
+        this.uploadCancelledByTheSender = uploadCancelledByTheSender;
         this.downloadRequested = downloadRequested;
         this.ownedIdentity = ownedIdentity;
         this.messageUid = messageUid;
@@ -110,6 +116,7 @@ public class ObvAttachment {
         return new ObvAttachment(
                 receivedAttachment.getMetadata(),
                 receivedAttachment.getUrl(),
+                receivedAttachment.isUploadCancelledByTheSender(),
                 receivedAttachment.isDownloadRequested(),
                 receivedAttachment.getOwnedIdentity(),
                 receivedAttachment.getMessageUid(),

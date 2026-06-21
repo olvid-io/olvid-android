@@ -68,11 +68,13 @@ public class RestoreAppDataFromBackupTask implements Callable<Boolean> {
                             ownedIdentity.unlockSalt = ownedIdentityPojo.unlock_salt;
                             db.ownedIdentityDao().updateUnlockPasswordAndSalt(ownedIdentity.bytesOwnedIdentity, ownedIdentity.unlockPassword, ownedIdentity.unlockSalt);
                         }
-                        if (ownedIdentityPojo.mute_notifications != null && ownedIdentityPojo.mute_notifications) {
+                        // only set a mute notification configuration if it is set and the timestamp is not expired
+                        if (ownedIdentityPojo.mute_notifications != null && ownedIdentityPojo.mute_notifications
+                                && (ownedIdentityPojo.mute_notification_timestamp == null || ownedIdentityPojo.mute_notification_timestamp > System.currentTimeMillis())) {
                             ownedIdentity.prefMuteNotifications = true;
                             ownedIdentity.prefMuteNotificationsTimestamp = ownedIdentityPojo.mute_notification_timestamp;
                             ownedIdentity.prefMuteNotificationsExceptMentioned = ownedIdentityPojo.mute_notifications_except_mentioned != null && ownedIdentityPojo.mute_notifications_except_mentioned;
-                            db.ownedIdentityDao().updateMuteNotifications(ownedIdentity.bytesOwnedIdentity, ownedIdentity.prefMuteNotifications, ownedIdentity.prefMuteNotificationsTimestamp, ownedIdentity.prefMuteNotificationsExceptMentioned);
+                            db.ownedIdentityDao().updateMuteNotifications(ownedIdentity.bytesOwnedIdentity, ownedIdentity.prefMuteNotificationsTimestamp, ownedIdentity.prefMuteNotificationsExceptMentioned, System.currentTimeMillis());
                         }
                         if (ownedIdentityPojo.show_neutral_notification_when_hidden != null && ownedIdentityPojo.show_neutral_notification_when_hidden) {
                             ownedIdentity.prefShowNeutralNotificationWhenHidden = true;

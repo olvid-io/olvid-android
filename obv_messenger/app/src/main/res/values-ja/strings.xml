@@ -50,7 +50,7 @@
 	<string name="dialog_message_contact_introduction" state="needs_review" hash="-398698689">%1$sと%2$sを互いに紹介しますか？</string>
 	<string name="dialog_message_contact_introduction_multiple" state="needs_review" hash="-1743988418">%1$sを以下の%2$d件の連絡先に紹介しますか？\n\n%3$s</string>
 	<string name="dialog_message_delete_attachment" state="needs_review" hash="-235504816">このメッセージから添付ファイル %1$s を本当に削除しますか？\nこの操作は元に戻せません。</string>
-	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="-273205987">添付ファイル %1$s を本当に削除しますか？\nこの操作は元に戻せません。</string>
+	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="1647132381">添付ファイル**%1$s**を本当に削除しますか？\nこの操作は元に戻せません。</string>
 	<string name="dialog_message_disband_group" state="needs_review" hash="-1617503323">グループ %1$s を解散しますか？\nこのグループへのメッセージ送信はできなくなります。既存のグループメッセージは影響を受けません。</string>
 	<string name="dialog_message_disband_non_empty_group_confirmation" state="needs_review" hash="1096257228">あなたはグループ %1$s を解散しようとしています。\nこれにより、すべてのメンバーと保留中のメンバーがグループから削除されます。現在、以下のようにいます。\n- %2$d 名のメンバー\n- %3$d 名の保留中のメンバー\n\nこのグループの解散を続行しますか？</string>
 	<string name="dialog_message_exchange_digits" state="needs_review" hash="1612882609">%1$sとのコード交換により、本人確認を再度行いますか？</string>
@@ -65,6 +65,7 @@
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">削除の確認？</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">グループを解散しますか？</string>
 	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">ディスカッションを検索…</string>
+	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">日付を入力してください</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">グループ詳細を編集</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">詳細情報を編集する</string>
 	<string name="dialog_title_exchange_digits" state="needs_review" hash="864614114">コード交換</string>
@@ -91,14 +92,18 @@
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">管理者がグループ名を変更しました：</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">管理者がグループの説明を次のように変更しました:</string>
 	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">管理者がグループの写真を変更しました。</string>
-	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">あなたの連絡先がOlvidカードを更新しました。古いバージョンと新しいバージョンは以下に表示されます。\n\n「更新」を押して、連絡先の情報をこの新しいバージョンで更新してください。</string>
+	<string name="explanation_new_contact_card_name" state="needs_review" hash="-1601853738">連絡先が名前を次のように変更しました:</string>
+	<string name="explanation_new_contact_card_position" state="needs_review" hash="184144104">連絡先が、役職/会社を以下に変更しました:</string>
+	<string name="explanation_new_contact_card_photo" state="needs_review" hash="-252626818">連絡先がプロフィール写真を更新しました。</string>
+	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">あなたの名前が以下に変更されました:</string>
+	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">あなたの役職/会社が更新されました。</string>
+	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">プロフィール写真が更新されました。</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">安全なディスカッションチャンネルが現在確立されています。この処理が完了するまで、この連絡先とのディスカッションを開始することはできません。あなたと連絡先がオンラインであれば、このプロセスは数秒で完了するはずです。\n\nもし問題が発生したと思われる場合は、チャンネル確立を再開できます。</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">連絡先が見つかりませんでした</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">グループが見つかりませんでした</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">メッセージが見つかりませんでした</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">添付ファイルが見つかりません</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">リンクが見つかりませんでした</string>
-	<string name="format_identity_details_custom_field" state="needs_review" hash="-1073344790">%1$s: %2$s</string>
 	<string name="hint_company" state="needs_review" hash="379200324">会社 (任意)</string>
 	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">メッセージを入力</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">一時的なメッセージ</string>
@@ -164,15 +169,10 @@
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">グループカード - 未公開ドラフト</string>
 	<string name="label_group_members" state="needs_review" hash="1460220752">グループメンバー</string>
 	<string name="label_other_group_members" state="needs_review" hash="-2121490032">他のグループメンバー</string>
-	<string name="label_groups" state="needs_review" hash="-990226727">グループ</string>
+	<string name="label_groups_common" state="needs_review" hash="1252823567">共通のグループ</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">招待を拒否しました</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">グループの詳細が更新されました</string>
-	<string name="label_new_olvid_card" state="needs_review" hash="688199407">連絡先の詳細が更新されました</string>
 	<string name="label_not_part_of_a_group" state="needs_review" hash="1667979596">まだどのグループにも参加していません</string>
-	<string name="label_olvid_card" state="needs_review" hash="-1953461576">オルビッドカード</string>
-	<string name="label_olvid_card_published" state="needs_review" hash="-1038740778">Olvidカード - 公開済み</string>
-	<string name="label_olvid_card_published_update" state="needs_review" hash="391148752">Olvidカード - 新規</string>
-	<string name="label_olvid_card_unpublished_draft" state="needs_review" hash="-786284715">Olvidカード - 未公開ドラフト</string>
 	<string name="label_pending_group_members" state="needs_review" hash="1481357803">保留中のグループメンバー</string>
 	<string name="label_text_copied_from_olvid" state="needs_review" hash="1675378287">Olvidからテキストをコピーしました</string>
 	<string name="label_trust_origins" state="needs_review" hash="-1177760062">信頼できる起源</string>
@@ -285,12 +285,16 @@
 	<string name="toast_message_shortcut_not_supported" state="needs_review" hash="-1300016753">お使いのデバイスではショートカットの作成がサポートされていません</string>
 	<string name="toast_message_unable_to_open_file" state="needs_review" hash="392405293">このファイルタイプを開くのに適したアプリケーションが見つかりませんでした</string>
 	<string name="toast_message_unparsable_url" state="needs_review" hash="-135719133">URLを正しく解析できませんでした</string>
-	<string name="trust_origin_direct_type" state="needs_review" hash="-67248053">%1$s - 一対一の検証</string>
-	<string name="trust_origin_group_type" state="needs_review" hash="230302215">%1$s - [PLACEHOLDER_2]さんからのグループ招待を受諾しました</string>
-	<string name="trust_origin_group_v2_type" state="needs_review" hash="-1152079590">%1$s - グループへの招待を受諾しました</string>
-	<string name="trust_origin_introduction_type" state="needs_review" hash="328494718">%1$s - 紹介者</string>
-	<string name="trust_origin_keycloak_type" state="needs_review" hash="1983748673">%2$s - %1$sによるIDプロバイダーによる検証</string>
-	<string name="trust_origin_unknown_type" state="needs_review" hash="2084263523">%1$s - 不明な信頼元</string>
+	<string name="trust_origin_direct_type" state="needs_review" hash="1798276315">直接検証</string>
+	<string name="trust_origin_group_type" state="needs_review" hash="1222060749"> が作成したグループへの招待を承諾しました</string>
+	<string name="trust_origin_group_v2_type" state="needs_review" hash="-566733151">グループへの招待を承諾しました</string>
+	<string name="trust_origin_introduction_type" state="needs_review" hash="-266148171">～より</string>
+	<string name="trust_origin_keycloak_type" state="needs_review" hash="-1113573733">%1$sのIDプロバイダーによる検証</string>
+	<string name="trust_origin_unknown_type" state="needs_review" hash="-491114965">信頼できるソースが不明</string>
+	<string name="trust_origin_direct_title" state="needs_review" hash="-1849285555">お互いを連絡先に追加しました</string>
+	<string name="trust_origin_introduction_title" state="needs_review" hash="-1034826640">はじめに</string>
+	<string name="trust_origin_group_title" state="needs_review" hash="1252823567">共通のグループ</string>
+	<string name="trust_origin_keycloak_title" state="needs_review" hash="-1917629373">ディレクトリを通じて追加されました</string>
 	<string name="menu_action_delete_contact" state="needs_review" hash="1849106991">連絡先を削除</string>
 	<string name="menu_action_delete_user" state="needs_review" hash="1683580694">ユーザーを削除</string>
 	<string name="dialog_title_delete_user" state="needs_review" hash="-56212547">ユーザーを削除しますか？</string>
@@ -299,6 +303,7 @@
 	<string name="text_empty_group" state="needs_review" hash="-464714974">空のグループ</string>
 	<string name="message_error_group_name_empty" state="needs_review" hash="1137468023">グループ名を入力してください</string>
 	<string name="hint_search_contact_name" state="needs_review" hash="-242911449">連絡先名を入力…</string>
+	<string name="hint_search_group_name" state="needs_review" hash="-265074656">グループ名を検索…</string>
 	<string name="menu_action_search" state="needs_review" hash="-2085358317">検索</string>
 	<string name="toast_message_polling_failed" state="needs_review" hash="402242307">メッセージの取得に失敗しました</string>
 	<string name="dialog_message_battery_optimization" state="needs_review" hash="1191860407">Androidのバッテリー最適化は、特定のバックグラウンドイベントをまとめて実行するために遅延させることで機能します。これにより、受信するOlvidメッセージの受信が遅れる場合があります。\n\nメッセージが速やかに受信されるようにするには、Olvidに「常にバックグラウンドで実行」を許可する必要があります。「設定」ボタンを押し、「許可」を押してください。</string>
@@ -819,6 +824,11 @@
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">メディアプレーヤー</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Olvidでメディアを再生する際の再生/一時停止コントロール</string>
 	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">オーディオファイルを再生できません</string>
+	<string name="label_voice_message" state="needs_review" hash="-348491668">ボイスメッセージ</string>
+	<string name="content_description_skip_previous" state="needs_review" hash="836036575">前の音声</string>
+	<string name="content_description_skip_next" state="needs_review" hash="-878180801">次の音声</string>
+	<string name="content_description_audio_play" state="needs_review" hash="1143766922">再生</string>
+	<string name="content_description_audio_pause" state="needs_review" hash="1931883968">一時停止</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">削除</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">すべて削除</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">すべての場所から削除できませんでした。もう一度お試しください。</string>
@@ -919,6 +929,7 @@
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">あなたのOlvid IDは現在、会社のIDプロバイダーによって管理されています。Olvidライセンスを手動でアクティブにすることはできません.\n\n詳細については、管理者にお問い合わせください。</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">不在着信</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">連絡先の詳細が更新されました</string>
+	<string name="text_own_details_updated" state="needs_review" hash="-1335488506">詳細が更新されました</string>
 	<string name="text_group_details_updated" state="needs_review" hash="1016500852">グループの詳細が更新されました</string>
 	<string name="dialog_title_sd_card_ringtone_bugged_android_9" state="needs_review" hash="-1202187296">Android 9通知音バグ</string>
 	<string name="dialog_message_sd_card_ringtone_bugged_android_9" state="needs_review" hash="1449296723">Olvidは、選択したメッセージ通知音を使用できません。無効になっています。Android 9のバグにより、外部ストレージ/SDカードへのアクセスを要求しないアプリでは、カスタム通知音を使用できません。\n\n標準の通知音を選択してみてください。それまでの間、通知は無音のままになります。</string>
@@ -1014,6 +1025,10 @@
 	<string name="dialog_title_available_space_low" state="needs_review" hash="610249394">デバイスのストレージ容量がほとんど一杯です</string>
 	<string name="dialog_message_available_space_low" state="needs_review" hash="78499573">デバイスの空き容量が少なくなっています。Olvidでファイルを受信または送信する際に、予期しないエラーが発生する可能性があります.\n\nおそらく、これはデバイスの空き容量を増やすのに最適なタイミングです。</string>
 	<string name="button_label_manage_storage" state="needs_review" hash="-918485427">ストレージの管理</string>
+	<string name="label_storage_all_files" state="needs_review" hash="1735747130">すべてのファイル</string>
+	<string name="label_storage_sent_by_me" state="needs_review" hash="640456592">私から送信</string>
+	<string name="label_storage_large_files" state="needs_review" hash="-257706820">5MBより大きい</string>
+	<string name="label_storage_discussions" state="needs_review" hash="491497248">ディスカッション</string>
 	<string name="pref_use_internal_image_viewer_title" state="needs_review" hash="1319400578">内蔵画像ビューアーを使用する</string>
 	<string name="pref_use_internal_image_viewer_summary" state="needs_review" hash="1248137666">有効にすると、画像添付をクリックすると内部ビューアーで開きます。そうでない場合、デバイスのデフォルトの画像アプリが使用されます。</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">画像の表示に失敗しました</string>
@@ -1166,7 +1181,7 @@
 	<string name="dialog_message_delete_profile_multi" state="needs_review" hash="-2003495595">このプロファイルを削除すると、デバイス上のこのプロファイルに関連するすべての情報が削除されます。これには、連絡先、グループ、およびこのプロファイルのすべての会話（メッセージと添付ファイル）の内容が含まれます。他のプロファイルはこの操作の影響を受けません。\n\nこのプロファイルをどのように削除するか選択するには、「次へ」を押してください。</string>
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">プロフィールを削除すると、このプロフィールに関連するデバイス上のすべての情報が削除されます。これには、連絡先、グループ、およびこのプロフィールのすべての会話（メッセージと添付ファイル）の内容が含まれます。\n\n<b>これは唯一表示されているプロフィールであり、非表示のプロフィールがある場合は、それらも同時に削除されます。</b>\n\n「次へ」を押して、このプロフィールの削除方法を選択してください。</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">プロフィールを<b>完全に</b>削除</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">ここに「%1$s」と入力して進んでください</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">続行するには、ここに「%1$s」と入力してください</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">プロフィールを<b>すべて</b>削除する場合：\n -\nローカルに削除され、<b>さらに</b>連絡先のデバイスからも削除されます\n -\n参加したグループから退出します\n -\nあなたが管理しているグループは解散されます\n\nプロフィールを<b>すべて</b>削除しない場合、デバイスからローカルにのみ削除されます。別のデバイスでバックアップを復元する予定がない限り、連絡先はメッセージを送信し続け、これらのメッセージが配信できないことに気づかない可能性があります。</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">現在ご利用のプロファイルは非アクティブになっているようです。おそらく別のデバイスに転送されたのでしょう。もし別のデバイスでこのプロファイルを使い続ける予定であれば、ここで安全に削除できます。\n\nもしこのプロファイルを二度と使わない場合は、まずこのデバイスで再アクティブ化し、連絡先との安全なチャンネルの再作成を待ってから、このプロファイルを「すべて削除」オプションを選択して削除する必要があります。</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">あなたのプロフィールは現在、複数のデバイスで有効になっています。\n\nプロフィールを<b>すべての場所</b>で削除する場合：\n	- すべてのデバイス<b>と</b>連絡先のデバイスから削除されます\n	- 参加したグループから退出します\n	- 管理しているグループは解散されます\n\n<b>すべての場所</b>でプロフィールを削除しない場合、ローカルデバイスからのみ削除され、他のデバイスで通常通り使用できます。</string>
@@ -1250,9 +1265,6 @@
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">グループ v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
 	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">アニメーション絵文字を使う（利用可能な場合）</string>
-	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">プロフィールストレージ使用量</string>
-	<string name="label_photos" state="needs_review" hash="1539779714">写真</string>
-	<string name="label_videos" state="needs_review" hash="-101497740">動画</string>
 	<string name="label_audio" state="needs_review" hash="-779820608">音声</string>
 	<string name="label_other" state="needs_review" hash="-543765264">その他</string>
 	<string name="label_all" state="needs_review" hash="752498555">すべて</string>
@@ -1267,14 +1279,7 @@
 	<string name="menu_action_sort_date_alt" state="needs_review" hash="646746321">日付で並べ替え（最も古い順）</string>
 	<string name="menu_action_sort_size_alt" state="needs_review" hash="1986077505">サイズで並べ替え (小さい順)</string>
 	<string name="menu_action_sort_name_alt" state="needs_review" hash="-802793419">名前でソート（逆順）</string>
-	<string name="text_sent_by_xx" state="needs_review" hash="248848108">%1$sによって送信されました</string>
 	<string name="text_unknown_sender" state="needs_review" hash="1913018414">不明の送信者</string>
-	<string name="text_sent_to_xx" state="needs_review" hash="918571953">%1$sに送信</string>
-	<string name="text_draft_for_xx" state="needs_review" hash="2063814784">%1$sの草案</string>
-	<string name="label_loading_attachments" state="needs_review" hash="856026474">添付ファイルの読み込み中…</string>
-	<string name="dialog_message_delete_attachment_for_many_messages" state="needs_review" hash="1800265017">添付ファイル %2$s は %1$d 通りのメッセージに添付されています。このファイルのみを削除しますか、それともすべての %1$d 件のメッセージから削除しますか？\nこの操作は元に戻せません。</string>
-	<string name="button_label_delete_one" state="needs_review" hash="-1916938532">1つ削除</string>
-	<string name="button_label_delete_all" state="needs_review" hash="-985749327">%1$d すべて削除</string>
 	<string name="dialog_title_save_selected_attachments" state="needs_review" hash="-405982081">選択した添付ファイルを保存</string>
 	<string name="pref_category_contacts_and_groups" state="needs_review" hash="1531647661">連絡先とグループ</string>
 	<string name="pref_auto_join_groups_title" state="needs_review" hash="29822089">グループ招待を自動的に承認…</string>
@@ -1634,7 +1639,7 @@
 	<string name="button_label_remove" state="needs_review" hash="1097276765">削除</string>
 	<string name="menu_action_remove_expiration" state="needs_review" hash="-156931599">このデバイスをアクティブに保ってください</string>
 	<string name="dialog_title_set_unexpiring_device" state="needs_review" hash="-1488033285">デバイスをアクティブに保つ</string>
-	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1293464179">現在、複数のデバイスをアクティブにするライセンスがありません。そのようなライセンスを購入する場合は、このダイアログを閉じて、下の「サブスクリプションプランを見る」を押してください。\n\n続行してデバイス「%1$s」をアクティブに保つには、代わりにデバイス「%2$s」を非アクティブ化します。続行しますか？</string>
+	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1457083107">現在、複数のデバイスを同時にアクティブにするためのライセンスをお持ちではありません。そのようなライセンスを購入したい場合は、このダイアログを閉じて、下の「サブスクリプションプランを見る」ボタンを押してください。\n\n続行してデバイス「%1$s」をアクティブな状態に保つには、代わりにデバイス「%2$s」を非アクティブ化します。よろしいですか？</string>
 	<string name="dialog_title_remove_background_image" state="needs_review" hash="488158841">現在の背景画像を削除しますか？</string>
 	<string name="dialog_title_introducing_markdown" state="needs_review" hash="175399162">メッセージの書式設定の紹介！</string>
 	<string name="dialog_message_introducing_markdown" state="needs_review" hash="1738415115">Olvidでは、Markdown構文を使ってメッセージの書式設定ができるようになりました🎨！\n\n**太字**や*斜体*で記述したり、# <big>見出し</big>を追加したりできます。\n\nサポートされているタグの一覧は、こちらで確認できます🦍：\nhttps://www.olvid.io/faq/format-your-messages/</string>
@@ -2039,6 +2044,7 @@
 	<string name="button_label_this_way" state="needs_review" hash="747183939">こちら</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">コードがコピーされました</string>
 	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">このグループに追加する相手を選択してください。</string>
+	<string name="explanation_choose_contact_introduction" state="needs_review" hash="1113777517">%1$sを誰に紹介するかお選びください。</string>
 	<string name="label_group_administration" state="needs_review" hash="871355986">グループ管理</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">通話拒否</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvidは、%1$d人を超える相手との通話を許可していません。</string>
@@ -2152,6 +2158,7 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">交渉中</string>
 	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">転送中</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">転送が完了しました</string>
+	<string name="history_transfer_step_processing_buffered_data" state="needs_review" hash="-1359029280">受信データの処理</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">転送に失敗しました</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">チャット履歴の転送</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">転送を開始できません。別の転送がすでに実行されている可能性があります。</string>
@@ -2270,7 +2277,8 @@
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">インポート中</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">コンテンツの分析</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">エクスポートされた会話を分析中</string>
-	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">OpenStreetMapのスタイルファイルを読み込む際にエラーが発生しました</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">OpenStreetMapのスタイルファイルを読み込む際にエラーが発生しました</string>
 	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">アプリ内サブスクリプションは利用できません</string>
 	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">インストールしたOlvidのバージョンには、Googleの課金ライブラリが含まれておらず、アプリ内購入をサポートしていません。\n\n詳細については、**feedback@olvid.io**までお問い合わせください。</string>
+	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">アップロードをキャンセル</string>
 </resources>

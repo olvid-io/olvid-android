@@ -270,7 +270,7 @@ public class DownloadGroupPhotoChildProtocol extends ConcreteProtocol {
             }
             UID photoServerLabel = new UID(jsonGroupDetailsWithVersionAndPhoto.getPhotoServerLabel());
 
-            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.GetUserDataQuery(receivedMessage.groupInformation.groupOwnerIdentity, photoServerLabel)));
+            CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.GetUserDataQuery(receivedMessage.groupInformation.groupOwnerIdentity, photoServerLabel, false)));
             ChannelMessageToSend messageToSend = new ServerGetPhotoMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
             protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
             return new DownloadingPhotoState(receivedMessage.groupInformation);

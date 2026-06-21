@@ -7,7 +7,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.location.Location
@@ -62,6 +61,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -77,7 +77,6 @@ import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.location.LocationRequestCompat
 import androidx.core.net.toUri
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentContainerView
 import io.olvid.engine.Logger
 import io.olvid.messenger.App
@@ -85,6 +84,7 @@ import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.HandlerExecutor
 import io.olvid.messenger.customClasses.InitialView
+import io.olvid.messenger.customClasses.OlvidLocationListener
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Message
 import io.olvid.messenger.databases.entity.jsons.JsonLocation
@@ -210,11 +210,17 @@ class LocationActivity : LockableActivity() {
     }
 
     private var locationManager: LocationManager? = null
-    private val passiveLocationListenerCompat = LocationListenerCompat { location ->
-        GpsDebugLogger.logGpsEvent("Next location is from passive provider")
-        onLocationUpdate(location)
+    private val passiveLocationListenerCompat = object : OlvidLocationListener {
+        override fun onLocationChanged(location: Location) {
+            GpsDebugLogger.logGpsEvent("Next location is from passive provider")
+            onLocationUpdate(location)
+        }
     }
-    private val locationListenerCompat = LocationListenerCompat { location -> onLocationUpdate(location) }
+    private val locationListenerCompat = object : OlvidLocationListener {
+        override fun onLocationChanged(location: Location) {
+            onLocationUpdate(location)
+        }
+    }
     private val fakeLocationListenerForGps = LocationListenerCompat { _ -> }
 
     private var mapView: MapViewAbstractFragment? = null
@@ -230,21 +236,10 @@ class LocationActivity : LockableActivity() {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(
-                androidx.compose.ui.graphics.Color.Transparent.toArgb(),
-                androidx.compose.ui.graphics.Color.Transparent.toArgb()
-            ),
-            navigationBarStyle = SystemBarStyle.light(
-                androidx.compose.ui.graphics.Color.Transparent.toArgb(),
-                ContextCompat.getColor(this, R.color.blackOverlay)
-            )
+            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
         super.onCreate(savedInstanceState)
-
-        WindowInsetsControllerCompat(window, window.decorView).run {
-            isAppearanceLightStatusBars = true
-            isAppearanceLightNavigationBars = true
-        }
 
         locationPermissionHelper = LocationPermissionHelper(this, this) {
             checkPermissionsAndEnableLocation()
@@ -1093,7 +1088,7 @@ class LocationActivity : LockableActivity() {
         markerIconCanvas.drawBitmap(resizedBitmap, 0f, initialViewSize.toFloat(), alphaWhitePaint)
 
         val blackPaint = Paint()
-        blackPaint.color = Color.BLACK
+        blackPaint.color = Color.Black.toArgb()
         markerIconCanvas.drawCircle(
             initialViewSize.toFloat() / 2,
             initialViewSize + shadowHeight.toFloat() / 2,

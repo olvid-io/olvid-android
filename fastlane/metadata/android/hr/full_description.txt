@@ -1,0 +1,17 @@
+Olvid je prva privatna aplikacija za trenutne poruke za sve. Pošaljite poruke, fotografije, datoteke i obavljajte sigurne telefonske i video pozive.
+
+Što je "privatni" messenger?
+
+To je messenger:
+- koji vam ne nameće nove kontakte. Vi ste u kontroli: sami birate s kim želite razgovarati. Olvid nudi nekoliko načina za povezivanje s drugim korisnicima Olvida, bilo osobno ili na daljinu.
+- koji ne zahtijeva nikakve osobne podatke. Olvid neće tražiti vaš broj telefona ili e-mail adresu. Za razliku od vašeg prethodnog messengera, Olvid nikada neće tražiti pristup vašem adresaru.
+- na kojem nikada nećete primati neželjene poruke ili poruke s nepoznatog izvora.
+- gdje sve razmjene imaju istu sigurnost i privatnost kao razgovor u stvarnom svijetu iza zatvorenih vrata. Olvid nudi end-to-end enkripciju i end-to-end autentifikaciju prema zadanim postavkama, uvijek, za sve što šaljete ili primate.
+
+Olvid vam jamči sigurne prostore, imune na vanjske agresije, koji vas izoliraju od digitalne buke i nasilja drugih društvenih mreža. Kreirajte grupe sa svojom obitelji, prijateljima i ključnim suradnicima. Bez spama, bez reklama. Konačno ponovno preuzimate potpunu kontrolu nad svojom komunikacijom.
+
+Olvid je dizajniran da bude najbolje mjesto za razmjenu mišljenja o važnim temama, s ljudima koji su vam važni.
+
+Olvid - Tehnologija
+
+U srcu Olvida nalazi se "kriptografski motor", rezultat nekoliko godina istraživanja, koji omogućuje matematičko dokazivanje integriteta, povjerljivosti i anonimnosti vaših komunikacija.

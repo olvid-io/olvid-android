@@ -1,0 +1,5 @@
+- Redesign několika komponent aplikace: kontaktní karta, profilová karta, správce úložiště atd.
+- Přidána kalendářová nabídka do konverzace pro rychlý přechod na konkrétní časový bod.
+- Přidán interní ovladač „probíhajícího přehrávání“ pro snadné přepínání mezi hlasovými zprávami.
+- Přidána možnost zrušit odeslání přílohy.
+- Zobrazení chybějících notifikací po skončení ztlumení profilu.

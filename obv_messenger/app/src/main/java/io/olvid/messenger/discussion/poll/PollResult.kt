@@ -72,7 +72,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -98,9 +97,9 @@ import io.olvid.messenger.databases.entity.jsons.JsonPoll
 import io.olvid.messenger.designsystem.components.AccessibilityFakeButton
 import io.olvid.messenger.designsystem.components.DonutChart
 import io.olvid.messenger.designsystem.components.DonutChartData
-import io.olvid.messenger.designsystem.components.OlvidDropdownMenu
-import io.olvid.messenger.designsystem.components.OlvidDropdownMenuItem
+import io.olvid.messenger.designsystem.components.OlvidSortButton
 import io.olvid.messenger.designsystem.components.OlvidTopAppBar
+import io.olvid.messenger.designsystem.components.SortMenuItem
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.systemBarsHorizontalPadding
 import io.olvid.messenger.designsystem.theme.OlvidTypography
@@ -325,7 +324,6 @@ fun PollOverview(
         }
 
         var sortByPollOrder by rememberSaveable { mutableStateOf(false) }
-        var showDropdown by remember { mutableStateOf(false) }
         Spacer(modifier = Modifier.height(24.dp))
         Row(
             Modifier
@@ -339,64 +337,20 @@ fun PollOverview(
                 style = OlvidTypography.body1.copy(fontWeight = FontWeight.Medium)
             )
             Spacer(modifier = Modifier.weight(1f))
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple()
-                    ) { showDropdown = !showDropdown }
-                    .padding(4.dp),
-                verticalAlignment = CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.label_poll_answers_sorted_by),
-                    style = OlvidTypography.body2.copy(color = colorResource(R.color.almostBlack))
+            OlvidSortButton(
+                items = listOf(
+                    SortMenuItem(
+                        label = stringResource(R.string.label_poll_answers_sorted_by_poll_order),
+                        isActive = sortByPollOrder,
+                        onClick = { sortByPollOrder = true }
+                    ),
+                    SortMenuItem(
+                        label = stringResource(R.string.label_poll_answers_sorted_by_answer_count),
+                        isActive = !sortByPollOrder,
+                        onClick = { sortByPollOrder = false }
+                    ),
                 )
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(
-                    painter = painterResource(R.drawable.ic_chevrons_sort),
-                    tint = colorResource(R.color.almostBlack),
-                    contentDescription = stringResource(R.string.label_poll_answers_sorted_by)
-                )
-                OlvidDropdownMenu(
-                    expanded = showDropdown,
-                    onDismissRequest = { showDropdown = false }
-                ) {
-                    OlvidDropdownMenuItem(
-                        text = stringResource(R.string.label_poll_answers_sorted_by_poll_order),
-                        onClick = {
-                            sortByPollOrder = true
-                            showDropdown = false
-                        },
-                        trailingIcon = {
-                            if (sortByPollOrder) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_check),
-                                    contentDescription = null,
-                                    tint = colorResource(R.color.darkGrey)
-                                )
-                            }
-                        }
-                    )
-                    OlvidDropdownMenuItem(
-                        text = stringResource(R.string.label_poll_answers_sorted_by_answer_count),
-                        onClick = {
-                            sortByPollOrder = false
-                            showDropdown = false
-                        },
-                        trailingIcon = {
-                            if (!sortByPollOrder) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_check),
-                                    contentDescription = null,
-                                    tint = colorResource(R.color.darkGrey)
-                                )
-                            }
-                        }
-                    )
-                }
-            }
+            )
         }
         if (answersCount == 0) {
             SectionCard(

@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">%1$d tag hozzáadás</item>
 		<item quantity="other" state="needs_review" hash="1091232977">%1$d tag hozzá</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Bemutatás %1$d kapcsolattal</item>
+		<item quantity="other" state="needs_review" hash="222947824">Mutasd be a %1$d névjegyeket</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">» Ezen az eszközön az előző eszköze deaktiválásra kerül:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">» Ezen az eszközön az alábbi eszközeid lesznek deaktiválva:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">Tényleg törölni szeretnéd a kiválasztott mellékletet?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">Biztosan törölni szeretné a kiválasztott %1$d mellékletet?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Ha ez a melléklet több üzenethez is csatolva van, a melléklet összes másolata törölve lesz.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Ha ezeket a mellékleteket több üzenethez is csatolják, a mellékletek összes másolata törlődik.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d nap, %2$02dóra %3$02dperc %4$02dmásodperc</item>

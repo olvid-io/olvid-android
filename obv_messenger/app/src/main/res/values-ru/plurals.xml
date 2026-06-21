@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">Добавить %1$d участника</item>
 		<item quantity="other" state="needs_review" hash="1091232977">Добавить %1$d участников</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Представить контакт %1$d</item>
+		<item quantity="other" state="needs_review" hash="222947824">Познакомьте %1$d со своими контактами</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">\" на этом устройстве ваш предыдущий телефон, указанный ниже, будет деактивирован:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">\" на этом устройстве ваши устройства, указанные ниже, будут деактивированы:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">Действительно хотите удалить выбранный файл?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">Вы действительно хотите удалить выбранные %1$d вложения?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Если этот файл прикреплен к нескольким сообщениям, все копии файла будут удалены.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Если эти вложения прикреплены к нескольким сообщениям, все копии вложений будут удалены.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d день, %2$02dч %3$02dм %4$02dс</item>

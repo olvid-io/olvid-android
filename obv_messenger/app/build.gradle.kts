@@ -1,5 +1,4 @@
-import com.android.build.VariantOutput
-import com.android.build.gradle.api.ApkVariantOutput
+import com.android.build.api.variant.FilterConfiguration
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -14,6 +13,9 @@ plugins {
 }
 
 val os: OperatingSystem? = OperatingSystem.current()
+
+val appVersionCode = 306
+val appVersionName = "4.4"
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
@@ -38,12 +40,12 @@ android {
         applicationId = "io.olvid.messenger"
         minSdk = 23
         targetSdk = 36
-        versionCode = 302
-        versionName = "4.3"
+        versionCode = appVersionCode
+        versionName = appVersionName
         vectorDrawables.useSupportLibrary = true
         // MultiDex is enabled by default for minSdk >= 21
         androidResources {
-            localeFilters.addAll(listOf("en", "fr", "af", "ar", "ca", "cs", "da", "de", "el", "es", "fa", "fi", "hi", "hr", "hu", "it", "iw", "ja", "ko", "nl", "no", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sv", "tr", "uk", "vi", "zh", "zh-rTW"))
+            localeFilters.addAll(listOf("en", "fr", "af", "ar", "bg", "bn", "ca", "cs", "da", "de", "el", "es", "et", "fa", "fi", "gu", "hi", "hr", "hu", "in", "it", "iw", "ja", "kn", "ko", "lt", "lv", "ml", "mr", "nl", "no", "pa", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sr", "sv", "sw", "ta", "te", "th", "fil", "tr", "uk", "ur", "vi", "zh", "zh-rTW"))
         }
         manifestPlaceholders["appAuthRedirectScheme"] = "olvid.openid"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -138,9 +140,18 @@ android {
     // also include nogoogle source folders in the FDroid build
     sourceSets {
         named("zfdroid") {
-            java.srcDirs("src/nogoogle/java")
-            kotlin.srcDirs("src/nogoogle/java")
-            res.srcDirs("src/nogoogle/res")
+            java.directories.apply {
+                clear()
+                add("src/nogoogle/java")
+            }
+            kotlin.directories.apply {
+                clear()
+                add("src/nogoogle/java")
+            }
+            res.directories.apply {
+                clear()
+                add("src/nogoogle/res")
+            }
         }
     }
 
@@ -153,19 +164,6 @@ android {
         }
     }
 
-    applicationVariants.configureEach {
-        if (flavorName.contains("zfdroid", ignoreCase = true)) {
-            outputs.forEach { output ->
-                val abi = output.filters.find { it.filterType == VariantOutput.FilterType.ABI.name }?.identifier
-                abi?.let {
-                    @Suppress("UNCHECKED_CAST")
-                    val archVersionCodeOffset = (project.ext.get("fdroidAbiCodes") as? Map<String, Int>)?.get(abi) ?: 0
-                    (output as ApkVariantOutput).versionCodeOverride =
-                        (100 * project.android.defaultConfig.versionCode!!) + archVersionCodeOffset
-                }
-            }
-        }
-    }
 }
 
 androidComponents {
@@ -180,6 +178,20 @@ androidComponents {
 
     onVariants { variant ->
         variant.packaging.resources.excludes.add("META-INF/*")
+
+        if (variant.flavorName?.contains("zfdroid", ignoreCase = true) == true) {
+            variant.outputs.forEach { output ->
+                val abi = output.filters
+                    .find { it.filterType == FilterConfiguration.FilterType.ABI }
+                    ?.identifier
+                if (abi != null) {
+                    @Suppress("UNCHECKED_CAST")
+                    val archVersionCodeOffset =
+                        (project.ext.get("fdroidAbiCodes") as? Map<String, Int>)?.get(abi) ?: 0
+                    output.versionCode.set((100 * appVersionCode) + archVersionCodeOffset)
+                }
+            }
+        }
     }
 }
 
@@ -219,8 +231,6 @@ dependencies {
 
     implementation(libs.accompanist.permissions)
     implementation(libs.reorderable)
-    implementation(libs.androidx.localbroadcastmanager)
-    implementation(libs.androidx.documentfile)
 
     implementation(libs.bundles.coil)
 

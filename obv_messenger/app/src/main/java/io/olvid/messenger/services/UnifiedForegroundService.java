@@ -44,7 +44,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.core.location.LocationListenerCompat;
 import androidx.core.location.LocationManagerCompat;
 import androidx.core.location.LocationRequestCompat;
 import androidx.core.util.Pair;
@@ -73,6 +72,7 @@ import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.HandlerExecutor;
 import io.olvid.messenger.customClasses.LocationShareQuality;
+import io.olvid.messenger.customClasses.OlvidLocationListener;
 import io.olvid.messenger.lock_screen.LockScreenOrNotActivity;
 import io.olvid.messenger.lock_screen.LockableActivity;
 import io.olvid.messenger.customClasses.PreviewUtils;
@@ -1220,7 +1220,7 @@ public class UnifiedForegroundService extends Service {
 
         // ---------- Core sharing engine: subscribe to location updates and handle updates of location
         // ---------- for every registered discussion
-        private static class LocationUpdatesSubscriber implements LocationListenerCompat {
+        private static class LocationUpdatesSubscriber implements OlvidLocationListener {
             public static final long RETRY_DELAY_MS = 60_000; // after an error, wait this long before retying
 
             private final HashMap<Long, DiscussionSharingHolder> holdersByDiscussionId = new HashMap<>();
@@ -1228,11 +1228,11 @@ public class UnifiedForegroundService extends Service {
             private final LocationManager locationManager = (LocationManager) App.getContext().getSystemService(Context.LOCATION_SERVICE);
             private final Executor executor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ? App.getContext().getMainExecutor() : new HandlerExecutor(Looper.getMainLooper());
             private final Handler timerHandler = new Handler(Looper.getMainLooper());
-            private final LocationListenerCompat passiveLocationListenerForGps = (Location location) -> {
+            private final OlvidLocationListener passiveLocationListenerForGps = (Location location) -> {
                 GpsDebugLogger.INSTANCE.logGpsEvent("Next location is from passive provider");
                 onLocationChanged(location);
             };
-            private final LocationListenerCompat fakeLocationListenerForGps = (Location location) -> {};
+            private final OlvidLocationListener fakeLocationListenerForGps = (Location location) -> {};
 
             // return null if holdersByDiscussionId is empty
             private @Nullable LocationShareQuality getMostPreciseRequestedQuality() {

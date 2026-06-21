@@ -37,11 +37,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import io.olvid.messenger.R
+import io.olvid.messenger.designsystem.components.BaseDialogContent
+import io.olvid.messenger.designsystem.components.CustomDialogContent
 import io.olvid.messenger.designsystem.components.OlvidTextButton
 import io.olvid.messenger.designsystem.theme.OlvidTypography
 import io.olvid.messenger.settings.SettingsActivity
@@ -50,12 +53,11 @@ import io.olvid.messenger.settings.SettingsActivity
 fun ArchiveSettingsContent(
     onOptionChosen: () -> Unit,
 ) {
-    Box(
+    CustomDialogContent(
         modifier = Modifier
             .wrapContentWidth()
             .padding(16.dp)
             .sizeIn(minWidth = 200.dp, maxWidth = 560.dp),
-        propagateMinConstraints = true
     ) {
         Column(
             modifier = Modifier
@@ -67,14 +69,12 @@ fun ArchiveSettingsContent(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.dialog_unarchive_setting_title),
-                color = colorResource(id = R.color.primary700),
                 style = OlvidTypography.h2
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.dialog_unarchive_setting_message),
-                color = colorResource(id = R.color.greyTint),
                 style = OlvidTypography.body1
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -108,18 +108,15 @@ fun ArchiveSettingsContent(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 text = stringResource(R.string.dialog_unarchive_setting_explain),
-                color = colorResource(id = R.color.greyTint),
-                style = OlvidTypography.body2
+                style = OlvidTypography.body2.copy(fontStyle = FontStyle.Italic)
             )
         }
     }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, locale = "fr")
 @Composable
 private fun ArchiveSettingsContentPreview() {
-    AppCompatTheme {
-        ArchiveSettingsContent(onOptionChosen = {})
-    }
+    ArchiveSettingsContent(onOptionChosen = {})
 }

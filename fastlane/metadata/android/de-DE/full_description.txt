@@ -1,0 +1,19 @@
+Olvid ist die erste private Instant-Messaging-Anwendung für alle. Senden Sie Nachrichten, Fotos, Dateien und führen Sie sichere Telefon- und Videoanrufe durch.
+
+
+Was ist ein "privater" Messenger?
+
+Es ist ein Messenger:
+- Der Ihnen keine neuen Kontakte aufzwingt. Sie haben die Kontrolle: Sie entscheiden, mit wem Sie kommunizieren möchten. Olvid bietet verschiedene Möglichkeiten, andere Olvid-Benutzer einzuladen, entweder persönlich oder aus der Ferne.
+- Der keine persönlichen Daten benötigt. Olvid wird nicht nach Ihrer Telefonnummer oder E-Mail-Adresse fragen. Im Gegensatz zu Ihrem vorherigen Messenger wird Olvid niemals Zugriff auf Ihr Adressbuch anfordern.
+- Auf dem Sie niemals unerwünschte Nachrichten oder Nachrichten von einer unbekannten Quelle erhalten.
+- Bei dem alle Nachrichten die gleiche Sicherheit und Privatsphäre wie ein echtes Gespräch hinter verschlossenen Türen genießen. Olvid bietet standardmäßig immer Ende-zu-Ende-Verschlüsselung und Ende-zu-Ende-Authentifizierung für alles, was Sie senden und empfangen.
+
+Olvid garantiert Ihnen sichere Räume, die gegen externe Angriffe immun sind und Sie von dem digitalen Lärm und der Gewalt anderer sozialer Netzwerke isolieren. Erstellen Sie Gruppen mit Ihrer Familie, Ihren Freunden und Ihren wichtigsten Mitarbeitern. Kein Spam, keine Werbung. Sie übernehmen endlich wieder die volle Kontrolle über Ihre Kommunikation.
+
+Olvid wurde entwickelt, um der beste Ort für den Austausch über wichtige Themen mit den Menschen zu sein, die Ihnen wichtig sind.
+
+
+Olvid - Technologie
+
+Im Herzen von Olvid befindet sich eine "kryptografische Engine", die aus mehreren Jahren Forschung stammt und es ermöglicht, die Integrität, Vertraulichkeit und Anonymität Ihrer Kommunikation mathematisch zu beweisen.

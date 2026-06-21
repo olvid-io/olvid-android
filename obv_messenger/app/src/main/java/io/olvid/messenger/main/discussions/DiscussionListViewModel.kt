@@ -206,6 +206,7 @@ class DiscussionListViewModel : ViewModel() {
             discussion.asList().apply {
                 forEach {
                     AppDatabase.getInstance().discussionDao().updateArchived(archived, it.id)
+                    UnreadCountsSingleton.discussionArchivedChanged(it.id, archived)
                     AppSingleton.getEngine().profileBackupNeeded(it.bytesOwnedIdentity)
                 }
                 propagateArchivedDiscussions(this, archived)
@@ -232,6 +233,7 @@ class DiscussionListViewModel : ViewModel() {
             AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(
                 discussionId, true
             )
+            UnreadCountsSingleton.discussionUnreadFlagChanged(discussionId, true)
         }
     }
 

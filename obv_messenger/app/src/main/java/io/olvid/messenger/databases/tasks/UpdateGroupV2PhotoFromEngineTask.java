@@ -66,7 +66,7 @@ public class UpdateGroupV2PhotoFromEngineTask implements Runnable {
                     // group indicates there is nothing new, still, after the photo download we realize that he should be notified --> notify him
                     Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, discussion.bytesOwnedIdentity);
                     newDetailsMessage.id = db.messageDao().insert(newDetailsMessage);
-                    UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
+                    UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.bytesOwnedIdentity, discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
                     if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
                         db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                     }

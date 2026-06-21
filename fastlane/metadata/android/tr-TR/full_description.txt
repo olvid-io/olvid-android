@@ -1,0 +1,19 @@
+Olvid, herkes için ilk özel anlık mesajlaşma uygulamasıdır. Mesaj, fotoğraf ve dosya gönderin, güvenli telefon ve görüntülü aramalar yapın.
+
+
+"Özel" bir mesajlaşma uygulaması nedir?
+
+Bu, şunları içeren bir uygulamadır:
+- Yeni kişileri size dayatmayan. Kontrol sizde: Kiminle konuşmak istediğinizi siz seçersiniz. Olvid, diğer Olvid kullanıcılarını yüz yüze veya uzaktan davet etmenin çeşitli yollarını sunar.
+- Herhangi bir kişisel veri gerektirmeyen. Olvid, telefon numaranızı veya e-posta adresinizi istemez. Önceki mesajlaşma uygulamasının aksine, Olvid asla adres defterinize erişim istemeyecektir.
+- Üzerinde asla istenmeyen mesajlar veya bilinmeyen bir kaynaktan gelen mesajlar almayacağınız.
+- Tüm iletişimlerin, gerçek hayattaki kapalı kapılar ardındaki bir konuşma kadar aynı güvenlik ve gizliliğe sahip olduğu. Olvid, varsayılan olarak uçtan uca şifreleme ve uçtan uca kimlik doğrulama sunar, her zaman, gönderdiğiniz veya aldığınız her şey için.
+
+Olvid, sizi dış saldırılardan koruyan, sizi diğer sosyal ağların dijital gürültüsünden ve şiddetinden izole eden güvenli alanlar garanti eder. Aileniz, arkadaşlarınız ve önemli iş ortaklarınızla gruplar oluşturun. Spam yok, reklam yok. Sonunda iletişimleriniz üzerinde tam kontrolü yeniden kazanırsınız.
+
+Olvid, önemli konularda, sizin için önemli olan kişilerle iletişim kurmak için en iyi yer olacak şekilde tasarlandı.
+
+
+Olvid - Teknoloji
+
+Olvid'in kalbinde, birkaç yıllık araştırmanın sonucu olan ve iletişimlerinizin bütünlüğünü, gizliliğini ve anonimliğini matematiksel olarak kanıtlamayı sağlayan bir "kriptografik motor" bulunmaktadır.

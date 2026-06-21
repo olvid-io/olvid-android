@@ -101,8 +101,8 @@ import io.olvid.messenger.lock_screen.LockableActivity
 class HistoryTransferActivity: LockableActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
         super.onCreate(savedInstanceState)
 
@@ -359,7 +359,8 @@ private fun Carrousel(
             TransferProgress.ContactingOtherDevice -> items.indexOf(CarrouselItemType.WAITING_FOR_OTHER_DEVICE)
             TransferProgress.Connecting -> items.indexOf(CarrouselItemType.CONNECTING)
             TransferProgress.Negotiating -> items.indexOf(CarrouselItemType.NEGOTIATING)
-            is TransferProgress.Transferring -> items.indexOf(CarrouselItemType.TRANSFERRING)
+            is TransferProgress.Transferring,
+            is TransferProgress.ProcessingReceivedData -> items.indexOf(CarrouselItemType.TRANSFERRING)
             is TransferProgress.Failed,
             TransferProgress.Finished -> items.indexOf(CarrouselItemType.FINISHED)
         }.coerceAtLeast(0)
@@ -518,8 +519,6 @@ fun ColumnScope.DetailedProgress(
     messagesEta: State<EtaEstimator.SpeedAndEta?>?,
     filesEta: State<EtaEstimator.SpeedAndEta?>?,
 ) {
-    val context = LocalContext.current
-
     when(progress) {
         is TransferProgress.DestinationWaitingForConfirmation,
         TransferProgress.ContactingOtherDevice,
@@ -536,147 +535,29 @@ fun ColumnScope.DetailedProgress(
         }
 
         is TransferProgress.Transferring -> {
-            if (progress.messagesTotal > 0) {
-                Text(
-                    modifier = Modifier.align(Alignment.Start),
-                    text = stringResource(
-                        if (role == TransferRole.SOURCE)
-                            if (transportType is TransferTransportType.ZipFileExport)
-                                R.string.transfer_label_exporting_messages
-                            else
-                                R.string.transfer_label_sending_messages
-                        else
-                            if (transportType is TransferTransportType.ZipFileImport)
-                                R.string.transfer_label_importing_messages
-                            else
-                                R.string.transfer_label_receiving_messages
-                    ),
-                    style = OlvidTypography.body1,
-                    maxLines = 1,
-                    color = colorResource(R.color.almostBlack),
-                )
+            ProgressBars(
+                messagesProgress = progress.messagesProgress,
+                messagesTotal = progress.messagesTotal,
+                filesProgress = progress.filesProgress,
+                filesTotal = progress.filesTotal,
+                role = role,
+                transportType = transportType,
+                messagesEta = messagesEta,
+                filesEta = filesEta
+            )
+        }
 
-
-                Spacer(Modifier.height(12.dp))
-
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp),
-                    progress = {
-                        progress.messagesProgress.toFloat() / progress.messagesTotal.toFloat()
-                    },
-                    trackColor = colorResource(R.color.mediumGrey),
-                    color = colorResource(R.color.green),
-                    strokeCap = StrokeCap.Round,
-                    gapSize = (-6).dp,
-                    drawStopIndicator = {}
-                )
-
-                Spacer(Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    messagesEta?.value?.takeIf {
-                        progress.messagesProgress < progress.messagesTotal
-                    }?.let { speedAndEta ->
-                        val remaining = speedAndEta.etaSeconds.formatEtaSeconds(context) ?: "-"
-                        val throughput = "~%.0f".format(speedAndEta.speedBps) + "/s"
-
-                        Text(
-                            text = stringResource(R.string.label_remaining_and_throughput, remaining, throughput),
-                            style = OlvidTypography.subtitle1,
-                            maxLines = 1,
-                            color = colorResource(R.color.greyTint)
-                        )
-                    }
-
-                    Spacer(Modifier.weight(1f, true))
-
-                    Text(
-                        text = "${progress.messagesProgress}/${progress.messagesTotal}",
-                        style = OlvidTypography.subtitle1,
-                        maxLines = 1,
-                        color = colorResource(R.color.greyTint)
-                    )
-                }
-
-            }
-
-
-            if (progress.messagesTotal > 0 && progress.filesTotal > 0) {
-                Spacer(Modifier.height(24.dp))
-            }
-
-
-            if (progress.filesTotal > 0) {
-                Text(
-                    modifier = Modifier.align(Alignment.Start),
-                    text = stringResource(
-                        if (role == TransferRole.SOURCE)
-                            if (transportType is TransferTransportType.ZipFileExport)
-                                R.string.transfer_label_exporting_attachments
-                            else
-                                R.string.transfer_label_sending_attachments
-                        else
-                            if (transportType is TransferTransportType.ZipFileImport)
-                                R.string.transfer_label_importing_attachments
-                            else
-                                R.string.transfer_label_receiving_attachments
-                    ),
-                    style = OlvidTypography.body1,
-                    maxLines = 1,
-                    color = colorResource(R.color.almostBlack),
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp),
-                    progress = {
-                        progress.filesProgress.toFloat() / progress.filesTotal.toFloat()
-                    },
-                    trackColor = colorResource(R.color.mediumGrey),
-                    color = colorResource(R.color.olvid_gradient_light),
-                    strokeCap = StrokeCap.Round,
-                    gapSize = (-6).dp,
-                    drawStopIndicator = {}
-                )
-
-                Spacer(Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    filesEta?.value?.takeIf {
-                        progress.filesProgress < progress.filesTotal
-                    }?.let { speedAndEta ->
-                        val remaining = speedAndEta.etaSeconds.formatEtaSeconds(context) ?: "-"
-                        val throughput = speedAndEta.speedBps.formatBytesSpeed(context) ?: "-"
-
-                        Text(
-                            text = stringResource(R.string.label_remaining_and_throughput, remaining, throughput),
-                            style = OlvidTypography.subtitle1,
-                            maxLines = 1,
-                            color = colorResource(R.color.greyTint)
-                        )
-                    }
-
-                    Spacer(Modifier.weight(1f, true))
-
-                    Text(
-                        text = Formatter.formatShortFileSize(context, progress.filesProgress) +
-                                "/" +
-                                Formatter.formatShortFileSize(context, progress.filesTotal),
-                        style = OlvidTypography.subtitle1,
-                        maxLines = 1,
-                        color = colorResource(R.color.greyTint)
-                    )
-                }
-            }
+        is TransferProgress.ProcessingReceivedData -> {
+            ProgressBars(
+                messagesProgress = progress.messagesProgress,
+                messagesTotal = progress.messagesTotal,
+                filesProgress = progress.filesProgress,
+                filesTotal = progress.filesTotal,
+                role = role,
+                transportType = transportType,
+                messagesEta = messagesEta,
+                filesEta = filesEta
+            )
         }
 
         is TransferProgress.Failed -> {
@@ -718,6 +599,162 @@ fun ColumnScope.DetailedProgress(
     }
 }
 
+
+@Composable
+private fun ColumnScope.ProgressBars(
+    messagesProgress: Int,
+    messagesTotal: Int,
+    filesProgress: Long,
+    filesTotal: Long,
+    role: TransferRole,
+    transportType: TransferTransportType,
+    messagesEta: State<EtaEstimator.SpeedAndEta?>?,
+    filesEta: State<EtaEstimator.SpeedAndEta?>?,
+) {
+    val context = LocalContext.current
+
+    if (messagesTotal > 0) {
+        Text(
+            modifier = Modifier.align(Alignment.Start),
+            text = stringResource(
+                if (role == TransferRole.SOURCE)
+                    if (transportType is TransferTransportType.ZipFileExport)
+                        R.string.transfer_label_exporting_messages
+                    else
+                        R.string.transfer_label_sending_messages
+                else
+                    if (transportType is TransferTransportType.ZipFileImport)
+                        R.string.transfer_label_importing_messages
+                    else
+                        R.string.transfer_label_receiving_messages
+            ),
+            style = OlvidTypography.body1,
+            maxLines = 1,
+            color = colorResource(R.color.almostBlack),
+        )
+
+
+        Spacer(Modifier.height(12.dp))
+
+        LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp),
+            progress = {
+                messagesProgress.toFloat() / messagesTotal.toFloat()
+            },
+            trackColor = colorResource(R.color.mediumGrey),
+            color = colorResource(R.color.green),
+            strokeCap = StrokeCap.Round,
+            gapSize = (-6).dp,
+            drawStopIndicator = {}
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            messagesEta?.value?.takeIf {
+                messagesProgress < messagesTotal
+            }?.let { speedAndEta ->
+                val remaining = speedAndEta.etaSeconds.formatEtaSeconds(context) ?: "-"
+                val throughput = "~%.0f".format(speedAndEta.speedBps) + "/s"
+
+                Text(
+                    text = stringResource(R.string.label_remaining_and_throughput, remaining, throughput),
+                    style = OlvidTypography.subtitle1,
+                    maxLines = 1,
+                    color = colorResource(R.color.greyTint)
+                )
+            }
+
+            Spacer(Modifier.weight(1f, true))
+
+            Text(
+                text = "${messagesProgress}/${messagesTotal}",
+                style = OlvidTypography.subtitle1,
+                maxLines = 1,
+                color = colorResource(R.color.greyTint)
+            )
+        }
+
+    }
+
+
+    if (messagesTotal > 0 && filesTotal > 0) {
+        Spacer(Modifier.height(24.dp))
+    }
+
+
+    if (filesTotal > 0) {
+        Text(
+            modifier = Modifier.align(Alignment.Start),
+            text = stringResource(
+                if (role == TransferRole.SOURCE)
+                    if (transportType is TransferTransportType.ZipFileExport)
+                        R.string.transfer_label_exporting_attachments
+                    else
+                        R.string.transfer_label_sending_attachments
+                else
+                    if (transportType is TransferTransportType.ZipFileImport)
+                        R.string.transfer_label_importing_attachments
+                    else
+                        R.string.transfer_label_receiving_attachments
+            ),
+            style = OlvidTypography.body1,
+            maxLines = 1,
+            color = colorResource(R.color.almostBlack),
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp),
+            progress = {
+                filesProgress.toFloat() / filesTotal.toFloat()
+            },
+            trackColor = colorResource(R.color.mediumGrey),
+            color = colorResource(R.color.olvid_gradient_light),
+            strokeCap = StrokeCap.Round,
+            gapSize = (-6).dp,
+            drawStopIndicator = {}
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            filesEta?.value?.takeIf {
+                filesProgress < filesTotal
+            }?.let { speedAndEta ->
+                val remaining = speedAndEta.etaSeconds.formatEtaSeconds(context) ?: "-"
+                val throughput = speedAndEta.speedBps.formatBytesSpeed(context) ?: "-"
+
+                Text(
+                    text = stringResource(R.string.label_remaining_and_throughput, remaining, throughput),
+                    style = OlvidTypography.subtitle1,
+                    maxLines = 1,
+                    color = colorResource(R.color.greyTint)
+                )
+            }
+
+            Spacer(Modifier.weight(1f, true))
+
+            Text(
+                text = Formatter.formatShortFileSize(context, filesProgress) +
+                        "/" +
+                        Formatter.formatShortFileSize(context, filesTotal),
+                style = OlvidTypography.subtitle1,
+                maxLines = 1,
+                color = colorResource(R.color.greyTint)
+            )
+        }
+    }
+}
 
 
 

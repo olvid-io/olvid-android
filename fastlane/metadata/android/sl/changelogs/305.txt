@@ -1,0 +1,4 @@
+- Prenovljen dizajn več komponent aplikacije: kartica stika, profilna kartica, upravljalnik pomnilnika itd.
+- Dodan prikaz koledarja v pogovoru za hiter dostop do določenega časovnega obdobja.
+- Dodan notranji upravljalnik za "predvajanje v teku", ki omogoča enostavno preklapljanje med glasovnimi sporočili. Izboljšane geste za predvajanje glasovnih sporočil.
+- Dodana možnost preklica pošiljanja priloge.

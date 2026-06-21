@@ -37,5 +37,5 @@ public class Constants {
     public static final int MAX_PAYLOAD_SIZE = 24_000; // max AWS message size is 32kB, but we need to account for the colissimo and encryption overheads, as well as JSON base64 encoding and overhead
     public static final long MAX_PENDING_BYTES_DURING_ATTACHMENT_UPLOAD = 5L * MAX_PAYLOAD_SIZE;
 
-    public static final String[] SUPPORTED_LANGUAGES = new String[]{"en", "fr", "ar", "ca", "cs", "da", "de", "el", "es", "fi", "iw", "hi", "hu", "it", "ja", "ko", "nl", "no", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sv", "uk", "zh", "zh-rTW"};
+    public static final String[] SUPPORTED_LANGUAGES = new String[]{"en", "fr", "ar", "bg", "bn", "ca", "cs", "da", "de", "el", "es", "et", "fi", "gu", "iw", "hi", "hu", "in", "it", "ja", "kn", "ko", "lt", "lv", "ml", "mr", "nl", "no", "pa", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sr", "sv", "sw", "ta", "te", "th", "fil", "uk", "ur", "zh", "zh-rTW"};
 }

@@ -33,6 +33,7 @@ import io.olvid.engine.crypto.AuthEnc;
 import io.olvid.engine.crypto.Hash;
 import io.olvid.engine.crypto.PRNG;
 import io.olvid.engine.crypto.Suite;
+import io.olvid.engine.datatypes.Constants;
 import io.olvid.engine.datatypes.EncryptedBytes;
 import io.olvid.engine.datatypes.Identity;
 import io.olvid.engine.datatypes.Operation;
@@ -166,6 +167,18 @@ public class UploadReturnReceiptOperation extends Operation {
                         finished = true;
                         return;
                     default:
+                        // the upload failed: delete any return receipt older than the expiration delay so we stop retrying them forever
+                        long expirationTimestamp = System.currentTimeMillis() - Constants.RETURN_RECEIPT_EXPIRATION_DELAY;
+                        boolean deletedSome = false;
+                        for (ReturnReceiptAndEncryptedPayload returnReceiptAndEncryptedPayload : returnReceiptAndEncryptedPayloads) {
+                            if (returnReceiptAndEncryptedPayload.returnReceipt.getCreationTimestamp() < expirationTimestamp) {
+                                returnReceiptAndEncryptedPayload.returnReceipt.delete();
+                                deletedSome = true;
+                            }
+                        }
+                        if (deletedSome) {
+                            sendManagerSession.session.commit();
+                        }
                         cancel(null);
                 }
             } catch (Exception e) {

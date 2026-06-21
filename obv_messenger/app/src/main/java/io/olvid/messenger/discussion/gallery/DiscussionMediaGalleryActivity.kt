@@ -630,6 +630,7 @@ class DiscussionMediaGalleryActivity : LockableActivity() {
                                                                         discussionId,
                                                                         item.fyleAndStatus.fyleMessageJoinWithStatus.messageId,
                                                                         item.fyleAndStatus.fyle.id,
+                                                                        null,
                                                                         false,
                                                                         false
                                                                     )

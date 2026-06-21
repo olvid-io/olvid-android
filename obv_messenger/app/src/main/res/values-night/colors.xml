@@ -47,6 +47,7 @@
     <color name="newDialogBackground">#171717</color>
     <color name="newDialogBorder">#323232</color>
 
+    <color name="trustIconBackground">#323232</color>
 
     <!-- Poll colors-->
     <color name="poll0">#EBBD57</color>

@@ -1,0 +1,1 @@
+- Vi har lagt til støtte for 18 nye språk: bulgarsk, bengali, estisk, filippinsk, gujarati, indonesisk, kannada, latvisk, litauisk, malayalam, marathi, punjabi, serbisk, swahili, tamil, telugu, thai og urdu.

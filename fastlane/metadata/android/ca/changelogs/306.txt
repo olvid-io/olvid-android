@@ -1,0 +1,5 @@
+- Redisseny de diversos components de l'aplicació: targeta de contacte, targeta de perfil, gestor d'emmagatzematge, etc.
+- S'ha afegit una vista de calendari a la conversa per anar ràpidament a un punt concret en el temps.
+- S'ha afegit un controlador intern de "reproducció en curs" per canviar fàcilment entre missatges de veu.
+- S'ha afegit la possibilitat de cancel·lar la càrrega d'un arxiu adjunt.
+- Es mostren les notificacions perdudes quan el silenciament del perfil expira.

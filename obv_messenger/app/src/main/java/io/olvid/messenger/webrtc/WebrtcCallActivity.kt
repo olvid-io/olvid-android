@@ -331,8 +331,8 @@ class WebrtcCallActivity : AppCompatActivity() {
                         actions = {
                             dialog.additionalButton?.let { button ->
                                 button()
-                                Spacer(modifier = Modifier.weight(1f, true))
                             }
+                            Spacer(modifier = Modifier.weight(1f, true))
                             OlvidTextButton(
                                 text = stringResource(id = R.string.button_label_ok),
                                 onClick = onDismiss

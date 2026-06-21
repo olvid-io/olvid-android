@@ -187,7 +187,7 @@ class KeycloakAuthenticationActivity : AppCompatActivity() {
                             // openid authentication successful, let's retrieve the authentication token
                             val additionalParameters = HashMap<String?, String?>()
                             if (clientSecret != null) {
-                                additionalParameters.put("client_secret", clientSecret)
+                                additionalParameters["client_secret"] = clientSecret
                             }
 
                             val tokenRequestBuilder = TokenRequest.Builder(

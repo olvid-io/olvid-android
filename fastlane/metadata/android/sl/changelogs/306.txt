@@ -1,0 +1,5 @@
+- Prenova več komponent aplikacije: kartica stika, profilna kartica, upravljalnik prostora za shranjevanje itd.
+- Dodan pogled koledarja v pogovoru za hitro premikanje na določeno točko v času.
+- Dodan notranji upravljalnik "predvajanja v teku" za enostavno preklapljanje med glasovnimi sporočili.
+- Dodana možnost preklica nalaganja priloge.
+- Prikaz manjkajočih obvestil, ko poteče čas utišanja profila.

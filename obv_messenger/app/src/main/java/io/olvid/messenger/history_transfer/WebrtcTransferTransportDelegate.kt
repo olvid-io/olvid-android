@@ -51,6 +51,10 @@ import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
 import java.io.InputStream
 import java.io.OutputStream
+import java.net.InetSocketAddress
+import java.net.Proxy
+import java.net.ProxySelector
+import java.net.URI
 import java.nio.ByteBuffer
 import java.util.Timer
 import java.util.TimerTask
@@ -75,8 +79,10 @@ class WebRTCTransferTransportDelegate(
     private val timer = Timer("webrtc-history-transfer-timer")
     private var dataChannelState: TransferTransportLayerState = TransferTransportLayerState.NOT_STARTED
         set(value) {
-            field = value
-            transferListener.onTransportLayerStateChange(value)
+            if (field != value) {
+                field = value
+                transferListener.onTransportLayerStateChange(value)
+            }
         }
     var sendAttachmentExecutor: ExecutorService = Executors.newFixedThreadPool(2)
 
@@ -246,6 +252,27 @@ class WebRTCTransferTransportDelegate(
                     .Options().apply {
                         this.networkIgnoreMask = PeerConnectionFactory.Options.ADAPTER_TYPE_LOOPBACK
                     })
+        // check if a proxy is required for WebRTC
+        try {
+            val proxies =
+                ProxySelector.getDefault().select(URI.create("https://turn.olvid.io/"))
+            for (proxy in proxies) {
+                val type = proxy.type()
+                if (type == Proxy.Type.HTTP) {
+                    val address = proxy.address()
+                    if (address is InetSocketAddress) {
+                        builder.setHttpsProxy(address.hostString, address.port)
+                        break
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        // set a user agent (for the proxy)
+        System.getProperty("http.agent")?.let {
+            builder.setUserAgent(it)
+        }
         peerConnectionFactory = builder.createPeerConnectionFactory()
         peerConnectionObserver = PeerConnectionObserver()
         sessionDescriptionObserver = SessionDescriptionObserver()
@@ -469,7 +496,6 @@ class WebRTCTransferTransportDelegate(
     }
 
     private fun sendAck(id: Int, chunk: Int) {
-        Logger.d("\uD83E\uDDF6 sendAck for seq: $id-$chunk")
         val chunkBytes = ByteArray(1) { TransferMessageType.ACK.value } +
                 id.to4ByteArray() +
                 0.to4ByteArray() +
@@ -542,7 +568,6 @@ class WebRTCTransferTransportDelegate(
                 break
             }
 
-            @Suppress("EmptyRange")
             val chunkBytes = sha256 +
                     offset.to8ByteArray() +
                     buffer.sliceArray(0..<bufferFullness)
@@ -616,7 +641,7 @@ class WebRTCTransferTransportDelegate(
                 PeerConnection.IceConnectionState.FAILED,
                 PeerConnection.IceConnectionState.DISCONNECTED,
                 PeerConnection.IceConnectionState.CLOSED -> {
-                    // we set aborted to true to unblock the webRtcExecutor
+                    // we set aborted to DISCONNECT to unblock the webRtcExecutor
                     aborted = TransferAbort.DISCONNECT
                     webRtcExecutor.execute {
                         dataChannelState = TransferTransportLayerState.CLOSED

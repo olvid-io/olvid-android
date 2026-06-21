@@ -19,7 +19,6 @@
 
 package io.olvid.messenger.main.archived
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.SystemBarStyle
@@ -69,9 +68,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
 import io.olvid.messenger.App
 import io.olvid.messenger.R
+import io.olvid.messenger.UnreadCountsSingleton
 import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.designsystem.components.SelectionTopAppBar
@@ -94,14 +93,10 @@ class ArchivedDiscussionsActivity : LockableActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
         super.onCreate(savedInstanceState)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
 
         setContent {
             val context = LocalContext.current
@@ -274,6 +269,9 @@ class ArchivedDiscussionsActivity : LockableActivity() {
                                                             discussionAndMessage.discussion.id,
                                                             true
                                                         )
+                                                    UnreadCountsSingleton.discussionUnreadFlagChanged(
+                                                        discussionAndMessage.discussion.id, true
+                                                    )
                                                 }
                                             }
                                         },

@@ -235,6 +235,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         }
                         Invitation invitation = new Invitation(dialog, creationTimestamp, discussionId);
                         db.invitationDao().insert(invitation);
+                        UnreadCountsSingleton.INSTANCE.invitationCreated(invitation.dialogUuid, invitation.bytesOwnedIdentity, invitation.categoryId);
                         db.discussionDao().updateLastMessageTimestamp(discussionId, InvitationListViewModelKt.getTimestamp(invitation));
                         break;
                     }
@@ -249,6 +250,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         }
                         Invitation invitation = new Invitation(dialog, creationTimestamp, discussionId);
                         db.invitationDao().insert(invitation);
+                        UnreadCountsSingleton.INSTANCE.invitationCreated(invitation.dialogUuid, invitation.bytesOwnedIdentity, invitation.categoryId);
                         db.discussionDao().updateLastMessageTimestamp(discussionId, InvitationListViewModelKt.getTimestamp(invitation));
                         // only notify if the invitation is different from the previous notification
                         if ((existingInvitation == null) || (existingInvitation.associatedDialog.getCategory().getId() != invitation.associatedDialog.getCategory().getId())) {
@@ -284,6 +286,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                         }
                         Invitation invitation = new Invitation(dialog, creationTimestamp, discussionId);
                         db.invitationDao().insert(invitation);
+                        UnreadCountsSingleton.INSTANCE.invitationCreated(invitation.dialogUuid, invitation.bytesOwnedIdentity, invitation.categoryId);
                         db.discussionDao().updateLastMessageTimestamp(discussionId, InvitationListViewModelKt.getTimestamp(invitation));
                         // only notify if the invitation is different from the previous notification
                         if ((existingInvitation == null) || (existingInvitation.associatedDialog.getCategory().getId() != invitation.associatedDialog.getCategory().getId())) {
@@ -313,6 +316,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                     Invitation existingInvitation = db.invitationDao().getByDialogUuid(dialogUuid);
                     if (existingInvitation != null) {
                         db.invitationDao().delete(existingInvitation);
+                        UnreadCountsSingleton.INSTANCE.invitationDeleted(existingInvitation.dialogUuid);
                         // clear any notification (useful only in multi-device)
                         AndroidNotificationManager.clearInvitationNotification(dialogUuid);
                         // delete pre discussion
@@ -320,6 +324,7 @@ public class EngineNotificationProcessor implements EngineNotificationListener {
                             Discussion discussion = db.discussionDao().getById(existingInvitation.discussionId);
                             if (discussion != null && discussion.isPreDiscussion() && !db.invitationDao().discussionHasInvitations(discussion.id)) {
                                 db.discussionDao().delete(discussion);
+                                UnreadCountsSingleton.INSTANCE.discussionDeleted(discussion.id);
                                 ShortcutActivity.disableShortcut(discussion.id);
                             }
                         }

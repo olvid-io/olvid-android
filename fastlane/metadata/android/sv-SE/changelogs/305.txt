@@ -1,0 +1,4 @@
+- Omdesign av flera appkomponenter: kontaktkort, profilkort, lagringshanterare, etc.
+- Kalendervy tillagd i konversationen för att snabbt kunna hoppa till en specifik tidpunkt.
+- Intern "pågående uppspelning”-kontroller tillagd för att enkelt kunna växla mellan röstmeddelanden. Vissa förbättringar av gester för uppspelning av röstmeddelanden.
+- Möjlighet att avbryta en bilaguppladdning tillagd.

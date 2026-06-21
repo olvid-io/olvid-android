@@ -177,17 +177,26 @@ public class DownloadMessagesAndListAttachmentsOperation extends PriorityOperati
                                 for (int i = 0; i < messageAndAttachmentLengths.attachmentLengths.length; i++) {
                                     InboxAttachment attachment = InboxAttachment.get(fetchManagerSession, ownedIdentity, messageAndAttachmentLengths.messageUid, i);
                                     if (attachment == null) {
-                                        if (messageAndAttachmentLengths.chunkDownloadPrivateUrls[i] == null) {
-                                            Logger.i("Empty list of chunks. Attachment was deleted from server.");
+                                        if (messageAndAttachmentLengths.uploadCancelled[i]) {
+                                            Logger.i("One attachment had its upload cancelled.");
+                                            InboxAttachment.createUploadCancelled(
+                                                    fetchManagerSession,
+                                                    ownedIdentity,
+                                                    messageAndAttachmentLengths.messageUid,
+                                                    i,
+                                                    messageAndAttachmentLengths.attachmentLengths[i],
+                                                    messageAndAttachmentLengths.chunkLengths[i]
+                                            );
+                                        } else {
+                                            InboxAttachment.create(fetchManagerSession,
+                                                    ownedIdentity,
+                                                    messageAndAttachmentLengths.messageUid,
+                                                    i,
+                                                    messageAndAttachmentLengths.attachmentLengths[i],
+                                                    messageAndAttachmentLengths.chunkLengths[i],
+                                                    messageAndAttachmentLengths.chunkDownloadPrivateUrls[i]
+                                            );
                                         }
-                                        InboxAttachment.create(fetchManagerSession,
-                                                ownedIdentity,
-                                                messageAndAttachmentLengths.messageUid,
-                                                i,
-                                                messageAndAttachmentLengths.attachmentLengths[i],
-                                                messageAndAttachmentLengths.chunkLengths[i],
-                                                messageAndAttachmentLengths.chunkDownloadPrivateUrls[i]
-                                        );
                                     }
                                 }
                             } else {
@@ -315,24 +324,36 @@ class DownloadMessagesAndListAttachmentsServerMethod extends ServerMethod {
                     for (int j = 0; j < attachmentCount; j++) {
                         Encoded[] attachmentParts = parts[5 + j].decodeList();
                         int attachmentNumber = (int) attachmentParts[0].decodeLong();
-                        long attachmentLength = attachmentParts[1].decodeLong();
-                        int chunkLength = (int) attachmentParts[2].decodeLong();
-                        String[] privateUrls = attachmentParts[3].decodeStringArray();
-                        messageAndAttachmentLengths.attachmentLengths[attachmentNumber] = attachmentLength;
-                        messageAndAttachmentLengths.chunkLengths[attachmentNumber] = chunkLength;
-                        if (chunkLength == 0) {
-                            continue;
-                        }
-                        if (privateUrls.length == (int) ((attachmentLength - 1) / chunkLength) + 1) {
-                            messageAndAttachmentLengths.chunkDownloadPrivateUrls[attachmentNumber] = privateUrls;
-                        } else {
+                        byte attachmentStatus = attachmentParts[1].decodeBytes()[0];
+
+                        if (attachmentStatus == ServerMethod.UPLOAD_CANCELLED) {
+                            long attachmentLength = attachmentParts[2].decodeLong();
+                            int chunkLength = (int) attachmentParts[3].decodeLong();
+                            messageAndAttachmentLengths.uploadCancelled[attachmentNumber] = true;
+                            messageAndAttachmentLengths.attachmentLengths[attachmentNumber] = attachmentLength;
+                            messageAndAttachmentLengths.chunkLengths[attachmentNumber] = chunkLength;
                             messageAndAttachmentLengths.chunkDownloadPrivateUrls[attachmentNumber] = null;
+                        } else {
+                            long attachmentLength = attachmentParts[2].decodeLong();
+                            int chunkLength = (int) attachmentParts[3].decodeLong();
+                            String[] privateUrls = attachmentParts[4].decodeStringArray();
+                            messageAndAttachmentLengths.uploadCancelled[attachmentNumber] = false;
+                            messageAndAttachmentLengths.attachmentLengths[attachmentNumber] = attachmentLength;
+                            messageAndAttachmentLengths.chunkLengths[attachmentNumber] = chunkLength;
+                            if (chunkLength == 0) {
+                                continue;
+                            }
+                            if (privateUrls.length == (int) ((attachmentLength - 1) / chunkLength) + 1) {
+                                messageAndAttachmentLengths.chunkDownloadPrivateUrls[attachmentNumber] = privateUrls;
+                            } else {
+                                messageAndAttachmentLengths.chunkDownloadPrivateUrls[attachmentNumber] = null;
+                            }
                         }
                     }
                     list.add(messageAndAttachmentLengths);
                 }
                 messageAndAttachmentLengthsArray = list.toArray(new MessageAndAttachmentLengths[0]);
-            } catch (DecodingException e) {
+            } catch (DecodingException | ArrayIndexOutOfBoundsException e) {
                 Logger.x(e);
                 returnStatus = ServerMethod.GENERAL_ERROR;
             }
@@ -350,9 +371,10 @@ class DownloadMessagesAndListAttachmentsServerMethod extends ServerMethod {
         final EncryptedBytes wrappedKey;
         final EncryptedBytes messageContent;
         final boolean hasExtendedContent;
+        final boolean[] uploadCancelled;
         final long[] attachmentLengths;
         final int[] chunkLengths;
-        final String[][] chunkDownloadPrivateUrls;
+        final String[][] chunkDownloadPrivateUrls; // chunkDownloadPrivateUrls[i] == null if we received the wrong number of chunkUrl --> we need to refresh them from server
 
         MessageAndAttachmentLengths(UID messageUid, long serverTimestamp, EncryptedBytes wrappedKey, EncryptedBytes messageContent, boolean hasExtendedContent, int attachmentCount) {
             this.messageUid = messageUid;
@@ -360,6 +382,7 @@ class DownloadMessagesAndListAttachmentsServerMethod extends ServerMethod {
             this.wrappedKey = wrappedKey;
             this.messageContent = messageContent;
             this.hasExtendedContent = hasExtendedContent;
+            this.uploadCancelled = new boolean[attachmentCount];
             this.attachmentLengths = new long[attachmentCount];
             this.chunkLengths = new int[attachmentCount];
             this.chunkDownloadPrivateUrls = new String[attachmentCount][];

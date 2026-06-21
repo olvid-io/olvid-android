@@ -1,0 +1,5 @@
+- Redesign de vários componentes do aplicativo: cartão de contato, cartão de perfil, gerenciador de armazenamento, etc.
+- Adicionada uma visualização de calendário à conversa para navegar rapidamente até um ponto específico no tempo.
+- Adicionado um controlador interno de "reprodução contínua" para alternar facilmente entre mensagens de voz.
+- Adicionada a possibilidade de cancelar o envio de um anexo.
+- Exibir notificações perdidas quando o período de silêncio do perfil terminar.

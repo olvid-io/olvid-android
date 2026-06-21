@@ -1,0 +1,1 @@
+- Adicionado suporte para 18 novos idiomas: búlgaro, bengali, estoniano, filipino, gujarati, indonésio, kannada, letão, lituano, malaiala, marata, panjabi, sérvio, suaíli, tâmil, télugo, tailandês e urdu.

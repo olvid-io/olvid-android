@@ -313,7 +313,7 @@ public class OutboxAttachment implements ObvDatabase {
         this.key = key;
         this.acknowledgedChunkCount = 0;
         this.acknowledged = false;
-        this.ciphertextChunkLength = Constants.DEFAULT_ATTACHMENT_CHUNK_LENGTH;
+        this.ciphertextChunkLength = (int) Math.min(Integer.MAX_VALUE, Math.max(attachmentLength / 100 + 41, Constants.DEFAULT_ATTACHMENT_CHUNK_LENGTH)); // the + 41 is here to compensate for encryption overhead
         this.cancelExternallyRequested = false;
         this.chunkUploadPrivateUrls = null;
     }

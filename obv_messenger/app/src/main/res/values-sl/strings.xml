@@ -50,7 +50,7 @@
 	<string name="dialog_message_contact_introduction" state="needs_review" hash="-398698689">Želiš predstaviti %1$s in %2$s drug drugemu?</string>
 	<string name="dialog_message_contact_introduction_multiple" state="needs_review" hash="-1743988418">Želiš predstaviti %1$s naslednjim %2$d kontaktom?\n\n%3$s</string>
 	<string name="dialog_message_delete_attachment" state="needs_review" hash="-235504816">Želite resnično izbrisati prilogo %1$s iz tega sporočila?\nTe dejanje ni mogoče razveljaviti.</string>
-	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="-273205987">Želite res izbrisati prilogo %1$s?\nTe dejanje ni mogoče razveljaviti.</string>
+	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="1647132381">Ali res želite izbrisati prilogo **%1$s**?\nTe dejanje ni mogoče povrniti.</string>
 	<string name="dialog_message_disband_group" state="needs_review" hash="-1617503323">Želiš razpustiti skupino %1$s?\nNe bo več mogoče poslati sporočil v to skupino. Obstoječa sporočila skupine ne bodo prizadeta.</string>
 	<string name="dialog_message_disband_non_empty_group_confirmation" state="needs_review" hash="1096257228">Pripravljaš se, da razveljaš skupino %1$s.\nTo bo odstranilo vse člane in čakajoče člane iz skupine. Trenutno je:\n- %2$d članov\n- %3$d čakajočih članov\n\nAli naj nadaljujem z razveljavitvijo te skupine?</string>
 	<string name="dialog_message_exchange_digits" state="needs_review" hash="1612882609">Želiš izmenjati kode z %1$s, da ponovno potrdiš njegovo identiteto?</string>
@@ -65,6 +65,7 @@
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">Potrdi izbris?</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">Razpustiti skupino?</string>
 	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">Poišči pogovor…</string>
+	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">Vnesite datum</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">Uredi podatke skupine</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">Uredite svoje podatke</string>
 	<string name="dialog_title_exchange_digits" state="needs_review" hash="864614114">Izmenjaj kode</string>
@@ -91,14 +92,18 @@
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Skrbnik je spremenil ime skupine v:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Skrbnik je spremenil opis skupine v:</string>
 	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">Skrbnik je spremenil skupinsko fotografijo.</string>
-	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">Tvoja stik je posodobil svojo Olvid Card. Stara in nova različica sta prikazani spodaj.\n\nPritisni \"posodobi\", da posodobiš informacije o svojem stiku s to novo različico.</string>
+	<string name="explanation_new_contact_card_name" state="needs_review" hash="-1601853738">Vaš kontakt je posodobil svoje ime na:</string>
+	<string name="explanation_new_contact_card_position" state="needs_review" hash="184144104">Vaš kontakt je posodobil svojo pozicijo/podjetje na:</string>
+	<string name="explanation_new_contact_card_photo" state="needs_review" hash="-252626818">Vaš kontakt je posodobil svojo profilno sliko.</string>
+	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">Vaše ime je bilo posodobljeno na:</string>
+	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">Vaša pozicija/podjetje je bila posodobljena na:</string>
+	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">Vaša fotografija je bila posodobljena.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">Varnostni komunikacijski kanal se trenutno vzpostavlja. Ne morete začeti pogovora s tem stikom, dokler se to ne zaključi. Ta postopek bi moral trajati le nekaj sekund, če ste vi in vaš stik na spletu.\n\nČe menite, da je šlo kaj narobe, lahko ponovno zaženete vzpostavitev kanala.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">Ni bil najden noben stik</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">Skupina ni bila najdena</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">Ni najdeno nobenih sporočil</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Ni bilo najdenih prilog</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Povezava ni bila najdena</string>
-	<string name="format_identity_details_custom_field" state="needs_review" hash="-1073344790">%1$s: %2$s</string>
 	<string name="hint_company" state="needs_review" hash="379200324">Podjetje (neobvezno)</string>
 	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Napiši sporočilo</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Začasna sporočila</string>
@@ -164,15 +169,10 @@
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">Skupinska kartica - Neobjavljen osnutek</string>
 	<string name="label_group_members" state="needs_review" hash="1460220752">Člani skupine</string>
 	<string name="label_other_group_members" state="needs_review" hash="-2121490032">Drugi člani skupine</string>
-	<string name="label_groups" state="needs_review" hash="-990226727">Skupine</string>
+	<string name="label_groups_common" state="needs_review" hash="1252823567">Skupne skupine</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">Vabilo\nzavrnjeno</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">Podrobnosti skupine posodobljene</string>
-	<string name="label_new_olvid_card" state="needs_review" hash="688199407">Kontaktni podatki posodobljeni</string>
 	<string name="label_not_part_of_a_group" state="needs_review" hash="1667979596">Še niste del katere od skupin</string>
-	<string name="label_olvid_card" state="needs_review" hash="-1953461576">Olvid Card</string>
-	<string name="label_olvid_card_published" state="needs_review" hash="-1038740778">Olvid Card - Objavljena</string>
-	<string name="label_olvid_card_published_update" state="needs_review" hash="391148752">Olvid Card - Novo</string>
-	<string name="label_olvid_card_unpublished_draft" state="needs_review" hash="-786284715">Olvid Card - Neobjavljen osnutek</string>
 	<string name="label_pending_group_members" state="needs_review" hash="1481357803">Člani skupine v čakanju</string>
 	<string name="label_text_copied_from_olvid" state="needs_review" hash="1675378287">Besedilo kopirano iz Olvid</string>
 	<string name="label_trust_origins" state="needs_review" hash="-1177760062">Zaupanja vredni viri</string>
@@ -285,12 +285,16 @@
 	<string name="toast_message_shortcut_not_supported" state="needs_review" hash="-1300016753">Ustvarjanje bližnjic ni podprto na vaši napravi</string>
 	<string name="toast_message_unable_to_open_file" state="needs_review" hash="392405293">Ni bilo mogoče najti ustrezne aplikacije za odpiranje te vrste datoteke</string>
 	<string name="toast_message_unparsable_url" state="needs_review" hash="-135719133">URL-ja se ni uspelo pravilno razčleniti</string>
-	<string name="trust_origin_direct_type" state="needs_review" hash="-67248053">%1$s - Neposredna preveritev</string>
-	<string name="trust_origin_group_type" state="needs_review" hash="230302215">%1$s - Sprejeto povabilo v skupino od\u0020</string>
-	<string name="trust_origin_group_v2_type" state="needs_review" hash="-1152079590">%1$s - Sprejeto povabilo v skupino</string>
-	<string name="trust_origin_introduction_type" state="needs_review" hash="328494718">%1$s - Predstavitev od\u0020</string>
-	<string name="trust_origin_keycloak_type" state="needs_review" hash="1983748673">%2$s - Preverjanje s strani ponudnika identitete ob %1$s</string>
-	<string name="trust_origin_unknown_type" state="needs_review" hash="2084263523">%1$s - Neznan vir zaupanja</string>
+	<string name="trust_origin_direct_type" state="needs_review" hash="1798276315">Osebna preveritev</string>
+	<string name="trust_origin_group_type" state="needs_review" hash="1222060749">Sprejel/a sem povabilo v skupino od </string>
+	<string name="trust_origin_group_v2_type" state="needs_review" hash="-566733151">Sprejeta vabilo v skupino</string>
+	<string name="trust_origin_introduction_type" state="needs_review" hash="-266148171">Predstavljeno od</string>
+	<string name="trust_origin_keycloak_type" state="needs_review" hash="-1113573733">Preverjanje s strani ponudnika identitete na %1$s</string>
+	<string name="trust_origin_unknown_type" state="needs_review" hash="-491114965">Neznan vir zaupanja</string>
+	<string name="trust_origin_direct_title" state="needs_review" hash="-1849285555">Dodali ste se med seboj kot kontakte.</string>
+	<string name="trust_origin_introduction_title" state="needs_review" hash="-1034826640">Predstavitev</string>
+	<string name="trust_origin_group_title" state="needs_review" hash="1252823567">Skupne skupine</string>
+	<string name="trust_origin_keycloak_title" state="needs_review" hash="-1917629373">Dodano preklič imenika</string>
 	<string name="menu_action_delete_contact" state="needs_review" hash="1849106991">Odstrani stik</string>
 	<string name="menu_action_delete_user" state="needs_review" hash="1683580694">Izbriši uporabnika</string>
 	<string name="dialog_title_delete_user" state="needs_review" hash="-56212547">Izbrisati uporabnika?</string>
@@ -299,6 +303,7 @@
 	<string name="text_empty_group" state="needs_review" hash="-464714974">Prazna skupina</string>
 	<string name="message_error_group_name_empty" state="needs_review" hash="1137468023">Vnesite ime skupine</string>
 	<string name="hint_search_contact_name" state="needs_review" hash="-242911449">Poišči ime stika…</string>
+	<string name="hint_search_group_name" state="needs_review" hash="-265074656">Išči ime skupine…</string>
 	<string name="menu_action_search" state="needs_review" hash="-2085358317">Išči</string>
 	<string name="toast_message_polling_failed" state="needs_review" hash="402242307">Neuspešno pridobivanje sporočil</string>
 	<string name="dialog_message_battery_optimization" state="needs_review" hash="1191860407">Optimizacija baterije v sistemu Android deluje tako, da odloži nekatere dogodke v ozadju, da jih lahko izvaja v serijah. To lahko zamudi prejem prihodnjih sporočil Olvid.\n\nDa bi zagotovili, da bodo vaša sporočila prejeta hitro, morate Olvidu dovoliti, da \"vedno deluje v ozadju\". Pritisnite \"Nastavitve\" spodaj in nato \"Dovoli\".</string>
@@ -819,6 +824,11 @@
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Predvajalnik medijev</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Gumbi za predvajanje/pauzo pri predvajanju medijev v Olvid</string>
 	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Ni mogoče predvajati zvočne datoteke</string>
+	<string name="label_voice_message" state="needs_review" hash="-348491668">Glasovno sporočilo</string>
+	<string name="content_description_skip_previous" state="needs_review" hash="836036575">Predhodna avdio datoteka</string>
+	<string name="content_description_skip_next" state="needs_review" hash="-878180801">Naslednji zvok</string>
+	<string name="content_description_audio_play" state="needs_review" hash="1143766922">Predvajaj</string>
+	<string name="content_description_audio_pause" state="needs_review" hash="1931883968">Pavza</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Izbriši</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Izbriši povsod</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Ni bilo mogoče izbrisati povsod. Poskusite znova.</string>
@@ -919,6 +929,7 @@
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Vaš Olvid ID trenutno upravlja ponudnik identitete vaše družbe. Ne morete ročno aktivirati licence Olvid.\n\nZa več informacij se obrnite na svojega skrbnika.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Zamujen klic</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Kontaktni podatki posodobljeni</string>
+	<string name="text_own_details_updated" state="needs_review" hash="-1335488506">Podrobnosti posodobljene</string>
 	<string name="text_group_details_updated" state="needs_review" hash="1016500852">Podrobnosti skupine posodobljene</string>
 	<string name="dialog_title_sd_card_ringtone_bugged_android_9" state="needs_review" hash="-1202187296">Napaka zvoka obvestil v Androidu 9</string>
 	<string name="dialog_message_sd_card_ringtone_bugged_android_9" state="needs_review" hash="1449296723">Olvid ne more uporabiti izbranega zvoka obvestila. Bil je onemogočen. Napaka v Androidu 9 preprečuje uporabo prilagojenih zvokov obvestil za aplikacije, ki ne zahtevajo dostopa do zunanjega pomnilnika/SD kartice.\n\nPoskusite izbrati standardni zvok obvestila. Do takrat bodo vaša obvestila ostala tiha!</string>
@@ -1014,6 +1025,10 @@
 	<string name="dialog_title_available_space_low" state="needs_review" hash="610249394">Pomnilnik naprave je skoraj poln</string>
 	<string name="dialog_message_available_space_low" state="needs_review" hash="78499573">Na tvoji napravi se zmanjšuje razpoložljiv prostor. Pričakuj nepričakovane napake pri sprejemanju ali pošiljanju datotek z Olvid.\n\nTo je verjetno pravi čas, da osvobodiš prostor na svoji napravi.</string>
 	<string name="button_label_manage_storage" state="needs_review" hash="-918485427">Upravljanje prostora za shranjevanje</string>
+	<string name="label_storage_all_files" state="needs_review" hash="1735747130">Vse datoteke</string>
+	<string name="label_storage_sent_by_me" state="needs_review" hash="640456592">Poslal/a sem</string>
+	<string name="label_storage_large_files" state="needs_review" hash="-257706820">Večje od 5 MB</string>
+	<string name="label_storage_discussions" state="needs_review" hash="491497248">Pogovori</string>
 	<string name="pref_use_internal_image_viewer_title" state="needs_review" hash="1319400578">Uporabi vgrajeni bralnik slik</string>
 	<string name="pref_use_internal_image_viewer_summary" state="needs_review" hash="1248137666">Ko je aktivirano, klik na prilogo slike jo bo odprl v notranjem brskalniku. V nasprotnem primeru bo uporabljena privzeta aplikacija za slike vaše naprave.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Sliko ni mogoče prikazati</string>
@@ -1167,7 +1182,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Izbris profila bo izbrisal vse informacije, povezane s tem profilom na vaši napravi. To vključuje vaše stike, skupine in vsebino vseh vaših pogovorov (sporočila in priloge) za ta profil.\n\n<b>To je vaš edini vidni profil in če imate skrite profile, bodo izbrisani istočasno.</b>\n\nPritisnite \"naprej\", da izberete način izbrisa tega profila.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Izbriši profil <b>povsod</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">Vpišite \"%1$s\" tukaj, da nadaljujete</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">Vnesite \\"%1$s\\" tukaj, da nadaljujete.</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">Če se odločite izbrisati svoj profil <b>povsod</b>:\n - bo bo izbrisan lokalno <b>in</b> na napravah vaših kontaktov\n - zapustili boste skupine, ki ste se jim pridružili\n - skupine, ki jih upravljate, bodo razpuščene\n\nČe ne izbrišete svojega profila <b>povsod</b>, bo izbrisan samo lokalno na vaši napravi. Če ne nameravate obnoviti varnostne kopije na drugi napravi, bodo morda vaši kontakti še naprej poskušali poslati sporočila, ne da bi vedeli, da jih ne morete prejeti.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">Vaš trenutni profil se zdi neaktiven, kar pomeni, da ste ga verjetno prenesli na drugo napravo. Če nameravate še naprej uporabljati ta profil na drugi napravi, ga lahko varno izbrišete tukaj.\n\nČe tega profila ne želite več uporabljati, ga boste najprej morali ponovno aktivirati na tej napravi, počakati na ponovno vzpostavitev varnih kanalov s svojimi stiki in šele nato izbrisati ta profil z izbiro možnosti » izbriši povsod «.</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">Vaš profil je trenutno omogočen na več napravah.\n\nČe se odločite izbrisati ta profil <b>povsod</b>: - bo bil izbrisan z vseh vaših naprav <b>in</b> iz naprav vaših kontaktov - zapustili boste skupine, ki ste se jim pridružili - skupine, ki jih upravljate, bodo razpuščene\n\nČe <b>ne</b> izbrišete tega profila povsod, bo izbrisan samo lokalno in ga boste lahko še naprej uporabljali na drugih napravah.</string>
@@ -1251,9 +1266,6 @@
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Skupine v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
 	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Uporabite animirane emojije (če so na voljo)</string>
-	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Uporaba prostora za shranjevanje profila</string>
-	<string name="label_photos" state="needs_review" hash="1539779714">Fotografije</string>
-	<string name="label_videos" state="needs_review" hash="-101497740">Videoposnetki</string>
 	<string name="label_audio" state="needs_review" hash="-779820608">Zvok</string>
 	<string name="label_other" state="needs_review" hash="-543765264">Drugi</string>
 	<string name="label_all" state="needs_review" hash="752498555">Vse</string>
@@ -1268,14 +1280,7 @@
 	<string name="menu_action_sort_date_alt" state="needs_review" hash="646746321">Razvrsti po datumu (najstarejše prvo)</string>
 	<string name="menu_action_sort_size_alt" state="needs_review" hash="1986077505">Razvrsti po velikosti (od najmanjšega naprej)</string>
 	<string name="menu_action_sort_name_alt" state="needs_review" hash="-802793419">Razvrsti po imenu (v obratnem vrstnem redu)</string>
-	<string name="text_sent_by_xx" state="needs_review" hash="248848108">Poslano prek %1$s</string>
 	<string name="text_unknown_sender" state="needs_review" hash="1913018414">Neznani pošiljatelj</string>
-	<string name="text_sent_to_xx" state="needs_review" hash="918571953">Poslano %1$s</string>
-	<string name="text_draft_for_xx" state="needs_review" hash="2063814784">Osnutek za %1$s</string>
-	<string name="label_loading_attachments" state="needs_review" hash="856026474">Nalagal se priloge…</string>
-	<string name="dialog_message_delete_attachment_for_many_messages" state="needs_review" hash="1800265017">Priloga %2$s je priložena %1$d različnim sporočilom. Želite jo izbrisati samo to, ali jo želite izbrisati iz vseh %1$d sporočil?\nTo dejanje ni povratno.</string>
-	<string name="button_label_delete_one" state="needs_review" hash="-1916938532">Izbriši enega</string>
-	<string name="button_label_delete_all" state="needs_review" hash="-985749327">Izbriši vse %1$d</string>
 	<string name="dialog_title_save_selected_attachments" state="needs_review" hash="-405982081">Shrani izbrane priloge</string>
 	<string name="pref_category_contacts_and_groups" state="needs_review" hash="1531647661">Kontakti in skupine</string>
 	<string name="pref_auto_join_groups_title" state="needs_review" hash="29822089">Samodejno sprejemaj povabila v skupine…</string>
@@ -1636,7 +1641,7 @@
 	<string name="button_label_remove" state="needs_review" hash="1097276765">Izbriši</string>
 	<string name="menu_action_remove_expiration" state="needs_review" hash="-156931599">Ohranite to napravo aktivno</string>
 	<string name="dialog_title_set_unexpiring_device" state="needs_review" hash="-1488033285">Ohranjajte napravo aktivno</string>
-	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1293464179">Trenutno nimate licence za več naprav, ki so aktivne. Če želite kupiti takšno licenco, zaprite to okno in pritisnite \"Poglej možnosti naročnine\" spodaj.\n\nZa nadaljevanje in ohranitev naprave \"%1$s\" aktivne bo naprava \"%2$s\" deaktivirana namesto nje. Želite nadaljevati?</string>
+	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1457083107">Trenutno nimate licence, ki bi vam omogočala uporabo več aktivnih naprav. Če želite kupiti takšno licenco, zaprite to okno in pritisnite »Poglej možnosti naročnine«.\n\nČe želite nadaljevati in ohraniti napravo »%1$s« aktivno, bo namesto tega deaktivirana naprava »%2$s«. Ali želite nadaljevati?</string>
 	<string name="dialog_title_remove_background_image" state="needs_review" hash="488158841">Odstraniti trenutno ozadno sliko?</string>
 	<string name="dialog_title_introducing_markdown" state="needs_review" hash="175399162">Predstavljamo oblikovanje sporočil!</string>
 	<string name="dialog_message_introducing_markdown" state="needs_review" hash="1738415115">Olvid zdaj omogoča oblikovanje vaših sporočil s sintakso markdown 🎨!\n\nPišite **<b>krepko</b>**, v *<i>poševno</i>*, dodajte # <big>NASLOVI</big>, itd.\n\nSeznam vseh podprtih oznak 🦍 najdete na:\nhttps://www.olvid.io/faq/format-your-messages/</string>
@@ -2041,6 +2046,7 @@
 	<string name="button_label_this_way" state="needs_review" hash="747183939">Sem</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">Koda je posneto</string>
 	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">Prosimo, izberite, koga želite dodati v to skupino.</string>
+	<string name="explanation_choose_contact_introduction" state="needs_review" hash="1113777517">Izberite, komu želite predstaviti %1$s.</string>
 	<string name="label_group_administration" state="needs_review" hash="871355986">Upravljanje skupine</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">Klic je blokiran</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid ne dovoljuje začeti klica z več kot %1$d osebami.</string>
@@ -2154,6 +2160,7 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Pogajanje</string>
 	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Prenos</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Prenos je končan</string>
+	<string name="history_transfer_step_processing_buffered_data" state="needs_review" hash="-1359029280">Obdelava prejetih podatkov</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Prenos je bil neuspešen</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Prenos zgodovine pogovorov</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Ni mogoče začeti prenos. Morda že poteka drug prenos?</string>
@@ -2272,7 +2279,8 @@
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Uvoz</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analiziram vsebino</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Analiziram izvožene pogovore</string>
-	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Pri nalaganju datoteke sloga OpenStreetMap je prišlo do napake.</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">Pri nalaganju datoteke sloga OpenStreetMap je prišlo do napake.</string>
 	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Predplatnine v aplikaciji niso na voljo</string>
 	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Različica aplikacije Olvid, ki ste jo namestili, ne vsebuje knjižnice Google Billing in ne podpira nakupov v aplikaciji.\n\nZa več informacij nas kontaktirajte na **feedback@olvid.io**.</string>
+	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">Prekini nalaganje</string>
 </resources>

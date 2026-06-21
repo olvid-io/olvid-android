@@ -22,6 +22,7 @@ package io.olvid.messenger.databases.dao;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
+import androidx.room.ColumnInfo;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Embedded;
@@ -30,10 +31,6 @@ import androidx.room.Query;
 
 import java.util.List;
 
-import io.olvid.engine.engine.types.ObvDialog;
-import io.olvid.messenger.databases.entity.Discussion;
-import io.olvid.messenger.databases.entity.Invitation;
-import io.olvid.messenger.databases.entity.Message;
 import io.olvid.messenger.databases.entity.OwnedIdentity;
 
 @Dao
@@ -90,12 +87,37 @@ public interface OwnedIdentityDao {
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
     void updateUnlockPasswordAndSalt(@NonNull byte[] bytesOwnedIdentity, @Nullable byte[] unlockPassword, @Nullable byte[] unlockSalt);
 
+    // set start timestamp when transitioning into mute; clear it when leaving mute; preserve original start when extending an active mute
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
-            " SET " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS + " = :prefMuteNotifications, " +
+            " SET " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS + " = 1, " +
             OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP + " = :prefMuteNotificationsTimestamp, " +
-            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED + " = :prefMuteNotificationsExceptMentioned " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED + " = :prefMuteNotificationsExceptMentioned, " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_START_TIMESTAMP +
+            " = CASE WHEN " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS_START_TIMESTAMP + " IS NULL THEN :nowTimestamp" +
+            "        ELSE " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS_START_TIMESTAMP +
+            " END " +
             " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
-    void updateMuteNotifications(@NonNull byte[] bytesOwnedIdentity, boolean prefMuteNotifications, @Nullable Long prefMuteNotificationsTimestamp, boolean prefMuteNotificationsExceptMentioned);
+    void updateMuteNotifications(@NonNull byte[] bytesOwnedIdentity, @Nullable Long prefMuteNotificationsTimestamp, boolean prefMuteNotificationsExceptMentioned, long nowTimestamp);
+
+    @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
+            " SET " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS + " = 0, " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP + " = NULL, " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_START_TIMESTAMP + " = NULL " +
+            " WHERE "  + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
+    void clearMuteNotifications(@NonNull byte[] bytesOwnedIdentity);
+
+    @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
+            " WHERE " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS + " = 1" +
+            " AND " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP + " IS NOT NULL")
+    @NonNull
+    List<OwnedIdentity> getAllWithFiniteMute();
+
+    @Query("SELECT MIN(" + OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP + ") FROM " + OwnedIdentity.TABLE_NAME +
+            " WHERE " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS + " = 1" +
+            " AND " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP + " IS NOT NULL" +
+            " AND " + OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP + " > :nowTimestamp")
+    @Nullable
+    Long getNextMuteExpirationAfter(long nowTimestamp);
 
 
     @Query("UPDATE " + OwnedIdentity.TABLE_NAME +
@@ -120,42 +142,6 @@ public interface OwnedIdentityDao {
 
 
 
-    @Query("SELECT oi.*, unread.count AS unreadMessageCount, unreadinv.count AS unreadInvitationCount, unreaddisc.count AS unreadDiscussionCount FROM " + OwnedIdentity.TABLE_NAME + " AS oi " +
-            " LEFT JOIN ( " +
-            " SELECT COUNT(*) AS count, disc." + Discussion.BYTES_OWNED_IDENTITY + " AS boi FROM " + Discussion.TABLE_NAME + " AS disc " +
-            " JOIN " + Message.TABLE_NAME + " AS mess " +
-            " ON disc.id = mess." + Message.DISCUSSION_ID +
-            " WHERE mess." + Message.STATUS + " = " + Message.STATUS_UNREAD +
-            " GROUP BY disc." + Discussion.BYTES_OWNED_IDENTITY +
-            " ) AS unread " +
-            " ON unread.boi = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
-
-            " LEFT JOIN (" +
-            " SELECT COUNT(*) AS count, inv." + Invitation.BYTES_OWNED_IDENTITY + " AS boi FROM " + Invitation.TABLE_NAME + " AS inv " +
-            " WHERE inv." + Invitation.CATEGORY_ID + " IN ( " +
-            ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY +
-            ") GROUP BY inv." + Discussion.BYTES_OWNED_IDENTITY +
-            " ) as unreadinv " +
-            " ON unreadinv.boi = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
-
-            " LEFT JOIN ( " +
-            " SELECT COUNT(*) AS count, disc." + Discussion.BYTES_OWNED_IDENTITY + " AS boi FROM " + Discussion.TABLE_NAME + " AS disc " +
-            " WHERE disc." + Discussion.UNREAD + " = 1 " +
-            " GROUP BY disc." + Discussion.BYTES_OWNED_IDENTITY +
-            " ) AS unreaddisc " +
-            " ON unreaddisc.boi = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
-
-            " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
-            " AND " + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :byteCurrentIdentity " +
-            " ORDER BY CASE WHEN " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " IS NULL THEN " + OwnedIdentity.DISPLAY_NAME + " ELSE " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " END ASC ")
-    LiveData<List<OwnedIdentityAndUnreadMessageCount>> getAllNotHiddenWithUnreadMessageCount(@NonNull byte[] byteCurrentIdentity);
-
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
             " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL ")
     LiveData<List<OwnedIdentity>> getAllNotHiddenLiveData();
@@ -171,11 +157,48 @@ public interface OwnedIdentityDao {
 
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
             " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
+            " AND " + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :bytesOwnedIdentity " +
+            " ORDER BY CASE WHEN " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " IS NULL THEN " + OwnedIdentity.DISPLAY_NAME + " ELSE " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " END ASC ")
+    LiveData<List<OwnedIdentity>> getAllNotHiddenExceptOneSorted(@NonNull byte[] bytesOwnedIdentity);
+
+    @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
+            " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
             " ORDER BY COALESCE(" + OwnedIdentity.CUSTOM_DISPLAY_NAME + ", " + OwnedIdentity.DISPLAY_NAME + ") ASC ")
     List<OwnedIdentity> getAllNotHiddenSortedSync();
 
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME)
     List<OwnedIdentity> getAll();
+
+    @Query("SELECT " + OwnedIdentity.BYTES_OWNED_IDENTITY + ", " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS + ", " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED + ", " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP +
+            " FROM " + OwnedIdentity.TABLE_NAME)
+    LiveData<List<MuteStateStub>> getMuteStateStubsLiveData();
+
+
+    @Query("SELECT " + OwnedIdentity.BYTES_OWNED_IDENTITY + ", " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS + ", " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED + ", " +
+            OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP +
+            " FROM " + OwnedIdentity.TABLE_NAME)
+    List<MuteStateStub> getMuteStateStubs();
+
+    class MuteStateStub {
+        @ColumnInfo(name = OwnedIdentity.BYTES_OWNED_IDENTITY)
+        @NonNull
+        public byte[] bytesOwnedIdentity;
+
+        @ColumnInfo(name = OwnedIdentity.PREF_MUTE_NOTIFICATIONS)
+        public boolean prefMuteNotifications;
+
+        @ColumnInfo(name = OwnedIdentity.PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED)
+        public boolean prefMuteNotificationsExceptMentioned;
+
+        @ColumnInfo(name = OwnedIdentity.PREF_MUTE_NOTIFICATIONS_TIMESTAMP)
+        @Nullable
+        public Long prefMuteNotificationsTimestamp;
+    }
 
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
             " WHERE " + OwnedIdentity.BYTES_OWNED_IDENTITY + " = :bytesOwnedIdentity")
@@ -197,50 +220,6 @@ public interface OwnedIdentityDao {
             " AND " + OwnedIdentity.UNLOCK_SALT + " IS NOT NULL ")
     List<OwnedIdentityPasswordAndSalt> getHiddenIdentityPasswordsAndSalts();
 
-    @Query("SELECT EXISTS ( " +
-            " SELECT 1 FROM " + Message.TABLE_NAME + " AS mess " +
-            " JOIN " + Discussion.TABLE_NAME + " AS disc " +
-            " ON disc.id = mess." + Message.DISCUSSION_ID +
-            " JOIN " + OwnedIdentity.TABLE_NAME + " AS oi " +
-            " ON disc." + Discussion.BYTES_OWNED_IDENTITY + " = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
-            " WHERE mess." + Message.STATUS + " = " + Message.STATUS_UNREAD +
-            " AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
-            " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :byteCurrentIdentity " +
-            " UNION " +
-            " SELECT 1 FROM " + Invitation.TABLE_NAME + " AS inv " +
-            " JOIN " + OwnedIdentity.TABLE_NAME + " AS oi " +
-            " ON inv." + Invitation.BYTES_OWNED_IDENTITY + " = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
-            " WHERE inv." + Invitation.CATEGORY_ID + " IN ( " +
-            ObvDialog.Category.ACCEPT_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.SAS_EXCHANGE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.SAS_CONFIRMED_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.ACCEPT_MEDIATOR_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.ACCEPT_GROUP_INVITE_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.ACCEPT_ONE_TO_ONE_INVITATION_DIALOG_CATEGORY + ", " +
-            ObvDialog.Category.GROUP_V2_INVITATION_DIALOG_CATEGORY +
-            ") AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
-            " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :byteCurrentIdentity " +
-            " UNION " +
-            " SELECT 1 FROM " + Discussion.TABLE_NAME + " AS disc " +
-            " JOIN " + OwnedIdentity.TABLE_NAME + " AS oi " +
-            " ON disc." + Discussion.BYTES_OWNED_IDENTITY + " = oi." + OwnedIdentity.BYTES_OWNED_IDENTITY +
-            " WHERE disc." + Discussion.UNREAD + " = 1 " +
-            " AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
-            " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :byteCurrentIdentity " +
-            " )")
-    LiveData<Boolean> otherNotHiddenOwnedIdentityHasMessageOrInvitation(@NonNull byte[] byteCurrentIdentity);
-
-    @Query("SELECT oi.*, disc.id AS discussionId FROM " + OwnedIdentity.TABLE_NAME + " AS oi " +
-            " JOIN " + Discussion.TABLE_NAME + " AS disc " +
-            " ON oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " = disc." + Discussion.BYTES_OWNED_IDENTITY +
-            " WHERE disc." + Discussion.BYTES_DISCUSSION_IDENTIFIER + " = :bytesDiscussionIdentifier " +
-            " AND disc." + Discussion.DISCUSSION_TYPE + " = :discussionType " +
-            " AND oi." + OwnedIdentity.BYTES_OWNED_IDENTITY + " != :bytesOwnedIdentity " +
-            " AND oi." + OwnedIdentity.UNLOCK_PASSWORD + " IS NULL " +
-            " ORDER BY CASE WHEN " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " IS NULL THEN " + OwnedIdentity.DISPLAY_NAME + " ELSE " + OwnedIdentity.CUSTOM_DISPLAY_NAME + " END ASC ")
-    LiveData<List<OwnedIdentityAndDiscussionId>> getOtherNonHiddenOwnedIdentitiesForDiscussion(@NonNull byte[] bytesOwnedIdentity, int discussionType, @NonNull byte[] bytesDiscussionIdentifier);
-
-
     @Query("SELECT * FROM " + OwnedIdentity.TABLE_NAME +
             " WHERE " + OwnedIdentity.UNLOCK_PASSWORD + " IS NOT NULL ")
     List<OwnedIdentity> getAllHidden();
@@ -258,11 +237,5 @@ public interface OwnedIdentityDao {
         public long unreadMessageCount;
         public long unreadInvitationCount;
         public long unreadDiscussionCount;
-    }
-
-    class OwnedIdentityAndDiscussionId {
-        @Embedded
-        public OwnedIdentity ownedIdentity;
-        public long discussionId;
     }
 }

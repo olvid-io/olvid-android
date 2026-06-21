@@ -40,19 +40,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import io.olvid.engine.engine.types.JsonIdentityDetails;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.OwnedIdentityUnreadCounts;
 import io.olvid.messenger.R;
+import io.olvid.messenger.UnreadCountsSingleton;
+import io.olvid.messenger.customClasses.BytesKey;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.dao.OwnedIdentityDao;
@@ -150,7 +156,42 @@ public class OwnIdentitySelectorPopupWindow {
         ownedIdentityListRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
         ownedIdentityListRecyclerView.setAdapter(adapter);
 
-        ownedIdentitiesAndMessageCount = Transformations.switchMap(AppSingleton.getCurrentIdentityLiveData(), (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao().getAllNotHiddenWithUnreadMessageCount(ownedIdentity != null ? ownedIdentity.bytesOwnedIdentity : new byte[0]));
+        LiveData<List<OwnedIdentity>> nonHiddenLiveData = Transformations.switchMap(
+                AppSingleton.getCurrentIdentityLiveData(),
+                (OwnedIdentity ownedIdentity) -> AppDatabase.getInstance().ownedIdentityDao()
+                        .getAllNotHiddenExceptOneSorted(ownedIdentity != null ? ownedIdentity.bytesOwnedIdentity : new byte[0])
+        );
+        LiveData<Map<BytesKey, OwnedIdentityUnreadCounts>> countsLiveData =
+                UnreadCountsSingleton.INSTANCE.getUnreadCountsByOwnedIdentityLiveData();
+
+        MediatorLiveData<List<OwnedIdentityDao.OwnedIdentityAndUnreadMessageCount>> combined = new MediatorLiveData<>();
+        Runnable combiner = () -> {
+            List<OwnedIdentity> identities = nonHiddenLiveData.getValue();
+            if (identities == null) {
+                combined.setValue(null);
+                return;
+            }
+            Map<BytesKey, OwnedIdentityUnreadCounts> counts = countsLiveData.getValue();
+            List<OwnedIdentityDao.OwnedIdentityAndUnreadMessageCount> merged = new ArrayList<>(identities.size());
+            for (OwnedIdentity oi : identities) {
+                OwnedIdentityDao.OwnedIdentityAndUnreadMessageCount item =
+                        new OwnedIdentityDao.OwnedIdentityAndUnreadMessageCount();
+                item.ownedIdentity = oi;
+                if (counts != null) {
+                    OwnedIdentityUnreadCounts c = counts.get(new BytesKey(oi.bytesOwnedIdentity));
+                    if (c != null) {
+                        item.unreadMessageCount = c.getUnreadMessageCountNonArchived();
+                        item.unreadInvitationCount = c.getInvitationCount();
+                        item.unreadDiscussionCount = c.getUnreadDiscussionCount();
+                    }
+                }
+                merged.add(item);
+            }
+            combined.setValue(merged);
+        };
+        combined.addSource(nonHiddenLiveData, v -> combiner.run());
+        combined.addSource(countsLiveData, v -> combiner.run());
+        ownedIdentitiesAndMessageCount = combined;
 
         final View separator = popupView.findViewById(R.id.separator);
         separatorObserver = (List<OwnedIdentityDao.OwnedIdentityAndUnreadMessageCount> ownedIdentityAndUnreadMessageCounts) -> {

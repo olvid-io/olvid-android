@@ -1,0 +1,1 @@
+- 'n Probleem met die Java-rekord-ontsuigering is reggestel, wat nie behoorlik in die nuutste Android Studio gewerk het nie.

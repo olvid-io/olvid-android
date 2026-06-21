@@ -31,6 +31,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,6 +60,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material.ripple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -72,7 +74,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -99,11 +103,13 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import io.olvid.messenger.App
+import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.ifNull
 import io.olvid.messenger.databases.AppDatabase
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.tasks.PropagatePinnedDiscussionsChangeTask
+import io.olvid.messenger.designsystem.components.DialogSecure
 import io.olvid.messenger.designsystem.cutoutHorizontalPadding
 import io.olvid.messenger.designsystem.plus
 import io.olvid.messenger.designsystem.scaledDp
@@ -159,6 +165,11 @@ fun DiscussionListScreen(
     val bookmarkedMessages by bookmarksViewModel.bookmarkedMessages.observeAsState()
     val refreshState = rememberPullRefreshState(refreshing, onRefresh)
     val hapticFeedback = LocalHapticFeedback.current
+
+    // everytime we change currentIdentity, we want to scroll back to the top of the discussion list
+    val currentIdentity by AppSingleton.getCurrentIdentityLiveData().observeAsState()
+    var resetScrollCounter by remember { mutableIntStateOf(9) }
+    var scrollToTop by remember { mutableStateOf(false) }
 
     if (globalSearchViewModel.filter.isNullOrEmpty().not()) {
         GlobalSearchScreen(
@@ -233,7 +244,7 @@ fun DiscussionListScreen(
                         && (discussionListViewModel.reorderList?.size ?: 0) > 1
                 var showArchiveSettings by remember { mutableStateOf(false) }
                 if (showArchiveSettings) {
-                    Dialog(
+                    DialogSecure(
                         onDismissRequest = { showArchiveSettings = false },
                         properties = DialogProperties(usePlatformDefaultWidth = false)
                     ) {
@@ -247,6 +258,19 @@ fun DiscussionListScreen(
                                 }
                             showArchiveSettings = false
                         })
+                    }
+                }
+
+                LaunchedEffect(currentIdentity) {
+                    // this detects current identity changes
+                    scrollToTop = true
+                }
+
+                LaunchedEffect(discussionListViewModel.reorderList) {
+                    // before actually scrolling to top, we wait for the discussion list livedata to have updated
+                    if (scrollToTop) {
+                        scrollToTop = false
+                        resetScrollCounter++
                     }
                 }
 
@@ -314,169 +338,40 @@ fun DiscussionListScreen(
                             || archivedDiscussions.isNullOrEmpty().not()
                             || bookmarkedMessages.isNullOrEmpty().not()
                         ) {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .systemBarsHorizontalPadding(),
-                                state = lazyListState,
-                                contentPadding = WindowInsets.safeDrawing
-                                    .only(WindowInsetsSides.Bottom)
-                                    .asPaddingValues(LocalDensity.current)
-                                        + PaddingValues(bottom = 80.dp + dimensionResource(R.dimen.tab_bar_size)),
-                            ) {
-
-                                item(key = -5L) {
-                                    if (archivedDiscussions.isNullOrEmpty()
-                                            .not() && discussionListViewModel.selection.isEmpty()
-                                    ) {
-                                        Column {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .clickable {
-                                                        context.startActivity(
-                                                            Intent(
-                                                                context,
-                                                                ArchivedDiscussionsActivity::class.java
-                                                            )
-                                                        )
-                                                    }
-                                                    .background(
-                                                        colorResource(
-                                                            id = R.color.almostWhite
-                                                        )
-                                                    )
-                                                    .padding(
-                                                        top = 16.dp,
-                                                        bottom = 16.dp,
-                                                        start = 16.dp,
-                                                        end = 4.dp
-                                                    )
-                                                    .cutoutHorizontalPadding(),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Icon(
-                                                    modifier = Modifier.padding(
-                                                        start = 16.dp,
-                                                        end = 32.dp,
-                                                    ),
-                                                    painter = painterResource(id = R.drawable.ic_archive),
-                                                    tint = colorResource(R.color.almostBlack),
-                                                    contentDescription = null
-                                                )
-                                                Text(
-                                                    modifier = Modifier.weight(1f),
-                                                    text = stringResource(R.string.activity_title_archived_discussions),
-                                                    color = colorResource(id = R.color.almostBlack),
-                                                    style = OlvidTypography.h3,
-                                                )
-                                                val unreadCount =
-                                                    archivedDiscussions?.count { it.unreadCount > 0 || it.discussion.unread }
-                                                        ?: 0
-                                                AnimatedVisibility(visible = unreadCount > 0) {
-                                                    Text(
-                                                        modifier = Modifier
-                                                            .padding(horizontal = 6.dp),
-                                                        text = "$unreadCount",
-                                                        style = OlvidTypography.body1.copy(
-                                                            fontWeight = FontWeight.Medium
-                                                        ),
-                                                        color = colorResource(id = R.color.olvid_gradient_light)
-                                                    )
-                                                }
-                                            }
-                                            Spacer(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(
-                                                        start = 84.dp,
-                                                        end = 12.dp
-                                                    )
-                                                    .requiredHeight(1.dp)
-                                                    .background(
-                                                        color = colorResource(id = R.color.lightGrey)
-                                                    )
-                                            )
-                                        }
-                                    } else {
-                                        Box(
-                                            modifier = Modifier
-                                                .requiredHeight(1.dp)
-                                                .fillMaxWidth()
-                                        ) {}
-                                    }
+                            // the key here forces a full redraw to avoid visual artifacts when scrolling exactly as the list is refreshed
+                            key(resetScrollCounter) {
+                                // scroll to top everytime the resetScrollCounter changes
+                                LaunchedEffect(Unit) {
+                                    lazyListState.scrollToItem(1, 1)
                                 }
 
-                                item(key = -4L) {
-                                    Box(
-                                        modifier = Modifier
-                                            .requiredHeight(1.dp)
-                                            .fillMaxWidth()
-                                    ) {}
-                                }
-
-                                tipsViewModel.tipToShow?.let { tip ->
-                                    item(key = -3L) {
-                                        val activity = LocalActivity.current
-                                        val visibleState = remember {
-                                            MutableTransitionState(initialState = false).apply {
-                                                targetState = true
-                                            }
-                                        }
-                                        AnimatedVisibility(
-                                            visibleState = visibleState,
-                                            enter = expandVertically(tween(durationMillis = 500, delayMillis = 500)),
-                                        ) {
-                                            Column {
-                                                TipItem(
-                                                    refreshTipState = {
-                                                        (activity as? MainActivity)?.let {
-                                                            App.runThread {
-                                                                tipsViewModel.refreshTipToShow(
-                                                                    it
-                                                                )
-                                                            }
-                                                        }
-                                                    },
-                                                    tipToShow = tip,
-                                                    autoOpenOlvidPlusDialog = tipsViewModel.autoOpenOlvidPlusDialog,
-                                                    expirationDays = tipsViewModel.deviceExpirationDays,
-                                                )
-                                                Spacer(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(
-                                                            start = 84.dp,
-                                                            end = 12.dp
-                                                        )
-                                                        .requiredHeight(1.dp)
-                                                        .background(
-                                                            color = colorResource(id = R.color.lightGrey)
-                                                        )
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (bookmarkedMessages.isNullOrEmpty()
-                                        .not() && discussionListViewModel.selection.isEmpty()
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .systemBarsHorizontalPadding(),
+                                    state = lazyListState,
+                                    contentPadding = WindowInsets.safeDrawing
+                                        .only(WindowInsetsSides.Bottom)
+                                        .asPaddingValues(LocalDensity.current)
+                                            + PaddingValues(bottom = 80.dp + dimensionResource(R.dimen.tab_bar_size)),
                                 ) {
-                                    item(key = -2L) {
-                                        AnimatedVisibility(
-                                            discussionListViewModel.selection.isEmpty(),
-                                            enter = slideInVertically(),
-                                            exit = slideOutVertically()
+
+                                    item(key = -5L) {
+                                        if (archivedDiscussions.isNullOrEmpty()
+                                                .not() && discussionListViewModel.selection.isEmpty()
                                         ) {
                                             Column {
                                                 Row(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .clickable {
+                                                        .clickable(
+                                                            interactionSource = remember { MutableInteractionSource() },
+                                                            indication = ripple(),
+                                                        ) {
                                                             context.startActivity(
                                                                 Intent(
                                                                     context,
-                                                                    BookmarkedMessagesActivity::class.java
+                                                                    ArchivedDiscussionsActivity::class.java
                                                                 )
                                                             )
                                                         }
@@ -499,25 +394,30 @@ fun DiscussionListScreen(
                                                             start = 16.dp,
                                                             end = 32.dp,
                                                         ),
-                                                        painter = painterResource(id = R.drawable.ic_star),
+                                                        painter = painterResource(id = R.drawable.ic_archive),
                                                         tint = colorResource(R.color.almostBlack),
                                                         contentDescription = null
                                                     )
                                                     Text(
                                                         modifier = Modifier.weight(1f),
-                                                        text = stringResource(R.string.activity_title_bookmarks),
+                                                        text = stringResource(R.string.activity_title_archived_discussions),
                                                         color = colorResource(id = R.color.almostBlack),
                                                         style = OlvidTypography.h3,
                                                     )
-                                                    Text(
-                                                        modifier = Modifier
-                                                            .padding(horizontal = 6.dp),
-                                                        text = "${bookmarkedMessages?.size ?: ""}",
-                                                        style = OlvidTypography.body1.copy(
-                                                            fontWeight = FontWeight.Medium
-                                                        ),
-                                                        color = colorResource(id = R.color.olvid_gradient_light)
-                                                    )
+                                                    val unreadCount =
+                                                        archivedDiscussions?.count { it.unreadCount > 0 || it.discussion.unread }
+                                                            ?: 0
+                                                    AnimatedVisibility(visible = unreadCount > 0) {
+                                                        Text(
+                                                            modifier = Modifier
+                                                                .padding(horizontal = 6.dp),
+                                                            text = "$unreadCount",
+                                                            style = OlvidTypography.body1.copy(
+                                                                fontWeight = FontWeight.Medium
+                                                            ),
+                                                            color = colorResource(id = R.color.olvid_gradient_light)
+                                                        )
+                                                    }
                                                 }
                                                 Spacer(
                                                     modifier = Modifier
@@ -532,181 +432,326 @@ fun DiscussionListScreen(
                                                         )
                                                 )
                                             }
+                                        } else {
+                                            Box(
+                                                modifier = Modifier
+                                                    .requiredHeight(1.dp)
+                                                    .fillMaxWidth()
+                                            ) {}
                                         }
                                     }
-                                }
 
-                                grouped.forEachIndexed { groupIndex, list ->
-                                    if (reorderable && groupIndex > 0) {
-                                        item(key = -1L) {
-                                            ReorderableItem(
-                                                enabled = true,
-                                                state = reorderableState,
-                                                key = -1L
+                                    item(key = -4L) {
+                                        Box(
+                                            modifier = Modifier
+                                                .requiredHeight(1.dp)
+                                                .fillMaxWidth()
+                                        ) {}
+                                    }
+
+                                    tipsViewModel.tipToShow?.let { tip ->
+                                        item(key = -3L) {
+                                            val activity = LocalActivity.current
+                                            val visibleState = remember {
+                                                MutableTransitionState(initialState = false).apply {
+                                                    targetState = true
+                                                }
+                                            }
+                                            AnimatedVisibility(
+                                                visibleState = visibleState,
+                                                enter = expandVertically(
+                                                    tween(
+                                                        durationMillis = 500,
+                                                        delayMillis = 500
+                                                    )
+                                                ),
                                             ) {
-                                                PinDivider()
+                                                Column {
+                                                    TipItem(
+                                                        refreshTipState = {
+                                                            (activity as? MainActivity)?.let {
+                                                                App.runThread {
+                                                                    tipsViewModel.refreshTipToShow(
+                                                                        it
+                                                                    )
+                                                                }
+                                                            }
+                                                        },
+                                                        tipToShow = tip,
+                                                        autoOpenOlvidPlusDialog = tipsViewModel.autoOpenOlvidPlusDialog,
+                                                        expirationDays = tipsViewModel.deviceExpirationDays,
+                                                    )
+                                                    Spacer(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(
+                                                                start = 84.dp,
+                                                                end = 12.dp
+                                                            )
+                                                            .requiredHeight(1.dp)
+                                                            .background(
+                                                                color = colorResource(id = R.color.lightGrey)
+                                                            )
+                                                    )
+                                                }
                                             }
                                         }
                                     }
-                                    itemsIndexed(
-                                        items = list,
-                                        key = { _, item -> item.discussion.id }) { index, discussionAndLastMessage ->
-                                        with(discussionAndLastMessage) {
-                                            val unread =
-                                                unreadCount > 0 || discussion.unread
-                                            ReorderableItem(
-                                                enabled = reorderable,
-                                                state = reorderableState,
-                                                key = discussion.id
+
+                                    if (bookmarkedMessages.isNullOrEmpty()
+                                            .not() && discussionListViewModel.selection.isEmpty()
+                                    ) {
+                                        item(key = -2L) {
+                                            AnimatedVisibility(
+                                                discussionListViewModel.selection.isEmpty(),
+                                                enter = slideInVertically(),
+                                                exit = slideOutVertically()
                                             ) {
-                                                SwipeForActionBox(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    maxOffset = 96.dp,
-                                                    enabledFromStartToEnd = discussionListViewModel.selection.isEmpty() && discussion.isPreDiscussion.not(),
-                                                    enabledFromEndToStart = discussionListViewModel.selection.isEmpty() && discussion.isPreDiscussion.not(),
-                                                    callbackStartToEnd = {
-                                                        if (unread) {
-                                                            onMarkAsRead.invoke(discussion.id)
-                                                        } else {
-                                                            onMarkAsUnread.invoke(discussion.id)
-                                                        }
-                                                    },
-                                                    callbackEndToStart = {
-                                                        discussionListViewModel.archiveDiscussion(
-                                                            discussion,
-                                                            archived = true,
-                                                            cancelable = true
-                                                        )
-                                                    },
-                                                    backgroundContentFromStartToEnd = { progress ->
-                                                        SwipeActionBackground(
-                                                            label = stringResource(
-                                                                if (unread) R.string.menu_action_discussion_mark_as_read else R.string.menu_action_discussion_mark_as_unread
-                                                            ),
-                                                            icon = if (unread) R.drawable.ic_action_mark_read else R.drawable.ic_action_mark_unread,
-                                                            backgroundColor = R.color.golden,
-                                                            progress = progress,
-                                                            fromStartToEnd = true
-                                                        )
-                                                    },
-                                                    backgroundContentFromEndToStart = { progress ->
-                                                        SwipeActionBackground(
-                                                            label = stringResource(
-                                                                R.string.menu_action_archive
-                                                            ),
-                                                            icon = R.drawable.ic_archive,
-                                                            backgroundColor = R.color.olvid_gradient_dark,
-                                                            progress = progress,
-                                                            fromStartToEnd = false
-                                                        )
-                                                    }
-                                                )
-                                                {
-                                                    val invitation by remember {
-                                                        derivedStateOf {
-                                                            invitations?.sortedBy { it.invitationTimestamp }
-                                                                ?.find { it.discussionId == discussion.id }
-                                                        }
-                                                    }
-                                                    DiscussionListItem(
+                                                Column {
+                                                    Row(
                                                         modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .clickable(
+                                                                interactionSource = remember { MutableInteractionSource() },
+                                                                indication = ripple(),
+                                                            ) {
+                                                                context.startActivity(
+                                                                    Intent(
+                                                                        context,
+                                                                        BookmarkedMessagesActivity::class.java
+                                                                    )
+                                                                )
+                                                            }
                                                             .background(
-                                                                shape = RoundedCornerShape(8.dp),
-                                                                color =
-                                                                    if (discussionListViewModel.isSelected(
-                                                                            discussion
-                                                                        )
-                                                                    ) {
-                                                                        colorResource(id = R.color.greySubtleOverlay)
-                                                                    } else {
-                                                                        colorResource(
-                                                                            id = R.color.almostWhite
-                                                                        )
-                                                                    }
+                                                                colorResource(
+                                                                    id = R.color.almostWhite
+                                                                )
+                                                            )
+                                                            .padding(
+                                                                top = 16.dp,
+                                                                bottom = 16.dp,
+                                                                start = 16.dp,
+                                                                end = 4.dp
                                                             )
                                                             .cutoutHorizontalPadding(),
-                                                        title = invitation?.getAnnotatedTitle(
-                                                            context
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Icon(
+                                                            modifier = Modifier.padding(
+                                                                start = 16.dp,
+                                                                end = 32.dp,
+                                                            ),
+                                                            painter = painterResource(id = R.drawable.ic_star),
+                                                            tint = colorResource(R.color.almostBlack),
+                                                            contentDescription = null
                                                         )
-                                                            .takeIf { discussion.isPreDiscussion }
-                                                            ?: discussion.getAnnotatedTitle(
-                                                                context
+                                                        Text(
+                                                            modifier = Modifier.weight(1f),
+                                                            text = stringResource(R.string.activity_title_bookmarks),
+                                                            color = colorResource(id = R.color.almostBlack),
+                                                            style = OlvidTypography.h3,
+                                                        )
+                                                        Text(
+                                                            modifier = Modifier
+                                                                .padding(horizontal = 6.dp),
+                                                            text = "${bookmarkedMessages?.size ?: ""}",
+                                                            style = OlvidTypography.body1.copy(
+                                                                fontWeight = FontWeight.Medium
                                                             ),
-                                                        body = invitation?.let {
-                                                            AnnotatedString(it.statusText)
-                                                        } ?: discussion.getAnnotatedBody(
-                                                                context,
-                                                                message
-                                                            ),
-                                                        date = invitation?.getAnnotatedDate(
-                                                            context
-                                                        ) ?: discussion.getAnnotatedDate(
-                                                                context,
-                                                                message
-                                                            ),
-                                                        initialViewSetup = { initialView ->
-                                                            invitation?.takeIf { discussion.isPreDiscussion }
-                                                                ?.let {
-                                                                    invitationListViewModel.initialViewSetup(
-                                                                        initialView,
-                                                                        it
-                                                                    )
-                                                                } ifNull {
-                                                                initialView.setDiscussion(
-                                                                    discussion
-                                                                )
-                                                            }
-                                                        },
-                                                        customColor = discussionCustomization?.colorJson?.color?.minus(
-                                                            0x1000000
-                                                        ) ?: 0x00ffffff,
-                                                        backgroundImageUrl = App.absolutePathFromRelative(
-                                                            discussionCustomization?.backgroundImageUrl
-                                                        ),
-                                                        unread = (invitation?.requiresAction() == true) || discussion.unread,
-                                                        unreadCount = unreadCount,
-                                                        muted = discussionCustomization?.shouldMuteNotifications() == true,
-                                                        locked = discussion.isLocked && (invitation == null || invitation?.requiresAction() == false),
-                                                        mentioned = unreadMention,
-                                                        pinned = discussion.pinned != 0,
-                                                        reorderableScope = this@ReorderableItem.takeIf { reorderable && discussion.isPreDiscussion.not() },
-                                                        locationsShared = locationsShared,
-                                                        pendingContact = discussion.isPreDiscussion || (discussion.isLocked && invitation != null),
-                                                        attachmentCount = if (message?.isLocationMessage == true) 0 else message?.totalAttachmentCount
-                                                            ?: 0,
-                                                        imageAndVideoCount = if (message?.isLocationMessage == true) 0 else message?.imageAndVideoCount
-                                                            ?: 0,
-                                                        videoCount = message?.videoCount ?: 0,
-                                                        audioCount = message?.audioCount ?: 0,
-                                                        firstFileName = message?.firstAttachmentName,
-                                                        onClick = { onClick(discussion) },
-                                                        selected = discussionListViewModel.isSelected(
-                                                            discussion
-                                                        ),
-                                                        onLongClick = {
-                                                            hapticFeedback.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress
+                                                            color = colorResource(id = R.color.olvid_gradient_light)
+                                                        )
+                                                    }
+                                                    Spacer(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(
+                                                                start = 84.dp,
+                                                                end = 12.dp
                                                             )
-                                                            onLongClick(discussion)
-                                                        },
-                                                        onDragStopped = {
-                                                            discussionListViewModel.syncPinnedDiscussions()
-                                                        },
-                                                        lastOutboundMessageStatus = message?.takeIf {it.getOutboundStatusIcon() != null}?.let { lastMessage ->
-                                                            {
-                                                                OutboundMessageStatus(
-                                                                    modifier = Modifier.padding(
-                                                                        end = scaledDp(4)
-                                                                    ),
-                                                                    size = scaledDp(14),
-                                                                    message = lastMessage
-                                                                )
+                                                            .requiredHeight(1.dp)
+                                                            .background(
+                                                                color = colorResource(id = R.color.lightGrey)
+                                                            )
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    grouped.forEachIndexed { groupIndex, list ->
+                                        if (reorderable && groupIndex > 0) {
+                                            item(key = -1L) {
+                                                ReorderableItem(
+                                                    enabled = true,
+                                                    state = reorderableState,
+                                                    key = -1L
+                                                ) {
+                                                    PinDivider()
+                                                }
+                                            }
+                                        }
+                                        itemsIndexed(
+                                            items = list,
+                                            key = { _, item -> item.discussion.id }) { _, discussionAndLastMessage ->
+                                            with(discussionAndLastMessage) {
+                                                val unread =
+                                                    unreadCount > 0 || discussion.unread
+                                                ReorderableItem(
+                                                    enabled = reorderable,
+                                                    state = reorderableState,
+                                                    key = discussion.id
+                                                ) {
+                                                    SwipeForActionBox(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        maxOffset = 96.dp,
+                                                        enabledFromStartToEnd = discussionListViewModel.selection.isEmpty() && discussion.isPreDiscussion.not(),
+                                                        enabledFromEndToStart = discussionListViewModel.selection.isEmpty() && discussion.isPreDiscussion.not(),
+                                                        callbackStartToEnd = {
+                                                            if (unread) {
+                                                                onMarkAsRead.invoke(discussion.id)
+                                                            } else {
+                                                                onMarkAsUnread.invoke(discussion.id)
                                                             }
                                                         },
-                                                        lastOutboundMessageStatusWidth =  message?.takeIf {it.getOutboundStatusIcon() != null}?.let { lastMessage ->
-                                                            (14 * lastMessage.getOutboundStatusIconAspectRation() + 4).sp
-                                                        } ?: 0.sp
+                                                        callbackEndToStart = {
+                                                            discussionListViewModel.archiveDiscussion(
+                                                                discussion,
+                                                                archived = true,
+                                                                cancelable = true
+                                                            )
+                                                        },
+                                                        backgroundContentFromStartToEnd = { progress ->
+                                                            SwipeActionBackground(
+                                                                label = stringResource(
+                                                                    if (unread) R.string.menu_action_discussion_mark_as_read else R.string.menu_action_discussion_mark_as_unread
+                                                                ),
+                                                                icon = if (unread) R.drawable.ic_action_mark_read else R.drawable.ic_action_mark_unread,
+                                                                backgroundColor = R.color.golden,
+                                                                progress = progress,
+                                                                fromStartToEnd = true
+                                                            )
+                                                        },
+                                                        backgroundContentFromEndToStart = { progress ->
+                                                            SwipeActionBackground(
+                                                                label = stringResource(
+                                                                    R.string.menu_action_archive
+                                                                ),
+                                                                icon = R.drawable.ic_archive,
+                                                                backgroundColor = R.color.olvid_gradient_dark,
+                                                                progress = progress,
+                                                                fromStartToEnd = false
+                                                            )
+                                                        }
                                                     )
+                                                    {
+                                                        val invitation by remember {
+                                                            derivedStateOf {
+                                                                invitations?.sortedBy { it.invitationTimestamp }
+                                                                    ?.find { it.discussionId == discussion.id }
+                                                            }
+                                                        }
+                                                        DiscussionListItem(
+                                                            modifier = Modifier
+                                                                .background(
+                                                                    shape = RoundedCornerShape(8.dp),
+                                                                    color =
+                                                                        if (discussionListViewModel.isSelected(
+                                                                                discussion
+                                                                            )
+                                                                        ) {
+                                                                            colorResource(id = R.color.greySubtleOverlay)
+                                                                        } else {
+                                                                            colorResource(
+                                                                                id = R.color.almostWhite
+                                                                            )
+                                                                        }
+                                                                )
+                                                                .cutoutHorizontalPadding(),
+                                                            title = invitation?.getAnnotatedTitle(
+                                                                context
+                                                            )
+                                                                .takeIf { discussion.isPreDiscussion }
+                                                                ?: discussion.getAnnotatedTitle(
+                                                                    context
+                                                                ),
+                                                            body = invitation?.let {
+                                                                AnnotatedString(it.statusText)
+                                                            } ?: discussion.getAnnotatedBody(
+                                                                context,
+                                                                message
+                                                            ),
+                                                            date = invitation?.getAnnotatedDate(
+                                                                context
+                                                            ) ?: discussion.getAnnotatedDate(
+                                                                context,
+                                                                message
+                                                            ),
+                                                            initialViewSetup = { initialView ->
+                                                                invitation?.takeIf { discussion.isPreDiscussion }
+                                                                    ?.let {
+                                                                        invitationListViewModel.initialViewSetup(
+                                                                            initialView,
+                                                                            it
+                                                                        )
+                                                                    } ifNull {
+                                                                    initialView.setDiscussion(
+                                                                        discussion
+                                                                    )
+                                                                }
+                                                            },
+                                                            customColor = discussionCustomization?.colorJson?.color?.minus(
+                                                                0x1000000
+                                                            ) ?: 0x00ffffff,
+                                                            backgroundImageUrl = App.absolutePathFromRelative(
+                                                                discussionCustomization?.backgroundImageUrl
+                                                            ),
+                                                            unread = (invitation?.requiresAction() == true) || discussion.unread,
+                                                            unreadCount = unreadCount,
+                                                            muted = discussionCustomization?.shouldMuteNotifications() == true,
+                                                            locked = discussion.isLocked && (invitation == null || invitation?.requiresAction() == false),
+                                                            mentioned = unreadMention,
+                                                            pinned = discussion.pinned != 0,
+                                                            reorderableScope = this@ReorderableItem.takeIf { reorderable && discussion.isPreDiscussion.not() },
+                                                            locationsShared = locationsShared,
+                                                            pendingContact = discussion.isPreDiscussion || (discussion.isLocked && invitation != null),
+                                                            attachmentCount = if (message?.isLocationMessage == true) 0 else message?.totalAttachmentCount
+                                                                ?: 0,
+                                                            imageAndVideoCount = if (message?.isLocationMessage == true) 0 else message?.imageAndVideoCount
+                                                                ?: 0,
+                                                            videoCount = message?.videoCount ?: 0,
+                                                            audioCount = message?.audioCount ?: 0,
+                                                            firstFileName = message?.firstAttachmentName,
+                                                            onClick = { onClick(discussion) },
+                                                            selected = discussionListViewModel.isSelected(
+                                                                discussion
+                                                            ),
+                                                            onLongClick = {
+                                                                hapticFeedback.performHapticFeedback(
+                                                                    HapticFeedbackType.LongPress
+                                                                )
+                                                                onLongClick(discussion)
+                                                            },
+                                                            onDragStopped = {
+                                                                discussionListViewModel.syncPinnedDiscussions()
+                                                            },
+                                                            lastOutboundMessageStatus = message?.takeIf { it.getOutboundStatusIcon() != null }
+                                                                ?.let { lastMessage ->
+                                                                    {
+                                                                        OutboundMessageStatus(
+                                                                            modifier = Modifier.padding(
+                                                                                end = scaledDp(4)
+                                                                            ),
+                                                                            size = scaledDp(14),
+                                                                            message = lastMessage
+                                                                        )
+                                                                    }
+                                                                },
+                                                            lastOutboundMessageStatusWidth = message?.takeIf { it.getOutboundStatusIcon() != null }
+                                                                ?.let { lastMessage ->
+                                                                    (14 * lastMessage.getOutboundStatusIconAspectRation() + 4).sp
+                                                                } ?: 0.sp
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }

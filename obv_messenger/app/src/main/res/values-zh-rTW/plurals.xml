@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">新增成員 %1$d</item>
 		<item quantity="other" state="needs_review" hash="1091232977">新增 %1$d 位成員</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">向 %1$d 介紹聯絡人</item>
+		<item quantity="other" state="needs_review" hash="222947824">向%1$d介紹您的聯絡人</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">「在此裝置上，您之前的裝置（如下所示）將會停用：」</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">» 在此裝置上，您之前的裝置將會停用：</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">您確定要刪除選取的附件嗎？</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">您確定要刪除選取的 %1$d 個附件嗎？</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">如果此附件附加到多個訊息中，則會刪除所有附件副本。</item>
+		<item quantity="other" state="needs_review" hash="890537395">如果這些附件附加到多個訊息中，所有附件的副本都將被刪除。</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d天，%2$02d小時%3$02d分%4$02d秒</item>

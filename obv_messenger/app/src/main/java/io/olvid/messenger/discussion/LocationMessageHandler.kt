@@ -68,6 +68,7 @@ class LocationMessageHandler(
                                 discussionViewModel.discussionId ?: -1,
                                 message.id,
                                 fyleAndStatuses[0].fyle.id,
+                                null,
                                 true,
                                 false
                             )
@@ -135,6 +136,7 @@ class LocationMessageHandler(
                     discussionViewModel.discussionId ?: -1,
                     message.id,
                     fyleAndStatuses[0].fyle.id,
+                    null,
                     true,
                     false
                 )

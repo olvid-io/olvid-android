@@ -64,6 +64,10 @@ import io.olvid.messenger.designsystem.components.OlvidTextButton
 fun SubscriptionStatusScreen(
     modifier: Modifier = Modifier,
     contentPadding: Dp = 0.dp,
+    backgroundModifier: Modifier = Modifier.background(
+        color = colorResource(R.color.almostWhite),
+        shape = RoundedCornerShape(16.dp)
+    ),
     apiKeyStatus: EngineAPI.ApiKeyStatus?,
     apiKeyExpirationTimestamp: Long?,
     apiKeyPermissions: List<EngineAPI.ApiKeyPermission?>,
@@ -76,10 +80,7 @@ fun SubscriptionStatusScreen(
     var showSubscriptionPlans by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = modifier
-            .background(
-                color = colorResource(R.color.almostWhite),
-                shape = RoundedCornerShape(16.dp)
-            )
+            .then(backgroundModifier)
             .padding(contentPadding)
     ) {
         SubscriptionStatusHeader(

@@ -341,6 +341,7 @@ public class NotificationActionService extends IntentService {
         AppDatabase.getInstance().messageDao().markAllDiscussionMessagesRead(discussionId);
         if (discussion.unread) {
             AppDatabase.getInstance().discussionDao().updateDiscussionUnreadStatus(discussionId, false);
+            UnreadCountsSingleton.INSTANCE.discussionUnreadFlagChanged(discussionId, false);
         }
         UnreadCountsSingleton.INSTANCE.markDiscussionRead(discussionId, null);
     }

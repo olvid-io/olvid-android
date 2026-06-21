@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">Thêm thành viên %1$d</item>
 		<item quantity="other" state="needs_review" hash="1091232977">Thêm %1$d thành viên</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Giới thiệu %1$d với một người liên hệ</item>
+		<item quantity="other" state="needs_review" hash="222947824">Giới thiệu %1$d với danh bạ của bạn</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">\" trên thiết bị này, thiết bị trước của bạn được liệt kê bên dưới sẽ bị hủy kích hoạt:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">» trên thiết bị này, các thiết bị khác của bạn sẽ bị hủy kích hoạt:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">Bạn có thực sự muốn xóa tệp đính kèm đã chọn không?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">Bạn có thực sự muốn xóa %1$d tệp đính kèm đã chọn không?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Nếu tệp đính kèm này được đính kèm vào nhiều tin nhắn, tất cả các bản sao của tệp đính kèm sẽ bị xóa.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Nếu các tệp đính kèm này được đính kèm vào nhiều tin nhắn, tất cả các bản sao của tệp đính kèm sẽ bị xóa.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d ngày, %2$02dh %3$02dm %4$02ds</item>

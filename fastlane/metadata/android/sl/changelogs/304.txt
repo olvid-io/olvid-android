@@ -1,0 +1,1 @@
+- Dodana podpora za 18 novih jezikov: bolgarščina, bengalščina, estonščina, filipinščina, gudžaratščina, indonezijščina, kannada, latvijščina, litvanščina, malajalam, maratščina, pandžabščina, srbščina, svahili, tamilščina, telugu, tajščina in urdu.

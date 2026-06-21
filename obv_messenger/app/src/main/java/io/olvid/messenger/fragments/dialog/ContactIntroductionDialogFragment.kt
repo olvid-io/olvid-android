@@ -25,32 +25,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager.LayoutParams
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.switchMap
-import io.olvid.messenger.App
-import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
-import io.olvid.messenger.R.layout
-import io.olvid.messenger.R.string
-import io.olvid.messenger.R.style
-import io.olvid.messenger.customClasses.SecureAlertDialogBuilder
-import io.olvid.messenger.customClasses.StringUtils
-import io.olvid.messenger.databases.AppDatabase
-import io.olvid.messenger.databases.entity.Contact
-import io.olvid.messenger.databases.entity.OwnedIdentity
-import io.olvid.messenger.fragments.FilteredContactListFragment
+import io.olvid.messenger.contact.ContactIntroductionScreen
+import io.olvid.messenger.designsystem.components.OlvidTopAppBar
 import io.olvid.messenger.settings.SettingsActivity
 
 class ContactIntroductionDialogFragment : DialogFragment() {
     private val bytesOwnedIdentity by lazy { arguments?.getByteArray(BYTES_OWNED_IDENTITY_KEY) }
-    private val bytesContactIdentityA by lazy { arguments?.getByteArray(BYTES_CONTACT_IDENTITY_KEY) }
-    private val displayNameA by lazy { arguments?.getString(DISPLAY_NAME_KEY) }
-    private var selectedContacts: List<Contact>? = null
+    private val bytesContactIdentity by lazy { arguments?.getByteArray(BYTES_CONTACT_IDENTITY_KEY) }
+    private val displayName by lazy { arguments?.getString(DISPLAY_NAME_KEY) }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
@@ -72,93 +63,37 @@ class ContactIntroductionDialogFragment : DialogFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val dialogView =
-            inflater.inflate(layout.dialog_fragment_pick_multiple_contacts, container, false)
-        val dialogContactNameFilter =
-            dialogView.findViewById<EditText>(R.id.dialog_discussion_filter)
-        val dialogTitle = dialogView.findViewById<TextView>(R.id.dialog_title)
-        dialogTitle.text = resources.getString(string.dialog_title_introduce_contact, displayNameA)
-        val cancelButton = dialogView.findViewById<Button>(R.id.button_cancel)
-        cancelButton.setOnClickListener { dismiss() }
-        val filteredContactListFragment = FilteredContactListFragment()
-        filteredContactListFragment.removeBottomPadding()
-        filteredContactListFragment.setSelectable(true)
-        filteredContactListFragment.setContactFilterEditText(dialogContactNameFilter)
-        filteredContactListFragment.setUnfilteredContacts(
-            AppSingleton.getCurrentIdentityLiveData().switchMap { ownedIdentity: OwnedIdentity? ->
-                if (ownedIdentity == null) {
-                    return@switchMap null
+    ): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                Column(
+                    modifier = Modifier
+                        .background(colorResource(R.color.almostWhite))
+                        .fillMaxSize()
+                ) {
+                    OlvidTopAppBar(
+                        titleText = stringResource(
+                                R.string.dialog_title_introduce_contact,
+                                displayName.orEmpty()
+                            ),
+                        onBackPressed = { dismiss() }
+                    )
+                    ContactIntroductionScreen(
+                        bytesOwnedIdentity = bytesOwnedIdentity ?: ByteArray(0),
+                        bytesContactIdentity = bytesContactIdentity ?: ByteArray(0),
+                        displayName = displayName.orEmpty(),
+                        onDone = { dismiss() }
+                    )
                 }
-                AppDatabase.getInstance().contactDao()
-                    .getAllOneToOneForOwnedIdentityWithChannelExcludingOne(
-                        ownedIdentity.bytesOwnedIdentity,
-                        bytesContactIdentityA ?: ByteArray(0)
-                    )
-            })
-        val okButton = dialogView.findViewById<Button>(R.id.button_ok)
-        okButton.setOnClickListener { view: View ->
-            dismiss()
-            if (selectedContacts.isNullOrEmpty()) {
-                return@setOnClickListener
             }
-            val bytesNewMemberIdentities = selectedContacts!!.map { it.bytesContactIdentity }.toTypedArray()
-            val introducedDisplayNames = StringUtils.joinContactDisplayNames(selectedContacts!!.map { it.getCustomDisplayName() }.toTypedArray())
-
-            val builder = SecureAlertDialogBuilder(view.context, style.CustomAlertDialog)
-                .setTitle(string.dialog_title_contact_introduction)
-                .setPositiveButton(string.button_label_ok) { _, _ ->
-                    try {
-                        AppSingleton.getEngine().startContactMutualIntroductionProtocol(
-                            bytesOwnedIdentity,
-                            bytesContactIdentityA,
-                            bytesNewMemberIdentities
-                        )
-                        App.toast(
-                            string.toast_message_contacts_introduction_started,
-                            Toast.LENGTH_SHORT
-                        )
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-                .setNegativeButton(string.button_label_cancel, null)
-            if (bytesNewMemberIdentities.size == 1) {
-                builder.setMessage(
-                    getString(
-                        string.dialog_message_contact_introduction,
-                        displayNameA,
-                        introducedDisplayNames
-                    )
-                )
-            } else {
-                builder.setMessage(
-                    getString(
-                        string.dialog_message_contact_introduction_multiple,
-                        displayNameA,
-                        bytesNewMemberIdentities.size,
-                        introducedDisplayNames
-                    )
-                )
-            }
-            builder.create().show()
         }
-        val selectedContactsObserver =
-            Observer<List<Contact>> { contacts: List<Contact>? -> selectedContacts = contacts }
-        filteredContactListFragment.setSelectedContactsObserver(selectedContactsObserver)
-        val transaction = childFragmentManager.beginTransaction()
-        transaction.replace(
-            R.id.dialog_filtered_contact_list_placeholder,
-            filteredContactListFragment
-        )
-        transaction.commit()
-        return dialogView
     }
 
     companion object {
         private const val BYTES_OWNED_IDENTITY_KEY = "bytes_owned_identity"
         private const val BYTES_CONTACT_IDENTITY_KEY = "bytes_contact_identity"
         private const val DISPLAY_NAME_KEY = "display_name"
+
         @JvmStatic
         fun newInstance(
             bytesOwnedIdentity: ByteArray?,

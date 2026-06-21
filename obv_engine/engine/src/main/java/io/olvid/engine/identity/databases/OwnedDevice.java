@@ -456,7 +456,7 @@ public class OwnedDevice implements ObvDatabase {
             statement.setBytes(2, this.uid.getBytes());
             statement.setBytes(3, this.ownedIdentity.getBytes());
             statement.executeUpdate();
-            this.lastRegistrationTimestamp = timestamp;
+            this.latestChannelCreationPingTimestamp = timestamp;
         }
     }
 
@@ -532,7 +532,7 @@ public class OwnedDevice implements ObvDatabase {
 
     @Override
     public void wasCommitted() {
-        // this notification is only caught in the ChannelManager, so as to create a new channel
+        // this notification is only caught in the ChannelManager, to create a new channel
         if ((commitHookBits & HOOK_BIT_INSERTED_OTHER_DEVICE) != 0) {
             HashMap<String, Object> userInfo = new HashMap<>();
             userInfo.put(IdentityNotifications.NOTIFICATION_NEW_OWNED_DEVICE_DEVICE_UID_KEY, uid);

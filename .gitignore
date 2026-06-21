@@ -1,4 +1,5 @@
 .venv/
+.env
 .DS_Store
 *~
 /obv_messenger/app/release/
@@ -18,3 +19,14 @@ build
 /captures
 .externalNativeBuild
 /obv_messenger/.kotlin/
+
+# fastlane locals
+fastlane/report.xml
+fastlane/Preview.html
+/vendor/
+.bundle/
+
+# Idempotency sidecars for translate_changelog.py / translate_listings.py
+fastlane/metadata/android/*/changelogs/.*.txt.hash
+fastlane/metadata/android/*/.*.txt.hash
+

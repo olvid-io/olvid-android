@@ -38,6 +38,7 @@ import io.olvid.engine.engine.types.ObvKeycloakIdBasedAuthResult
 import io.olvid.engine.engine.types.identities.ObvKeycloakAuthType
 import io.olvid.messenger.App
 import io.olvid.messenger.AppSingleton
+import io.olvid.messenger.BuildConfig
 import io.olvid.messenger.customClasses.ConfigurationPojo
 import io.olvid.messenger.customClasses.NoExceptionConnectionBuilder
 import io.olvid.messenger.customClasses.NoExceptionConnectionBuilder.Companion.downloadContent
@@ -59,9 +60,13 @@ import net.openid.appauth.AppAuthConfiguration
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthState.AuthStateAction
 import net.openid.appauth.AuthorizationException
+import net.openid.appauth.AuthorizationRequest
+import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ClientSecretPost
+import net.openid.appauth.GrantTypeValues
+import net.openid.appauth.ResponseTypeValues
 import net.openid.appauth.TokenRequest
 import net.openid.appauth.TokenResponse
 import org.jose4j.jwk.JsonWebKey
@@ -205,7 +210,7 @@ object KeycloakTasks {
                 .readValue(bytes, JsonMagicResponse::class.java)
 
             response.accessToken?.let {
-                authState.update(it, response.refreshToken)
+                authState.initializeFromMagicLinkOrIdBasedAuthResponse(it, response.refreshToken, response.clientId, response.clientSecret)
                 callback.success(authState)
             } ?: run {
                 callback.failed(RFC_INVALID_SIGNATURE)
@@ -385,7 +390,7 @@ object KeycloakTasks {
                         val error = output["error"] as Int?
                         if (error != null) {
                             when (error) {
-                                ERROR_CODE_INTERNAL_ERROR, ERROR_CODE_INVALID_REQUEST -> callback.failed(
+                                ERROR_CODE_INTERNAL_ERROR, ERROR_CODE_INVALID_REQUEST, ERROR_CODE_PERMISSION_DENIED -> callback.failed(
                                     RFC_SERVER_ERROR
                                 )
 
@@ -959,22 +964,76 @@ object KeycloakTasks {
     }
 }
 
-fun AuthState.update(accessToken: String, refreshToken: String?) {
-    update(
-        TokenResponse.Builder(
-            TokenRequest.Builder(
-                authorizationServiceConfiguration!!,
-                "fake"
+fun AuthState.initializeFromMagicLinkOrIdBasedAuthResponse(accessToken: String, refreshToken: String?, clientId: String?, clientSecret: String?) {
+    val configuration = authorizationServiceConfiguration
+    if (configuration == null) {
+        Logger.e("Called initializeFromMagicLinkOrIdBasedAuthResponse() on an AuthState without an AuthorizationServiceConfiguration!")
+        return
+    }
+    val accessTokenExpiration = runCatching {
+        val jwtConsumer = JwtConsumerBuilder()
+            .setSkipSignatureVerification()
+            .setSkipAllValidators()
+            .build()
+        val context = jwtConsumer.process(accessToken)
+        return@runCatching context.jwtClaims.expirationTime?.valueInMillis
+    }.getOrNull()
+
+    // if clientId is null, we will not be able to refresh the accessToken, so treat it as if no refreshToken was given
+    if (refreshToken == null || clientId == null) {
+        update(
+            TokenResponse.Builder(
+                TokenRequest.Builder(
+                    configuration,
+                    "fake"
+                )
+                    .setGrantType(GrantTypeValues.IMPLICIT)
+                    .build()
             )
-                .setGrantType("fake")
-                .build()
+                .setAccessToken(accessToken)
+                .setAccessTokenExpirationTime(accessTokenExpiration)
+                .setTokenType(TokenResponse.TOKEN_TYPE_BEARER)
+                .build(),
+            null
         )
-            .setAccessToken(accessToken)
-            .setRefreshToken(refreshToken)
-            .setTokenType(TokenResponse.TOKEN_TYPE_BEARER)
-            .build(),
-        null
-    )
+    } else {
+        // we simulate a real OpenID Connect authentication with AUTHORIZATION_CODE
+        // this way the refreshToken can properly be used
+        update(
+            AuthorizationResponse.Builder(
+                AuthorizationRequest.Builder(
+                    configuration,
+                    clientId,
+                    ResponseTypeValues.CODE,
+                    BuildConfig.KEYCLOAK_REDIRECT_URL.toUri()
+                )
+                    .setScope("openid")
+                    .build()
+            ).build(),
+            null
+        )
+
+        update(
+            TokenResponse.Builder(
+                TokenRequest.Builder(
+                    configuration,
+                    clientId
+                )
+                    // if a clientSecret was provided, add it here
+                    .setAdditionalParameters(clientSecret?.let { mapOf("client_secret" to it) } ?: emptyMap())
+                    .setGrantType(GrantTypeValues.AUTHORIZATION_CODE)
+                    .setAuthorizationCode("fake") // we don't actually use an authorization code, but this is required by AppAuth
+                    .setRedirectUri(BuildConfig.KEYCLOAK_REDIRECT_URL.toUri())
+                    .build()
+            )
+                .setAccessToken(accessToken)
+                .setAccessTokenExpirationTime(accessTokenExpiration) // we need to manually set the accessTokenExpiration otherwise AppAuth never attempts to refresh it
+                .setRefreshToken(refreshToken)
+                .setTokenType(TokenResponse.TOKEN_TYPE_BEARER)
+                .build(),
+            null
+        )
+    }
 }
 
 fun AuthState.performActionWithFreshTokens(bytesOwnedIdentity: ByteArray?, authorizationService: AuthorizationService, supportedAuthenticationMethods: List<ObvKeycloakAuthType>, action: AuthStateAction) {
@@ -991,7 +1050,7 @@ fun AuthState.performActionWithFreshTokens(bytesOwnedIdentity: ByteArray?, autho
                     val idBasedAuthResult = AppSingleton.getEngine().performKeycloakIdBasedAuth(bytesOwnedIdentity)
                     if (idBasedAuthResult.status == ObvKeycloakIdBasedAuthResult.Status.SUCCESS) {
                         // if id-based reauthentication worked, update the current AuthState
-                        update(idBasedAuthResult.accessToken, idBasedAuthResult.refreshToken)
+                        initializeFromMagicLinkOrIdBasedAuthResponse(idBasedAuthResult.accessToken, idBasedAuthResult.refreshToken, idBasedAuthResult.clientId, idBasedAuthResult.clientSecret)
                         // then perform the action with the fresh token
                         action.execute(idBasedAuthResult.accessToken, idToken, null)
                     } else {

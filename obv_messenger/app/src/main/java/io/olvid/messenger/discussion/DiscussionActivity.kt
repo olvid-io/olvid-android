@@ -23,7 +23,6 @@ import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -83,7 +82,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
 import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -93,6 +91,8 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import io.olvid.engine.Logger
 import io.olvid.messenger.App
+import io.olvid.messenger.UnreadCountsSingleton
+import io.olvid.messenger.AppSingleton
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding
 import io.olvid.messenger.lock_screen.LockableActivity
@@ -102,6 +102,7 @@ import io.olvid.messenger.customClasses.SecureUriHandler
 import io.olvid.messenger.customClasses.StringUtils
 import io.olvid.messenger.customClasses.onBackPressed
 import io.olvid.messenger.databases.AppDatabase
+import io.olvid.messenger.databases.dao.FyleMessageJoinWithStatusDao
 import io.olvid.messenger.databases.entity.Contact
 import io.olvid.messenger.databases.entity.Discussion
 import io.olvid.messenger.databases.entity.DiscussionCustomization
@@ -123,9 +124,11 @@ import io.olvid.messenger.discussion.compose.MessageEditHandler
 import io.olvid.messenger.discussion.linkpreview.LinkPreviewViewModel
 import io.olvid.messenger.discussion.mention.MentionViewModel
 import io.olvid.messenger.discussion.message.MessageActionMenu
+import io.olvid.messenger.discussion.search.DiscussionCalendarDialog
 import io.olvid.messenger.discussion.search.DiscussionSearchViewModel
 import io.olvid.messenger.main.invitations.InvitationListViewModel
 import io.olvid.messenger.notifications.AndroidNotificationManager
+import io.olvid.messenger.services.AudioPlaybackNotificationManager
 import io.olvid.messenger.owneddetails.SelectDetailsPhotoViewModel
 import io.olvid.messenger.settings.SettingsActivity
 import java.io.FileInputStream
@@ -197,14 +200,8 @@ class DiscussionActivity : LockableActivity() {
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(
-                Color.Transparent.toArgb(),
-                Color.Transparent.toArgb()
-            ),
-            navigationBarStyle = SystemBarStyle.light(
-                Color.Transparent.toArgb(),
-                ContextCompat.getColor(this, R.color.blackOverlay)
-            )
+            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
 
         super.onCreate(savedInstanceState)
@@ -213,10 +210,7 @@ class DiscussionActivity : LockableActivity() {
             finishAndClearViewModel()
         }
 
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
-            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
+        AudioPlaybackNotificationManager.bind(this)
 
         setContent {
             val discussion by discussionViewModel.discussion.observeAsState()
@@ -347,6 +341,7 @@ class DiscussionActivity : LockableActivity() {
                                 composeMessageViewModel = composeMessageViewModel,
                                 sendReadReceipt = sendReadReceipt,
                                 messageClicked = ::messageClicked,
+                                onCancelAttachmentUpload = ::cancelAttachmentUpload,
                                 saveAttachment = ::saveAttachment,
                                 saveAllAttachments = ::saveAllAttachments,
                                 openMap = locationMessageHandler::openMap,
@@ -498,6 +493,23 @@ class DiscussionActivity : LockableActivity() {
                         )
                     }
                 }
+
+                if (discussionViewModel.showCalendarView) {
+                    val galleryMediasGroupedByDate by discussionViewModel.galleryMediasGroupedByDate.observeAsState(emptyMap())
+                    DiscussionCalendarDialog(
+                        initialDateMillis = discussionViewModel.calendarInitialDateMillis,
+                        attachmentsByDate = galleryMediasGroupedByDate,
+                        onDateSelected = { dateMillis ->
+                            discussionViewModel.scrollToDate(dateMillis)
+                            discussionViewModel.showCalendarView = false
+                        },
+                        onMessageSelected = { messageId ->
+                            discussionViewModel.scrollToMessageRequest = ScrollRequest(messageId = messageId, highlight = true, triggeredBySearch = true)
+                            discussionViewModel.showCalendarView = false
+                        },
+                        onDismissRequest = { discussionViewModel.showCalendarView = false }
+                    )
+                }
             }
         }
 
@@ -615,6 +627,7 @@ class DiscussionActivity : LockableActivity() {
                 App.runThread {
                     AppDatabase.getInstance().discussionDao()
                         .updateDiscussionUnreadStatus(discussion.id, false)
+                    UnreadCountsSingleton.discussionUnreadFlagChanged(discussion.id, false)
                 }
             }
         }
@@ -862,6 +875,7 @@ class DiscussionActivity : LockableActivity() {
     override fun onDestroy() {
         super.onDestroy()
         audioAttachmentServiceBinding?.release()
+        AudioPlaybackNotificationManager.unbind()
     }
 
     override fun onPause() {
@@ -870,6 +884,14 @@ class DiscussionActivity : LockableActivity() {
         saveDraft()
         if (discussionViewModel.markAsReadOnPause) {
             discussionViewModel.markMessagesRead(true)
+        }
+    }
+
+    private fun cancelAttachmentUpload(fyleAndStatus: FyleMessageJoinWithStatusDao.FyleAndStatus) {
+        val engineMessageIdentifier = fyleAndStatus.fyleMessageJoinWithStatus.engineMessageIdentifier ?: return
+        val attachmentNumber = fyleAndStatus.fyleMessageJoinWithStatus.engineNumber ?: return
+        App.runThread {
+            AppSingleton.getEngine().cancelAttachmentUpload(fyleAndStatus.fyleMessageJoinWithStatus.bytesOwnedIdentity, engineMessageIdentifier, attachmentNumber)
         }
     }
 

@@ -1,0 +1,4 @@
+- Nový dizajn viacerých častí aplikácie: karta kontaktu, profilová karta, správca úložiska a pod.
+- Pridaný kalendár do konverzácie, aby ste sa rýchlo dostali na konkrétny čas.
+- Pridaný interný ovládač „prebiehajúceho prehrávania“ na jednoduché prepínanie medzi hlasovými správami. Vylepšené gestá pre prehrávanie hlasových správ.
+- Pridaná možnosť zrušiť odosielanie prílohy.

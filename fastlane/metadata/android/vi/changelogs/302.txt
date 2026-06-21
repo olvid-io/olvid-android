@@ -1,0 +1,1 @@
+- Sửa lỗi khiến tính năng desugaring của Java Records không hoạt động đúng cách trong phiên bản Android Studio mới nhất.

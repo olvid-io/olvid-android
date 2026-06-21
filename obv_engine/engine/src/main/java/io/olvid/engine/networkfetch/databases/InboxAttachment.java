@@ -81,6 +81,9 @@ public class InboxAttachment implements ObvDatabase {
     private String chunkDownloadPrivateUrls;
     static final String CHUNK_DOWNLOAD_PRIVATE_URLS = "chunk_download_private_urls";
 
+    public static final String UPLOAD_CANCELLED_CHUNK_URLS = "__CANCELLED__";
+
+
     public Identity getOwnedIdentity() {
         return ownedIdentity;
     }
@@ -125,6 +128,10 @@ public class InboxAttachment implements ObvDatabase {
         return downloadRequested;
     }
 
+    public boolean isUploadCancelledBySender() {
+        return UPLOAD_CANCELLED_CHUNK_URLS.equals(chunkDownloadPrivateUrls);
+    }
+
     public Long getTimestampOfFetchRequest() {
         return timestampOfFetchRequest;
     }
@@ -134,7 +141,7 @@ public class InboxAttachment implements ObvDatabase {
     }
 
     public String[] getChunkDownloadPrivateUrls() {
-        if (chunkDownloadPrivateUrls == null) {
+        if (chunkDownloadPrivateUrls == null || isUploadCancelledBySender()) {
             return new String[0];
         }
         return chunkDownloadPrivateUrls.split("¦", -1);
@@ -387,12 +394,20 @@ public class InboxAttachment implements ObvDatabase {
         if (ownedIdentity == null || messageUid == null) {
             return null;
         }
-        InboxAttachment inboxAttachment = new InboxAttachment(fetchManagerSession, ownedIdentity, messageUid, attachmentNumber, expectedLength, chunkLength, chunkDownloadPrivateUrls);
+        InboxAttachment inboxAttachment = new InboxAttachment(fetchManagerSession, ownedIdentity, messageUid, attachmentNumber, expectedLength, chunkLength, false, chunkDownloadPrivateUrls);
         inboxAttachment.insert();
         return inboxAttachment;
     }
 
-    private InboxAttachment(FetchManagerSession fetchManagerSession, Identity ownedIdentity, UID messageUid, int attachmentNumber, long expectedLength, int chunkLength, String[] chunkDownloadPrivateUrls) {
+    public static void createUploadCancelled(FetchManagerSession fetchManagerSession, Identity ownedIdentity, UID messageUid, int attachmentNumber, long expectedLength, int chunkLength) throws SQLException {
+        if (ownedIdentity == null || messageUid == null) {
+            return;
+        }
+        InboxAttachment inboxAttachment = new InboxAttachment(fetchManagerSession, ownedIdentity, messageUid, attachmentNumber, expectedLength, chunkLength, true, null);
+        inboxAttachment.insert();
+    }
+
+    private InboxAttachment(FetchManagerSession fetchManagerSession, Identity ownedIdentity, UID messageUid, int attachmentNumber, long expectedLength, int chunkLength, boolean uploadCancelled, String[] chunkDownloadPrivateUrls) {
         this.fetchManagerSession = fetchManagerSession;
         this.ownedIdentity = ownedIdentity;
         this.messageUid = messageUid;
@@ -409,7 +424,9 @@ public class InboxAttachment implements ObvDatabase {
         this.markedForDeletion = false;
 
         String serialized;
-        if (chunkDownloadPrivateUrls == null || chunkDownloadPrivateUrls.length == 0) {
+        if (uploadCancelled) {
+            serialized = UPLOAD_CANCELLED_CHUNK_URLS;
+        } else if (chunkDownloadPrivateUrls == null || chunkDownloadPrivateUrls.length == 0) {
             serialized = null;
         } else {
             StringBuilder sb = new StringBuilder();

@@ -1,0 +1,4 @@
+- Rediseño de varios componentes de la aplicación: tarjeta de contacto, tarjeta de perfil, administrador de almacenamiento, etc.
+- Se agregó una vista de calendario a la conversación para poder ir rápidamente a un momento específico.
+- Se agregó un controlador interno de "reproducción en curso" para cambiar fácilmente entre mensajes de voz. Algunas mejoras en los gestos de reproducción de mensajes de voz.
+- Se agregó la posibilidad de cancelar la carga de un archivo adjunto.

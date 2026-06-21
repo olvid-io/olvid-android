@@ -60,6 +60,8 @@ public class ReturnReceipt implements ObvDatabase {
     static final String KEY = "key";
     private Integer attachmentNumber;
     static final String ATTACHMENT_NUMBER = "attachment_number";
+    private long creationTimestamp;
+    static final String CREATION_TIMESTAMP = "creation_timestamp";
 
 
     public long getId() {
@@ -94,6 +96,10 @@ public class ReturnReceipt implements ObvDatabase {
         return attachmentNumber;
     }
 
+    public long getCreationTimestamp() {
+        return creationTimestamp;
+    }
+
     public static ReturnReceipt create(SendManagerSession sendManagerSession, Identity ownedIdentity, Identity contactIdentity, UID[] contactDeviceUids, int status, byte[] nonce, AuthEncKey key, Integer attachmentNumber) {
         if ((ownedIdentity == null) || (contactIdentity == null) || (nonce == null) || (key == null)) {
             return null;
@@ -117,6 +123,7 @@ public class ReturnReceipt implements ObvDatabase {
         this.nonce = nonce;
         this.key = key;
         this.attachmentNumber = attachmentNumber;
+        this.creationTimestamp = System.currentTimeMillis();
     }
 
     private ReturnReceipt(SendManagerSession sendManagerSession, ResultSet res) throws SQLException {
@@ -136,6 +143,7 @@ public class ReturnReceipt implements ObvDatabase {
         if (res.wasNull()) {
             this.attachmentNumber = null;
         }
+        this.creationTimestamp = res.getLong(CREATION_TIMESTAMP);
     }
 
 
@@ -216,7 +224,8 @@ public class ReturnReceipt implements ObvDatabase {
                     STATUS + " INTEGER NOT NULL, " +
                     NONCE + " BLOB NOT NULL, " +
                     KEY + " BLOB NOT NULL, " +
-                    ATTACHMENT_NUMBER + " INTEGER);");
+                    ATTACHMENT_NUMBER + " INTEGER, " +
+                    CREATION_TIMESTAMP + " BIGINT NOT NULL);");
         }
     }
 
@@ -226,6 +235,18 @@ public class ReturnReceipt implements ObvDatabase {
                 statement.execute("ALTER TABLE return_receipt ADD COLUMN attachment_number INTEGER DEFAULT NULL");
             }
             oldVersion = 26;
+        }
+        if (oldVersion < 51 && newVersion >= 51) {
+            Logger.d("MIGRATING `return_receipt` DATABASE FROM VERSION " + oldVersion + " TO 51");
+            try (Statement statement = session.createStatement()) {
+                statement.execute("ALTER TABLE return_receipt ADD COLUMN creation_timestamp BIGINT NOT NULL DEFAULT 0");
+            }
+            // set the creation timestamp of pre-existing return receipts to now, so they expire 60 days from the migration
+            try (PreparedStatement preparedStatement = session.prepareStatement("UPDATE return_receipt SET creation_timestamp = ?")) {
+                preparedStatement.setLong(1, System.currentTimeMillis());
+                preparedStatement.executeUpdate();
+            }
+            oldVersion = 51;
         }
     }
 
@@ -239,7 +260,8 @@ public class ReturnReceipt implements ObvDatabase {
                 STATUS + ", " +
                 NONCE + ", " +
                 KEY + ", " +
-                ATTACHMENT_NUMBER + ") VALUES (?,?,?,?,?, ?,?);",
+                ATTACHMENT_NUMBER + ", " +
+                CREATION_TIMESTAMP + ") VALUES (?,?,?,?,?, ?,?,?);",
                 true)) {
             statement.setBytes(1, ownedIdentity.getBytes());
             statement.setBytes(2, contactIdentity.getBytes());
@@ -252,6 +274,7 @@ public class ReturnReceipt implements ObvDatabase {
             } else {
                 statement.setNull(7, Types.INTEGER);
             }
+            statement.setLong(8, creationTimestamp);
             statement.executeUpdate();
             try (ResultSet res = statement.getGeneratedKeys()) {
                 if (res.next()) {

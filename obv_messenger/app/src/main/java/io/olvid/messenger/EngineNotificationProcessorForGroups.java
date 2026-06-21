@@ -489,7 +489,7 @@ public class EngineNotificationProcessorForGroups implements EngineNotificationL
                             if (discussion != null) {
                                 Message newDetailsMessage = Message.createNewPublishedDetailsMessage(db, discussion.id, group.bytesGroupOwnerIdentity);
                                 newDetailsMessage.id = db.messageDao().insert(newDetailsMessage);
-                                UnreadCountsSingleton.INSTANCE.newUnreadMessage(discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
+                                UnreadCountsSingleton.INSTANCE.newUnreadMessage(bytesOwnedIdentity, discussion.id, newDetailsMessage.id, false, newDetailsMessage.timestamp);
                                 if (discussion.updateLastMessageTimestamp(newDetailsMessage.timestamp)) {
                                     db.discussionDao().updateLastMessageTimestamp(discussion.id, discussion.lastMessageTimestamp);
                                 }

@@ -1,0 +1,1 @@
+- Ondersteuning vir 18 nuwe tale bygevoeg: Bulgaars, Bengali, Estnies, Filippyns, Gujarati, Indonesies, Kannada, Lets, Litaus, Malayalam, Marathi, Pandjabi, Serbies, Swahili, Tamil, Telugu, Thai en Oerdoe.

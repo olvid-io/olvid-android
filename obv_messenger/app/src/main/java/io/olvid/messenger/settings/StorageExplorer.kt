@@ -20,7 +20,6 @@ package io.olvid.messenger.settings
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.text.format.Formatter
@@ -41,7 +40,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.LiveData
@@ -54,8 +52,8 @@ import androidx.recyclerview.widget.RecyclerView
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.ItemDecorationSimpleDivider
-import io.olvid.messenger.lock_screen.LockableActivity
 import io.olvid.messenger.customClasses.StringUtils
+import io.olvid.messenger.lock_screen.LockableActivity
 import java.io.File
 import java.io.FileInputStream
 
@@ -66,8 +64,8 @@ class StorageExplorer : LockableActivity() {
     @SuppressLint("ObsoleteSdkInt")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
-            navigationBarStyle = SystemBarStyle.light(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
+            statusBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), Color.Transparent.toArgb()),
+            navigationBarStyle = SystemBarStyle.auto(Color.Transparent.toArgb(), ContextCompat.getColor(this, R.color.blackOverlay))
         )
 
         super.onCreate(savedInstanceState)
@@ -90,10 +88,6 @@ class StorageExplorer : LockableActivity() {
                 }
             }
         })
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightNavigationBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
 
         setContentView(R.layout.activity_storage_explorer)
 
@@ -254,7 +248,7 @@ class StorageExplorer : LockableActivity() {
         val folderChevronImageView: ImageView = itemView.findViewById(R.id.folder_chevron_image)
 
         init {
-            itemView.setOnClickListener { v: View? -> viewHolderClickListener(absoluteAdapterPosition) }
+            itemView.setOnClickListener { _: View? -> viewHolderClickListener(absoluteAdapterPosition) }
         }
     }
 

@@ -1,0 +1,1 @@
+- Er is een probleem opgelost waarbij de 'desugaring' van Java-records niet correct werkte in de nieuwste versie van Android Studio.

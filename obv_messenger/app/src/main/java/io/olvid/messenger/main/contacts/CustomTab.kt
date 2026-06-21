@@ -47,7 +47,8 @@ fun CustomTab(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     selectedContentColor: Color = LocalContentColor.current,
     unselectedContentColor: Color = selectedContentColor.copy(alpha = ContentAlpha.medium),
-    horizontalTextPadding: Dp = 16.dp
+    horizontalTextPadding: Dp = 16.dp,
+    tabHeight: Dp = 48.dp
 ) {
     val styledText = @Composable {
         val style = MaterialTheme.typography.button.copy(textAlign = TextAlign.Center)
@@ -74,7 +75,7 @@ fun CustomTab(
                 constraints.copy(minHeight = 0)
             )
 
-            val tabHeight = 48.dp.roundToPx()
+            val tabHeight = tabHeight.roundToPx()
             layout(textPlaceable.width, tabHeight) {
                 val contentY = (tabHeight - textPlaceable.height) / 2
                 textPlaceable.placeRelative(0, contentY)

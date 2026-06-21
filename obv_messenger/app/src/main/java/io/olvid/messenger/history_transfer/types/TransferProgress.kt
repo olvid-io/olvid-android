@@ -31,6 +31,8 @@ sealed interface TransferProgress {
     data object Negotiating : TransferProgress
     data class Transferring(val messagesProgress: Int, val messagesTotal: Int, val filesProgress: Long, val filesTotal: Long): TransferProgress
     data object Finished: TransferProgress
+    // the following state is only used on DST side, after a connection loss but received messages are still processing
+    data class ProcessingReceivedData(val messagesProgress: Int, val messagesTotal: Int, val filesProgress: Long, val filesTotal: Long): TransferProgress
     data class Failed(val reason: TransferFailReason): TransferProgress
 
     @Composable
@@ -42,6 +44,7 @@ sealed interface TransferProgress {
             Negotiating -> stringResource(R.string.history_transfer_step_negotiating)
             is Transferring -> stringResource(R.string.history_transfer_step_transferring)
             Finished -> stringResource(R.string.history_transfer_step_finished)
+            is ProcessingReceivedData -> stringResource(R.string.history_transfer_step_processing_buffered_data)
             is Failed -> stringResource(R.string.history_transfer_step_failed)
             null -> stringResource(R.string.history_transfer_step_none)
         }

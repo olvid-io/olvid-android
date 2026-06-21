@@ -22,6 +22,7 @@ package io.olvid.messenger.discussion.message
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -33,6 +34,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -81,9 +83,16 @@ fun EphemeralVisibilityExplanation(
 
         Column(
             modifier = modifier
-                .clickable {
-                    onClick?.invoke()
-                },
+                .then(
+                    onClick?.let {
+                        Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(),
+                            onClick = onClick
+                        )
+                    } ?: Modifier
+                )
+,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (onClick != null) {

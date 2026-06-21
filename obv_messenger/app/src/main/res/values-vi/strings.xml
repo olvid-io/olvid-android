@@ -50,7 +50,7 @@
 	<string name="dialog_message_contact_introduction" state="needs_review" hash="-398698689">Bạn có muốn giới thiệu %1$s với %2$s không?</string>
 	<string name="dialog_message_contact_introduction_multiple" state="needs_review" hash="-1743988418">Bạn có muốn giới thiệu %1$s với các liên hệ %2$d sau đây không?\n\n%3$s</string>
 	<string name="dialog_message_delete_attachment" state="needs_review" hash="-235504816">Bạn có thực sự muốn xóa tệp đính kèm %1$s khỏi tin nhắn này không?\nHành động này không thể hoàn tác.</string>
-	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="-273205987">Bạn có thực sự muốn xóa tệp đính kèm %1$s?\nHành động này không thể hoàn tác.</string>
+	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="1647132381">Bạn có thực sự muốn xóa tệp đính kèm **%1$s** không?\nHành động này không thể hoàn tác.</string>
 	<string name="dialog_message_disband_group" state="needs_review" hash="-1617503323">Bạn có muốn giải tán nhóm %1$s không?\nSẽ không còn khả năng gửi tin nhắn đến nhóm này nữa. Các tin nhắn nhóm hiện có sẽ không bị ảnh hưởng.</string>
 	<string name="dialog_message_disband_non_empty_group_confirmation" state="needs_review" hash="1096257228">Bạn sắp giải tán nhóm %1$s.\nThao tác này sẽ xóa tất cả các thành viên và thành viên đang chờ khỏi nhóm. Hiện tại có:\n- %2$d thành viên\n- %3$d thành viên đang chờ\n\nBạn có muốn tiếp tục giải tán nhóm này không?</string>
 	<string name="dialog_message_exchange_digits" state="needs_review" hash="1612882609">Bạn có muốn trao đổi mã với %1$s để xác minh lại danh tính của họ không?</string>
@@ -65,6 +65,7 @@
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">Xác nhận xóa?</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">Giải tán nhóm?</string>
 	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">Tìm kiếm cuộc trò chuyện…</string>
+	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">Nhập ngày</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">Chỉnh sửa chi tiết nhóm</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">Chỉnh sửa thông tin cá nhân của bạn</string>
 	<string name="dialog_title_exchange_digits" state="needs_review" hash="864614114">Trao đổi mã</string>
@@ -91,14 +92,18 @@
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">Quản trị viên đã thay đổi tên nhóm thành:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">Quản trị viên đã thay đổi mô tả nhóm thành:</string>
 	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">Quản trị viên đã thay đổi ảnh đại diện nhóm.</string>
-	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">Liên hệ của bạn đã cập nhật Thẻ Olvid. Cả phiên bản cũ và mới đều được hiển thị bên dưới.\n\nNhấn \"cập nhật\" để cập nhật thông tin liên hệ của bạn với phiên bản mới này.</string>
+	<string name="explanation_new_contact_card_name" state="needs_review" hash="-1601853738">Liên hệ của bạn đã cập nhật tên thành:</string>
+	<string name="explanation_new_contact_card_position" state="needs_review" hash="184144104">Liên hệ của bạn đã cập nhật thông tin về vị trí/công ty:</string>
+	<string name="explanation_new_contact_card_photo" state="needs_review" hash="-252626818">Liên hệ của bạn đã cập nhật ảnh đại diện.</string>
+	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">Tên của bạn đã được cập nhật thành:</string>
+	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">Chức danh/công ty của bạn đã được cập nhật thành:</string>
+	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">Ảnh đại diện của bạn đã được cập nhật.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">Một kênh thảo luận bảo mật hiện đang được thiết lập. Bạn không thể bắt đầu bất kỳ cuộc thảo luận nào với liên hệ này cho đến khi việc này hoàn tất. Quá trình này chỉ nên mất vài giây nếu cả bạn và liên hệ của bạn đều trực tuyến.\n\nNếu bạn nghĩ rằng có điều gì đó sai sót, bạn có thể khởi động lại quá trình thiết lập kênh.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">Không tìm thấy liên hệ</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">Không tìm thấy nhóm</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">Không tìm thấy tin nhắn</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Không tìm thấy tệp đính kèm</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Không tìm thấy liên kết</string>
-	<string name="format_identity_details_custom_field" state="needs_review" hash="-1073344790">%1$s : %2$s</string>
 	<string name="hint_company" state="needs_review" hash="379200324">Công ty (tùy chọn)</string>
 	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Viết tin nhắn</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Tin nhắn tạm thời</string>
@@ -164,15 +169,10 @@
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">Thẻ Nhóm - Bản Nháp Chưa Xuất Bản</string>
 	<string name="label_group_members" state="needs_review" hash="1460220752">Thành viên nhóm</string>
 	<string name="label_other_group_members" state="needs_review" hash="-2121490032">Các thành viên khác trong nhóm</string>
-	<string name="label_groups" state="needs_review" hash="-990226727">Nhóm</string>
+	<string name="label_groups_common" state="needs_review" hash="1252823567">Các nhóm chung</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">Lời mời bị từ chối</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">Chi tiết nhóm đã được cập nhật</string>
-	<string name="label_new_olvid_card" state="needs_review" hash="688199407">Thông tin liên hệ đã được cập nhật</string>
 	<string name="label_not_part_of_a_group" state="needs_review" hash="1667979596">Chưa tham gia nhóm nào</string>
-	<string name="label_olvid_card" state="needs_review" hash="-1953461576">Thẻ Olvid</string>
-	<string name="label_olvid_card_published" state="needs_review" hash="-1038740778">Thẻ Olvid - Đã xuất bản</string>
-	<string name="label_olvid_card_published_update" state="needs_review" hash="391148752">Thẻ Olvid - Mới</string>
-	<string name="label_olvid_card_unpublished_draft" state="needs_review" hash="-786284715">Thẻ Olvid - Bản nháp chưa xuất bản</string>
 	<string name="label_pending_group_members" state="needs_review" hash="1481357803">Thành viên nhóm đang chờ xử lý</string>
 	<string name="label_text_copied_from_olvid" state="needs_review" hash="1675378287">Văn bản đã được sao chép từ Olvid</string>
 	<string name="label_trust_origins" state="needs_review" hash="-1177760062">Nguồn đáng tin cậy</string>
@@ -285,12 +285,16 @@
 	<string name="toast_message_shortcut_not_supported" state="needs_review" hash="-1300016753">Thiết bị của bạn không hỗ trợ tạo lối tắt</string>
 	<string name="toast_message_unable_to_open_file" state="needs_review" hash="392405293">Không tìm thấy ứng dụng phù hợp để mở loại tệp này</string>
 	<string name="toast_message_unparsable_url" state="needs_review" hash="-135719133">Không thể phân tích URL hợp lệ</string>
-	<string name="trust_origin_direct_type" state="needs_review" hash="-67248053">%1$s - Xác minh trực tiếp</string>
-	<string name="trust_origin_group_type" state="needs_review" hash="230302215">%1$s - Đã chấp nhận lời mời tham gia nhóm từ </string>
-	<string name="trust_origin_group_v2_type" state="needs_review" hash="-1152079590">%1$s - Đã chấp nhận lời mời vào nhóm</string>
-	<string name="trust_origin_introduction_type" state="needs_review" hash="328494718">%1$s - Giới thiệu từ </string>
-	<string name="trust_origin_keycloak_type" state="needs_review" hash="1983748673">%2$s - Xác minh bởi nhà cung cấp danh tính %1$s</string>
-	<string name="trust_origin_unknown_type" state="needs_review" hash="2084263523">%1$s - Nguồn gốc đáng tin cậy không xác định</string>
+	<string name="trust_origin_direct_type" state="needs_review" hash="1798276315">Xác minh trực tiếp</string>
+	<string name="trust_origin_group_type" state="needs_review" hash="1222060749">Đã chấp nhận lời mời tham gia nhóm từ </string>
+	<string name="trust_origin_group_v2_type" state="needs_review" hash="-566733151">Đã chấp nhận lời mời vào nhóm</string>
+	<string name="trust_origin_introduction_type" state="needs_review" hash="-266148171">Giới thiệu bởi</string>
+	<string name="trust_origin_keycloak_type" state="needs_review" hash="-1113573733">Xác thực bởi nhà cung cấp dịch vụ tại %1$s</string>
+	<string name="trust_origin_unknown_type" state="needs_review" hash="-491114965">Nguồn gốc đáng tin cậy không xác định</string>
+	<string name="trust_origin_direct_title" state="needs_review" hash="-1849285555">Bạn đã thêm nhau vào danh bạ</string>
+	<string name="trust_origin_introduction_title" state="needs_review" hash="-1034826640">Giới thiệu</string>
+	<string name="trust_origin_group_title" state="needs_review" hash="1252823567">Các nhóm chung</string>
+	<string name="trust_origin_keycloak_title" state="needs_review" hash="-1917629373">Được thêm thông qua danh bạ</string>
 	<string name="menu_action_delete_contact" state="needs_review" hash="1849106991">Xóa liên hệ</string>
 	<string name="menu_action_delete_user" state="needs_review" hash="1683580694">Xóa người dùng</string>
 	<string name="dialog_title_delete_user" state="needs_review" hash="-56212547">Xóa người dùng?</string>
@@ -299,6 +303,7 @@
 	<string name="text_empty_group" state="needs_review" hash="-464714974">Nhóm trống</string>
 	<string name="message_error_group_name_empty" state="needs_review" hash="1137468023">Vui lòng nhập tên nhóm</string>
 	<string name="hint_search_contact_name" state="needs_review" hash="-242911449">Tìm tên liên hệ…</string>
+	<string name="hint_search_group_name" state="needs_review" hash="-265074656">Tìm kiếm tên nhóm…</string>
 	<string name="menu_action_search" state="needs_review" hash="-2085358317">Tìm kiếm</string>
 	<string name="toast_message_polling_failed" state="needs_review" hash="402242307">Không thể tải xuống tin nhắn</string>
 	<string name="dialog_message_battery_optimization" state="needs_review" hash="1191860407">Tối ưu hóa pin trên Android hoạt động bằng cách trì hoãn một số sự kiện nền để chạy chúng theo lô. Điều này có thể làm chậm việc nhận các tin nhắn Olvid đến.\n\nĐể đảm bảo tin nhắn của bạn được nhận kịp thời, bạn nên cho phép Olvid \"luôn chạy trong nền\". Nhấn \"Cài đặt\" bên dưới, sau đó \"Cho phép\".</string>
@@ -819,6 +824,11 @@
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Trình phát đa phương tiện</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Điều khiển phát/tạm dừng khi phát nội dung đa phương tiện trong Olvid</string>
 	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Không thể phát tệp âm thanh</string>
+	<string name="label_voice_message" state="needs_review" hash="-348491668">Tin nhắn thoại</string>
+	<string name="content_description_skip_previous" state="needs_review" hash="836036575">Âm thanh trước đó</string>
+	<string name="content_description_skip_next" state="needs_review" hash="-878180801">Âm thanh tiếp theo</string>
+	<string name="content_description_audio_play" state="needs_review" hash="1143766922">Phát</string>
+	<string name="content_description_audio_pause" state="needs_review" hash="1931883968">Tạm dừng</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Xóa</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Xóa ở mọi nơi</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Không thể xóa trên tất cả các thiết bị. Vui lòng thử lại.</string>
@@ -919,6 +929,7 @@
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">ID Olvid của bạn hiện đang được quản lý bởi nhà cung cấp danh tính của công ty bạn. Bạn không thể kích hoạt thủ công giấy phép Olvid.\n\nVui lòng liên hệ với quản trị viên để biết thêm chi tiết.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Cuộc gọi nhỡ</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Thông tin liên hệ đã được cập nhật</string>
+	<string name="text_own_details_updated" state="needs_review" hash="-1335488506">Chi tiết đã được cập nhật</string>
 	<string name="text_group_details_updated" state="needs_review" hash="1016500852">Chi tiết nhóm đã được cập nhật</string>
 	<string name="dialog_title_sd_card_ringtone_bugged_android_9" state="needs_review" hash="-1202187296">Lỗi âm thanh thông báo Android 9</string>
 	<string name="dialog_message_sd_card_ringtone_bugged_android_9" state="needs_review" hash="1449296723">Olvid không thể sử dụng âm thông báo bạn đã chọn. Nó đã bị tắt. Một lỗi trong Android 9 ngăn chặn việc sử dụng âm thông báo tùy chỉnh trong các ứng dụng không yêu cầu quyền truy cập vào bộ nhớ ngoài/thẻ SD.\n\nBạn nên thử chọn một âm thông báo tiêu chuẩn. Cho đến khi có bản sửa lỗi, thông báo của bạn sẽ vẫn im lặng!</string>
@@ -1014,6 +1025,10 @@
 	<string name="dialog_title_available_space_low" state="needs_review" hash="610249394">Bộ nhớ thiết bị gần đầy</string>
 	<string name="dialog_message_available_space_low" state="needs_review" hash="78499573">Thiết bị của bạn đang sắp hết dung lượng lưu trữ. Bạn có thể gặp phải lỗi không mong muốn khi nhận hoặc gửi tệp với Olvid.\n\nCó lẽ đây là thời điểm thích hợp để giải phóng dung lượng trên thiết bị của bạn.</string>
 	<string name="button_label_manage_storage" state="needs_review" hash="-918485427">Quản lý bộ nhớ</string>
+	<string name="label_storage_all_files" state="needs_review" hash="1735747130">Tất cả tệp</string>
+	<string name="label_storage_sent_by_me" state="needs_review" hash="640456592">Đã gửi bởi tôi</string>
+	<string name="label_storage_large_files" state="needs_review" hash="-257706820">Lớn hơn 5 MB</string>
+	<string name="label_storage_discussions" state="needs_review" hash="491497248">Thảo luận</string>
 	<string name="pref_use_internal_image_viewer_title" state="needs_review" hash="1319400578">Sử dụng trình xem ảnh tích hợp</string>
 	<string name="pref_use_internal_image_viewer_summary" state="needs_review" hash="1248137666">Khi bật tùy chọn này, việc nhấp vào tệp đính kèm hình ảnh sẽ mở nó trong trình xem tích hợp. Nếu không, ứng dụng hình ảnh mặc định của thiết bị bạn sẽ được sử dụng.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Không thể hiển thị hình ảnh</string>
@@ -1167,7 +1182,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Xóa một hồ sơ sẽ xóa mọi thông tin liên quan đến hồ sơ này trên thiết bị của bạn. Điều này bao gồm danh bạ, nhóm và nội dung của tất cả các cuộc trò chuyện của bạn (tin nhắn và tệp đính kèm) cho hồ sơ này.\n\n<b>Đây là hồ sơ duy nhất hiển thị của bạn và nếu bạn có bất kỳ hồ sơ ẩn nào, chúng sẽ bị xóa đồng thời.</b>\n\nNhấn \"tiếp theo\" để chọn cách xóa hồ sơ này.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Xóa hồ sơ <b>mọi nơi</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">Nhập \"%1$s\" vào đây để tiếp tục</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">Nhập \\"%1$s\\" vào đây để tiếp tục</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">Nếu bạn chọn xóa hồ sơ của mình <b>mọi nơi</b>:\n - hồ sơ sẽ bị xóa cục bộ <b>và</b> trên thiết bị của những người liên hệ của bạn\n - bạn sẽ rời khỏi các nhóm mà bạn đã tham gia\n - các nhóm bạn quản lý sẽ bị giải tán\n\nNếu bạn <b>không</b> xóa hồ sơ của mình ở mọi nơi, nó chỉ bị xóa cục bộ trên thiết bị của bạn. Trừ khi bạn có kế hoạch khôi phục bản sao lưu trên thiết bị khác, những người liên hệ của bạn có thể vẫn cố gắng gửi tin nhắn cho bạn và có thể không nhận ra rằng những tin nhắn này không thể được chuyển đến.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">Có vẻ như hồ sơ hiện tại của bạn đang không hoạt động, có nghĩa là bạn có thể đã chuyển nó sang một thiết bị khác. Nếu bạn dự định tiếp tục sử dụng hồ sơ này trên thiết bị khác, bạn có thể xóa nó một cách an toàn từ đây.\n\nNếu bạn không muốn sử dụng hồ sơ này nữa, bạn cần phải kích hoạt lại nó trên thiết bị này trước, đợi các kênh bảo mật với liên hệ của bạn được tạo lại, và sau đó xóa hồ sơ này bằng cách chọn tùy chọn \"xóa ở mọi nơi\".</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">Hồ sơ của bạn hiện đang được bật trên nhiều thiết bị.\n\nNếu bạn chọn xóa hồ sơ của mình <b>mọi nơi</b>: - nó sẽ bị xóa khỏi tất cả các thiết bị của bạn <b>và</b> trên thiết bị của những người liên hệ của bạn\n - bạn sẽ rời khỏi các nhóm mà bạn đã tham gia\n - các nhóm bạn quản lý sẽ bị giải tán\n\nNếu bạn <b>không</b> xóa hồ sơ của mình ở mọi nơi, nó chỉ bị xóa cục bộ và bạn có thể tiếp tục sử dụng nó bình thường trên các thiết bị khác của mình.</string>
@@ -1251,9 +1266,6 @@
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Nhóm v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
 	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Sử dụng biểu tượng cảm xúc động (nếu có)</string>
-	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Dung lượng lưu trữ hồ sơ</string>
-	<string name="label_photos" state="needs_review" hash="1539779714">Ảnh</string>
-	<string name="label_videos" state="needs_review" hash="-101497740">Video</string>
 	<string name="label_audio" state="needs_review" hash="-779820608">Âm thanh</string>
 	<string name="label_other" state="needs_review" hash="-543765264">Khác</string>
 	<string name="label_all" state="needs_review" hash="752498555">Tất cả</string>
@@ -1268,14 +1280,7 @@
 	<string name="menu_action_sort_date_alt" state="needs_review" hash="646746321">Sắp xếp theo ngày (cũ nhất trước)</string>
 	<string name="menu_action_sort_size_alt" state="needs_review" hash="1986077505">Sắp xếp theo kích thước (nhỏ nhất trước)</string>
 	<string name="menu_action_sort_name_alt" state="needs_review" hash="-802793419">Sắp xếp theo tên (đảo ngược)</string>
-	<string name="text_sent_by_xx" state="needs_review" hash="248848108">Được gửi bởi %1$s</string>
 	<string name="text_unknown_sender" state="needs_review" hash="1913018414">Người gửi không xác định</string>
-	<string name="text_sent_to_xx" state="needs_review" hash="918571953">Đã gửi đến %1$s</string>
-	<string name="text_draft_for_xx" state="needs_review" hash="2063814784">Nháp cho %1$s</string>
-	<string name="label_loading_attachments" state="needs_review" hash="856026474">Đang tải tệp đính kèm…</string>
-	<string name="dialog_message_delete_attachment_for_many_messages" state="needs_review" hash="1800265017">Tệp đính kèm %2$s đã được đính kèm vào %1$d tin nhắn khác nhau. Bạn có muốn xóa chỉ tin này hay xóa khỏi tất cả %1$d tin nhắn?\nHành động này không thể hoàn tác.</string>
-	<string name="button_label_delete_one" state="needs_review" hash="-1916938532">Xóa một</string>
-	<string name="button_label_delete_all" state="needs_review" hash="-985749327">Xóa tất cả %1$d</string>
 	<string name="dialog_title_save_selected_attachments" state="needs_review" hash="-405982081">Lưu các tệp đính kèm đã chọn</string>
 	<string name="pref_category_contacts_and_groups" state="needs_review" hash="1531647661">Liên hệ &amp; Nhóm</string>
 	<string name="pref_auto_join_groups_title" state="needs_review" hash="29822089">Tự động chấp nhận lời mời tham gia nhóm…</string>
@@ -1637,7 +1642,7 @@
 	<string name="button_label_remove" state="needs_review" hash="1097276765">Xóa</string>
 	<string name="menu_action_remove_expiration" state="needs_review" hash="-156931599">Giữ thiết bị này hoạt động</string>
 	<string name="dialog_title_set_unexpiring_device" state="needs_review" hash="-1488033285">Giữ thiết bị hoạt động</string>
-	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1293464179">Hiện tại, bạn chưa có giấy phép sử dụng nhiều thiết bị hoạt động. Nếu bạn muốn mua giấy phép như vậy, vui lòng đóng hộp thoại này và nhấn \"Xem gói đăng ký\" bên dưới.\n\nĐể tiếp tục và giữ cho thiết bị \"%1$s\" hoạt động, thiết bị \"%2$s\" sẽ bị hủy kích hoạt thay thế. Bạn có muốn tiếp tục không?</string>
+	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1457083107">Hiện tại, bạn không có giấy phép sử dụng nhiều thiết bị cùng lúc. Nếu bạn muốn mua giấy phép đó, hãy đóng hộp thoại này và nhấn vào \"Xem các gói đăng ký\".\n\nĐể tiếp tục và giữ cho thiết bị \"%1$s\" hoạt động, thiết bị \"%2$s\" sẽ bị tắt thay thế. Bạn có muốn tiếp tục không?</string>
 	<string name="dialog_title_remove_background_image" state="needs_review" hash="488158841">Bạn có muốn xóa hình nền hiện tại không?</string>
 	<string name="dialog_title_introducing_markdown" state="needs_review" hash="175399162">Giới thiệu định dạng tin nhắn!</string>
 	<string name="dialog_message_introducing_markdown" state="needs_review" hash="1738415115">Olvid giờ đây cho phép bạn định dạng tin nhắn bằng cú pháp markdown 🎨!\n\nViết bằng **<b>in đậm</b>**, *<i>nghiêng</i>*, thêm # <big>TIÊU ĐỀ</big>, v.v.\n\nTìm danh sách tất cả các thẻ được hỗ trợ 🦍 tại:\nhttps://www.olvid.io/faq/format-your-messages/</string>
@@ -2042,6 +2047,7 @@
 	<string name="button_label_this_way" state="needs_review" hash="747183939">Ở đây</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">Mã đã được sao chép</string>
 	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">Vui lòng chọn những người bạn muốn thêm vào nhóm này.</string>
+	<string name="explanation_choose_contact_introduction" state="needs_review" hash="1113777517">Vui lòng chọn người bạn muốn giới thiệu %1$s.</string>
 	<string name="label_group_administration" state="needs_review" hash="871355986">Quản lý nhóm</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">Cuộc gọi bị chặn</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid không cho phép bắt đầu cuộc gọi với hơn %1$d người.</string>
@@ -2155,6 +2161,7 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Đàm phán</string>
 	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Đang chuyển</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Quá trình truyền đã hoàn tất</string>
+	<string name="history_transfer_step_processing_buffered_data" state="needs_review" hash="-1359029280">Đang xử lý dữ liệu đã nhận</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Truyền tải thất bại</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Chuyển lịch sử trò chuyện</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Không thể bắt đầu quá trình truyền. Có thể một quá trình truyền khác đã đang chạy?</string>
@@ -2273,7 +2280,8 @@
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Đang nhập</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Phân tích nội dung</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Phân tích các cuộc trò chuyện đã xuất</string>
-	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Đã xảy ra lỗi khi tải tệp kiểu OpenStreetMap.</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">Đã xảy ra lỗi khi tải tệp kiểu OpenStreetMap.</string>
 	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Không khả dụng tính năng đăng ký trong ứng dụng</string>
 	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Phiên bản Olvid bạn đã cài đặt không bao gồm thư viện thanh toán của Google và không hỗ trợ mua hàng trong ứng dụng.\n\nĐể biết thêm thông tin, vui lòng liên hệ với chúng tôi theo địa chỉ **feedback@olvid.io**.</string>
+	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">Hủy tải lên</string>
 </resources>

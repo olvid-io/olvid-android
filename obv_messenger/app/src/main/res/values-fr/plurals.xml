@@ -53,6 +53,10 @@
         <item quantity="one">Ajouter %1$d membre</item>
         <item quantity="other">Ajouter %1$d membres</item>
     </plurals>
+    <plurals name="label_introduce_contacts">
+        <item quantity="one">Présenter à %1$d contact</item>
+        <item quantity="other">Présenter à %1$d contacts</item>
+    </plurals>
     <plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity"> » sur cet appareil, vous allez désactiver votre ancien appareil :</item>
         <item quantity="other"> » sur cet appareil, vous allez désactiver vos anciens appareils :</item>
@@ -154,6 +158,10 @@
     <plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Souhaitez-vous supprimer la pièce jointe sélectionnée\u00a0?</item>
         <item quantity="other">Souhaitez-vous supprimer les %1$d pièces jointes sélectionnées\u00a0?</item>
+    </plurals>
+    <plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Si cette pièce jointe est attachée à plusieurs messages, toutes les copies de la pièce jointe seront supprimées.</item>
+        <item quantity="other">Si ces pièces jointes sont attachées à plusieurs messages, toutes les copies des pièces jointes seront supprimées.</item>
     </plurals>
     <plurals name="text_app_uptime_days" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d\u00a0jour,\u00a0%2$02dh\u00a0%3$02dm\u00a0%4$02ds</item>

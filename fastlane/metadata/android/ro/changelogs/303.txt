@@ -1,0 +1,1 @@
+- Adăugat suport pentru 18 limbi noi: bulgară, bengaleză, estoniană, filipineză, gujarati, indoneziană, kannada, letonă, lituaniană, malayalam, marathi, punjabi, sârbă, swahili, tamilă, telugu, thailandeză și urdu.

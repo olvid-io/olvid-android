@@ -109,7 +109,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import io.olvid.engine.Logger
 import io.olvid.messenger.App
 import io.olvid.messenger.R
 import io.olvid.messenger.customClasses.AudioAttachmentServiceBinding

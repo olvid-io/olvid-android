@@ -74,6 +74,8 @@ import kotlinx.coroutines.Dispatchers;
                 @Index({FyleMessageJoinWithStatus.ENGINE_MESSAGE_IDENTIFIER, FyleMessageJoinWithStatus.ENGINE_NUMBER}),
                 @Index({FyleMessageJoinWithStatus.MESSAGE_ID, FyleMessageJoinWithStatus.ENGINE_NUMBER}),
                 @Index({FyleMessageJoinWithStatus.BYTES_OWNED_IDENTITY}),
+                @Index(FyleMessageJoinWithStatus.SIZE),
+                @Index(FyleMessageJoinWithStatus.MIME_TYPE),
         }
 )
 public class FyleMessageJoinWithStatus {
@@ -111,6 +113,7 @@ public class FyleMessageJoinWithStatus {
     public static final int RECEPTION_STATUS_DELIVERED_ALL = 3;
     public static final int RECEPTION_STATUS_DELIVERED_ALL_READ_ONE = 4;
     public static final int RECEPTION_STATUS_DELIVERED_ALL_READ_ALL = 5;
+    public static final int RECEPTION_STATUS_CANCELLED = 6;
 
     @ColumnInfo(name = FYLE_ID)
     public final long fyleId;

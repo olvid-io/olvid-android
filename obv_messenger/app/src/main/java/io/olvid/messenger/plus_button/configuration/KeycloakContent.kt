@@ -413,7 +413,7 @@ internal fun KeycloakContent(
                                                     Toast.LENGTH_SHORT
                                                 )
                                             }
-                                        }
+                                        },
                                     )
                                 }
                             }

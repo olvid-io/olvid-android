@@ -71,6 +71,7 @@ fun <T> SelectionTopAppBar(
     selectedStringResource: Int = R.plurals.action_mode_title_discussion_list,
     selectionActions: List<Pair<Int, () -> Unit>> = emptyList(),
     actions: List<Pair<Int, () -> Unit>> = emptyList(),
+    actionsContent: (@Composable () -> Unit)? = null,
     otherActions: List<Pair<Int, () -> Unit>> = emptyList(),
     redItems: List<Int> = emptyList(),
     disabledItems: List<Int> = emptyList(),
@@ -123,13 +124,17 @@ fun <T> SelectionTopAppBar(
             AnimatedVisibility(visible = selection.isNotEmpty() || selectionActions.isNotEmpty() || otherActions.isNotEmpty()) {
                 CompositionLocalProvider(LocalContentColor provides colorResource(id = R.color.almostBlack)) {
                     Row {
-                        (if (selection.isEmpty()) actions else selectionActions).forEach {
-                            IconButton(onClick = it.second, enabled = it.first !in disabledItems) {
-                                Icon(
-                                    modifier = Modifier.size(24.dp),
-                                    painter = painterResource(it.first),
-                                    contentDescription = null
-                                )
+                        if (selection.isEmpty() && actionsContent != null) {
+                            actionsContent()
+                        } else {
+                            (if (selection.isEmpty()) actions else selectionActions).forEach {
+                                IconButton(onClick = it.second, enabled = it.first !in disabledItems) {
+                                    Icon(
+                                        modifier = Modifier.size(24.dp),
+                                        painter = painterResource(it.first),
+                                        contentDescription = null
+                                    )
+                                }
                             }
                         }
                         if (selection.isEmpty() && otherActions.isNotEmpty()) {
@@ -181,10 +186,16 @@ fun OlvidTopAppBar(
     title: (@Composable () -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
     transparent: Boolean = false,
+    elevationShadow: Boolean = true,
     onBackPressed: (() -> Unit)? = null
 ) {
     TopAppBar(
-        modifier = modifier.shadow(4.dp),
+        modifier = modifier.then (
+            if (elevationShadow)
+                Modifier.shadow(4.dp)
+            else
+                Modifier
+        ),
         expandedHeight = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) 48.dp else 56.dp,
         title = {
             titleText?.let {

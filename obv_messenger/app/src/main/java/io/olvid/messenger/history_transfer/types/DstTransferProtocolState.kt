@@ -70,7 +70,11 @@ class DstTransferProtocolState: TransferProtocolState() {
         } else if (!readyToReceiveMessages()) {
             transferProgress.value = TransferProgress.Negotiating
         } else if (receivedMessageCount < totalMessageCount || receivedBytes < totalBytes) {
-            transferProgress.value = TransferProgress.Transferring(receivedMessageCount, totalMessageCount, receivedBytes, totalBytes)
+            // if we are in the ProcessingReceivedData state, we stay in it
+            transferProgress.value = if (transferProgress.value is TransferProgress.ProcessingReceivedData)
+                TransferProgress.ProcessingReceivedData(receivedMessageCount, totalMessageCount, receivedBytes, totalBytes)
+            else
+                TransferProgress.Transferring(receivedMessageCount, totalMessageCount, receivedBytes, totalBytes)
             return receivedMessageCount == totalMessageCount
         } else {
             transferProgress.value = TransferProgress.Finished

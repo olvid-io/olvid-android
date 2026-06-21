@@ -52,6 +52,10 @@
 		<item quantity="one" state="needs_review" hash="-1537484553">Dodaj %1$d członka</item>
 		<item quantity="other" state="needs_review" hash="1091232977">Dodaj %1$d członków</item>
 	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Przedstaw %1$d</item>
+		<item quantity="other" state="needs_review" hash="222947824">Przedstaw %1$d kontaktom</item>
+	</plurals>
 	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1131862199">\"na tym urządzeniu twoje poprzednie urządzenie zostanie dezaktywowane:</item>
 		<item quantity="other" state="needs_review" hash="-2011302529">\"na tym urządzeniu twoje pozostałe urządzenia zostaną dezaktywowane:</item>
@@ -153,6 +157,10 @@
 	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1117804388">Czy na pewno chcesz usunąć wybrany załącznik?</item>
 		<item quantity="other" state="needs_review" hash="-1540151013">Czy na pewno chcesz usunąć wybrane %1$d załączniki?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Jeśli ten załącznik jest dołączony do wielu wiadomości, wszystkie kopie załącznika zostaną usunięte.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Jeśli te załączniki zostaną dołączone do wielu wiadomości, wszystkie kopie załączników zostaną usunięte.</item>
 	</plurals>
 	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
 		<item quantity="one" state="needs_review" hash="1400550170">%1$d dzień, %2$02dh %3$02dm %4$02ds</item>

@@ -29,6 +29,7 @@ import java.util.Objects;
 
 import io.olvid.engine.engine.types.sync.ObvSyncDiff;
 import io.olvid.engine.engine.types.sync.ObvSyncSnapshotNode;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.databases.AppDatabase;
 import io.olvid.messenger.databases.entity.DiscussionCustomization;
 import io.olvid.messenger.databases.entity.Message;
@@ -138,7 +139,9 @@ public class DiscussionCustomizationSyncSnapshot implements ObvSyncSnapshotNode 
         }
 
         if (domain.contains(ARCHIVED)) {
-            db.discussionDao().updateArchived(archived != null && archived, discussionId);
+            boolean newArchived = archived != null && archived;
+            db.discussionDao().updateArchived(newArchived, discussionId);
+            UnreadCountsSingleton.INSTANCE.discussionArchivedChanged(discussionId, newArchived);
         }
 
         if (changed) {

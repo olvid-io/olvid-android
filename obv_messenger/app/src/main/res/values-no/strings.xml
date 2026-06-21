@@ -50,7 +50,7 @@
 	<string name="dialog_message_contact_introduction" state="needs_review" hash="-398698689">Vil du introdusere %1$s og %2$s for hverandre?</string>
 	<string name="dialog_message_contact_introduction_multiple" state="needs_review" hash="-1743988418">Vil du introdusere %1$s til de følgende %2$d kontaktene?\n\n%3$s</string>
 	<string name="dialog_message_delete_attachment" state="needs_review" hash="-235504816">Vil du virkelig slette vedlegget %1$s fra denne meldingen?\nDenne handlingen kan ikke angres.</string>
-	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="-273205987">Vil du virkelig slette vedlegget %1$s?\nDenne handlingen kan ikke angres.</string>
+	<string name="dialog_message_delete_attachment_gallery" state="needs_review" hash="1647132381">Vil du virkelig slette vedlegget **%1$s**?\nDenne handlingen kan ikke angres.</string>
 	<string name="dialog_message_disband_group" state="needs_review" hash="-1617503323">Ønsker du å oppløse gruppen %1$s?\nDet vil ikke lenger være mulig å sende meldinger til denne gruppen. Eksisterende gruppemeldinger vil ikke bli påvirket.</string>
 	<string name="dialog_message_disband_non_empty_group_confirmation" state="needs_review" hash="1096257228">Du er i ferd med å oppløse gruppen %1$s.\nDette vil fjerne alle medlemmer og ventende medlemmer fra gruppen. Det er for øyeblikket:\n- %2$d medlemmer\n- %3$d ventende medlemmer\n\nFortsetter du med å oppløse denne gruppen?</string>
 	<string name="dialog_message_exchange_digits" state="needs_review" hash="1612882609">Vil du utveksle koder med %1$s for å verifisere identiteten hans/hennes på nytt?</string>
@@ -65,6 +65,7 @@
 	<string name="dialog_title_confirm_deletion" state="needs_review" hash="1379899502">Bekreft sletting?</string>
 	<string name="dialog_title_disband_group" state="needs_review" hash="-1969676773">Oppløs gruppen?</string>
 	<string name="dialog_title_discussion_search" state="needs_review" hash="1592749041">Søk etter en samtale…</string>
+	<string name="dialog_title_go_to_date" state="needs_review" hash="-571974927">Skriv inn en dato.</string>
 	<string name="dialog_title_edit_group_details" state="needs_review" hash="310205135">Rediger gruppedetaljer</string>
 	<string name="dialog_title_edit_identity_details" state="needs_review" hash="1515554822">Rediger detaljene dine</string>
 	<string name="dialog_title_exchange_digits" state="needs_review" hash="864614114">Bytt koder</string>
@@ -91,14 +92,18 @@
 	<string name="explanation_new_group_v2_card_name" state="needs_review" hash="1205812893">En administrator har endret gruppenavnet til:</string>
 	<string name="explanation_new_group_v2_card_description" state="needs_review" hash="-1635384068">En administrator har endret gruppe beskrivelsen til:</string>
 	<string name="explanation_new_group_v2_card_photo" state="needs_review" hash="-1543823397">En administrator har endret gruppebildet.</string>
-	<string name="explanation_new_olvid_card" state="needs_review" hash="-2005705997">Kontakten din har oppdatert sitt Olvid Card. Både den gamle og den nye versjonen vises nedenfor.\n\nTrykk på \"oppdater\" for å oppdatere kontakten din med denne nye versjonen.</string>
+	<string name="explanation_new_contact_card_name" state="needs_review" hash="-1601853738">Kontakten din har oppdatert navnet sitt til:</string>
+	<string name="explanation_new_contact_card_position" state="needs_review" hash="184144104">Kontakten din har oppdatert sin stilling/bedrift.</string>
+	<string name="explanation_new_contact_card_photo" state="needs_review" hash="-252626818">Kontakten din har oppdatert profilbildet sitt.</string>
+	<string name="explanation_unpublished_owned_card_name" state="needs_review" hash="1358741056">Navnet ditt er oppdatert til:</string>
+	<string name="explanation_unpublished_owned_card_position" state="needs_review" hash="1270243950">Din stilling/bedrift er oppdatert til:</string>
+	<string name="explanation_unpublished_owned_card_photo" state="needs_review" hash="-1245438367">Profilbildet ditt er oppdatert.</string>
 	<string name="explanation_no_channel" state="needs_review" hash="-1057490708">En sikker kommunikasjonskanal blir opprettet nå. Du kan ikke starte en samtale med denne kontakten før den er fullført. Denne prosessen bør bare ta noen sekunder hvis du og kontakten din er på nett.\n\nHvis du tror at noe har gått galt, kan du starte kanaloppsettet på nytt.</string>
 	<string name="explanation_no_contact_match_filter" state="needs_review" hash="-86895406">Ingen kontakt funnet</string>
 	<string name="explanation_no_group_match_filter" state="needs_review" hash="-1633823785">Ingen gruppe funnet</string>
 	<string name="explanation_no_message_found" state="needs_review" hash="-1329622990">Ingen meldinger funnet</string>
 	<string name="explanation_no_attachment_found" state="needs_review" hash="156593369">Ingen vedlegg funnet</string>
 	<string name="explanation_no_link_found" state="needs_review" hash="-1419950450">Ingen lenke funnet</string>
-	<string name="format_identity_details_custom_field" state="needs_review" hash="-1073344790">%1$s: %2$s</string>
 	<string name="hint_company" state="needs_review" hash="379200324">Selskap (valgfritt)</string>
 	<string name="hint_compose_your_message" state="needs_review" hash="-25761578">Skriv melding</string>
 	<string name="hint_compose_your_message_ephemeral" state="needs_review" hash="-1527208333">Midlertidig melding</string>
@@ -164,15 +169,10 @@
 	<string name="label_group_card_unpublished_draft" state="needs_review" hash="1299537899">Gruppekort - Upublisert utkast</string>
 	<string name="label_group_members" state="needs_review" hash="1460220752">Gruppemedlemmer</string>
 	<string name="label_other_group_members" state="needs_review" hash="-2121490032">Andre gruppemedlemmer</string>
-	<string name="label_groups" state="needs_review" hash="-990226727">Grupper</string>
+	<string name="label_groups_common" state="needs_review" hash="1252823567">Felles grupper</string>
 	<string name="label_invitation_declined" state="needs_review" hash="2038173833">Invitasjon\navvist</string>
 	<string name="label_new_group_card" state="needs_review" hash="1006740909">Gruppedetaljer oppdatert</string>
-	<string name="label_new_olvid_card" state="needs_review" hash="688199407">Kontaktinformasjon oppdatert</string>
 	<string name="label_not_part_of_a_group" state="needs_review" hash="1667979596">Enda ikke en del av en gruppe</string>
-	<string name="label_olvid_card" state="needs_review" hash="-1953461576">Olvid Card</string>
-	<string name="label_olvid_card_published" state="needs_review" hash="-1038740778">Olvid Card - Publisert</string>
-	<string name="label_olvid_card_published_update" state="needs_review" hash="391148752">Olvid Card - Ny</string>
-	<string name="label_olvid_card_unpublished_draft" state="needs_review" hash="-786284715">Olvid Card - Upublisert utkast</string>
 	<string name="label_pending_group_members" state="needs_review" hash="1481357803">Venter på gruppemedlemmer</string>
 	<string name="label_text_copied_from_olvid" state="needs_review" hash="1675378287">Tekst kopiert fra Olvid</string>
 	<string name="label_trust_origins" state="needs_review" hash="-1177760062">Pålitelige kilder</string>
@@ -285,12 +285,16 @@
 	<string name="toast_message_shortcut_not_supported" state="needs_review" hash="-1300016753">Opprettelse av snarveier støttes ikke på enheten din</string>
 	<string name="toast_message_unable_to_open_file" state="needs_review" hash="392405293">Kunne ikke finne en passende applikasjon for å åpne denne filtypen</string>
 	<string name="toast_message_unparsable_url" state="needs_review" hash="-135719133">Kunne ikke analysere URL-en korrekt</string>
-	<string name="trust_origin_direct_type" state="needs_review" hash="-67248053">%1$s - Direkte verifisering</string>
-	<string name="trust_origin_group_type" state="needs_review" hash="230302215">%1$s - Mottok gruppeinvitasjon fra [PLACEHOLDER_2]</string>
-	<string name="trust_origin_group_v2_type" state="needs_review" hash="-1152079590">%1$s - Aksepterte invitasjon til gruppe</string>
-	<string name="trust_origin_introduction_type" state="needs_review" hash="328494718">%1$s - Introduksjon fra</string>
-	<string name="trust_origin_keycloak_type" state="needs_review" hash="1983748673">%2$s - Validering av identitetsleverandøren kl %1$s</string>
-	<string name="trust_origin_unknown_type" state="needs_review" hash="2084263523">%1$s - Ukjent kilde til tillit</string>
+	<string name="trust_origin_direct_type" state="needs_review" hash="1798276315">En-til-en-verifisering</string>
+	<string name="trust_origin_group_type" state="needs_review" hash="1222060749">Aksepterte gruppeinvitasjon fra</string>
+	<string name="trust_origin_group_v2_type" state="needs_review" hash="-566733151">Invitasjon til gruppen akseptert</string>
+	<string name="trust_origin_introduction_type" state="needs_review" hash="-266148171">Introdusert av </string>
+	<string name="trust_origin_keycloak_type" state="needs_review" hash="-1113573733">Validering av identitetsleverandøren på %1$s.</string>
+	<string name="trust_origin_unknown_type" state="needs_review" hash="-491114965">Ukjent tillitskilde</string>
+	<string name="trust_origin_direct_title" state="needs_review" hash="-1849285555">Dere har lagt hverandre til som kontakter.</string>
+	<string name="trust_origin_introduction_title" state="needs_review" hash="-1034826640">Introduksjon</string>
+	<string name="trust_origin_group_title" state="needs_review" hash="1252823567">Felles grupper</string>
+	<string name="trust_origin_keycloak_title" state="needs_review" hash="-1917629373">Lagt til via katalogen</string>
 	<string name="menu_action_delete_contact" state="needs_review" hash="1849106991">Fjern kontakt</string>
 	<string name="menu_action_delete_user" state="needs_review" hash="1683580694">Slett bruker</string>
 	<string name="dialog_title_delete_user" state="needs_review" hash="-56212547">Slett bruker?</string>
@@ -299,6 +303,7 @@
 	<string name="text_empty_group" state="needs_review" hash="-464714974">Tom gruppe</string>
 	<string name="message_error_group_name_empty" state="needs_review" hash="1137468023">Vennligst oppgi et gruppenavn</string>
 	<string name="hint_search_contact_name" state="needs_review" hash="-242911449">Søk kontaktnavn…</string>
+	<string name="hint_search_group_name" state="needs_review" hash="-265074656">Søk etter gruppenavn…</string>
 	<string name="menu_action_search" state="needs_review" hash="-2085358317">Søk</string>
 	<string name="toast_message_polling_failed" state="needs_review" hash="402242307">Kunne ikke hente meldinger</string>
 	<string name="dialog_message_battery_optimization" state="needs_review" hash="1191860407">Batterioptimalisering på Android fungerer ved å forsinke visse bakgrunnshendelser for å kjøre dem i batcher. Dette kan forsinke mottakelsen av innkommende Olvid-meldinger.\n\nFor å sikre at meldingene dine mottas raskt, bør du tillate Olvid å \"alltid kjøre i bakgrunnen\". Trykk på \"Innstillinger\" nedenfor og deretter \"Tillat\".</string>
@@ -819,6 +824,11 @@
 	<string name="notification_channel_media_player_service_name" state="needs_review" hash="1438436396">Mediespiller</string>
 	<string name="notification_channel_media_player_service_description" state="needs_review" hash="-1343259431">Spill/pause-kontroller ved avspilling av media i Olvid</string>
 	<string name="toast_message_unable_to_play_audio" state="needs_review" hash="69482079">Kunne ikke spille av lydfilen.</string>
+	<string name="label_voice_message" state="needs_review" hash="-348491668">Stemmelding</string>
+	<string name="content_description_skip_previous" state="needs_review" hash="836036575">Forrige lyd</string>
+	<string name="content_description_skip_next" state="needs_review" hash="-878180801">Neste lydfil</string>
+	<string name="content_description_audio_play" state="needs_review" hash="1143766922">Spill av</string>
+	<string name="content_description_audio_pause" state="needs_review" hash="1931883968">Pause</string>
 	<string name="button_label_delete" state="needs_review" hash="-232100842">Slett</string>
 	<string name="button_label_delete_everywhere" state="needs_review" hash="-1203719973">Slett overalt</string>
 	<string name="toast_message_unable_to_delete_everywhere" state="needs_review" hash="58173879">Kunne ikke slette overalt. Prøv igjen.</string>
@@ -919,6 +929,7 @@
 	<string name="text_explanation_keycloak_license_activation_impossible" state="needs_review" hash="193453903">Din Olvid-ID administreres for øyeblikket av din bedrifts identitetsleverandør. Du kan ikke aktivere en Olvid-lisens manuelt.\n\nVennligst kontakt administratoren din for mer informasjon.</string>
 	<string name="text_missed_call" state="needs_review" hash="228485254">Ubesvart anrop</string>
 	<string name="text_contact_details_updated" state="needs_review" hash="-1719580261">Kontaktinformasjon oppdatert</string>
+	<string name="text_own_details_updated" state="needs_review" hash="-1335488506">Detaljer oppdatert</string>
 	<string name="text_group_details_updated" state="needs_review" hash="1016500852">Gruppedetaljer oppdatert</string>
 	<string name="dialog_title_sd_card_ringtone_bugged_android_9" state="needs_review" hash="-1202187296">Android 9 varslingslyd feil</string>
 	<string name="dialog_message_sd_card_ringtone_bugged_android_9" state="needs_review" hash="1449296723">Olvid kan ikke bruke varslingslyden du valgte. Den er deaktivert. En feil i Android 9 hindrer bruk av egendefinerte varslingslyder i apper som ikke ber om tilgang til ekstern lagring/SD-kort.\n\nDu bør prøve å velge en standard varslingslyd. Frem til da vil varslene dine være stille.</string>
@@ -1014,6 +1025,10 @@
 	<string name="dialog_title_available_space_low" state="needs_review" hash="610249394">Enhetslagring nesten full</string>
 	<string name="dialog_message_available_space_low" state="needs_review" hash="78499573">Enheten din har lite ledig plass. Forvent uventede feil når du mottar eller sender filer med Olvid.\n\nDette er sannsynligvis et godt tidspunkt å frigjøre plass på enheten din.</string>
 	<string name="button_label_manage_storage" state="needs_review" hash="-918485427">Administrer lagring</string>
+	<string name="label_storage_all_files" state="needs_review" hash="1735747130">Alle filer</string>
+	<string name="label_storage_sent_by_me" state="needs_review" hash="640456592">Sendt av meg</string>
+	<string name="label_storage_large_files" state="needs_review" hash="-257706820">Større enn 5 MB</string>
+	<string name="label_storage_discussions" state="needs_review" hash="491497248">Diskusjoner</string>
 	<string name="pref_use_internal_image_viewer_title" state="needs_review" hash="1319400578">Bruk intern bildeviser</string>
 	<string name="pref_use_internal_image_viewer_summary" state="needs_review" hash="1248137666">Når den er aktivert, åpner et klikk på et bildevedlegg det i den interne viseren. Ellers brukes standardbildeappen på enheten din.</string>
 	<string name="label_unable_to_display_image" state="needs_review" hash="-1495534207">Kunne ikke vise bildet</string>
@@ -1167,7 +1182,7 @@
 	<string name="dialog_message_delete_last_profile_multi" state="needs_review" hash="-103140781">Å slette en profil vil slette all informasjon relatert til denne profilen på enheten din. Dette inkluderer dine kontakter, grupper og innholdet i alle dine samtaler (meldinger og vedlegg) for denne profilen.\n\n<b>Dette er din eneste synlige profil, og hvis du har skjulte profiler, vil disse bli slettet samtidig.</b>\n\nTrykk på \"neste\" for å velge hvordan denne profilen skal slettes.</string>
 	<string name="switch_label_delete_profile_everywhere" state="needs_review" hash="-74965346">Slett profil <b>overalt</b>
 	</string>
-	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="2102800357">Skriv \"%1$s\" her for å fortsette</string>
+	<string name="hint_type_delete_here_to_proceed" state="needs_review" hash="-1622625725">Skriv \\"%1$s\\" her for å fortsette</string>
 	<string name="explanation_delete_owned_identity" state="needs_review" hash="2036375772">Hvis du velger å slette profilen din <b>overalt</b>: :\n - den vil bli slettet lokalt <b>og</b> på enhetene til kontaktene dine\n - du vil forlate gruppene du har blitt med i\n - grupper du administrerer vil bli oppløst\n\nHvis du <b>ikke</b> sletter profilen din overalt, vil den bare bli slettet lokalt på enheten din. Med mindre du planlegger å gjenopprette en sikkerhetskopi på en annen enhet, kan kontaktene dine fortsatt prøve å sende deg meldinger og innse kanskje ikke at disse meldingene ikke kan leveres.</string>
 	<string name="explanation_delete_inactive_owned_identity" state="needs_review" hash="-575337242">Din nåværende profil ser ut til å være inaktiv, sannsynligvis fordi du har overført den til en annen enhet. Hvis du planlegger å fortsette å bruke denne profilen på den andre enheten, kan du trygt slette den her.\n\nHvis du ikke vil bruke denne profilen igjen, må du først reaktivere den på denne enheten, vente på at sikre kanaler med kontaktene dine gjenopprettes, og først deretter slette denne profilen ved å velge alternativet «slett overalt».</string>
 	<string name="explanation_delete_owned_identity_multi" state="needs_review" hash="-184045089">Profilen din er for øyeblikket aktivert på flere enheter.\n\nHvis du velger å slette profilen din <b>overalt</b>:\n	- den vil bli slettet fra alle enhetene dine <b>og</b> fra kontaktenes enheter\n	- du vil forlate gruppene du har blitt med i\n	- gruppene du administrerer vil bli oppløst\n\nHvis du ikke sletter profilen din <b>overalt</b>, vil den bare bli slettet lokalt, og du kan fortsette å bruke den som normalt på dine andre enheter.</string>
@@ -1251,9 +1266,6 @@
 	<string name="debug_label_capability_groups_v2" state="needs_review" hash="-1593524737">Grupper v2: %1$b</string>
 	<string name="bullet" state="needs_review" hash="-268536188">•</string>
 	<string name="pref_use_animated_emojis_title" state="needs_review" hash="1580316614">Bruk animerte emojis (hvis tilgjengelig)</string>
-	<string name="label_profile_storage_usage" state="needs_review" hash="-1452041639">Profil lagringsbruk</string>
-	<string name="label_photos" state="needs_review" hash="1539779714">Bilder</string>
-	<string name="label_videos" state="needs_review" hash="-101497740">Videoer</string>
 	<string name="label_audio" state="needs_review" hash="-779820608">Lyd</string>
 	<string name="label_other" state="needs_review" hash="-543765264">Andre</string>
 	<string name="label_all" state="needs_review" hash="752498555">Alle</string>
@@ -1268,14 +1280,7 @@
 	<string name="menu_action_sort_date_alt" state="needs_review" hash="646746321">Sorter etter dato (eldste først)</string>
 	<string name="menu_action_sort_size_alt" state="needs_review" hash="1986077505">Sorter etter størrelse (minst først)</string>
 	<string name="menu_action_sort_name_alt" state="needs_review" hash="-802793419">Sorter etter navn (reversert)</string>
-	<string name="text_sent_by_xx" state="needs_review" hash="248848108">Sendt via %1$s</string>
 	<string name="text_unknown_sender" state="needs_review" hash="1913018414">Ukjent avsender</string>
-	<string name="text_sent_to_xx" state="needs_review" hash="918571953">Sendt til %1$s</string>
-	<string name="text_draft_for_xx" state="needs_review" hash="2063814784">Utkast for %1$s</string>
-	<string name="label_loading_attachments" state="needs_review" hash="856026474">Laster opp vedlegg…</string>
-	<string name="dialog_message_delete_attachment_for_many_messages" state="needs_review" hash="1800265017">Vedlegget %2$s er vedlagt %1$d forskjellige meldinger. Vil du bare slette denne, eller vil du slette den fra alle %1$d meldinger?\nDenne handlingen kan ikke angres.</string>
-	<string name="button_label_delete_one" state="needs_review" hash="-1916938532">Slett én</string>
-	<string name="button_label_delete_all" state="needs_review" hash="-985749327">Slett alle %1$d</string>
 	<string name="dialog_title_save_selected_attachments" state="needs_review" hash="-405982081">Lagre valgte vedlegg</string>
 	<string name="pref_category_contacts_and_groups" state="needs_review" hash="1531647661">Kontakter og grupper</string>
 	<string name="pref_auto_join_groups_title" state="needs_review" hash="29822089">Aksepter gruppeinvitasjoner automatisk…</string>
@@ -1637,7 +1642,7 @@
 	<string name="button_label_remove" state="needs_review" hash="1097276765">Slett</string>
 	<string name="menu_action_remove_expiration" state="needs_review" hash="-156931599">Hold denne enheten aktiv</string>
 	<string name="dialog_title_set_unexpiring_device" state="needs_review" hash="-1488033285">Hold en enhet aktiv</string>
-	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1293464179">Du har for øyeblikket ikke lisens til å ha flere aktive enheter. Hvis du ønsker å kjøpe en slik lisens, lukk denne dialogen og trykk på «Se abonnementer» nedenfor.\n\nFor å fortsette og holde enheten «%1$s» aktiv, vil enheten «%2$s» bli deaktivert i stedet. Ønsker du å fortsette?</string>
+	<string name="dialog_message_set_unexpiring_device" state="needs_review" hash="-1457083107">Du har for øyeblikket ikke en lisens som tillater deg å ha flere aktive enheter. Hvis du ønsker å kjøpe en slik lisens, lukk denne dialogen og trykk på \"Se abonnementstilbud\" nedenfor.\n\nFor å fortsette og beholde enheten \"%1$s\" aktiv, vil enheten \"%2$s\" bli deaktivert i stedet. Ønsker du å fortsette?</string>
 	<string name="dialog_title_remove_background_image" state="needs_review" hash="488158841">Fjerne gjeldende bakgrunnsbilde?</string>
 	<string name="dialog_title_introducing_markdown" state="needs_review" hash="175399162">Introducerer meldingsformatering!</string>
 	<string name="dialog_message_introducing_markdown" state="needs_review" hash="1738415115">Olvid lar deg nå formatere meldingene dine ved hjelp av markdown-syntaks🎨!\n\nSkriv i **<b>fet skrift</b>**, i *<i>kursiv</i>*, legg til # <big>OVERSKRIFTER</big>, osv.\n\nDu finner listen over alle støttede tagger🦍 på:\nhttps://www.olvid.io/faq/format-your-messages/</string>
@@ -2042,6 +2047,7 @@
 	<string name="button_label_this_way" state="needs_review" hash="747183939">Hit</string>
 	<string name="toast_code_copied" state="needs_review" hash="-1522785848">Kode kopiert</string>
 	<string name="explanation_choose_members" state="needs_review" hash="-1385158706">Velg hvem du vil legge til i denne gruppen.</string>
+	<string name="explanation_choose_contact_introduction" state="needs_review" hash="1113777517">Velg hvem du vil introdusere %1$s til.</string>
 	<string name="label_group_administration" state="needs_review" hash="871355986">Gruppeadministrasjon</string>
 	<string name="dialog_title_call_blocked" state="needs_review" hash="1594606530">Anrop blokkert</string>
 	<string name="dialog_message_call_blocked" state="needs_review" hash="-1409982613">Olvid tillater ikke å starte en samtale med mer enn %1$d personer.</string>
@@ -2155,6 +2161,7 @@
 	<string name="history_transfer_step_negotiating" state="needs_review" hash="2025825777">Forhandler</string>
 	<string name="history_transfer_step_transferring" state="needs_review" hash="695828334">Overfører</string>
 	<string name="history_transfer_step_finished" state="needs_review" hash="-1834598630">Overføringen er fullført</string>
+	<string name="history_transfer_step_processing_buffered_data" state="needs_review" hash="-1359029280">Behandler mottatte data</string>
 	<string name="history_transfer_step_failed" state="needs_review" hash="722402846">Overføringen mislyktes</string>
 	<string name="pref_category_history_transfer_title" state="needs_review" hash="1191393558">Overfør chatlogg</string>
 	<string name="toast_message_unable_to_start_transfer" state="needs_review" hash="362080814">Kunne ikke starte overføringen. Det kan hende at en annen overføring allerede er i gang.</string>
@@ -2273,7 +2280,8 @@
 	<string name="history_transfer_step_transferring_import" state="needs_review" hash="456801713">Importerer</string>
 	<string name="history_transfer_step_negotiating_import" state="needs_review" hash="1021263770">Analyserer innhold</string>
 	<string name="history_transfer_step_negotiating_export" state="needs_review" hash="1263504702">Analyserer eksporterte samtaler</string>
-	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="1021153187">Det oppstod en feil under lasting av OpenStreetMap-stilfilen.</string>
+	<string name="label_error_loading_openstreetmap_style_file" state="needs_review" hash="-2596045">Det oppstod en feil under lasting av OpenStreetMap-stilfilen.</string>
 	<string name="dialog_title_subscriptions_not_available" state="needs_review" hash="336174241">Abonnementer i appen er ikke tilgjengelige.</string>
 	<string name="dialog_message_subscriptions_not_available" state="needs_review" hash="2093768678">Versjonen av Olvid du har installert, inneholder ikke Googles faktureringsbibliotek og støtter ikke kjøp i appen.\n\nFor mer informasjon, vennligst kontakt oss på **feedback@olvid.io**.</string>
+	<string name="menu_action_cancel_upload" state="needs_review" hash="1672681586">Avbryt opplasting</string>
 </resources>

@@ -1,0 +1,4 @@
+- Riprogettazione di diversi componenti dell'app: scheda contatto, scheda profilo, gestore di archiviazione, ecc.
+- Aggiunta di una visualizzazione calendario nella chat per accedere rapidamente a un punto specifico nel tempo.
+- Aggiunto un controller interno per la "riproduzione in corso" per passare facilmente da un messaggio vocale all'altro. Migliorate le interazioni per la riproduzione audio.
+- Aggiunta la possibilità di annullare l'invio di un allegato.

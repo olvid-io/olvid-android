@@ -1,0 +1,19 @@
+Olvid to pierwsza prywatna aplikacja do przesyłania wiadomości dla wszystkich. Wysyłaj wiadomości, zdjęcia i pliki oraz prowadź bezpieczne rozmowy telefoniczne i wideo.
+
+
+Co to jest „prywatny” komunikator?
+
+To komunikator:
+- który nie narzuca Ci nowych kontaktów. Ty masz kontrolę: sam decydujesz, z kim chcesz rozmawiać. Olvid oferuje kilka sposobów na nawiązanie kontaktu z innymi użytkownikami Olvid, zarówno osobiście, jak i zdalnie.
+- który nie wymaga żadnych danych osobowych. Olvid nie będzie pytał o Twój numer telefonu ani adres e-mail. W przeciwieństwie do Twojego poprzedniego komunikatora, Olvid nigdy nie będzie żądał dostępu do Twojej książki adresowej.
+- na którym nigdy nie otrzymasz niechcianych wiadomości ani wiadomości z nieznanego źródła.
+- w którym wszystkie wiadomości korzystają z tego samego poziomu bezpieczeństwa i prywatności, co rozmowa w realnym świecie za zamkniętymi drzwiami. Olvid oferuje domyślnie szyfrowanie end-to-end i uwierzytelnianie end-to-end, zawsze, dla wszystkiego, co wysyłasz i odbierasz.
+
+Olvid gwarantuje bezpieczne przestrzenie, odporne na agresję zewnętrzną, które izolują Cię od cyfrowego szumu i przemocy innych sieci społecznościowych. Twórz grupy z rodziną, przyjaciółmi i kluczowymi współpracownikami. Bez spamu, bez reklam. Wreszcie odzyskujesz pełną kontrolę nad swoją komunikacją.
+
+Olvid został zaprojektowany tak, aby być najlepszym miejscem do wymiany informacji na tematy, które są ważne, z osobami, które są dla Ciebie ważne.
+
+
+Olvid - Technologia
+
+W sercu Olvid znajduje się „silnik kryptograficzny”, będący wynikiem kilku lat badań, który pozwala na matematyczne udowodnienie integralności, poufności i anonimowości Twojej komunikacji.

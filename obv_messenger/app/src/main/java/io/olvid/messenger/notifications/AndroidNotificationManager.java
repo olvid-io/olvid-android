@@ -71,8 +71,9 @@ import io.olvid.engine.engine.types.ObvDialog;
 import io.olvid.engine.engine.types.identities.ObvGroupV2;
 import io.olvid.messenger.App;
 import io.olvid.messenger.AppSingleton;
+import io.olvid.messenger.UnreadCountsSingleton;
 import io.olvid.messenger.R;
-import io.olvid.messenger.activities.ContactDetailsActivity;
+import io.olvid.messenger.contact.ContactDetailsActivity;
 import io.olvid.messenger.customClasses.InitialView;
 import io.olvid.messenger.customClasses.Markdown;
 import io.olvid.messenger.customClasses.StringUtils;
@@ -733,6 +734,7 @@ public class AndroidNotificationManager {
     private static void unarchiveDiscussionAndAutoDownloadAttachmentsIfNeeded(@NonNull Discussion discussion, @Nullable Message message) {
         discussion.archived = false;
         AppDatabase.getInstance().discussionDao().updateArchived(false, discussion.id);
+        UnreadCountsSingleton.INSTANCE.discussionArchivedChanged(discussion.id, false);
         AppSingleton.getEngine().profileBackupNeeded(discussion.bytesOwnedIdentity);
 
         if (message != null && message.totalAttachmentCount != 0) {

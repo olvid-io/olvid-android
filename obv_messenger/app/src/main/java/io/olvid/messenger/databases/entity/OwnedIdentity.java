@@ -29,6 +29,7 @@ import androidx.room.PrimaryKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import io.olvid.engine.engine.types.EngineAPI;
 import io.olvid.engine.engine.types.JsonIdentityDetails;
@@ -59,6 +60,7 @@ public class OwnedIdentity {
     public static final String PREF_MUTE_NOTIFICATIONS = "pref_mute_notifications";
     public static final String PREF_MUTE_NOTIFICATIONS_EXCEPT_MENTIONED = "pref_mute_notifications_except_mentioned";
     public static final String PREF_MUTE_NOTIFICATIONS_TIMESTAMP = "pref_mute_notifications_timestamp"; // when to stop muting notifications, null if unlimited
+    public static final String PREF_MUTE_NOTIFICATIONS_START_TIMESTAMP = "pref_mute_notifications_start_timestamp"; // when the current mute started, null when not muted; used to recap missed messages on mute end
     public static final String PREF_SHOW_NEUTRAL_NOTIFICATION_WHEN_HIDDEN = "pref_show_neutral_notification_when_hidden"; // if true, even when the profile is hidden you will get an "Olvid requires your attention" notification
     public static final String CAPABILITY_WEBRTC_CONTINUOUS_ICE = "capability_webrtc_continuous_ice";
     public static final String CAPABILITY_GROUPS_V2 = "capability_groups_v2";
@@ -142,6 +144,10 @@ public class OwnedIdentity {
     @Nullable
     public Long prefMuteNotificationsTimestamp;
 
+    @ColumnInfo(name = PREF_MUTE_NOTIFICATIONS_START_TIMESTAMP)
+    @Nullable
+    public Long prefMuteNotificationsStartTimestamp;
+
     @ColumnInfo(name = PREF_SHOW_NEUTRAL_NOTIFICATION_WHEN_HIDDEN)
     public boolean prefShowNeutralNotificationWhenHidden;
 
@@ -155,7 +161,7 @@ public class OwnedIdentity {
     public boolean capabilityOneToOneContacts;
 
     // Constructor required by Room
-    public OwnedIdentity(@NonNull byte[] bytesOwnedIdentity, @NonNull String displayName, @Nullable String identityDetails, int apiKeyStatus, int unpublishedDetails, @Nullable String photoUrl, long apiKeyPermissions, @Nullable Long apiKeyExpirationTimestamp, boolean keycloakManaged, boolean active, @Nullable String customDisplayName, @Nullable byte[] unlockPassword, @Nullable byte[] unlockSalt, boolean prefMuteNotifications, boolean prefMuteNotificationsExceptMentioned, @Nullable Long prefMuteNotificationsTimestamp, boolean prefShowNeutralNotificationWhenHidden, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
+    public OwnedIdentity(@NonNull byte[] bytesOwnedIdentity, @NonNull String displayName, @Nullable String identityDetails, int apiKeyStatus, int unpublishedDetails, @Nullable String photoUrl, long apiKeyPermissions, @Nullable Long apiKeyExpirationTimestamp, boolean keycloakManaged, boolean active, @Nullable String customDisplayName, @Nullable byte[] unlockPassword, @Nullable byte[] unlockSalt, boolean prefMuteNotifications, boolean prefMuteNotificationsExceptMentioned, @Nullable Long prefMuteNotificationsTimestamp, @Nullable Long prefMuteNotificationsStartTimestamp, boolean prefShowNeutralNotificationWhenHidden, boolean capabilityWebrtcContinuousIce, boolean capabilityGroupsV2, boolean capabilityOneToOneContacts) {
         this.bytesOwnedIdentity = bytesOwnedIdentity;
         this.displayName = displayName;
         this.identityDetails = identityDetails;
@@ -172,6 +178,7 @@ public class OwnedIdentity {
         this.prefMuteNotifications = prefMuteNotifications;
         this.prefMuteNotificationsExceptMentioned = prefMuteNotificationsExceptMentioned;
         this.prefMuteNotificationsTimestamp = prefMuteNotificationsTimestamp;
+        this.prefMuteNotificationsStartTimestamp = prefMuteNotificationsStartTimestamp;
         this.prefShowNeutralNotificationWhenHidden = prefShowNeutralNotificationWhenHidden;
         this.capabilityWebrtcContinuousIce = capabilityWebrtcContinuousIce;
         this.capabilityGroupsV2 = capabilityGroupsV2;
@@ -197,6 +204,7 @@ public class OwnedIdentity {
         this.prefMuteNotifications = false;
         this.prefMuteNotificationsExceptMentioned = true;
         this.prefMuteNotificationsTimestamp = null;
+        this.prefMuteNotificationsStartTimestamp = null;
         this.prefShowNeutralNotificationWhenHidden = false;
         this.capabilityWebrtcContinuousIce = false;
         this.capabilityGroupsV2 = false;
@@ -275,17 +283,39 @@ public class OwnedIdentity {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof OwnedIdentity)) {
-            return false;
-        }
-        OwnedIdentity other = (OwnedIdentity) obj;
-        return Arrays.equals(bytesOwnedIdentity, other.bytesOwnedIdentity);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OwnedIdentity)) return false;
+        OwnedIdentity that = (OwnedIdentity) o;
+        return apiKeyStatus == that.apiKeyStatus &&
+                unpublishedDetails == that.unpublishedDetails &&
+                apiKeyPermissions == that.apiKeyPermissions &&
+                keycloakManaged == that.keycloakManaged &&
+                active == that.active &&
+                prefMuteNotifications == that.prefMuteNotifications &&
+                prefMuteNotificationsExceptMentioned == that.prefMuteNotificationsExceptMentioned &&
+                prefShowNeutralNotificationWhenHidden == that.prefShowNeutralNotificationWhenHidden &&
+                capabilityWebrtcContinuousIce == that.capabilityWebrtcContinuousIce &&
+                capabilityGroupsV2 == that.capabilityGroupsV2 &&
+                capabilityOneToOneContacts == that.capabilityOneToOneContacts &&
+                Arrays.equals(bytesOwnedIdentity, that.bytesOwnedIdentity) &&
+                Objects.equals(displayName, that.displayName) &&
+                Objects.equals(identityDetails, that.identityDetails) &&
+                Objects.equals(photoUrl, that.photoUrl) &&
+                Objects.equals(apiKeyExpirationTimestamp, that.apiKeyExpirationTimestamp) &&
+                Objects.equals(customDisplayName, that.customDisplayName) &&
+                Arrays.equals(unlockPassword, that.unlockPassword) &&
+                Arrays.equals(unlockSalt, that.unlockSalt) &&
+                Objects.equals(prefMuteNotificationsTimestamp, that.prefMuteNotificationsTimestamp);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(bytesOwnedIdentity);
+        int result = Objects.hash(displayName, identityDetails, apiKeyStatus, unpublishedDetails, photoUrl, apiKeyPermissions, apiKeyExpirationTimestamp, keycloakManaged, active, customDisplayName, prefMuteNotifications, prefMuteNotificationsExceptMentioned, prefMuteNotificationsTimestamp, prefShowNeutralNotificationWhenHidden, capabilityWebrtcContinuousIce, capabilityGroupsV2, capabilityOneToOneContacts);
+        result = 31 * result + Arrays.hashCode(bytesOwnedIdentity);
+        result = 31 * result + Arrays.hashCode(unlockPassword);
+        result = 31 * result + Arrays.hashCode(unlockSalt);
+        return result;
     }
 
     public boolean hasMultiDeviceApiKeyPermission() {

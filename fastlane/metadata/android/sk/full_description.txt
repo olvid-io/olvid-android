@@ -1,0 +1,19 @@
+Olvid je prvá súkromná aplikácia na okamžité správy pre všetkých. Posielajte správy, fotografie, súbory a uskutočňujte zabezpečené telefonáty a videohovory.
+
+
+Čo znamená „súkromá“ aplikácia na správy?
+
+Je to aplikácia:
+- ktorá vám nevnucuje nových kontaktov. Vy máte kontrolu: sami si vyberáte, s kým chcete komunikovať. Olvid ponúka niekoľko spôsobov, ako pozvať ďalších používateľov Olvid, či už osobne alebo na diaľku.
+- ktorá nevyžaduje žiadne osobné údaje. Olvid sa vás nebude pýtať na vaše telefónne číslo ani na vašu e-mailovú adresu. Na rozdiel od vašej predchádzajúcej aplikácie na správy, Olvid nikdy nebude požadovať prístup k vašim kontaktom.
+- na ktorej nikdy nebudete dostávať nevyžiadané správy alebo správy z neznámeho zdroja.
+- pri ktorej všetky výmeny informácií využívajú rovnakú úroveň bezpečnosti a súkromia ako skutočná konverzácia za zatvorenými dverami. Olvid ponúka štandardne šifrovanie a autentifikáciu konca-na-koniec, vždy a pre všetko, čo posielate alebo prijímate.
+
+Olvid vám zaručuje bezpečné priestory, ktoré sú chránené pred vonkajšími zásahmi, a ktoré vás izolujú od digitálneho hluku a násilia iných sociálnych sietí. Vytvorte si skupiny so svojou rodinou, priateľmi a kľúčovými spolupracovníkmi. Žiadny spam, žiadna reklama. Konečne získate plnú kontrolu nad svojou komunikáciou.
+
+Olvid bol navrhnutý tak, aby bol najlepším miestom na výmenu informácií o témach, na ktorých záleží, s ľuďmi, na ktorých vám záleží.
+
+
+Olvid - Technológia
+
+V srdci Olvid sa nachádza „kryptografický engine“, ktorý vznikol vďaka niekoľkoročnému výskumu a umožňuje matematicky dokázať integritu, dôvernosť a anonymitu vašej komunikácie.

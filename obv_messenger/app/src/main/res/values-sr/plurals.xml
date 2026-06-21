@@ -1,0 +1,285 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+	<plurals name="label_files_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="6081130">%1$d фајл</item>
+		<item quantity="other" state="needs_review" hash="2115209750">%1$d datoteke</item>
+	</plurals>
+	<plurals name="text_files" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1591553998">Datoteka</item>
+		<item quantity="other" state="needs_review" hash="2115209750">%1$d datoteke</item>
+	</plurals>
+	<plurals name="text_audios" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-779820608">Audio</item>
+		<item quantity="other" state="needs_review" hash="1428618080">%1$d audio snimci</item>
+	</plurals>
+	<plurals name="text_others" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1866852709">%1$d drugi</item>
+		<item quantity="other" state="needs_review" hash="-2006565347">%1$d ostali</item>
+	</plurals>
+	<plurals name="text_images" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1471675200">Фотографија</item>
+		<item quantity="other" state="needs_review" hash="1150196960">%1$d fotografije</item>
+	</plurals>
+	<plurals name="text_videos" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="366973148">Video</item>
+		<item quantity="other" state="needs_review" hash="-67686396">%1$d video snimaka</item>
+	</plurals>
+	<plurals name="text_common_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-722881286">\"%1$s\" i još jedna zajednička grupa</item>
+		<item quantity="other" state="needs_review" hash="1064420361">\"%1$s\" i %2$d imaju zajedničke grupe</item>
+	</plurals>
+	<plurals name="tip_expiring_device_message" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1156880361">Jedan od vaših uređaja će uskoro isteći i biti deaktiviran za **manje od %1$d dana**.\nMožete kupiti pretplatu na **Olvid+** kako biste ga zadržali aktivnim.</item>
+		<item quantity="other" state="needs_review" hash="-574658149">Jedan od vaših uređaja će isteći i biti deaktiviran za **manje od %1$d dana**.\nMožete kupiti pretplatu na **Olvid+** kako biste ga zadržali aktivnim.</item>
+	</plurals>
+	<plurals name="text_joined_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-683497602">%1$s se pridružio/pridružila grupi</item>
+		<item quantity="other" state="needs_review" hash="51603026">%1$s se pridružio/pridružila grupi</item>
+	</plurals>
+	<plurals name="text_left_the_group" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="399208793">%1$s je napustio/napustila grupu</item>
+		<item quantity="other" state="needs_review" hash="1945116549">%1$s je napustio/napustila grupu</item>
+	</plurals>
+	<plurals name="label_poll_answers" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="1797058436">Nema odgovora</item>
+		<item quantity="one" state="needs_review" hash="-7151672">%1$d odgovor</item>
+		<item quantity="other" state="needs_review" hash="1394570044">%1$d odgovora</item>
+	</plurals>
+	<plurals name="label_remove_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="312762041">Uklonite člana %1$d</item>
+		<item quantity="other" state="needs_review" hash="1816849257">Uklonite %1$d članova</item>
+	</plurals>
+	<plurals name="label_add_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1537484553">Dodaj člana %1$d</item>
+		<item quantity="other" state="needs_review" hash="1091232977">Dodajte %1$d članova</item>
+	</plurals>
+	<plurals name="label_introduce_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="226735888">Predstavite %1$d kontaktu</item>
+		<item quantity="other" state="needs_review" hash="222947824">Predstavite %1$d kontaktima</item>
+	</plurals>
+	<plurals name="explanation_backup_v2_device_expiration_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1131862199">\" na ovom uređaju, vaš prethodni uređaj će biti deaktiviran:</item>
+		<item quantity="other" state="needs_review" hash="-2011302529">\" na ovom uređaju, vaši uređaji navedeni ispod biće deaktivirani:</item>
+	</plurals>
+	<plurals name="label_backups_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1088606803">%1$d pronađena kopija</item>
+		<item quantity="other" state="needs_review" hash="-577868099">Pronađeno %1$d rezervnih kopija</item>
+	</plurals>
+	<plurals name="label_profiles_found" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1498976610">Pronadjeno %1$d profil</item>
+		<item quantity="other" state="needs_review" hash="749391135">Pronađeno %1$d profila</item>
+	</plurals>
+	<plurals name="label_backup_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="-174007554">Nema grupa</item>
+		<item quantity="one" state="needs_review" hash="237276495">%1$d grupa</item>
+		<item quantity="other" state="needs_review" hash="900821953">%1$d grupa</item>
+	</plurals>
+	<plurals name="label_backup_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="zero" state="needs_review" hash="246373927">Nema kontakata</item>
+		<item quantity="one" state="needs_review" hash="-1671298344">%1$d kontakt</item>
+		<item quantity="other" state="needs_review" hash="1022571360">%1$d kontakti</item>
+	</plurals>
+	<plurals name="label_discussion_archive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1772966333">Razgovor arhiviran</item>
+		<item quantity="other" state="needs_review" hash="1402495414">%1$d razgovori arhivirani</item>
+	</plurals>
+	<plurals name="label_discussion_unarchive_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1312483800">Razgovor ponovo dostupan</item>
+		<item quantity="other" state="needs_review" hash="-2093736213">%1$d razgovora vraćeno u aktivno stanje</item>
+	</plurals>
+	<plurals name="label_message_unbookmark_done" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2045500103">Poruka uklonjena iz omiljenih</item>
+		<item quantity="other" state="needs_review" hash="204728896">%1$d poruka uklonjena iz beležnice</item>
+	</plurals>
+	<plurals name="dialog_title_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-716893580">Da li želite da obrišete odabrani razgovor?</item>
+		<item quantity="other" state="needs_review" hash="-15840526">Da li želite da obrišete odabrane razgovore?</item>
+	</plurals>
+	<plurals name="dialog_title_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-862879351">Da li želite da obrišete odabrane poruke?</item>
+		<item quantity="other" state="needs_review" hash="-2020248805">Da li želite da obrišete odabrane poruke?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-931157230">Da li zaista želite da obrišete odabranu konverzaciju i sve poruke koje sadrži?\nOva akcija se ne može poništiti.</item>
+		<item quantity="other" state="needs_review" hash="-1815739098">Da li zaista želite da obrišete %1$d odabrane razgovore i sve poruke koje sadrže?\nOva akcija se ne može poništiti.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_discussions_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-2139168692">Kako želite da obrišete odabranu konverzaciju i sve poruke koje sadrži?\nOva akcija se ne može poništiti.</item>
+		<item quantity="other" state="needs_review" hash="-1430564144">Kako želite da obrišete %1$d odabrane razgovore i sve poruke koje sadrže?\nOva akcija se ne može poništiti.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-947341357">Da li zaista želite da obrišete odabranu poruku?\nOva akcija se ne može poništiti.</item>
+		<item quantity="other" state="needs_review" hash="-752621695">Da li zaista želite da obrišete %1$d izabranih poruka?\nOva akcija se ne može poništiti.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_messages_choice" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-474913536">Kako želite da obrišete odabranu poruku?\nOva akcija se ne može poništiti.</item>
+		<item quantity="other" state="needs_review" hash="-895867176">Kako želite da obrišete %1$d izabranih poruka?\nOva akcija se ne može poništiti.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_messages_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-606769319">Spremate se da **trajno** obrišete poruku za **sve** učesnike u ovoj konverzaciji. Molimo vas, proverite da li ste sigurni da želite to da uradite.</item>
+		<item quantity="other" state="needs_review" hash="-1284393519">Spremate se da **trajno** obrišete %1$d poruka za **sve** učesnike u ovoj konverzaciji. Molimo vas, proverite da li ste sigurni da želite to da uradite.</item>
+	</plurals>
+	<plurals name="dialog_warning_delete_discussions_everywhere" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118446236">Uskoro ćete **trajno** izbrisati razgovor i sve poruke koje sadrži za **sve** učesnike u ovom razgovoru. Molimo vas, proverite da li ste sigurni da želite to da uradite.</item>
+		<item quantity="other" state="needs_review" hash="-1558931055">Spremate se da **trajno** obrišete %1$d razgovora i poruke koje sadrže, za **sve** učesnike u tim razgovorima. Molimo vas, proverite da li ste sigurni da želite da to uradite.</item>
+	</plurals>
+	<plurals name="dialog_message_invite_all_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1306576418">Spremate se da pozovete svakog člana grupe sa kojim imate zajednički kanal (trenutno 1 član) u privatnu diskusiju.\nDa li želite da nastavite?</item>
+		<item quantity="other" state="needs_review" hash="-994717142">Spremate se da pozovete svakog člana grupe sa kojim imate kanal (trenutno %1$d članova) u privatnu diskusiju.\nŽelite li da nastavite?</item>
+	</plurals>
+	<plurals name="explanation_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-127723614">Jedan član grupe može biti pozvan u privatnu diskusiju</item>
+		<item quantity="other" state="needs_review" hash="-496794154">%1$d članovi grupe mogu biti pozvani u privatnu diskusiju</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1699852572">1 zajednička grupa</item>
+		<item quantity="other" state="needs_review" hash="-261780100">%1$d zajedničke grupe</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_impossible_end" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1000092559">. Morate napustiti ovu grupu da biste nastavili.</item>
+		<item quantity="other" state="needs_review" hash="-1973752801">. Morate napustiti ove grupe da biste nastavili.</item>
+	</plurals>
+	<plurals name="dialog_message_delete_user_with_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1290867480">Uskoro ćete ukloniti %1$s sa vaše liste drugih korisnika.\n\nImajte na umu da je %1$s pozvan u %2$d grupu kojoj pripadate. Ako se pridruži, biće ponovo dodato na ovu listu. Možda ćete želeti da napustite ovu grupu kako biste to izbegli.\n\nDa li zaista želite da obrišete ovog korisnika?</item>
+		<item quantity="other" state="needs_review" hash="1544662217">Uskoro ćete ukloniti %1$s sa vaše liste drugih korisnika.\n\nImajte na umu da je %1$s pozvan u %2$d grupe kojima pripadate. Ako se pridruži nekoj od njih, biće ponovo dodato na ovu listu. Možda ćete želeti da napustite ove grupe kako biste to izbegli.\n\nDa li zaista želite da obrišete ovog korisnika?</item>
+	</plurals>
+	<plurals name="dialog_message_auto_join_pending_groups" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-97256410">Promena ove postavke će automatski prihvatiti jedan neodobreni poziv u grupu.\nKliknite na OK da potvrdite svoj izbor i pridružite se ovoj grupi.</item>
+		<item quantity="other" state="needs_review" hash="1009007696">Promena ove postavke će automatski prihvatiti %1$d neodobrena pozivanja u grupe.\nPritisnite OK da potvrdite svoj izbor i pridružite se ovim grupama.</item>
+	</plurals>
+	<plurals name="dialog_message_save_selected_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1768885312">Kada budete upitani, odaberite folder u koji želite da sačuvate odabrani prilog.\nImajte na umu da pristup nekim folderima može biti ograničen.</item>
+		<item quantity="other" state="needs_review" hash="-1416662415">Kada budete upitani, odaberite folder u koji želite da sačuvate izabrane %1$d priloge.\nImajte na umu da pristup nekim folderima može biti ograničen.</item>
+	</plurals>
+	<plurals name="action_mode_title_storage" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">Izabrano %1$d</item>
+		<item quantity="other" state="needs_review" hash="1429480972">Izabrano %1$d</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1117804388">Da li zaista želite da obrišete odabrani prilog?</item>
+		<item quantity="other" state="needs_review" hash="-1540151013">Da li zaista želite da obrišete %1$d izabranih priloga?</item>
+	</plurals>
+	<plurals name="dialog_message_delete_attachments_mutli_explanation" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="193144109">Ako je ova prilog povezana sa više poruka, sve kopije priloga će biti izbrisane.</item>
+		<item quantity="other" state="needs_review" hash="890537395">Ako su ove priloge dodate u više poruka, sve kopije priloga će biti izbrisane.</item>
+	</plurals>
+	<plurals name="text_app_uptime_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1400550170">%1$d dan,\u00a0%2$02dh\u00a0%3$02dmin\u00a0%4$02ds</item>
+		<item quantity="other" state="needs_review" hash="-1847999182">%1$d dana, %2$02d sati, %3$02d minuta, %4$02d sekundi</item>
+	</plurals>
+	<plurals name="text_message_possibly_missing" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1040869757">%1$d nedostaje poruka…</item>
+		<item quantity="other" state="needs_review" hash="-970055416">%1$d nedostaju poruke…</item>
+	</plurals>
+	<plurals name="text_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="800251665">Grupni poziv sa %2$s i još jednom osobom</item>
+		<item quantity="other" state="needs_review" hash="-1654053808">Grupni poziv sa %2$s i još %1$d osoba</item>
+	</plurals>
+	<plurals name="text_unanswered_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1313506338">Propusteni grupni poziv sa %2$s i još jednom osobom</item>
+		<item quantity="other" state="needs_review" hash="1027194941">Propusteni grupni poziv sa %2$s i %1$d ostalih korisnika</item>
+	</plurals>
+	<plurals name="text_failed_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="575911091">Neuspešni grupni poziv sa %2$s i još jednom osobom.</item>
+		<item quantity="other" state="needs_review" hash="1768048524">Neuspešni grupni poziv sa %2$s i još %1$d osoba</item>
+	</plurals>
+	<plurals name="text_busy_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1115369211">Grupni poziv tokom %2$s i dok je još jedna osoba bila zauzeta</item>
+		<item quantity="other" state="needs_review" hash="-332659300">Grupni poziv dok su %2$s i %1$d bili zauzeti</item>
+	</plurals>
+	<plurals name="text_rejected_outgoing_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1401449639">Odbijen grupni poziv sa %2$s i još jednom osobom.</item>
+		<item quantity="other" state="needs_review" hash="-150166810">Odbijen grupni poziv sa %2$s i %1$d ostalih korisnika</item>
+	</plurals>
+	<plurals name="text_incoming_group_call_with_contacts" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-366344569">Grupni poziv od %2$s i još jedne osobe</item>
+		<item quantity="other" state="needs_review" hash="1471743578">Grupni poziv od %2$s i %1$d drugih korisnika</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="461822174">Izabrano %1$d</item>
+		<item quantity="other" state="needs_review" hash="1431585621">Izabrano %1$d</item>
+	</plurals>
+	<plurals name="action_mode_title_discussion_list" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1431585607">Izabrano %1$d</item>
+		<item quantity="other" state="needs_review" hash="1429480972">Izabrano %1$d</item>
+	</plurals>
+	<plurals name="notification_public_title_new_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d nova poruka</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d nove poruke</item>
+	</plurals>
+	<plurals name="dialog_message_invite_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1495957123">%3$s će biti pozvan da se pridruži grupi %2$s.</item>
+		<item quantity="other" state="needs_review" hash="-250521442">Sledeći %1$d kontakti biće pozvani da se pridruže grupi %2$s: %3$s.</item>
+	</plurals>
+	<plurals name="dialog_message_remove_group_members" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1633684901">%3$s biće uklonjen/a iz grupe %2$s.</item>
+		<item quantity="other" state="needs_review" hash="2062819899">Sledeći članovi grupe %1$d biće uklonjeni iz grupe %2$s: %3$s.</item>
+	</plurals>
+	<plurals name="text_unread_message_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1344235901">%1$d nova poruka</item>
+		<item quantity="other" state="needs_review" hash="-1400449161">%1$d nove poruke</item>
+	</plurals>
+	<plurals name="text_reply_attachment_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="2118984743">%1$d prilog</item>
+		<item quantity="other" state="needs_review" hash="1321323314">%1$d priloga</item>
+	</plurals>
+	<plurals name="text_and_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-226443285">I %1$d ostali</item>
+		<item quantity="other" state="needs_review" hash="-2101659023">I još %1$d drugih</item>
+	</plurals>
+	<plurals name="text_contact_names_last_separator_x_other" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-970333">&amp; %1$d ostali</item>
+		<item quantity="other" state="needs_review" hash="1931856055">&amp; %1$d ostalih</item>
+	</plurals>
+	<plurals name="dialog_message_confirm_retention_policy" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-202072457">Primena politike zadržavanja koju ste upravo odabrali bi obrisala jednu poruku.\nDa li ste sigurni da želite da nastavite?</item>
+		<item quantity="other" state="needs_review" hash="-576713525">Primena politike zadržavanja koju ste upravo odabrali bi rezultirala brisanjem %1$d poruka.\nDa li ste sigurni da želite da nastavite?</item>
+	</plurals>
+	<plurals name="text_keycloak_missing_search_result" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="812170692">… i još jedan rezultat pretrage\nMolimo vas, precizirajte vašu pretragu</item>
+		<item quantity="other" state="needs_review" hash="1969873890">… i %1$d dodatnih rezultata pretrage\nMolimo vas, precizirajte vašu pretragu</item>
+	</plurals>
+	<plurals name="duration_seconds" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="251130693">1 sekunda</item>
+		<item quantity="other" state="needs_review" hash="624952161">%1$d sekundi</item>
+	</plurals>
+	<plurals name="duration_minutes" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1053938976">1\u00a0minut</item>
+		<item quantity="other" state="needs_review" hash="-1051808">%1$d minuta</item>
+	</plurals>
+	<plurals name="duration_hours" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1004063951">1 sat</item>
+		<item quantity="other" state="needs_review" hash="1322950935">%1$d sati</item>
+	</plurals>
+	<plurals name="duration_days" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1264358968">1 dan</item>
+		<item quantity="other" state="needs_review" hash="-1170846734">%1$d dana</item>
+	</plurals>
+	<plurals name="duration_years" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="388401904">1 godina</item>
+		<item quantity="other" state="needs_review" hash="298429520">%1$d godina</item>
+	</plurals>
+	<plurals name="other_members_count" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1379655782">1 član</item>
+		<item quantity="other" state="needs_review" hash="965402074">%1$d\u00a0članova</item>
+	</plurals>
+	<plurals name="dialog_message_delete_remote_deleted_messages" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1006155949">Trenutno imate 1 obrisanu poruku u vašim razgovorima. Da li želite da je obrišete?</item>
+		<item quantity="other" state="needs_review" hash="-1716115044">Trenutno imate %1$d poruka koje su izbrisane od strane druge strane u vašim razgovorima. Da li želite da izbrišete sve takve oznake?</item>
+	</plurals>
+	<plurals name="label_xxx_contacts_sharing_their_position" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="1367750681">1 kontakt deli svoju lokaciju</item>
+		<item quantity="other" state="needs_review" hash="1164266856">%1$d kontakti dele svoje lokacije</item>
+	</plurals>
+	<plurals name="label_you_and_xxx_contacts_sharing_their_location" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1602016664">Vi i još jedna osoba delite svoju lokaciju</item>
+		<item quantity="other" state="needs_review" hash="1789697147">Vi i još %1$d osoba delite svoju lokaciju</item>
+	</plurals>
+	<plurals name="subscription_offer_month_free" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1966265224">%1$d meseci besplatno</item>
+		<item quantity="other" state="needs_review" hash="-599634154">%1$d meseci besplatno</item>
+	</plurals>
+	<plurals name="toast_message_messages_copied_to_clipboard" tools:ignore="MissingQuantity,UnusedQuantity">
+		<item quantity="one" state="needs_review" hash="-1393207312">%1$d poruka kopirana u međuspremnik</item>
+		<item quantity="other" state="needs_review" hash="-604999755">%1$d poruka kopirana u međuspremnik</item>
+	</plurals>
+</resources>

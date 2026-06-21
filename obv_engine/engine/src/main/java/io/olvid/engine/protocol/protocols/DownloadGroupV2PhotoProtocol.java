@@ -192,6 +192,7 @@ public class DownloadGroupV2PhotoProtocol extends ConcreteProtocol {
             this.photoPathToDelete = null;
         }
 
+        @SuppressWarnings("unused")
         public ServerGetPhotoMessage(ReceivedMessage receivedMessage) throws Exception {
             super(new CoreProtocolMessage(receivedMessage));
             if (receivedMessage.getEncodedResponse() == null) {
@@ -271,7 +272,7 @@ public class DownloadGroupV2PhotoProtocol extends ConcreteProtocol {
 
                 return new DownloadingPhotoState(receivedMessage.groupIdentifier, receivedMessage.serverPhotoInfo);
             } else {
-                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.GetUserDataQuery(receivedMessage.serverPhotoInfo.serverPhotoIdentity, receivedMessage.serverPhotoInfo.serverPhotoLabel)));
+                CoreProtocolMessage coreProtocolMessage = buildCoreProtocolMessage(SendChannelInfo.createServerQueryChannelInfo(getOwnedIdentity(), new ServerQuery.GetUserDataQuery(receivedMessage.serverPhotoInfo.serverPhotoIdentity, receivedMessage.serverPhotoInfo.serverPhotoLabel, true)));
                 ChannelMessageToSend messageToSend = new ServerGetPhotoMessage(coreProtocolMessage).generateChannelServerQueryMessageToSend();
                 protocolManagerSession.channelDelegate.post(protocolManagerSession.session, messageToSend, getPrng());
 

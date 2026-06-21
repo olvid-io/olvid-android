@@ -1,0 +1,19 @@
+Olvid là ứng dụng nhắn tin tức thời riêng tư đầu tiên dành cho tất cả mọi người. Gửi tin nhắn, ảnh, tệp và thực hiện các cuộc gọi thoại và video an toàn.
+
+
+Ứng dụng nhắn tin "riêng tư" là gì?
+
+Đó là một ứng dụng nhắn tin:
+- Không tự động thêm các liên hệ mới cho bạn. Bạn có toàn quyền kiểm soát: bạn chọn người mà bạn muốn trò chuyện cùng. Olvid cung cấp một số cách để mời những người dùng Olvid khác, trực tiếp hoặc từ xa.
+- Không yêu cầu bất kỳ dữ liệu cá nhân nào. Olvid sẽ không yêu cầu số điện thoại hoặc địa chỉ email của bạn. Không giống như ứng dụng nhắn tin trước đây của bạn, Olvid sẽ không bao giờ yêu cầu quyền truy cập vào danh bạ của bạn.
+- Bạn sẽ không bao giờ nhận được tin nhắn không mong muốn hoặc tin nhắn từ nguồn không xác định.
+- Trong đó, tất cả các trao đổi đều được hưởng lợi từ cùng mức độ bảo mật và quyền riêng tư như một cuộc trò chuyện thực tế trong không gian riêng tư. Olvid cung cấp mã hóa đầu cuối và xác thực đầu cuối theo mặc định, luôn luôn, cho mọi thứ bạn gửi và nhận.
+
+Olvid đảm bảo cho bạn không gian an toàn, miễn nhiễm với các hành vi xâm phạm từ bên ngoài, giúp bạn tách biệt khỏi tiếng ồn kỹ thuật số và bạo lực của các mạng xã hội khác. Tạo nhóm với gia đình, bạn bè và những người cộng tác quan trọng của bạn. Không có thư rác, không có quảng cáo. Cuối cùng, bạn lấy lại toàn quyền kiểm soát các phương tiện liên lạc của mình.
+
+Olvid được thiết kế để trở thành nơi tốt nhất để trao đổi về những chủ đề quan trọng, với những người quan trọng đối với bạn.
+
+
+Olvid - Công nghệ
+
+Ở trung tâm của Olvid là một "công cụ mã hóa", được phát triển từ nhiều năm nghiên cứu, cho phép chứng minh một cách toán học tính toàn vẹn, tính bảo mật và tính ẩn danh của các giao tiếp của bạn.

@@ -1,0 +1,1 @@
+- Rettet et problem med Java Records, hvor de ikke fungerede korrekt i den seneste version af Android Studio.

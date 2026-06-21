@@ -1,0 +1,1 @@
+- S-a remediat o problemă legată de optimizarea înregistrărilor Java, care nu funcționa corect în cea mai recentă versiune a Android Studio.

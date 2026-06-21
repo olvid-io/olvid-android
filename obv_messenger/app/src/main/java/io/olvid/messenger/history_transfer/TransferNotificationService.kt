@@ -182,6 +182,7 @@ class TransferNotificationService : Service() {
                     this@TransferNotificationService,
                     0,
                     Intent(this@TransferNotificationService, TransferNotificationService::class.java).apply {
+                        putExtra(EXTRA_TRANSFER_ID, transferIdAndProgressState.first)
                         action = ACTION_ABORT
                     },
                     PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -230,12 +231,22 @@ class TransferNotificationService : Service() {
                     setStyle(null)
                     setContentText(getString(R.string.history_transfer_step_negotiating))
                 }
-                is TransferProgress.Transferring -> {
+                is TransferProgress.Transferring,
+                is TransferProgress.ProcessingReceivedData -> {
                     setStyle(
                         NotificationCompat.ProgressStyle()
                             .setProgress(
-                                (if (progress.messagesTotal != 0) progress.messagesProgress*1000 / progress.messagesTotal else 1000) +
-                                        (if (progress.filesTotal != 0L) (progress.filesProgress * 1000 / progress.filesTotal).toInt() else 1000)
+                                when (progress) {
+                                    is TransferProgress.Transferring -> {
+                                        (if (progress.messagesTotal != 0) progress.messagesProgress * 1000 / progress.messagesTotal else 1000) +
+                                                (if (progress.filesTotal != 0L) (progress.filesProgress * 1000 / progress.filesTotal).toInt() else 1000)
+                                    }
+
+                                    is TransferProgress.ProcessingReceivedData -> {
+                                        (if (progress.messagesTotal != 0) progress.messagesProgress * 1000 / progress.messagesTotal else 1000) +
+                                                (if (progress.filesTotal != 0L) (progress.filesProgress * 1000 / progress.filesTotal).toInt() else 1000)
+                                    }
+                                }
                             )
                             .addProgressSegment(
                                 NotificationCompat.ProgressStyle.Segment(2000)

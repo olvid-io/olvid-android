@@ -83,6 +83,7 @@ class GroupV2DetailsViewModel : ViewModel() {
 
     var loaderState by mutableStateOf(LoaderState.NONE)
     var detailsAndPhotos by mutableStateOf<ObvGroupV2DetailsAndPhotos?>(null)
+    var fullScreenPhotoUrl by mutableStateOf<String?>(null)
 
     init {
         changeSet = ChangeSet()
@@ -669,6 +670,16 @@ class GroupV2DetailsViewModel : ViewModel() {
                 }
                 value = editedMembersList
             }
+        }
+    }
+
+    fun openGallery(context: Context) {
+        val bytesOwnedIdentity = bytesOwnedIdentity ?: return
+        val bytesGroupIdentifier = bytesGroupIdentifier ?: return
+        App.runThread {
+            AppDatabase.getInstance().discussionDao()
+                .getByGroupIdentifier(bytesOwnedIdentity, bytesGroupIdentifier)
+                ?.let { App.openDiscussionMediaGalleryActivity(context, it.id) }
         }
     }
 

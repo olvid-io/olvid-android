@@ -559,6 +559,25 @@ public abstract class DiscussionDao {
     public abstract LiveData<Integer> countForOwnedIdentity(byte[] bytesOwnedIdentity);
 
 
+    @Query("SELECT id, " + Discussion.BYTES_OWNED_IDENTITY + ", " + Discussion.ARCHIVED + ", " + Discussion.UNREAD + " FROM " + Discussion.TABLE_NAME)
+    public abstract List<DiscussionStub> getAllDiscussionStubs();
+
+    public static class DiscussionStub {
+        @ColumnInfo(name = "id")
+        public long id;
+
+        @ColumnInfo(name = Discussion.BYTES_OWNED_IDENTITY)
+        @NonNull
+        public byte[] bytesOwnedIdentity;
+
+        @ColumnInfo(name = Discussion.ARCHIVED)
+        public boolean archived;
+
+        @ColumnInfo(name = Discussion.UNREAD)
+        public boolean unread;
+    }
+
+
     public static class DiscussionAndLastMessage {
         @Embedded(prefix = "disc_")
         public Discussion discussion;
